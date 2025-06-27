@@ -47,12 +47,16 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
     base::stop("Please specify algorithm: Thompson or UCB1")
   }
 
+  priors <- lapply(base::seq_len(base::max(data$period_number)), \(x) {
+    create_prior(prior_periods = prior_periods, current_period = x)
+  })
+
   for (i in 2:max(data$period_number)) {
     if (verbose) {
       base::cat(paste("Period Number:", i, "\n"))
     }
 
-    prior <- create_prior(prior_periods, current_period = i)
+    prior <- priors[[i]]
 
     bandit <- mab_sample(
       data = data,
