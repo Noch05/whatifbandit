@@ -60,8 +60,10 @@ create_new_cols.tbl_df <- function(data,
     }
 
     data <- data |>
-      tidyr::unite("block", tidyselect::all_of(block_cols), sep = "_", remove = FALSE) |>
-      tidyr::unite("treatment_block", c({{ condition_col }}, tidyselect::all_of(block_cols)), sep = "_", remove = FALSE)
+      dplyr::mutate(
+        block = do.call(paste, c(dplyr::across(tidyselect::all_of(block_cols)), sep = "_")),
+        treatment_block = do.call(paste, c(dplyr::across(c({{ condition_col }}, tidyselect::all_of(block_cols))), sep = "_"))
+      )
   } else {
     data <- data |>
       dplyr::mutate(treatment_block = {{ condition_col }})

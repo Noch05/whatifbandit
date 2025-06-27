@@ -78,10 +78,17 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       condition_col = {{ condition_col }},
       success_col = {{ success_col }}
     )
-
     # Creating block for imputing
-    current_data <- current_data |>
-      tidyr::unite("impute_block", c(mab_condition, tidyselect::all_of(block_cols)), sep = "_", remove = FALSE)
+    if (blocking) {
+      current_data <- current_data |>
+        dplyr::mutate(
+          impute_block = do.call(paste, c(dplyr::across(c(mab_condition, tidyselect::all_of(block_cols))), sep = "_"))
+        )
+    } else {
+      current_data <- current_data |>
+        dplyr::mutate(impute_block = mab_condition)
+    }
+
 
     if (whole_experiment) {
       impute_info <- imputation_information
