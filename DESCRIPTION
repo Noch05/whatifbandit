@@ -21,7 +21,7 @@ Imports:
     purrr,
     randomizr,
     rlang,
-    stringr,
     tibble,
     tidyr,
-    tidyselect
+    tidyselect,
+    data.table
