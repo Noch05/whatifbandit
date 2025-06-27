@@ -11,29 +11,32 @@
 #'
 #' @param data A data frame that provides the input data for the trial.
 #' @param time_unit A string specifying the unit of time for assigning periods.
-#'                  Acceptable values are "Individual", "Day", "Week", or "Month".
+#'                  Acceptable values are "Day", "Week", or "Month".
 #' @param perfect_assignment Logical; if TRUE, assumes perfect information for treatment assignment
 #'                           (i.e., all outcomes are observed regardless of the date).
 #'                           If FALSE, hides outcomes not yet theoretically observed, based on
 #'                           `letter_sent_date` from the `tanf` dataset.
 #' @param algorithm A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".
-#' @param period_length Numeric; length of each treatment period, based on the `time_unit`.
-#'                      For example, if `time_unit = "Day"` and `period_length = 10`, each period is 10 days long.
+#' @param period_length Numeric; length of each treatment period.
+#' If assignment method is "Date", this refers to the
+#' length of periods by your specified `time_unit` (i.e., if "Day", 10 would be 10 days).
+#' If assignment methods is "Batch", this refers to the number of people in each batch.
 #' @param prior_periods Numeric; number of previous periods to use in the treatment assignment model
 #' or specify string "All" to use all previous periods.
 #' @param whole_experiment Logical; if TRUE, uses all past experimental data for imputing outcomes.
 #'                         If FALSE, uses only data available up to the current period.
-#' @param conditions Named Character vector containing treatment conditions, Control condition, must be named "Control"
-#' @param blocking Logical; Whether or not to use treatment blocking
-#' @param block_cols Character Vector of variables to block by
-#' @param date_col Column in data, contains date of treatment
-#' @param month_col Column in data, contains month of treatment
-#' @param id_col Column in data, contains unique id as a key
-#' @param condition_col Column in data, contains original treatment conditions
-#' @param success_col Column in data, contains binary successes
-#' @param success_date_col Column in data, contains date each success occurred
-#' @param assignment_date_col Column in data, contains date of wave assignment
-#' @param verbose Logical; Whether or not to print iteration number
+#' @param conditions Named Character vector containing treatment conditions, Control condition, must be named "Control".
+#' @param blocking Logical; Whether or not to use treatment blocking.
+#' @param block_cols Character Vector of variables to block by.
+#' @param date_col Column in data, contains date of treatment.
+#' @param month_col Column in data, contains month of treatment.
+#' @param id_col Column in data, contains unique id as a key.
+#' @param condition_col Column in data, contains original treatment conditions.
+#' @param success_col Column in data, contains binary successes.
+#' @param success_date_col Column in data, contains date each success occurred.
+#' @param assignment_date_col Column in data, contains date of wave assignment.
+#' @param verbose Logical; Whether or not to print iteration number. FALSE by default.
+#' @param assignment_method String; "Date" or "Batch" to define the assignment into treatment waves.
 #'
 #'
 #' @return  A custom mab class object, which is a named list containing:
@@ -51,23 +54,23 @@
 #' @export
 
 single_mab_simulation <- function(data,
-                                    time_unit,
-                                    perfect_assignment,
-                                    algorithm,
-                                    period_length = NULL,
-                                    prior_periods,
-                                    whole_experiment,
-                                    conditions,
-                                    blocking,
-                                    block_cols = NULL,
-                                    date_col,
-                                    month_col = NULL,
-                                    id_col,
-                                    condition_col,
-                                    success_col,
-                                    success_date_col = NULL,
-                                    assignment_date_col = NULL,
-                                    verbose) {
+                                  time_unit = NULL,
+                                  perfect_assignment,
+                                  algorithm,
+                                  period_length = NULL,
+                                  prior_periods,
+                                  whole_experiment,
+                                  conditions,
+                                  blocking,
+                                  block_cols = NULL,
+                                  date_col = NULL,
+                                  month_col = NULL,
+                                  id_col,
+                                  condition_col,
+                                  success_col,
+                                  success_date_col = NULL,
+                                  assignment_date_col = NULL,
+                                  verbose = FALSE, assignment_method) {
   # Input Validation
 
 
@@ -82,43 +85,47 @@ single_mab_simulation <- function(data,
     condition_col = {{ condition_col }},
     verbose = verbose,
     success_date_col = {{ success_date_col }},
-    assignment_date_col = {{ assignment_date_col }}
+    assignment_date_col = {{ assignment_date_col }},
+    month_col = {{ month_col }},
+    assignment_method
   )
 
   data <- mab_prepare(
     data = data,
-    date_col = {{date_col}},
+    date_col = {{ date_col }},
     time_unit = time_unit,
     period_length = period_length,
-    success_col = {{success_col}},
-    condition_col = {{condition_col}},
-    success_date_col = {{success_date_col}},
-    month_col = {{month_col}},
+    success_col = {{ success_col }},
+    condition_col = {{ condition_col }},
+    success_date_col = {{ success_date_col }},
+    month_col = {{ month_col }},
     perfect_assignment = perfect_assignment,
+    assignment_method = assignment_method,
     blocking = blocking,
     block_cols = block_cols
   )
 
-results <- mab_simulation(
-  data = data,
-  time_unit = time_unit,
-  period_length = period_length,
-  prior_periods = prior_periods,
-  algorithm = algorithm,
-  whole_experiment = whole_experiment,
-  perfect_assignment = perfect_assignment,
-  conditions = conditions,
-  blocking = blocking,
-  block_cols = block_cols,
-  date_col = {{ date_col }},
-  month_col = {{ month_col }},
-  id_col = {{ id_col }},
-  condition_col = {{ condition_col }},
-  success_col = {{ success_col }},
-  success_date_col = {{ success_date_col }},
-  assignment_date_col = {{ assignment_date_col }},
-  verbose = verbose
-)
+  results <- mab_simulation(
+    data = data,
+    time_unit = time_unit,
+    period_length = period_length,
+    prior_periods = prior_periods,
+    algorithm = algorithm,
+    whole_experiment = whole_experiment,
+    perfect_assignment = perfect_assignment,
+    conditions = conditions,
+    blocking = blocking,
+    block_cols = block_cols,
+    date_col = {{ date_col }},
+    month_col = {{ month_col }},
+    id_col = {{ id_col }},
+    condition_col = {{ condition_col }},
+    success_col = {{ success_col }},
+    success_date_col = {{ success_date_col }},
+    assignment_date_col = {{ assignment_date_col }},
+    verbose = verbose,
+    assignment_method = assignment_method
+  )
 
   return(results)
 }

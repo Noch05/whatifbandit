@@ -11,40 +11,48 @@ mab_prepare(
   period_length,
   success_col,
   condition_col,
-  success_date_col,
+  success_date_col = NULL,
   month_col,
   perfect_assignment,
   blocking,
-  block_cols
+  block_cols,
+  assignment_method
 )
 }
 \arguments{
 \item{data}{A data frame that provides the input data for the trial.}
 
-\item{date_col}{Column in data, contains date of treatment}
+\item{date_col}{Column in data, contains date of treatment.}
 
 \item{time_unit}{A string specifying the unit of time for assigning periods.
-Acceptable values are "Individual", "Day", "Week", or "Month".}
+Acceptable values are "Day", "Week", or "Month".}
 
-\item{period_length}{Numeric; length of each treatment period, based on the \code{time_unit}.
-For example, if \code{time_unit = "Day"} and \code{period_length = 10}, each period is 10 days long.}
+\item{period_length}{Numeric; length of each treatment period.
+If assignment method is "Date", this refers to the
+length of periods by your specified \code{time_unit} (i.e., if "Day", 10 would be 10 days).
+If assignment methods is "Batch", this refers to the number of people in each batch.}
 
-\item{success_col}{Column in data, contains binary successes}
+\item{success_col}{Column in data, contains binary successes.}
 
-\item{condition_col}{Column in data, contains original treatment conditions}
+\item{condition_col}{Column in data, contains original treatment conditions.}
 
-\item{success_date_col}{Column in data, contains date each success occurred}
+\item{success_date_col}{Column in data, contains date each success occurred.}
 
-\item{month_col}{Column in data, contains month of treatment}
+\item{month_col}{Column in data, contains month of treatment.}
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
 If FALSE, hides outcomes not yet theoretically observed, based on
 \code{letter_sent_date} from the \code{tanf} dataset.}
 
-\item{blocking}{Logical; Whether or not to use treatment blocking}
+\item{blocking}{Logical; Whether or not to use treatment blocking.}
 
-\item{block_cols}{Character Vector of variables to block by}
+\item{block_cols}{Character Vector of variables to block by.}
+
+\item{assignment_method}{String; "Date" or "Batch" to define the assignment into treatment waves.}
+}
+\value{
+Prepared data.frame containing the columns required by \code{\link[=mab_simulation]{mab_simulation()}}
 }
 \description{
 This function acts as an internal helper to \code{\link[=single_mab_simulation]{single_mab_simulation()}}
@@ -57,5 +65,6 @@ into data that can be used by \code{\link[=mab_simulation]{mab_simulation()}}.
 \item \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}
 \item \code{\link[=mab_simulation]{mab_simulation()}}
 \item \code{\link[=create_cutoff]{create_cutoff()}}
+\item \code{\link[=create_new_cols]{create_new_cols()}}
 }
 }

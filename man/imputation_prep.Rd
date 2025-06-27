@@ -4,13 +4,7 @@
 \alias{imputation_prep}
 \title{Prepping Data For Outcome Imputation}
 \usage{
-imputation_prep(
-  data,
-  whole_experiment,
-  current_period,
-  success_col,
-  current_data
-)
+imputation_prep(data, whole_experiment, success_col)
 }
 \arguments{
 \item{data}{A data frame that provides the input data for the trial.}
@@ -18,22 +12,17 @@ imputation_prep(
 \item{whole_experiment}{Logical; if TRUE, uses all past experimental data for imputing outcomes.
 If FALSE, uses only data available up to the current period.}
 
-\item{current_period}{The current period of the simulation. Defined by loop structure inside \code{\link[=run_mab_trial]{run_mab_trial()}}.}
-
-\item{success_col}{Column in data, contains binary successes}
-
-\item{current_data}{data.frame, contains data from the period currently being imputed}
+\item{success_col}{Column in data, contains binary successes.}
 }
 \value{
 A summary data frame of success probabilities by treatment condition and blocking condition, passed to
 \code{\link[=impute_success]{impute_success()}}
 }
 \description{
-Called Internally by \code{\link[=run_mab_trial]{run_mab_trial()}}, this function prepares
+This function prepares
 to have values of success imputed for those who were switched treatment conditions
 by \code{\link[=assign_treatments]{assign_treatments()}}. Simply calculates the Probability of success based on
 treatment condition, using original experimental data.
-Works to minimize errors from \link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra}, when blocking by service center is used.
 }
 \seealso{
 \itemize{

@@ -23,17 +23,17 @@ assign_treatments(
 
 \item{current_period}{The current period of the simulation. Defined by loop structure inside \code{\link[=run_mab_trial]{run_mab_trial()}}.}
 
-\item{blocking}{Logical; Whether or not to use treatment blocking}
+\item{blocking}{Logical; Whether or not to use treatment blocking.}
 
 \item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
 
-\item{id_col}{Column in data, contains unique id as a key}
+\item{id_col}{Column in data, contains unique id as a key.}
 
-\item{conditions}{Named Character vector containing treatment conditions, Control condition, must be named "Control"}
+\item{conditions}{Named Character vector containing treatment conditions, Control condition, must be named "Control".}
 
-\item{condition_col}{Column in data, contains original treatment conditions}
+\item{condition_col}{Column in data, contains original treatment conditions.}
 
-\item{success_col}{Column in data, contains binary successes}
+\item{success_col}{Column in data, contains binary successes.}
 
 \item{prior}{Vector of prior periods to use for calculation, passed by \code{\link[=create_prior]{create_prior()}}}
 }

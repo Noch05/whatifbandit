@@ -27,11 +27,11 @@ results of previous periods of the MAB procedure.}
 If FALSE, hides outcomes not yet theoretically observed, based on
 \code{letter_sent_date} from the \code{tanf} dataset.}
 
-\item{assignment_date_col}{Column in data, contains date of wave assignment}
+\item{assignment_date_col}{Column in data, contains date of wave assignment.}
 
-\item{success_date_col}{Column in data, contains date each success occurred}
+\item{success_date_col}{Column in data, contains date each success occurred.}
 
-\item{conditions}{Named Character vector containing treatment conditions, Control condition, must be named "Control"}
+\item{conditions}{Named Character vector containing treatment conditions, Control condition, must be named "Control".}
 }
 \value{
 A data.frame, containing the number of successes, success rate, and number of people for each

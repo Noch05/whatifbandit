@@ -22,18 +22,18 @@ contains the probabilities of success for each treatment condition, and block, i
 by service center, to be passed to \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}} for the
 probabilities of imputation.}
 
-\item{id_col}{Column in data, contains unique id as a key}
+\item{id_col}{Column in data, contains unique id as a key.}
 
-\item{condition_col}{Column in data, contains original treatment conditions}
+\item{condition_col}{Column in data, contains original treatment conditions.}
 
-\item{success_col}{Column in data, contains binary successes}
+\item{success_col}{Column in data, contains binary successes.}
 
-\item{success_date_col}{Column in data, contains date each success occurred}
+\item{success_date_col}{Column in data, contains date each success occurred.}
 
 \item{prior_data}{A data frame containing results from previous periods, to be joined together at the end,
 and passed into the next loop of the assignment process defined by \code{\link[=run_mab_trial]{run_mab_trial()}}.}
 
-\item{conditions}{Named Character vector containing treatment conditions, Control condition, must be named "Control"}
+\item{conditions}{Named Character vector containing treatment conditions, Control condition, must be named "Control".}
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).

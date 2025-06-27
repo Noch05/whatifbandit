@@ -45,6 +45,7 @@ multiple_mab_simulation <- function(data,
                                     success_col,
                                     success_date_col = NULL,
                                     assignment_date_col = NULL,
+                                    assigment_method,
                                     verbose,
                                     times, seeds, keep_data) {
   if (!is.numeric(times) || times < 1) {
@@ -69,18 +70,19 @@ multiple_mab_simulation <- function(data,
     condition_col = {{ condition_col }},
     verbose = verbose,
     success_date_col = {{ success_date_col }},
-    assignment_date_col = {{ assignment_date_col }}
+    assignment_date_col = {{ assignment_date_col }},
+    month_col = {{ month_col }}
   )
 
   data <- mab_prepare(
     data = data,
-    date_col = {{date_col}},
+    date_col = {{ date_col }},
     time_unit = time_unit,
     period_length = period_length,
-    success_col = {{success_col}},
-    condition_col = {{condition_col}},
-    success_date_col = {{success_date_col}},
-    month_col = {{month_col}},
+    success_col = {{ success_col }},
+    condition_col = {{ condition_col }},
+    success_date_col = {{ success_date_col }},
+    month_col = {{ month_col }},
     perfect_assignment = perfect_assignment,
     blocking = blocking,
     block_cols = block_cols
@@ -107,7 +109,8 @@ multiple_mab_simulation <- function(data,
       success_col = {{ success_col }},
       success_date_col = {{ success_date_col }},
       assignment_date_col = {{ assignment_date_col }},
-      verbose = FALSE
+      verbose = FALSE,
+      assigment_method = assignment_method
     )
     if (!keep_data) {
       results <- results[names(results) != "final_data"]
@@ -134,13 +137,14 @@ multiple_mab_simulation <- function(data,
       assignment_date_col = rlang::enquo(assignment_date_col),
       times = times,
       seeds = seeds,
-      keep_data = keep_data
+      keep_data = keep_data,
+      assigment_method = assignment_method
     ),
     seed = TRUE,
     packages = c(
       "tanfmab", "dplyr", "rlang", "tidyselect",
       "tidyr", "bandit", "tibble", "lubridate",
-      "purrr", "furrr", "randomizr"
+      "purrr", "furrr", "randomizr", "data.table"
     )
   ),
   .progress = verbose

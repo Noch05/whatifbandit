@@ -19,17 +19,14 @@
 #' * [get_adaptive_aipw()]
 #' * [single_mab_simulation()]
 #' @export
-
-
-
-
+#-------------------------------------------------------------------------------
 ## Adaptive AIPW Weights from Hadad et. al (2021) Using Constant Allocation Rate
 adaptive_aipw <- function(mab, conditions, periods, algorithm) {
   conditions <- base::sort(conditions)
 
   data <- mab[[1]]
 
-  estimates <- list()
+  estimates <- base::vector(mode = "list", length = periods)
 
   if (algorithm == "Thompson") {
     bandits <- mab[[2]]
@@ -93,8 +90,5 @@ adaptive_aipw <- function(mab, conditions, periods, algorithm) {
   returns <- dplyr::bind_rows(estimates) |>
     dplyr::mutate(estimator = "AIPW") |>
     base::rbind(sample)
-
-
-
   return(returns)
 }

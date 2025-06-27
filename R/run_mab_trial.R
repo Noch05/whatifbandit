@@ -32,13 +32,17 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
                           id_col, condition_col,
                           success_col, success_date_col,
                           assignment_date_col, verbose) {
+  imputation_information <- imputation_prep(
+    data = data,
+    whole_experiment = whole_experiment,
+    success_col = {{ success_col }}
+  )
 
-  bandits <- list()
-
+  bandits <- vector(mode = "list", length = max(data$period_number))
   if (algorithm == "Thompson") {
-    bandits[["period_1"]] <- rlang::set_names(rep(1 / length(conditions), length(conditions)), conditions)
+    bandits[[1]] <- rlang::set_names(rep(1 / length(conditions), length(conditions)), conditions)
   } else if (algorithm == "UCB1") {
-    bandits[["period_1"]] <- tibble::tibble(mab_condition = conditions, ucb = rep(0, length(conditions)))
+    bandits[[1]] <- tibble::tibble(mab_condition = conditions, ucb = rep(0, length(conditions)))
   } else {
     base::stop("Please specify algorithm: Thompson or UCB1")
   }
@@ -61,7 +65,7 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       assignment_date_col = {{ assignment_date_col }}
     )
 
-    bandits[[paste0("period_", i)]] <- bandit
+    bandits[[i]] <- bandit
 
     current_data <- assign_treatments(
       data = data,
@@ -79,12 +83,15 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
     current_data <- current_data |>
       tidyr::unite("impute_block", c(mab_condition, tidyselect::all_of(block_cols)), sep = "_", remove = FALSE)
 
-    imputation_info <- imputation_prep(
-      data = data,
-      whole_experiment = whole_experiment,
-      current_period = i,
-      current_data = current_data,
-      success_col = {{ success_col }}
+    if (whole_experiment) {
+      impute_info <- imputation_information
+    } else {
+      impute_info <- imputation_information[[i]]
+    }
+
+    imputation_info <- check_impute(
+      imputation_information = impute_info,
+      current_data = current_data
     )
 
     data <- impute_success(

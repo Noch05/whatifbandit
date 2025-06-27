@@ -1,17 +1,16 @@
 #' Prepping Data For Outcome Imputation
 
 #' @name imputation_prep
-#' @description Called Internally by [run_mab_trial()], this function prepares
+#' @description This function prepares
 #' to have values of success imputed for those who were switched treatment conditions
 #' by [assign_treatments()]. Simply calculates the Probability of success based on
 #' treatment condition, using original experimental data.
-#' Works to minimize errors from [randomizr::block_and_cluster_ra], when blocking by service center is used.
 #'
 #'
 #'
 #' @inheritParams single_mab_simulation
 #' @inheritParams assign_treatments
-#' @param current_data data.frame, contains data from the period currently being imputed
+
 #'
 #' @returns A summary data frame of success probabilities by treatment condition and blocking condition, passed to
 #' [impute_success()]
@@ -22,24 +21,50 @@
 
 
 
-imputation_prep <- function(data, whole_experiment, current_period, success_col,
-                            current_data) {
+imputation_prep <- function(data, whole_experiment, success_col) {
   # Choosing Whether to use all the data from the experiment or only up to the current treatment period
 
   if (whole_experiment) {
-    imputation_information <- data
-  } else if (!whole_experiment) {
     imputation_information <- data |>
-      dplyr::filter(period_number %in% base::seq_len(current_period - 1))
+      dplyr::group_by(treatment_block) |>
+      dplyr::summarize(success_rate = base::mean({{ success_col }}, na.rm = TRUE), .groups = "drop") |>
+      dplyr::mutate(failure_rate = 1 - success_rate)
+
+    return(imputation_information)
+  } else if (!whole_experiment) {
+    summary <- data |>
+      dplyr::group_by(period_number, treatment_block) |>
+      dplyr::summarize(
+        count = dplyr::n(),
+        n_success = base::sum({{ success_col }})
+      ) |>
+      dplyr::ungroup()
+
+    imputation_information <- lapply(2:base::max(data$period_number), function(i) {
+      imputation_info <- summary |>
+        dplyr::filter(period_number < i) |>
+        dplyr::group_by(treatment_block) |>
+        dplyr::summarise(success_rate = base::sum(n_success) / base::sum(count)) |>
+        dplyr::mutate(failure_rate = 1 - success_rate)
+    })
+    imputation_information <- c(list(0), imputation_information)
+
+    return(imputation_information)
   } else {
-    base::stop("Specify logical for whole_experiment")
+    base::stop("Specify logical for `whole_experiment`")
   }
+}
 
-  imputation_information <- imputation_information |>
-    dplyr::group_by(treatment_block) |>
-    dplyr::summarize(success_rate = base::mean({{ success_col }}, na.rm = TRUE), .groups = "drop") |>
-    dplyr::mutate(failure_rate = 1 - success_rate)
-
+#' Checking Imputation Info
+#' @description
+#' Ensures the Imputation Info in the current iteration of [run_mab_trial()],
+#' contains all the info needed, important when blocking or using small assignment waves
+#'
+#' @name check_impute
+#' @param current_data data.frame, contains data from the period currently being imputed
+#' @param imputation_information data.frame created by [imputation_prep()].
+#'
+check_impute <- function(imputation_information, current_data) {
   mean_rate <- base::mean(imputation_information$success_rate)
 
   missing_blocks <- stats::na.omit(

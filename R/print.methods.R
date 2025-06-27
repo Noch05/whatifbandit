@@ -16,8 +16,20 @@ print.mab <- function(x, ...) {
   base::cat("Perfect Assignment: ", settings$perfect_assignment, "\n")
   base::cat("Whole Experiment:   ", settings$whole_experiment, "\n")
   base::cat("Blocking Variables: ", settings$block_cols, "\n")
-  base::cat("Time Unit:          ", settings$time_unit, "\n")
-  base::cat("Period Length:      ", settings$period_length, "\n")
+  base::cat("Assignment Method:  ", settings$assignment_method, "\n")
+  base::cat("Period Length:      ", settings$period_length)
+  if (settings$assignment_method == "Batch") {
+    base::cat(" People\n")
+  }
+  if (settings$assignment_method == "Date") {
+    base::cat(settings$time_unit)
+    if (settings$period_length > 1) {
+      base::cat("s\n")
+    } else {
+      base::cat("\n")
+    }
+  }
+
   base::cat("Total Periods:      ", length(x$bandits), "\n")
   base::cat("Prior Periods:      ", settings$prior_periods, "\n")
   base::cat("Conditions:         ", base::paste(settings$conditions, collapse = ", "), "\n")

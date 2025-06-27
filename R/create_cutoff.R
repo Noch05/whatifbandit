@@ -1,30 +1,102 @@
 #' Create Treatment Wave Cutoffs
 #' @name create_cutoff
-#' @description Used during [run_mab_trial()] to prepare data for the Multi-Arm-Bandit procedure, by assigning treatment
-#' waves and initializing new columns
+#' @description Used during [mab_prepare()] to assign treatment periods
 #'
 #' @inheritParams single_mab_simulation
 #'
-#' @return data frame containing the original data with 5 additional columns.
+#' @return data.frame containing the original data with 1 additional column.
 #' \item{period_number}{Integer identifying the treatment wave for each observation}
-#' \item{mab_success}{New variable to hold new success from Multi-arm bandit procedure, NA until assigned.}
-#' \item{mab_condition}{New variable to hold new treatment condition from Multi-arm bandit procedure, NA until assigned.}
-#' \item{impute_req}{Binary indicator for imputation requirement, NA until assigned}
-#' \item{new_recert_date}{New variable to new recertification date from Multi-arm bandit procedure, NA until assigned.}
 #' @seealso
-#' *[run_mab_trial()]
-#' @export
+#' *[mab_prepare()]
+#------------------------------------------------------------------------------------------
+create_cutoff <- function(data, date_col = NULL, month_col = NULL, period_length = NULL) {
+  base::UseMethod("create_cutoff")
+}
+#------------------------------------------------------------------------------------------
 
+#' @method create_cutoff Day
+#' @title [create_cutoff()] Day Based Periods
+#' @inheritParams create_cutoff
+#'
+create_cutoff.Day <- function(data, date_col, period_length, ...) {
+  if (inherits(data, "data.table")) {
+    date_col <- rlang::as_name(rlang::enquo(date_col))
+    start_date <- base::min(data[, get(date_col)])
 
+    data[, period_number := base::floor(
+      lubridate::interval(start_date, base::get(date_col)) / lubridate::days(1) / period_length
+    ) + 1]
+    setkey(data, period_number)
 
-create_cutoff <- function(data, time_unit, date_col, month_col = NULL, period_length = NULL,
-                          success_col, condition_col, success_date_col, perfect_assignment) {
-  start_date <- base::min(dplyr::pull(data, {{ date_col }}), na.rm = TRUE)
+    return(invisible(data))
+  } else {
+    start_date <- base::min(dplyr::pull(data, {{ date_col }}), na.rm = TRUE)
 
-  if (time_unit == "Individual") {
     data <- data |>
-      dplyr::mutate(period_number = dplyr::row_number())
-  } else if (time_unit == "Month") {
+      dplyr::mutate(
+        period_number = base::floor(
+          lubridate::interval(start_date, {{ date_col }}) / lubridate::days(1) / period_length
+        ) + 1
+      )
+    return(data)
+  }
+}
+#------------------------------------------------------------------
+#' @method create_cutoff Week
+#' @title [create_cutoff()] Week Based Periods
+#' @inheritParams create_cutoff
+create_cutoff.Week <- function(data, date_col, period_length, ...) {
+  if (inherits(data, "data.table")) {
+    date_col <- rlang::as_name(rlang::enquo(date_col))
+    start_date <- base::min(data[, get(date_col)])
+
+    data[, period_number := base::floor(
+      lubridate::interval(start_date, base::get(date_col)) / lubridate::weeks(1) / period_length
+    ) + 1]
+    setkey(data, period_number)
+
+    return(invisible(data))
+  } else {
+    start_date <- base::min(dplyr::pull(data, {{ date_col }}), na.rm = TRUE)
+
+    data <- data |>
+      dplyr::mutate(
+        period_number = base::floor(
+          lubridate::interval(start_date, {{ date_col }}) / lubridate::weeks(1) / period_length
+        ) + 1
+      )
+    return(data)
+  }
+}
+#------------------------------------------------------------------
+
+#' #' @method create_cutoff Month
+#' @title [create_cutoff()] Month Based Periods
+#' @inheritParams create_cutoff
+#'
+create_cutoff.Month <- function(data, date_col, month_col, period_length) {
+  if (inherits(data, "data.table")) {
+    date_col <- rlang::as_name(rlang::enquo(date_col))
+    start_date <- base::min(data[, get(date_col)])
+
+    month_col <- rlang::as_name(rlang::enquo(month_col))
+
+    first_month <- data[order(date_col), get(month_col)][1]
+
+    start_month <- lubridate::ymd(base::paste0(lubridate::year(start_date), "-", first_month, "-01"))
+
+    data[, month_date := lubridate::ymd(
+      base::paste0(lubridate::year(base::get(date_col)), "-", ..month_col, "-01")
+    )]
+
+    data[, period_number := base::floor(
+      lubridate::interval(start_month, month_date) / base::months(1) / period_length
+    ) + 1]
+
+    data[, month_date := NULL]
+    return(invisible(data))
+  } else {
+    start_date <- base::min(dplyr::pull(data, {{ date_col }}), na.rm = TRUE)
     first_month <- data |>
       dplyr::slice_min(order_by = {{ date_col }}, n = 1, with_ties = FALSE) |>
       dplyr::pull({{ month_col }})
@@ -32,40 +104,51 @@ create_cutoff <- function(data, time_unit, date_col, month_col = NULL, period_le
     start_month <- lubridate::ymd(
       paste0(lubridate::year(start_date), "-", first_month, "-01")
     )
-
-    data <- data |>
+    data |>
       dplyr::mutate(
-        month_date = lubridate::ymd(paste0(lubridate::year({{ date_col }}), "-", {{ month_col }}, "-01")),
-        period_number = floor(lubridate::interval(start_month, month_date) / base::months(1) / period_length)
+        month_date = lubridate::ymd(paste0(
+          lubridate::year({{ date_col }}), "-", {{ month_col }}, "-01"
+        )),
+        period_number = base::floor(
+          lubridate::interval(start_month, month_date) / base::months(1) / period_length
+        )
       ) |>
       dplyr::select(-month_date)
-  } else if (time_unit == "Day") {
-    data <- data |>
-      dplyr::mutate(
-        period_number = floor(lubridate::interval(start_date, {{ date_col }}) / lubridate::days(1) / period_length) + 1
-      )
-  } else if (time_unit == "Week") {
-    data <- data |>
-      dplyr::mutate(
-        period_number = floor(lubridate::interval(start_date, {{ date_col }}) / lubridate::weeks(1) / period_length) + 1
-      )
-  } else {
-    rlang::abort("Invalid Time-Unit, Valid units: Day, Week, Month, Individual")
+
+    return(data)
   }
-
-  data <- data |>
-    dplyr::mutate(
-      period_number = base::match(period_number, base::sort(base::unique(period_number))),
-      mab_success = dplyr::if_else(period_number == 1, {{ success_col }}, NA_real_),
-      mab_condition = dplyr::if_else(period_number == 1, {{ condition_col }}, NA_character_),
-      impute_req = dplyr::if_else(period_number == 1, 0, NA_real_)
-    )
-
-  if (!perfect_assignment) {
-    data <- data |>
-      dplyr::mutate(new_success_date = dplyr::if_else(period_number == 1, {{ success_date_col }}, NA))
-  }
-
-
-  return(data)
 }
+
+
+#' @method create_cutoff Individual
+#' @title [create_cutoff()] Individual Periods
+#' @inheritParams create_cutoff
+#'
+create_cutoff.Individual <- function(data, ...) {
+  if (inherits(data, "data.table")) {
+    data[, period_number := .I]
+    setkey(data, period_number)
+    return(invisible(data))
+  } else {
+    data <- data |>
+      dplyr::mutate(period_number = dplyr::row_number())
+    return(data)
+  }
+}
+#----------------------------------------------------------------------------------
+#' @method create_cutoff Batch
+#' @title [create_cutoff()] Batch Based Periods
+#' @inheritParams create_cutoff
+#'
+create_cutoff.Batch <- function(data, period_length, ...) {
+  if (inherits(data, "data.table")) {
+    data[, period_number := base::ceiling((.I / period_length))]
+    setkey(data, period_number)
+    return(invisible(data))
+  } else {
+    data <- data |>
+      dplyr::mutate(period_number = base::ceiling(dplyr::row_number() / period_length))
+    return(data)
+  }
+}
+#------------------------------------------------------------------------------------

@@ -1,24 +1,23 @@
 #' @title Simulates Multi-Arm Bandit Trial From Prepared Inputs
-#'@name mab_simulation
+#' @name mab_simulation
 #'
-#'@description This function acts as an internal helper to [single_mab_simulation()]
-#'and [multiple_mab_simulation()] by providing a common framework for executing
-#'a single Multi-Arm-Bandit Trial with adaptive inference. It assumes all inputs have
-#'been preprocessed by [mab_prepare()], or inside of the wrappers. Centralizes
-#'a single trial to prevent redundant loops.
-#'@inheritParams single_mab_simulation
-#'
-#'
+#' @description This function acts as an internal helper to [single_mab_simulation()]
+#' and [multiple_mab_simulation()] by providing a common framework for executing
+#' a single Multi-Arm-Bandit Trial with adaptive inference. It assumes all inputs have
+#' been preprocessed by [mab_prepare()], or inside of the wrappers. Centralizes
+#' a single trial to prevent redundant loops.
+#' @inheritParams single_mab_simulation
 #'
 #'
-#'@seealso
+#'
+#'
+#' @seealso
 #'* [single_mab_simulation()]
 #'* [multiple_mab_simulation()]
 #'* [run_mab_trial()]
 #'* [get_adaptive_aipw()]
 #'* [mab_prepare()]
 #'
-#'@export
 #'
 
 
@@ -39,9 +38,8 @@ mab_simulation <- function(data,
                            success_col,
                            success_date_col = NULL,
                            assignment_date_col = NULL,
-                           verbose) {
-
-
+                           verbose,
+                           assignment_method) {
   # Run the main MAB trial with all required arguments
   results <- run_mab_trial(
     data = data,
@@ -64,14 +62,18 @@ mab_simulation <- function(data,
     verbose = verbose
   ) |>
     get_adaptive_aipw(
-      conditions = conditions, algorithm = algorithm, id_col = {{ id_col }},
+      conditions = conditions, algorithm = algorithm,
       verbose = verbose
     )
 
-  class(results) <- c("mab", "list")
+  class(results) <- c("mab", class(results))
+
+  data_name <- base::deparse(base::substitute(data))
+
 
   results$settings <- list(
-    data = deparse(substitute(data)),
+    data = data_name,
+    assignment_method = assignment_method,
     time_unit = time_unit,
     perfect_assignment = perfect_assignment,
     algorithm = algorithm,

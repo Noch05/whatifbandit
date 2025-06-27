@@ -22,6 +22,7 @@ multiple_mab_simulation(
   success_col,
   success_date_col = NULL,
   assignment_date_col = NULL,
+  assigment_method,
   verbose,
   times,
   seeds,
@@ -32,7 +33,7 @@ multiple_mab_simulation(
 \item{data}{A data frame that provides the input data for the trial.}
 
 \item{time_unit}{A string specifying the unit of time for assigning periods.
-Acceptable values are "Individual", "Day", "Week", or "Month".}
+Acceptable values are "Day", "Week", or "Month".}
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
@@ -41,8 +42,10 @@ If FALSE, hides outcomes not yet theoretically observed, based on
 
 \item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
 
-\item{period_length}{Numeric; length of each treatment period, based on the \code{time_unit}.
-For example, if \code{time_unit = "Day"} and \code{period_length = 10}, each period is 10 days long.}
+\item{period_length}{Numeric; length of each treatment period.
+If assignment method is "Date", this refers to the
+length of periods by your specified \code{time_unit} (i.e., if "Day", 10 would be 10 days).
+If assignment methods is "Batch", this refers to the number of people in each batch.}
 
 \item{prior_periods}{Numeric; number of previous periods to use in the treatment assignment model
 or specify string "All" to use all previous periods.}
@@ -50,25 +53,25 @@ or specify string "All" to use all previous periods.}
 \item{whole_experiment}{Logical; if TRUE, uses all past experimental data for imputing outcomes.
 If FALSE, uses only data available up to the current period.}
 
-\item{conditions}{Named Character vector containing treatment conditions, Control condition, must be named "Control"}
+\item{conditions}{Named Character vector containing treatment conditions, Control condition, must be named "Control".}
 
-\item{blocking}{Logical; Whether or not to use treatment blocking}
+\item{blocking}{Logical; Whether or not to use treatment blocking.}
 
-\item{block_cols}{Character Vector of variables to block by}
+\item{block_cols}{Character Vector of variables to block by.}
 
-\item{date_col}{Column in data, contains date of treatment}
+\item{date_col}{Column in data, contains date of treatment.}
 
-\item{month_col}{Column in data, contains month of treatment}
+\item{month_col}{Column in data, contains month of treatment.}
 
-\item{id_col}{Column in data, contains unique id as a key}
+\item{id_col}{Column in data, contains unique id as a key.}
 
-\item{condition_col}{Column in data, contains original treatment conditions}
+\item{condition_col}{Column in data, contains original treatment conditions.}
 
-\item{success_col}{Column in data, contains binary successes}
+\item{success_col}{Column in data, contains binary successes.}
 
-\item{success_date_col}{Column in data, contains date each success occurred}
+\item{success_date_col}{Column in data, contains date each success occurred.}
 
-\item{assignment_date_col}{Column in data, contains date of wave assignment}
+\item{assignment_date_col}{Column in data, contains date of wave assignment.}
 
 \item{verbose}{Logical; Toggles progress bar from \link[furrr:future_map]{furrr::future_map}.}
 

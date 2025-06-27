@@ -4,18 +4,16 @@
 \alias{get_adaptive_aipw}
 \title{Compute Adaptive AIPW Estimates of Treatment Success}
 \usage{
-get_adaptive_aipw(mab, conditions, algorithm, id_col, verbose)
+get_adaptive_aipw(mab, conditions, algorithm, verbose)
 }
 \arguments{
 \item{mab}{A named list that has been created by \code{\link[=run_mab_trial]{run_mab_trial()}}}
 
-\item{conditions}{Named Character vector containing treatment conditions, Control condition, must be named "Control"}
+\item{conditions}{Named Character vector containing treatment conditions, Control condition, must be named "Control".}
 
 \item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
 
-\item{id_col}{Column in data, contains unique id as a key}
-
-\item{verbose}{Logical; Whether or not to print iteration number}
+\item{verbose}{Logical; Whether or not to print iteration number. FALSE by default.}
 }
 \value{
 A named list containing:

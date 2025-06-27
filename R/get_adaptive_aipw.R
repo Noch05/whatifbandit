@@ -23,7 +23,11 @@
 
 
 
-get_adaptive_aipw <- function(mab, conditions, algorithm, id_col, verbose) {
+get_adaptive_aipw <- function(mab, conditions, algorithm, verbose) {
+  if (verbose) {
+    message("Calculating AIPW Estimates")
+  }
+
   periods <- base::max(mab[[1]]$period_number)
 
   mab[[1]] <- get_iaipw(
@@ -31,7 +35,6 @@ get_adaptive_aipw <- function(mab, conditions, algorithm, id_col, verbose) {
     conditions = conditions,
     algorithm = algorithm,
     periods = periods,
-    id_col = {{ id_col }},
     verbose = verbose
   )
 
