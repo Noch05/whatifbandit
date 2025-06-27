@@ -1,0 +1,115 @@
+#' Runs Multi-Arm Bandit Trial
+#' @name run_mab_trial
+#'
+#' @description Performs a full Multi-Arm Bandit (MAB) trial using Thompson Sampling or UCB1.
+#' The function provides loop around each step of the process for each treatment wave. The function
+#' performs adaptive treatment assignment based on prior performance, imputes potential outcomes based on
+#' original experimental data from and Randomized Controlled Trial (RCT), and then uses that information to update the
+#' assignment for the next wave until completed. Supports flexible customization in treatment blocking strategy,
+#' the size of each treatment wave, and information availability to simulate both a real experiment, and non-stationary
+#' bandit strategy.
+#'
+#' @inheritParams single_mab_simulation
+#'
+#'
+#' @return  A named list containing:
+#' \item{final_data}{The processed data with treatment assignments and imputed outcomes labelled with "mab_" prefix.}
+#' \item{bandits}{Either the UCB1 statistics or Thompson Sampling posterior distributions.}
+#'
+#' @seealso
+#' * [single_mab_simulation()]
+#' * [create_cutoff()]
+#' *[create_prior()]
+#' *[mab_sample()]
+#' *[assign_treatments()]
+#' @export
+#'
+run_mab_trial <- function(data, time_unit, period_length = NULL,
+                          prior_periods, algorithm,
+                          whole_experiment, perfect_assignment, conditions,
+                          blocking = FALSE, block_cols = NULL,
+                          date_col, month_col = NULL,
+                          id_col, condition_col,
+                          success_col, success_date_col,
+                          assignment_date_col, verbose) {
+
+  bandits <- list()
+
+  if (algorithm == "Thompson") {
+    bandits[["period_1"]] <- rlang::set_names(rep(1 / length(conditions), length(conditions)), conditions)
+  } else if (algorithm == "UCB1") {
+    bandits[["period_1"]] <- tibble::tibble(mab_condition = conditions, ucb = rep(0, length(conditions)))
+  } else {
+    base::stop("Please specify algorithm: Thompson or UCB1")
+  }
+
+  for (i in 2:max(data$period_number)) {
+    if (verbose) {
+      base::cat(paste("Period Number:", i, "\n"))
+    }
+
+    prior <- create_prior(prior_periods, current_period = i)
+
+    bandit <- mab_sample(
+      data = data,
+      algorithm = algorithm,
+      prior = prior,
+      current_period = i,
+      perfect_assignment = perfect_assignment,
+      conditions = conditions,
+      success_date_col = {{ success_date_col }},
+      assignment_date_col = {{ assignment_date_col }}
+    )
+
+    bandits[[paste0("period_", i)]] <- bandit
+
+    current_data <- assign_treatments(
+      data = data,
+      bandit = bandit,
+      current_period = i,
+      blocking = blocking,
+      algorithm = algorithm,
+      id_col = {{ id_col }},
+      conditions = conditions,
+      condition_col = {{ condition_col }},
+      success_col = {{ success_col }}
+    )
+
+    # Creating block for imputing
+    current_data <- current_data |>
+      tidyr::unite("impute_block", c(mab_condition, tidyselect::all_of(block_cols)), sep = "_", remove = FALSE)
+
+    imputation_info <- imputation_prep(
+      data = data,
+      whole_experiment = whole_experiment,
+      current_period = i,
+      current_data = current_data,
+      success_col = {{ success_col }}
+    )
+
+    data <- impute_success(
+      current_data = current_data,
+      imputation_info = imputation_info,
+      id_col = {{ id_col }},
+      condition_col = {{ condition_col }},
+      success_col = {{ success_col }},
+      success_date_col = {{ success_date_col }},
+      prior_data = data,
+      conditions = conditions,
+      perfect_assignment = perfect_assignment
+    )
+  }
+
+  bandits <- dplyr::bind_rows(bandits, .id = "period")
+
+  if (algorithm == "UCB1") {
+    bandits <- bandits |>
+      dplyr::select(ucb, mab_condition, period) |>
+      tidyr::pivot_wider(values_from = "ucb", names_from = c("mab_condition"))
+  }
+
+  return(list(
+    final_data = data,
+    bandits = bandits
+  ))
+}
