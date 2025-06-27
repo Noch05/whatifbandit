@@ -5,22 +5,18 @@
 \title{Gather Past Results for Given Assignment Period}
 \usage{
 get_past_results(
-  data,
-  prior,
-  current_period,
+  current_data,
+  prior_data,
   perfect_assignment,
-  assignment_date_col,
-  success_date_col,
+  assignment_date_col = NULL,
+  success_date_col = NULL,
   conditions
 )
 }
 \arguments{
-\item{data}{Data.frame object containing appropriate columns created by \code{\link[=create_cutoff]{create_cutoff()}}, and
-results of previous periods of the MAB procedure.}
+\item{current_data}{Data with only observations from the current resampling period}
 
-\item{prior}{Numeric vector containing the prior periods to be used for the treatment assignment}
-
-\item{current_period}{The current period of the simulation. Defined by loop structure inside \code{\link[=run_mab_trial]{run_mab_trial()}}.}
+\item{prior_data}{Data with only the observbations from the prior index}
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
@@ -34,14 +30,12 @@ If FALSE, hides outcomes not yet theoretically observed, based on
 \item{conditions}{Named Character vector containing treatment conditions, Control condition, must be named "Control".}
 }
 \value{
-A data.frame, containing the number of successes, success rate, and number of people for each
+A data.frame, containing the number of successes, and number of people for each
 treatment condition.
 }
 \description{
-Part of the Multi-Arm Bandit Trial Pipeline. This function filters the data by
-the prior periods, calculates the success and success rate by treatment group to be used to
-assign treatments via a Multi-Arm Bandit Algorithm. Provides functionality for simulating
-the lack of information during assignment periods.
+This Function Summarizes the results of prior periods to be used for next Multi-Arm Bandit
+Sampling period.
 }
 \seealso{
 *\code{\link[=run_mab_trial]{run_mab_trial()}}
