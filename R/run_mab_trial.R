@@ -51,6 +51,9 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
     create_prior(prior_periods = prior_periods, current_period = x)
   })
 
+  data <- data |>
+    dplyr::arrange(period_number, {{ id_col }})
+
   for (i in 2:max(data$period_number)) {
     if (verbose) {
       base::cat(paste("Period Number:", i, "\n"))
@@ -58,8 +61,11 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
 
     prior <- priors[[i]]
 
-    current_data <- data |> filter(period_number == i)
-    prior_data <- data |> filter(period_number %in% prior)
+    current_data <- data |>
+      dplyr::filter(period_number == i)
+
+    prior_data <- data |>
+      dplyr::filter(period_number %in% prior)
 
     past_results <- get_past_results(
       current_data = current_data,
@@ -72,7 +78,7 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
 
 
     bandit <- get_bandit(
-      prior_results = prior_results,
+      past_results = past_results,
       algorithm = algorithm,
       conditions = conditions
     )

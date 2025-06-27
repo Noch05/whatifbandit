@@ -109,7 +109,7 @@ get_past_results.data.table <- function(current_data, prior_data,
 
     past_results <- data.table::rbindlist(list(past_results, replace))
 
-    setorder(past_results, mab_condition)
+    data.table::setorder(past_results, mab_condition)
   }
   return(invisible(past_results))
 }
