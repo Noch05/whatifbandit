@@ -58,15 +58,23 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
 
     prior <- priors[[i]]
 
-    bandit <- mab_sample(
-      data = data,
-      algorithm = algorithm,
-      prior = prior,
-      current_period = i,
+    current_data <- data |> filter(period_number == i)
+    prior_data <- data |> filter(period_number %in% prior)
+
+    past_results <- get_past_results(
+      current_data = current_data,
+      prior_data = prior_data,
       perfect_assignment = perfect_assignment,
-      conditions = conditions,
       success_date_col = {{ success_date_col }},
-      assignment_date_col = {{ assignment_date_col }}
+      assignment_date_col = {{ assignment_date_col }},
+      conditions = conditions
+    )
+
+
+    bandit <- get_bandit(
+      prior_results = prior_results,
+      algorithm = algorithm,
+      conditions = conditions
     )
 
     bandits[[i]] <- bandit

@@ -59,7 +59,3 @@ get_bandit.UCB1 <- function(past_results, conditions) {
     )
   return(bandit)
 }
-
-#'
-#'
-#'

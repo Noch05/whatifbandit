@@ -40,6 +40,8 @@ mab_simulation <- function(data,
                            assignment_date_col = NULL,
                            verbose,
                            assignment_method) {
+  conditions <- base::sort(conditions)
+
   # Run the main MAB trial with all required arguments
   results <- run_mab_trial(
     data = data,
