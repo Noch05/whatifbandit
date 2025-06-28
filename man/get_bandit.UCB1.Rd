@@ -4,7 +4,7 @@
 \alias{get_bandit.UCB1}
 \title{UCB1 Sampling Algorithm}
 \usage{
-\method{get_bandit}{UCB1}(past_results, conditions)
+\method{get_bandit}{UCB1}(past_results, conditions, current_period)
 }
 \arguments{
 \item{past_results}{Data.frame containing summary of prior periods.

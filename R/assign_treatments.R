@@ -10,7 +10,6 @@
 #' @inheritParams single_mab_simulation
 #' @inheritParams create_prior
 #' @param bandit Bandit object from [mab_sample()], defines treatment assignment based on either Thompson or UCB1 algorithms
-#' @param prior Vector of prior periods to use for calculation, passed by [create_prior()]
 #'
 #'
 #' @returns An updated data frame object with the new treatment conditions. If this treatment is different
@@ -21,61 +20,128 @@
 #'* [mab_sample()]
 #'* [randomizr::block_and_cluster_ra()]
 #'* [randomizr::cluster_ra()]
-#' @export
+#'
 
 
 
-assign_treatments <- function(data, bandit, current_period, blocking,
+
+assign_treatments <- function(current_data, bandit, blocking,
                               algorithm, id_col, conditions, condition_col,
                               success_col) {
-  data <- data |>
-    dplyr::filter(period_number == current_period) |>
-    dplyr::arrange({{ id_col }})
+  current_data <- switch(algorithm,
+    "Thompson" = assign_treatments.Thompson(
+      current_data = current_data,
+      bandit = bandit,
+      id_col = {{ id_col }},
+      conditions = conditions,
+      condition_col = {{ condition_col }},
+      success_col = {{ success_col }}
+    ),
+    "UCB1" = assign_treatments.UCB1(
+      current_data = current_data,
+      bandit = bandit,
+      id_col = {{ id_col }},
+      conditions = conditions,
+      condition_col = {{ condition_col }},
+      success_col = {{ success_col }}
+    ),
+    rlang::abort("Specify valid algorithm: Thompson or UCB1")
+  )
+  return(current_data)
+}
+#-------------------------------------------------------------------------------
+#' @method assign_treatments Thompson
+#' @title Assign New Treatments Based on Thompson Posteririor
+#' @inheritParams assign_treatments
 
-  if (algorithm == "Thompson") {
+assign_treatments.Thompson <- function(current_data, bandit, blocking,
+                                       algorithm, id_col, conditions, condition_col,
+                                       success_col) {
+  # Performing Randomized Treatment Assignment
+  if (inherits(current_data, "data.table")) {
     if (blocking) {
-      new_treatments <- randomizr::block_and_cluster_ra(
-        clusters = dplyr::pull(data, {{ id_col }}),
-        blocks = dplyr::pull(data, block),
-        prob_each = bandit,
-        conditions = conditions
-      )
-    } else if (!blocking) {
-      new_treatments <- randomizr::cluster_ra(
-        clusters = dplyr::pull(data, {{ id_col }}),
-        prob_each = bandit,
-        conditions = conditions
-      )
-    } else {
-      base::stop("Invalid: Specify TRUE or FALSE for blocking")
+      blocks <- data[, block]
     }
+    clusters <- data[, get(rlang::as_name(rlang::enquo(id_col)))]
+  } else {
+    if (blocking) {
+      blocks <- dplyr::pull(data, block)
+    }
+    clusters <- dplyr::pull(data, {{ id_col }})
+  }
 
-    new_treatments_df <- tibble::tibble(
-      mab_condition = new_treatments,
-      !!rlang::enquo(id_col) := dplyr::pull(data, {{ id_col }})
+
+  if (blocking) {
+    new_treatments <- randomizr::block_and_cluster_ra(
+      cluseters = clusters,
+      blocks = blocks,
+      prob_each = bandit,
+      conditions = conditions
     )
+  } else if (!blocking) {
+    new_treatments <- randomizr::cluster_ra(
+      clusters = clusters,
+      prob_each = bandit,
+      conditions = conditions
+    )
+  } else {
+    rlang::abort("Invalid: Specify TRUE or FALSE for blocking")
+  }
 
-    data <- dplyr::rows_update(data, new_treatments_df, by = names(new_treatments_df)[2]) |>
-      dplyr::mutate(
-        mab_condition = dplyr::if_else(
-          is.na(mab_condition), {{ condition_col }}, mab_condition
-        ),
-        impute_req = dplyr::if_else(as.character({{ condition_col }}) != as.character(mab_condition), 1, 0)
+
+  if (inherits(data, "data.table")) {
+    current_data[, mab_condition := new_treatments][
+      , impute_req := data.table::fifelse(
+        base::as.character(mab_condition) != base::as.character(get(rlang::as_name(rlang::enquo(condition_col)))),
+        1, 0
       )
-  } else if (algorithm == "UCB1") {
+    ]
+
+    return(invisible(current_data))
+  } else {
+    current_data <- current_data |>
+      mutate(
+        mab_condition = new_treatments,
+        impute_req = dplyr::if_else(
+          base::as.character(mab_condition) != base::as.character({{ condition_col }}, 1, 0)
+        )
+      )
+
+    return(current_data)
+  }
+}
+#-------------------------------------------------------------------------------
+#' @method assign_treatments UCB1
+#' @title Assign New Treatments Based on UCB1 Statistic
+#' @inheritParams assign_treatments
+
+assign_treatments.UCB1 <- function(current_data, bandit, blocking,
+                                   algorithm, id_col, conditions, condition_col,
+                                   success_col) {
+  if (inherits(bandit, "data.table")) {
+    best_condtion <- base::as.character(bandit[order(ucb)][1, mab_condition])
+
+    current_data[, mab_conditon := best_condition][
+      ,
+      impute_rep := data.table::fifelse(
+        base::as.character(base::get(condition_col)) != as.character(mab_condition),
+        1, 0
+      )
+    ]
+    return(invisible(current_data))
+  } else {
     best_condition <- bandit |>
       dplyr::slice_max(order_by = ucb, n = 1, with_ties = FALSE) |>
-      dplyr::ungroup()
+      dplyr::ungroup() |>
+      dplyr::pull(mab_condition)
 
-    data <- data |>
+    current_data <- current_data |>
       dplyr::mutate(
-        mab_condition = base::as.character(best_condition$mab_condition),
+        mab_condition = base::as.character(best_condition),
         impute_req = dplyr::if_else(
           as.character({{ condition_col }}) != as.character(mab_condition), 1, 0
         )
       )
-  } else {
-    base::stop("Specify valid algorithm: Thompson or UCB1")
+    return(current_data)
   }
-  return(data)
 }

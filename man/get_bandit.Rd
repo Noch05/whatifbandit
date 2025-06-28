@@ -4,7 +4,7 @@
 \alias{get_bandit}
 \title{Calculate Multi-Arm Bandit Decision Based on Algorithm}
 \usage{
-get_bandit(past_results, algorithm, conditions)
+get_bandit(past_results, algorithm, conditions, current_period = NULL)
 }
 \arguments{
 \item{past_results}{Data.frame containing summary of prior periods.

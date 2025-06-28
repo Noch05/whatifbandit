@@ -80,15 +80,15 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
     bandit <- get_bandit(
       past_results = past_results,
       algorithm = algorithm,
-      conditions = conditions
+      conditions = conditions,
+      current_period = i
     )
 
     bandits[[i]] <- bandit
 
     current_data <- assign_treatments(
-      data = data,
+      current_data = current_data,
       bandit = bandit,
-      current_period = i,
       blocking = blocking,
       algorithm = algorithm,
       id_col = {{ id_col }},

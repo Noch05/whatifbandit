@@ -5,9 +5,8 @@
 \title{Adaptively Assign Treatments in a Period}
 \usage{
 assign_treatments(
-  data,
+  current_data,
   bandit,
-  current_period,
   blocking,
   algorithm,
   id_col,
@@ -17,11 +16,7 @@ assign_treatments(
 )
 }
 \arguments{
-\item{data}{A data frame that provides the input data for the trial.}
-
 \item{bandit}{Bandit object from \code{\link[=mab_sample]{mab_sample()}}, defines treatment assignment based on either Thompson or UCB1 algorithms}
-
-\item{current_period}{The current period of the simulation. Defined by loop structure inside \code{\link[=run_mab_trial]{run_mab_trial()}}.}
 
 \item{blocking}{Logical; Whether or not to use treatment blocking.}
 
@@ -34,8 +29,6 @@ assign_treatments(
 \item{condition_col}{Column in data, contains original treatment conditions.}
 
 \item{success_col}{Column in data, contains binary successes.}
-
-\item{prior}{Vector of prior periods to use for calculation, passed by \code{\link[=create_prior]{create_prior()}}}
 }
 \value{
 An updated data frame object with the new treatment conditions. If this treatment is different

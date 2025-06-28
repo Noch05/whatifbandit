@@ -15,7 +15,7 @@
 #'* [get_past_results()]
 
 
-get_bandit <- function(past_results, algorithm, conditions) {
+get_bandit <- function(past_results, algorithm, conditions, current_period = NULL) {
   bandit <- switch(algorithm,
     "Thompson" = get_bandit.Thompson(past_results = past_results, conditions = conditions),
     "UCB1" = get_bandit.UCB1(past_results = past_results, conditions = conditions),
@@ -49,13 +49,22 @@ get_bandit.Thompson <- function(past_results, conditions) {
 #' @returns Data.frame containing UCB and Success Rate for each condition
 #'
 
-get_bandit.UCB1 <- function(past_results, conditions) {
+get_bandit.UCB1 <- function(past_results, conditions, current_period) {
   correction <- 1e-10
-  bandit <- past_results |>
-    dplyr::mutate(
-      ucb = success_rate + base::sqrt(
-        (2 * base::log(current_period - 1)) / (n + correction)
+
+  if (inherits(past_results, "data.table")) {
+    past_results[, ucb := success_rate + base::sqrt(
+      (2 * base::log(current_period - 1)) / (n + correction)
+    )]
+
+    return(invisible(past_results))
+  } else {
+    bandit <- past_results |>
+      dplyr::mutate(
+        ucb = success_rate + base::sqrt(
+          (2 * base::log(current_period - 1)) / (n + correction)
+        )
       )
-    )
-  return(bandit)
+    return(bandit)
+  }
 }
