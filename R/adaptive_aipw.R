@@ -21,7 +21,7 @@
 #' @export
 #-------------------------------------------------------------------------------
 ## Adaptive AIPW Weights from Hadad et. al (2021) Using Constant Allocation Rate
-adaptive_aipw <- function(mab, conditions, periods, algorithm) {
+adaptive_aipw <- function(mab, conditions, periods, algorithm, verbose) {
   verbose_log(verbose, "Aggregating AIPW Estimates")
 
   data <- mab[[1]]

@@ -38,7 +38,7 @@ get_adaptive_aipw <- function(mab, conditions, algorithm, verbose) {
     mab = mab,
     periods = periods,
     conditions = conditions,
-    algorithm = algorithm
+    algorithm = algorithm, verbose = verbose
   )
 
   results <- list(
