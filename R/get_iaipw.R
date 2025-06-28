@@ -100,7 +100,7 @@ get_iaipw.tbl_df <- function(mab, periods, algorithm, conditions, verbose) {
 
       bandit_prob <- ifelse(
         algorithm == "UCB1",
-        ifelse(i == 1, (1 / base:length(conditions)), 1), base::as.numeric(bandits[[condition]][i])
+        ifelse(i == 1, (1 / base::length(conditions)), 1), base::as.numeric(bandits[[condition]][i])
       )
 
       iaipws <- base::ifelse(
