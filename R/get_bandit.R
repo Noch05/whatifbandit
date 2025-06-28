@@ -18,7 +18,7 @@
 get_bandit <- function(past_results, algorithm, conditions, current_period = NULL) {
   bandit <- switch(algorithm,
     "Thompson" = get_bandit.Thompson(past_results = past_results, conditions = conditions),
-    "UCB1" = get_bandit.UCB1(past_results = past_results, conditions = conditions),
+    "UCB1" = get_bandit.UCB1(past_results = past_results, conditions = conditions, current_period = current_period),
     rlang::abort("Invalid `algorithm`. Valid Algorithms: 'Thomspon', 'UCB1'")
   )
   return(bandit)
