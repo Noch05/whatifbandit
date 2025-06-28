@@ -17,7 +17,10 @@ print.mab <- function(x, ...) {
   base::cat("Whole Experiment:   ", settings$whole_experiment, "\n")
   base::cat("Blocking Variables: ", settings$block_cols, "\n")
   base::cat("Assignment Method:  ", settings$assignment_method, "\n")
-  base::cat("Period Length:      ", settings$period_length)
+
+  if (setttings$assignment_method %in% c("Batch", "Data")) {
+    base::cat("Period Length:      ", settings$period_length)
+  }
   if (settings$assignment_method == "Batch") {
     base::cat(" People\n")
   }

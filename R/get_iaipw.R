@@ -66,7 +66,6 @@ get_iaipw.tbl_df <- function(mab, periods, algorithm, conditions, verbose) {
     if (verbose) {
       base::cat(base::paste0("Period Number: ", x, "\n"))
     }
-
     if (x == 1) {
       return(tibble::tibble(
         mab_condition = conditions,
@@ -89,15 +88,8 @@ get_iaipw.tbl_df <- function(mab, periods, algorithm, conditions, verbose) {
     return(prior_data)
   })
 
-  if (algorithm == "UCB1") {
-    bandits <- base::lapply(base::seq_len(periods), function(i) {
-      prob <- if (i == 1) 1 / base::length(conditions) else 1
-      rlang::set_names(rep(prob, base::length(conditions)), base::sort(conditions))
-    }) |>
-      dplyr::bind_rows(, .id = "period")
-  } else {
-    bandits <- mab[[2]]
-  }
+
+  bandits <- mab[[2]]
 
   for (i in seq_len(periods)) {
     mhats <- rlang::set_names(prior_data[[i]]$success_rate, base::sort(prior_data[[i]]$mab_condition))
@@ -105,7 +97,11 @@ get_iaipw.tbl_df <- function(mab, periods, algorithm, conditions, verbose) {
 
     for (j in seq_along(conditions)) {
       condition <- conditions[j]
-      bandit_prob <- base::as.numeric(bandits[[condition]][i])
+
+      bandit_prob <- ifelse(
+        algorithm == "UCB1",
+        ifelse(i == 1, (1 / base:length(conditions)), 1), base::as.numeric(bandits[[condition]][i])
+      )
 
       iaipws <- base::ifelse(
         data$mab_condition[subset] == condition,
