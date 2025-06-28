@@ -7,7 +7,7 @@
 assign_treatments(
   current_data,
   bandit,
-  blocking,
+  blocking = NULL,
   algorithm,
   id_col,
   conditions,

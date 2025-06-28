@@ -25,7 +25,7 @@
 
 
 
-assign_treatments <- function(current_data, bandit, blocking,
+assign_treatments <- function(current_data, bandit, blocking = NULL,
                               algorithm, id_col, conditions, condition_col,
                               success_col) {
   current_data <- switch(algorithm,
@@ -33,6 +33,7 @@ assign_treatments <- function(current_data, bandit, blocking,
       current_data = current_data,
       bandit = bandit,
       id_col = {{ id_col }},
+      blocking = blocking,
       conditions = conditions,
       condition_col = {{ condition_col }},
       success_col = {{ success_col }}
@@ -60,20 +61,20 @@ assign_treatments.Thompson <- function(current_data, bandit, blocking,
   # Performing Randomized Treatment Assignment
   if (inherits(current_data, "data.table")) {
     if (blocking) {
-      blocks <- data[, block]
+      blocks <- current_data[, block]
     }
-    clusters <- data[, get(rlang::as_name(rlang::enquo(id_col)))]
+    clusters <- current_data[, get(rlang::as_name(rlang::enquo(id_col)))]
   } else {
     if (blocking) {
-      blocks <- dplyr::pull(data, block)
+      blocks <- dplyr::pull(current_data, block)
     }
-    clusters <- dplyr::pull(data, {{ id_col }})
+    clusters <- dplyr::pull(current_data, {{ id_col }})
   }
 
 
   if (blocking) {
     new_treatments <- randomizr::block_and_cluster_ra(
-      cluseters = clusters,
+      clusters = clusters,
       blocks = blocks,
       prob_each = bandit,
       conditions = conditions
@@ -89,7 +90,7 @@ assign_treatments.Thompson <- function(current_data, bandit, blocking,
   }
 
 
-  if (inherits(data, "data.table")) {
+  if (inherits(current_data, "data.table")) {
     current_data[, mab_condition := new_treatments][
       , impute_req := data.table::fifelse(
         base::as.character(mab_condition) != base::as.character(get(rlang::as_name(rlang::enquo(condition_col)))),
@@ -103,7 +104,7 @@ assign_treatments.Thompson <- function(current_data, bandit, blocking,
       mutate(
         mab_condition = new_treatments,
         impute_req = dplyr::if_else(
-          base::as.character(mab_condition) != base::as.character({{ condition_col }}, 1, 0)
+          base::as.character(mab_condition) != base::as.character({{ condition_col }}), 1, 0
         )
       )
 
@@ -115,7 +116,7 @@ assign_treatments.Thompson <- function(current_data, bandit, blocking,
 #' @title Assign New Treatments Based on UCB1 Statistic
 #' @inheritParams assign_treatments
 
-assign_treatments.UCB1 <- function(current_data, bandit, blocking,
+assign_treatments.UCB1 <- function(current_data, bandit,
                                    algorithm, id_col, conditions, condition_col,
                                    success_col) {
   if (inherits(bandit, "data.table")) {

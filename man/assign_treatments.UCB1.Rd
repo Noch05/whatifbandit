@@ -7,7 +7,6 @@
 \method{assign_treatments}{UCB1}(
   current_data,
   bandit,
-  blocking,
   algorithm,
   id_col,
   conditions,
@@ -17,8 +16,6 @@
 }
 \arguments{
 \item{bandit}{Bandit object from \code{\link[=mab_sample]{mab_sample()}}, defines treatment assignment based on either Thompson or UCB1 algorithms}
-
-\item{blocking}{Logical; Whether or not to use treatment blocking.}
 
 \item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
 
