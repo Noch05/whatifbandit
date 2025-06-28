@@ -54,20 +54,14 @@ imputation_prep <- function(data, whole_experiment, success_col, perfect_assignm
   if (!perfect_assignment) {
     dates <- data |>
       dplyr::group_by({{ condition_col }}, period_number) |>
-      dplyr::summarize(mean_date = base::mean({{ success_date_col }}, na.rm = TRUE)) |>
-      dplyr::rename(condition = {{ condition_col }})
-
-    dates <- lapply(2:base::max(data$period_number), function(j) {
-      dates <- dplyr::filter(dates, period_number == j)
-
-      return(rlang::set_names(dates$mean_date, dates$condition))
-    })
-    dates <- c(list(0), dates)
+      dplyr::summarize(mean_date = base::mean({{ success_date_col }}, na.rm = TRUE), .groups = "drop") |>
+      tidyr::pivot_wider(names_from = rlang::as_name(rlang::enquo(condition_col)), values_from = "mean_date")
   } else {
     dates <- NULL
   }
 
   imputation_information <- list(imputation_information, dates)
+
   return(imputation_information)
 }
 
