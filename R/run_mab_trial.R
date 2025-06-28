@@ -37,7 +37,8 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
     whole_experiment = whole_experiment,
     success_col = {{ success_col }},
     success_date_col = {{ success_date_col }},
-    perfect_assignment = perfect_assignment
+    perfect_assignment = perfect_assignment,
+    condition_col = {{ condition_col }}
   )
 
   bandits <- vector(mode = "list", length = max(data$period_number))
@@ -114,10 +115,19 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
     if (whole_experiment) {
       impute_info <- imputation_information[[1]]
     } else {
-      impute_info <- imputation_information[[1]][[i]]
+      impute_info <- imputation_information[[1]] |>
+        dplyr::filter(period_number < i) |>
+        dplyr::group_by(treatment_block) |>
+        dplyr::summarize(
+          success_rate = base::sum(n_success) / base::sum(count),
+          failure_rate = 1 - success_rate
+        )
     }
     if (!perfect_assignment) {
-      dates <- imputation_information[[2]][[i]]
+      dates <- rlang::set_names(
+        base::as.Date(base::as.numeric(imputation_information[[2]][i, -1])),
+        base::names(imputation_information[[2]][i, -1])
+      )
     }
 
     imputation_info <- check_impute(

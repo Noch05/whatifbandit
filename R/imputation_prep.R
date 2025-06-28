@@ -32,22 +32,12 @@ imputation_prep <- function(data, whole_experiment, success_col, perfect_assignm
       dplyr::summarize(success_rate = base::mean({{ success_col }}, na.rm = TRUE), .groups = "drop") |>
       dplyr::mutate(failure_rate = 1 - success_rate)
   } else if (!whole_experiment) {
-    summary <- data |>
+    imputation_information <- data |>
       dplyr::group_by(period_number, treatment_block) |>
       dplyr::summarize(
         count = dplyr::n(),
-        n_success = base::sum({{ success_col }})
-      ) |>
-      dplyr::ungroup()
-
-    imputation_information <- lapply(2:base::max(data$period_number), function(i) {
-      imputation_info <- summary |>
-        dplyr::filter(period_number < i) |>
-        dplyr::group_by(treatment_block) |>
-        dplyr::summarise(success_rate = base::sum(n_success) / base::sum(count)) |>
-        dplyr::mutate(failure_rate = 1 - success_rate)
-    })
-    imputation_information <- c(list(0), imputation_information)
+        n_success = base::sum({{ success_col }}), .groups = "drop"
+      )
   } else {
     rlang::abort("Specify Logical for `whole_experiment`")
   }
@@ -77,19 +67,15 @@ imputation_prep <- function(data, whole_experiment, success_col, perfect_assignm
 #'
 check_impute <- function(imputation_information, current_data) {
   mean_rate <- base::mean(imputation_information$success_rate)
+  current_blocks <- current_data$impute_block[current_data$impute_req == 1]
+  imputation_blocks <- imputation_information$treatment_block
 
   missing_blocks <- stats::na.omit(
-    base::setdiff(
-      current_data$impute_block[current_data$impute_req == 1],
-      imputation_information$treatment_block
-    )
+    base::setdiff(current_blocks, imputation_blocks)
   )
 
   blocks_to_remove <- stats::na.omit(
-    base::setdiff(
-      imputation_information$treatment_block,
-      current_data$impute_block[current_data$impute_req == 1]
-    )
+    base::setdiff(imputation_blocks, current_blocks)
   )
 
   if (base::length(missing_blocks) > 0) {

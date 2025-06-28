@@ -62,11 +62,13 @@ mab_simulation <- function(data,
     success_date_col = {{ success_date_col }},
     assignment_date_col = {{ assignment_date_col }},
     verbose = verbose
-  ) |>
-    get_adaptive_aipw(
-      conditions = conditions, algorithm = algorithm,
-      verbose = verbose
-    )
+  )
+
+  results <- get_adaptive_aipw(
+    mab = results,
+    conditions = conditions, algorithm = algorithm,
+    verbose = verbose
+  )
 
   class(results) <- c("mab", class(results))
 

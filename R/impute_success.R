@@ -23,7 +23,7 @@
 
 
 impute_success <- function(current_data, imputation_info, id_col,
-                           success_col, prior_data, perfect_assignment, dates,
+                           success_col, prior_data, perfect_assignment, dates = NULL,
                            success_date_col) {
   ## Imputing success randomly based on previously calculated Probabilities
   ##

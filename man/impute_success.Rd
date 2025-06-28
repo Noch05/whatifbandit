@@ -11,7 +11,7 @@ impute_success(
   success_col,
   prior_data,
   perfect_assignment,
-  dates,
+  dates = NULL,
   success_date_col
 )
 }
