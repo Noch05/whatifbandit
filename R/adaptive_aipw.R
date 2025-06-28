@@ -34,7 +34,7 @@ adaptive_aipw <- function(mab, conditions, periods, algorithm) {
     selected_arms <- mab[[2]] |>
       tidyr::pivot_longer(cols = -period, names_to = "mab_condition", values_to = "ucb") |>
       dplyr::group_by(period) |>
-      slice_max(order_by = dplyr::desc(ucb), with_ties = FALSE)
+      dplyr::slice_max(order_by = dplyr::desc(ucb), with_ties = FALSE)
 
     bandits <- lapply(base::seq_len(periods), function(i) {
       if (i == 1) {

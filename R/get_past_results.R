@@ -32,7 +32,7 @@ get_past_results <- function(current_data, prior_data, perfect_assignment, assig
 get_past_results.tbl_df <- function(current_data, prior_data, perfect_assignment, assignment_date_col = NULL,
                                     success_date_col = NULL, conditions) {
   if (!perfect_assignment) {
-    current_date <- base::max(dplyr::pull(current_data, {{ assignmet_date_col }}), na.rm = TRUE)
+    current_date <- base::max(dplyr::pull(current_data, {{ assignment_date_col }}), na.rm = TRUE)
 
     past_results <- prior_data |>
       dplyr::mutate(known_success = dplyr::if_else(

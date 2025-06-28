@@ -104,7 +104,7 @@ create_cutoff.Month <- function(data, date_col, month_col, period_length) {
     start_month <- lubridate::ymd(
       paste0(lubridate::year(start_date), "-", first_month, "-01")
     )
-    data |>
+    data <- data |>
       dplyr::mutate(
         month_date = lubridate::ymd(paste0(
           lubridate::year({{ date_col }}), "-", {{ month_col }}, "-01"

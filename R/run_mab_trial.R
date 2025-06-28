@@ -35,7 +35,9 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
   imputation_information <- imputation_prep(
     data = data,
     whole_experiment = whole_experiment,
-    success_col = {{ success_col }}
+    success_col = {{ success_col }},
+    success_date_col = {{ success_date_col }},
+    perfect_assignment = perfect_assignment
   )
 
   bandits <- vector(mode = "list", length = max(data$period_number))
@@ -96,6 +98,7 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       condition_col = {{ condition_col }},
       success_col = {{ success_col }}
     )
+
     # Creating block for imputing
     if (blocking) {
       current_data <- current_data |>
@@ -109,9 +112,12 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
 
 
     if (whole_experiment) {
-      impute_info <- imputation_information
+      impute_info <- imputation_information[[1]]
     } else {
-      impute_info <- imputation_information[[i]]
+      impute_info <- imputation_information[[1]][[i]]
+    }
+    if (!perfect_assignment) {
+      dates <- imputation_information[[2]][[i]]
     }
 
     imputation_info <- check_impute(
@@ -119,16 +125,16 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       current_data = current_data
     )
 
+
     data <- impute_success(
       current_data = current_data,
       imputation_info = imputation_info,
+      dates = dates,
       id_col = {{ id_col }},
-      condition_col = {{ condition_col }},
       success_col = {{ success_col }},
-      success_date_col = {{ success_date_col }},
       prior_data = data,
-      conditions = conditions,
-      perfect_assignment = perfect_assignment
+      perfect_assignment = perfect_assignment,
+      success_date_col = {{ success_date_col }}
     )
   }
 

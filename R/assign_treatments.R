@@ -101,7 +101,7 @@ assign_treatments.Thompson <- function(current_data, bandit, blocking,
     return(invisible(current_data))
   } else {
     current_data <- current_data |>
-      mutate(
+      dplyr::mutate(
         mab_condition = new_treatments,
         impute_req = dplyr::if_else(
           base::as.character(mab_condition) != base::as.character({{ condition_col }}), 1, 0

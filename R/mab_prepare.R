@@ -51,15 +51,17 @@ mab_prepare <- function(data, date_col, time_unit,
     date_col = {{ date_col }},
     period_length = period_length,
     month_col = {{ month_col }}
-  ) |>
-    create_new_cols(
-      success_date_col = {{ success_date_col }},
-      perfect_assignment = perfect_assignment,
-      blocking = blocking,
-      block_cols = block_cols,
-      success_col = {{ success_col }},
-      condition_col = {{ condition_col }}
-    )
+  )
+
+  data <- create_new_cols(
+    data = data,
+    success_date_col = {{ success_date_col }},
+    perfect_assignment = perfect_assignment,
+    blocking = blocking,
+    block_cols = block_cols,
+    success_col = {{ success_col }},
+    condition_col = {{ condition_col }}
+  )
 
   if (inherits(data, "data.table")) {
     data.table::setattr(data, "class", c("data.table", "data.frame"))

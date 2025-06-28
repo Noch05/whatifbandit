@@ -4,7 +4,14 @@
 \alias{imputation_prep}
 \title{Prepping Data For Outcome Imputation}
 \usage{
-imputation_prep(data, whole_experiment, success_col)
+imputation_prep(
+  data,
+  whole_experiment,
+  success_col,
+  perfect_assignment,
+  success_date_col = NULL,
+  condition_col = NULL
+)
 }
 \arguments{
 \item{data}{A data frame that provides the input data for the trial.}
@@ -13,20 +20,29 @@ imputation_prep(data, whole_experiment, success_col)
 If FALSE, uses only data available up to the current period.}
 
 \item{success_col}{Column in data, contains binary successes.}
+
+\item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
+(i.e., all outcomes are observed regardless of the date).
+If FALSE, hides outcomes not yet theoretically observed, based on
+\code{letter_sent_date} from the \code{tanf} dataset.}
+
+\item{success_date_col}{Column in data, contains date each success occurred.}
+
+\item{condition_col}{Column in data, contains original treatment conditions.}
 }
 \value{
-A summary data frame of success probabilities by treatment condition and blocking condition, passed to
-\code{\link[=impute_success]{impute_success()}}
+A named list containing:
+\item{Probabilities}{summary data frame of success probabilities by treatment condition and blocking condition.}
+\item{Dates}{Success Dates by condition, to be used for imputing new dates of success}
+#' @seealso
+\itemize{
+\item \code{\link[=impute_success]{impute_success()}}
+\item \code{\link[=run_mab_trial]{run_mab_trial()}}
+}
 }
 \description{
 This function prepares
 to have values of success imputed for those who were switched treatment conditions
 by \code{\link[=assign_treatments]{assign_treatments()}}. Simply calculates the Probability of success based on
 treatment condition, using original experimental data.
-}
-\seealso{
-\itemize{
-\item \code{\link[=impute_success]{impute_success()}}
-\item \code{\link[=run_mab_trial]{run_mab_trial()}}
-}
 }
