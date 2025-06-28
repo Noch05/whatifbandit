@@ -42,7 +42,8 @@ impute_success <- function(current_data, imputation_info, id_col,
       clusters = clusters,
       block_prob_each = dplyr::select(imputation_info, failure_rate, success_rate),
       num_arms = 2,
-      conditions = c(0, 1)
+      conditions = c(0, 1),
+      check_inputs = FALSE
     )
 
     # Joining Data Together and Returning
@@ -52,12 +53,10 @@ impute_success <- function(current_data, imputation_info, id_col,
     imputed <- dplyr::rows_update(current_data, filtered_data, by = rlang::as_name(rlang::enquo(id_col))) |>
       dplyr::mutate(mab_success = dplyr::if_else(base::is.na(mab_success) & impute_req == 0,
         {{ success_col }}, mab_success
-      )) |>
-      dplyr::select(-impute_block)
+      ))
   } else {
     imputed <- current_data |>
-      dplyr::mutate(mab_success = {{ success_col }}) |>
-      dplyr::select(-impute_block)
+      dplyr::mutate(mab_success = {{ success_col }})
   }
 
   # Recert Date for newly imputed success as average of recert date in the period from experimental data, grouped by original treatment

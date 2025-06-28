@@ -46,7 +46,8 @@ create_new_cols.tbl_df <- function(data,
       period_number = base::match(period_number, base::sort(base::unique(period_number))),
       mab_success = dplyr::if_else(period_number == 1, {{ success_col }}, NA_real_),
       mab_condition = dplyr::if_else(period_number == 1, {{ condition_col }}, NA_character_),
-      impute_req = dplyr::if_else(period_number == 1, 0, NA_real_)
+      impute_req = dplyr::if_else(period_number == 1, 0, NA_real_),
+      impute_block = NA_character_
     )
 
   if (!perfect_assignment) {
@@ -112,7 +113,8 @@ create_new_cols.data.table <- function(data,
     period_number == 1, `:=`(
       mab_success = base::get(success_col_name),
       mab_condition = base::get(condition_col_name),
-      impute_req = 0
+      impute_req = 0,
+      impute_block = NA_character_
     )
   ]
   if (!perfect_assignment) {
