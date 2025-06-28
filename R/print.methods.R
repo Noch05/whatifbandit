@@ -18,7 +18,7 @@ print.mab <- function(x, ...) {
   base::cat("Blocking Variables: ", settings$block_cols, "\n")
   base::cat("Assignment Method:  ", settings$assignment_method, "\n")
 
-  if (setttings$assignment_method %in% c("Batch", "Data")) {
+  if (settings$assignment_method %in% c("Batch", "Data")) {
     base::cat("Period Length:      ", settings$period_length)
   }
   if (settings$assignment_method == "Batch") {

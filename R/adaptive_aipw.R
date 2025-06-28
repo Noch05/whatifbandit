@@ -31,30 +31,32 @@ adaptive_aipw <- function(mab, conditions, periods, algorithm) {
   if (algorithm == "Thompson") {
     bandits <- mab[[2]]
   } else if (algorithm == "UCB1") {
-    sampled <- data |>
-      dplyr::group_by(period_number, mab_condition) |>
-      dplyr::summarize(n = dplyr::n())
+    selected_arms <- mab[[2]] |>
+      tidyr::pivot_longer(cols = -period, names_to = "mab_condition", values_to = "ucb") |>
+      dplyr::group_by(period) |>
+      slice_max(order_by = dplyr::desc(ucb), with_ties = FALSE)
 
-    bandits <- list()
-
-    for (j in 1:periods) {
-      if (j == 1) {
-        bandits[[j]] <- rlang::set_names(rep(1 / base::length(conditions), base::length(conditions)), base::sort(conditions))
+    bandits <- lapply(base::seq_len(periods), function(i) {
+      if (i == 1) {
+        bandits <- rlang::set_names(rep(
+          1 / base::length(conditions),
+          base::length(conditions)
+        ), conditions)
+        return(bandits)
       } else {
-        sampled_now <- dplyr::filter(sampled, period_number == j)
+        bandits <- base::ifelse(selected_arms$mab_condition[i] == conditions, 1, 0)
 
-        bandits[[j]] <- rlang::set_names(rep(0, base::length(conditions)), base::sort(conditions))
-
-        bandits[[j]][base::as.character(sampled_now$mab_condition)] <- 1
+        base::names(bandits) <- conditions
+        return(bandits)
       }
-    }
-    bandits <- dplyr::bind_rows(bandits, .id = "period")
+    }) |>
+      dplyr::bind_rows(.id = "period")
   } else {
     base::stop("Please Specify UCB1 or Thompson for algorithm")
   }
 
 
-  for (i in 1:base::length(conditions)) {
+  for (i in base::seq_len(length(conditions))) {
     results <- data |>
       dplyr::group_by(period_number) |>
       dplyr::summarize(avg = base::mean(!!rlang::sym(base::paste0("aipw_", conditions[i])), na.rm = TRUE)) |>
