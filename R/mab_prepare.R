@@ -23,7 +23,9 @@ mab_prepare <- function(data, date_col, time_unit,
                         success_date_col = NULL,
                         month_col,
                         perfect_assignment, blocking,
-                        block_cols, assignment_method) {
+                        block_cols, assignment_method, verbose) {
+  verbose_log(verbose, "Preparing Data")
+
   custom_class <- switch(assignment_method,
     "Date" = {
       switch(time_unit,

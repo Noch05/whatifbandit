@@ -16,7 +16,8 @@ mab_prepare(
   perfect_assignment,
   blocking,
   block_cols,
-  assignment_method
+  assignment_method,
+  verbose
 )
 }
 \arguments{
@@ -50,6 +51,8 @@ If FALSE, hides outcomes not yet theoretically observed, based on
 \item{block_cols}{Character Vector of variables to block by.}
 
 \item{assignment_method}{String; "Date" or "Batch" to define the assignment into treatment waves.}
+
+\item{verbose}{Logical; Whether or not to print iteration number. FALSE by default.}
 }
 \value{
 Prepared data.frame containing the columns required by \code{\link[=mab_simulation]{mab_simulation()}}

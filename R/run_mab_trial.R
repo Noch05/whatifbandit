@@ -32,6 +32,8 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
                           id_col, condition_col,
                           success_col, success_date_col,
                           assignment_date_col, verbose) {
+  verbose_log(verbose, "Precomputing")
+
   imputation_information <- imputation_prep(
     data = data,
     whole_experiment = whole_experiment,
@@ -57,10 +59,10 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
   data <- data |>
     dplyr::arrange(period_number, {{ id_col }})
 
+
+  verbose_log(verbose, "Starting Bandit Trial")
   for (i in 2:max(data$period_number)) {
-    if (verbose) {
-      base::cat(paste("Period Number:", i, "\n"))
-    }
+    verbose_log(verbose, paste0("Period: ", i))
 
     prior <- priors[[i]]
 

@@ -102,7 +102,8 @@ single_mab_simulation <- function(data,
     perfect_assignment = perfect_assignment,
     assignment_method = assignment_method,
     blocking = blocking,
-    block_cols = block_cols
+    block_cols = block_cols,
+    verbose = verbose
   )
 
   results <- mab_simulation(

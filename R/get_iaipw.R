@@ -47,6 +47,7 @@ get_iaipw <- function(mab, periods, algorithm, conditions, verbose) {
 
 
 get_iaipw.tbl_df <- function(mab, periods, algorithm, conditions, verbose) {
+  verbose_log(verbose, "Computing Individual AIPW Estimates")
   data <- mab[[1]]
   conditions <- base::sort(conditions)
 
@@ -63,9 +64,6 @@ get_iaipw.tbl_df <- function(mab, periods, algorithm, conditions, verbose) {
 
 
   prior_data <- base::lapply(base::seq_len(periods), function(x) {
-    if (verbose) {
-      base::cat(base::paste0("Period Number: ", x, "\n"))
-    }
     if (x == 1) {
       return(tibble::tibble(
         mab_condition = conditions,
@@ -92,6 +90,7 @@ get_iaipw.tbl_df <- function(mab, periods, algorithm, conditions, verbose) {
   bandits <- mab[[2]]
 
   for (i in seq_len(periods)) {
+    verbose_log(paste0(verbose, "Period: ", i))
     mhats <- rlang::set_names(prior_data[[i]]$success_rate, base::sort(prior_data[[i]]$mab_condition))
     subset <- which(data$period_number == i)
 
