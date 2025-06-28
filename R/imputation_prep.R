@@ -12,16 +12,18 @@
 #' @inheritParams assign_treatments
 
 #'
-#' @returns A summary data frame of success probabilities by treatment condition and blocking condition, passed to
-#' [impute_success()]
-#' @seealso
+#' @returns A named list containing:
+#' \item{Probabilities}{summary data frame of success probabilities by treatment condition and blocking condition.}
+#' \item{Dates}{Success Dates by condition, to be used for imputing new dates of success}
+#' #' @seealso
 #' * [impute_success()]
 #'* [run_mab_trial()]
 #' @export
 
 
 
-imputation_prep <- function(data, whole_experiment, success_col) {
+imputation_prep <- function(data, whole_experiment, success_col, perfect_assignment, success_date_col = NULL,
+                            condition_col = NULL) {
   # Choosing Whether to use all the data from the experiment or only up to the current treatment period
 
   if (whole_experiment) {
@@ -29,8 +31,6 @@ imputation_prep <- function(data, whole_experiment, success_col) {
       dplyr::group_by(treatment_block) |>
       dplyr::summarize(success_rate = base::mean({{ success_col }}, na.rm = TRUE), .groups = "drop") |>
       dplyr::mutate(failure_rate = 1 - success_rate)
-
-    return(imputation_information)
   } else if (!whole_experiment) {
     summary <- data |>
       dplyr::group_by(period_number, treatment_block) |>
@@ -48,12 +48,28 @@ imputation_prep <- function(data, whole_experiment, success_col) {
         dplyr::mutate(failure_rate = 1 - success_rate)
     })
     imputation_information <- c(list(0), imputation_information)
-
-    return(imputation_information)
   } else {
-    base::stop("Specify logical for `whole_experiment`")
+    rlang::abort("Specify Logical for `whole_experiment`")
   }
+  if (!perfect_assignment) {
+    dates <- data |>
+      dplyr::group_by({{ condition_col }}, period) |>
+      dplyr::summarize(mean_date = base::mean({{ success_date_col }}, na.rm = TRUE)) |>
+      dplyr::rename(condition = {{ condition_col }})
+
+    dates <- lapply(2:base::max(data$period_number), function(j) {
+      return(
+        dates |> filter(period_number == j)
+      )
+    })
+  } else {
+    dates <- NULL
+  }
+
+  imputation_information <- list(imputation_information, dates)
+  return(imputation_information)
 }
+
 
 #' Checking Imputation Info
 #' @description
