@@ -26,7 +26,7 @@ create_cutoff.Day <- function(data, date_col, period_length, ...) {
     data[, period_number := base::floor(
       lubridate::interval(start_date, base::get(date_col)) / lubridate::days(1) / period_length
     ) + 1]
-    setkey(data, period_number)
+    data.table::setkey(data, period_number)
 
     return(invisible(data))
   } else {
@@ -53,7 +53,7 @@ create_cutoff.Week <- function(data, date_col, period_length, ...) {
     data[, period_number := base::floor(
       lubridate::interval(start_date, base::get(date_col)) / lubridate::weeks(1) / period_length
     ) + 1]
-    setkey(data, period_number)
+    data.table::setkey(data, period_number)
 
     return(invisible(data))
   } else {
@@ -127,7 +127,7 @@ create_cutoff.Month <- function(data, date_col, month_col, period_length) {
 create_cutoff.Individual <- function(data, ...) {
   if (inherits(data, "data.table")) {
     data[, period_number := .I]
-    setkey(data, period_number)
+    data.table::setkey(data, period_number)
     return(invisible(data))
   } else {
     data <- data |>
@@ -143,7 +143,7 @@ create_cutoff.Individual <- function(data, ...) {
 create_cutoff.Batch <- function(data, period_length, ...) {
   if (inherits(data, "data.table")) {
     data[, period_number := base::ceiling((.I / period_length))]
-    setkey(data, period_number)
+    data.table::setkey(data, period_number)
     return(invisible(data))
   } else {
     data <- data |>

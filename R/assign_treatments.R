@@ -120,12 +120,12 @@ assign_treatments.UCB1 <- function(current_data, bandit,
                                    algorithm, id_col, conditions, condition_col,
                                    success_col) {
   if (inherits(bandit, "data.table")) {
-    best_condtion <- base::as.character(bandit[order(ucb)][1, mab_condition])
+    best_condition <- base::as.character(bandit[order(ucb)][1, mab_condition])
 
     current_data[, mab_conditon := best_condition][
       ,
-      impute_rep := data.table::fifelse(
-        base::as.character(base::get(condition_col)) != as.character(mab_condition),
+      impute_req := data.table::fifelse(
+        base::as.character(base::get(rlang::as_name(rlang::enquo(condition_col)))) != as.character(mab_condition),
         1, 0
       )
     ]

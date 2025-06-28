@@ -78,7 +78,7 @@ get_past_results.tbl_df <- function(current_data, prior_data, perfect_assignment
 get_past_results.data.table <- function(current_data, prior_data,
                                         perfect_assignment, assignment_date_col = NULL,
                                         success_date_col = NULL, conditions) {
-  if (!perfect_assigment) {
+  if (!perfect_assignment) {
     assignment_date_col_name <- rlang::as_name(rlang::enquo(assignment_date_col))
     success_date_col_name <- rlang::as_name(rlang::enquo(success_date_col))
 
@@ -88,7 +88,7 @@ get_past_results.data.table <- function(current_data, prior_data,
       current_date >= get(success_date_col_name) &
         !is.na(get(success_date_col_name)), 1, 0
     )]
-  } else if (perfect_assigmnet) {
+  } else if (perfect_assignment) {
     prior_data[, known_success := mab_success]
   } else {
     rlang::abort("Specify Logical for `perfect_assignment`")
