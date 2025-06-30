@@ -86,7 +86,7 @@ create_cutoff.Month <- function(data, date_col, month_col, period_length) {
     start_month <- lubridate::ymd(base::paste0(lubridate::year(start_date), "-", first_month, "-01"))
 
     data[, month_date := lubridate::ymd(
-      base::paste0(lubridate::year(base::get(date_col)), "-", ..month_col, "-01")
+      base::paste0(lubridate::year(base::get(date_col)), "-", base::get(month_col), "-01")
     )]
 
     data[, period_number := base::floor(
