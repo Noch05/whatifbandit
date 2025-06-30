@@ -39,7 +39,7 @@ mab_simulation <- function(data,
                            success_date_col = NULL,
                            assignment_date_col = NULL,
                            verbose,
-                           assignment_method) {
+                           assignment_method, control_augment) {
   conditions <- base::sort(conditions)
 
   # Run the main MAB trial with all required arguments
@@ -61,7 +61,8 @@ mab_simulation <- function(data,
     success_col = {{ success_col }},
     success_date_col = {{ success_date_col }},
     assignment_date_col = {{ assignment_date_col }},
-    verbose = verbose
+    verbose = verbose,
+    control_augment = control_augment
   )
 
   results <- get_adaptive_aipw(

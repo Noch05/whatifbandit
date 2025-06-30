@@ -15,12 +15,15 @@
 #'* [get_past_results()]
 
 
-get_bandit <- function(past_results, algorithm, conditions, current_period = NULL) {
+get_bandit <- function(past_results, algorithm, conditions, current_period = NULL, control_augment = 0) {
   bandit <- switch(algorithm,
     "Thompson" = get_bandit.Thompson(past_results = past_results, conditions = conditions),
     "UCB1" = get_bandit.UCB1(past_results = past_results, conditions = conditions, current_period = current_period),
     rlang::abort("Invalid `algorithm`. Valid Algorithms: 'Thomspon', 'UCB1'")
   )
+  bandit[[2]] <- augment_prob(assignment_probs = bandit[[2]], control_augment = control_augment)
+
+
   return(bandit)
 }
 #-------------------------------------------------------------------
@@ -40,7 +43,8 @@ get_bandit.Thompson <- function(past_results, conditions) {
   if (base::sum(bandit) != 1) {
     bandit <- bandit / base::sum(bandit)
   }
-  return(bandit)
+
+  return(list(bandit, assignment_prob = bandit))
 }
 #-------------------------------------------------------------------
 #' @method get_bandit UCB1
@@ -56,15 +60,43 @@ get_bandit.UCB1 <- function(past_results, conditions, current_period) {
     past_results[, ucb := success_rate + base::sqrt(
       (2 * base::log(current_period - 1)) / (n + correction)
     )]
-
-    return(invisible(past_results))
+    best_condition <- base::as.character(bandit[order(ucb)][1, mab_condition])
   } else {
-    bandit <- past_results |>
+    past_results <- past_results |>
       dplyr::mutate(
         ucb = success_rate + base::sqrt(
           (2 * base::log(current_period - 1)) / (n + correction)
         )
       )
-    return(bandit)
+    best_condition <- past_results |>
+      dplyr::slice_max(order_by = ucb, n = 1, with_ties = FALSE) |>
+      dplyr::ungroup() |>
+      dplyr::pull(mab_condition)
   }
+
+  assignment_probs <- rlang::set_names(rep(0, length(conditions)), conditions)
+  assignment_probs[[best_condition]] <- 1
+
+  return(invisible(list(past_results, assignment_probs)))
+}
+
+#' @name augment_prob
+#' @title Control Augmentation for Treatment Assignment
+#' @description
+#' Adjusts Probabilities of Assignment to match a control augmentation framework
+#' @inheritParams single_mab_simulation
+#' @param assignment_probs Named numeric vector; contains probabilities of
+#' assignment with the control condition named "Control".
+#' @returns Named numeric vector with updated probabilities
+
+augment_prob <- function(assignment_probs, control_augment) {
+  if (assignment_probs[["Control"]] < control_augment) {
+    diff <- control_augment - assignment_probs[["Control"]]
+    sub_from <- diff / base::length(conditions)
+
+    assignment_probs[["Control"]] <- assignment_probs[["Control"]] + diff
+    assignment_probs[!base::names(assignment_probs) %in% "Control"] <-
+      assignment_probs[!base::names(assignment_probs) %in% "Control"] - sub_from
+  }
+  return(assignment_probs)
 }

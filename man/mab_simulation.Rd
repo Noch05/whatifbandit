@@ -23,7 +23,8 @@ mab_simulation(
   success_date_col = NULL,
   assignment_date_col = NULL,
   verbose,
-  assignment_method
+  assignment_method,
+  control_augment
 )
 }
 \arguments{
@@ -73,6 +74,9 @@ If FALSE, uses only data available up to the current period.}
 \item{verbose}{Logical; Whether or not to print iteration number. FALSE by default.}
 
 \item{assignment_method}{String; "Date" or "Batch" to define the assignment into treatment waves.}
+
+\item{control_augment}{Number \in \link{0,1}; Proportion of each wave guaranteed to get "Control" treatment.
+Default is 0}
 }
 \description{
 This function acts as an internal helper to \code{\link[=single_mab_simulation]{single_mab_simulation()}}

@@ -22,7 +22,8 @@ run_mab_trial(
   success_col,
   success_date_col,
   assignment_date_col,
-  verbose
+  verbose,
+  control_augment
 )
 }
 \arguments{
@@ -70,6 +71,9 @@ If FALSE, hides outcomes not yet theoretically observed, based on
 \item{assignment_date_col}{Column in data, contains date of wave assignment.}
 
 \item{verbose}{Logical; Whether or not to print iteration number. FALSE by default.}
+
+\item{control_augment}{Number \in \link{0,1}; Proportion of each wave guaranteed to get "Control" treatment.
+Default is 0}
 }
 \value{
 A named list containing:

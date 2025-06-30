@@ -31,7 +31,7 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
                           date_col, month_col = NULL,
                           id_col, condition_col,
                           success_col, success_date_col,
-                          assignment_date_col, verbose) {
+                          assignment_date_col, verbose, control_augment) {
   verbose_log(verbose, "Precomputing")
 
   imputation_information <- imputation_prep(
@@ -86,7 +86,8 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       past_results = past_results,
       algorithm = algorithm,
       conditions = conditions,
-      current_period = i
+      current_period = i,
+      control_augment = control_augment
     )
 
     bandits[[i]] <- bandit

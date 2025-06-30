@@ -37,6 +37,8 @@
 #' @param assignment_date_col Column in data, contains date of wave assignment.
 #' @param verbose Logical; Whether or not to print iteration number. FALSE by default.
 #' @param assignment_method String; "Date" or "Batch" to define the assignment into treatment waves.
+#' @param control_augment Number \in [0,1]; Proportion of each wave guaranteed to get "Control" treatment.
+#' Default is 0
 #'
 #'
 #' @return  A custom mab class object, which is a named list containing:
@@ -70,7 +72,8 @@ single_mab_simulation <- function(data,
                                   success_col,
                                   success_date_col = NULL,
                                   assignment_date_col = NULL,
-                                  verbose = FALSE, assignment_method) {
+                                  verbose = FALSE, assignment_method,
+                                  control_augment = 0) {
   # Input Validation
 
 
@@ -125,7 +128,8 @@ single_mab_simulation <- function(data,
     success_date_col = {{ success_date_col }},
     assignment_date_col = {{ assignment_date_col }},
     verbose = verbose,
-    assignment_method = assignment_method
+    assignment_method = assignment_method,
+    control_augment = control_augment
   )
 
   return(results)

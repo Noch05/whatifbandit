@@ -4,7 +4,13 @@
 \alias{get_bandit}
 \title{Calculate Multi-Arm Bandit Decision Based on Algorithm}
 \usage{
-get_bandit(past_results, algorithm, conditions, current_period = NULL)
+get_bandit(
+  past_results,
+  algorithm,
+  conditions,
+  current_period = NULL,
+  control_augment = 0
+)
 }
 \arguments{
 \item{past_results}{Data.frame containing summary of prior periods.
@@ -13,6 +19,9 @@ Created by \code{\link[=get_past_results]{get_past_results()}} components}
 \item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
 
 \item{conditions}{Named Character vector containing treatment conditions, Control condition, must be named "Control".}
+
+\item{control_augment}{Number \in \link{0,1}; Proportion of each wave guaranteed to get "Control" treatment.
+Default is 0}
 }
 \value{
 The bandit object for the given period.
