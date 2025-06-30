@@ -43,14 +43,18 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
     condition_col = {{ condition_col }}
   )
 
-  bandits <- vector(mode = "list", length = max(data$period_number))
+  bandits <- vector(mode = "list", length = 2)
+  bandits[["bandit_stat"]] <- vector(mode = "list", length = base::max(data$period_number))
+  bandits[["assignment_prob"]] <- vector(mode = "list", length = base::max(data$period_number))
+
   if (algorithm == "Thompson") {
-    bandits[[1]] <- rlang::set_names(rep(1 / length(conditions), length(conditions)), conditions)
+    bandits[["bandit_stat"]][[1]] <- rlang::set_names(rep(1 / length(conditions), length(conditions)), conditions)
   } else if (algorithm == "UCB1") {
-    bandits[[1]] <- tibble::tibble(mab_condition = conditions, ucb = rep(0, length(conditions)))
+    bandits[["bandit_stat"]][[1]] <- tibble::tibble(mab_condition = conditions, ucb = rep(0, length(conditions)))
   } else {
     base::stop("Please specify algorithm: Thompson or UCB1")
   }
+  bandits[["assignment_prob"]][[1]] <- rlang::set_names(rep(1 / length(conditions), length(conditions)), conditions)
 
   priors <- lapply(base::seq_len(base::max(data$period_number)), \(x) {
     create_prior(prior_periods = prior_periods, current_period = x)
@@ -58,7 +62,6 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
 
   data <- data |>
     dplyr::arrange(period_number, {{ id_col }})
-
 
   verbose_log(verbose, "Starting Bandit Trial")
   for (i in 2:max(data$period_number)) {
@@ -90,7 +93,8 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       control_augment = control_augment
     )
 
-    bandits[[i]] <- bandit[[1]]
+    bandits[["assignment_prob"]][[i]] <- bandit[[2]]
+    bandits[["bandit_stat"]][[i]] <- bandit[[1]]
 
     current_data <- assign_treatments(
       current_data = current_data,
@@ -151,16 +155,18 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
     )
   }
 
-  bandits <- dplyr::bind_rows(bandits, .id = "period")
+  bandit_stats <- dplyr::bind_rows(bandits[["bandit_stat"]], .id = "period")
+  assignment_probs <- dplyr::bind_rows(bandits[["assignment_prob"]], .id = "period")
 
   if (algorithm == "UCB1") {
-    bandits <- bandits |>
+    bandit_stats <- bandit_stats |>
       dplyr::select(ucb, mab_condition, period) |>
       tidyr::pivot_wider(values_from = "ucb", names_from = c("mab_condition"))
   }
 
   return(list(
     final_data = data,
-    bandits = bandits
+    bandits = bandit_stats,
+    assignment_probs = assignment_probs
   ))
 }

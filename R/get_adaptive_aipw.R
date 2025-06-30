@@ -42,8 +42,9 @@ get_adaptive_aipw <- function(mab, conditions, algorithm, verbose) {
   )
 
   results <- list(
-    final_data = mab[[1]],
-    bandits = mab[[2]],
+    final_data = mab[["final_data"]],
+    bandits = mab[["bandits"]],
+    assignment_probs = mab[["assignment_probs"]],
     estimates = estimates
   )
 

@@ -79,6 +79,7 @@ mab_simulation <- function(data,
   results$settings <- list(
     data = data_name,
     assignment_method = assignment_method,
+    control_augment = control_augment,
     time_unit = time_unit,
     perfect_assignment = perfect_assignment,
     algorithm = algorithm,

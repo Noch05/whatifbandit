@@ -24,7 +24,7 @@ get_bandit <- function(past_results, algorithm, conditions, current_period = NUL
 
   bandit[[2]] <- augment_prob(
     assignment_probs = bandit[[2]], control_augment = control_augment,
-    conditions = conditions
+    conditions = conditions, algorithm = algorithm
   )
 
   if (base::sum(bandit[[2]]) != 1) {
@@ -94,11 +94,29 @@ get_bandit.UCB1 <- function(past_results, conditions, current_period) {
 #' assignment with the control condition named "Control".
 #' @returns Named numeric vector with updated probabilities
 
-augment_prob <- function(assignment_probs, control_augment, conditions) {
+augment_prob <- function(assignment_probs, control_augment, conditions, algorithm) {
+  assignment_probs <- switch(algorithm,
+    "Thompson" = augment_prob.Thompson(
+      assignment_probs = assignment_probs,
+      control_augment = control_augment,
+      conditions = conditions
+    ),
+    "UCB1" = augment_prob.UCB1(
+      assignment_probs = assignment_probs,
+      control_augment = control_augment,
+      conditions = conditions
+    ),
+    rlang::abort("Invalid `algorithm`. Valid Algorithms: 'Thomspon', 'UCB1'")
+  )
+}
+#' @method augment_prob Thompson
+#' @title Augment Prob For Thompson Sampling
+#' @inheritParams augment_prob
+augment_prob.Thompson <- function(assignment_probs, control_augment, conditions) {
   ctrl <- base::names(conditions) == "Control"
 
   if (assignment_probs[ctrl] < control_augment) {
-    diff <- control_augment - assignment_probs[base::names(conditions) == "Control"]
+    diff <- control_augment - assignment_probs[ctrl]
 
     sub_from <- diff / base::length(conditions)
 
@@ -113,9 +131,26 @@ augment_prob <- function(assignment_probs, control_augment, conditions) {
     )
   }
 
+  return(assignment_probs)
+}
+
+#' @method augment_prob UCB1
+#' @title Augment Prob For UCB1
+#' @inheritParams augment_prob
+augment_prob.UCB1 <- function(assignment_probs, control_augment, conditions) {
+  ctrl <- base::names(conditions) == "Control"
+  selected <- assignment_probs == 1
+
+  if (assignment_probs[ctrl] < control_augment) {
+    diff <- control_augment - assignment_probs[ctrl]
+    assignment_probs[ctrl] <- assignment_probs[ctrl] + diff
+    assignment_probs[selected] <- assignment_probs[selected] - diff
+  }
 
   return(assignment_probs)
 }
+
+
 
 #' @title Ensure Non-Zero Probabilities of Assignment
 #' @description Redistributes Probabilities when control augmentation produces negatives
@@ -139,7 +174,7 @@ fix_negatives <- function(assignment_probs, conditions, iter = 1) {
   # Recursive Process that ends once an acceptable degree of precision is met
 
   if ((-1 * sum(assignment_probs[assignment_probs < 0]) > 1e-10) && iter < 50) {
-    fix_negatives(
+    assignment_probs <- fix_negatives(
       assignment_probs = assignment_probs, conditions = conditions,
       iter = iter + 1
     )

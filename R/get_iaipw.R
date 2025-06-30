@@ -48,7 +48,7 @@ get_iaipw <- function(mab, periods, algorithm, conditions, verbose) {
 
 get_iaipw.tbl_df <- function(mab, periods, algorithm, conditions, verbose) {
   verbose_log(verbose, "Computing Individual AIPW Estimates")
-  data <- mab[[1]]
+  data <- mab[["final_data"]]
   conditions <- base::sort(conditions)
 
   new_cols <- paste0("aipw_", conditions)
@@ -87,7 +87,7 @@ get_iaipw.tbl_df <- function(mab, periods, algorithm, conditions, verbose) {
   })
 
 
-  bandits <- mab[[2]]
+  probs <- mab[["assignment_probs"]]
 
   for (i in seq_len(periods)) {
     verbose_log(verbose, paste0("Period: ", i))
@@ -97,10 +97,7 @@ get_iaipw.tbl_df <- function(mab, periods, algorithm, conditions, verbose) {
     for (j in seq_along(conditions)) {
       condition <- conditions[j]
 
-      bandit_prob <- ifelse(
-        algorithm == "UCB1",
-        ifelse(i == 1, (1 / base::length(conditions)), 1), base::as.numeric(bandits[[condition]][i])
-      )
+      bandit_prob <- base::as.numeric(probs[[condition]][i])
 
       iaipws <- base::ifelse(
         data$mab_condition[subset] == condition,
