@@ -4,10 +4,12 @@
 \alias{fix_negatives}
 \title{Ensure Non-Zero Probabilities of Assignment}
 \usage{
-fix_negatives(assignment_probs, conditions)
+fix_negatives(assignment_probs, conditions, iter = 1)
 }
 \arguments{
 \item{assignment_probs}{Named Numeric Vector; Containing probabilities of treatment assignment}
+
+\item{iter, }{iteration tracker, stops function if it reaches the limit of}
 }
 \value{
 Named Numeric Vector; Containing probabilities of treatment assignment, all positive.

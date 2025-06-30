@@ -121,9 +121,10 @@ augment_prob <- function(assignment_probs, control_augment, conditions) {
 #' @description Redistributes Probabilities when control augmentation produces negatives
 #' @name fix_negatives
 #' @param assignment_probs Named Numeric Vector; Containing probabilities of treatment assignment
+#' @param iter, iteration tracker, stops function if it reaches the limit of
 #' @returns Named Numeric Vector; Containing probabilities of treatment assignment, all positive.
 
-fix_negatives <- function(assignment_probs, conditions) {
+fix_negatives <- function(assignment_probs, conditions, iter = 1) {
   negatives <- assignment_probs < 0
   take_from <- assignment_probs > 0 & base::names(conditions) != "Control"
 
@@ -137,8 +138,11 @@ fix_negatives <- function(assignment_probs, conditions) {
 
   # Recursive Process that ends once an acceptable degree of precision is met
 
-  if (-1 * sum(assignment_probs[assignment_probs < 0]) > 1e-10) {
-    fix_negatives(assignment_probs = assignment_probs, conditions = conditions)
+  if ((-1 * sum(assignment_probs[assignment_probs < 0]) > 1e-10) && iter < 50) {
+    fix_negatives(
+      assignment_probs = assignment_probs, conditions = conditions,
+      iter = iter + 1
+    )
   } else {
     assignment_probs[assignment_probs < 0] <- 1e-10
   }
