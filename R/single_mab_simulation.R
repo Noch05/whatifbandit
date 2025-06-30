@@ -74,6 +74,7 @@ single_mab_simulation <- function(data,
                                   assignment_date_col = NULL,
                                   verbose = FALSE, assignment_method,
                                   control_augment = 0) {
+  data_name <- deparse(substitute(data))
   # Input Validation
 
 
@@ -131,6 +132,7 @@ single_mab_simulation <- function(data,
     assignment_method = assignment_method,
     control_augment = control_augment
   )
+  results$settings$data <- data_name
 
   return(results)
 }

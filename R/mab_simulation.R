@@ -73,11 +73,9 @@ mab_simulation <- function(data,
 
   class(results) <- c("mab", class(results))
 
-  data_name <- base::deparse(base::substitute(data))
-
 
   results$settings <- list(
-    data = data_name,
+    data = NULL,
     assignment_method = assignment_method,
     control_augment = control_augment,
     time_unit = time_unit,
