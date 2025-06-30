@@ -76,7 +76,7 @@ If FALSE, uses only data available up to the current period.}
 \item{assignment_method}{String; "Date" or "Batch" to define the assignment into treatment waves.}
 
 \item{control_augment}{Number \in \link{0,1}; Proportion of each wave guaranteed to get "Control" treatment.
-Default is 0}
+Default is 0. Creates potential conflicts with \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}, when not set to 0.}
 }
 \value{
 A custom mab class object, which is a named list containing:

@@ -38,7 +38,7 @@
 #' @param verbose Logical; Whether or not to print iteration number. FALSE by default.
 #' @param assignment_method String; "Date" or "Batch" to define the assignment into treatment waves.
 #' @param control_augment Number \in [0,1]; Proportion of each wave guaranteed to get "Control" treatment.
-#' Default is 0
+#' Default is 0. Creates potential conflicts with [randomizr::complete_ra()], when not set to 0.
 #'
 #'
 #' @return  A custom mab class object, which is a named list containing:

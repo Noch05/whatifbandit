@@ -21,12 +21,15 @@ get_bandit <- function(past_results, algorithm, conditions, current_period = NUL
     "UCB1" = get_bandit.UCB1(past_results = past_results, conditions = conditions, current_period = current_period),
     rlang::abort("Invalid `algorithm`. Valid Algorithms: 'Thomspon', 'UCB1'")
   )
-  bandit[[2]] <- augment_prob(assignment_probs = bandit[[2]], control_augment = control_augment)
+
+  bandit[[2]] <- augment_prob(
+    assignment_probs = bandit[[2]], control_augment = control_augment,
+    conditions = conditions
+  )
 
   if (base::sum(bandit[[2]]) != 1) {
-    bandit[[2]] <- bandits[[2]] / base::sum(bandit[[2]])
+    bandit[[2]] <- bandit[[2]] / base::sum(bandit[[2]])
   }
-
 
   return(bandit)
 }
@@ -42,7 +45,7 @@ get_bandit.Thompson <- function(past_results, conditions) {
     n = past_results$n,
     alpha = 1,
     beta = 1
-  ), base::sort(conditions))
+  ), conditions)
 
   return(list(bandit, assignment_prob = bandit))
 }
@@ -75,6 +78,7 @@ get_bandit.UCB1 <- function(past_results, conditions, current_period) {
   }
 
   assignment_probs <- rlang::set_names(rep(0, length(conditions)), conditions)
+
   assignment_probs[[best_condition]] <- 1
 
   return(invisible(list(past_results, assignment_probs)))
@@ -90,14 +94,54 @@ get_bandit.UCB1 <- function(past_results, conditions, current_period) {
 #' assignment with the control condition named "Control".
 #' @returns Named numeric vector with updated probabilities
 
-augment_prob <- function(assignment_probs, control_augment) {
-  if (assignment_probs[["Control"]] < control_augment) {
-    diff <- control_augment - assignment_probs[["Control"]]
+augment_prob <- function(assignment_probs, control_augment, conditions) {
+  ctrl <- base::names(conditions) == "Control"
+
+  if (assignment_probs[ctrl] < control_augment) {
+    diff <- control_augment - assignment_probs[base::names(conditions) == "Control"]
+
     sub_from <- diff / base::length(conditions)
 
-    assignment_probs[["Control"]] <- assignment_probs[["Control"]] + diff
-    assignment_probs[!base::names(assignment_probs) %in% "Control"] <-
-      assignment_probs[!base::names(assignment_probs) %in% "Control"] - sub_from
+    assignment_probs[ctrl] <- assignment_probs[ctrl] + diff
+
+    assignment_probs[!ctrl] <- assignment_probs[!ctrl] - sub_from
   }
+  if (any(assignment_probs < 0)) {
+    assignment_probs <- fix_negatives(
+      assignment_probs = assignment_probs,
+      conditions = conditions
+    )
+  }
+
+
+  return(assignment_probs)
+}
+
+#' @title Ensure Non-Zero Probabilities of Assignment
+#' @description Redistributes Probabilities when control augmentation produces negatives
+#' @name fix_negatives
+#' @param assignment_probs Named Numeric Vector; Containing probabilities of treatment assignment
+#' @returns Named Numeric Vector; Containing probabilities of treatment assignment, all positive.
+
+fix_negatives <- function(assignment_probs, conditions) {
+  negatives <- assignment_probs < 0
+  take_from <- assignment_probs > 0 & base::names(conditions) != "Control"
+
+  amount_to_make_up <- sum(assignment_probs[negatives])
+
+  assignment_probs[negatives] <- assignment_probs[negatives] - assignment_probs[negatives]
+
+  sub_from <- amount_to_make_up / base::length(assignment_probs[take_from])
+
+  assignment_probs[take_from] <- assignment_probs[take_from] - sub_from
+
+  # Recursive Process that ends once an acceptable degree of precision is met
+
+  if (-1 * sum(assignment_probs[assignment_probs < 0]) > 1e-10) {
+    fix_negatives(assignment_probs = assignment_probs, conditions = conditions)
+  } else {
+    assignment_probs[assignment_probs < 0] <- 1e-10
+  }
+
   return(assignment_probs)
 }

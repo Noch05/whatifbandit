@@ -73,7 +73,7 @@ If FALSE, hides outcomes not yet theoretically observed, based on
 \item{verbose}{Logical; Whether or not to print iteration number. FALSE by default.}
 
 \item{control_augment}{Number \in \link{0,1}; Proportion of each wave guaranteed to get "Control" treatment.
-Default is 0}
+Default is 0. Creates potential conflicts with \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}, when not set to 0.}
 }
 \value{
 A named list containing:
