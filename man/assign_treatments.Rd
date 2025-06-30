@@ -6,7 +6,7 @@
 \usage{
 assign_treatments(
   current_data,
-  bandit,
+  probs,
   blocking = NULL,
   algorithm,
   id_col,
@@ -16,7 +16,7 @@ assign_treatments(
 )
 }
 \arguments{
-\item{bandit}{Bandit object from \code{\link[=mab_sample]{mab_sample()}}, defines treatment assignment based on either Thompson or UCB1 algorithms}
+\item{probs}{Named Numeric Vector; Probability of Assignment for each treatment condition.}
 
 \item{blocking}{Logical; Whether or not to use treatment blocking.}
 
@@ -35,10 +35,8 @@ An updated data frame object with the new treatment conditions. If this treatmen
 then from under the original experiment, they are labelled as imputation required.
 }
 \description{
-Assigns new treatments for an assignment wave based on the Bandit object provided. If UCB1, the
-treatment with the highest bound will be chosen for all observations, If Thompson, the probabilities will be used
-to randomly assign treatments using \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}} or \code{\link[randomizr:cluster_ra]{randomizr::cluster_ra()}} from the
-\link{randomizr} package.
+Assigns new treatments for an assignment wave based on the assignment probabilities provided.
+Probabilities passed to \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}} or \code{\link[randomizr:cluster_ra]{randomizr::cluster_ra()}} for random assignment.
 }
 \seealso{
 \itemize{

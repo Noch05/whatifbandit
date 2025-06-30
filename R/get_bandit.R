@@ -23,6 +23,10 @@ get_bandit <- function(past_results, algorithm, conditions, current_period = NUL
   )
   bandit[[2]] <- augment_prob(assignment_probs = bandit[[2]], control_augment = control_augment)
 
+  if (base::sum(bandit[[2]]) != 1) {
+    bandit[[2]] <- bandits[[2]] / base::sum(bandit[[2]])
+  }
+
 
   return(bandit)
 }
@@ -39,10 +43,6 @@ get_bandit.Thompson <- function(past_results, conditions) {
     alpha = 1,
     beta = 1
   ), base::sort(conditions))
-
-  if (base::sum(bandit) != 1) {
-    bandit <- bandit / base::sum(bandit)
-  }
 
   return(list(bandit, assignment_prob = bandit))
 }
@@ -83,7 +83,8 @@ get_bandit.UCB1 <- function(past_results, conditions, current_period) {
 #' @name augment_prob
 #' @title Control Augmentation for Treatment Assignment
 #' @description
-#' Adjusts Probabilities of Assignment to match a control augmentation framework
+#' Adjusts Probabilities of Assignment to match a control augmentation framework.
+#' If probability threshold is not meant, values are adjusted uniformly to augment the control probability.
 #' @inheritParams single_mab_simulation
 #' @param assignment_probs Named numeric vector; contains probabilities of
 #' assignment with the control condition named "Control".

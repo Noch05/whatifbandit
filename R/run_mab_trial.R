@@ -90,11 +90,11 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       control_augment = control_augment
     )
 
-    bandits[[i]] <- bandit
+    bandits[[i]] <- bandit[[1]]
 
     current_data <- assign_treatments(
       current_data = current_data,
-      bandit = bandit,
+      probs = bandit[[2]],
       blocking = blocking,
       algorithm = algorithm,
       id_col = {{ id_col }},

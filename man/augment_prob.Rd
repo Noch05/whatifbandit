@@ -17,5 +17,6 @@ Default is 0}
 Named numeric vector with updated probabilities
 }
 \description{
-Adjusts Probabilities of Assignment to match a control augmentation framework
+Adjusts Probabilities of Assignment to match a control augmentation framework.
+If probability threshold is not meant, values are adjusted uniformly to augment the control probability.
 }
