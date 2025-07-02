@@ -83,15 +83,16 @@ create_new_cols.data.frame <- function(data,
                                        success_col,
                                        success_date_col,
                                        perfect_assignment) {
-  data <- create_new_cols.tbl_df(tibble::as_tibble(data),
+  data <- create_new_cols.tbl_df(
+    tibble::as_tibble(data),
     blocking = blocking,
     block_cols = block_cols,
     condition_col = {{ condition_col }},
     success_col = {{ success_col }},
-    condition_col = {{ condition_col }},
     success_date_col = {{ success_date_col }},
     perfect_assignment = perfect_assignment
   )
+
   return(data)
 }
 #---------------------------------------------------------------------------------
