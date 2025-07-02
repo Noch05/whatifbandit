@@ -4,7 +4,7 @@
 \alias{plot.mab}
 \title{Plot Generic for mab objects}
 \usage{
-\method{plot}{mab}(x, type, save = FALSE, path = NULL, ...)
+\method{plot}{mab}(x, type, estimator = NULL, save = FALSE, path = NULL, ...)
 }
 \arguments{
 \item{x}{mab class object created by}
@@ -16,11 +16,13 @@
 \item {estimate}: Shows AIPW Estimates with 95\% Normal Confidence Intervals based on their estimated variance.
 }}
 
+\item{estimator}{Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type}
+
 \item{save}{Logical; Whether or not to save the plot to disk; FALSE by default.}
 
 \item{path}{String; File directory to save file.}
 
-\item{...}{further arguments passed to or from other methods}
+\item{...}{arguments to pass to \code{\link[=ggplot2:geom_*]{ggplot2:geom_*()}} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, etc.)}
 }
 \value{
 ggplot object, that can be customized and added to with \code{+}
