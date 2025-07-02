@@ -154,7 +154,7 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
 
   if (algorithm == "UCB1") {
     bandit_stats <- bandit_stats |>
-      dplyr::select(ucb, mab_condition, period) |>
+      dplyr::select(ucb, mab_condition, period_number) |>
       tidyr::pivot_wider(values_from = "ucb", names_from = c("mab_condition"))
   }
 
