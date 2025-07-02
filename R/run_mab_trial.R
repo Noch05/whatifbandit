@@ -155,8 +155,10 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
     )
   }
 
-  bandit_stats <- dplyr::bind_rows(bandits[["bandit_stat"]], .id = "period")
-  assignment_probs <- dplyr::bind_rows(bandits[["assignment_prob"]], .id = "period")
+  bandit_stats <- dplyr::bind_rows(bandits[["bandit_stat"]], .id = "period_number") |>
+    dplyr::mutate(period_number = base::as.numeric(period_number))
+  assignment_probs <- dplyr::bind_rows(bandits[["assignment_prob"]], .id = "period_number") |>
+    dplyr::mutate(period_number = base::as.numeric(period_number))
 
   if (algorithm == "UCB1") {
     bandit_stats <- bandit_stats |>

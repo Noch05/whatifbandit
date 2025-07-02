@@ -19,7 +19,8 @@ get_iaipw(mab, periods, algorithm, conditions, verbose)
 }
 \value{
 A data frame containing the data used in the MAB trial
-with new columns corresponding to the individual AIPW estimate for each treatment condition.
+with new columns corresponding to the individual AIPW estimate for each treatment condition, and
+the probability of being assigned a given treatment condition.
 }
 \description{
 Calculates the individual Augmented Inverse Probability Weighted Estimate (AIPW) of treatment

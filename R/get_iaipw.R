@@ -10,7 +10,8 @@
 #'
 #'
 #' @returns A data frame containing the data used in the MAB trial
-#' with new columns corresponding to the individual AIPW estimate for each treatment condition.
+#' with new columns corresponding to the individual AIPW estimate for each treatment condition, and
+#' the probability of being assigned a given treatment condition.
 #'
 #' @seealso
 #' * [run_mab_trial()]
@@ -54,6 +55,7 @@ get_iaipw.tbl_df <- function(mab, periods, algorithm, conditions, verbose) {
   new_cols <- paste0("aipw_", conditions)
   data[new_cols] <- NA_real_
 
+
   prior_data <- data |>
     dplyr::group_by(period_number, mab_condition) |>
     dplyr::summarize(
@@ -61,53 +63,45 @@ get_iaipw.tbl_df <- function(mab, periods, algorithm, conditions, verbose) {
       trials = dplyr::n(),
       .groups = "drop"
     )
-
-
-  prior_data <- base::lapply(base::seq_len(periods), function(x) {
-    if (x == 1) {
-      return(tibble::tibble(
-        mab_condition = conditions,
-        success_rate = 0
-      ))
-    } else {
-      prior_data <- prior_data |>
-        dplyr::filter(period_number < x) |>
-        dplyr::group_by(mab_condition) |>
-        dplyr::summarize(success_rate = base::sum(successes) / base::sum(trials))
-    }
-
-    if (nrow(prior_data) != length(conditions)) {
-      add_cond <- tibble::tibble(
-        mab_condition = base::setdiff(conditions, prior_data$mab_condition),
-        success_rate = 0
-      )
-      prior_data <- base::rbind(prior_data, add_cond)
-    }
-    return(prior_data)
-  })
-
-
   probs <- mab[["assignment_probs"]]
+  names(probs) <- c("period_number", paste0(names(probs)[-1], "_assign_prob"))
 
-  for (i in seq_len(periods)) {
-    verbose_log(verbose, paste0("Period: ", i))
-    mhats <- rlang::set_names(prior_data[[i]]$success_rate, base::sort(prior_data[[i]]$mab_condition))
-    subset <- which(data$period_number == i)
-
-    for (j in seq_along(conditions)) {
-      condition <- conditions[j]
-
-      bandit_prob <- base::as.numeric(probs[[condition]][i])
-
-      iaipws <- base::ifelse(
-        data$mab_condition[subset] == condition,
-        (data$mab_success[subset] / bandit_prob) +
-          (1 - 1 / bandit_prob) * mhats[condition],
-        mhats[condition]
+  data <- base::expand.grid(
+    period_number = base::seq_len(periods),
+    mab_condition = conditions
+  ) |>
+    dplyr::left_join(prior_data, by = c("period_number", "mab_condition")) |>
+    dplyr::mutate(dplyr::across(c(successes, trials), ~ tidyr::replace_na(.x, 0))) |>
+    dplyr::arrange(mab_condition, period_number) |>
+    dplyr::group_by(mab_condition) |>
+    dplyr::mutate(
+      cumulative_successes = dplyr::lag(base::cumsum(successes), default = 0),
+      cumulative_trials = dplyr::lag(base::cumsum(trials), default = 0),
+      prior_period_success_rate = dplyr::if_else(
+        cumulative_trials > 0, cumulative_successes / cumulative_trials, 0
       )
-      data[[new_cols[j]]][subset] <- iaipws
-    }
+    ) |>
+    dplyr::select(period_number, mab_condition, prior_period_success_rate) |>
+    tidyr::pivot_wider(
+      names_from = mab_condition, values_from = "prior_period_success_rate",
+      names_prefix = "prior_rate_"
+    ) |>
+    dplyr::right_join(data, by = "period_number") |>
+    dplyr::left_join(probs, by = "period_number")
+
+  for (condition in conditions) {
+    verbose_log(verbose, paste0("Condition: ", condition))
+
+    probability <- data[[paste0(condition, "_assign_prob")]]
+    mhat <- data[[paste0("prior_rate_", condition)]]
+
+    data[[paste0("aipw_", condition)]] <- base::ifelse(
+      data$mab_condition == condition,
+      (data$mab_success / probability) + (1 - (1 / probability)) * mhat,
+      mhat
+    )
   }
+
 
   check <- data |>
     dplyr::summarize(dplyr::across(dplyr::starts_with("aipw_"), ~ base::sum(base::is.na(.x)))) |>
@@ -119,3 +113,10 @@ get_iaipw.tbl_df <- function(mab, periods, algorithm, conditions, verbose) {
   return(data)
 }
 # ------------------------------------------------------------------------------
+#' @method get_iaipw data.table
+#' @title [get_iaipw()] for data.tables
+#' @inheritParams get_iaipw
+#'
+get_iaipw.data.table <- function(mab, periods, algorithm, conditions, verbose) {
+  return(0)
+}
