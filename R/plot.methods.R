@@ -16,11 +16,11 @@
 #' @export
 #' @returns ggplot object, that can be customized and added to with `+`
 
-plot.mab <- function(x, type, save = FALSE, path = NULL) {
+plot.mab <- function(x, type, save = FALSE, path = NULL, ...) {
   plot <- switch(type,
-    "arm" = plot_arms(x = x, object = "bandits"),
-    "assign" = plot_arms(x = x, object = "assignment_probs"),
-    "estimate" = plot_estimates(x = x)
+    "arm" = plot_arms(x = x, object = "bandits", ...),
+    "assign" = plot_arms(x = x, object = "assignment_probs", ...),
+    "estimate" = plot_estimates(x = x, ...)
   )
   if (save) {
     ggplot2::ggsave(plot, filename = path)
@@ -35,10 +35,11 @@ plot.mab <- function(x, type, save = FALSE, path = NULL) {
 #' Helper to [plot.mab()]. Plots Treatment Arms over Time.
 #' @returns ggplot object
 #' @param x, mab object passed from [plot.mab()]
+#' @inheritParams plot.mab
 #' @param object, String; Location to gather treatment arm data from, either
 #' "bandits" or "assignment_probs"
 
-plot_arms <- function(x, object) {
+plot_arms <- function(x, object, ...) {
   data <- x[[object]]
   periods <- base::max(data$period_number)
 
@@ -66,14 +67,14 @@ plot_arms <- function(x, object) {
       x = period_number, y = probs,
       color = condition
     )) +
-    ggplot2::geom_line(linewidth = 1) +
+    ggplot2::geom_line(...) +
     ggplot2::scale_y_continuous(breaks = base::seq(0, 1, 0.1), limits = base::range(0, 1)) +
     ggplot2::scale_x_continuous(
       breaks = base::seq(0, periods, 1),
       limits = range(1, periods)
     ) +
     ggplot2::labs(
-      x = "Period",
+      x = "Assignment Period",
       y = ylab,
       title = title,
       color = "Treatment Arm"
