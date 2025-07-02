@@ -4,10 +4,10 @@
 \alias{summary.mab}
 \title{Summary Generic for "mab" class}
 \usage{
-\method{summary}{mab}(x, level = 0.95, ...)
+\method{summary}{mab}(object, level = 0.95, ...)
 }
 \arguments{
-\item{x}{"mab" class object created by \code{\link[=single_mab_simulation]{single_mab_simulation()}}.}
+\item{object}{"mab" class object created by \code{\link[=single_mab_simulation]{single_mab_simulation()}}.}
 
 \item{level}{Confidence Interval Width (i.e 0.90, .95, 0.99)}
 

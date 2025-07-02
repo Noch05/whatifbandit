@@ -5,6 +5,7 @@
 #' @importFrom data.table .I
 #' @importFrom data.table .N
 #'
+#'
 
 utils::globalVariables(c(
   ".SD", "assignment_method", "avg", "bandit",
@@ -17,7 +18,11 @@ utils::globalVariables(c(
   ".I", ".N", ":=", "period_number",
   "mab_condition", "month_date",
   "success_rate", "failure_rate",
-  "mab_success"
+  "mab_success", "variance", "probs",
+  "prior_period_success_rate", "estimator",
+  "cumulative_trials", "cumulative_count",
+  "condition", "cumulative_success", "cumulative_successes",
+  "."
 ))
 
 NULL
