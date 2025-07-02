@@ -36,8 +36,21 @@ imputation_prep <- function(data, whole_experiment, success_col, perfect_assignm
       dplyr::group_by(period_number, treatment_block) |>
       dplyr::summarize(
         count = dplyr::n(),
-        n_success = base::sum({{ success_col }}), .groups = "drop"
-      )
+        n_success = base::sum({{ success_col }}), .groups = "drop",
+      ) |>
+      arrange(period_number, treatment_block) |>
+      dplyr::group_by(treatment_block) |>
+      dplyr::mutate(
+        cumulative_count = dplyr::lag(base::cumsum(count), default = 0),
+        cumulative_success = dplyr::lag(base::cumsum(n_success), default = 0),
+        success_rate = dplyr::if_else(
+          cumulative_count > 0, (cumulative_success / cumulative_count), 0
+        )
+      ) |>
+      dplyr::ungroup() |>
+      dplyr::select(period_number, treatment_block, success_rate) |>
+      dplyr::mutate(failure_rate = 1 - success_rate) |>
+      dplyr::group_split(period_number)
   } else {
     rlang::abort("Specify Logical for `whole_experiment`")
   }

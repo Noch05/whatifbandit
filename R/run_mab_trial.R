@@ -120,13 +120,7 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
     if (whole_experiment) {
       impute_info <- imputation_information[[1]]
     } else {
-      impute_info <- imputation_information[[1]] |>
-        dplyr::filter(period_number < i) |>
-        dplyr::group_by(treatment_block) |>
-        dplyr::summarize(
-          success_rate = base::sum(n_success) / base::sum(count),
-          failure_rate = 1 - success_rate
-        )
+      impute_info <- imputation_information[[1]][[i]]
     }
     if (!perfect_assignment) {
       dates <- rlang::set_names(
