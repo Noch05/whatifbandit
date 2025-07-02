@@ -2,8 +2,8 @@ Package: whatifbandit
 Title: Replication Functions and Data For ""
 Version: 0.0.0.9000
 Authors@R: 
-    person("Noah", "Ochital", "no9857a@american.edu", role = c("aut", "cre"))
-    person("Ryan", "T", "Moore", "rtm@american.edu", role = c("aut", "cre"))
+    person("Noah", "Ochital", , "no9857a@american.edu", role = c("aut", "cre"))
+    person("Ryan","Moore", "T", "rtm@american.edu", role = c("aut", "cre"))
 Description: What the package does (one paragraph).
 License: GPL (>= 3)
 Encoding: UTF-8
