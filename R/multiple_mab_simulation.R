@@ -188,7 +188,7 @@ multiple_mab_simulation <- function(data,
     )
   )
 
-  base::class(results) <- c("multiple.mab", "mab", "list")
+  base::class(results) <- c("multiple.mab", "list")
 
   return(results)
 }

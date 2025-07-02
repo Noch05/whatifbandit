@@ -38,7 +38,7 @@ imputation_prep <- function(data, whole_experiment, success_col, perfect_assignm
         count = dplyr::n(),
         n_success = base::sum({{ success_col }}), .groups = "drop",
       ) |>
-      arrange(period_number, treatment_block) |>
+      dplyr::arrange(period_number, treatment_block) |>
       dplyr::group_by(treatment_block) |>
       dplyr::mutate(
         cumulative_count = dplyr::lag(base::cumsum(count), default = 0),
