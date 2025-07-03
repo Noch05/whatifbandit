@@ -38,7 +38,7 @@ return(invisible(data))
 #' @title [create_cutoff()] Day Based Periods
 #' @inheritParams create_cutoff
 #'
-create_cutoff.Day <- function(data, date_col, period_length, ...) {
+create_cutoff.Day <- function(data, date_col, period_length) {
   if (inherits(data, "data.table")) {
     date_col <- rlang::as_name(rlang::enquo(date_col))
     start_date <- base::min(data[, get(date_col)])
@@ -65,7 +65,7 @@ create_cutoff.Day <- function(data, date_col, period_length, ...) {
 #' @method create_cutoff Week
 #' @title [create_cutoff()] Week Based Periods
 #' @inheritParams create_cutoff
-create_cutoff.Week <- function(data, date_col, period_length, ...) {
+create_cutoff.Week <- function(data, date_col, period_length) {
   if (inherits(data, "data.table")) {
     date_col <- rlang::as_name(rlang::enquo(date_col))
     start_date <- base::min(data[, get(date_col)])
