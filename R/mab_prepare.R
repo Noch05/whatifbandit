@@ -26,33 +26,12 @@ mab_prepare <- function(data, date_col, time_unit,
                         block_cols, assignment_method, verbose) {
   verbose_log(verbose, "Preparing Data")
 
-  custom_class <- switch(assignment_method,
-    "Date" = {
-      switch(time_unit,
-        "Day" = c("Day", class(data)),
-        "Week" = c("Week", class(data)),
-        "Month" = c("Month", class(data)),
-        rlang::abort("Invalid time_unit. Valid units are: 'Day', 'Week', 'Month'")
-      )
-    },
-    "Batch" = c("Batch", class(data)),
-    "Individual" = c("Individual", class(data)),
-    rlang::abort("Invalid assignment_method. Valid methods are: 'Individual', 'Batch', 'Date'")
-  )
-
-  if (inherits(data, "data.table")) {
-    data.table::setattr(data, "class", custom_class)
-  } else {
-    base::class(data) <- custom_class
-  }
-
-
-
   data <- create_cutoff(
     data = data,
     date_col = {{ date_col }},
     period_length = period_length,
-    month_col = {{ month_col }}
+    month_col = {{ month_col }},
+    assignment_method = assignment_method
   )
 
   data <- create_new_cols(
