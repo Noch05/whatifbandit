@@ -106,7 +106,7 @@ check_impute <- function(imputation_information, current_data) {
       dplyr::filter(!treatment_block %in% blocks_to_remove)
   }
 
-  imputation_information <- imputation_information[!duplicated(df$treatment_block), ][order(imputation_information$treatment_block), ]
+  imputation_information <- imputation_information[!duplicated(imputation_information$treatment_block), ][order(imputation_information$treatment_block), ]
 
 
   return(imputation_information)
