@@ -108,7 +108,8 @@ single_mab_simulation <- function(data,
     blocking = blocking,
     block_cols = block_cols,
     verbose = verbose
-  )
+  ) |>
+    dplyr::arrange(period_number, {{ id_col }})
 
   verbose_log(verbose, "Precomputing")
 

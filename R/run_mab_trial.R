@@ -44,11 +44,9 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
     "UCB1" = tibble::tibble(mab_condition = conditions, ucb = rep(0, length(conditions))),
     rlang::abort("Invalid Algorithm: Valid Algorithms are `Thompson` and `UCB`")
   )
-
   bandits[["assignment_prob"]][[1]] <- rlang::set_names(rep(1 / length(conditions), length(conditions)), conditions)
 
-  data <- data |>
-    dplyr::arrange(period_number, {{ id_col }})
+
 
   verbose_log(verbose, "Starting Bandit Trial")
   for (i in 2:periods) {
