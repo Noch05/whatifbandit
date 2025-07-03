@@ -6,7 +6,7 @@ Authors@R: c(
     person(given = "Ryan T", family = "Moore", email = "rtm@american.edu", role = c("aut"))
     )
 Description: Simulates the results of randomized controlled trials, as if they had been conducted as adaptive Multi-Arm Bandit (MAB) trials instead.
-License: GPL (>= 3) + LICENSE
+License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
