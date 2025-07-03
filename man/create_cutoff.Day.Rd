@@ -4,7 +4,7 @@
 \alias{create_cutoff.Day}
 \title{\code{\link[=create_cutoff]{create_cutoff()}} Day Based Periods}
 \usage{
-\method{create_cutoff}{Day}(data, date_col, period_length, ...)
+\method{create_cutoff}{Day}(data, date_col, period_length)
 }
 \arguments{
 \item{data}{A data frame that provides the input data for the trial.}

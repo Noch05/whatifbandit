@@ -4,7 +4,7 @@
 \alias{create_cutoff.Batch}
 \title{\code{\link[=create_cutoff]{create_cutoff()}} Batch Based Periods}
 \usage{
-\method{create_cutoff}{Batch}(data, period_length, ...)
+\method{create_cutoff}{Batch}(data, period_length)
 }
 \arguments{
 \item{data}{A data frame that provides the input data for the trial.}

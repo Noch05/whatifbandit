@@ -4,7 +4,7 @@
 \alias{create_cutoff.Individual}
 \title{\code{\link[=create_cutoff]{create_cutoff()}} Individual Periods}
 \usage{
-\method{create_cutoff}{Individual}(data, ...)
+\method{create_cutoff}{Individual}(data)
 }
 \arguments{
 \item{data}{A data frame that provides the input data for the trial.}

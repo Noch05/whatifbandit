@@ -4,7 +4,14 @@
 \alias{create_cutoff}
 \title{Create Treatment Wave Cutoffs}
 \usage{
-create_cutoff(data, date_col = NULL, month_col = NULL, period_length = NULL)
+create_cutoff(
+  data,
+  date_col = NULL,
+  month_col = NULL,
+  period_length = NULL,
+  assignment_method,
+  time_unit
+)
 }
 \arguments{
 \item{data}{A data frame that provides the input data for the trial.}
@@ -17,6 +24,11 @@ create_cutoff(data, date_col = NULL, month_col = NULL, period_length = NULL)
 If assignment method is "Date", this refers to the
 length of periods by your specified \code{time_unit} (i.e., if "Day", 10 would be 10 days).
 If assignment methods is "Batch", this refers to the number of people in each batch.}
+
+\item{assignment_method}{String; "Date" or "Batch" to define the assignment into treatment waves.}
+
+\item{time_unit}{A string specifying the unit of time for assigning periods.
+Acceptable values are "Day", "Week", or "Month".}
 }
 \value{
 data.frame containing the original data with 1 additional column.

@@ -7,6 +7,7 @@
 #' been preprocessed by [mab_prepare()], or inside of the wrappers. Centralizes
 #' a single trial to prevent redundant loops.
 #' @inheritParams single_mab_simulation
+#' @inheritParams run_mab_trial
 #'
 #'
 #'
@@ -39,7 +40,8 @@ mab_simulation <- function(data,
                            success_date_col = NULL,
                            assignment_date_col = NULL,
                            verbose,
-                           assignment_method, control_augment) {
+                           assignment_method, control_augment,
+                           imputation_information) {
   conditions <- base::sort(conditions)
 
   # Run the main MAB trial with all required arguments
@@ -62,7 +64,8 @@ mab_simulation <- function(data,
     success_date_col = {{ success_date_col }},
     assignment_date_col = {{ assignment_date_col }},
     verbose = verbose,
-    control_augment = control_augment
+    control_augment = control_augment,
+    imputation_information = imputation_information
   )
 
   results <- get_adaptive_aipw(

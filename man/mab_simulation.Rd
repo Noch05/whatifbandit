@@ -24,7 +24,8 @@ mab_simulation(
   assignment_date_col = NULL,
   verbose,
   assignment_method,
-  control_augment
+  control_augment,
+  imputation_information
 )
 }
 \arguments{
@@ -77,6 +78,9 @@ If FALSE, uses only data available up to the current period.}
 
 \item{control_augment}{Number \eqn{\in} [0,1]; Proportion of each wave guaranteed to get "Control" treatment.
 Default is 0. Creates potential conflicts with \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}, when not set to 0.}
+
+\item{imputation_information}{List of data.frames containing information required to impute success/failures, and dates
+of success if \verb{Perfect Assignment} is FALSE. Created by \code{\link[=imputation_prep]{imputation_prep()}}.}
 }
 \description{
 This function acts as an internal helper to \code{\link[=single_mab_simulation]{single_mab_simulation()}}

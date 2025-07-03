@@ -9,28 +9,33 @@
 #' @seealso
 #' *[mab_prepare()]
 #------------------------------------------------------------------------------------------
-create_cutoff <- function(data, date_col = NULL, month_col = NULL, period_length = NULL, 
-                          assignment_method) {
-  
+create_cutoff <- function(data, date_col = NULL, month_col = NULL, period_length = NULL,
+                          assignment_method, time_unit) {
   data <- switch(assignment_method,
-                 "Individual" = create_cutoff.Individual(data = data),
-                 "Batch" = create_cutoff.Batch(data = data, period_length = period_length),
-                 "Date" = switch(time_unit,
-                                 "Day" = create_cutoff.Day(data = data,
-                                                           date_col = {{date_col}},
-                                                           period_length = period_length),
-                                 "Month" = create_cutoff.Month(data = data,
-                                                              month_col = {{month_col}}
-                                                              date_col = {{date_col}},
-                                                              period_length = period_length),
-                                 "Week" = create_cutoff.Week(data = data,
-                                                            date_col = {{date_col}},
-                                                            period_length = period_length),
-                                 rlang::abort("Invalid Time Unit: Valid Units are `Week`, `Month`, and `Day`")),
-                 rlang::abort("Invalid Assignment Method: valid methods are `Individual`, `Batch`, `Date`"))
-return(invisible(data))
-  
-  
+    "Individual" = create_cutoff.Individual(data = data),
+    "Batch" = create_cutoff.Batch(data = data, period_length = period_length),
+    "Date" = switch(time_unit,
+      "Day" = create_cutoff.Day(
+        data = data,
+        date_col = {{ date_col }},
+        period_length = period_length
+      ),
+      "Month" = create_cutoff.Month(
+        data = data,
+        month_col = {{ month_col }},
+        date_col = {{ date_col }},
+        period_length = period_length
+      ),
+      "Week" = create_cutoff.Week(
+        data = data,
+        date_col = {{ date_col }},
+        period_length = period_length
+      ),
+      rlang::abort("Invalid Time Unit: Valid Units are `Week`, `Month`, and `Day`")
+    ),
+    rlang::abort("Invalid Assignment Method: valid methods are `Individual`, `Batch`, `Date`")
+  )
+  return(invisible(data))
 }
 #------------------------------------------------------------------------------------------
 

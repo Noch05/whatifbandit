@@ -23,7 +23,8 @@ run_mab_trial(
   success_date_col,
   assignment_date_col,
   verbose,
-  control_augment
+  control_augment,
+  imputation_information
 )
 }
 \arguments{
@@ -74,6 +75,9 @@ If FALSE, hides outcomes not yet theoretically observed, based on
 
 \item{control_augment}{Number \eqn{\in} [0,1]; Proportion of each wave guaranteed to get "Control" treatment.
 Default is 0. Creates potential conflicts with \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}, when not set to 0.}
+
+\item{imputation_information}{List of data.frames containing information required to impute success/failures, and dates
+of success if \verb{Perfect Assignment} is FALSE. Created by \code{\link[=imputation_prep]{imputation_prep()}}.}
 }
 \value{
 A named list containing:
@@ -82,10 +86,8 @@ A named list containing:
 }
 \description{
 Performs a full Multi-Arm Bandit (MAB) trial using Thompson Sampling or UCB1.
-The function provides loop around each step of the process for each treatment wave. The function
-performs adaptive treatment assignment based on prior performance, imputes potential outcomes based on
-original experimental data from and Randomized Controlled Trial (RCT), and then uses that information to update the
-assignment for the next wave until completed. Supports flexible customization in treatment blocking strategy,
+The function provides loop around each step of the process for each treatment wave, performing adaptive
+treatment assignment, and outcome imputation. Supports flexible customization in treatment blocking strategy,
 the size of each treatment wave, and information availability to simulate both a real experiment, and non-stationary
 bandit strategy.
 }

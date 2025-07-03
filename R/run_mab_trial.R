@@ -39,13 +39,12 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
   bandits[["bandit_stat"]] <- vector(mode = "list", length = (periods + 1))
   bandits[["assignment_prob"]] <- vector(mode = "list", length = periods)
 
-  if (algorithm == "Thompson") {
-    bandits[["bandit_stat"]][[1]] <- rlang::set_names(rep(1 / length(conditions), length(conditions)), conditions)
-  } else if (algorithm == "UCB1") {
-    bandits[["bandit_stat"]][[1]] <- tibble::tibble(mab_condition = conditions, ucb = rep(0, length(conditions)))
-  } else {
-    base::stop("Please specify algorithm: Thompson or UCB1")
-  }
+  bandits[["bandit_stat"]][[1]] <- switch(algorithm,
+    "Thompson" = rlang::set_names(rep(1 / length(conditions), length(conditions)), conditions),
+    "UCB1" = tibble::tibble(mab_condition = conditions, ucb = rep(0, length(conditions))),
+    rlang::abort("Invalid Algorithm: Valid Algorithms are `Thompson` and `UCB`")
+  )
+
   bandits[["assignment_prob"]][[1]] <- rlang::set_names(rep(1 / length(conditions), length(conditions)), conditions)
 
   data <- data |>
