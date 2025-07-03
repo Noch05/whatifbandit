@@ -1,11 +1,12 @@
 Package: whatifbandit
-Title: Replication Functions and Data For ""
+Title: Analyzing Randomized Experiments as Multi-Arm Bandits
 Version: 0.0.0.9000
-Authors@R: 
-    person("Noah", "Ochital", "no9857a@american.edu", role = c("aut", "cre"))
-    person("Ryan", "T", "Moore", "rtm@american.edu", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-License: GPL (>= 3)
+Authors@R: c(
+    person(given = "Noah", family = "Ochital", email = "no9857a@american.edu", role = c("aut", "cre")),
+    person(given = "Ryan T", family = "Moore", email = "rtm@american.edu", role = c("aut"))
+    )
+Description: Simulates the results of randomized controlled trials, as if they had been conducted as adaptive Multi-Arm Bandit (MAB) trials instead.
+License: GPL (>= 3) + LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
