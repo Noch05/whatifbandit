@@ -34,14 +34,16 @@ get_past_results.tbl_df <- function(current_data, prior_data, perfect_assignment
   if (!perfect_assignment) {
     current_date <- base::max(dplyr::pull(current_data, {{ assignment_date_col }}), na.rm = TRUE)
 
-    past_results <- prior_data |>
-      dplyr::mutate(known_success = dplyr::if_else(
-        current_date >= {{ success_date_col }} & !base::is.na({{ success_date_col }}),
-        1, 0
-      ))
+    success_date_name <- rlang::as_name(rlang::enquo(success_date_col))
+
+    past_results <- prior_data
+    past_results$known_success <- base::ifelse(
+      current_date >= past_results[[success_date_name]] & !base::is.na(past_results[[success_date_name]]),
+      1, 0
+    )
   } else {
-    past_results <- prior_data |>
-      dplyr::mutate(known_success = mab_success)
+    past_results <- prior_data
+    past_results$known_success <- past_results$mab_condition
   }
 
   past_results <- past_results |>
@@ -62,7 +64,7 @@ get_past_results.tbl_df <- function(current_data, prior_data, perfect_assignment
       success_rate = 0, n = 0
     )
 
-    past_results <- base::rbind(past_results, replace)
+    past_results <- dplyr::bind_rows(past_results, replace)
     past_results <- past_results[order(past_results$mab_condition), ]
   }
   return(past_results)
