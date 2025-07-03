@@ -46,19 +46,14 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
   )
   bandits[["assignment_prob"]][[1]] <- rlang::set_names(rep(1 / length(conditions), length(conditions)), conditions)
 
-
-
   verbose_log(verbose, "Starting Bandit Trial")
   for (i in 2:periods) {
     verbose_log(verbose, paste0("Period: ", i))
 
     prior <- create_prior(prior_periods = prior_periods, current_period = i)
 
-    current_data <- data |>
-      dplyr::filter(period_number == i)
-
-    prior_data <- data |>
-      dplyr::filter(period_number %in% prior)
+    current_data <- data[data$period_number == i, ]
+    prior_data <- data[data$period_number < i, ]
 
     past_results <- get_past_results(
       current_data = current_data,
@@ -68,7 +63,6 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       assignment_date_col = {{ assignment_date_col }},
       conditions = conditions
     )
-
 
     bandit <- get_bandit(
       past_results = past_results,
@@ -118,7 +112,6 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       imputation_information = impute_info,
       current_data = current_data
     )
-
 
     data <- impute_success(
       current_data = current_data,
