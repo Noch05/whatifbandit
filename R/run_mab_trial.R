@@ -42,10 +42,11 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
     perfect_assignment = perfect_assignment,
     condition_col = {{ condition_col }}
   )
+  periods <- base::max(data$period_number)
 
   bandits <- vector(mode = "list", length = 2)
-  bandits[["bandit_stat"]] <- vector(mode = "list", length = base::max(data$period_number))
-  bandits[["assignment_prob"]] <- vector(mode = "list", length = base::max(data$period_number))
+  bandits[["bandit_stat"]] <- vector(mode = "list", length = (periods + 1))
+  bandits[["assignment_prob"]] <- vector(mode = "list", length = periods)
 
   if (algorithm == "Thompson") {
     bandits[["bandit_stat"]][[1]] <- rlang::set_names(rep(1 / length(conditions), length(conditions)), conditions)
@@ -56,18 +57,14 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
   }
   bandits[["assignment_prob"]][[1]] <- rlang::set_names(rep(1 / length(conditions), length(conditions)), conditions)
 
-  priors <- lapply(base::seq_len(base::max(data$period_number)), \(x) {
-    create_prior(prior_periods = prior_periods, current_period = x)
-  })
-
   data <- data |>
     dplyr::arrange(period_number, {{ id_col }})
 
   verbose_log(verbose, "Starting Bandit Trial")
-  for (i in 2:max(data$period_number)) {
+  for (i in 2:periods) {
     verbose_log(verbose, paste0("Period: ", i))
 
-    prior <- priors[[i]]
+    prior <- create_prior(prior_periods = prior_periods, current_period = i)
 
     current_data <- data |>
       dplyr::filter(period_number == i)
@@ -146,17 +143,52 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       success_date_col = {{ success_date_col }}
     )
   }
+  final_summary <- data |>
+    dplyr::group_by(mab_condition) |>
+    dplyr::summarize(
+      successes = base::sum(mab_success, na.rm = TRUE),
+      success_rate = base::mean(mab_success, na.rm = TRUE),
+      n = dplyr::n(),
+      .groups = "drop"
+    ) |>
+    dplyr::ungroup()
 
-  bandit_stats <- dplyr::bind_rows(bandits[["bandit_stat"]], .id = "period_number") |>
-    dplyr::mutate(period_number = base::as.numeric(period_number))
+  final_bandit <- get_bandit(
+    past_results = final_summary,
+    algorithm = algorithm,
+    conditions = conditions,
+    current_period = (periods + 1),
+    control_augment = control_augment
+  )
+  bandits[["bandit_stat"]][[(periods + 1)]] <- final_bandit[[1]]
+
+  bandit_stats <- switch(algorithm,
+    "Thompson" = {
+      dplyr::bind_rows(bandits[["bandit_stat"]], .id = "period_number") |>
+        dplyr::mutate(
+          period_number = base::as.numeric(period_number),
+          dplyr::across(-period_number, ~ dplyr::lead(., n = 1L, default = NA))
+        ) |>
+        dplyr::slice(base::seq_len(periods))
+    },
+    "UCB1" = {
+      dplyr::bind_rows(bandits[["bandit_stat"]], .id = "period_number") |>
+        dplyr::select(ucb, mab_condition, period_number) |>
+        tidyr::pivot_wider(values_from = "ucb", names_from = c("mab_condition")) |>
+        dplyr::mutate(
+          period_number = base::as.numeric(period_number),
+          dplyr::across(-period_number, ~ dplyr::lead(., n = 1L, default = NA))
+        ) |>
+        dplyr::slice(base::seq_len(periods))
+    },
+    rlang::abort("Invalid Algorithm: valid algorithsm are `Thompson`, and `UCB1`")
+  )
+
+
   assignment_probs <- dplyr::bind_rows(bandits[["assignment_prob"]], .id = "period_number") |>
     dplyr::mutate(period_number = base::as.numeric(period_number))
 
-  if (algorithm == "UCB1") {
-    bandit_stats <- bandit_stats |>
-      dplyr::select(ucb, mab_condition, period_number) |>
-      tidyr::pivot_wider(values_from = "ucb", names_from = c("mab_condition"))
-  }
+
 
   return(list(
     final_data = data,
