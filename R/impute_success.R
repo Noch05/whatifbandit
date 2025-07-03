@@ -27,12 +27,12 @@ impute_success <- function(current_data, imputation_info, id_col,
                            success_date_col) {
   ## Imputing success randomly based on previously calculated Probabilities
   ##
+  success_col_name <- rlang::as_name(rlang::enquo(success_col))
 
   if (base::any(current_data$impute_req == 1, na.rm = TRUE)) {
-    filtered_data <- current_data |>
-      dplyr::filter(impute_req == 1)
+    filtered_data <- current_data[current_data$impute_req == 1, ]
 
-    blocks <- dplyr::pull(filtered_data, impute_block)
+    blocks <- filtered_data$impute_block
 
     clusters <- dplyr::pull(filtered_data, {{ id_col }})
 
@@ -40,23 +40,23 @@ impute_success <- function(current_data, imputation_info, id_col,
     imputations <- randomizr::block_and_cluster_ra(
       blocks = blocks,
       clusters = clusters,
-      block_prob_each = dplyr::select(imputation_info, failure_rate, success_rate),
+      block_prob_each = imputation_info[, c("failure_rate", "success_rate")],
       num_arms = 2,
       conditions = c(0, 1),
       check_inputs = FALSE
     )
 
     # Joining Data Together and Returning
-    filtered_data <- filtered_data |>
-      dplyr::mutate(mab_success = imputations)
+    filtered_data$mab_success <- imputations
 
-    imputed <- dplyr::rows_update(current_data, filtered_data, by = rlang::as_name(rlang::enquo(id_col))) |>
-      dplyr::mutate(mab_success = dplyr::if_else(base::is.na(mab_success) & impute_req == 0,
-        {{ success_col }}, mab_success
-      ))
+    imputed <- dplyr::rows_update(current_data, filtered_data, by = rlang::as_name(rlang::enquo(id_col)))
+
+    imputed$mab_success <- base::ifelse(
+      base::is.na(imputed$mab_success) & imputed$impute_req == 0, imputed[[success_col_name]], imputed$mab_success
+    )
   } else {
-    imputed <- current_data |>
-      dplyr::mutate(mab_success = {{ success_col }})
+    imputed <- current_data
+    imputed$mab_success <- imputed[[success_col_name]]
   }
 
   # Recert Date for newly imputed success as average of recert date in the period from experimental data, grouped by original treatment
@@ -64,14 +64,13 @@ impute_success <- function(current_data, imputation_info, id_col,
   # Those who changed treatment, and resulted in success when before were failures will not have a recert date
   #
   if (!perfect_assignment) {
-    imputed <- imputed |>
-      dplyr::mutate(
-        new_success_date = dplyr::case_when(
-          impute_req == 0 | ({{ success_col }} == 1 & mab_success == 1) ~ {{ success_date_col }},
-          mab_success == 1 & {{ success_col }} == 0 ~ dates[mab_condition],
-          mab_success == 0 | TRUE ~ base::as.Date(NA)
-        )
-      )
+    success_date_col_name <- rlang::as_name(rlang::enquo(success_date_col))
+
+    imputed$new_success_date <- dplyr::case_when(
+      imputed$impute_req == 0 | (imputed[[success_col_name]] == 0 & imputed$mab_success == 1) ~ imputed[[success_date_col_name]],
+      imputed$mab_success == 1 & imputed[[success_col_name]] == 0 ~ dates[imputed$mab_condition],
+      imputed$mab_success == 0 | TRUE ~ base::as.Date(NA)
+    )
   }
 
   data <- dplyr::rows_update(prior_data, imputed, by = rlang::as_string(rlang::ensym(id_col)))
