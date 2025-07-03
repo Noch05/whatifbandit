@@ -94,12 +94,11 @@ check_impute <- function(imputation_information, current_data) {
   if (base::length(missing_blocks) > 0) {
     addition <- tibble::tibble(
       treatment_block = missing_blocks,
-      success_rate = mean_rate,
-      period_number = NA
+      success_rate = mean_rate
     )
     addition$failure_rate <- 1 - addition$success_rate
 
-    imputation_information <- base::rbind(imputation_information, addition)
+    imputation_information <- dplyr::bind_rows(imputation_information, addition)
   }
 
   if (base::length(blocks_to_remove) > 0) {
