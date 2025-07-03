@@ -19,6 +19,8 @@
 #' * [single_mab_simulation()]
 #'
 get_iaipw <- function(mab, periods, algorithm, conditions, verbose) {
+  verbose_log(verbose, "Computing Individual AIPW Estimates")
+
   data_class <- class(mab[[1]])
   if ("data.table" %in% data_class) {
     return(get_iaipw.data.table(
@@ -48,9 +50,7 @@ get_iaipw <- function(mab, periods, algorithm, conditions, verbose) {
 
 
 get_iaipw.tbl_df <- function(mab, periods, algorithm, conditions, verbose) {
-  verbose_log(verbose, "Computing Individual AIPW Estimates")
   data <- mab[["final_data"]]
-  conditions <- base::sort(conditions)
 
   new_cols <- paste0("aipw_", conditions)
   data[new_cols] <- NA_real_
@@ -118,5 +118,87 @@ get_iaipw.tbl_df <- function(mab, periods, algorithm, conditions, verbose) {
 #' @inheritParams get_iaipw
 #'
 get_iaipw.data.table <- function(mab, periods, algorithm, conditions, verbose) {
-  return(0)
+  data <- mab[["final_data"]]
+  new_cols <- paste0("aipw_", conditions)
+  data[, (new_cols) := NA_real_]
+
+  prior_data <- data[, .(
+    successes = base::sum(mab_success),
+    trials = .N
+  ), by = .(period_number, mab_condition)]
+
+
+  probs <- mab[["assignment_probs"]]
+  names(probs) <- c("period_number", paste0(names(probs)[-1], "_assign_prob"))
+
+  grid <- data.table::CJ(
+    period_number = base::seq_len(periods),
+    mab_condition = conditions
+  )
+
+  prior_data <- merge(grid, prior_data, by = c("mab_condition", "period_number"), all.x = TRUE)
+  prior_data[base::is.na(successes), successes := 0][base::is.na(trials), trials := 0]
+  data.table::setorder(prior_data, mab_condition, period_number)
+
+  prior_data[, `:=`(
+    cumulative_successes = data.table::shift(base::cumsum(successes),
+      fill = 0,
+      type = "lag", n = 1L
+    ),
+    cumulative_trials = data.table::shift(base::cumsum(trials),
+      fill = 0, type = "lag",
+      n = 1L
+    )
+  ), by = mab_condition]
+
+  prior_data[, prior_period_success_rate := data.table::fifelse(
+    cumulative_trials > 0, cumulative_successes / cumulative_trials, 0
+  )][
+    ,
+    .(
+      period_number,
+      mab_condition,
+      prior_period_success_rate
+    )
+  ]
+
+  prior_data <- data.table::dcast(
+    prior_data, period_number ~ mab_condition,
+    value.var = "prior_period_success_rate",
+  )
+
+  data.table::setnames(prior_data,
+    old = base::names(prior_data),
+    new = c(
+      "period_number",
+      base::paste0(
+        "prior_rate_",
+        base::names(prior_data)[base::names(prior_data) != "period_number"]
+      )
+    )
+  )
+  data <- merge(data, prior_data, by = "period_number", all.x = TRUE)
+  data <- merge(data, probs, by = "period_number", all.x = TRUE)
+
+  for (condition in conditions) {
+    verbose_log(verbose, paste0("Condition: ", condition))
+
+    probability <- base::paste0(condition, "_assign_prob")
+    mhat <- base::paste0("prior_rate_", condition)
+    aipw <- base::paste0(paste0("aipw_", condition))
+    data[, (aipw) := data.table::fifelse(
+      mab_condition == condition,
+      (mab_success / base::get(probability) + (1 - (1 / base::get(probability))) * base::get(mhat)),
+      base::get(mhat)
+    )]
+  }
+
+
+  check <- data[, base::lapply(.SD, \(x) base::sum(base::is.na(x))), .SDcols = data.table::patterns("^aipw_")]
+  totalNA <- base::sum(base::unlist(check))
+
+  if (totalNA != 0) {
+    base::warning(paste0(check, " Individual AIPW Scores are NA"))
+  }
+  return(data)
 }
