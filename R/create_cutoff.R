@@ -9,8 +9,28 @@
 #' @seealso
 #' *[mab_prepare()]
 #------------------------------------------------------------------------------------------
-create_cutoff <- function(data, date_col = NULL, month_col = NULL, period_length = NULL) {
-  base::UseMethod("create_cutoff")
+create_cutoff <- function(data, date_col = NULL, month_col = NULL, period_length = NULL, 
+                          assignment_method) {
+  
+  data <- switch(assignment_method,
+                 "Individual" = create_cutoff.Individual(data = data),
+                 "Batch" = create_cutoff.Batch(data = data, period_length = period_length),
+                 "Date" = switch(time_unit,
+                                 "Day" = create_cutoff.Day(data = data,
+                                                           date_col = {{date_col}},
+                                                           period_length = period_length),
+                                 "Month" = create_cutoff.Month(data = data,
+                                                              month_col = {{month_col}}
+                                                              date_col = {{date_col}},
+                                                              period_length = period_length),
+                                 "Week" = create_cutoff.Week(data = data,
+                                                            date_col = {{date_col}},
+                                                            period_length = period_length),
+                                 rlang::abort("Invalid Time Unit: Valid Units are `Week`, `Month`, and `Day`")),
+                 rlang::abort("Invalid Assignment Method: valid methods are `Individual`, `Batch`, `Date`"))
+return(invisible(data))
+  
+  
 }
 #------------------------------------------------------------------------------------------
 
@@ -124,7 +144,7 @@ create_cutoff.Month <- function(data, date_col, month_col, period_length) {
 #' @title [create_cutoff()] Individual Periods
 #' @inheritParams create_cutoff
 #'
-create_cutoff.Individual <- function(data, ...) {
+create_cutoff.Individual <- function(data) {
   if (inherits(data, "data.table")) {
     data[, period_number := .I]
     data.table::setkey(data, period_number)
@@ -140,7 +160,7 @@ create_cutoff.Individual <- function(data, ...) {
 #' @title [create_cutoff()] Batch Based Periods
 #' @inheritParams create_cutoff
 #'
-create_cutoff.Batch <- function(data, period_length, ...) {
+create_cutoff.Batch <- function(data, period_length) {
   if (inherits(data, "data.table")) {
     data[, period_number := base::ceiling((.I / period_length))]
     data.table::setkey(data, period_number)

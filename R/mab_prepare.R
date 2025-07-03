@@ -31,7 +31,8 @@ mab_prepare <- function(data, date_col, time_unit,
     date_col = {{ date_col }},
     period_length = period_length,
     month_col = {{ month_col }},
-    assignment_method = assignment_method
+    assignment_method = assignment_method,
+    time_unit = time_unit
   )
 
   data <- create_new_cols(
