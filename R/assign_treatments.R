@@ -20,8 +20,6 @@
 #'
 
 
-
-
 assign_treatments <- function(current_data, probs, blocking = NULL,
                               algorithm, id_col, conditions, condition_col,
                               success_col) {
@@ -66,16 +64,13 @@ assign_treatments <- function(current_data, probs, blocking = NULL,
         1, 0
       )
     ]
-
     return(invisible(current_data))
   } else {
-    current_data <- current_data |>
-      dplyr::mutate(
-        mab_condition = new_treatments,
-        impute_req = dplyr::if_else(
-          base::as.character(mab_condition) != base::as.character({{ condition_col }}), 1, 0
-        )
-      )
+    current_data$mab_condition <- new_treatments
+    current_data$impute_req <- base::ifelse(
+      base::as.character(current_data$mab_condition) !=
+        base::as.character(current_data[[rlang::as_name(rlang::enquo(condition_col))]]), 1, 0
+    )
 
     return(current_data)
   }
