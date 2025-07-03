@@ -2,14 +2,14 @@
 #' @name run_mab_trial
 #'
 #' @description Performs a full Multi-Arm Bandit (MAB) trial using Thompson Sampling or UCB1.
-#' The function provides loop around each step of the process for each treatment wave. The function
-#' performs adaptive treatment assignment based on prior performance, imputes potential outcomes based on
-#' original experimental data from and Randomized Controlled Trial (RCT), and then uses that information to update the
-#' assignment for the next wave until completed. Supports flexible customization in treatment blocking strategy,
+#' The function provides loop around each step of the process for each treatment wave, performing adaptive
+#' treatment assignment, and outcome imputation. Supports flexible customization in treatment blocking strategy,
 #' the size of each treatment wave, and information availability to simulate both a real experiment, and non-stationary
 #' bandit strategy.
 #'
 #' @inheritParams single_mab_simulation
+#' @param imputation_information List of data.frames containing information required to impute success/failures, and dates
+#' of success if `Perfect Assignment` is FALSE. Created by [imputation_prep()].
 #'
 #'
 #' @return  A named list containing:
@@ -31,17 +31,8 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
                           date_col, month_col = NULL,
                           id_col, condition_col,
                           success_col, success_date_col,
-                          assignment_date_col, verbose, control_augment) {
-  verbose_log(verbose, "Precomputing")
-
-  imputation_information <- imputation_prep(
-    data = data,
-    whole_experiment = whole_experiment,
-    success_col = {{ success_col }},
-    success_date_col = {{ success_date_col }},
-    perfect_assignment = perfect_assignment,
-    condition_col = {{ condition_col }}
-  )
+                          assignment_date_col, verbose, control_augment,
+                          imputation_information) {
   periods <- base::max(data$period_number)
 
   bandits <- vector(mode = "list", length = 2)

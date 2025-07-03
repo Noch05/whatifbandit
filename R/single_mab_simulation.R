@@ -110,6 +110,17 @@ single_mab_simulation <- function(data,
     verbose = verbose
   )
 
+  verbose_log(verbose, "Precomputing")
+
+  imputation_information <- imputation_prep(
+    data = data,
+    whole_experiment = whole_experiment,
+    success_col = {{ success_col }},
+    success_date_col = {{ success_date_col }},
+    perfect_assignment = perfect_assignment,
+    condition_col = {{ condition_col }}
+  )
+
   results <- mab_simulation(
     data = data,
     time_unit = time_unit,
@@ -130,7 +141,8 @@ single_mab_simulation <- function(data,
     assignment_date_col = {{ assignment_date_col }},
     verbose = verbose,
     assignment_method = assignment_method,
-    control_augment = control_augment
+    control_augment = control_augment,
+    imputation_information = imputation_information
   )
   results$settings$data <- data_name
 
