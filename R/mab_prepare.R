@@ -18,8 +18,8 @@
 #'* [create_new_cols()]
 
 mab_prepare <- function(data = data,
-                        col_names,
-                        col_syms,
+                        data_cols = data_cols,
+                        block_cols = block_cols,
                         time_unit,
                         period_length,
                         perfect_assignment,
@@ -30,8 +30,7 @@ mab_prepare <- function(data = data,
 
   data <- create_cutoff(
     data = data,
-    col_names = col_names,
-    col_syms = col_syms,
+    data_cols = data_cols,
     period_length = period_length,
     assignment_method = assignment_method,
     time_unit = time_unit

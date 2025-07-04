@@ -28,12 +28,12 @@
 #' Control condition, must be named "Control" when 'control_augment' > 0.
 #' @param data_cols Named Character vector containing the names of columns in data as strings:
 #' \itemize{
-#' \item{id:} {Column in data, contains unique id as a key}
-#' \item{success:} {Column in data; Binary successes from original experiment}
-#' \item{date:} {Column in data, contains original date of event/trial; only ncessary when assigning by 'Date'}
-#' \item{month:} {Column in data, contains month of treatment; only necessary when time_unit = 'Month'}
-#' \item{success_date:} {Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE}
-#' \item{assignment_date:} {Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
+#' \item{id_col:} {Column in data, contains unique id as a key}
+#' \item{success_col:} {Column in data; Binary successes from original experiment}
+#' \item{date_col:} {Column in data, contains original date of event/trial; only ncessary when assigning by 'Date'}
+#' \item{month_col:} {Column in data, contains month of treatment; only necessary when time_unit = 'Month'}
+#' \item{success_date_col:} {Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE}
+#' \item{assignment_date_col:} {Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
 #' Used to simulate imperfect information on part of researchers conducting an adaptive trial}}
 #' @param blocking Logical; Whether or not to use treatment blocking.
 #' @param block_cols Character Vector of variables to block by.
@@ -95,8 +95,8 @@ single_mab_simulation <- function(data,
 
   data <- mab_prepare(
     data = data,
-    col_names = col_names,
-    col_syms = col_syms,
+    data_cols = data_cols,
+    block_cols = block_cols,
     time_unit = time_unit,
     period_length = period_length,
     perfect_assignment = perfect_assignment,
@@ -146,10 +146,10 @@ single_mab_simulation <- function(data,
 }
 #' @name cols
 #' @title Column arguments shared across functions
-#' @param id Column in data, contains unique id as a key
-#' @param success  Column in data; Binary successes from original experiment
-#' @param date  Column in data, contains original date of event/trial; only ncessary when assigning by 'Date'
-#' @param month  Column in data, contains month of treatment; only necessary when time_unit = 'Month'
-#' @param success_date  Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE
-#' @param assignment_date  Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
+#' @param id_col Column in data, contains unique id as a key
+#' @param success_col  Column in data; Binary successes from original experiment
+#' @param date_col  Column in data, contains original date of event/trial; only ncessary when assigning by 'Date'
+#' @param month_col  Column in data, contains month of treatment; only necessary when time_unit = 'Month'
+#' @param success_date_col  Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE
+#' @param assignment_date_col  Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
 NULL

@@ -10,7 +10,7 @@
 #' @seealso
 #' *[mab_prepare()]
 #------------------------------------------------------------------------------------------
-create_cutoff <- function(data, col_names, col_syms, period_length = NULL,
+create_cutoff <- function(data, data_cols, period_length = NULL,
                           assignment_method, time_unit) {
   data <- switch(assignment_method,
     "Individual" = create_cutoff.Individual(data = data),
@@ -18,18 +18,18 @@ create_cutoff <- function(data, col_names, col_syms, period_length = NULL,
     "Date" = switch(time_unit,
       "Day" = create_cutoff.Day(
         data = data,
-        date = {{ date_col }},
+        date_col = data_cols$date_col,
         period_length = period_length
       ),
       "Month" = create_cutoff.Month(
         data = data,
-        month = {{ month_col }},
-        date = {{ date_col }},
+        month_col = data_cols$month_col,
+        date_col = data_cols$date_col,
         period_length = period_length
       ),
       "Week" = create_cutoff.Week(
         data = data,
-        date = {{ date_col }},
+        date_col = data_cols$date_col,
         period_length = period_length
       ),
       rlang::abort("Invalid Time Unit: Valid Units are `Week`, `Month`, and `Day`")
@@ -46,22 +46,21 @@ create_cutoff <- function(data, col_names, col_syms, period_length = NULL,
 #'
 create_cutoff.Day <- function(data, date_col, period_length) {
   if (inherits(data, "data.table")) {
-    date_col <- rlang::as_name(rlang::enquo(date_col))
-    start_date <- base::min(data[, get(date_col)])
+    start_date <- base::min(data[, get(date_col$name)])
 
     data[, period_number := base::floor(
-      lubridate::interval(start_date, base::get(date_col)) / lubridate::days(1) / period_length
+      lubridate::interval(start_date, base::get(date_col$name)) / lubridate::days(1) / period_length
     ) + 1]
     data.table::setkey(data, period_number)
 
     return(invisible(data))
   } else {
-    start_date <- base::min(dplyr::pull(data, {{ date_col }}), na.rm = TRUE)
+    start_date <- base::min(dplyr::pull(data, !!date_col$sym), na.rm = TRUE)
 
     data <- data |>
       dplyr::mutate(
         period_number = base::floor(
-          lubridate::interval(start_date, {{ date_col }}) / lubridate::days(1) / period_length
+          lubridate::interval(start_date, !!date_col$sym) / lubridate::days(1) / period_length
         ) + 1
       )
     return(data)
@@ -73,22 +72,21 @@ create_cutoff.Day <- function(data, date_col, period_length) {
 #' @inheritParams create_cutoff
 create_cutoff.Week <- function(data, date_col, period_length) {
   if (inherits(data, "data.table")) {
-    date_col <- rlang::as_name(rlang::enquo(date_col))
-    start_date <- base::min(data[, get(date_col)])
+    start_date <- base::min(data[, get(date_col$name)])
 
     data[, period_number := base::floor(
-      lubridate::interval(start_date, base::get(date_col)) / lubridate::weeks(1) / period_length
+      lubridate::interval(start_date, base::get(date_col$name)) / lubridate::weeks(1) / period_length
     ) + 1]
     data.table::setkey(data, period_number)
 
     return(invisible(data))
   } else {
-    start_date <- base::min(dplyr::pull(data, {{ date_col }}), na.rm = TRUE)
+    start_date <- base::min(dplyr::pull(data, !!date_col$sym), na.rm = TRUE)
 
     data <- data |>
       dplyr::mutate(
         period_number = base::floor(
-          lubridate::interval(start_date, {{ date_col }}) / lubridate::weeks(1) / period_length
+          lubridate::interval(start_date, !!date_col$sym) / lubridate::weeks(1) / period_length
         ) + 1
       )
     return(data)
@@ -102,17 +100,14 @@ create_cutoff.Week <- function(data, date_col, period_length) {
 #'
 create_cutoff.Month <- function(data, date_col, month_col, period_length) {
   if (inherits(data, "data.table")) {
-    date_col <- rlang::as_name(rlang::enquo(date_col))
-    start_date <- base::min(data[, get(date_col)])
+    start_date <- base::min(data[, get(date_col$name)])
 
-    month_col <- rlang::as_name(rlang::enquo(month_col))
-
-    first_month <- data[order(date_col), get(month_col)][1]
+    first_month <- data[order(base::get(date_col$name)), base::get(month_col$name)][1]
 
     start_month <- lubridate::ymd(base::paste0(lubridate::year(start_date), "-", first_month, "-01"))
 
     data[, month_date := lubridate::ymd(
-      base::paste0(lubridate::year(base::get(date_col)), "-", base::get(month_col), "-01")
+      base::paste0(lubridate::year(base::get(date_col$name)), "-", base::get(month_col$name), "-01")
     )]
 
     data[, period_number := base::floor(
@@ -120,12 +115,13 @@ create_cutoff.Month <- function(data, date_col, month_col, period_length) {
     ) + 1]
 
     data[, month_date := NULL]
+
     return(invisible(data))
   } else {
-    start_date <- base::min(dplyr::pull(data, {{ date_col }}), na.rm = TRUE)
+    start_date <- base::min(dplyr::pull(data, !!date_col$sym), na.rm = TRUE)
     first_month <- data |>
-      dplyr::slice_min(order_by = {{ date_col }}, n = 1, with_ties = FALSE) |>
-      dplyr::pull({{ month_col }})
+      dplyr::slice_min(order_by = !!date_col$sym, n = 1, with_ties = FALSE) |>
+      dplyr::pull(!!month_col$sym)
 
     start_month <- lubridate::ymd(
       paste0(lubridate::year(start_date), "-", first_month, "-01")
@@ -133,7 +129,7 @@ create_cutoff.Month <- function(data, date_col, month_col, period_length) {
     data <- data |>
       dplyr::mutate(
         month_date = lubridate::ymd(paste0(
-          lubridate::year({{ date_col }}), "-", {{ month_col }}, "-01"
+          lubridate::year(!!date_col$sym), "-", !!month_col$sym, "-01"
         )),
         period_number = base::floor(
           lubridate::interval(start_month, month_date) / base::months(1) / period_length
