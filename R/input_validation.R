@@ -102,14 +102,14 @@ check_args <- function(data,
       }
     }
   }
-  if (!blocking && !is.null(col_names$block)) {
+  if (!blocking && !is.null(col_names$block) && verbose) {
     message("Blocking is FALsE, arguments passed to `block_cols` will be ignored.")
   }
 
   unique_ids <- length(unique(data[[col_names$data$id]]))
 
   if (unique_ids != nrow(data)) {
-    rlang::abort(paste(col_names$id, "is not a unique identifier, a unique id for each observation is required"))
+    rlang::abort(paste(col_names$data$id, "is not a unique identifier, a unique id for each observation is required"))
   }
 }
 
@@ -163,24 +163,27 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, col_nam
   # Check for missing required columns
   for (col in required_cols) {
     missing_input <- !col %in% names(col_names$data)
+
+    if (missing_input) {
+      rlang::abort(
+        message = sprintf("Required column %s is not declared in `data_cols.", col),
+        class = "missing_input_error",
+        col = col,
+        bullet = paste0("reason: ", req_reasons[[col]])
+      )
+    }
     missing_data <- !col_names$data[[col]] %in% names(data)
 
-    if (missing_input || missing_data) {
-      problems <- c(
-        if (missing_input) "not declared in `data_cols`",
-        if (missing_data) "not found in provided `data.frame`"
+    if (missing_data) {
+      rlang::abort(
+        message = sprintf("Required column %s is not found in provided `data`.", col),
+        class = "missing_column_error",
+        col = col,
+        bullet = paste0("reason: ", req_reasons[[col]])
       )
-      msg <- paste(
-        sprintf(
-          "`%s` is required because %s, but it is %s.",
-          col,
-          req_reasons[[col]],
-          paste(problems, collapse = " and ")
-        )
-      )
-      rlang::abort(msg)
     }
   }
+
 
   # Now handle non-required columns that are present but unnecessary
   if (verbose) {
@@ -193,13 +196,11 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, col_nam
     )
 
     for (col in non_required_cols) {
-      if (col %in% col_names$data) {
-        reason <- non_req_reasons[[col]]
-        msg <- sprintf(
-          "`%s` was provided, but is not required because %s. It will be ignored.",
-          col, reason
-        )
-        message(msg)
+      if (col %in% names(col_names$data)) {
+        message(sprintf(
+          "`%s` is not required because %s. It will be ignored.",
+          col, non_req_reasons[[col]]
+        ))
       }
     }
   }
