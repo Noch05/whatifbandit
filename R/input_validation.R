@@ -165,22 +165,16 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, col_nam
     missing_input <- !col %in% names(col_names$data)
 
     if (missing_input) {
-      rlang::abort(
-        message = sprintf("Required column %s is not declared in `data_cols.", col),
-        class = "missing_input_error",
-        col = col,
-        bullet = paste0("reason: ", req_reasons[[col]])
-      )
+      rlang::abort(c(sprintf("Required column `%s` is not declared in `data_cols`.", col),
+        "x" = paste0("reason: ", req_reasons[[col]])
+      ))
     }
     missing_data <- !col_names$data[[col]] %in% names(data)
 
     if (missing_data) {
-      rlang::abort(
-        message = sprintf("Required column %s is not found in provided `data`.", col),
-        class = "missing_column_error",
-        col = col,
-        bullet = paste0("reason: ", req_reasons[[col]])
-      )
+      rlang::abort(c(sprintf("Required column `%s` is not found in provided `data`.", col),
+        "x" = paste0("reason: ", req_reasons[[col]])
+      ))
     }
   }
 
@@ -197,9 +191,11 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, col_nam
 
     for (col in non_required_cols) {
       if (col %in% names(col_names$data)) {
-        message(sprintf(
-          "`%s` is not required because %s. It will be ignored.",
-          col, non_req_reasons[[col]]
+        rlang::warn(c(
+          "i" = sprintf(
+            "`%s` is not required because %s. It will be ignored.",
+            col, non_req_reasons[[col]]
+          )
         ))
       }
     }
