@@ -30,12 +30,12 @@ on the dates treatments would have been assigned for each wave.}
 }
 \value{
 Updated \code{data} object of same class with 6 new columns:
-\item{mab_success}{New variable to hold new success from Multi-arm bandit procedure, NA until assigned.}
-\item{mab_condition}{New variable to hold new treatment condition from Multi-arm bandit procedure, NA until assigned.}
-\item{impute_req}{Binary indicator for imputation requirement, NA until assigned}
-\item{new_success_date}{New variable to new recertification date from Multi-arm bandit procedure, NA until assigned.}
-\item{block}{New variable indicating the variables to block by for assignment}
-\item{treatment_block}{New variable combining block with original treatment condition}
+\item{mab_success:}{New variable to hold new success from Multi-arm bandit procedure, NA until assigned.}
+\item{mab_condition:}{New variable to hold new treatment condition from Multi-arm bandit procedure, NA until assigned.}
+\item{impute_req:}{Binary indicator for imputation requirement, NA until assigned}
+\item{new_success_date:}{New variable to new recertification date from Multi-arm bandit procedure, NA until assigned.}
+\item{block:}{New variable indicating the variables to block by for assignment}
+\item{treatment_block:}{New variable combining block with original treatment condition}
 }
 \description{
 Initializes partially empty columns in \code{data}, to ensure compatibility with, \code{\link[=mab_simulation]{mab_simulation()}}.

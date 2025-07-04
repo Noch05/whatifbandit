@@ -1,10 +1,8 @@
 #' Prepping Data For Outcome Imputation
 
 #' @name imputation_prep
-#' @description This function prepares
-#' to have values of success imputed for those who were switched treatment conditions
-#' by [assign_treatments()]. Simply calculates the Probability of success based on
-#' treatment condition, using original experimental data.
+#' @description Pre-computes the conditional probabilities of success and dates of success for each distinct
+#' treatment block to impute during [mab_simulation()] for those who get assigned new treatments.
 #'
 #'
 #'
@@ -12,9 +10,11 @@
 
 #'
 #' @returns A named list containing:
-#' \item{Probabilities}{summary data frame of success probabilities by treatment condition and blocking condition.}
-#' \item{Dates}{Success Dates by condition, to be used for imputing new dates of success}
-#' #' @seealso
+#' \item{original_summary:}{Summary object of same type as `data`,
+#' which contains probability of success for each treatment block for each treatment period}
+#' \item{dates_summary:}{Average success date for each treatment block at each treatment period}
+#'
+#' @seealso
 #' * [impute_success()]
 #'* [run_mab_trial()]
 #' @export
