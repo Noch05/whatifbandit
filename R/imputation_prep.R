@@ -10,14 +10,13 @@
 
 #'
 #' @returns A named list containing:
-#' \item{original_summary:}{Summary object of same type as `data`,
+#' \item{original_summary:}{Object the same type as `data`,
 #' which contains probability of success for each treatment block for each treatment period}
 #' \item{dates_summary:}{Average success date for each treatment block at each treatment period}
 #'
 #' @seealso
-#' * [impute_success()]
-#'* [run_mab_trial()]
-#' @export
+#' *[impute_success()]
+#' *[run_mab_trial()]
 
 
 
@@ -55,7 +54,7 @@ imputation_prep <- function(data, whole_experiment, perfect_assignment, data_col
 
   if (!perfect_assignment) {
     dates_summary <- data |>
-      dplyr::group_by(!!data_cols$condition_col$sym, period_number) |>
+      dplyr::group_by(treatment_block, period_number) |>
       dplyr::summarize(mean_date = base::mean(!!data_cols$success_date_col$sym, na.rm = TRUE), .groups = "drop") |>
       tidyr::pivot_wider(names_from = data_cols$condition_col$name, values_from = "mean_date")
   } else {

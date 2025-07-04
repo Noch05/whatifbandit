@@ -68,7 +68,7 @@ impute_success <- function(current_data, imputation_info, id_col,
 
     imputed$new_success_date <- dplyr::case_when(
       imputed$impute_req == 0 | (imputed[[success_col_name]] == 0 & imputed$mab_success == 1) ~ imputed[[success_date_col_name]],
-      imputed$mab_success == 1 & imputed[[success_col_name]] == 0 ~ dates[imputed$mab_condition],
+      imputed$mab_success == 1 & imputed[[success_col_name]] == 0 ~ dates[imputed$impute_block],
       imputed$mab_success == 0 | TRUE ~ base::as.Date(NA)
     )
   }
