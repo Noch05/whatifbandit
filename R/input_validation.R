@@ -5,9 +5,10 @@
 #' @description This function provides input validation,
 #' checking to ensure that all required function arguments have been entered,
 #' and that they do not conflict with one another. The goal is to provide the user
-#' with informative error base::messages so they can quickly fix their usage of the function.
+#' with informative error messages so they can quickly fix their usage of the function.
 #'
 #' @inheritParams single_mab_simulation
+#' @inheritParams cols
 #'
 #' @returns No return value. Throws an error
 #' if problems exist before running [single_mab_simulation]
@@ -15,16 +16,22 @@
 #'
 #' @seealso
 #' *[single_mab_simulation()]
+#' *[multiple_mab_simulation()]
 #'
 #'
 #'
-check_args <- function(data, time_unit = NULL, prior_periods, period_length,
-                       algorithm, whole_experiment, perfect_assignment,
-                       blocking, block_cols = NULL, conditions,
-                       date_col, month_col, id_col, condition_col,
-                       success_col,
-                       success_date_col = NULL, assignment_date_col = NULL,
-                       verbose, assignment_method) {
+check_args <- function(data,
+                       assignment_method,
+                       algorithm,
+                       conditions,
+                       prior_periods,
+                       perfect_assignment,
+                       whole_experiment,
+                       blocking,
+                       col_names,
+                       time_unit,
+                       period_length,
+                       control_augment) {
   # Basic Checks for Data and algorithm
   if (base::is.null(data) || !base::is.data.frame(data)) {
     rlang::abort("Input 'data' must be a non-null data.frame.")
@@ -35,29 +42,63 @@ check_args <- function(data, time_unit = NULL, prior_periods, period_length,
   }
 
   # Checking Logical values
-
-
   logical_args <- base::list(
     verbose = verbose,
     blocking = blocking,
     whole_experiment = whole_experiment,
     perfect_assignment = perfect_assignment
   )
-
   for (i in base::seq_along(logical_args)) {
     if (!is.logical(logical_args[[i]])) {
       rlang::abort(sprintf("`%s` must be logical (TRUE or FALSE).", base::names(logical_args)[[i]]))
     }
   }
+  # Checking Arguments are properly provided
+  if (assignment_method == "Date" && is.null(time_unit)) {
+    rlang::abort("`time_unit` must be provided when assignment method is `Date`")
+  }
+  if (assignment_method %in% c("Date", "Batch") && is.null(period_length)) {
+    rlang::abort("`period_length`, must be provided when Date or Batch assignment is used")
+  }
+  if (control_augment > 0 && !"Control" %in% names(conditions)) {
+    rlang::abort("Condtions vector must have a at least one condition named 'Control'
+    when control augmentation is used")
+  }
+  if ((period_length %% 1 != 0 || period_length > 0) && !is.null(period_length)) {
+    rlang::abort("`period_length` must be a positive integer")
+  }
 
-  # Checking Column Existence
 
-  cols <- base::list(
-    id_col = rlang::enquo(id_col),
-    date_col = rlang::enquo(date_col),
-    condition_col = rlang::enquo(condition_col),
-    success_col = rlang::enquo(success_col)
-  )
+
+  # Checking Column Proper Columns are Provided
+  all_cols <- c("id", "success", "date", "month", "success_date", "assignment_date")
+  required_cols <- all_cols[1:2]
+  
+  if(assignment_method == "Date") {
+    if(time_unit == "Month") {
+      required_cols <- c(required_cols, all_cols[3:4])
+    }
+    else {
+      required_cols <- c(required_cols, all_cols[3])
+    }
+  }
+  if (!pefect_assignment) {
+    required_cols <- c(required_cols, all_cols[5:6])
+  }
+  non_required_cols <- base::setdiff(all_cols, required_cols)
+  
+  
+
+
+    # Checking Column Existence
+
+    cols <- base::list(
+      id_col = rlang::enquo(id_col),
+      date_col = rlang::enquo(date_col),
+      condition_col = rlang::enquo(condition_col),
+      success_col = rlang::enquo(success_col)
+    )
+  }
 
   for (i in base::seq_along(cols)) {
     if (!check_col(data, !!cols[[i]])) {
@@ -157,11 +198,6 @@ check_args <- function(data, time_unit = NULL, prior_periods, period_length,
 #'
 #'
 check_col <- function(data, col) {
-  if (rlang::quo_is_null(rlang::enquo(col))) {
-    return(FALSE)
-  }
-  name <- rlang::as_name(rlang::enquo(col))
-
   return(name %in% base::names(data))
 }
 
