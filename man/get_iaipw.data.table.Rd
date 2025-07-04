@@ -13,7 +13,8 @@
 
 \item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
 
-\item{conditions}{Named Character vector containing treatment conditions, Control condition, must be named "Control".}
+\item{conditions}{Named Character vector containing treatment conditions.
+Control condition, must be named "Control" when 'control_augment' > 0.}
 
 \item{verbose}{Logical; Whether or not to print iteration number. FALSE by default.}
 }

@@ -22,13 +22,8 @@ assign_treatments(
 
 \item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
 
-\item{id_col}{Column in data, contains unique id as a key.}
-
-\item{conditions}{Named Character vector containing treatment conditions, Control condition, must be named "Control".}
-
-\item{condition_col}{Column in data, contains original treatment conditions.}
-
-\item{success_col}{Column in data, contains binary successes.}
+\item{conditions}{Named Character vector containing treatment conditions.
+Control condition, must be named "Control" when 'control_augment' > 0.}
 }
 \value{
 An updated data frame object with the new treatment conditions. If this treatment is different

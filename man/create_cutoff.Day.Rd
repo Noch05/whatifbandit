@@ -7,9 +7,7 @@
 \method{create_cutoff}{Day}(data, date_col, period_length)
 }
 \arguments{
-\item{data}{A data frame that provides the input data for the trial.}
-
-\item{date_col}{Column in data, contains date of treatment.}
+\item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
 
 \item{period_length}{Numeric; length of each treatment period.
 If assignment method is "Date", this refers to the

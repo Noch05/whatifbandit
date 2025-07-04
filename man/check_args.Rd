@@ -6,73 +6,57 @@
 \usage{
 check_args(
   data,
-  time_unit = NULL,
-  prior_periods,
-  period_length,
+  assignment_method,
   algorithm,
-  whole_experiment,
-  perfect_assignment,
-  blocking,
-  block_cols = NULL,
   conditions,
-  date_col,
-  month_col,
-  id_col,
-  condition_col,
-  success_col,
-  success_date_col = NULL,
-  assignment_date_col = NULL,
-  verbose,
-  assignment_method
+  prior_periods,
+  perfect_assignment,
+  whole_experiment,
+  blocking,
+  col_names,
+  time_unit,
+  period_length,
+  control_augment,
+  verbose
 )
 }
 \arguments{
-\item{data}{A data frame that provides the input data for the trial.}
+\item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
 
-\item{time_unit}{A string specifying the unit of time for assigning periods.
-Acceptable values are "Day", "Week", or "Month".}
+\item{assignment_method}{String; "Date" or "Batch" to define the assignment into treatment waves.}
+
+\item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
+
+\item{conditions}{Named Character vector containing treatment conditions.
+Control condition, must be named "Control" when 'control_augment' > 0.}
 
 \item{prior_periods}{Numeric; number of previous periods to use in the treatment assignment model
 or specify string "All" to use all previous periods.}
+
+\item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
+(i.e., all outcomes are observed regardless of the date).
+If FALSE, hides outcomes not yet theoretically observed, based
+on the dates treatments would have been assigned for each wave.}
+
+\item{whole_experiment}{Logical; if TRUE, uses all past experimental data for imputing outcomes.
+If FALSE, uses only data available up to the current period.}
+
+\item{blocking}{Logical; Whether or not to use treatment blocking.}
+
+\item{col_names}{Names of the columns as strings passed from user's input into \code{\link[=sinlge_mab_simulation]{sinlge_mab_simulation()}} or \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}}
+
+\item{time_unit}{A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'
+Acceptable values are "Day", "Week", or "Month".}
 
 \item{period_length}{Numeric; length of each treatment period.
 If assignment method is "Date", this refers to the
 length of periods by your specified \code{time_unit} (i.e., if "Day", 10 would be 10 days).
 If assignment methods is "Batch", this refers to the number of people in each batch.}
 
-\item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
-
-\item{whole_experiment}{Logical; if TRUE, uses all past experimental data for imputing outcomes.
-If FALSE, uses only data available up to the current period.}
-
-\item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
-(i.e., all outcomes are observed regardless of the date).
-If FALSE, hides outcomes not yet theoretically observed, based on
-\code{letter_sent_date} from the \code{tanf} dataset.}
-
-\item{blocking}{Logical; Whether or not to use treatment blocking.}
-
-\item{block_cols}{Character Vector of variables to block by.}
-
-\item{conditions}{Named Character vector containing treatment conditions, Control condition, must be named "Control".}
-
-\item{date_col}{Column in data, contains date of treatment.}
-
-\item{month_col}{Column in data, contains month of treatment.}
-
-\item{id_col}{Column in data, contains unique id as a key.}
-
-\item{condition_col}{Column in data, contains original treatment conditions.}
-
-\item{success_col}{Column in data, contains binary successes.}
-
-\item{success_date_col}{Column in data, contains date each success occurred.}
-
-\item{assignment_date_col}{Column in data, contains date of wave assignment.}
+\item{control_augment}{Number \eqn{\in} [0,1]; Proportion of each wave guaranteed to get "Control" treatment.
+Default is 0.}
 
 \item{verbose}{Logical; Whether or not to print iteration number. FALSE by default.}
-
-\item{assignment_method}{String; "Date" or "Batch" to define the assignment into treatment waves.}
 }
 \value{
 No return value. Throws an error
@@ -83,8 +67,9 @@ or \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}.
 This function provides input validation,
 checking to ensure that all required function arguments have been entered,
 and that they do not conflict with one another. The goal is to provide the user
-with informative error base::messages so they can quickly fix their usage of the function.
+with informative error messages so they can quickly fix their usage of the function.
 }
 \seealso{
 *\code{\link[=single_mab_simulation]{single_mab_simulation()}}
+*\code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}
 }

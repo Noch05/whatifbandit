@@ -14,11 +14,7 @@ create_cutoff(
 )
 }
 \arguments{
-\item{data}{A data frame that provides the input data for the trial.}
-
-\item{date_col}{Column in data, contains date of treatment.}
-
-\item{month_col}{Column in data, contains month of treatment.}
+\item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
 
 \item{period_length}{Numeric; length of each treatment period.
 If assignment method is "Date", this refers to the
@@ -27,7 +23,7 @@ If assignment methods is "Batch", this refers to the number of people in each ba
 
 \item{assignment_method}{String; "Date" or "Batch" to define the assignment into treatment waves.}
 
-\item{time_unit}{A string specifying the unit of time for assigning periods.
+\item{time_unit}{A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'
 Acceptable values are "Day", "Week", or "Month".}
 }
 \value{

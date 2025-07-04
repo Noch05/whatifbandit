@@ -24,7 +24,8 @@
 #' or specify string "All" to use all previous periods.
 #' @param whole_experiment Logical; if TRUE, uses all past experimental data for imputing outcomes.
 #'                         If FALSE, uses only data available up to the current period.
-#' @param conditions Named Character vector containing treatment conditions, Control condition, must be named "Control".
+#' @param conditions Named Character vector containing treatment conditions.
+#' Control condition, must be named "Control" when 'control_augment' > 0.
 #' @param data_cols Named List containing the names of columns in data as strings:
 #' \itemize{
 #' \item{id:} {Column in data, contains unique id as a key}
@@ -61,6 +62,7 @@ single_mab_simulation <- function(data,
                                   algorithm,
                                   conditions,
                                   prior_periods,
+                                  perfect_assignment,
                                   whole_experiment,
                                   blocking,
                                   data_cols,
@@ -70,11 +72,8 @@ single_mab_simulation <- function(data,
                                   block_cols = NULL,
                                   verbose = FALSE) {
   data_name <- deparse(substitute(data))
-  col_names <- date_cols
-  col_syms <- date_cols
-  block_names <- block_cols
-  block_syms <- syms(block_cols)
-
+  col_names <- list(data = data_cols, block = block_cols)
+  col_syms <- list(data = rlang::syms(data_cols), block = rlang::syms(block_cols))
   # Input Validation
 
 
@@ -83,16 +82,11 @@ single_mab_simulation <- function(data,
     perfect_assignment = perfect_assignment,
     algorithm = algorithm, period_length = period_length,
     whole_experiment = whole_experiment, prior_periods = prior_periods,
-    conditions = conditions, blocking = blocking,
-    block_cols = block_cols, date_col = {{ date_col }},
-    id_col = {{ id_col }}, success_col = {{ success_col }},
-    condition_col = {{ condition_col }},
-    verbose = verbose,
-    success_date_col = {{ success_date_col }},
-    assignment_date_col = {{ assignment_date_col }},
-    month_col = {{ month_col }},
-    assignment_method
+    col_names = col_names, conditions = conditions, blocking = blocking,
+    assignment_method = assignment_method, verbose = verbose,
+    control_augment = control_augment
   )
+
 
   data <- mab_prepare(
     data = data,
@@ -149,13 +143,14 @@ single_mab_simulation <- function(data,
 
   return(results)
 }
-#' @noRd
 #' @name cols
-#' @noRD
+#' @title Column arguments shared across functions
 #' @param id Column in data, contains unique id as a key
 #' @param success  Column in data; Binary successes from original experiment
 #' @param date  Column in data, contains original date of event/trial; only ncessary when assigning by 'Date'
 #' @param month  Column in data, contains month of treatment; only necessary when time_unit = 'Month'
 #' @param success_date  Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE
 #' @param assignment_date  Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
-#'
+#' @param col_names Names of the columns as strings passed from user's input into [sinlge_mab_simulation()] or [multiple_mab_simulation()]
+#' @param col_syms Names of columns as symbols passed from user's input into [sinlge_mab_simulation()] or [multiple_mab_simulation()]
+NULL

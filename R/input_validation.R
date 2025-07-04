@@ -31,18 +31,20 @@ check_args <- function(data,
                        col_names,
                        time_unit,
                        period_length,
-                       control_augment) {
+                       control_augment,
+                       verbose) {
   # Basic Checks for Data and algorithm
   if (base::is.null(data) || !base::is.data.frame(data)) {
     rlang::abort("Input 'data' must be a non-null data.frame.")
   }
 
   if (!algorithm %in% c("Thompson", "UCB1")) {
-    rlang::abort("'algorithm' must be Thompson or UCB1.")
+    rlang::abort("'algorithm' must be 'Thompson' or 'UCB1'.")
   }
-  character_args <- list(
-    conditions = conditions,
-  )
+
+  if (is.null(conditions) || !is.character(conditions)) {
+    rlang::abort("`conditions`, must be provided as a character vector.")
+  }
 
   # Checking Logical values
   logical_args <- base::list(
@@ -58,31 +60,53 @@ check_args <- function(data,
   }
   # Checking Arguments are properly provided
   if (assignment_method == "Date" && is.null(time_unit)) {
-    rlang::abort("`time_unit` must be provided when assignment method is `Date`")
+    rlang::abort("`time_unit` must be provided when assignment method is `Date`.")
   }
   if (assignment_method %in% c("Date", "Batch") && is.null(period_length)) {
-    rlang::abort("`period_length`, must be provided when Date or Batch assignment is used")
+    rlang::abort("`period_length`, must be provided when Date or Batch assignment is used.")
   }
   if (control_augment > 0 && !"Control" %in% names(conditions)) {
     rlang::abort("Condtions vector must have a at least one condition named 'Control'
-    when control augmentation is used")
+    when control augmentation is used.")
   }
   if ((period_length %% 1 != 0 || period_length < 0) && !is.null(period_length)) {
-    rlang::abort("`period_length` must be a positive integer")
+    rlang::abort("`period_length` must be a positive integer.")
   }
-  if ((prior_periods %% 1 != 0 || prior_periods < 0 || prior_periods != "All") && !is.null(period_length)) {
-    rlang::abort("`prior_periods` must be a positive integer or 'All'")
+
+  if (is.numeric(prior_periods)) {
+    if (prior_periods %% 1 != 0 || prior_periods < 0) {
+      rlang::abort("`prior_periods` must be a positive integer or 'All'.")
+    }
+  } else {
+    if (prior_periods != "All") {
+      rlang::abort("`prior_periods` must be a positive integer or 'All'.")
+    }
   }
 
   # Checking Column Proper Columns are Provided
 
   check_cols(
+    data = data,
     assignment_method = assignment_method, time_unit = time_unit,
     perfect_assignment = perfect_assignment,
-    col_names = col_names
+    col_names = col_names, verbose = verbose
   )
+  if (blocking) {
+    if (is.null(col_names$block)) {
+      rlang::abort("block_cols must be provided when blocking = TRUE.")
+    } else {
+      for (col in col_names$block) {
+        if (!col %in% names(data)) {
+          rlang::abort(sprintf("`%s is not in the data, but was chosen as a block.", col))
+        }
+      }
+    }
+  }
+  if (!blocking && !is.null(col_names$block)) {
+    message("Blocking is FALsE, arguments passed to `block_cols` will be ignored.")
+  }
 
-  unique_ids <- length(unique(data[[col_names$id]]))
+  unique_ids <- length(unique(data[[col_names$data$id]]))
 
   if (unique_ids != nrow(data)) {
     rlang::abort(paste(col_names$id, "is not a unique identifier, a unique id for each observation is required"))
@@ -109,7 +133,7 @@ check_args <- function(data,
 #' *[check_args()]
 #'
 #'
-check_cols <- function(assignment_method, time_unit, perfect_assignment, col_names, data) {
+check_cols <- function(assignment_method, time_unit, perfect_assignment, col_names, data, verbose) {
   # All possible columns
   all_cols <- c("id", "success", "date", "month", "success_date", "assignment_date")
 
@@ -138,8 +162,8 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, col_nam
 
   # Check for missing required columns
   for (col in required_cols) {
-    missing_input <- !col %in% col_names$data
-    missing_data <- !col %in% names(data)
+    missing_input <- !col %in% names(col_names$data)
+    missing_data <- !col_names$data[[col]] %in% names(data)
 
     if (missing_input || missing_data) {
       problems <- c(
@@ -159,22 +183,24 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, col_nam
   }
 
   # Now handle non-required columns that are present but unnecessary
-  non_required_cols <- setdiff(all_cols, required_cols)
-  non_req_reasons <- list(
-    date = "assignment_method is not 'Date'",
-    month = "time_unit is not 'Month'",
-    success_date = "perfect_assignment is TRUE",
-    assignment_date = "perfect_assignment is TRUE"
-  )
+  if (verbose) {
+    non_required_cols <- setdiff(all_cols, required_cols)
+    non_req_reasons <- list(
+      date = "assignment_method is not 'Date'",
+      month = "time_unit is not 'Month'",
+      success_date = "perfect_assignment is TRUE",
+      assignment_date = "perfect_assignment is TRUE"
+    )
 
-  for (col in non_required_cols) {
-    if (col %in% col_names$data) {
-      reason <- non_req_reasons[[col]]
-      msg <- sprintf(
-        "`%s` was provided, but is not required because %s. It will be ignored.",
-        col, reason
-      )
-      message(msg)
+    for (col in non_required_cols) {
+      if (col %in% col_names$data) {
+        reason <- non_req_reasons[[col]]
+        msg <- sprintf(
+          "`%s` was provided, but is not required because %s. It will be ignored.",
+          col, reason
+        )
+        message(msg)
+      }
     }
   }
 }

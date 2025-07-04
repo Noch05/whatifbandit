@@ -10,7 +10,8 @@
 \item{past_results}{Data.frame containing summary of prior periods.
 Created by \code{\link[=get_past_results]{get_past_results()}} components}
 
-\item{conditions}{Named Character vector containing treatment conditions, Control condition, must be named "Control".}
+\item{conditions}{Named Character vector containing treatment conditions.
+Control condition, must be named "Control" when 'control_augment' > 0.}
 }
 \value{
 Named Numeric Vector of Posterior Probabilities

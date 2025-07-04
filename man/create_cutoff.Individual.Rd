@@ -7,7 +7,7 @@
 \method{create_cutoff}{Individual}(data)
 }
 \arguments{
-\item{data}{A data frame that provides the input data for the trial.}
+\item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
 }
 \description{
 \code{\link[=create_cutoff]{create_cutoff()}} Individual Periods

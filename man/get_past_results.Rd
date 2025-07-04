@@ -20,14 +20,11 @@ get_past_results(
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
-If FALSE, hides outcomes not yet theoretically observed, based on
-\code{letter_sent_date} from the \code{tanf} dataset.}
+If FALSE, hides outcomes not yet theoretically observed, based
+on the dates treatments would have been assigned for each wave.}
 
-\item{assignment_date_col}{Column in data, contains date of wave assignment.}
-
-\item{success_date_col}{Column in data, contains date each success occurred.}
-
-\item{conditions}{Named Character vector containing treatment conditions, Control condition, must be named "Control".}
+\item{conditions}{Named Character vector containing treatment conditions.
+Control condition, must be named "Control" when 'control_augment' > 0.}
 }
 \value{
 A data.frame, containing the number of successes, and number of people for each

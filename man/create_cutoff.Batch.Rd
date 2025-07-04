@@ -7,7 +7,7 @@
 \method{create_cutoff}{Batch}(data, period_length)
 }
 \arguments{
-\item{data}{A data frame that provides the input data for the trial.}
+\item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
 
 \item{period_length}{Numeric; length of each treatment period.
 If assignment method is "Date", this refers to the

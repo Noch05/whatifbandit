@@ -6,82 +6,74 @@
 \usage{
 single_mab_simulation(
   data,
-  time_unit = NULL,
-  perfect_assignment,
-  algorithm,
-  period_length = NULL,
-  prior_periods,
-  whole_experiment,
-  conditions,
-  blocking,
-  block_cols = NULL,
-  date_col = NULL,
-  month_col = NULL,
-  id_col,
-  condition_col,
-  success_col,
-  success_date_col = NULL,
-  assignment_date_col = NULL,
-  verbose = FALSE,
   assignment_method,
-  control_augment = 0
+  algorithm,
+  conditions,
+  prior_periods,
+  perfect_assignment,
+  whole_experiment,
+  blocking,
+  data_cols,
+  control_augment = 0,
+  time_unit = NULL,
+  period_length = NULL,
+  block_cols = NULL,
+  verbose = FALSE
 )
 }
 \arguments{
-\item{data}{A data frame that provides the input data for the trial.}
+\item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
 
-\item{time_unit}{A string specifying the unit of time for assigning periods.
-Acceptable values are "Day", "Week", or "Month".}
+\item{assignment_method}{String; "Date" or "Batch" to define the assignment into treatment waves.}
+
+\item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
+
+\item{conditions}{Named Character vector containing treatment conditions.
+Control condition, must be named "Control" when 'control_augment' > 0.}
+
+\item{prior_periods}{Numeric; number of previous periods to use in the treatment assignment model
+or specify string "All" to use all previous periods.}
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
-If FALSE, hides outcomes not yet theoretically observed, based on
-\code{letter_sent_date} from the \code{tanf} dataset.}
+If FALSE, hides outcomes not yet theoretically observed, based
+on the dates treatments would have been assigned for each wave.}
 
-\item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
+\item{whole_experiment}{Logical; if TRUE, uses all past experimental data for imputing outcomes.
+If FALSE, uses only data available up to the current period.}
+
+\item{blocking}{Logical; Whether or not to use treatment blocking.}
+
+\item{data_cols}{Named List containing the names of columns in data as strings:
+\itemize{
+\item{id:} {Column in data, contains unique id as a key}
+\item{success:} {Column in data; Binary successes from original experiment}
+\item{date:} {Column in data, contains original date of event/trial; only ncessary when assigning by 'Date'}
+\item{month:} {Column in data, contains month of treatment; only necessary when time_unit = 'Month'}
+\item{success_date:} {Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE}
+\item{assignment_date:} {Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
+Used to simulate imperfect information on part of researchers conducting an adaptive trial}}}
+
+\item{control_augment}{Number \eqn{\in} [0,1]; Proportion of each wave guaranteed to get "Control" treatment.
+Default is 0.}
+
+\item{time_unit}{A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'
+Acceptable values are "Day", "Week", or "Month".}
 
 \item{period_length}{Numeric; length of each treatment period.
 If assignment method is "Date", this refers to the
 length of periods by your specified \code{time_unit} (i.e., if "Day", 10 would be 10 days).
 If assignment methods is "Batch", this refers to the number of people in each batch.}
 
-\item{prior_periods}{Numeric; number of previous periods to use in the treatment assignment model
-or specify string "All" to use all previous periods.}
-
-\item{whole_experiment}{Logical; if TRUE, uses all past experimental data for imputing outcomes.
-If FALSE, uses only data available up to the current period.}
-
-\item{conditions}{Named Character vector containing treatment conditions, Control condition, must be named "Control".}
-
-\item{blocking}{Logical; Whether or not to use treatment blocking.}
-
 \item{block_cols}{Character Vector of variables to block by.}
 
-\item{date_col}{Column in data, contains date of treatment.}
-
-\item{month_col}{Column in data, contains month of treatment.}
-
-\item{id_col}{Column in data, contains unique id as a key.}
-
-\item{condition_col}{Column in data, contains original treatment conditions.}
-
-\item{success_col}{Column in data, contains binary successes.}
-
-\item{success_date_col}{Column in data, contains date each success occurred.}
-
-\item{assignment_date_col}{Column in data, contains date of wave assignment.}
-
 \item{verbose}{Logical; Whether or not to print iteration number. FALSE by default.}
-
-\item{assignment_method}{String; "Date" or "Batch" to define the assignment into treatment waves.}
-
-\item{control_augment}{Number \eqn{\in} [0,1]; Proportion of each wave guaranteed to get "Control" treatment.
-Default is 0. Creates potential conflicts with \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}, when not set to 0.}
 }
 \value{
 A custom mab class object, which is a named list containing:
 \item{final_data}{The processed data with treatment assignments and imputed outcomes, labelled with "mab_" prefix.}
 \item{bandits}{Either the UCB1 statistics or Thompson Sampling posterior distributions.}
+\item{assignment_probs}{Probability of being assigned each treatment arm at a given period}
 \item{estimates}{AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances.}
 \item{settings}{A list of the configuration settings used in the trial.}
 }

@@ -14,21 +14,15 @@ imputation_prep(
 )
 }
 \arguments{
-\item{data}{A data frame that provides the input data for the trial.}
+\item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
 
 \item{whole_experiment}{Logical; if TRUE, uses all past experimental data for imputing outcomes.
 If FALSE, uses only data available up to the current period.}
 
-\item{success_col}{Column in data, contains binary successes.}
-
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
-If FALSE, hides outcomes not yet theoretically observed, based on
-\code{letter_sent_date} from the \code{tanf} dataset.}
-
-\item{success_date_col}{Column in data, contains date each success occurred.}
-
-\item{condition_col}{Column in data, contains original treatment conditions.}
+If FALSE, hides outcomes not yet theoretically observed, based
+on the dates treatments would have been assigned for each wave.}
 }
 \value{
 A named list containing:

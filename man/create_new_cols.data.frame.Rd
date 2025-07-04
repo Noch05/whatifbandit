@@ -15,22 +15,16 @@
 )
 }
 \arguments{
-\item{data}{A data frame that provides the input data for the trial.}
+\item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
 
 \item{blocking}{Logical; Whether or not to use treatment blocking.}
 
 \item{block_cols}{Character Vector of variables to block by.}
 
-\item{condition_col}{Column in data, contains original treatment conditions.}
-
-\item{success_col}{Column in data, contains binary successes.}
-
-\item{success_date_col}{Column in data, contains date each success occurred.}
-
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
-If FALSE, hides outcomes not yet theoretically observed, based on
-\code{letter_sent_date} from the \code{tanf} dataset.}
+If FALSE, hides outcomes not yet theoretically observed, based
+on the dates treatments would have been assigned for each wave.}
 }
 \description{
 \code{\link[=create_new_cols]{create_new_cols()}} for Data.frames

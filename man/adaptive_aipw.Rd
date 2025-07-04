@@ -9,7 +9,8 @@ adaptive_aipw(mab, conditions, periods, algorithm, verbose)
 \arguments{
 \item{mab}{A named list that has been created by \code{\link[=run_mab_trial]{run_mab_trial()}}}
 
-\item{conditions}{Named Character vector containing treatment conditions, Control condition, must be named "Control".}
+\item{conditions}{Named Character vector containing treatment conditions.
+Control condition, must be named "Control" when 'control_augment' > 0.}
 
 \item{periods}{Numeric; number of treatment waves.}
 

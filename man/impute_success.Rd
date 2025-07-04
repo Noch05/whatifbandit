@@ -21,19 +21,13 @@ contains the probabilities of success for each treatment condition, and block, i
 by service center, to be passed to \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}} for the
 probabilities of imputation.}
 
-\item{id_col}{Column in data, contains unique id as a key.}
-
-\item{success_col}{Column in data, contains binary successes.}
-
 \item{prior_data}{A data frame containing results from previous periods, to be joined together at the end,
 and passed into the next loop of the assignment process defined by \code{\link[=run_mab_trial]{run_mab_trial()}}.}
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
-If FALSE, hides outcomes not yet theoretically observed, based on
-\code{letter_sent_date} from the \code{tanf} dataset.}
-
-\item{success_date_col}{Column in data, contains date each success occurred.}
+If FALSE, hides outcomes not yet theoretically observed, based
+on the dates treatments would have been assigned for each wave.}
 
 \item{data}{A data frame object created by \code{\link[=assign_treatments]{assign_treatments()}},
 containing the new treatment conditions and whose outcome needs to be imputed}

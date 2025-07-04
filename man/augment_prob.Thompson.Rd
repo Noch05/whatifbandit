@@ -11,9 +11,10 @@
 assignment with the control condition named "Control".}
 
 \item{control_augment}{Number \eqn{\in} [0,1]; Proportion of each wave guaranteed to get "Control" treatment.
-Default is 0. Creates potential conflicts with \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}, when not set to 0.}
+Default is 0.}
 
-\item{conditions}{Named Character vector containing treatment conditions, Control condition, must be named "Control".}
+\item{conditions}{Named Character vector containing treatment conditions.
+Control condition, must be named "Control" when 'control_augment' > 0.}
 }
 \description{
 Augment Prob For Thompson Sampling

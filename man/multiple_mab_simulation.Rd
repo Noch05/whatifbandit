@@ -30,15 +30,15 @@ multiple_mab_simulation(
 )
 }
 \arguments{
-\item{data}{A data frame that provides the input data for the trial.}
+\item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
 
-\item{time_unit}{A string specifying the unit of time for assigning periods.
+\item{time_unit}{A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'
 Acceptable values are "Day", "Week", or "Month".}
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
-If FALSE, hides outcomes not yet theoretically observed, based on
-\code{letter_sent_date} from the \code{tanf} dataset.}
+If FALSE, hides outcomes not yet theoretically observed, based
+on the dates treatments would have been assigned for each wave.}
 
 \item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
 
@@ -53,25 +53,12 @@ or specify string "All" to use all previous periods.}
 \item{whole_experiment}{Logical; if TRUE, uses all past experimental data for imputing outcomes.
 If FALSE, uses only data available up to the current period.}
 
-\item{conditions}{Named Character vector containing treatment conditions, Control condition, must be named "Control".}
+\item{conditions}{Named Character vector containing treatment conditions.
+Control condition, must be named "Control" when 'control_augment' > 0.}
 
 \item{blocking}{Logical; Whether or not to use treatment blocking.}
 
 \item{block_cols}{Character Vector of variables to block by.}
-
-\item{date_col}{Column in data, contains date of treatment.}
-
-\item{month_col}{Column in data, contains month of treatment.}
-
-\item{id_col}{Column in data, contains unique id as a key.}
-
-\item{condition_col}{Column in data, contains original treatment conditions.}
-
-\item{success_col}{Column in data, contains binary successes.}
-
-\item{success_date_col}{Column in data, contains date each success occurred.}
-
-\item{assignment_date_col}{Column in data, contains date of wave assignment.}
 
 \item{verbose}{Logical; Toggles progress bar from \link[furrr:future_map]{furrr::future_map}.}
 
