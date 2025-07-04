@@ -1,11 +1,11 @@
 #' Gather Past Results for Given Assignment Period
 #' @name get_past_results
-#' @description This Function Summarizes the results of prior periods to be used for next Multi-Arm Bandit
-#' Sampling period.
+#' @description Summarizes results of prior periods to use for the current Multi-Arm-Bandit assignment.
 #'
 #' @inheritParams single_mab_simulation
 #' @inheritParams create_prior
-#' @param current_data Data with only observations from the current re sampling period
+#' @inheritParams cols
+#' @param current_data Data with only observations from the current sampling period
 #' @param prior_data Data with only the observations from the prior index
 #'
 #' @returns A data.frame, containing the number of successes, and number of people for each
@@ -35,18 +35,16 @@ get_past_results.tbl_df <- function(current_data, prior_data, perfect_assignment
     current_date <- base::max(current_data[[assignment_date_col$name]])
 
 
-    past_results <- prior_data
 
-    past_results$known_success <- base::ifelse(
+    prior_data$known_success <- base::ifelse(
       current_date >= past_results[[success_date_col$name]] & !base::is.na(past_results[[success_date_col$name]]),
       1, 0
     )
   } else {
-    past_results <- prior_data
-    past_results$known_success <- past_results$mab_condition
+    prior_data$known_success <- prior_data$mab_condition
   }
 
-  past_results <- past_results |>
+  prior_data <- prior_data |>
     dplyr::group_by(mab_condition) |>
     dplyr::summarize(
       successes = base::sum(known_success, na.rm = TRUE),
@@ -56,7 +54,7 @@ get_past_results.tbl_df <- function(current_data, prior_data, perfect_assignment
     ) |>
     dplyr::ungroup()
 
-  if (base::nrow(past_results) != base::length(conditions)) {
+  if (base::nrow(prior_data) != base::length(conditions)) {
     conditions_add <- base::setdiff(conditions, past_results$mab_condition)
 
     replace <- tibble::tibble(
@@ -64,10 +62,10 @@ get_past_results.tbl_df <- function(current_data, prior_data, perfect_assignment
       success_rate = 0, n = 0
     )
 
-    past_results <- dplyr::bind_rows(past_results, replace)
-    past_results <- past_results[order(past_results$mab_condition), ]
+    prior_data <- dplyr::bind_rows(prior_data, replace)
+    prior_data <- past_results[order(prior_data$mab_condition), ]
   }
-  return(past_results)
+  return(prior_data)
 }
 #------------------------------------------------------------------------------
 
