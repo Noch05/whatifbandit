@@ -35,15 +35,12 @@ mab_prepare <- function(data = data,
     assignment_method = assignment_method,
     time_unit = time_unit
   )
-
   data <- create_new_cols(
     data = data,
-    success_date_col = {{ success_date_col }},
+    data_cols = data_cols,
     perfect_assignment = perfect_assignment,
     blocking = blocking,
-    block_cols = block_cols,
-    success_col = {{ success_col }},
-    condition_col = {{ condition_col }}
+    block_cols = block_cols
   )
 
 

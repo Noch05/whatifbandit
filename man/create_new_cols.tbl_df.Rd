@@ -4,22 +4,24 @@
 \alias{create_new_cols.tbl_df}
 \title{\code{\link[=create_new_cols]{create_new_cols()}} for Tibbles}
 \usage{
-\method{create_new_cols}{tbl_df}(
-  data,
-  blocking,
-  block_cols,
-  condition_col,
-  success_col,
-  success_date_col,
-  perfect_assignment
-)
+\method{create_new_cols}{tbl_df}(data, data_cols, block_cols, blocking, perfect_assignment)
 }
 \arguments{
 \item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
 
-\item{blocking}{Logical; Whether or not to use treatment blocking.}
+\item{data_cols}{Named Character vector containing the names of columns in data as strings:
+\itemize{
+\item{id_col:} {Column in data, contains unique id as a key}
+\item{success_col:} {Column in data; Binary successes from original experiment}
+\item{date_col:} {Column in data, contains original date of event/trial; only ncessary when assigning by 'Date'}
+\item{month_col:} {Column in data, contains month of treatment; only necessary when time_unit = 'Month'}
+\item{success_date_col:} {Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE}
+\item{assignment_date_col:} {Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
+Used to simulate imperfect information on part of researchers conducting an adaptive trial}}}
 
 \item{block_cols}{Character Vector of variables to block by.}
+
+\item{blocking}{Logical; Whether or not to use treatment blocking.}
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).

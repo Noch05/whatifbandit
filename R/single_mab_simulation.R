@@ -77,7 +77,8 @@ single_mab_simulation <- function(data,
     name = .x, symbol = rlang::sym(.x)
   )) |>
     stats::setNames(names(data_cols))
-  block_cols <- list(names = block_cols, symbol = rlang::sym(block_cols))
+
+  block_cols <- list(name = block_cols, symbol = rlang::sym(block_cols))
 
   # Input Validation
 
@@ -103,8 +104,8 @@ single_mab_simulation <- function(data,
     assignment_method = assignment_method,
     blocking = blocking,
     verbose = verbose
-  ) |>
-    dplyr::arrange(period_number, !!col_syms$data$id)
+  )
+
 
   verbose_log(verbose, "Precomputing")
 

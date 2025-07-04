@@ -1,7 +1,8 @@
 #' Create Treatment Wave Cutoffs
 #' @name create_cutoff
 #' @description Used during [mab_prepare()] to assign each observation a new treatment assignment period, based
-#' on user-supplied speficiations;
+#' on user-supplied specifications, and user supplied data from
+#' `date_col` and `month_col` in `data_cols`.
 #' @inheritParams single_mab_simulation
 #' @inheritParams cols
 #'
