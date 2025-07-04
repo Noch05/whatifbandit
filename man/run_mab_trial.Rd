@@ -65,7 +65,7 @@ Control condition, must be named "Control" when 'control_augment' > 0.}
 Default is 0.}
 
 \item{imputation_information}{Object created by \code{\link[=imputation_prep]{imputation_prep()}} containing the conditional means and success dates
-for each treatment to impute from.}
+for each treatment block to impute from.}
 }
 \value{
 A named list containing:

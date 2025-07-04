@@ -1,17 +1,11 @@
 #' Imputing New Outcomes under MAB Trial
 #' @name impute_success
-#' @description Imputes Outcomes for the current treatment assignment period. Uses data from original RCT
-#' and [randomizr] to randomly assign success of the new treatments under the MAB procedure based on the success rates
-#' of each treatment during the original experiment. Runs in loop defined by [run_mab_trial()].
+#' @description Imputes Outcomes for the current treatment assignment period.
+#' Uses[randomizr::block_and_cluster_ra] to impute success of the new treatments based on data from the original trial
 #'
-#' @param data A data frame object created by [assign_treatments()],
-#' containing the new treatment conditions and whose outcome needs to be imputed
-#' @param imputation_info A data frame object created by [imputation_prep()]
-#' contains the probabilities of success for each treatment condition, and block, if blocked
-#' by service center, to be passed to [randomizr::block_and_cluster_ra()] for the
-#' probabilities of imputation.
-#' @param prior_data A data frame containing results from previous periods, to be joined together at the end,
-#' and passed into the next loop of the assignment process defined by [run_mab_trial()].
+#' @param data Updated `data` object containing new treatments from [assign_treatments()] to impute outcomes for
+#' @inheritParams run_mab_trial
+#' @param prior_data `data` object from previous periods. Joined together at the end for the next iteration of the simulation.
 #' @inheritParams single_mab_simulation
 #'
 #' @seealso

@@ -10,6 +10,7 @@
 #' @inheritParams single_mab_simulation
 #' @param imputation_information Object created by [imputation_prep()] containing the conditional means and success dates
 #' for each treatment block to impute from.
+#' @inheritParams cols
 #'
 #'
 #' @return  A named list containing:
@@ -114,11 +115,11 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       current_data = current_data,
       imputation_info = imputation_info,
       dates = dates,
-      id_col = {{ id_col }},
-      success_col = {{ success_col }},
+      id_col = data_cols$id_col,
+      success_col = data_cols$success_col,
       prior_data = data,
       perfect_assignment = perfect_assignment,
-      success_date_col = {{ success_date_col }}
+      success_date_col = data_cols$success_date_col
     )
   }
   final_summary <- data |>

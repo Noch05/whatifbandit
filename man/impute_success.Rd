@@ -16,26 +16,18 @@ impute_success(
 )
 }
 \arguments{
-\item{imputation_info}{A data frame object created by \code{\link[=imputation_prep]{imputation_prep()}}
-contains the probabilities of success for each treatment condition, and block, if blocked
-by service center, to be passed to \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}} for the
-probabilities of imputation.}
-
-\item{prior_data}{A data frame containing results from previous periods, to be joined together at the end,
-and passed into the next loop of the assignment process defined by \code{\link[=run_mab_trial]{run_mab_trial()}}.}
+\item{prior_data}{\code{data} object from previous periods. Joined together at the end for the next iteration of the simulation.}
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
 If FALSE, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.}
 
-\item{data}{A data frame object created by \code{\link[=assign_treatments]{assign_treatments()}},
-containing the new treatment conditions and whose outcome needs to be imputed}
+\item{data}{Updated \code{data} object containing new treatments from \code{\link[=assign_treatments]{assign_treatments()}} to impute outcomes for}
 }
 \description{
-Imputes Outcomes for the current treatment assignment period. Uses data from original RCT
-and \link{randomizr} to randomly assign success of the new treatments under the MAB procedure based on the success rates
-of each treatment during the original experiment. Runs in loop defined by \code{\link[=run_mab_trial]{run_mab_trial()}}.
+Imputes Outcomes for the current treatment assignment period.
+Uses\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra} to impute success of the new treatments based on data from the original trial
 }
 \seealso{
 \itemize{

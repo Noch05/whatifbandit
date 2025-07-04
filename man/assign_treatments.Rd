@@ -22,11 +22,15 @@ assign_treatments(
 
 \item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
 
+\item{id_col}{Column in data, contains unique id as a key}
+
 \item{conditions}{Named Character vector containing treatment conditions.
 Control condition, must be named "Control" when 'control_augment' > 0.}
+
+\item{success_col}{Column in data; Binary successes from original experiment}
 }
 \value{
-An updated data frame object with the new treatment conditions. If this treatment is different
+Updated \code{data} object with the new treatment conditions. If this treatment is different
 then from under the original experiment, they are labelled as imputation required.
 }
 \description{

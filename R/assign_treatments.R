@@ -7,9 +7,10 @@
 #'
 #' @inheritParams single_mab_simulation
 #' @inheritParams create_prior
+#' @inheritParams cols
 #' @param probs Named Numeric Vector; Probability of Assignment for each treatment condition.
 #'
-#' @returns An updated data frame object with the new treatment conditions. If this treatment is different
+#' @returns Updated `data` object with the new treatment conditions. If this treatment is different
 #' then from under the original experiment, they are labelled as imputation required.
 #'
 #' @seealso

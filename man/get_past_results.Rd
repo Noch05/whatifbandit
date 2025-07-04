@@ -14,7 +14,7 @@ get_past_results(
 )
 }
 \arguments{
-\item{current_data}{Data with only observations from the current re sampling period}
+\item{current_data}{Data with only observations from the current sampling period}
 
 \item{prior_data}{Data with only the observations from the prior index}
 
@@ -22,6 +22,10 @@ get_past_results(
 (i.e., all outcomes are observed regardless of the date).
 If FALSE, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.}
+
+\item{assignment_date_col}{Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.}
+
+\item{success_date_col}{Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE}
 
 \item{conditions}{Named Character vector containing treatment conditions.
 Control condition, must be named "Control" when 'control_augment' > 0.}
@@ -31,8 +35,7 @@ A data.frame, containing the number of successes, and number of people for each
 treatment condition.
 }
 \description{
-This Function Summarizes the results of prior periods to be used for next Multi-Arm Bandit
-Sampling period.
+Summarizes results of prior periods to use for the current Multi-Arm-Bandit assignment.
 }
 \seealso{
 *\code{\link[=run_mab_trial]{run_mab_trial()}}
