@@ -58,90 +58,47 @@ multiple_mab_simulation <- function(data,
     stop("Argument 'keep_data' must logical. Please enter `TRUE` or `FALSE`")
   }
 
-  check_args(
-    data = data, time_unit = time_unit,
-    perfect_assignment = perfect_assignment,
-    algorithm = algorithm, period_length = period_length,
-    whole_experiment = whole_experiment, prior_periods = prior_periods,
-    conditions = conditions, blocking = blocking,
-    block_cols = block_cols, date_col = {{ date_col }},
-    id_col = {{ id_col }}, success_col = {{ success_col }},
-    condition_col = {{ condition_col }},
-    verbose = verbose,
-    success_date_col = {{ success_date_col }},
-    assignment_date_col = {{ assignment_date_col }},
-    month_col = {{ month_col }}
-  )
+  data_name <- deparse(substitute(data))
 
-  data <- mab_prepare(
-    data = data,
-    date_col = {{ date_col }},
-    time_unit = time_unit,
+  prepped <- pre_mab_simulation(
+    data = data, assignment_method = assignment_method,
+    algorithm = algorithm, conditions = conditions,
+    prior_periods = prior_periods, perfect_assignment = perfect_assignment,
+    whole_experiment = whole_experiment, blocking = blocking,
+    block_cols = block_cols, data_cols = data_cols,
+    control_augment = control_augment, time_unit = time_unit,
     period_length = period_length,
-    success_col = {{ success_col }},
-    condition_col = {{ condition_col }},
-    success_date_col = {{ success_date_col }},
-    month_col = {{ month_col }},
-    perfect_assignment = perfect_assignment,
-    blocking = blocking,
-    block_cols = block_cols
+    verbose = verbose
   )
-
+  verbose_log(verbose, "Starting Simulations")
 
   mabs <- furrr::future_map(seq_len(times), ~ {
     set.seed(seeds[.x])
     results <- mab_simulation(
-      data = data,
+      data = prepped$data,
       time_unit = time_unit,
-      perfect_assignment = perfect_assignment,
-      algorithm = algorithm,
       period_length = period_length,
       prior_periods = prior_periods,
+      algorithm = algorithm,
       whole_experiment = whole_experiment,
+      perfect_assignment = perfect_assignment,
       conditions = conditions,
       blocking = blocking,
-      block_cols = block_cols,
-      date_col = {{ date_col }},
-      month_col = {{ month_col }},
-      id_col = {{ id_col }},
-      condition_col = {{ condition_col }},
-      success_col = {{ success_col }},
-      success_date_col = {{ success_date_col }},
-      assignment_date_col = {{ assignment_date_col }},
+      block_cols = prepped$block_cols,
+      data_cols = prepped$data_cols,
       verbose = FALSE,
-      assigment_method = assignment_method
+      assignment_method = assignment_method,
+      control_augment = control_augment,
+      imputation_information = prepped$imputation_information
     )
     if (!keep_data) {
       results <- results[names(results) != "final_data"]
     }
   },
   .options = furrr::furrr_options(
-    globals = list(
-      data = data,
-      time_unit = time_unit,
-      perfect_assignment = perfect_assignment,
-      algorithm = algorithm,
-      period_length = period_length,
-      prior_periods = prior_periods,
-      whole_experiment = whole_experiment,
-      conditions = conditions,
-      blocking = blocking,
-      block_cols = block_cols,
-      date_col = rlang::enquo(date_col),
-      month_col = rlang::enquo(month_col),
-      id_col = rlang::enquo(id_col),
-      condition_col = rlang::enquo(condition_col),
-      success_col = rlang::enquo(success_col),
-      success_date_col = rlang::enquo(success_date_col),
-      assignment_date_col = rlang::enquo(assignment_date_col),
-      times = times,
-      seeds = seeds,
-      keep_data = keep_data,
-      assigment_method = assignment_method
-    ),
     seed = TRUE,
     packages = c(
-      "tanfmab", "dplyr", "rlang", "tidyselect",
+      "whatifbandit", "dplyr", "rlang", "tidyselect",
       "tidyr", "bandit", "tibble", "lubridate",
       "purrr", "furrr", "randomizr", "data.table"
     )
@@ -172,7 +129,7 @@ multiple_mab_simulation <- function(data,
     bandits = bandits,
     estimates = estimates,
     settings = list(
-      data = deparse(substitute(data)),
+      data = data_name,
       time_unit = time_unit,
       perfect_assignment = perfect_assignment,
       algorithm = algorithm,
@@ -187,7 +144,7 @@ multiple_mab_simulation <- function(data,
     )
   )
 
-  base::class(results) <- c("multiple.mab", "list")
+  base::class(results) <- c("multiple.mab", class(results))
 
   return(results)
 }

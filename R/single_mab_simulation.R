@@ -71,7 +71,6 @@ single_mab_simulation <- function(data,
                                   period_length = NULL,
                                   block_cols = NULL,
                                   verbose = FALSE) {
-  # Reformatting Inputs into names and symbols
   data_name <- deparse(substitute(data))
 
   prepped <- pre_mab_simulation(
