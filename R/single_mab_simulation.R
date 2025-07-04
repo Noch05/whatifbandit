@@ -107,7 +107,7 @@ single_mab_simulation <- function(data,
     verbose = verbose
   )
 
-  # Precomputing Important values to be accessed for the simulation
+  # Pre-computing Important values to be accessed for the simulation
   verbose_log(verbose, "Precomputing")
 
   imputation_information <- imputation_prep(
@@ -116,8 +116,6 @@ single_mab_simulation <- function(data,
     data_cols = data_cols,
     perfect_assignment = perfect_assignment
   )
-  print(imputation_information[[1]])
-  print(imputation_information[[2]])
 
   verbose_log(verbose, "Simulating")
 

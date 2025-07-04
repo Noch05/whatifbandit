@@ -8,20 +8,13 @@ run_mab_trial(
   data,
   time_unit,
   period_length = NULL,
+  data_cols,
+  block_cols,
   prior_periods,
   algorithm,
   whole_experiment,
   perfect_assignment,
   conditions,
-  blocking = FALSE,
-  block_cols = NULL,
-  date_col,
-  month_col = NULL,
-  id_col,
-  condition_col,
-  success_col,
-  success_date_col,
-  assignment_date_col,
   verbose,
   control_augment,
   imputation_information
@@ -37,6 +30,18 @@ Acceptable values are "Day", "Week", or "Month".}
 If assignment method is "Date", this refers to the
 length of periods by your specified \code{time_unit} (i.e., if "Day", 10 would be 10 days).
 If assignment methods is "Batch", this refers to the number of people in each batch.}
+
+\item{data_cols}{Named Character vector containing the names of columns in data as strings:
+\itemize{
+\item{id_col:} {Column in data, contains unique id as a key}
+\item{success_col:} {Column in data; Binary successes from original experiment}
+\item{date_col:} {Column in data, contains original date of event/trial; only ncessary when assigning by 'Date'}
+\item{month_col:} {Column in data, contains month of treatment; only necessary when time_unit = 'Month'}
+\item{success_date_col:} {Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE}
+\item{assignment_date_col:} {Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
+Used to simulate imperfect information on part of researchers conducting an adaptive trial}}}
+
+\item{block_cols}{Character Vector of variables to block by.}
 
 \item{prior_periods}{Numeric; number of previous periods to use in the treatment assignment model
 or specify string "All" to use all previous periods.}
@@ -54,17 +59,13 @@ on the dates treatments would have been assigned for each wave.}
 \item{conditions}{Named Character vector containing treatment conditions.
 Control condition, must be named "Control" when 'control_augment' > 0.}
 
-\item{blocking}{Logical; Whether or not to use treatment blocking.}
-
-\item{block_cols}{Character Vector of variables to block by.}
-
 \item{verbose}{Logical; Whether or not to print iteration number. FALSE by default.}
 
 \item{control_augment}{Number \eqn{\in} [0,1]; Proportion of each wave guaranteed to get "Control" treatment.
 Default is 0.}
 
-\item{imputation_information}{List of data.frames containing information required to impute success/failures, and dates
-of success if \verb{Perfect Assignment} is FALSE. Created by \code{\link[=imputation_prep]{imputation_prep()}}.}
+\item{imputation_information}{Object created by \code{\link[=imputation_prep]{imputation_prep()}} containing the conditional means and success dates
+for each treatment to impute from.}
 }
 \value{
 A named list containing:

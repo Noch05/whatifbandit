@@ -28,12 +28,12 @@ assign_treatments <- function(current_data, probs, blocking = NULL,
     if (blocking) {
       blocks <- current_data[, block]
     }
-    clusters <- current_data[, get(rlang::as_name(rlang::enquo(id_col)))]
+    clusters <- current_data[, get(id_col$name)]
   } else {
     if (blocking) {
-      blocks <- dplyr::pull(current_data, block)
+      blocks <- current_data$block[["block"]]
     }
-    clusters <- dplyr::pull(current_data, {{ id_col }})
+    clusters <- current_data[[id_col$name]]
   }
 
 
@@ -60,7 +60,7 @@ assign_treatments <- function(current_data, probs, blocking = NULL,
   if (inherits(current_data, "data.table")) {
     current_data[, mab_condition := new_treatments][
       , impute_req := data.table::fifelse(
-        base::as.character(mab_condition) != base::as.character(get(rlang::as_name(rlang::enquo(condition_col)))),
+        base::as.character(mab_condition) != base::as.character(base::get(condition_col$name)),
         1, 0
       )
     ]
@@ -69,7 +69,7 @@ assign_treatments <- function(current_data, probs, blocking = NULL,
     current_data$mab_condition <- new_treatments
     current_data$impute_req <- base::ifelse(
       base::as.character(current_data$mab_condition) !=
-        base::as.character(current_data[[rlang::as_name(rlang::enquo(condition_col))]]), 1, 0
+        base::as.character(current_data[[condition_col$name]]), 1, 0
     )
 
     return(current_data)

@@ -66,8 +66,8 @@ Control condition, must be named "Control" when 'control_augment' > 0.}
 \item{control_augment}{Number \eqn{\in} [0,1]; Proportion of each wave guaranteed to get "Control" treatment.
 Default is 0.}
 
-\item{imputation_information}{List of data.frames containing information required to impute success/failures, and dates
-of success if \verb{Perfect Assignment} is FALSE. Created by \code{\link[=imputation_prep]{imputation_prep()}}.}
+\item{imputation_information}{Object created by \code{\link[=imputation_prep]{imputation_prep()}} containing the conditional means and success dates
+for each treatment to impute from.}
 }
 \description{
 This function acts as an internal helper to \code{\link[=single_mab_simulation]{single_mab_simulation()}}

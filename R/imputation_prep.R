@@ -2,9 +2,7 @@
 
 #' @name imputation_prep
 #' @description Pre-computes the conditional probabilities of success and dates of success for each distinct
-#' treatment block to impute during [mab_simulation()] for those who get assigned new treatments.
-#'
-#'
+#' treatment block to impute them in [mab_simulation()] for those who get assigned new treatments.
 #'
 #' @inheritParams single_mab_simulation
 

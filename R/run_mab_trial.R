@@ -8,8 +8,8 @@
 #' bandit strategy.
 #'
 #' @inheritParams single_mab_simulation
-#' @param imputation_information List of data.frames containing information required to impute success/failures, and dates
-#' of success if `Perfect Assignment` is FALSE. Created by [imputation_prep()].
+#' @param imputation_information Object created by [imputation_prep()] containing the conditional means and success dates
+#' for each treatment block to impute from.
 #'
 #'
 #' @return  A named list containing:
@@ -25,13 +25,10 @@
 #' @export
 #'
 run_mab_trial <- function(data, time_unit, period_length = NULL,
+                          data_cols, block_cols,
                           prior_periods, algorithm,
                           whole_experiment, perfect_assignment, conditions,
-                          blocking = FALSE, block_cols = NULL,
-                          date_col, month_col = NULL,
-                          id_col, condition_col,
-                          success_col, success_date_col,
-                          assignment_date_col, verbose, control_augment,
+                          verbose, control_augment,
                           imputation_information) {
   periods <- base::max(data$period_number)
 
@@ -59,8 +56,8 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       current_data = current_data,
       prior_data = prior_data,
       perfect_assignment = perfect_assignment,
-      success_date_col = {{ success_date_col }},
-      assignment_date_col = {{ assignment_date_col }},
+      success_date_col = data_cols$success_date_col,
+      assignment_date_col = data_cols$assignment_date_col,
       conditions = conditions
     )
 
@@ -80,16 +77,16 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       probs = bandit[[2]],
       blocking = blocking,
       algorithm = algorithm,
-      id_col = {{ id_col }},
+      id_col = data_cols$id_col,
       conditions = conditions,
-      condition_col = {{ condition_col }},
-      success_col = {{ success_col }}
+      condition_col = data_cols$condition_col,
+      success_col = data_cols$success_col
     )
 
     # Creating block for imputing
     if (blocking) {
       current_data[["impute_block"]] <- do.call(
-        paste, c(current_data[, c("mab_condition", block_cols)], sep = "_")
+        paste, c(current_data[, c("mab_condition", block_cols$name)], sep = "_")
       )
     } else {
       current_data[["impute_block"]] <- current_data$mab_condition

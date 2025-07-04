@@ -32,13 +32,13 @@ get_past_results <- function(current_data, prior_data, perfect_assignment, assig
 get_past_results.tbl_df <- function(current_data, prior_data, perfect_assignment, assignment_date_col = NULL,
                                     success_date_col = NULL, conditions) {
   if (!perfect_assignment) {
-    current_date <- base::max(dplyr::pull(current_data, {{ assignment_date_col }}), na.rm = TRUE)
+    current_date <- base::max(current_data[[assignment_date_col$name]])
 
-    success_date_name <- rlang::as_name(rlang::enquo(success_date_col))
 
     past_results <- prior_data
+
     past_results$known_success <- base::ifelse(
-      current_date >= past_results[[success_date_name]] & !base::is.na(past_results[[success_date_name]]),
+      current_date >= past_results[[success_date_col$name]] & !base::is.na(past_results[[success_date_col$name]]),
       1, 0
     )
   } else {
@@ -81,14 +81,11 @@ get_past_results.data.table <- function(current_data, prior_data,
                                         perfect_assignment, assignment_date_col = NULL,
                                         success_date_col = NULL, conditions) {
   if (!perfect_assignment) {
-    assignment_date_col_name <- rlang::as_name(rlang::enquo(assignment_date_col))
-    success_date_col_name <- rlang::as_name(rlang::enquo(success_date_col))
-
-    current_date <- base::max(current_data[, get(assignment_date_col_name)])
+    current_date <- base::max(current_data[, base::get(assignment_date_col$name)])
 
     prior_data[, known_success := data.table::fifelse(
-      current_date >= get(success_date_col_name) &
-        !is.na(get(success_date_col_name)), 1, 0
+      current_date >= base::get(success_date_col$name) &
+        !is.na(get(success_date_col$name)), 1, 0
     )]
   } else if (perfect_assignment) {
     prior_data[, known_success := mab_success]
@@ -128,8 +125,8 @@ get_past_results.data.frame <- function(current_data, prior_data,
     current_data = tibble::as_tibble(current_data),
     prior_data = tibble::as_tibble(prior_data),
     perfect_assignment = perfect_assignment,
-    success_date_col = {{ success_date_col }},
-    assignment_date_col = {{ assignment_date_col }},
+    success_date_col = success_date_col,
+    assignment_date_col = success_date_col,
     conditions = conditions
   )
   return(past_results)
