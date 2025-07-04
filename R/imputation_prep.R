@@ -9,7 +9,6 @@
 #'
 #'
 #' @inheritParams single_mab_simulation
-#' @inheritParams assign_treatments
 
 #'
 #' @returns A named list containing:
@@ -22,21 +21,20 @@
 
 
 
-imputation_prep <- function(data, whole_experiment, success_col, perfect_assignment, success_date_col = NULL,
-                            condition_col = NULL) {
+imputation_prep <- function(data, whole_experiment, perfect_assignment, data_cols) {
   # Choosing Whether to use all the data from the experiment or only up to the current treatment period
 
   if (whole_experiment) {
-    imputation_information <- data |>
+    original_summary <- data |>
       dplyr::group_by(treatment_block) |>
-      dplyr::summarize(success_rate = base::mean({{ success_col }}, na.rm = TRUE), .groups = "drop") |>
+      dplyr::summarize(success_rate = base::mean(!!data_cols$success_col$sym, na.rm = TRUE), .groups = "drop") |>
       dplyr::mutate(failure_rate = 1 - success_rate)
   } else if (!whole_experiment) {
-    imputation_information <- data |>
+    original_summary <- data |>
       dplyr::group_by(period_number, treatment_block) |>
       dplyr::summarize(
         count = dplyr::n(),
-        n_success = base::sum({{ success_col }}), .groups = "drop",
+        n_success = base::sum(!!data_cols$success_col$sym), .groups = "drop",
       ) |>
       dplyr::arrange(period_number, treatment_block) |>
       dplyr::group_by(treatment_block) |>
@@ -54,16 +52,17 @@ imputation_prep <- function(data, whole_experiment, success_col, perfect_assignm
   } else {
     rlang::abort("Specify Logical for `whole_experiment`")
   }
+
   if (!perfect_assignment) {
-    dates <- data |>
-      dplyr::group_by({{ condition_col }}, period_number) |>
-      dplyr::summarize(mean_date = base::mean({{ success_date_col }}, na.rm = TRUE), .groups = "drop") |>
-      tidyr::pivot_wider(names_from = rlang::as_name(rlang::enquo(condition_col)), values_from = "mean_date")
+    dates_summary <- data |>
+      dplyr::group_by(!!data_cols$condition_col$sym, period_number) |>
+      dplyr::summarize(mean_date = base::mean(!!data_cols$success_date_col$sym, na.rm = TRUE), .groups = "drop") |>
+      tidyr::pivot_wider(names_from = data_cols$condition_col$name, values_from = "mean_date")
   } else {
-    dates <- NULL
+    dates_summary <- NULL
   }
 
-  imputation_information <- list(imputation_information, dates)
+  imputation_information <- list(original_summary, dates_summary)
 
   return(imputation_information)
 }

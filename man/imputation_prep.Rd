@@ -4,14 +4,7 @@
 \alias{imputation_prep}
 \title{Prepping Data For Outcome Imputation}
 \usage{
-imputation_prep(
-  data,
-  whole_experiment,
-  success_col,
-  perfect_assignment,
-  success_date_col = NULL,
-  condition_col = NULL
-)
+imputation_prep(data, whole_experiment, perfect_assignment, data_cols)
 }
 \arguments{
 \item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
@@ -23,6 +16,16 @@ If FALSE, uses only data available up to the current period.}
 (i.e., all outcomes are observed regardless of the date).
 If FALSE, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.}
+
+\item{data_cols}{Named Character vector containing the names of columns in data as strings:
+\itemize{
+\item{id_col:} {Column in data, contains unique id as a key}
+\item{success_col:} {Column in data; Binary successes from original experiment}
+\item{date_col:} {Column in data, contains original date of event/trial; only ncessary when assigning by 'Date'}
+\item{month_col:} {Column in data, contains month of treatment; only necessary when time_unit = 'Month'}
+\item{success_date_col:} {Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE}
+\item{assignment_date_col:} {Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
+Used to simulate imperfect information on part of researchers conducting an adaptive trial}}}
 }
 \value{
 A named list containing:

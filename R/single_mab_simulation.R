@@ -73,6 +73,7 @@ single_mab_simulation <- function(data,
                                   verbose = FALSE) {
   # Reformatting Inputs into names and symbols
   data_name <- deparse(substitute(data))
+
   data_cols <- purrr::map(data_cols, ~ list(
     name = .x, symbol = rlang::sym(.x)
   )) |>
@@ -93,7 +94,7 @@ single_mab_simulation <- function(data,
     control_augment = control_augment
   )
 
-
+  # Preparing Data to be simulated
   data <- mab_prepare(
     data = data,
     data_cols = data_cols,
@@ -106,18 +107,21 @@ single_mab_simulation <- function(data,
     verbose = verbose
   )
 
-
+  # Precomputing Important values to be accessed for the simulation
   verbose_log(verbose, "Precomputing")
 
   imputation_information <- imputation_prep(
     data = data,
     whole_experiment = whole_experiment,
-    success_col = {{ success_col }},
-    success_date_col = {{ success_date_col }},
-    perfect_assignment = perfect_assignment,
-    condition_col = {{ condition_col }}
+    data_cols = data_cols,
+    perfect_assignment = perfect_assignment
   )
+  print(imputation_information[[1]])
+  print(imputation_information[[2]])
 
+  verbose_log(verbose, "Simulating")
+
+  # Simulating the MAB Trial
   results <- mab_simulation(
     data = data,
     time_unit = time_unit,

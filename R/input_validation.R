@@ -160,7 +160,7 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, data_co
     }
   }
   if (!perfect_assignment) {
-    required_cols <- c(required_cols, "success_date", "assignment_date_col")
+    required_cols <- c(required_cols, "success_date_col", "assignment_date_col")
   }
 
   # Check for missing required columns
