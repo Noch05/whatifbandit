@@ -98,7 +98,7 @@ multiple_mab_simulation <- function(data,
   .options = furrr::furrr_options(
     seed = TRUE,
     packages = c(
-      "whatifbandit", "dplyr", "rlang", "tidyselect",
+      "whatifbandit", "dplyr", "rlang",
       "tidyr", "bandit", "tibble", "lubridate",
       "purrr", "furrr", "randomizr", "data.table"
     )

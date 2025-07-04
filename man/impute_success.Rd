@@ -16,12 +16,18 @@ impute_success(
 )
 }
 \arguments{
+\item{id_col}{Column in data, contains unique id as a key}
+
+\item{success_col}{Column in data; Binary successes from original experiment}
+
 \item{prior_data}{\code{data} object from previous periods. Joined together at the end for the next iteration of the simulation.}
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
 If FALSE, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.}
+
+\item{success_date_col}{Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE}
 
 \item{data}{Updated \code{data} object containing new treatments from \code{\link[=assign_treatments]{assign_treatments()}} to impute outcomes for}
 }

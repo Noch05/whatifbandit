@@ -8,9 +8,9 @@
 
 #'
 #' @returns A named list containing:
-#' \item{original_summary:}{Object the same type as `data`,
+#' \item{original_summary: }{Object the same type as `data`,
 #' which contains probability of success for each treatment block for each treatment period}
-#' \item{dates_summary:}{Average success date for each treatment block at each treatment period}
+#' \item{dates_summary: }{Average success date for each treatment block at each treatment period}
 #'
 #' @seealso
 #' *[impute_success()]

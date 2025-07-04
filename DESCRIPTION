@@ -24,5 +24,4 @@ Imports:
     rlang,
     tibble,
     tidyr,
-    tidyselect,
     data.table

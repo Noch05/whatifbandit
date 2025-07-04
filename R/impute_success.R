@@ -7,6 +7,7 @@
 #' @inheritParams run_mab_trial
 #' @param prior_data `data` object from previous periods. Joined together at the end for the next iteration of the simulation.
 #' @inheritParams single_mab_simulation
+#' @inheritParams cols
 #'
 #' @seealso
 #'* [run_mab_trial()]
