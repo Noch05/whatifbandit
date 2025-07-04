@@ -40,6 +40,9 @@ check_args <- function(data,
   if (!algorithm %in% c("Thompson", "UCB1")) {
     rlang::abort("'algorithm' must be Thompson or UCB1.")
   }
+  character_args <- list(
+    conditions = conditions,
+  )
 
   # Checking Logical values
   logical_args <- base::list(
@@ -64,142 +67,114 @@ check_args <- function(data,
     rlang::abort("Condtions vector must have a at least one condition named 'Control'
     when control augmentation is used")
   }
-  if ((period_length %% 1 != 0 || period_length > 0) && !is.null(period_length)) {
+  if ((period_length %% 1 != 0 || period_length < 0) && !is.null(period_length)) {
     rlang::abort("`period_length` must be a positive integer")
   }
-
-
+  if ((prior_periods %% 1 != 0 || prior_periods < 0 || prior_periods != "All") && !is.null(period_length)) {
+    rlang::abort("`prior_periods` must be a positive integer or 'All'")
+  }
 
   # Checking Column Proper Columns are Provided
-  all_cols <- c("id", "success", "date", "month", "success_date", "assignment_date")
-  required_cols <- all_cols[1:2]
-  
-  if(assignment_method == "Date") {
-    if(time_unit == "Month") {
-      required_cols <- c(required_cols, all_cols[3:4])
-    }
-    else {
-      required_cols <- c(required_cols, all_cols[3])
-    }
-  }
-  if (!pefect_assignment) {
-    required_cols <- c(required_cols, all_cols[5:6])
-  }
-  non_required_cols <- base::setdiff(all_cols, required_cols)
-  
-  
 
+  check_cols(
+    assignment_method = assignment_method, time_unit = time_unit,
+    perfect_assignment = perfect_assignment,
+    col_names = col_names
+  )
 
-    # Checking Column Existence
+  unique_ids <- length(unique(data[[col_names$id]]))
 
-    cols <- base::list(
-      id_col = rlang::enquo(id_col),
-      date_col = rlang::enquo(date_col),
-      condition_col = rlang::enquo(condition_col),
-      success_col = rlang::enquo(success_col)
-    )
-  }
-
-  for (i in base::seq_along(cols)) {
-    if (!check_col(data, !!cols[[i]])) {
-      rlang::abort(sprintf("`%s` not found in data.frame.", base::names(cols)[[i]]))
-    }
-  }
-
-  # Additional Compatibility checks
-  if (!perfect_assignment && !check_col(data, col = {{ success_date_col }})) {
-    rlang::abort("`success_date_col` must be provided when `perfect_assigment` is FALSE.")
-  }
-
-  if (blocking && base::is.null(block_cols)) {
-    rlang::abort("`block_cols` must be provided when blocking is TRUE.")
-  }
-
-  if (!perfect_assignment && !check_col(data, col = {{ assignment_date_col }})) {
-    rlang::abort("`assignment_date_col` must be provided when `perfect_assigment` is FALSE.")
-  }
-
-  # Assignment Method Checks
-  if (assignment_method == "Date" & !check_col(data, col = {{ date_col }})) {
-    rlang::abort("`date_col` must be provided when assignment_method is \"Date\"")
-  }
-
-  if (assignment_method == "Date" && !check_col(data, col = {{ date_col }})) {
-    rlang::abort("`date_col` must be provided when assignment_method is \"Date\"")
-  }
-
-  if (assignment_method %in% c("Date", "Batch") && (period_length < 0 || is.null(period_length) ||
-    period_length %% 1 != 0)) {
-    rlang::abort("`period_length` must be a non-null positive integer")
-  }
-
-  if (time_unit == "Month" && !(check_col(data, col = {{ month_col }}))) {
-    rlang::abort("`month_col` must be provided when `time_unit` is 'Month'")
-  }
-
-
-  distinct_data <- data |>
-    dplyr::distinct({{ id_col }})
-
-  if (nrow(data) != nrow(distinct_data)) {
-    rlang::abort(sprintf(
-      "`%s`` must be contain a unique ID for each observation. Please provide a valid column.",
-      rlang::as_name(rlang::enquo(id_col))
-    ))
-  }
-  if (!"Control" %in% base::names(conditions) || base::is.null(conditions) ||
-    !base::is.character(conditions)) {
-    rlang::abort("`conditions` must be a named character vector with the control condition named `Control`.
-         Please provide a valid vector.")
-  }
-
-
-  # Non Critical Messages -------------------------------------------------
-
-  if (verbose) {
-    if (assignment_method == "Date" && time_unit != "Month" && (check_col(data, col = {{ month_col }}))) {
-      base::message("`time_unit` is not 'Month', `month_col` will be ignored.")
-    }
-    if (assignment_method %in% c("Batch", "Individual") && check_col(data, {{ date_col }})) {
-      base::message("`assignment_method` is not 'Date', `date_col`, will be ignored.")
-    }
-
-    if (assignment_method == "Individual" && !base::is.null(period_length)) {
-      base::message("Individual assignment specified, 'period_length' will be ignored.")
-    }
-
-    if (perfect_assignment && (check_col(data, col = {{ success_date_col }}) ||
-      check_col(data, col = {{ assignment_date_col }}))) {
-      base::message("'perfect_assignment' is TRUE; success_date and assignment_date cols will be ignored.")
-    }
-
-    if (!blocking && !base::is.null(block_cols)) {
-      base::message("blocking is FALSE. `block_cols` will be ignored.")
-    }
+  if (unique_ids != nrow(data)) {
+    rlang::abort(paste(col_names$id, "is not a unique identifier, a unique id for each observation is required"))
   }
 }
 
 
-#' @title Checking Existence of a Column in data.frame
-#' @name check_col
+#--------------------------------------------------------------------------------------------------------------
+#' @title Checking existence and declaration of columns
+#' @name check_cols
 #'
 #'
-#' @description Helper function. Checks whether the specified column
-#' exists in the data provided.
+#' @description Takes the user's settings as input, and checks the required columns against
+#' which ones are provided, and throws in error if the user did not provide a required column, or
+#' the column they provide is not present in their data.
 #'
-#' @param data input data.frame
-#' @param col column to check if exists
+#' @inheritParams single_mab_simulation
+#' @inheritParams cols
 #'
-#' @returns TRUE or FALSE based on the existence of the column in the data.
+#' @returns Throws an error if columns are not properly declared or in data
 #'
 #' @seealso
 #' *[single_mab_simulation()]
 #' *[check_args()]
 #'
 #'
-check_col <- function(data, col) {
-  return(name %in% base::names(data))
+check_cols <- function(assignment_method, time_unit, perfect_assignment, col_names, data) {
+  # All possible columns
+  all_cols <- c("id", "success", "date", "month", "success_date", "assignment_date")
+
+  # Reason each column might be required
+  req_reasons <- list(
+    id = "it is always required",
+    success = "it is always required",
+    date = "assignment_method is 'Date'",
+    month = "time_unit is 'Month'",
+    success_date = "perfect_assignment is FALSE",
+    assignment_date = "perfect_assignment is FALSE"
+  )
+
+  # Determine required columns based on settings
+  required_cols <- c("id", "success")
+
+  if (assignment_method == "Date") {
+    required_cols <- c(required_cols, "date")
+    if (time_unit == "Month") {
+      required_cols <- c(required_cols, "month")
+    }
+  }
+  if (!perfect_assignment) {
+    required_cols <- c(required_cols, "success_date", "assignment_date")
+  }
+
+  # Check for missing required columns
+  for (col in required_cols) {
+    missing_input <- !col %in% col_names$data
+    missing_data <- !col %in% names(data)
+
+    if (missing_input || missing_data) {
+      problems <- c(
+        if (missing_input) "not declared in `data_cols`",
+        if (missing_data) "not found in provided `data.frame`"
+      )
+      msg <- paste(
+        sprintf(
+          "`%s` is required because %s, but it is %s.",
+          col,
+          req_reasons[[col]],
+          paste(problems, collapse = " and ")
+        )
+      )
+      rlang::abort(msg)
+    }
+  }
+
+  # Now handle non-required columns that are present but unnecessary
+  non_required_cols <- setdiff(all_cols, required_cols)
+  non_req_reasons <- list(
+    date = "assignment_method is not 'Date'",
+    month = "time_unit is not 'Month'",
+    success_date = "perfect_assignment is TRUE",
+    assignment_date = "perfect_assignment is TRUE"
+  )
+
+  for (col in non_required_cols) {
+    if (col %in% col_names$data) {
+      reason <- non_req_reasons[[col]]
+      msg <- sprintf(
+        "`%s` was provided, but is not required because %s. It will be ignored.",
+        col, reason
+      )
+      message(msg)
+    }
+  }
 }
-
-
-#'
