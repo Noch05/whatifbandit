@@ -91,6 +91,8 @@ plot_arms <- function(x, object, ...) {
 #' Plot Summary of AIPW estimates and variances for Each Treatment Arm
 #' @returns ggplot2 object that can be added to with `+`
 plot_estimates <- function(x, estimator, ...) {
+  if (base::is.null(estimator)) rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")
+
   estimator_arg <- switch(estimator,
     "Both" = c("Sample", "AIPW"),
     "AIPW" = c("AIPW"),
