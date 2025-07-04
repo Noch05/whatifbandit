@@ -9,8 +9,8 @@
 #'
 #'
 #' @param data A data frame, tibble or data.table that provides the input data for the trial.
-#' @param time_unit A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'
-#'                  Acceptable values are "Day", "Week", or "Month".
+#' @param time_unit A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'.
+#'  Acceptable values are "Day", "Week", or "Month".
 #' @param perfect_assignment Logical; if TRUE, assumes perfect information for treatment assignment
 #'                           (i.e., all outcomes are observed regardless of the date).
 #'                           If FALSE, hides outcomes not yet theoretically observed, based
@@ -26,7 +26,7 @@
 #'                         If FALSE, uses only data available up to the current period.
 #' @param conditions Named Character vector containing treatment conditions.
 #' Control condition, must be named "Control" when 'control_augment' > 0.
-#' @param data_cols Named List containing the names of columns in data as strings:
+#' @param data_cols Named Character vector containing the names of columns in data as strings:
 #' \itemize{
 #' \item{id:} {Column in data, contains unique id as a key}
 #' \item{success:} {Column in data; Binary successes from original experiment}
@@ -71,9 +71,14 @@ single_mab_simulation <- function(data,
                                   period_length = NULL,
                                   block_cols = NULL,
                                   verbose = FALSE) {
+  # Reformatting Inputs into names and symbols
   data_name <- deparse(substitute(data))
-  col_names <- list(data = data_cols, block = block_cols)
-  col_syms <- list(data = rlang::syms(data_cols), block = rlang::syms(block_cols))
+  data_cols <- purrr::map(data_cols, ~ list(
+    name = .x, symbol = rlang::sym(.x)
+  )) |>
+    stats::setNames(names(data_cols))
+  block_cols <- list(names = block_cols, symbol = rlang::sym(block_cols))
+
   # Input Validation
 
 
@@ -82,7 +87,7 @@ single_mab_simulation <- function(data,
     perfect_assignment = perfect_assignment,
     algorithm = algorithm, period_length = period_length,
     whole_experiment = whole_experiment, prior_periods = prior_periods,
-    col_names = col_names, conditions = conditions, blocking = blocking,
+    data_cols = data_cols, block_cols = block_cols, conditions = conditions, blocking = blocking,
     assignment_method = assignment_method, verbose = verbose,
     control_augment = control_augment
   )
@@ -90,20 +95,16 @@ single_mab_simulation <- function(data,
 
   data <- mab_prepare(
     data = data,
-    date_col = {{ date_col }},
+    col_names = col_names,
+    col_syms = col_syms,
     time_unit = time_unit,
     period_length = period_length,
-    success_col = {{ success_col }},
-    condition_col = {{ condition_col }},
-    success_date_col = {{ success_date_col }},
-    month_col = {{ month_col }},
     perfect_assignment = perfect_assignment,
     assignment_method = assignment_method,
     blocking = blocking,
-    block_cols = block_cols,
     verbose = verbose
   ) |>
-    dplyr::arrange(period_number, {{ id_col }})
+    dplyr::arrange(period_number, !!col_syms$data$id)
 
   verbose_log(verbose, "Precomputing")
 
@@ -151,6 +152,4 @@ single_mab_simulation <- function(data,
 #' @param month  Column in data, contains month of treatment; only necessary when time_unit = 'Month'
 #' @param success_date  Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE
 #' @param assignment_date  Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
-#' @param col_names Names of the columns as strings passed from user's input into [sinlge_mab_simulation()] or [multiple_mab_simulation()]
-#' @param col_syms Names of columns as symbols passed from user's input into [sinlge_mab_simulation()] or [multiple_mab_simulation()]
 NULL

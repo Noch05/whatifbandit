@@ -1,12 +1,13 @@
-#' @title Prepare Data for Multi Arm Bandit Trials
+#' @title Prepare Data for Multi-Arm-Bandit Trials
 #' @name mab_prepare
 #' @inheritParams single_mab_simulation
+#' @inheritParams cols
 #'
-#' @description This function acts as an internal helper to [single_mab_simulation()]
-#' and [multiple_mab_simulation()] by transforming user input data
-#' into data that can be used by [mab_simulation()].
+#' @description Transforms user-provided input data for use with [mab_simulation()]. Adds
+#' additional columns to ensure compatibility.
 #'
-#' @returns Prepared data.frame containing the columns required by [mab_simulation()]
+#' @returns A prepared data object of the same class as `data`,
+#'  containing all the columns required by [mab_simulation()].
 #'
 #'
 #' @seealso
@@ -15,22 +16,23 @@
 #'* [mab_simulation()]
 #'* [create_cutoff()]
 #'* [create_new_cols()]
-#' @export
 
-mab_prepare <- function(data, date_col, time_unit,
-                        period_length, success_col,
-                        condition_col,
-                        success_date_col = NULL,
-                        month_col,
-                        perfect_assignment, blocking,
-                        block_cols, assignment_method, verbose) {
+mab_prepare <- function(data = data,
+                        col_names,
+                        col_syms,
+                        time_unit,
+                        period_length,
+                        perfect_assignment,
+                        assignment_method,
+                        blocking,
+                        verbose) {
   verbose_log(verbose, "Preparing Data")
 
   data <- create_cutoff(
     data = data,
-    date_col = {{ date_col }},
+    col_names = col_names,
+    col_syms = col_syms,
     period_length = period_length,
-    month_col = {{ month_col }},
     assignment_method = assignment_method,
     time_unit = time_unit
   )
@@ -45,15 +47,6 @@ mab_prepare <- function(data, date_col, time_unit,
     condition_col = {{ condition_col }}
   )
 
-  if (inherits(data, "data.table")) {
-    data.table::setattr(data, "class", c("data.table", "data.frame"))
-  } else {
-    base::class(data) <- setdiff(class(data), c(
-      "Day", "Week",
-      "Month", "Individual",
-      "Batch"
-    ))
-  }
 
   return(data)
 }

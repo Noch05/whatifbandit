@@ -8,7 +8,7 @@ check_cols(
   assignment_method,
   time_unit,
   perfect_assignment,
-  col_names,
+  data_cols,
   data,
   verbose
 )
@@ -16,7 +16,7 @@ check_cols(
 \arguments{
 \item{assignment_method}{String; "Date" or "Batch" to define the assignment into treatment waves.}
 
-\item{time_unit}{A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'
+\item{time_unit}{A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'.
 Acceptable values are "Day", "Week", or "Month".}
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
@@ -24,7 +24,15 @@ Acceptable values are "Day", "Week", or "Month".}
 If FALSE, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.}
 
-\item{col_names}{Names of the columns as strings passed from user's input into \code{\link[=sinlge_mab_simulation]{sinlge_mab_simulation()}} or \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}}
+\item{data_cols}{Named Character vector containing the names of columns in data as strings:
+\itemize{
+\item{id:} {Column in data, contains unique id as a key}
+\item{success:} {Column in data; Binary successes from original experiment}
+\item{date:} {Column in data, contains original date of event/trial; only ncessary when assigning by 'Date'}
+\item{month:} {Column in data, contains month of treatment; only necessary when time_unit = 'Month'}
+\item{success_date:} {Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE}
+\item{assignment_date:} {Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
+Used to simulate imperfect information on part of researchers conducting an adaptive trial}}}
 
 \item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
 

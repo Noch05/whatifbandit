@@ -44,7 +44,7 @@ If FALSE, uses only data available up to the current period.}
 
 \item{blocking}{Logical; Whether or not to use treatment blocking.}
 
-\item{data_cols}{Named List containing the names of columns in data as strings:
+\item{data_cols}{Named Character vector containing the names of columns in data as strings:
 \itemize{
 \item{id:} {Column in data, contains unique id as a key}
 \item{success:} {Column in data; Binary successes from original experiment}
@@ -57,7 +57,7 @@ Used to simulate imperfect information on part of researchers conducting an adap
 \item{control_augment}{Number \eqn{\in} [0,1]; Proportion of each wave guaranteed to get "Control" treatment.
 Default is 0.}
 
-\item{time_unit}{A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'
+\item{time_unit}{A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'.
 Acceptable values are "Day", "Week", or "Month".}
 
 \item{period_length}{Numeric; length of each treatment period.

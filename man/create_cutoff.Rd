@@ -6,8 +6,8 @@
 \usage{
 create_cutoff(
   data,
-  date_col = NULL,
-  month_col = NULL,
+  col_names,
+  col_syms,
   period_length = NULL,
   assignment_method,
   time_unit
@@ -23,15 +23,16 @@ If assignment methods is "Batch", this refers to the number of people in each ba
 
 \item{assignment_method}{String; "Date" or "Batch" to define the assignment into treatment waves.}
 
-\item{time_unit}{A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'
+\item{time_unit}{A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'.
 Acceptable values are "Day", "Week", or "Month".}
 }
 \value{
-data.frame containing the original data with 1 additional column.
-\item{period_number}{Integer identifying the treatment wave for each observation}
+Updated \code{data} object with the new \code{period_number} column. \code{period_number} is an integer
+representing an observation's new assignment period.
 }
 \description{
-Used during \code{\link[=mab_prepare]{mab_prepare()}} to assign treatment periods
+Used during \code{\link[=mab_prepare]{mab_prepare()}} to assign each observation a new treatment assignment period, based
+on user-supplied speficiations;
 }
 \seealso{
 *\code{\link[=mab_prepare]{mab_prepare()}}

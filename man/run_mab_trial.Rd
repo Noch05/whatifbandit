@@ -30,7 +30,7 @@ run_mab_trial(
 \arguments{
 \item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
 
-\item{time_unit}{A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'
+\item{time_unit}{A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'.
 Acceptable values are "Day", "Week", or "Month".}
 
 \item{period_length}{Numeric; length of each treatment period.

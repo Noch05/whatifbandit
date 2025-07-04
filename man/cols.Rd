@@ -15,10 +15,6 @@
 \item{success_date}{Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE}
 
 \item{assignment_date}{Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.}
-
-\item{col_names}{Names of the columns as strings passed from user's input into \code{\link[=sinlge_mab_simulation]{sinlge_mab_simulation()}} or \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}}
-
-\item{col_syms}{Names of columns as symbols passed from user's input into \code{\link[=sinlge_mab_simulation]{sinlge_mab_simulation()}} or \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}}
 }
 \description{
 Column arguments shared across functions

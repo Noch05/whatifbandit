@@ -1,15 +1,16 @@
 #' Create Treatment Wave Cutoffs
 #' @name create_cutoff
-#' @description Used during [mab_prepare()] to assign treatment periods
-#'
+#' @description Used during [mab_prepare()] to assign each observation a new treatment assignment period, based
+#' on user-supplied speficiations;
 #' @inheritParams single_mab_simulation
+#' @inheritParams cols
 #'
-#' @return data.frame containing the original data with 1 additional column.
-#' \item{period_number}{Integer identifying the treatment wave for each observation}
+#' @return Updated `data` object with the new `period_number` column. `period_number` is an integer
+#' representing an observation's new assignment period.
 #' @seealso
 #' *[mab_prepare()]
 #------------------------------------------------------------------------------------------
-create_cutoff <- function(data, date_col = NULL, month_col = NULL, period_length = NULL,
+create_cutoff <- function(data, col_names, col_syms, period_length = NULL,
                           assignment_method, time_unit) {
   data <- switch(assignment_method,
     "Individual" = create_cutoff.Individual(data = data),
@@ -17,18 +18,18 @@ create_cutoff <- function(data, date_col = NULL, month_col = NULL, period_length
     "Date" = switch(time_unit,
       "Day" = create_cutoff.Day(
         data = data,
-        date_col = {{ date_col }},
+        date = {{ date_col }},
         period_length = period_length
       ),
       "Month" = create_cutoff.Month(
         data = data,
-        month_col = {{ month_col }},
-        date_col = {{ date_col }},
+        month = {{ month_col }},
+        date = {{ date_col }},
         period_length = period_length
       ),
       "Week" = create_cutoff.Week(
         data = data,
-        date_col = {{ date_col }},
+        date = {{ date_col }},
         period_length = period_length
       ),
       rlang::abort("Invalid Time Unit: Valid Units are `Week`, `Month`, and `Day`")

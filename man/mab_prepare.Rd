@@ -2,28 +2,24 @@
 % Please edit documentation in R/mab_prepare.R
 \name{mab_prepare}
 \alias{mab_prepare}
-\title{Prepare Data for Multi Arm Bandit Trials}
+\title{Prepare Data for Multi-Arm-Bandit Trials}
 \usage{
 mab_prepare(
-  data,
-  date_col,
+  data = data,
+  col_names,
+  col_syms,
   time_unit,
   period_length,
-  success_col,
-  condition_col,
-  success_date_col = NULL,
-  month_col,
   perfect_assignment,
-  blocking,
-  block_cols,
   assignment_method,
+  blocking,
   verbose
 )
 }
 \arguments{
 \item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
 
-\item{time_unit}{A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'
+\item{time_unit}{A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'.
 Acceptable values are "Day", "Week", or "Month".}
 
 \item{period_length}{Numeric; length of each treatment period.
@@ -36,21 +32,19 @@ If assignment methods is "Batch", this refers to the number of people in each ba
 If FALSE, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.}
 
-\item{blocking}{Logical; Whether or not to use treatment blocking.}
-
-\item{block_cols}{Character Vector of variables to block by.}
-
 \item{assignment_method}{String; "Date" or "Batch" to define the assignment into treatment waves.}
+
+\item{blocking}{Logical; Whether or not to use treatment blocking.}
 
 \item{verbose}{Logical; Whether or not to print iteration number. FALSE by default.}
 }
 \value{
-Prepared data.frame containing the columns required by \code{\link[=mab_simulation]{mab_simulation()}}
+A prepared data object of the same class as \code{data},
+containing all the columns required by \code{\link[=mab_simulation]{mab_simulation()}}.
 }
 \description{
-This function acts as an internal helper to \code{\link[=single_mab_simulation]{single_mab_simulation()}}
-and \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}} by transforming user input data
-into data that can be used by \code{\link[=mab_simulation]{mab_simulation()}}.
+Transforms user-provided input data for use with \code{\link[=mab_simulation]{mab_simulation()}}. Adds
+additional columns to ensure compatibility.
 }
 \seealso{
 \itemize{

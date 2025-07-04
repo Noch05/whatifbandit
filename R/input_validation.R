@@ -28,7 +28,8 @@ check_args <- function(data,
                        perfect_assignment,
                        whole_experiment,
                        blocking,
-                       col_names,
+                       data_cols,
+                       block_cols,
                        time_unit,
                        period_length,
                        control_augment,
@@ -89,24 +90,26 @@ check_args <- function(data,
     data = data,
     assignment_method = assignment_method, time_unit = time_unit,
     perfect_assignment = perfect_assignment,
-    col_names = col_names, verbose = verbose
+    data_cols = data_cols, verbose = verbose
   )
   if (blocking) {
-    if (is.null(col_names$block)) {
+    if (is.null(block_cols)) {
       rlang::abort("block_cols must be provided when blocking = TRUE.")
     } else {
-      for (col in col_names$block) {
-        if (!col %in% names(data)) {
-          rlang::abort(sprintf("`%s is not in the data, but was chosen as a block.", col))
+      for (i in base::seq_along(block_cols$name)) {
+        if (!block_cols$name[[i]] %in% names(data)) {
+          rlang::abort(sprintf("`%s is not in the data, but was chosen as a block.", block_cols$name[[i]]))
         }
       }
     }
   }
-  if (!blocking && !is.null(col_names$block) && verbose) {
-    message("Blocking is FALsE, arguments passed to `block_cols` will be ignored.")
+  if (!blocking && !is.null(block_cols) && verbose) {
+    rlang::warn(c(
+      "i" = "Blocking is FALsE, arguments passed to `block_cols` will be ignored."
+    ))
   }
 
-  unique_ids <- length(unique(data[[col_names$data$id]]))
+  unique_ids <- length(unique(data[[data_cols$id$name]]))
 
   if (unique_ids != nrow(data)) {
     rlang::abort(paste(col_names$data$id, "is not a unique identifier, a unique id for each observation is required"))
@@ -133,7 +136,7 @@ check_args <- function(data,
 #' *[check_args()]
 #'
 #'
-check_cols <- function(assignment_method, time_unit, perfect_assignment, col_names, data, verbose) {
+check_cols <- function(assignment_method, time_unit, perfect_assignment, data_cols, data, verbose) {
   # All possible columns
   all_cols <- c("id", "success", "date", "month", "success_date", "assignment_date")
 
@@ -161,19 +164,19 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, col_nam
   }
 
   # Check for missing required columns
-  for (col in required_cols) {
-    missing_input <- !col %in% names(col_names$data)
+  for (i in base::seq_along(required_cols)) {
+    missing_input <- !required_cols[[i]] %in% names(data_cols)
 
     if (missing_input) {
-      rlang::abort(c(sprintf("Required column `%s` is not declared in `data_cols`.", col),
-        "x" = paste0("reason: ", req_reasons[[col]])
+      rlang::abort(c(sprintf("Required column `%s` is not declared in `data_cols`.", required_cols[[i]]),
+        "x" = paste0("reason: ", req_reasons[[required_cols[[i]]]])
       ))
     }
-    missing_data <- !col_names$data[[col]] %in% names(data)
+    missing_data <- !data_cols[[required_cols[[i]]]]$name %in% names(data)
 
     if (missing_data) {
-      rlang::abort(c(sprintf("Required column `%s` is not found in provided `data`.", col),
-        "x" = paste0("reason: ", req_reasons[[col]])
+      rlang::abort(c(sprintf("Required column `%s` is not found in provided `data`.", required_cols[[i]]),
+        "x" = paste0("reason: ", req_reasons[[required_cols[[i]]]])
       ))
     }
   }
@@ -189,12 +192,12 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, col_nam
       assignment_date = "perfect_assignment is TRUE"
     )
 
-    for (col in non_required_cols) {
-      if (col %in% names(col_names$data)) {
+    for (i in base::seq_along(non_required_cols)) {
+      if (non_required_cols[[i]] %in% names(data_cols)) {
         rlang::warn(c(
           "i" = sprintf(
             "`%s` is not required because %s. It will be ignored.",
-            col, non_req_reasons[[col]]
+            non_required_cols[[i]], non_req_reasons[[non_required_cols[[i]]]]
           )
         ))
       }
