@@ -138,29 +138,29 @@ check_args <- function(data,
 #'
 check_cols <- function(assignment_method, time_unit, perfect_assignment, data_cols, data, verbose) {
   # All possible columns
-  all_cols <- c("id", "success", "date", "month", "success_date", "assignment_date")
+  all_cols <- c("id_col", "success_col", "date_col", "month_col", "success_date_col", "assignment_date_col")
 
   # Reason each column might be required
   req_reasons <- list(
-    id = "it is always required",
-    success = "it is always required",
-    date = "assignment_method is 'Date'",
-    month = "time_unit is 'Month'",
-    success_date = "perfect_assignment is FALSE",
-    assignment_date = "perfect_assignment is FALSE"
+    id_col = "it is always required",
+    success_col = "it is always required",
+    date_col = "assignment_method is 'Date'",
+    month_col = "time_unit is 'Month'",
+    success_date_col = "perfect_assignment is FALSE",
+    assignment_date_col = "perfect_assignment is FALSE"
   )
 
   # Determine required columns based on settings
-  required_cols <- c("id", "success")
+  required_cols <- c("id_col", "success_col")
 
   if (assignment_method == "Date") {
-    required_cols <- c(required_cols, "date")
+    required_cols <- c(required_cols, "date_col")
     if (time_unit == "Month") {
-      required_cols <- c(required_cols, "month")
+      required_cols <- c(required_cols, "month_col")
     }
   }
   if (!perfect_assignment) {
-    required_cols <- c(required_cols, "success_date", "assignment_date")
+    required_cols <- c(required_cols, "success_date", "assignment_date_col")
   }
 
   # Check for missing required columns
@@ -186,10 +186,10 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, data_co
   if (verbose) {
     non_required_cols <- setdiff(all_cols, required_cols)
     non_req_reasons <- list(
-      date = "assignment_method is not 'Date'",
-      month = "time_unit is not 'Month'",
-      success_date = "perfect_assignment is TRUE",
-      assignment_date = "perfect_assignment is TRUE"
+      date_col = "assignment_method is not 'Date'",
+      month_col = "time_unit is not 'Month'",
+      success_date_col = "perfect_assignment is TRUE",
+      assignment_date_col = "perfect_assignment is TRUE"
     )
 
     for (i in base::seq_along(non_required_cols)) {
