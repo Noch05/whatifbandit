@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiple_mab_simulation.R
 \name{multiple_mab_simulation}
 \alias{multiple_mab_simulation}
-\title{Conducts Multiple Multi-Arm Bandit Trials with Adapative Inference in Parallel}
+\title{Conducts Multiple Multi-Arm Bandit Trials with Adaptive Inference in Parallel}
 \usage{
 multiple_mab_simulation(
   data,
@@ -66,19 +66,19 @@ Control condition, must be named "Control" when 'control_augment' > 0.}
 
 \item{seeds}{Numeric vector of \code{length(times)} containing valid seeds to define random state for each trial.}
 
-\item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets.}
+\item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets
+.}
 }
 \value{
-A custom S3 class multiple.mab object, which is a named list containing:
+\code{multiple.mab} class object, which is a named list containing:
 \item{final_data_nest}{Data.frame containing a nested data.frame with the final data from each trial}
 \item{bandits}{Data.frame containing the Thompson/UCB1 statitics across all treatments, periods, and trials}
 \item{estimates}{Data.frame containing the AIPW statitics across all treatments, and trials}
 \item{settings}{A list of the configuration settings used in the trial.}
 }
 \description{
-This function provides an easy way to repeat the Multi-Arm Bandit Simulations
-conducted by \code{\link[=single_mab_simulation]{single_mab_simulation()}} with different random states. Allows for
-parallel processing using \code{\link[future:plan]{future::plan()}} and \code{\link[furrr:future_map]{furrr::future_map()}}.
+Repeated Multi-Arm Bandit Simulations with the same settings in different
+random states. Allows for parallel processing using \code{\link[future:plan]{future::plan()}} and \code{\link[furrr:future_map]{furrr::future_map()}}.
 }
 \seealso{
 \itemize{

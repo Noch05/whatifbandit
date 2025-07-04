@@ -42,7 +42,7 @@
 #' Default is 0.
 #' @param verbose Logical; Whether or not to print iteration number. FALSE by default.
 #'
-#' @return  A custom mab class object, which is a named list containing:
+#' @return `mab` class object, which is named list containing:
 #' \item{final_data}{The processed data with treatment assignments and imputed outcomes, labelled with "mab_" prefix.}
 #' \item{bandits}{Either the UCB1 statistics or Thompson Sampling posterior distributions.}
 #' \item{assignment_probs}{Probability of being assigned each treatment arm at a given period}
@@ -74,54 +74,21 @@ single_mab_simulation <- function(data,
   # Reformatting Inputs into names and symbols
   data_name <- deparse(substitute(data))
 
-  data_cols <- purrr::map(data_cols, ~ list(
-    name = .x, symbol = rlang::sym(.x)
-  )) |>
-    stats::setNames(names(data_cols))
-
-  block_cols <- list(name = block_cols, symbol = rlang::sym(block_cols))
-
-  # Input Validation
-
-
-  check_args(
-    data = data, time_unit = time_unit,
-    perfect_assignment = perfect_assignment,
-    algorithm = algorithm, period_length = period_length,
-    whole_experiment = whole_experiment, prior_periods = prior_periods,
-    data_cols = data_cols, block_cols = block_cols, conditions = conditions, blocking = blocking,
-    assignment_method = assignment_method, verbose = verbose,
-    control_augment = control_augment
-  )
-
-  # Preparing Data to be simulated
-  data <- mab_prepare(
-    data = data,
-    data_cols = data_cols,
-    block_cols = block_cols,
-    time_unit = time_unit,
+  prepped <- pre_mab_simulation(
+    data = data, assignment_method = assignment_method,
+    algorithm = algorithm, conditions = conditions,
+    prior_periods = prior_periods, perfect_assignment = perfect_assignment,
+    whole_experiment = whole_experiment, blocking = blocking,
+    block_cols = block_cols, data_cols = data_cols,
+    control_augment = control_augment, time_unit = time_unit,
     period_length = period_length,
-    perfect_assignment = perfect_assignment,
-    assignment_method = assignment_method,
-    blocking = blocking,
     verbose = verbose
   )
 
-  # Pre-computing Important values to be accessed for the simulation
-  verbose_log(verbose, "Precomputing")
-
-  imputation_information <- imputation_prep(
-    data = data,
-    whole_experiment = whole_experiment,
-    data_cols = data_cols,
-    perfect_assignment = perfect_assignment
-  )
-
-  verbose_log(verbose, "Simulating")
 
   # Simulating the MAB Trial
   results <- mab_simulation(
-    data = data,
+    data = prepped$data,
     time_unit = time_unit,
     period_length = period_length,
     prior_periods = prior_periods,
@@ -130,12 +97,12 @@ single_mab_simulation <- function(data,
     perfect_assignment = perfect_assignment,
     conditions = conditions,
     blocking = blocking,
-    block_cols = block_cols,
-    data_cols = data_cols,
+    block_cols = prepped$block_cols,
+    data_cols = prepped$data_cols,
     verbose = verbose,
     assignment_method = assignment_method,
     control_augment = control_augment,
-    imputation_information = imputation_information
+    imputation_information = prepped$imputation_information
   )
   results$settings$data <- data_name
 

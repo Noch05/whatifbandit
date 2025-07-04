@@ -1,18 +1,17 @@
-#' Conducts Multiple Multi-Arm Bandit Trials with Adapative Inference in Parallel
+#' Conducts Multiple Multi-Arm Bandit Trials with Adaptive Inference in Parallel
 #'
 #' @name multiple_mab_simulation
-#' @description
-#' This function provides an easy way to repeat the Multi-Arm Bandit Simulations
-#' conducted by [single_mab_simulation()] with different random states. Allows for
-#' parallel processing using [future::plan()] and [furrr::future_map()].
+#' @description Repeated Multi-Arm Bandit Simulations with the same settings in different
+#' random states. Allows for parallel processing using [future::plan()] and [furrr::future_map()].
 #'
 #'
 #' @inheritParams single_mab_simulation
 #' @param verbose Logical; Toggles progress bar from [furrr::future_map].
 #' @param times Numeric; number of simulations to conduct.
 #' @param seeds Numeric vector of `length(times)` containing valid seeds to define random state for each trial.
-#' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets.
-#' @returns A custom S3 class multiple.mab object, which is a named list containing:
+#' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets
+#' .
+#' @returns `multiple.mab` class object, which is a named list containing:
 #' \item{final_data_nest}{Data.frame containing a nested data.frame with the final data from each trial}
 #' \item{bandits}{Data.frame containing the Thompson/UCB1 statitics across all treatments, periods, and trials}
 #' \item{estimates}{Data.frame containing the AIPW statitics across all treatments, and trials}
