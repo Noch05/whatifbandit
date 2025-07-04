@@ -27,14 +27,13 @@ impute_success <- function(current_data, imputation_info, id_col,
                            success_date_col) {
   ## Imputing success randomly based on previously calculated Probabilities
   ##
-  success_col_name <- rlang::as_name(rlang::enquo(success_col))
 
   if (base::any(current_data$impute_req == 1, na.rm = TRUE)) {
     filtered_data <- current_data[current_data$impute_req == 1, ]
 
     blocks <- filtered_data$impute_block
 
-    clusters <- dplyr::pull(filtered_data, {{ id_col }})
+    clusters <- filtered_data[[id_col$name]]
 
 
     imputations <- randomizr::block_and_cluster_ra(
@@ -49,7 +48,7 @@ impute_success <- function(current_data, imputation_info, id_col,
     # Joining Data Together and Returning
     filtered_data$mab_success <- imputations
 
-    imputed <- dplyr::rows_update(current_data, filtered_data, by = rlang::as_name(rlang::enquo(id_col)))
+    imputed <- dplyr::rows_update(current_data, filtered_data, by = id_col$name)
 
     imputed$mab_success <- base::ifelse(
       base::is.na(imputed$mab_success) & imputed$impute_req == 0, imputed[[success_col_name]], imputed$mab_success
@@ -64,16 +63,14 @@ impute_success <- function(current_data, imputation_info, id_col,
   # Those who changed treatment, and resulted in success when before were failures will not have a recert date
   #
   if (!perfect_assignment) {
-    success_date_col_name <- rlang::as_name(rlang::enquo(success_date_col))
-
     imputed$new_success_date <- dplyr::case_when(
-      imputed$impute_req == 0 | (imputed[[success_col_name]] == 0 & imputed$mab_success == 1) ~ imputed[[success_date_col_name]],
-      imputed$mab_success == 1 & imputed[[success_col_name]] == 0 ~ dates[imputed$impute_block],
+      imputed$impute_req == 0 | (imputed[[success_col$name]] == 0 & imputed$mab_success == 1) ~ imputed[[success_date_col$name]],
+      imputed$mab_success == 1 & imputed[[success_col$name]] == 0 ~ dates[imputed$impute_block],
       imputed$mab_success == 0 | TRUE ~ base::as.Date(NA)
     )
   }
 
-  data <- dplyr::rows_update(prior_data, imputed, by = rlang::as_string(rlang::ensym(id_col)))
+  data <- dplyr::rows_update(prior_data, imputed, by = id_col$name)
 
   return(data)
 }
