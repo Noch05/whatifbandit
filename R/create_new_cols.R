@@ -1,18 +1,19 @@
 #' @title Create Necessary Columns for Multi-Arm Bandit Trial
 #' @name create_new_cols
-#' @description Creates the new columns in the data necessary to be passed to [mab_simulation()],
-#' based on the treatment periods and user specified options.
+#' @description Initializes partially empty columns in `data`, to ensure compatibility with, [mab_simulation()].
+#' These are initialized as `NA` except for observations with `period_number` = 1, whose are the starting point for
+#' the adaptive trial.
 #'
 #' @inheritParams single_mab_simulation
 #'
 #'
-#' @returns Data.frame containing 6 new Columns:
+#' @returns Updated `data` object of same class with 6 new columns:
 #' \item{mab_success}{New variable to hold new success from Multi-arm bandit procedure, NA until assigned.}
 #' \item{mab_condition}{New variable to hold new treatment condition from Multi-arm bandit procedure, NA until assigned.}
 #' \item{impute_req}{Binary indicator for imputation requirement, NA until assigned}
 #' \item{new_success_date}{New variable to new recertification date from Multi-arm bandit procedure, NA until assigned.}
 #' \item{block}{New variable indicating the variables to block by for assignment}
-#' \item{treatment_block}{New variable combinind block with original treatment condition}
+#' \item{treatment_block}{New variable combining block with original treatment condition}
 #'
 #' @seealso
 #' *[create_cutoff()]
@@ -20,11 +21,8 @@
 #'
 #'
 create_new_cols <- function(data,
-                            blocking,
+                            data_cols,
                             block_cols,
-                            condition_col,
-                            success_col,
-                            success_date_col = NULL,
                             perfect_assignment) {
   base::UseMethod("create_new_cols")
 }
@@ -35,11 +33,8 @@ create_new_cols <- function(data,
 #' @inheritParams create_new_cols
 
 create_new_cols.tbl_df <- function(data,
+                                   data_cols,
                                    blocking,
-                                   block_cols,
-                                   condition_col,
-                                   success_col,
-                                   success_date_col,
                                    perfect_assignment) {
   data <- data |>
     dplyr::mutate(
@@ -77,19 +72,14 @@ create_new_cols.tbl_df <- function(data,
 #' @inheritParams create_new_cols
 #'
 create_new_cols.data.frame <- function(data,
+                                       data_cols,
                                        blocking,
-                                       block_cols,
-                                       condition_col,
-                                       success_col,
-                                       success_date_col,
                                        perfect_assignment) {
   data <- create_new_cols.tbl_df(
     tibble::as_tibble(data),
+    data_cols = data_cols,
     blocking = blocking,
     block_cols = block_cols,
-    condition_col = {{ condition_col }},
-    success_col = {{ success_col }},
-    success_date_col = {{ success_date_col }},
     perfect_assignment = perfect_assignment
   )
 
@@ -101,11 +91,9 @@ create_new_cols.data.frame <- function(data,
 #' @inheritParams create_new_cols
 
 create_new_cols.data.table <- function(data,
+                                       data_cols,
                                        blocking,
                                        block_cols,
-                                       condition_col,
-                                       success_col,
-                                       success_date_col,
                                        perfect_assignment) {
   condition_col_name <- rlang::as_name(rlang::enquo(condition_col))
   success_col_name <- rlang::as_name(rlang::enquo(success_col))
