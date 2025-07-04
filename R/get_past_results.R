@@ -37,7 +37,7 @@ get_past_results.tbl_df <- function(current_data, prior_data, perfect_assignment
 
 
     prior_data$known_success <- base::ifelse(
-      current_date >= past_results[[success_date_col$name]] & !base::is.na(past_results[[success_date_col$name]]),
+      current_date >= prior_data[[success_date_col$name]] & !base::is.na(prior_data[[success_date_col$name]]),
       1, 0
     )
   } else {
@@ -55,7 +55,7 @@ get_past_results.tbl_df <- function(current_data, prior_data, perfect_assignment
     dplyr::ungroup()
 
   if (base::nrow(prior_data) != base::length(conditions)) {
-    conditions_add <- base::setdiff(conditions, past_results$mab_condition)
+    conditions_add <- base::setdiff(conditions, prior_data$mab_condition)
 
     replace <- tibble::tibble(
       mab_condition = conditions_add, successes = 0,
@@ -63,7 +63,7 @@ get_past_results.tbl_df <- function(current_data, prior_data, perfect_assignment
     )
 
     prior_data <- dplyr::bind_rows(prior_data, replace)
-    prior_data <- past_results[order(prior_data$mab_condition), ]
+    prior_data <- prior_data[order(prior_data$mab_condition), ]
   }
   return(prior_data)
 }

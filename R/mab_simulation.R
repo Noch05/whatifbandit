@@ -1,11 +1,10 @@
 #' @title Simulates Multi-Arm Bandit Trial From Prepared Inputs
 #' @name mab_simulation
 #'
-#' @description This function acts as an internal helper to [single_mab_simulation()]
-#' and [multiple_mab_simulation()] by providing a common framework for executing
-#' a single Multi-Arm-Bandit Trial with adaptive inference. It assumes all inputs have
-#' been preprocessed by [mab_prepare()], or inside of the wrappers. Centralizes
-#' a single trial to prevent redundant loops.
+#' @description Internal helper to[single_mab_simulation()]
+#' and [multiple_mab_simulation()]. Centralizes necessary functions to conduct a
+#' single Multi-Arm-Bandit Trial with adaptive inference. It assumes all inputs have
+#' been preprocessed by [mab_prepare()].
 #' @inheritParams single_mab_simulation
 #' @inheritParams run_mab_trial
 #'
@@ -26,19 +25,13 @@ mab_simulation <- function(data,
                            time_unit,
                            perfect_assignment,
                            algorithm,
-                           period_length = NULL,
+                           period_length,
                            prior_periods,
                            whole_experiment,
                            conditions,
                            blocking,
-                           block_cols = NULL,
-                           date_col,
-                           month_col = NULL,
-                           id_col,
-                           condition_col,
-                           success_col,
-                           success_date_col = NULL,
-                           assignment_date_col = NULL,
+                           block_cols,
+                           data_cols,
                            verbose,
                            assignment_method, control_augment,
                            imputation_information) {
@@ -56,13 +49,7 @@ mab_simulation <- function(data,
     conditions = conditions,
     blocking = blocking,
     block_cols = block_cols,
-    date_col = {{ date_col }},
-    month_col = {{ month_col }},
-    id_col = {{ id_col }},
-    condition_col = {{ condition_col }},
-    success_col = {{ success_col }},
-    success_date_col = {{ success_date_col }},
-    assignment_date_col = {{ assignment_date_col }},
+    data_cols = data_cols,
     verbose = verbose,
     control_augment = control_augment,
     imputation_information = imputation_information
@@ -89,7 +76,7 @@ mab_simulation <- function(data,
     whole_experiment = whole_experiment,
     conditions = conditions,
     blocking = blocking,
-    block_cols = block_cols
+    block_cols = block_cols$name
   )
 
   return(results)

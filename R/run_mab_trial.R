@@ -26,7 +26,7 @@
 #' @export
 #'
 run_mab_trial <- function(data, time_unit, period_length = NULL,
-                          data_cols, block_cols,
+                          data_cols, block_cols, blocking,
                           prior_periods, algorithm,
                           whole_experiment, perfect_assignment, conditions,
                           verbose, control_augment,

@@ -9,19 +9,13 @@ mab_simulation(
   time_unit,
   perfect_assignment,
   algorithm,
-  period_length = NULL,
+  period_length,
   prior_periods,
   whole_experiment,
   conditions,
   blocking,
-  block_cols = NULL,
-  date_col,
-  month_col = NULL,
-  id_col,
-  condition_col,
-  success_col,
-  success_date_col = NULL,
-  assignment_date_col = NULL,
+  block_cols,
+  data_cols,
   verbose,
   assignment_method,
   control_augment,
@@ -59,6 +53,16 @@ Control condition, must be named "Control" when 'control_augment' > 0.}
 
 \item{block_cols}{Character Vector of variables to block by.}
 
+\item{data_cols}{Named Character vector containing the names of columns in data as strings:
+\itemize{
+\item{id_col:} {Column in data, contains unique id as a key}
+\item{success_col:} {Column in data; Binary successes from original experiment}
+\item{date_col:} {Column in data, contains original date of event/trial; only ncessary when assigning by 'Date'}
+\item{month_col:} {Column in data, contains month of treatment; only necessary when time_unit = 'Month'}
+\item{success_date_col:} {Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE}
+\item{assignment_date_col:} {Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
+Used to simulate imperfect information on part of researchers conducting an adaptive trial}}}
+
 \item{verbose}{Logical; Whether or not to print iteration number. FALSE by default.}
 
 \item{assignment_method}{String; "Date" or "Batch" to define the assignment into treatment waves.}
@@ -70,11 +74,10 @@ Default is 0.}
 for each treatment block to impute from.}
 }
 \description{
-This function acts as an internal helper to \code{\link[=single_mab_simulation]{single_mab_simulation()}}
-and \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}} by providing a common framework for executing
-a single Multi-Arm-Bandit Trial with adaptive inference. It assumes all inputs have
-been preprocessed by \code{\link[=mab_prepare]{mab_prepare()}}, or inside of the wrappers. Centralizes
-a single trial to prevent redundant loops.
+Internal helper to\code{\link[=single_mab_simulation]{single_mab_simulation()}}
+and \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}. Centralizes necessary functions to conduct a
+single Multi-Arm-Bandit Trial with adaptive inference. It assumes all inputs have
+been preprocessed by \code{\link[=mab_prepare]{mab_prepare()}}.
 }
 \seealso{
 \itemize{

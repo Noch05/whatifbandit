@@ -10,6 +10,7 @@ run_mab_trial(
   period_length = NULL,
   data_cols,
   block_cols,
+  blocking,
   prior_periods,
   algorithm,
   whole_experiment,
@@ -42,6 +43,8 @@ If assignment methods is "Batch", this refers to the number of people in each ba
 Used to simulate imperfect information on part of researchers conducting an adaptive trial}}}
 
 \item{block_cols}{Character Vector of variables to block by.}
+
+\item{blocking}{Logical; Whether or not to use treatment blocking.}
 
 \item{prior_periods}{Numeric; number of previous periods to use in the treatment assignment model
 or specify string "All" to use all previous periods.}

@@ -13,7 +13,6 @@
 #'* [imputation_prep()]
 #'* [randomizr::block_and_cluster_ra()]
 #'* [randomizr::cluster_ra()]
-#' @export
 
 
 impute_success <- function(current_data, imputation_info, id_col,
@@ -45,11 +44,11 @@ impute_success <- function(current_data, imputation_info, id_col,
     imputed <- dplyr::rows_update(current_data, filtered_data, by = id_col$name)
 
     imputed$mab_success <- base::ifelse(
-      base::is.na(imputed$mab_success) & imputed$impute_req == 0, imputed[[success_col_name]], imputed$mab_success
+      base::is.na(imputed$mab_success) & imputed$impute_req == 0, imputed[[success_col$name]], imputed$mab_success
     )
   } else {
     imputed <- current_data
-    imputed$mab_success <- imputed[[success_col_name]]
+    imputed$mab_success <- imputed[[success_col$name]]
   }
 
   # Recert Date for newly imputed success as average of recert date in the period from experimental data, grouped by original treatment

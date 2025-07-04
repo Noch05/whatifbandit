@@ -54,7 +54,7 @@ imputation_prep <- function(data, whole_experiment, perfect_assignment, data_col
     dates_summary <- data |>
       dplyr::group_by(treatment_block, period_number) |>
       dplyr::summarize(mean_date = base::mean(!!data_cols$success_date_col$sym, na.rm = TRUE), .groups = "drop") |>
-      tidyr::pivot_wider(names_from = data_cols$condition_col$name, values_from = "mean_date")
+      tidyr::pivot_wider(names_from = "treatment_block", values_from = "mean_date")
   } else {
     dates_summary <- NULL
   }
