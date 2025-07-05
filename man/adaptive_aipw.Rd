@@ -4,10 +4,10 @@
 \alias{adaptive_aipw}
 \title{Calculate Adaptive AIPW Estimates}
 \usage{
-adaptive_aipw(mab, conditions, periods, algorithm, verbose)
+adaptive_aipw(data, assignment_probs, conditions, periods, algorithm, verbose)
 }
 \arguments{
-\item{mab}{A named list that has been created by \code{\link[=run_mab_trial]{run_mab_trial()}}}
+\item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
 
 \item{conditions}{Named Character vector containing treatment conditions.
 Control condition, must be named "Control" when 'control_augment' > 0.}
@@ -17,11 +17,6 @@ Control condition, must be named "Control" when 'control_augment' > 0.}
 \item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
 
 \item{verbose}{Logical; Whether or not to print iteration number. FALSE by default.}
-}
-\value{
-A data.frame containing:
-\item{mean}{Adaptive AIPW estimate for each treatment}
-\item{variance}{Variance of each estimate}
 }
 \description{
 Takes the average of the individual AIPW scores created by \code{\link[=get_iaipw]{get_iaipw()}} for each period,
@@ -33,6 +28,6 @@ estimate for each treatment condition.
 \itemize{
 \item \code{\link[=get_iaipw]{get_iaipw()}}
 \item \code{\link[=get_adaptive_aipw]{get_adaptive_aipw()}}
-\item \code{\link[=single_mab_simulation]{single_mab_simulation()}}
+\item \code{\link[=mab_simulation]{mab_simulation()}}
 }
 }

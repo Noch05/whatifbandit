@@ -18,9 +18,9 @@ Control condition, must be named "Control" when 'control_augment' > 0.}
 }
 \value{
 A named list containing:
-\item{final_data}{Data frame from [run_mab_trial[], updated with individual AIPW scores]}
+\item{final_data}{\code{final_data} from \code{\link[=run_mab_trial]{run_mab_trial()}}, updated with individual AIPW scores]}
 \item{bandits}{Either the UCB1 statistics or Thompson Sampling posterior distributions.}
-\item{estimates}{Data.frame containing AIPW estimate and variance for each treatment}
+\item{estimates}{ object containing AIPW estimate and variance for each treatment}
 }
 \description{
 Wrapper function around \code{\link[=get_iaipw]{get_iaipw()}} and \code{\link[=adaptive_aipw]{adaptive_aipw()}}. Computes Adaptive Augmented

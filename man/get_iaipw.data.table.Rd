@@ -7,8 +7,6 @@
 \method{get_iaipw}{data.table}(mab, periods, algorithm, conditions, verbose)
 }
 \arguments{
-\item{mab}{A named list that has been created by \code{\link[=run_mab_trial]{run_mab_trial()}}}
-
 \item{periods}{Numeric; number of treatment waves.}
 
 \item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}

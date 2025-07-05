@@ -4,10 +4,18 @@
 \alias{get_iaipw.tbl_df}
 \title{\code{\link[=get_iaipw]{get_iaipw()}} for tibbles}
 \usage{
-\method{get_iaipw}{tbl_df}(mab, periods, algorithm, conditions, verbose)
+\method{get_iaipw}{tbl_df}(
+  data,
+  bandits,
+  assignment_probs,
+  periods,
+  algorithm,
+  conditions,
+  verbose
+)
 }
 \arguments{
-\item{mab}{A named list that has been created by \code{\link[=run_mab_trial]{run_mab_trial()}}}
+\item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
 
 \item{periods}{Numeric; number of treatment waves.}
 

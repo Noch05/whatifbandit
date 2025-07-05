@@ -18,25 +18,9 @@
 #' * [get_adaptive_aipw()]
 #' * [single_mab_simulation()]
 #'
-get_iaipw <- function(mab, periods, algorithm, conditions, verbose) {
-  data_class <- class(mab[[1]])
-  if ("data.table" %in% data_class) {
-    return(get_iaipw.data.table(
-      mab = mab,
-      periods = periods,
-      algorithm = algorithm,
-      conditions = conditions,
-      verbose = verbose
-    ))
-  } else {
-    return(get_iaipw.tbl_df(
-      mab = mab,
-      periods = periods,
-      algorithm = algorithm,
-      conditions = conditions,
-      verbose = verbose
-    ))
-  }
+get_iaipw <- function(data, bandits, assignment_probs, periods, algorithm, conditions, verbose) {
+  verbose_log(verbose, "Computing Individual AIPW Estimates")
+  base::useMethod("get_iaipw")
 }
 #-------------------------------------------------------------------------------
 
@@ -46,10 +30,7 @@ get_iaipw <- function(mab, periods, algorithm, conditions, verbose) {
 #' [get_iaipw()] for tibbles
 #' @inheritParams get_iaipw
 
-
-get_iaipw.tbl_df <- function(mab, periods, algorithm, conditions, verbose) {
-  verbose_log(verbose, "Computing Individual AIPW Estimates")
-  data <- mab[["final_data"]]
+get_iaipw.tbl_df <- function(data, bandits, assignment_probs, periods, algorithm, conditions, verbose) {
   conditions <- base::sort(conditions)
 
   new_cols <- paste0("aipw_", conditions)
@@ -63,8 +44,7 @@ get_iaipw.tbl_df <- function(mab, periods, algorithm, conditions, verbose) {
       trials = dplyr::n(),
       .groups = "drop"
     )
-  probs <- mab[["assignment_probs"]]
-  names(probs) <- c("period_number", paste0(names(probs)[-1], "_assign_prob"))
+  names(assignment_probs) <- c("period_number", paste0(names(probs)[-1], "_assign_prob"))
 
   data <- base::expand.grid(
     period_number = base::seq_len(periods),
@@ -87,7 +67,7 @@ get_iaipw.tbl_df <- function(mab, periods, algorithm, conditions, verbose) {
       names_prefix = "prior_rate_"
     ) |>
     dplyr::right_join(data, by = "period_number") |>
-    dplyr::left_join(probs, by = "period_number")
+    dplyr::left_join(assignmnet_probs, by = "period_number")
 
   for (condition in conditions) {
     verbose_log(verbose, paste0("Condition: ", condition))

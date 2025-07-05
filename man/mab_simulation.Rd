@@ -74,6 +74,14 @@ Default is 0.}
 \item{imputation_information}{Object created by \code{\link[=imputation_prep]{imputation_prep()}} containing the conditional means and success dates
 for each treatment block to impute from.}
 }
+\value{
+\code{mab} class object, which is named list containing:
+\item{final_data}{The processed data with treatment assignments and imputed outcomes, labelled with "mab_" prefix.}
+\item{bandits}{Either the UCB1 statistics or Thompson Sampling posterior distributions.}
+\item{assignment_probs}{Probability of being assigned each treatment arm at a given period}
+\item{estimates}{AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances.}
+\item{settings}{A list of the configuration settings used in the trial.}
+}
 \description{
 Internal helper to\code{\link[=single_mab_simulation]{single_mab_simulation()}}
 and \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}. Centralizes necessary functions to conduct a

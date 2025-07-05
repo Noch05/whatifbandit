@@ -10,7 +10,12 @@
 #'
 #'
 #'
-#'
+#' @return `mab` class object, which is named list containing:
+#' \item{final_data}{The processed data with treatment assignments and imputed outcomes, labelled with "mab_" prefix.}
+#' \item{bandits}{Either the UCB1 statistics or Thompson Sampling posterior distributions.}
+#' \item{assignment_probs}{Probability of being assigned each treatment arm at a given period}
+#' \item{estimates}{AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances.}
+#' \item{settings}{A list of the configuration settings used in the trial.}
 #' @seealso
 #'* [single_mab_simulation()]
 #'* [multiple_mab_simulation()]
@@ -38,7 +43,7 @@ mab_simulation <- function(data,
   conditions <- base::sort(conditions)
 
   # Run the main MAB trial with all required arguments
-  results <- run_mab_trial(
+  sim_results <- run_mab_trial(
     data = data,
     time_unit = time_unit,
     period_length = period_length,
@@ -55,10 +60,16 @@ mab_simulation <- function(data,
     imputation_information = imputation_information
   )
 
-  results <- get_adaptive_aipw(
+  inference_results <- get_adaptive_aipw(
     mab = results,
     conditions = conditions, algorithm = algorithm,
     verbose = verbose
+  )
+  results <- list(
+    final_data = inference_results$final_data,
+    bandits = sim_results$bandits,
+    assignment_probs = sim_results$assignment_probs,
+    estimates = inference_results$estimates
   )
 
   class(results) <- c("mab", class(results))

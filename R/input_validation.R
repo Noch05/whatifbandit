@@ -115,10 +115,15 @@ check_args <- function(data,
     ))
   }
 
-  unique_ids <- length(unique(data[[data_cols$id$name]]))
+  if (inherits(data, "data.table")) {
+    unique_ids <- length(unique(data[, get(data_cols$id$name)]))
+  } else {
+    unique_ids <- length(unique(data[[data_cols$id$name]]))
+  }
+
 
   if (unique_ids != nrow(data)) {
-    rlang::abort(paste(col_names$data$id, "is not a unique identifier, a unique id for each observation is required"))
+    rlang::abort(paste(data_cols$id$name, "is not a unique identifier, a unique id for each observation is required"))
   }
 }
 

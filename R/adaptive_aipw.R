@@ -8,33 +8,33 @@
 #'
 #' @param periods Numeric; number of treatment waves.
 #' @inheritParams get_adaptive_aipw
+#' @inheritParams single_mab_simulation
 #'
 #'
-#' @returns A data.frame containing:
-#' \item{mean}{Adaptive AIPW estimate for each treatment}
-#' \item{variance}{Variance of each estimate}
+#'
 #'
 #' @seealso
 #' * [get_iaipw()]
 #' * [get_adaptive_aipw()]
-#' * [single_mab_simulation()]
-#' @export
+#' * [mab_simulation()]
 #-------------------------------------------------------------------------------
 ## Adaptive AIPW Weights from Hadad et. al (2021) Using Constant Allocation Rate
-adaptive_aipw <- function(mab, conditions, periods, algorithm, verbose) {
+adaptive_aipw <- function(data, assignment_probs, conditions, periods, algorithm, verbose) {
   verbose_log(verbose, "Aggregating AIPW Estimates")
-
-  data <- mab[["final_data"]]
-
+  base::UseMethod("adaptive_aipw")
+}
+#' @title Adaptive AIPW Estimates for Tibbles
+#' @method adaptive_aipw tbl_df
+#' @inheritParams adaptive_aipw
+adaptive_aipw.tbl_df <- function(data, assignment_probs, conditions, periods, algorithm, verbose) {
   estimates <- base::vector(mode = "list", length = periods)
-  probs <- mab[["assignment_probs"]]
 
   for (i in base::seq_len(length(conditions))) {
     results <- data |>
       dplyr::group_by(period_number) |>
       dplyr::summarize(avg = base::mean(!!rlang::sym(base::paste0("aipw_", conditions[i])), na.rm = TRUE)) |>
       dplyr::mutate(time_weights = purrr::map_dbl(period_number, ~ base::sqrt(
-        base::as.numeric(probs[.x, conditions[i]]) / periods
+        base::as.numeric(assignment_probs[.x, conditions[i]]) / periods
       )))
 
     estimate <- results |>
@@ -67,3 +67,8 @@ adaptive_aipw <- function(mab, conditions, periods, algorithm, verbose) {
     base::rbind(sample)
   return(returns)
 }
+#-------------------------------------------------------------------------------
+#' @title Adaptive AIPW Estimates for data.frames
+#' @method adaptive_aipw data.frame
+#' @inheritParams adaptive_aipw
+#'
