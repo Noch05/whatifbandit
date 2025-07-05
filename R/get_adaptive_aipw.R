@@ -30,7 +30,6 @@ get_adaptive_aipw <- function(data, assignment_probs, periods,
   data <- get_iaipw(
     data = data,
     assignment_probs = assignment_probs,
-    mab = mab,
     conditions = conditions,
     algorithm = algorithm,
     periods = periods,
@@ -38,7 +37,8 @@ get_adaptive_aipw <- function(data, assignment_probs, periods,
   )
 
   estimates <- adaptive_aipw(
-    mab = mab,
+    data = data,
+    assignment_probs = assignment_probs,
     periods = periods,
     conditions = conditions,
     algorithm = algorithm, verbose = verbose

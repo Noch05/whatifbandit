@@ -20,7 +20,7 @@
 #'
 get_iaipw <- function(data, assignment_probs, periods, algorithm, conditions, verbose) {
   verbose_log(verbose, "Computing Individual AIPW Estimates")
-  base::useMethod("get_iaipw")
+  base::UseMethod("get_iaipw")
 }
 #-------------------------------------------------------------------------------
 
@@ -31,8 +31,6 @@ get_iaipw <- function(data, assignment_probs, periods, algorithm, conditions, ve
 #' @inheritParams get_iaipw
 
 get_iaipw.tbl_df <- function(data, assignment_probs, periods, algorithm, conditions, verbose) {
-  conditions <- base::sort(conditions)
-
   new_cols <- paste0("aipw_", conditions)
   data[new_cols] <- NA_real_
 
@@ -44,7 +42,7 @@ get_iaipw.tbl_df <- function(data, assignment_probs, periods, algorithm, conditi
       trials = dplyr::n(),
       .groups = "drop"
     )
-  names(assignment_probs) <- c("period_number", paste0(names(probs)[-1], "_assign_prob"))
+  names(assignment_probs) <- c("period_number", paste0(names(assignment_probs)[-1], "_assign_prob"))
 
   data <- base::expand.grid(
     period_number = base::seq_len(periods),
@@ -67,7 +65,8 @@ get_iaipw.tbl_df <- function(data, assignment_probs, periods, algorithm, conditi
       names_prefix = "prior_rate_"
     ) |>
     dplyr::right_join(data, by = "period_number") |>
-    dplyr::left_join(assignmnet_probs, by = "period_number")
+    dplyr::select(tidyselect::all_of(names(data)), tidyselect::everything()) |>
+    dplyr::left_join(assignment_probs, by = "period_number")
 
   for (condition in conditions) {
     verbose_log(verbose, paste0("Condition: ", condition))
@@ -81,7 +80,7 @@ get_iaipw.tbl_df <- function(data, assignment_probs, periods, algorithm, conditi
       mhat
     )
   }
-
+  utils::View(data)
 
   check <- data |>
     dplyr::summarize(dplyr::across(dplyr::starts_with("aipw_"), ~ base::sum(base::is.na(.x)))) |>

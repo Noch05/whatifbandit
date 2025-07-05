@@ -26,6 +26,7 @@ adaptive_aipw <- function(data, assignment_probs, conditions, periods, algorithm
 #' @title Adaptive AIPW Estimates for Tibbles
 #' @method adaptive_aipw tbl_df
 #' @inheritParams adaptive_aipw
+#'
 adaptive_aipw.tbl_df <- function(data, assignment_probs, conditions, periods, algorithm, verbose) {
   estimates <- base::vector(mode = "list", length = periods)
 
@@ -71,7 +72,8 @@ adaptive_aipw.tbl_df <- function(data, assignment_probs, conditions, periods, al
 #' @title Adaptive AIPW Estimates for data.frames
 #' @method adaptive_aipw data.frame
 #' @inheritParams adaptive_aipw
-adaptive_aipw.data.frame <- function(data, assignment_probs, conditions, periods, algorithm, verbose) {
+adaptive_aipw.data.frame <- function(data, assignment_probs, conditions,
+                                     periods, algorithm, verbose) {
   return(
     adaptive_aipw.tbl_df(
       data = tibble::as_tibble(data),
@@ -82,4 +84,11 @@ adaptive_aipw.data.frame <- function(data, assignment_probs, conditions, periods
       verbose = verbose
     )
   )
+}
+#------------------------------------------------------------------------------
+#' @title Adaptive AIPW Estimates for data.tables
+#' @method adaptive_aipw data.table
+#' @inheritParams adaptive_aipw
+adaptive_aipw.data.table <- function(data, assignment_probs, conditions,
+                                     periods, algorithm, verbose) {
 }
