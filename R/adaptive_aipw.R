@@ -52,7 +52,8 @@ adaptive_aipw.tbl_df <- function(data, assignment_probs, conditions, periods, al
       ))
     }
   ) |>
-    dplyr::bind_rows()
+    dplyr::bind_rows() |>
+    mutate(estimator = "AIPW")
 
   sample <- data |>
     dplyr::group_by(mab_condition) |>
@@ -62,9 +63,7 @@ adaptive_aipw.tbl_df <- function(data, assignment_probs, conditions, periods, al
     ) |>
     dplyr::mutate(estimator = "Sample")
 
-  returns <- dplyr::bind_rows(estimates) |>
-    dplyr::mutate(estimator = "AIPW") |>
-    base::rbind(sample)
+  returns <- dplyr::bind_rows(estimates, sample)
 
 
   return(returns)
@@ -92,4 +91,43 @@ adaptive_aipw.data.frame <- function(data, assignment_probs, conditions,
 #' @inheritParams adaptive_aipw
 adaptive_aipw.data.table <- function(data, assignment_probs, conditions,
                                      periods, algorithm, verbose) {
+  estimates <- purrr::map(
+    conditions, ~ {
+      results <- data[, .(
+        base::mean(base::get(base::paste0("aipw_", .x)), na.rm = TRUE),
+        base::unique(base::get(base::paste0(.x, "_assign_prob")))
+      ),
+      by = period_number
+      ]
+      results[, time_weights = assign_prob / periods]
+
+      estimate <- (base::sum(results$avg * results$time_weights, na.rm = TRUE)) /
+        (base::sum(results$time_weights, na.rm = TRUE))
+
+      variance <- base::sum((results$time_weights^2) * (results$avg - estimate)^2) /
+        (base::sum(results$time_weights)^2)
+
+      return(data.table::data.table(
+        mean = estimate,
+        variance = variance,
+        mab_condition = .x
+      ))
+    }
+  ) |>
+    data.table::rbindlist()
+  estimates[, estimator := "AIPW"]
+
+
+
+  sample <- data[, .(
+    mean = base::mean(mab_success, na.rm = TRUE),
+    variance = stats::var(mab_success, na.rm = TRUE)
+  ),
+  by = mab_condition
+  ]
+
+  sample[, estimator := "Sample"]
+  returns <- data.table::rbindlist(estimates, sample)
+
+  return(returns)
 }
