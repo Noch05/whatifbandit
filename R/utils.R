@@ -1,6 +1,5 @@
 #' @importFrom rlang .data
 #' @importFrom rlang !!
-#' @importFrom rlang !!!
 #' @importFrom data.table :=
 #' @importFrom data.table .I
 #' @importFrom data.table .N
@@ -37,3 +36,15 @@ NULL
 #' @param success_date_col  Column in data, contains original dates each success occurred; only necessary when 'perfect_assignment' = FALSE.
 #' @param assignment_date_col  Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
 NULL
+
+#' Verbose Printer
+#' @description Shorthand Function for checking `verbose` and then printing. Takes verbose from higher scope
+#' @name verbose_log
+#' @param message The message to be printed to screen, as a string.
+#' @param log Logical; Whether or not to print the message
+
+verbose_log <- function(log, message) {
+  if (log) {
+    base::cat(message, "\n")
+  }
+}
