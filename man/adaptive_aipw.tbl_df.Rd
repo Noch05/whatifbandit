@@ -7,7 +7,10 @@
 \method{adaptive_aipw}{tbl_df}(data, assignment_probs, conditions, periods, algorithm, verbose)
 }
 \arguments{
-\item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
+\item{data}{\code{final_data} object from \code{\link[=run_mab_trial]{run_mab_trial()}}. Contains results of Multi-Arm-Bandit Simulation}
+
+\item{assignment_probs}{\code{assignment_probs} object from \code{\link[=run_mab_trial]{run_mab_trial()}}. Contains probability
+of receiving each treatment at each treatment period in the simulated trial.}
 
 \item{conditions}{Named Character vector containing treatment conditions.
 Control condition, must be named "Control" when 'control_augment' > 0.}

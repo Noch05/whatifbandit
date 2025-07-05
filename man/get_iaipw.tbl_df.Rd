@@ -4,18 +4,13 @@
 \alias{get_iaipw.tbl_df}
 \title{\code{\link[=get_iaipw]{get_iaipw()}} for tibbles}
 \usage{
-\method{get_iaipw}{tbl_df}(
-  data,
-  bandits,
-  assignment_probs,
-  periods,
-  algorithm,
-  conditions,
-  verbose
-)
+\method{get_iaipw}{tbl_df}(data, assignment_probs, periods, algorithm, conditions, verbose)
 }
 \arguments{
-\item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
+\item{data}{\code{final_data} object from \code{\link[=run_mab_trial]{run_mab_trial()}}. Contains results of Multi-Arm-Bandit Simulation}
+
+\item{assignment_probs}{\code{assignment_probs} object from \code{\link[=run_mab_trial]{run_mab_trial()}}. Contains probability
+of receiving each treatment at each treatment period in the simulated trial.}
 
 \item{periods}{Numeric; number of treatment waves.}
 

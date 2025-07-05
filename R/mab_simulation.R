@@ -61,7 +61,9 @@ mab_simulation <- function(data,
   )
 
   inference_results <- get_adaptive_aipw(
-    mab = results,
+    data = sim_results$final_data,
+    assignment_probs = sim_results$assignment_probs,
+    periods = base::max(sim_results$final_data$period_number, na.rm = TRUE),
     conditions = conditions, algorithm = algorithm,
     verbose = verbose
   )
@@ -69,26 +71,24 @@ mab_simulation <- function(data,
     final_data = inference_results$final_data,
     bandits = sim_results$bandits,
     assignment_probs = sim_results$assignment_probs,
-    estimates = inference_results$estimates
+    estimates = inference_results$estimates,
+    settings = list(
+      data = NULL,
+      assignment_method = assignment_method,
+      control_augment = control_augment,
+      time_unit = time_unit,
+      perfect_assignment = perfect_assignment,
+      algorithm = algorithm,
+      period_length = period_length,
+      prior_periods = prior_periods,
+      whole_experiment = whole_experiment,
+      conditions = conditions,
+      blocking = blocking,
+      block_cols = block_cols$name
+    )
   )
 
   class(results) <- c("mab", class(results))
-
-
-  results$settings <- list(
-    data = NULL,
-    assignment_method = assignment_method,
-    control_augment = control_augment,
-    time_unit = time_unit,
-    perfect_assignment = perfect_assignment,
-    algorithm = algorithm,
-    period_length = period_length,
-    prior_periods = prior_periods,
-    whole_experiment = whole_experiment,
-    conditions = conditions,
-    blocking = blocking,
-    block_cols = block_cols$name
-  )
 
   return(results)
 }

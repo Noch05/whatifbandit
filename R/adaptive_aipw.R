@@ -6,7 +6,6 @@
 #' \href{https://www.pnas.org/doi/pdf/10.1073/pnas.2014602118}{Hadad et. al (2021)} to calculate a final
 #' estimate for each treatment condition.
 #'
-#' @param periods Numeric; number of treatment waves.
 #' @inheritParams get_adaptive_aipw
 #' @inheritParams single_mab_simulation
 #'
@@ -23,6 +22,7 @@ adaptive_aipw <- function(data, assignment_probs, conditions, periods, algorithm
   verbose_log(verbose, "Aggregating AIPW Estimates")
   base::UseMethod("adaptive_aipw")
 }
+#-------------------------------------------------------------------------------
 #' @title Adaptive AIPW Estimates for Tibbles
 #' @method adaptive_aipw tbl_df
 #' @inheritParams adaptive_aipw
@@ -71,4 +71,15 @@ adaptive_aipw.tbl_df <- function(data, assignment_probs, conditions, periods, al
 #' @title Adaptive AIPW Estimates for data.frames
 #' @method adaptive_aipw data.frame
 #' @inheritParams adaptive_aipw
-#'
+adaptive_aipw.data.frame <- function(data, assignment_probs, conditions, periods, algorithm, verbose) {
+  return(
+    adaptive_aipw.tbl_df(
+      data = tibble::as_tibble(data),
+      assignment_probs = tibble::as_tibble(assignment_probs),
+      conditons = conditions,
+      periods = periods,
+      algorithm = algorithm,
+      verbose = verbose
+    )
+  )
+}

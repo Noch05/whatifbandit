@@ -6,7 +6,7 @@
 #'
 #' @inheritParams get_adaptive_aipw
 #' @inheritParams single_mab_simulation
-#' @param periods Numeric; number of treatment waves.
+
 #'
 #'
 #' @returns A data frame containing the data used in the MAB trial
@@ -18,7 +18,7 @@
 #' * [get_adaptive_aipw()]
 #' * [single_mab_simulation()]
 #'
-get_iaipw <- function(data, bandits, assignment_probs, periods, algorithm, conditions, verbose) {
+get_iaipw <- function(data, assignment_probs, periods, algorithm, conditions, verbose) {
   verbose_log(verbose, "Computing Individual AIPW Estimates")
   base::useMethod("get_iaipw")
 }
@@ -30,7 +30,7 @@ get_iaipw <- function(data, bandits, assignment_probs, periods, algorithm, condi
 #' [get_iaipw()] for tibbles
 #' @inheritParams get_iaipw
 
-get_iaipw.tbl_df <- function(data, bandits, assignment_probs, periods, algorithm, conditions, verbose) {
+get_iaipw.tbl_df <- function(data, assignment_probs, periods, algorithm, conditions, verbose) {
   conditions <- base::sort(conditions)
 
   new_cols <- paste0("aipw_", conditions)

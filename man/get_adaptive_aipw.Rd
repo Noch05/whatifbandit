@@ -4,10 +4,22 @@
 \alias{get_adaptive_aipw}
 \title{Compute Adaptive AIPW Estimates of Treatment Success}
 \usage{
-get_adaptive_aipw(mab, conditions, algorithm, verbose)
+get_adaptive_aipw(
+  data,
+  assignment_probs,
+  periods,
+  conditions,
+  algorithm,
+  verbose
+)
 }
 \arguments{
-\item{mab}{A named list that has been created by \code{\link[=run_mab_trial]{run_mab_trial()}}}
+\item{data}{\code{final_data} object from \code{\link[=run_mab_trial]{run_mab_trial()}}. Contains results of Multi-Arm-Bandit Simulation}
+
+\item{assignment_probs}{\code{assignment_probs} object from \code{\link[=run_mab_trial]{run_mab_trial()}}. Contains probability
+of receiving each treatment at each treatment period in the simulated trial.}
+
+\item{periods}{Numeric; number of treatment waves.}
 
 \item{conditions}{Named Character vector containing treatment conditions.
 Control condition, must be named "Control" when 'control_augment' > 0.}
