@@ -83,7 +83,7 @@ for each treatment block to impute from.}
 \item{settings}{A list of the configuration settings used in the trial.}
 }
 \description{
-Internal helper to\code{\link[=single_mab_simulation]{single_mab_simulation()}}
+Internal helper to \code{\link[=single_mab_simulation]{single_mab_simulation()}}
 and \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}. Centralizes necessary functions to conduct a
 single Multi-Arm-Bandit Trial with adaptive inference. It assumes all inputs have
 been preprocessed by \code{\link[=mab_prepare]{mab_prepare()}}.
@@ -94,6 +94,6 @@ been preprocessed by \code{\link[=mab_prepare]{mab_prepare()}}.
 \item \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}
 \item \code{\link[=run_mab_trial]{run_mab_trial()}}
 \item \code{\link[=get_adaptive_aipw]{get_adaptive_aipw()}}
-\item \code{\link[=mab_prepare]{mab_prepare()}}
+\item \code{\link[=pre_mab_simulation]{pre_mab_simulation()}}
 }
 }

@@ -123,7 +123,7 @@ get_past_results.data.frame <- function(current_data, prior_data,
     current_data = tibble::as_tibble(current_data),
     prior_data = tibble::as_tibble(prior_data),
     perfect_assignment = perfect_assignment,
-    assignment_date_col = success_date_col,
+    assignment_date_col = assignment_date_col,
     conditions = conditions
   )
   return(past_results)

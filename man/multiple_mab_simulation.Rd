@@ -98,7 +98,7 @@ random states. Allows for parallel processing using \code{\link[future:plan]{fut
 \item \code{\link[=check_args]{check_args()}}
 \item \code{\link[=single_mab_simulation]{single_mab_simulation()}}
 \item \code{\link[=mab_simulation]{mab_simulation()}}
-\item \code{\link[=mab_prepare]{mab_prepare()}}
+\item \code{\link[=pre_mab_simulation]{pre_mab_simulation()}}
 \item \code{\link[furrr:future_map]{furrr::future_map()}}
 \item \link[future:plan]{future::plan}
 }

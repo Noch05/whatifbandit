@@ -26,6 +26,7 @@
 #' * [check_impute()]
 #' * [get_past_results()]
 #' * [impute_success()]
+#'
 #' @export
 #'
 run_mab_trial <- function(data, time_unit, period_length = NULL,

@@ -22,7 +22,7 @@
 
 \item{path}{String; File directory to save file.}
 
-\item{...}{arguments to pass to \code{\link[=ggplot2:geom_*]{ggplot2:geom_*()}} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, etc.)}
+\item{...}{arguments to pass to \verb{ggplot2:geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, etc.)}
 }
 \value{
 ggplot object, that can be customized and added to with \code{+} (To change, scales, labels, legend, theme, etc.)

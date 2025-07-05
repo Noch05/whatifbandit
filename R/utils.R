@@ -22,7 +22,7 @@ utils::globalVariables(c(
   "prior_period_success_rate", "estimator",
   "cumulative_trials", "cumulative_count",
   "condition", "cumulative_success", "cumulative_successes",
-  "."
+  "trial", "."
 ))
 
 NULL

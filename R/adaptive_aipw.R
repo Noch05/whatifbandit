@@ -53,7 +53,7 @@ adaptive_aipw.tbl_df <- function(data, assignment_probs, conditions, periods, al
     }
   ) |>
     dplyr::bind_rows() |>
-    mutate(estimator = "AIPW")
+    dplyr::mutate(estimator = "AIPW")
 
   sample <- data |>
     dplyr::group_by(mab_condition) |>
@@ -78,7 +78,7 @@ adaptive_aipw.data.frame <- function(data, assignment_probs, conditions,
     adaptive_aipw.tbl_df(
       data = tibble::as_tibble(data),
       assignment_probs = tibble::as_tibble(assignment_probs),
-      conditons = conditions,
+      conditions = conditions,
       periods = periods,
       algorithm = algorithm,
       verbose = verbose

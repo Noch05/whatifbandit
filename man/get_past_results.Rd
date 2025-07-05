@@ -37,5 +37,5 @@ Summarizes results of prior periods to use for the current Multi-Arm-Bandit assi
 \seealso{
 *\code{\link[=run_mab_trial]{run_mab_trial()}}
 *\code{\link[=single_mab_simulation]{single_mab_simulation()}}
-*\code{\link[=mab_sample]{mab_sample()}}
+*\code{\link[=get_bandit]{get_bandit()}}
 }

@@ -11,7 +11,7 @@ plot_estimates(x, estimator, ...)
 
 \item{estimator}{Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type}
 
-\item{...}{arguments to pass to \code{\link[=ggplot2:geom_*]{ggplot2:geom_*()}} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, etc.)}
+\item{...}{arguments to pass to \verb{ggplot2:geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, etc.)}
 }
 \value{
 ggplot2 object that can be added to with \code{+}

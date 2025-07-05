@@ -41,10 +41,10 @@ Updated \code{data} object with the new \code{period_number} column. \code{perio
 representing an observation's new assignment period.
 }
 \description{
-Used during \code{\link[=mab_prepare]{mab_prepare()}} to assign each observation a new treatment assignment period, based
+Used during \code{\link[=pre_mab_simulation]{pre_mab_simulation()}} to assign each observation a new treatment assignment period, based
 on user-supplied specifications, and user supplied data from
 \code{date_col} and \code{month_col} in \code{data_cols}.
 }
 \seealso{
-*\code{\link[=mab_prepare]{mab_prepare()}}
+*\code{\link[=pre_mab_simulation]{pre_mab_simulation()}}
 }

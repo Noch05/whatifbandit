@@ -72,10 +72,10 @@ If assignment methods is "Batch", this refers to the number of people in each ba
 }
 \value{
 Named list containing:
-\item{data_cols:} {List of necessary columns in data as strings and symbols}
-\item{block_cols:} {List of columns to block by in data as strings and symbols}
-\item{data:} {Prepared \code{data} object the same class as inputted. Contains all
-columns required for \code{\link[=mab_simulation]{mab_simulation()}}}
+\item{data_cols:}{List of necessary columns in data as strings and symbols.}
+\item{block_cols:} List of columns to block by in data as strings and symbols.}
+\item{data:}{Prepared \code{data} object the same class as inputted. Contains all
+columns required for \code{\link[=mab_simulation]{mab_simulation()}}.}
 \item{imputation_infromation:} {List containing necessary information
 for outcome and date imputation for \link{mab_simulation}}
 }

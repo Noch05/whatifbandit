@@ -105,7 +105,7 @@ imputation_prep.data.table <- function(data, whole_experiment, perfect_assignmen
       base::get(data_cols$success_col$name)
     )), by = .(period_number, treatment_block)]
 
-    setorder(original_summary, period_number, treatment_block)
+    data.table::setorder(original_summary, period_number, treatment_block)
 
     original_summary[, `:=`(
       cumulative_count = data.table::shift(base::cumsum(count),
@@ -132,7 +132,7 @@ imputation_prep.data.table <- function(data, whole_experiment, perfect_assignmen
   }
 
   if (!perfect_assignment) {
-    dates_summary <- dcast(
+    dates_summary <- data.table::dcast(
       data[, .(period_number, treatment_block, base::get(data_cols$success_date_col$name))],
       formula = period_number ~ treatment_block, fun.aggregate = \(x) base::mean(x, na.rm = TRUE),
       value.var = "V3"

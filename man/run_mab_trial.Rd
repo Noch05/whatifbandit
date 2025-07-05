@@ -86,9 +86,12 @@ bandit strategy.
 \seealso{
 \itemize{
 \item \code{\link[=single_mab_simulation]{single_mab_simulation()}}
-\item \code{\link[=create_cutoff]{create_cutoff()}}
-*\code{\link[=create_prior]{create_prior()}}
-*\code{\link[=mab_sample]{mab_sample()}}
-*\code{\link[=assign_treatments]{assign_treatments()}}
+\item \code{\link[=mab_simulation]{mab_simulation()}}
+\item \code{\link[=create_prior]{create_prior()}}
+\item \code{\link[=get_bandit]{get_bandit()}}
+\item \code{\link[=assign_treatments]{assign_treatments()}}
+\item \code{\link[=check_impute]{check_impute()}}
+\item \code{\link[=get_past_results]{get_past_results()}}
+\item \code{\link[=impute_success]{impute_success()}}
 }
 }

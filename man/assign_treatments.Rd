@@ -40,7 +40,6 @@ Probabilities passed to \code{\link[randomizr:block_and_cluster_ra]{randomizr::b
 \seealso{
 \itemize{
 \item \code{\link[=run_mab_trial]{run_mab_trial()}}
-\item \code{\link[=mab_sample]{mab_sample()}}
 \item \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}}
 \item \code{\link[randomizr:cluster_ra]{randomizr::cluster_ra()}}
 }

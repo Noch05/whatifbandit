@@ -90,6 +90,6 @@ completing the full MAB pipeline: treatment assignment, success imputation, and 
 \item \code{\link[=get_adaptive_aipw]{get_adaptive_aipw()}}
 \item \code{\link[=check_args]{check_args()}}
 \item \code{\link[=mab_simulation]{mab_simulation()}}
-\item \code{\link[=mab_prepare]{mab_prepare()}}
+\item \code{\link[=pre_mab_simulation]{pre_mab_simulation()}}
 }
 }
