@@ -32,7 +32,7 @@ assign_treatments <- function(current_data, probs, blocking = NULL,
     clusters <- current_data[, get(id_col$name)]
   } else {
     if (blocking) {
-      blocks <- current_data$block[["block"]]
+      blocks <- current_data$block
     }
     clusters <- current_data[[id_col$name]]
   }
