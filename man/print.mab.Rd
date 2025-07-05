@@ -7,13 +7,12 @@
 \method{print}{mab}(x, ...)
 }
 \arguments{
-\item{x}{`mab`` class object created by \code{\link[=single_mab_simulation]{single_mab_simulation()}}}
+\item{x}{\code{mab} class object created by \code{\link[=single_mab_simulation]{single_mab_simulation()}}}
 
 \item{...}{further arguments passed to or from other methods}
 }
 \value{
 Text summary of settings used for the Multi-Arm Bandit trial.
-@export
 }
 \description{
 Custom Print Display for objects of \code{mab} class returned by \code{\link[=single_mab_simulation]{single_mab_simulation()}}.

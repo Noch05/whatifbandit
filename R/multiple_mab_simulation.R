@@ -144,7 +144,7 @@ multiple_mab_simulation <- function(data,
       blocking = blocking,
       block_cols = prepped$block_cols$name,
       trials = times,
-      keep = keep_data
+      keep_data = keep_data
     )
   )
 

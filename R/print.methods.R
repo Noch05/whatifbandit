@@ -1,11 +1,12 @@
 #' Print Generic For `mab`
 #' @description
 #' Custom Print Display for objects of `mab` class returned by [single_mab_simulation()].
-#' @param x `mab`` class object created by [single_mab_simulation()]
+#' @param x `mab` class object created by [single_mab_simulation()]
 #' @param ... further arguments passed to or from other methods
 #' @method print mab
+#' @name print.mab
 #' @returns Text summary of settings used for the Multi-Arm Bandit trial.
-#'  @export
+#' @export
 print.mab <- function(x, ...) {
   print_mab(x)
   base::cat("----------------------------------------------------- \n")
@@ -32,6 +33,7 @@ print.multiple.mab <- function(x, ...) {
 #' @name print_mab
 #' @param mab `mab` or `multiple.mab` object to derive settings from
 #' @returns Text summary of settings used for the Multi-Arm Bandit trial.
+#' @export
 print_mab <- function(mab) {
   settings <- mab$settings
 
