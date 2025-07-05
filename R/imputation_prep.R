@@ -101,25 +101,32 @@ imputation_prep.data.table <- function(data, whole_experiment, perfect_assignmen
     original_summary[, failure_rate := 1 - success_rate]
     setorder(original_summary, treatment_block)
   } else if (!whole_experiment) {
-    original_summary <- data |>
-      dplyr::group_by(period_number, treatment_block) |>
-      dplyr::summarize(
-        count = dplyr::n(),
-        n_success = base::sum(!!data_cols$success_col$sym), .groups = "drop",
-      ) |>
-      dplyr::arrange(period_number, treatment_block) |>
-      dplyr::group_by(treatment_block) |>
-      dplyr::mutate(
-        cumulative_count = dplyr::lag(base::cumsum(count), default = 0),
-        cumulative_success = dplyr::lag(base::cumsum(n_success), default = 0),
-        success_rate = dplyr::if_else(
-          cumulative_count > 0, (cumulative_success / cumulative_count), 0
-        )
-      ) |>
-      dplyr::ungroup() |>
-      dplyr::select(period_number, treatment_block, success_rate) |>
-      dplyr::mutate(failure_rate = 1 - success_rate) |>
-      dplyr::group_split(period_number)
+    original_summary <- data[, .(count = .N, n_success = base::sum(
+      base::get(data_cols$success_col$name)
+    )), by = .(period_number, treatment_block)]
+
+    setorder(original_summary, period_number, treatment_block)
+
+    original_summary[, `:=`(
+      cumulative_count = data.table::shift(base::cumsum(count),
+        type = "lag",
+        fill = 0
+      ),
+      cumulative_success = data.table::shift(base::cumsum(n_success),
+        type = "lag",
+        fill = 0
+      )
+    ), by = treatment_block]
+
+    original_summary[, success_rate := data.table::fifelse(
+      cumulative_count > 0, (cumulative_success / cumulative_count), 0
+    )]
+
+    original_summary <- original_summary[, .(period_number, treatment_block, success_rate)]
+
+    original_summary[, failure_rate := 1 - success_rate]
+
+    original_summary <- split(original_summary, by = "period_number")
   } else {
     rlang::abort("Specify Logical for `whole_experiment`")
   }
