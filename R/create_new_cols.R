@@ -128,7 +128,7 @@ create_new_cols.data.table <- function(data,
   } else {
     data[, treatment_block := get(data_cols$condition_col$name)]
   }
-
+  data.table::setkeyv(data, cols = c("period_number", data_cols$id$name))
   data.table::setorderv(data, cols = c("period_number", data_cols$id$name))
 
   return(invisible(data))

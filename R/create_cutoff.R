@@ -53,7 +53,6 @@ create_cutoff.Day <- function(data, date_col, period_length) {
     data[, period_number := base::floor(
       lubridate::interval(start_date, base::get(date_col$name)) / lubridate::days(1) / period_length
     ) + 1]
-    data.table::setkey(data, period_number)
 
     return(invisible(data))
   } else {
