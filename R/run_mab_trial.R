@@ -57,7 +57,6 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       current_data = current_data,
       prior_data = prior_data,
       perfect_assignment = perfect_assignment,
-      success_date_col = data_cols$success_date_col,
       assignment_date_col = data_cols$assignment_date_col,
       conditions = conditions
     )

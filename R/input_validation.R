@@ -66,7 +66,7 @@ check_args <- function(data,
     rlang::abort("`time_unit` must be provided when assignment method is `Date`.")
   }
   if (assignment_method != "Date" && !is.null(time_unit)) {
-    rlang::abort("`time_unit` is not required when assignment method is not `Date`. It will be ignored")
+    rlang::warn(c("i" = "`time_unit` is not required when assignment method is not `Date`. It will be ignored"))
   }
   if (assignment_method %in% c("Date", "Batch") && is.null(period_length)) {
     rlang::abort("`period_length`, must be provided when Date or Batch assignment is used.")

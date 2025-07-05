@@ -9,7 +9,6 @@
   prior_data,
   perfect_assignment,
   assignment_date_col = NULL,
-  success_date_col = NULL,
   conditions
 )
 }
@@ -24,8 +23,6 @@ If FALSE, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.}
 
 \item{assignment_date_col}{Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.}
-
-\item{success_date_col}{Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE}
 
 \item{conditions}{Named Character vector containing treatment conditions.
 Control condition, must be named "Control" when 'control_augment' > 0.}

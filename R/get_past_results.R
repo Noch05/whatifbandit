@@ -18,7 +18,7 @@
 #'
 #'
 get_past_results <- function(current_data, prior_data, perfect_assignment, assignment_date_col = NULL,
-                             success_date_col = NULL, conditions) {
+                             conditions) {
   base::UseMethod("get_past_results")
 }
 
@@ -30,18 +30,18 @@ get_past_results <- function(current_data, prior_data, perfect_assignment, assig
 
 
 get_past_results.tbl_df <- function(current_data, prior_data, perfect_assignment, assignment_date_col = NULL,
-                                    success_date_col = NULL, conditions) {
+                                    conditions) {
   if (!perfect_assignment) {
     current_date <- base::max(current_data[[assignment_date_col$name]])
 
 
 
     prior_data$known_success <- base::ifelse(
-      current_date >= prior_data[[success_date_col$name]] & !base::is.na(prior_data[[success_date_col$name]]),
+      current_date >= prior_data[["new_success_date"]] & !base::is.na(prior_data[["new_success_date"]]),
       1, 0
     )
   } else {
-    prior_data$known_success <- prior_data$mab_condition
+    prior_data$known_success <- prior_data$mab_success
   }
 
   prior_data <- prior_data |>
@@ -77,13 +77,13 @@ get_past_results.tbl_df <- function(current_data, prior_data, perfect_assignment
 
 get_past_results.data.table <- function(current_data, prior_data,
                                         perfect_assignment, assignment_date_col = NULL,
-                                        success_date_col = NULL, conditions) {
+                                        conditions) {
   if (!perfect_assignment) {
     current_date <- base::max(current_data[, base::get(assignment_date_col$name)])
 
     prior_data[, known_success := data.table::fifelse(
-      current_date >= base::get(success_date_col$name) &
-        !is.na(get(success_date_col$name)), 1, 0
+      current_date >= new_success_date &
+        !is.na(new_success_date), 1, 0
     )]
   } else if (perfect_assignment) {
     prior_data[, known_success := mab_success]
@@ -118,12 +118,11 @@ get_past_results.data.table <- function(current_data, prior_data,
 #' @inheritParams get_past_results
 get_past_results.data.frame <- function(current_data, prior_data,
                                         perfect_assignment, assignment_date_col = NULL,
-                                        success_date_col = NULL, conditions) {
+                                        conditions) {
   past_results <- get_past_results.tbl_df(
     current_data = tibble::as_tibble(current_data),
     prior_data = tibble::as_tibble(prior_data),
     perfect_assignment = perfect_assignment,
-    success_date_col = success_date_col,
     assignment_date_col = success_date_col,
     conditions = conditions
   )
