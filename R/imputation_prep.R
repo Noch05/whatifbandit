@@ -88,4 +88,55 @@ imputation_prep.data.frame <- function(data, whole_experiment, perfect_assignmen
   )
 }
 #-------------------------------------------------------------------------------
+#' @method imputation_prep data.talbe
+#' @title
+#' imputation Prep for data.tables
+#' @inheritParams imputation_prep
+
+imputation_prep.data.table <- function(data, whole_experiment, perfect_assignment, data_cols) {
+  if (whole_experiment) {
+    original_summary <- data[, .(
+      success_rate = base::mean(base::get(data_cols$success_col$name), na.rm = TRUE)
+    ), by = treatment_block]
+    original_summary[, failure_rate := 1 - success_rate]
+    setorder(original_summary, treatment_block)
+  } else if (!whole_experiment) {
+    original_summary <- data |>
+      dplyr::group_by(period_number, treatment_block) |>
+      dplyr::summarize(
+        count = dplyr::n(),
+        n_success = base::sum(!!data_cols$success_col$sym), .groups = "drop",
+      ) |>
+      dplyr::arrange(period_number, treatment_block) |>
+      dplyr::group_by(treatment_block) |>
+      dplyr::mutate(
+        cumulative_count = dplyr::lag(base::cumsum(count), default = 0),
+        cumulative_success = dplyr::lag(base::cumsum(n_success), default = 0),
+        success_rate = dplyr::if_else(
+          cumulative_count > 0, (cumulative_success / cumulative_count), 0
+        )
+      ) |>
+      dplyr::ungroup() |>
+      dplyr::select(period_number, treatment_block, success_rate) |>
+      dplyr::mutate(failure_rate = 1 - success_rate) |>
+      dplyr::group_split(period_number)
+  } else {
+    rlang::abort("Specify Logical for `whole_experiment`")
+  }
+
+  if (!perfect_assignment) {
+    dates_summary <- dcast(
+      data[, .(period_number, treatment_block, base::get(data_cols$success_date_col$name))],
+      formula = period_number ~ treatment_block, fun.aggregate = \(x) base::mean(x, na.rm = TRUE),
+      value.var = "V3"
+    )
+  } else {
+    dates_summary <- NULL
+  }
+
+  imputation_information <- list(original_summary, dates_summary)
+
+  return(imputation_information)
+}
+#-------------------------------------------------------------------------------
 #
