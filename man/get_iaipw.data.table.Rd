@@ -4,9 +4,14 @@
 \alias{get_iaipw.data.table}
 \title{\code{\link[=get_iaipw]{get_iaipw()}} for data.tables}
 \usage{
-\method{get_iaipw}{data.table}(mab, periods, algorithm, conditions, verbose)
+\method{get_iaipw}{data.table}(data, assignment_probs, periods, algorithm, conditions, verbose)
 }
 \arguments{
+\item{data}{\code{final_data} object from \code{\link[=run_mab_trial]{run_mab_trial()}}. Contains results of Multi-Arm-Bandit Simulation}
+
+\item{assignment_probs}{\code{assignment_probs} object from \code{\link[=run_mab_trial]{run_mab_trial()}}. Contains probability
+of receiving each treatment at each treatment period in the simulated trial.}
+
 \item{periods}{Numeric; number of treatment waves.}
 
 \item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}

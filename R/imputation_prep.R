@@ -88,7 +88,7 @@ imputation_prep.data.frame <- function(data, whole_experiment, perfect_assignmen
   )
 }
 #-------------------------------------------------------------------------------
-#' @method imputation_prep data.talbe
+#' @method imputation_prep data.table
 #' @title
 #' imputation Prep for data.tables
 #' @inheritParams imputation_prep
@@ -99,7 +99,8 @@ imputation_prep.data.table <- function(data, whole_experiment, perfect_assignmen
       success_rate = base::mean(base::get(data_cols$success_col$name), na.rm = TRUE)
     ), by = treatment_block]
     original_summary[, failure_rate := 1 - success_rate]
-    setorder(original_summary, treatment_block)
+
+    data.table::setorder(original_summary, treatment_block)
   } else if (!whole_experiment) {
     original_summary <- data[, .(count = .N, n_success = base::sum(
       base::get(data_cols$success_col$name)

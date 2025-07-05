@@ -9,6 +9,10 @@ create_cutoff.Month(data, date_col, month_col, period_length)
 \arguments{
 \item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
 
+\item{date_col}{Column in data, contains original date of event/trial; only necessary when assigning by 'Date'.}
+
+\item{month_col}{Column in data, contains month of treatment; only necessary when time_unit = 'Month'.}
+
 \item{period_length}{Numeric; length of each treatment period.
 If assignment method is "Date", this refers to the
 length of periods by your specified \code{time_unit} (i.e., if "Day", 10 would be 10 days).

@@ -28,12 +28,13 @@
 #' Control condition, must be named "Control" when 'control_augment' > 0.
 #' @param data_cols Named Character vector containing the names of columns in data as strings:
 #' \itemize{
-#' \item id_col: Column in data, contains unique id as a key.
-#' \item success_col: Column in data; Binary successes from original experiment.
-#' \item date_col: Column in data, contains original date of event/trial; only ncessary when assigning by 'Date'.
-#' \item month_col: Column in data, contains month of treatment; only necessary when time_unit = 'Month'.
-#' \item success_date_col: Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE.
-#' \item assignment_date_col: Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
+#' \item `id_col`: Column in data, contains unique id as a key.
+#' \item `success_col`: Column in data; Binary successes from original experiment.
+#' \item `condition_col`: Column in data; Original Treatment condition for each observation.
+#' \item `date_col`: Column in data, contains original date of event/trial; only ncessary when assigning by 'Date'.
+#' \item `month_col`: Column in data, contains month of treatment; only necessary when time_unit = 'Month'.
+#' \item `success_date_col`: Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE.
+#' \item `assignment_date_col`: Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
 #' Used to simulate imperfect information on part of researchers conducting an adaptive trial.
 #' }
 #' @param blocking Logical; Whether or not to use treatment blocking.
@@ -44,11 +45,13 @@
 #' @param verbose Logical; Whether or not to print iteration number. FALSE by default.
 #'
 #' @return `mab` class object, which is named list containing:
-#' \item{final_data}{The processed data with treatment assignments and imputed outcomes, labelled with "mab_" prefix.}
-#' \item{bandits}{Either the UCB1 statistics or Thompson Sampling posterior distributions.}
-#' \item{assignment_probs}{Probability of being assigned each treatment arm at a given period}
-#' \item{estimates}{AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances.}
-#' \item{settings}{A list of the configuration settings used in the trial.}
+#' \itemize{
+#' \item `final_data`: The processed data with treatment assignments and imputed outcomes, labelled with "mab_" prefix.
+#' \item `bandits`: Either the UCB1 statistics or Thompson Sampling posterior distributions.
+#' \item `assignment_probs`: Probability of being assigned each treatment arm at a given period
+#' \item `estimates`: AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances.
+#' \item `settings`: A list of the configuration settings used in the trial.
+#' }
 #'
 #' @seealso
 #' * [run_mab_trial()]

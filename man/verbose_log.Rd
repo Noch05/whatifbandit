@@ -7,6 +7,8 @@
 verbose_log(log, message)
 }
 \arguments{
+\item{log}{Logical; Whether or not to print the message}
+
 \item{message}{The message to be printed to screen, as a string.}
 }
 \description{

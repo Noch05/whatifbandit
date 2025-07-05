@@ -16,9 +16,14 @@ impute_success(
 )
 }
 \arguments{
-\item{id_col}{Column in data, contains unique id as a key}
+\item{current_data}{Updated \code{data} object containing new treatments from \code{\link[=assign_treatments]{assign_treatments()}} to impute outcomes for}
 
-\item{success_col}{Column in data; Binary successes from original experiment}
+\item{imputation_info}{\code{data} object containing probabilities of success from the original experiment, to impute outcomes from.
+Created by \code{\link[=imputation_prep]{imputation_prep()}}}
+
+\item{id_col}{Column in data, contains unique id as a key.}
+
+\item{success_col}{Column in data; Binary successes from original experiment.}
 
 \item{prior_data}{\code{data} object from previous periods. Joined together at the end for the next iteration of the simulation.}
 
@@ -27,9 +32,10 @@ impute_success(
 If FALSE, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.}
 
-\item{success_date_col}{Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE}
+\item{dates}{Named date vector; Contains average date by treatment block to impute new success dates for
+observations whose change in treatment changes their outcome from failure to success.}
 
-\item{data}{Updated \code{data} object containing new treatments from \code{\link[=assign_treatments]{assign_treatments()}} to impute outcomes for}
+\item{success_date_col}{Column in data, contains original dates each success occurred; only necessary when 'perfect_assignment' = FALSE.}
 }
 \description{
 Imputes Outcomes for the current treatment assignment period.

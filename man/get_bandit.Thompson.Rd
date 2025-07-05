@@ -7,8 +7,8 @@
 \method{get_bandit}{Thompson}(past_results, conditions)
 }
 \arguments{
-\item{past_results}{Data.frame containing summary of prior periods.
-Created by \code{\link[=get_past_results]{get_past_results()}} components}
+\item{past_results}{\code{data} object containing summary of prior periods.
+Created by \code{\link[=get_past_results]{get_past_results()}}.}
 
 \item{conditions}{Named Character vector containing treatment conditions.
 Control condition, must be named "Control" when 'control_augment' > 0.}

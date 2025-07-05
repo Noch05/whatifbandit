@@ -9,6 +9,7 @@
 #' @inheritParams create_prior
 #' @inheritParams cols
 #' @param probs Named Numeric Vector; Probability of Assignment for each treatment condition.
+#' @param current_data `data` object with only observations from the current period of the simulation.
 #'
 #' @returns Updated `data` object with the new treatment conditions. If this treatment is different
 #' then from under the original experiment, they are labelled as imputation required.

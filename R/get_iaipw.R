@@ -96,6 +96,6 @@ get_iaipw.tbl_df <- function(data, assignment_probs, periods, algorithm, conditi
 #' @title [get_iaipw()] for data.tables
 #' @inheritParams get_iaipw
 #'
-get_iaipw.data.table <- function(mab, periods, algorithm, conditions, verbose) {
+get_iaipw.data.table <- function(data, assignment_probs, periods, algorithm, conditions, verbose) {
   return(0)
 }

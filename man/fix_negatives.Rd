@@ -9,6 +9,9 @@ fix_negatives(assignment_probs, conditions, iter = 1)
 \arguments{
 \item{assignment_probs}{Named Numeric Vector; Containing probabilities of treatment assignment}
 
+\item{conditions}{Named Character vector containing treatment conditions.
+Control condition, must be named "Control" when 'control_augment' > 0.}
+
 \item{iter, }{iteration tracker, stops function if it reaches the limit of}
 }
 \value{

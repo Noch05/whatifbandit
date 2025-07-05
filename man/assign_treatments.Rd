@@ -16,18 +16,22 @@ assign_treatments(
 )
 }
 \arguments{
+\item{current_data}{\code{data} object with only observations from the current period of the simulation.}
+
 \item{probs}{Named Numeric Vector; Probability of Assignment for each treatment condition.}
 
 \item{blocking}{Logical; Whether or not to use treatment blocking.}
 
 \item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
 
-\item{id_col}{Column in data, contains unique id as a key}
+\item{id_col}{Column in data, contains unique id as a key.}
 
 \item{conditions}{Named Character vector containing treatment conditions.
 Control condition, must be named "Control" when 'control_augment' > 0.}
 
-\item{success_col}{Column in data; Binary successes from original experiment}
+\item{condition_col}{Column in data; Original Treatment condition for each observation.}
+
+\item{success_col}{Column in data; Binary successes from original experiment.}
 }
 \value{
 Updated \code{data} object with the new treatment conditions. If this treatment is different

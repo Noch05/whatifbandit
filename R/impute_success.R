@@ -3,9 +3,13 @@
 #' @description Imputes Outcomes for the current treatment assignment period.
 #' Uses[randomizr::block_and_cluster_ra] to impute success of the new treatments based on data from the original trial
 #'
-#' @param data Updated `data` object containing new treatments from [assign_treatments()] to impute outcomes for
+#' @param current_data Updated `data` object containing new treatments from [assign_treatments()] to impute outcomes for
 #' @inheritParams run_mab_trial
 #' @param prior_data `data` object from previous periods. Joined together at the end for the next iteration of the simulation.
+#' @param imputation_info `data` object containing probabilities of success from the original experiment, to impute outcomes from.
+#' Created by [imputation_prep()]
+#' @param dates Named date vector; Contains average date by treatment block to impute new success dates for
+#' observations whose change in treatment changes their outcome from failure to success.
 #' @inheritParams single_mab_simulation
 #' @inheritParams cols
 #'

@@ -11,12 +11,13 @@ create_new_cols(data, data_cols, block_cols, blocking, perfect_assignment)
 
 \item{data_cols}{Named Character vector containing the names of columns in data as strings:
 \itemize{
-\item id_col: Column in data, contains unique id as a key.
-\item success_col: Column in data; Binary successes from original experiment.
-\item date_col: Column in data, contains original date of event/trial; only ncessary when assigning by 'Date'.
-\item month_col: Column in data, contains month of treatment; only necessary when time_unit = 'Month'.
-\item success_date_col: Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE.
-\item assignment_date_col: Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
+\item \code{id_col}: Column in data, contains unique id as a key.
+\item \code{success_col}: Column in data; Binary successes from original experiment.
+\item \code{condition_col}: Column in data; Original Treatment condition for each observation.
+\item \code{date_col}: Column in data, contains original date of event/trial; only ncessary when assigning by 'Date'.
+\item \code{month_col}: Column in data, contains month of treatment; only necessary when time_unit = 'Month'.
+\item \code{success_date_col}: Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE.
+\item \code{assignment_date_col}: Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
 Used to simulate imperfect information on part of researchers conducting an adaptive trial.
 }}
 
@@ -31,12 +32,14 @@ on the dates treatments would have been assigned for each wave.}
 }
 \value{
 Updated \code{data} object of same class with 6 new columns:
-\item{mab_success:}{New variable to hold new success from Multi-arm bandit procedure, NA until assigned.}
-\item{mab_condition:}{New variable to hold new treatment condition from Multi-arm bandit procedure, NA until assigned.}
-\item{impute_req:}{Binary indicator for imputation requirement, NA until assigned}
-\item{new_success_date:}{New variable to new recertification date from Multi-arm bandit procedure, NA until assigned.}
-\item{block:}{New variable indicating the variables to block by for assignment}
-\item{treatment_block:}{New variable combining block with original treatment condition}
+\itemize{
+\item mab_success: New variable to hold new success from Multi-arm bandit procedure, NA until assigned.
+\item mab_condition: New variable to hold new treatment condition from Multi-arm bandit procedure, NA until assigned.
+\item impute_req: Binary indicator for imputation requirement, NA until assigned.
+\item new_success_date: New variable to new recertification date from Multi-arm bandit procedure, NA until assigned.
+\item block New variable indicating the variables to block by for assignment.
+\item treatment_block New variable combining block with original treatment condition.
+}
 }
 \description{
 Initializes partially empty columns in \code{data}, to ensure compatibility with, \code{\link[=mab_simulation]{mab_simulation()}}.
@@ -45,5 +48,5 @@ the adaptive trial.
 }
 \seealso{
 *\code{\link[=create_cutoff]{create_cutoff()}}
-*\code{\link[=mab_prepare]{mab_prepare()}}
+*\code{\link[=pre_mab_simulation]{pre_mab_simulation()}}
 }

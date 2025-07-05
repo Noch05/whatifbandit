@@ -7,11 +7,13 @@
 \method{get_bandit}{UCB1}(past_results, conditions, current_period)
 }
 \arguments{
-\item{past_results}{Data.frame containing summary of prior periods.
-Created by \code{\link[=get_past_results]{get_past_results()}} components}
+\item{past_results}{\code{data} object containing summary of prior periods.
+Created by \code{\link[=get_past_results]{get_past_results()}}.}
 
 \item{conditions}{Named Character vector containing treatment conditions.
 Control condition, must be named "Control" when 'control_augment' > 0.}
+
+\item{current_period}{Numeric scalar; current period of the adaptive trial simulation.}
 }
 \value{
 Data.frame containing UCB and Success Rate for each condition

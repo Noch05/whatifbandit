@@ -46,12 +46,13 @@ If FALSE, uses only data available up to the current period.}
 
 \item{data_cols}{Named Character vector containing the names of columns in data as strings:
 \itemize{
-\item id_col: Column in data, contains unique id as a key.
-\item success_col: Column in data; Binary successes from original experiment.
-\item date_col: Column in data, contains original date of event/trial; only ncessary when assigning by 'Date'.
-\item month_col: Column in data, contains month of treatment; only necessary when time_unit = 'Month'.
-\item success_date_col: Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE.
-\item assignment_date_col: Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
+\item \code{id_col}: Column in data, contains unique id as a key.
+\item \code{success_col}: Column in data; Binary successes from original experiment.
+\item \code{condition_col}: Column in data; Original Treatment condition for each observation.
+\item \code{date_col}: Column in data, contains original date of event/trial; only ncessary when assigning by 'Date'.
+\item \code{month_col}: Column in data, contains month of treatment; only necessary when time_unit = 'Month'.
+\item \code{success_date_col}: Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE.
+\item \code{assignment_date_col}: Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
 Used to simulate imperfect information on part of researchers conducting an adaptive trial.
 }}
 
@@ -72,12 +73,14 @@ If assignment methods is "Batch", this refers to the number of people in each ba
 }
 \value{
 Named list containing:
-\item{data_cols:}{List of necessary columns in data as strings and symbols.}
-\item{block_cols:} List of columns to block by in data as strings and symbols.}
-\item{data:}{Prepared \code{data} object the same class as inputted. Contains all
-columns required for \code{\link[=mab_simulation]{mab_simulation()}}.}
-\item{imputation_infromation:} {List containing necessary information
-for outcome and date imputation for \link{mab_simulation}}
+\itemize{
+\item \code{data_cols}: List of necessary columns in \code{data} as strings and symbols.
+\item \code{block_cols}: List of columns to block by in \code{data} as strings and symbols.
+\item \code{data}: Prepared \code{data} object the same class as inputted. Contains all
+columns required for \code{\link[=mab_simulation]{mab_simulation()}}.
+\item \code{imputation_information}: List containing necessary information
+for outcome and date imputation for \code{\link[=mab_simulation]{mab_simulation()}}.
+}
 }
 \description{
 Common function for all the actions that need to take place before

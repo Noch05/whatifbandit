@@ -44,6 +44,7 @@ create_cutoff <- function(data, data_cols, period_length = NULL,
 #' @method create_cutoff Day
 #' @title [create_cutoff()] Day Based Periods
 #' @inheritParams create_cutoff
+#' @inheritParams cols
 #'
 create_cutoff.Day <- function(data, date_col, period_length) {
   if (inherits(data, "data.table")) {
@@ -71,6 +72,7 @@ create_cutoff.Day <- function(data, date_col, period_length) {
 #' @method create_cutoff Week
 #' @title [create_cutoff()] Week Based Periods
 #' @inheritParams create_cutoff
+#' @inheritParams cols
 create_cutoff.Week <- function(data, date_col, period_length) {
   if (inherits(data, "data.table")) {
     start_date <- base::min(data[, get(date_col$name)])
@@ -98,6 +100,7 @@ create_cutoff.Week <- function(data, date_col, period_length) {
 #' #' @method create_cutoff Month
 #' @title [create_cutoff()] Month Based Periods
 #' @inheritParams create_cutoff
+#' @inheritParams cols
 #'
 create_cutoff.Month <- function(data, date_col, month_col, period_length) {
   if (inherits(data, "data.table")) {

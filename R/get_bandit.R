@@ -4,8 +4,9 @@
 #' @name get_bandit
 #'
 #' @inheritParams single_mab_simulation
-#' @param past_results Data.frame containing summary of prior periods.
-#' Created by [get_past_results()] components
+#' @param past_results `data` object containing summary of prior periods.
+#' Created by [get_past_results()].
+#' @param current_period Numeric scalar; current period of the adaptive trial simulation.
 #'
 #'
 #' @returns The bandit object for the given period.
@@ -157,6 +158,7 @@ augment_prob.UCB1 <- function(assignment_probs, control_augment, conditions) {
 #' @name fix_negatives
 #' @param assignment_probs Named Numeric Vector; Containing probabilities of treatment assignment
 #' @param iter, iteration tracker, stops function if it reaches the limit of
+#' @inheritParams single_mab_simulation
 #' @returns Named Numeric Vector; Containing probabilities of treatment assignment, all positive.
 
 fix_negatives <- function(assignment_probs, conditions, iter = 1) {

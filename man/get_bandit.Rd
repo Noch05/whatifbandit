@@ -13,13 +13,15 @@ get_bandit(
 )
 }
 \arguments{
-\item{past_results}{Data.frame containing summary of prior periods.
-Created by \code{\link[=get_past_results]{get_past_results()}} components}
+\item{past_results}{\code{data} object containing summary of prior periods.
+Created by \code{\link[=get_past_results]{get_past_results()}}.}
 
 \item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
 
 \item{conditions}{Named Character vector containing treatment conditions.
 Control condition, must be named "Control" when 'control_augment' > 0.}
+
+\item{current_period}{Numeric scalar; current period of the adaptive trial simulation.}
 
 \item{control_augment}{Number \eqn{\in} [0,1]; Proportion of each wave guaranteed to get "Control" treatment.
 Default is 0.}
