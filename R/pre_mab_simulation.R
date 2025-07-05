@@ -26,7 +26,6 @@ pre_mab_simulation <- function(data,
   )) |>
     stats::setNames(names(data_cols))
 
-
   if (!base::is.null(block_cols)) {
     block_cols <- list(name = block_cols, symbol = rlang::sym(block_cols))
   }

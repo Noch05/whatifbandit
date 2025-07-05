@@ -54,14 +54,19 @@ check_args <- function(data,
     whole_experiment = whole_experiment,
     perfect_assignment = perfect_assignment
   )
-  for (i in base::seq_along(logical_args)) {
-    if (!is.logical(logical_args[[i]])) {
-      rlang::abort(sprintf("`%s` must be logical (TRUE or FALSE).", base::names(logical_args)[[i]]))
+
+  purrr::walk2(logical_args, names(logical_args), ~ {
+    if (!is.logical(.x)) {
+      rlang::abort(sprintf("`%s` must be logical (TRUE or FALSE).", .y))
     }
-  }
+  })
+
   # Checking Arguments are properly provided
   if (assignment_method == "Date" && is.null(time_unit)) {
     rlang::abort("`time_unit` must be provided when assignment method is `Date`.")
+  }
+  if (assignment_method != "Date" && !is.null(time_unit)) {
+    rlang::abort("`time_unit` is not required when assignment method is not `Date`. It will be ignored")
   }
   if (assignment_method %in% c("Date", "Batch") && is.null(period_length)) {
     rlang::abort("`period_length`, must be provided when Date or Batch assignment is used.")
@@ -141,7 +146,7 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, data_co
   all_cols <- c("id_col", "success_col", "date_col", "month_col", "success_date_col", "assignment_date_col")
 
   # Reason each column might be required
-  req_reasons <- list(
+  all_reasons <- list(
     id_col = "it is always required",
     success_col = "it is always required",
     date_col = "assignment_method is 'Date'",
@@ -162,24 +167,25 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, data_co
   if (!perfect_assignment) {
     required_cols <- c(required_cols, "success_date_col", "assignment_date_col")
   }
+  req_reasons <- all_reasons[required_cols]
 
   # Check for missing required columns
-  for (i in base::seq_along(required_cols)) {
-    missing_input <- !required_cols[[i]] %in% names(data_cols)
-
+  #
+  purrr::walk2(required_cols, req_reasons, ~ {
+    missing_input <- !.x %in% names(data_cols)
     if (missing_input) {
-      rlang::abort(c(sprintf("Required column `%s` is not declared in `data_cols`.", required_cols[[i]]),
-        "x" = paste0("reason: ", req_reasons[[required_cols[[i]]]])
+      rlang::abort(c(sprintf("Required column `%s` is not declared in `data_cols`.", .x),
+        "x" = paste0("reason: ", .y)
       ))
     }
-    missing_data <- !data_cols[[required_cols[[i]]]]$name %in% names(data)
 
+    missing_data <- !data_cols[[.x]]$name %in% names(data)
     if (missing_data) {
-      rlang::abort(c(sprintf("Required column `%s` is not found in provided `data`.", required_cols[[i]]),
-        "x" = paste0("reason: ", req_reasons[[required_cols[[i]]]])
+      rlang::abort(c(sprintf("Required column `%s` is not found in provided `data`.", .x),
+        "x" = paste0("reason: ", .y)
       ))
     }
-  }
+  })
 
 
   # Now handle non-required columns that are present but unnecessary
@@ -191,16 +197,15 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, data_co
       success_date_col = "perfect_assignment is TRUE",
       assignment_date_col = "perfect_assignment is TRUE"
     )
+    non_req_reasons <- non_req_reasons[non_required_cols]
 
-    for (i in base::seq_along(non_required_cols)) {
-      if (non_required_cols[[i]] %in% names(data_cols)) {
-        rlang::warn(c(
-          "i" = sprintf(
-            "`%s` is not required because %s. It will be ignored.",
-            non_required_cols[[i]], non_req_reasons[[non_required_cols[[i]]]]
-          )
-        ))
+    purrr::walk2(non_req_reasons, non_req_reasons, ~ {
+      if (.x %in% names(data_cols)) {
+        rlang::warn(c("i" = sprintf(
+          "`%s` is not required because %s. It will be ignored.",
+          .x, .y
+        )))
       }
-    }
+    })
   }
 }
