@@ -28,31 +28,28 @@ adaptive_aipw <- function(data, assignment_probs, conditions, periods, algorithm
 #' @inheritParams adaptive_aipw
 #'
 adaptive_aipw.tbl_df <- function(data, assignment_probs, conditions, periods, algorithm, verbose) {
-  estimates <- base::vector(mode = "list", length = periods)
+  estimates <- purrr::map(
+    condtions, ~ {
+      results <- data |>
+        dplyr::group_by(period_number) |>
+        dplyr::summarize(avg = base::mean(!!rlang::sym(base::paste0("aipw_", .x)), na.rm = TRUE)) |>
+        dplyr::mutate(time_weights = (!!rlang::sym(base::paste0(.x), "_assign_prob") / periods))
 
-  for (i in base::seq_len(length(conditions))) {
-    results <- data |>
-      dplyr::group_by(period_number) |>
-      dplyr::summarize(avg = base::mean(!!rlang::sym(base::paste0("aipw_", conditions[i])), na.rm = TRUE)) |>
-      dplyr::mutate(time_weights = purrr::map_dbl(period_number, ~ base::sqrt(
-        base::as.numeric(assignment_probs[.x, conditions[i]]) / periods
-      )))
 
-    estimate <- results |>
-      dplyr::summarize(estimate = base::sum(avg * time_weights, na.rm = TRUE) / base::sum(time_weights, na.rm = TRUE)) |>
-      dplyr::pull()
+      estimate <- (base::sum(results$avg * results$time_weights, na.rm = TRUE)) /
+        (base::sum(results$time_weights, na.rm = TRUE))
 
-    variance <- results |>
-      dplyr::mutate(time_weights_sq = time_weights^2) |>
-      dplyr::summarize(variance = base::sum(time_weights_sq * (avg - estimate)^2) / (base::sum(time_weights))^2) |>
-      dplyr::pull()
+      variance <- base::sum((results$time_weights^2) * (results$avg - estimate)^2) /
+        (base::sum(results$time_weights)^2)
 
-    estimates[[i]] <- tibble::tibble(
-      mean = estimate,
-      variance = variance,
-      mab_condition = conditions[i]
-    )
-  }
+      return(tibble::tibble(
+        mean = estimate,
+        variance = variance,
+        mab_condition = .x
+      ))
+    }
+  ) |>
+    dplyr::bind_rows()
 
   sample <- data |>
     dplyr::group_by(mab_condition) |>
@@ -62,10 +59,11 @@ adaptive_aipw.tbl_df <- function(data, assignment_probs, conditions, periods, al
     ) |>
     dplyr::mutate(estimator = "Sample")
 
-
   returns <- dplyr::bind_rows(estimates) |>
     dplyr::mutate(estimator = "AIPW") |>
     base::rbind(sample)
+
+
   return(returns)
 }
 #-------------------------------------------------------------------------------
