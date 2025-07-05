@@ -72,6 +72,10 @@ check_args <- function(data,
   if (assignment_method %in% c("Date", "Batch") && is.null(period_length)) {
     rlang::abort("`period_length`, must be provided when Date or Batch assignment is used.")
   }
+  if (is.null(control_augment) || !is.numeric(control_augment) || control_augment < 0 || control_augment > 1) {
+    rlang::abort("`control_augment` must be a non-null double between 0 and 1")
+  }
+
   if (control_augment > 0 && !"Control" %in% names(conditions)) {
     rlang::abort("Condtions vector must have a at least one condition named 'Control'
     when control augmentation is used.")
@@ -126,6 +130,7 @@ check_args <- function(data,
     rlang::abort(paste(data_cols$id$name, "is not a unique identifier, a unique id for each observation is required"))
   }
 }
+
 
 
 #--------------------------------------------------------------------------------------------------------------
