@@ -2,18 +2,18 @@
 % Please edit documentation in R/print.methods.R
 \name{print.multiple.mab}
 \alias{print.multiple.mab}
-\title{Print Generic for Multiple.Mab Object}
+\title{Print Generic For \code{multiple.mab}}
 \usage{
 \method{print}{multiple.mab}(x, ...)
 }
 \arguments{
-\item{x}{"multiple.mab" class object}
+\item{x}{\code{multiple.mab} class object}
 
 \item{...}{further arguments passed to or from other methods}
 }
 \value{
-Text Summary of Settings Used for the Multiple MAB Trials
+Text summary of settings used for the Multi-Arm Bandit trials.
 }
 \description{
-Custom Print Display for multiple.mab objects returned by \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}.
+Custom Print Display for `multiple.mab`` objects returned by \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}.
 }

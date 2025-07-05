@@ -1,37 +1,37 @@
-#' Print Generics for Mab Object
+#' Print Generic For `mab`
 #' @description
-#' Custom Print Display for objects of mab class returned by [single_mab_simulation()].
-#' @export
-#' @param x "mab" class object created by [single_mab_simulation()]
+#' Custom Print Display for objects of `mab` class returned by [single_mab_simulation()].
+#' @param x `mab`` class object created by [single_mab_simulation()]
 #' @param ... further arguments passed to or from other methods
 #' @method print mab
-#' @returns Text Summary of the Settings used for the MAB trial
+#' @returns Text summary of settings used for the Multi-Arm Bandit trial.
+#'  @export
 print.mab <- function(x, ...) {
   print_mab(x)
   base::cat("----------------------------------------------------- \n")
 }
 #-------------------------------------------------------------------------------
-#' Print Generic for Multiple.Mab Object
-#' @description Custom Print Display for multiple.mab objects returned by [multiple_mab_simulation()].
+#' Print Generic For `multiple.mab`
+#' @description Custom Print Display for `multiple.mab`` objects returned by [multiple_mab_simulation()].
 #' @method print multiple.mab
-#' @param x "multiple.mab" class object
+#' @param x `multiple.mab` class object
 #' @param ... further arguments passed to or from other methods
-#' @returns Text Summary of Settings Used for the Multiple MAB Trials
+#' @returns Text summary of settings used for the Multi-Arm Bandit trials.
 #' @export
 print.multiple.mab <- function(x, ...) {
   settings <- x$settings
   print_mab(x)
-  base::cat("Trials Conducted:      ", settings$trials, " trials\n")
-  base::cat("Keep Final Data:       ", settings$keep_data, "\n")
+  base::cat("Trials Conducted:     ", settings$trials, "trials\n")
+  base::cat("Keep Final Data:      ", settings$keep_data, "\n")
   base::cat("----------------------------------------------------- \n")
 }
 #-----------------------------------------------------------------------------
 
-#' Print Helper for MAB and Multiple MAB Objects
-#' @description Common items for the print generics for mab and multiple.mab classes
+#' Print Helper for `mab` and `multiple.mab`
+#' @description Common items for the print generics for `mab` and `multiple.ma`b classes
 #' @name print_mab
-#' @param mab MAB or Multiple MAB object to derive settings from
-#' @returns Text Summary of Settings used for the Mab Trial
+#' @param mab `mab` or `multiple.mab` object to derive settings from
+#' @returns Text summary of settings used for the Multi-Arm Bandit trial.
 print_mab <- function(mab) {
   settings <- mab$settings
 

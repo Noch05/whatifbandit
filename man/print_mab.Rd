@@ -2,16 +2,16 @@
 % Please edit documentation in R/print.methods.R
 \name{print_mab}
 \alias{print_mab}
-\title{Print Helper for MAB and Multiple MAB Objects}
+\title{Print Helper for \code{mab} and \code{multiple.mab}}
 \usage{
 print_mab(mab)
 }
 \arguments{
-\item{mab}{MAB or Multiple MAB object to derive settings from}
+\item{mab}{\code{mab} or \code{multiple.mab} object to derive settings from}
 }
 \value{
-Text Summary of Settings used for the Mab Trial
+Text summary of settings used for the Multi-Arm Bandit trial.
 }
 \description{
-Common items for the print generics for mab and multiple.mab classes
+Common items for the print generics for \code{mab} and \code{multiple.ma}b classes
 }

@@ -28,25 +28,22 @@
 #' @export
 
 multiple_mab_simulation <- function(data,
-                                    time_unit,
-                                    perfect_assignment,
+                                    assignment_method,
                                     algorithm,
-                                    period_length = NULL,
-                                    prior_periods,
-                                    whole_experiment,
                                     conditions,
+                                    prior_periods,
+                                    perfect_assignment,
+                                    whole_experiment,
                                     blocking,
+                                    data_cols,
+                                    times,
+                                    seeds,
+                                    keep_data = FALSE,
+                                    control_augment = 0,
+                                    time_unit = NULL,
+                                    period_length = NULL,
                                     block_cols = NULL,
-                                    date_col,
-                                    month_col = NULL,
-                                    id_col,
-                                    condition_col,
-                                    success_col,
-                                    success_date_col = NULL,
-                                    assignment_date_col = NULL,
-                                    assigment_method,
-                                    verbose,
-                                    times, seeds, keep_data) {
+                                    verbose = FALSE) {
   if (!is.numeric(times) || times < 1) {
     stop("Argument 'times' must be a numeric value greater than or equal to 1.
          Please provide a valid value.")
@@ -94,6 +91,7 @@ multiple_mab_simulation <- function(data,
     if (!keep_data) {
       results <- results[names(results) != "final_data"]
     }
+    results <- results[names(results) != "settings"]
   },
   .options = furrr::furrr_options(
     seed = TRUE,
@@ -110,8 +108,12 @@ multiple_mab_simulation <- function(data,
   bandits <- dplyr::bind_rows(
     lapply(mabs[base::seq_len(times)], `[[`, "bandits"),
     .id = "trial"
-  )
-  estimates <- dplyr::bind_rows(base::lapply(mabs[base::seq_len(times)], `[[`, "estimates"), .id = "trial")
+  ) |>
+    dplyr::mutate(trial = base::as.numeric(trial))
+
+
+  estimates <- dplyr::bind_rows(base::lapply(mabs[base::seq_len(times)], `[[`, "estimates"), .id = "trial") |>
+    dplyr::mutate(trial = base::as.numeric(trial))
 
 
   if (keep_data) {
@@ -130,6 +132,8 @@ multiple_mab_simulation <- function(data,
     estimates = estimates,
     settings = list(
       data = data_name,
+      assignment_method = assignment_method,
+      control_augment = control_augment,
       time_unit = time_unit,
       perfect_assignment = perfect_assignment,
       algorithm = algorithm,
@@ -138,9 +142,9 @@ multiple_mab_simulation <- function(data,
       whole_experiment = whole_experiment,
       conditions = conditions,
       blocking = blocking,
-      block_cols = block_cols,
+      block_cols = prepped$block_cols$name,
       trials = times,
-      keep_data = keep_data
+      keep = keep_data
     )
   )
 

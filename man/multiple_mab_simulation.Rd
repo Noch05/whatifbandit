@@ -6,61 +6,57 @@
 \usage{
 multiple_mab_simulation(
   data,
-  time_unit,
-  perfect_assignment,
+  assignment_method,
   algorithm,
-  period_length = NULL,
-  prior_periods,
-  whole_experiment,
   conditions,
+  prior_periods,
+  perfect_assignment,
+  whole_experiment,
   blocking,
-  block_cols = NULL,
-  date_col,
-  month_col = NULL,
-  id_col,
-  condition_col,
-  success_col,
-  success_date_col = NULL,
-  assignment_date_col = NULL,
-  assigment_method,
-  verbose,
+  data_cols,
   times,
   seeds,
-  keep_data
+  keep_data = FALSE,
+  control_augment = 0,
+  time_unit = NULL,
+  period_length = NULL,
+  block_cols = NULL,
+  verbose = FALSE
 )
 }
 \arguments{
 \item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
 
-\item{time_unit}{A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'.
-Acceptable values are "Day", "Week", or "Month".}
+\item{assignment_method}{String; "Date" or "Batch" to define the assignment into treatment waves.}
+
+\item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
+
+\item{conditions}{Named Character vector containing treatment conditions.
+Control condition, must be named "Control" when 'control_augment' > 0.}
+
+\item{prior_periods}{Numeric; number of previous periods to use in the treatment assignment model
+or specify string "All" to use all previous periods.}
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
 If FALSE, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.}
 
-\item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
-
-\item{period_length}{Numeric; length of each treatment period.
-If assignment method is "Date", this refers to the
-length of periods by your specified \code{time_unit} (i.e., if "Day", 10 would be 10 days).
-If assignment methods is "Batch", this refers to the number of people in each batch.}
-
-\item{prior_periods}{Numeric; number of previous periods to use in the treatment assignment model
-or specify string "All" to use all previous periods.}
-
 \item{whole_experiment}{Logical; if TRUE, uses all past experimental data for imputing outcomes.
 If FALSE, uses only data available up to the current period.}
 
-\item{conditions}{Named Character vector containing treatment conditions.
-Control condition, must be named "Control" when 'control_augment' > 0.}
-
 \item{blocking}{Logical; Whether or not to use treatment blocking.}
 
-\item{block_cols}{Character Vector of variables to block by.}
-
-\item{verbose}{Logical; Toggles progress bar from \link[furrr:future_map]{furrr::future_map}.}
+\item{data_cols}{Named Character vector containing the names of columns in data as strings:
+\itemize{
+\item id_col: Column in data, contains unique id as a key.
+\item success_col: Column in data; Binary successes from original experiment.
+\item date_col: Column in data, contains original date of event/trial; only ncessary when assigning by 'Date'.
+\item month_col: Column in data, contains month of treatment; only necessary when time_unit = 'Month'.
+\item success_date_col: Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE.
+\item assignment_date_col: Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
+Used to simulate imperfect information on part of researchers conducting an adaptive trial.
+}}
 
 \item{times}{Numeric; number of simulations to conduct.}
 
@@ -68,6 +64,21 @@ Control condition, must be named "Control" when 'control_augment' > 0.}
 
 \item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets
 .}
+
+\item{control_augment}{Number \eqn{\in} [0,1]; Proportion of each wave guaranteed to get "Control" treatment.
+Default is 0.}
+
+\item{time_unit}{A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'.
+Acceptable values are "Day", "Week", or "Month".}
+
+\item{period_length}{Numeric; length of each treatment period.
+If assignment method is "Date", this refers to the
+length of periods by your specified \code{time_unit} (i.e., if "Day", 10 would be 10 days).
+If assignment methods is "Batch", this refers to the number of people in each batch.}
+
+\item{block_cols}{Character Vector of variables to block by.}
+
+\item{verbose}{Logical; Toggles progress bar from \link[furrr:future_map]{furrr::future_map}.}
 }
 \value{
 \code{multiple.mab} class object, which is a named list containing:
