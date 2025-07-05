@@ -22,7 +22,7 @@
 #' * [check_args()]
 #' * [single_mab_simulation()]
 #' * [mab_simulation()]
-#' * [mab_prepare()]
+#' * [pre_mab_simulation()]
 #' * [furrr::future_map()]
 #' * [future::plan]
 #' @export

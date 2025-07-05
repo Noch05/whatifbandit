@@ -19,10 +19,13 @@
 #'
 #' @seealso
 #' * [single_mab_simulation()]
-#' * [create_cutoff()]
-#' *[create_prior()]
-#' *[mab_sample()]
-#' *[assign_treatments()]
+#' * [mab_simulation()]
+#' * [create_prior()]
+#' * [get_bandit()]
+#' * [assign_treatments()]
+#' * [check_impute()]
+#' * [get_past_results()]
+#' * [impute_success()]
 #' @export
 #'
 run_mab_trial <- function(data, time_unit, period_length = NULL,

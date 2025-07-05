@@ -7,10 +7,10 @@
 #' running the Multi-Arm-Bandit Simulation. Intakes data and column names,
 #' check for valid arguments, prepare data and pre-compute key values.
 #' @returns Named list containing:
-#' \item{data_cols:} {List of necessary columns in data as strings and symbols}
-#' \item{block_cols:} {List of columns to block by in data as strings and symbols}
-#' \item{data:} {Prepared `data` object the same class as inputted. Contains all
-#' columns required for [mab_simulation()]}
+#' \item{data_cols:}{List of necessary columns in data as strings and symbols.}
+#' \item{block_cols:} List of columns to block by in data as strings and symbols.}
+#' \item{data:}{Prepared `data` object the same class as inputted. Contains all
+#' columns required for [mab_simulation()].}
 #' \item{imputation_infromation:} {List containing necessary information
 #' for outcome and date imputation for [mab_simulation]}
 #'

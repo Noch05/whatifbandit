@@ -1,7 +1,7 @@
 #' @title Simulates Multi-Arm Bandit Trial From Prepared Inputs
 #' @name mab_simulation
 #'
-#' @description Internal helper to[single_mab_simulation()]
+#' @description Internal helper to [single_mab_simulation()]
 #' and [multiple_mab_simulation()]. Centralizes necessary functions to conduct a
 #' single Multi-Arm-Bandit Trial with adaptive inference. It assumes all inputs have
 #' been preprocessed by [mab_prepare()].
@@ -21,7 +21,7 @@
 #'* [multiple_mab_simulation()]
 #'* [run_mab_trial()]
 #'* [get_adaptive_aipw()]
-#'* [mab_prepare()]
+#'* [pre_mab_simulation()]
 #'
 #'
 

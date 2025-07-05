@@ -1,6 +1,6 @@
 #' Create Treatment Wave Cutoffs
 #' @name create_cutoff
-#' @description Used during [mab_prepare()] to assign each observation a new treatment assignment period, based
+#' @description Used during [pre_mab_simulation()] to assign each observation a new treatment assignment period, based
 #' on user-supplied specifications, and user supplied data from
 #' `date_col` and `month_col` in `data_cols`.
 #' @inheritParams single_mab_simulation
@@ -9,7 +9,7 @@
 #' @return Updated `data` object with the new `period_number` column. `period_number` is an integer
 #' representing an observation's new assignment period.
 #' @seealso
-#' *[mab_prepare()]
+#' *[pre_mab_simulation()]
 #------------------------------------------------------------------------------------------
 create_cutoff <- function(data, data_cols, period_length = NULL,
                           assignment_method, time_unit) {

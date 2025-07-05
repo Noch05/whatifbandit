@@ -13,7 +13,7 @@
 #' @param save Logical; Whether or not to save the plot to disk; FALSE by default.
 #' @param path String; File directory to save file.
 #' @param estimator Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type
-#' @param ... arguments to pass to [ggplot2:geom_*()] function (e.g. `color`, `linewidth`, `alpha`, etc.)
+#' @param ... arguments to pass to `ggplot2:geom_*` function (e.g. `color`, `linewidth`, `alpha`, etc.)
 #' @export
 #' @returns ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
 

@@ -14,7 +14,7 @@
 #' @seealso
 #' *[run_mab_trial()]
 #' *[single_mab_simulation()]
-#' *[mab_sample()]
+#' *[get_bandit()]
 #'
 #'
 get_past_results <- function(current_data, prior_data, perfect_assignment, assignment_date_col = NULL,

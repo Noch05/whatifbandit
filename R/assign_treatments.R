@@ -15,7 +15,6 @@
 #'
 #' @seealso
 #'* [run_mab_trial()]
-#'* [mab_sample()]
 #'* [randomizr::block_and_cluster_ra()]
 #'* [randomizr::cluster_ra()]
 #'

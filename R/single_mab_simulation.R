@@ -55,7 +55,7 @@
 #' * [get_adaptive_aipw()]
 #' * [check_args()]
 #' * [mab_simulation()]
-#' * [mab_prepare()]
+#' * [pre_mab_simulation()]
 #' @export
 
 single_mab_simulation <- function(data,
