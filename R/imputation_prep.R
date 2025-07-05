@@ -23,7 +23,7 @@ imputation_prep <- function(data, whole_experiment, perfect_assignment, data_col
 #-------------------------------------------------------------------------------
 
 #' @method imputation_prep tbl_df
-#' imputation Prep for Tibbles
+#' @title imputation Prep for Tibbles
 #' @inheritParams imputation_prep
 
 imputation_prep.tbl_df <- function(data, whole_experiment, perfect_assignment, data_cols) {
@@ -73,6 +73,7 @@ imputation_prep.tbl_df <- function(data, whole_experiment, perfect_assignment, d
 }
 #-------------------------------------------------------------------------------
 #' @method imputation_prep data.frame
+#' @title
 #' imputation Prep for data.frames
 #' @inheritParams imputation_prep
 
