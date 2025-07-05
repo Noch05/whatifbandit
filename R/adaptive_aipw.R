@@ -29,11 +29,14 @@ adaptive_aipw <- function(data, assignment_probs, conditions, periods, algorithm
 #'
 adaptive_aipw.tbl_df <- function(data, assignment_probs, conditions, periods, algorithm, verbose) {
   estimates <- purrr::map(
-    condtions, ~ {
+    conditions, ~ {
       results <- data |>
         dplyr::group_by(period_number) |>
-        dplyr::summarize(avg = base::mean(!!rlang::sym(base::paste0("aipw_", .x)), na.rm = TRUE)) |>
-        dplyr::mutate(time_weights = (!!rlang::sym(base::paste0(.x), "_assign_prob") / periods))
+        dplyr::summarize(
+          avg = base::mean(!!rlang::sym(base::paste0("aipw_", .x)), na.rm = TRUE),
+          assign_prob = base::unique(!!rlang::sym(base::paste0(.x, "_assign_prob")))
+        ) |>
+        dplyr::mutate(time_weights = (assign_prob / periods))
 
 
       estimate <- (base::sum(results$avg * results$time_weights, na.rm = TRUE)) /

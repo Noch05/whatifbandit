@@ -80,7 +80,7 @@ get_iaipw.tbl_df <- function(data, assignment_probs, periods, algorithm, conditi
       mhat
     )
   }
-  utils::View(data)
+
 
   check <- data |>
     dplyr::summarize(dplyr::across(dplyr::starts_with("aipw_"), ~ base::sum(base::is.na(.x)))) |>
