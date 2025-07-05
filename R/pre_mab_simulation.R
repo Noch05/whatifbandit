@@ -1,10 +1,26 @@
 #' @name pre_mab_simulation
 #' @inheritParams single_mab_simulation
 #' @title Pre-Simulation Setup for [mab_simulation()]
+
+
 #' @description Common function for all the actions that need to take place before
 #' running the Multi-Arm-Bandit Simulation. Intakes data and column names,
 #' check for valid arguments, prepare data and pre-compute key values.
+#' @returns Named list containing:
+#' \item{data_cols:} {List of necessary columns in data as strings and symbols}
+#' \item{block_cols:} {List of columns to block by in data as strings and symbols}
+#' \item{data:} {Prepared `data` object the same class as inputted. Contains all
+#' columns required for [mab_simulation()]}
+#' \item{imputation_infromation:} {List containing necessary information
+#' for outcome and date imputation for [mab_simulation]}
 #'
+#' @seealso
+#' *[single_mab_simulation()]
+#' *[multiple_mab_simulation()]
+#' *[check_args()]
+#' *[create_cutoff()]
+#' *[create_new_cols()]
+#' *[imputation_prep()]
 
 
 pre_mab_simulation <- function(data,
@@ -42,17 +58,21 @@ pre_mab_simulation <- function(data,
   )
 
   # Preparing Data to be simulated
-  data <- mab_prepare(
+  verbose_log(verbose, "Preparing Data")
+
+  data <- create_cutoff(
     data = data,
     data_cols = data_cols,
-    block_cols = block_cols,
-    time_unit = time_unit,
     period_length = period_length,
-    perfect_assignment = perfect_assignment,
     assignment_method = assignment_method,
-    blocking = blocking,
-    verbose = verbose
-  )
+    time_unit = time_unit
+  ) |>
+    create_new_cols(
+      data_cols = data_cols,
+      perfect_assignment = perfect_assignment,
+      blocking = blocking,
+      block_cols = block_cols
+    )
 
   # Pre-computing Important values to be accessed for the simulation
   verbose_log(verbose, "Precomputing")

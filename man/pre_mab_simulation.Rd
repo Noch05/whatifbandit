@@ -70,8 +70,25 @@ If assignment methods is "Batch", this refers to the number of people in each ba
 
 \item{verbose}{Logical; Whether or not to print iteration number. FALSE by default.}
 }
+\value{
+Named list containing:
+\item{data_cols:} {List of necessary columns in data as strings and symbols}
+\item{block_cols:} {List of columns to block by in data as strings and symbols}
+\item{data:} {Prepared \code{data} object the same class as inputted. Contains all
+columns required for \code{\link[=mab_simulation]{mab_simulation()}}}
+\item{imputation_infromation:} {List containing necessary information
+for outcome and date imputation for \link{mab_simulation}}
+}
 \description{
 Common function for all the actions that need to take place before
 running the Multi-Arm-Bandit Simulation. Intakes data and column names,
 check for valid arguments, prepare data and pre-compute key values.
+}
+\seealso{
+*\code{\link[=single_mab_simulation]{single_mab_simulation()}}
+*\code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}
+*\code{\link[=check_args]{check_args()}}
+*\code{\link[=create_cutoff]{create_cutoff()}}
+*\code{\link[=create_new_cols]{create_new_cols()}}
+*\code{\link[=imputation_prep]{imputation_prep()}}
 }
