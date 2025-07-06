@@ -4,7 +4,7 @@
 \alias{check_impute.data.table}
 \title{\code{\link[=check_impute]{check_impute()}} for data.tables}
 \usage{
-\method{check_impute}{data.table}(imputation_information, current_data)
+\method{check_impute}{data.table}(imputation_information, current_data, current_period)
 }
 \arguments{
 \item{imputation_information}{\code{success} element of the \code{imputation_information}
@@ -12,6 +12,8 @@ list created by \code{\link[=imputation_prep]{imputation_prep()}}.}
 
 \item{current_data}{Data with only observations from the current sampling period; if \code{data} is a data.table,
 this is the whole dataset.}
+
+\item{current_period}{current_period of the simulation.}
 }
 \description{
 \code{\link[=check_impute]{check_impute()}} for data.tables

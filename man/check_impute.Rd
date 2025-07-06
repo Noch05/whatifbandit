@@ -4,7 +4,7 @@
 \alias{check_impute}
 \title{Checking Imputation Info}
 \usage{
-check_impute(imputation_information, current_data)
+check_impute(imputation_information, current_data, current_period)
 }
 \arguments{
 \item{imputation_information}{\code{success} element of the \code{imputation_information}
@@ -12,6 +12,8 @@ list created by \code{\link[=imputation_prep]{imputation_prep()}}.}
 
 \item{current_data}{Data with only observations from the current sampling period; if \code{data} is a data.table,
 this is the whole dataset.}
+
+\item{current_period}{current_period of the simulation.}
 }
 \description{
 Ensures the Imputation Info in the current iteration of \code{\link[=run_mab_trial]{run_mab_trial()}},

@@ -48,7 +48,8 @@ impute_loop_prep <- function(current_data, block_cols, imputation_information, c
 
   impute_success <- check_impute(
     imputation_information = impute_success,
-    current_data = current_data
+    current_data = current_data,
+    current_period = current_period
   )
 
 
