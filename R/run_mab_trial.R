@@ -125,7 +125,10 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
     )
   }
 
-  results <- end_mab_trial(data = data, bandits = bandits)
+  results <- end_mab_trial(
+    data = data, bandits = bandits, algorithm = algorithm,
+    conditions = conditions, periods = periods
+  )
 
 
 

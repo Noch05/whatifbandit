@@ -4,12 +4,19 @@
 \alias{end_mab_trial.tbl_df}
 \title{\code{\link[=end_mab_trial]{end_mab_trial()}} for tibbles}
 \usage{
-\method{end_mab_trial}{tbl_df}(data, bandits)
+\method{end_mab_trial}{tbl_df}(data, bandits, algorithm, periods, conditions)
 }
 \arguments{
-\item{data}{finalized data from \code{\link[=run_mab_trial]{run_mab_trial()}}}
+\item{data}{finalized data from \code{\link[=run_mab_trial]{run_mab_trial()}}.}
 
-\item{bandits}{Finalized bandits list from \code{\link[=run_mab_trial]{run_mab_trial()}}}
+\item{bandits}{Finalized bandits list from \code{\link[=run_mab_trial]{run_mab_trial()}}.}
+
+\item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
+
+\item{periods}{Numeric scalar; total number of periods in Multi-Arm-Bandit trial.}
+
+\item{conditions}{Named Character vector containing treatment conditions.
+Control condition, must be named "Control" when 'control_augment' > 0.}
 }
 \description{
 \code{\link[=end_mab_trial]{end_mab_trial()}} for tibbles

@@ -4,12 +4,19 @@
 \alias{end_mab_trial}
 \title{Ends Multi-Arm Bandit Trial}
 \usage{
-end_mab_trial(data, bandits)
+end_mab_trial(data, bandits, algorithm, periods, conditions)
 }
 \arguments{
-\item{data}{finalized data from \code{\link[=run_mab_trial]{run_mab_trial()}}}
+\item{data}{finalized data from \code{\link[=run_mab_trial]{run_mab_trial()}}.}
 
-\item{bandits}{Finalized bandits list from \code{\link[=run_mab_trial]{run_mab_trial()}}}
+\item{bandits}{Finalized bandits list from \code{\link[=run_mab_trial]{run_mab_trial()}}.}
+
+\item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
+
+\item{periods}{Numeric scalar; total number of periods in Multi-Arm-Bandit trial.}
+
+\item{conditions}{Named Character vector containing treatment conditions.
+Control condition, must be named "Control" when 'control_augment' > 0.}
 }
 \description{
 Condenses output from \code{\link[=run_mab_trial]{run_mab_trial()}} into

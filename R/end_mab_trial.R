@@ -2,13 +2,15 @@
 #' @title Ends Multi-Arm Bandit Trial
 #' @description Condenses output from [run_mab_trial()] into
 #' manageable structure.
-#' @param data finalized data from [run_mab_trial()]
-#' @param bandits Finalized bandits list from [run_mab_trial()]
+#' @param data finalized data from [run_mab_trial()].
+#' @param bandits Finalized bandits list from [run_mab_trial()].
+#' @param periods Numeric scalar; total number of periods in Multi-Arm-Bandit trial.
+#' @inheritParams single_mab_simulation
 #'
 #' @seealso
 #'* [run_mab_trial()]
 
-end_mab_trial <- function(data, bandits) {
+end_mab_trial <- function(data, bandits, algorithm, periods, conditions) {
   base::UseMethod("end_mab_trial")
 }
 
@@ -19,7 +21,7 @@ end_mab_trial <- function(data, bandits) {
 #' @inheritParams end_mab_trial
 #' @title [end_mab_trial()] for tibbles
 
-end_mab_trial.tbl_df <- function(data, bandits) {
+end_mab_trial.tbl_df <- function(data, bandits, algorithm, periods, conditions) {
   final_summary <- data |>
     dplyr::group_by(mab_condition) |>
     dplyr::summarize(
@@ -35,8 +37,10 @@ end_mab_trial.tbl_df <- function(data, bandits) {
     algorithm = algorithm,
     conditions = conditions,
     current_period = (periods + 1),
-    control_augment = control_augment
+    control_augment = 0
   )
+
+
   bandits$bandit_stat[[(periods + 1)]] <- final_bandit[[1]]
 
   bandit_stats <- switch(algorithm,
@@ -62,24 +66,27 @@ end_mab_trial.tbl_df <- function(data, bandits) {
   )
 
 
-  assignment_probs <- dplyr::bind_rows(bandits[["assignment_prob"]], .id = "period_number") |>
+  assignment_probs <- dplyr::bind_rows(bandits$assignment_prob, .id = "period_number") |>
     dplyr::mutate(period_number = base::as.numeric(period_number))
 
   return(list(
-    data = data,
+    final_data = data,
     bandits = bandit_stats,
-    assignmnet_probs = assignment_probs
+    assignment_probs = assignment_probs
   ))
 }
 #-------------------------------------------------------------------------------
 #' @method end_mab_trial data.frame
 #' @inheritParams end_mab_trial
 #' @title [end_mab_trial()] for data.frames
-end_mab_trial.data.frame <- function(data, bandits) {
+end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditions) {
   return(
     end_mab_trial.tbl_df(
       data = tibble::as_tibble(data),
-      bandits = bandits
+      bandits = bandits,
+      algorithm = algorithm,
+      periods = periods,
+      conditions = conditions
     )
   )
 }
