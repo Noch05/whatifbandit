@@ -56,12 +56,19 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
 
     prior <- create_prior(prior_periods = prior_periods, current_period = i)
 
-    current_data <- data[data$period_number == i, ]
-    prior_data <- data[data$period_number %in% prior, ]
+    if (!inherits(data, "data.table")) {
+      current_data <- data[data$period_number == i, ]
+      prior_data <- data[data$period_number %in% prior, ]
+    } else {
+      current_data <- data
+      prior_data <- NULL
+    }
 
     past_results <- get_past_results(
       current_data = current_data,
       prior_data = prior_data,
+      current_period = i,
+      prior = prior,
       perfect_assignment = perfect_assignment,
       assignment_date_col = data_cols$assignment_date_col,
       conditions = conditions
@@ -88,33 +95,7 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       condition_col = data_cols$condition_col,
       success_col = data_cols$success_col
     )
-
-    # Creating block for imputing
-    if (blocking) {
-      current_data$impute_block <- do.call(
-        paste, c(current_data[, c("mab_condition", block_cols$name)], sep = "_")
-      )
-    } else {
-      current_data$impute_block <- current_data$mab_condition
-    }
-
-
-    if (whole_experiment) {
-      impute_info <- imputation_information[[1]]
-    } else {
-      impute_info <- imputation_information[[1]][[i]]
-    }
-    if (!perfect_assignment) {
-      dates <- rlang::set_names(
-        base::as.Date(base::as.numeric(imputation_information[[2]][i, -1])),
-        base::names(imputation_information[[2]][i, -1])
-      )
-    }
-
-    imputation_info <- check_impute(
-      imputation_information = impute_info,
-      current_data = current_data
-    )
+    prepped_impute <- impute_loop_prep(current_data = current_data, )
 
     data <- impute_success(
       current_data = current_data,

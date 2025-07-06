@@ -6,16 +6,20 @@
 \usage{
 \method{get_past_results}{data.table}(
   current_data,
-  prior_data,
+  current_period,
+  prior,
   perfect_assignment,
   assignment_date_col = NULL,
   conditions
 )
 }
 \arguments{
-\item{current_data}{Data with only observations from the current sampling period}
+\item{current_data}{Data with only observations from the current sampling period; if \code{data} is a data.table,
+this is the whole dataset.}
 
-\item{prior_data}{Data with only the observations from the prior index}
+\item{current_period}{current_period of the simulation.}
+
+\item{prior}{vector of prior periods to use for bandit calculations.}
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).

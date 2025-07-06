@@ -31,9 +31,11 @@ Used to simulate imperfect information on part of researchers conducting an adap
 }
 \value{
 A named list containing:
-\item{original_summary: }{Object the same type as \code{data},
-which contains probability of success for each treatment block for each treatment period}
-\item{dates_summary: }{Average success date for each treatment block at each treatment period}
+\itemize{
+\item \code{success}: Object the same type as \code{data},
+which contains probability of success for each treatment block for each treatment period.
+\item \code{dates}: Average success date for each treatment block at each treatment period.
+}
 }
 \description{
 Pre-computes the conditional probabilities of success and dates of success for each distinct

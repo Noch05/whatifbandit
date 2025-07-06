@@ -123,16 +123,15 @@ end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditio
         idcol = "period_number"
       )
       x[, period_number := base::as.numeric(period_number)]
-      cols <- base::setdiff(names(x), "period_number")
 
-      x[, (cols) := lapply(.SD, function(col) {
+      x[, (conditions) := lapply(.SD, function(col) {
         data.table::shift(col,
           n = 1L,
           type = "lead",
           fill = NA
         )
       }),
-      .SDcols = cols
+      .SDcols = conditions
       ]
       x[base::seq_len(periods), ]
     },
@@ -143,20 +142,19 @@ end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditio
       )
       x <- data.table::dcast(
         data = x[, .(ucb, mab_condition, period_number)],
-        formula = period_number ~ mab_condition
+        formula = period_number ~ mab_condition, value.var = ucb
       )
 
       x[, period_number := base::as.numeric(period_number)]
-      cols <- base::setdiff(names(x), "period_number")
 
-      x[, (cols) := lapply(.SD, function(col) {
+      x[, (conditions) := base::lapply(.SD, function(col) {
         data.table::shift(col,
           n = 1L,
           type = "lead",
           fill = NA
         )
       }),
-      .SDcols = cols
+      .SDcols = conditions
       ]
       x[base::seq_len(periods), ]
     },

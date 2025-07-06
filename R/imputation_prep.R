@@ -8,9 +8,11 @@
 
 #'
 #' @returns A named list containing:
-#' \item{original_summary: }{Object the same type as `data`,
-#' which contains probability of success for each treatment block for each treatment period}
-#' \item{dates_summary: }{Average success date for each treatment block at each treatment period}
+#' \itemize{
+#' \item `success`: Object the same type as `data`,
+#' which contains probability of success for each treatment block for each treatment period.
+#' \item `dates`: Average success date for each treatment block at each treatment period.
+#' }
 #'
 #' @seealso
 #' *[impute_success()]
@@ -142,7 +144,7 @@ imputation_prep.data.table <- function(data, whole_experiment, perfect_assignmen
     dates_summary <- NULL
   }
 
-  imputation_information <- list(original_summary, dates_summary)
+  imputation_information <- list(success = original_summary, dates = dates_summary)
 
   return(imputation_information)
 }
