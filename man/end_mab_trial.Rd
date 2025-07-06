@@ -18,6 +18,14 @@ end_mab_trial(data, bandits, algorithm, periods, conditions)
 \item{conditions}{Named Character vector containing treatment conditions.
 Control condition, must be named "Control" when 'control_augment' > 0.}
 }
+\value{
+A named list containing:
+\itemize {
+\item \code{final_data}: Processed data with new treatment assignments and imputed outcomes labelled with "mab_" prefix.
+\item \code{bandits}: Thompson Probability or UCB1 statistic for each treatment arm at each period of the simulation.
+\item \code{assignment_probs}: Assignment probabilities for each treatment arm at each period of the simulation.
+}
+}
 \description{
 Condenses output from \code{\link[=run_mab_trial]{run_mab_trial()}} into
 manageable structure.

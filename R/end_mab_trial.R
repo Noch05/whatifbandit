@@ -6,7 +6,12 @@
 #' @param bandits Finalized bandits list from [run_mab_trial()].
 #' @param periods Numeric scalar; total number of periods in Multi-Arm-Bandit trial.
 #' @inheritParams single_mab_simulation
-#'
+#' @return  A named list containing:
+#' \itemize {
+#' \item `final_data`: Processed data with new treatment assignments and imputed outcomes labelled with "mab_" prefix.
+#' \item `bandits`: Thompson Probability or UCB1 statistic for each treatment arm at each period of the simulation.
+#' \item `assignment_probs`: Assignment probabilities for each treatment arm at each period of the simulation.
+#' }
 #' @seealso
 #'* [run_mab_trial()]
 
@@ -91,3 +96,9 @@ end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditio
   )
 }
 #-------------------------------------------------------------------------------
+#' @method end_mab_trial data.table
+#' @inheritParams end_mab_trial
+#' @title [end_mab_trial()] for data.tables
+end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditions) {
+  return(0)
+}

@@ -14,8 +14,11 @@
 #'
 #'
 #' @return  A named list containing:
-#' \item{final_data}{The processed data with treatment assignments and imputed outcomes labelled with "mab_" prefix.}
-#' \item{bandits}{Either the UCB1 statistics or Thompson Sampling posterior distributions.}
+#' \itemize {
+#' \item `final_data`: Processed data with new treatment assignments and imputed outcomes labelled with "mab_" prefix.
+#' \item `bandits`: Thompson Probability or UCB1 statistic for each treatment arm at each period of the simulation.
+#' \item `assignment_probs`: Assignment probabilities for each treatment arm at each period of the simulation.
+#' }
 #'
 #' @seealso
 #' * [single_mab_simulation()]
