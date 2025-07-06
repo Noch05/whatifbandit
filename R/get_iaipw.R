@@ -68,14 +68,14 @@ get_iaipw.tbl_df <- function(data, assignment_probs, periods, conditions, verbos
     dplyr::select(tidyselect::all_of(names(data)), tidyselect::everything()) |>
     dplyr::left_join(assignment_probs, by = "period_number")
 
-  for (condition in conditions) {
-    verbose_log(verbose, paste0("Condition: ", condition))
+  for (i in base::seq_along(conditions)) {
+    verbose_log(verbose, paste0("Condition: ", conditions[[i]]))
 
-    probability <- data[[paste0(condition, "_assign_prob")]]
-    mhat <- data[[paste0("prior_rate_", condition)]]
+    probability <- data[[paste0(conditions[[i]], "_assign_prob")]]
+    mhat <- data[[paste0("prior_rate_", conditions[[i]])]]
 
-    data[[paste0("aipw_", condition)]] <- base::ifelse(
-      data$mab_condition == condition,
+    data[[paste0("aipw_", conditions[[i]])]] <- base::ifelse(
+      data$mab_condition == conditions[[i]],
       (data$mab_success / probability) + (1 - (1 / probability)) * mhat,
       mhat
     )
@@ -95,7 +95,7 @@ get_iaipw.tbl_df <- function(data, assignment_probs, periods, conditions, verbos
 
 #' @method get_iaipw data.frame
 #' @title [get_aipw()] for data.frames
-#' @inheritParams get_aipw
+#' @inheritParams get_iaipw
 get_iaipw.data.frame <- function(data, assignment_probs, periods, algorithm, conditions, verbose) {
   return(
     get_iaipw.tbl_df(
@@ -113,5 +113,71 @@ get_iaipw.data.frame <- function(data, assignment_probs, periods, algorithm, con
 #' @inheritParams get_iaipw
 #'
 get_iaipw.data.table <- function(data, assignment_probs, periods, algorithm, conditions, verbose) {
-  return(0)
+  new_cols <- paste0("aipw_", conditions)
+  data[, (new_cols) := NA_real_]
+
+  prior_data <- data[, .(
+    successes = base::sum(mab_success),
+    trials = .N
+  ), by = c("mab_condition", "period_number")]
+  data.table::setkey(prior_data, period_number)
+
+  full_grid <- data.table::CJ(
+    period_number = base::seq_len(periods),
+    mab_condition = conditions
+  )
+  full_grid <- merge(full_grid, prior_data,
+    by = c("period_number", "mab_condition"),
+    suffixes = c("", ""), all = TRUE
+  )
+  full_grid[is.na(full_grid)] <- 0
+
+  data.table::setorder(full_grid, mab_condition, period_number)
+  full_grid[, `:=`(
+    cumulative_successes = data.table::shift(base::cumsum(successes),
+      n = 1L, type = "lag", fill = 0
+    ),
+    cumulative_trials = data.table::shift(base::cumsum(trials),
+      n = 1L, type = "lag", fill = 0
+    )
+  ), by = c("mab_condition")]
+  full_grid[, prior_period_success_rate := data.table::fifelse(
+    cumulative_trials > 0, cumulative_successes / cumulative_trials, 0
+  )]
+
+  full_grid <- data.table::dcast(
+    data = full_grid[, .(period_number, mab_condition, prior_period_success_rate)],
+    formula = period_number ~ mab_condition, value.var = "prior_period_success_rate"
+  )
+  data.table::setnames(full_grid, c("period_number", paste0("prior_rate_", names(full_grid)[-1])))
+  data.table::setnames(assignment_probs, c("period_number", paste0(names(assignment_probs)[-1], "_assign_prob")))
+
+  data <- merge(data, full_grid, all = TRUE, by = "period_number")
+  data <- merge(data, assignment_probs,
+    by = "period_number",
+    all = TRUE, suffixes = c("", "_assign_prob")
+  )
+
+
+  for (i in base::seq_along(conditions)) {
+    verbose_log(verbose, paste0("Condition: ", conditions[[i]]))
+    probability <- paste0(conditions[[i]], "_assign_prob")
+    mhat <- paste0("prior_rate_", conditions[[i]])
+
+
+    data[, (paste0("aipw_", conditions[[i]])) := data.table::fifelse(
+      mab_condition == conditions[[i]],
+      (mab_success / get(probability)) + (1 - 1 / get(probability)) * get(mhat),
+      get(mhat),
+    )]
+  }
+
+  check <- base::sum(base::unlist(data[, lapply(.SD, \(x) base::sum(base::is.na(x))), .SDcols = new_cols]))
+
+
+  if (check != 0) {
+    base::warning(paste0(check, " Individual AIPW Scores are NA"))
+  }
+
+  return(invisible(data))
 }

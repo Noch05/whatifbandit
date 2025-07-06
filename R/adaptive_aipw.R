@@ -93,12 +93,12 @@ adaptive_aipw.data.table <- function(data, assignment_probs, conditions,
   estimates <- purrr::map(
     conditions, ~ {
       results <- data[, .(
-        base::mean(base::get(base::paste0("aipw_", .x)), na.rm = TRUE),
-        base::unique(base::get(base::paste0(.x, "_assign_prob")))
+        avg = base::mean(base::get(base::paste0("aipw_", .x)), na.rm = TRUE),
+        assign_prob = base::unique(base::get(base::paste0(.x, "_assign_prob")))
       ),
       by = period_number
       ]
-      results[, time_weights = assign_prob / periods]
+      results[, time_weights := assign_prob / periods]
 
       estimate <- (base::sum(results$avg * results$time_weights, na.rm = TRUE)) /
         (base::sum(results$time_weights, na.rm = TRUE))
@@ -112,8 +112,8 @@ adaptive_aipw.data.table <- function(data, assignment_probs, conditions,
         mab_condition = .x
       ))
     }
-  ) |>
-    data.table::rbindlist()
+  )
+  estimates <- data.table::rbindlist(estimates)
   estimates[, estimator := "AIPW"]
 
 
@@ -126,7 +126,9 @@ adaptive_aipw.data.table <- function(data, assignment_probs, conditions,
   ]
 
   sample[, estimator := "Sample"]
-  returns <- data.table::rbindlist(estimates, sample)
+  returns <- data.table::rbindlist(list(estimates, sample),
+    use.names = TRUE
+  )
 
   return(returns)
 }

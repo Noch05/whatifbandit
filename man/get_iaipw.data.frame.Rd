@@ -6,6 +6,19 @@
 \usage{
 \method{get_iaipw}{data.frame}(data, assignment_probs, periods, algorithm, conditions, verbose)
 }
+\arguments{
+\item{data}{\code{final_data} object from \code{\link[=run_mab_trial]{run_mab_trial()}}. Contains results of Multi-Arm-Bandit Simulation}
+
+\item{assignment_probs}{\code{assignment_probs} object from \code{\link[=run_mab_trial]{run_mab_trial()}}. Contains probability
+of receiving each treatment at each treatment period in the simulated trial.}
+
+\item{periods}{Numeric; number of treatment waves.}
+
+\item{conditions}{Named Character vector containing treatment conditions.
+Control condition, must be named "Control" when 'control_augment' > 0.}
+
+\item{verbose}{Logical; Whether or not to print iteration number. FALSE by default.}
+}
 \description{
 \code{\link[=get_aipw]{get_aipw()}} for data.frames
 }

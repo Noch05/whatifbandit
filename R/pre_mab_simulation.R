@@ -39,6 +39,7 @@ pre_mab_simulation <- function(data,
                                period_length,
                                block_cols,
                                verbose) {
+  if (inherits(data, "data.table")) data <- copy(data)
   data_cols <- purrr::map(data_cols, ~ list(
     name = .x, symbol = rlang::sym(.x)
   )) |>
