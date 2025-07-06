@@ -9,7 +9,7 @@
 #' @inheritParams create_prior
 #' @inheritParams cols
 #' @param probs Named Numeric Vector; Probability of Assignment for each treatment condition.
-#' @param current_data `data` object with only observations from the current period of the simulation.
+#' @inheritParams get_past_results
 #'
 #' @returns Updated `data` object with the new treatment conditions. If this treatment is different
 #' then from under the original experiment, they are labelled as imputation required.
@@ -23,13 +23,13 @@
 
 assign_treatments <- function(current_data, probs, blocking = NULL,
                               algorithm, id_col, conditions, condition_col,
-                              success_col) {
+                              success_col, current_period) {
   # Performing Randomized Treatment Assignment
   if (inherits(current_data, "data.table")) {
     if (blocking) {
-      blocks <- current_data[, block]
+      blocks <- current_data[period_number == current_period, block]
     }
-    clusters <- current_data[, get(id_col$name)]
+    clusters <- current_data[period_number == current_period, get(id_col$name)]
   } else {
     if (blocking) {
       blocks <- current_data$block
@@ -59,7 +59,7 @@ assign_treatments <- function(current_data, probs, blocking = NULL,
 
 
   if (inherits(current_data, "data.table")) {
-    current_data[, mab_condition := new_treatments][
+    current_data[period_number == current_period, mab_condition := new_treatments][
       , impute_req := data.table::fifelse(
         base::as.character(mab_condition) != base::as.character(base::get(condition_col$name)),
         1, 0

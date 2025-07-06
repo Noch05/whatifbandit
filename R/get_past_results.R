@@ -102,6 +102,7 @@ get_past_results.data.table <- function(current_data, current_period,
     success_rate = base::mean(known_success, na.rm = TRUE),
     n = .N
   ), by = mab_condition]
+
   current_data[, known_success := NULL]
 
 

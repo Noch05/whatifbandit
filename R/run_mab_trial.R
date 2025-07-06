@@ -93,7 +93,8 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       id_col = data_cols$id_col,
       conditions = conditions,
       condition_col = data_cols$condition_col,
-      success_col = data_cols$success_col
+      success_col = data_cols$success_col,
+      current_period = i
     )
     prepped_impute <- impute_loop_prep(current_data = current_data, )
 

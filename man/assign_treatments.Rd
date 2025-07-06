@@ -12,11 +12,13 @@ assign_treatments(
   id_col,
   conditions,
   condition_col,
-  success_col
+  success_col,
+  current_period
 )
 }
 \arguments{
-\item{current_data}{\code{data} object with only observations from the current period of the simulation.}
+\item{current_data}{Data with only observations from the current sampling period; if \code{data} is a data.table,
+this is the whole dataset.}
 
 \item{probs}{Named Numeric Vector; Probability of Assignment for each treatment condition.}
 
@@ -32,6 +34,8 @@ Control condition, must be named "Control" when 'control_augment' > 0.}
 \item{condition_col}{Column in data; Original Treatment condition for each observation.}
 
 \item{success_col}{Column in data; Binary successes from original experiment.}
+
+\item{current_period}{The current period of the simulation. Defined by loop structure inside \code{\link[=run_mab_trial]{run_mab_trial()}}.}
 }
 \value{
 Updated \code{data} object with the new treatment conditions. If this treatment is different
