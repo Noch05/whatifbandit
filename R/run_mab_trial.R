@@ -36,16 +36,16 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
                           imputation_information) {
   periods <- base::max(data$period_number)
 
-  bandits <- vector(mode = "list", length = 2)
-  bandits[["bandit_stat"]] <- vector(mode = "list", length = (periods + 1))
-  bandits[["assignment_prob"]] <- vector(mode = "list", length = periods)
+  bandits <- base::vector(mode = "list", length = 2)
+  bandits$bandit_stat <- base::vector(mode = "list", length = (periods + 1))
+  bandits$assignment_prob <- base::vector(mode = "list", length = periods)
 
-  bandits[["bandit_stat"]][[1]] <- switch(algorithm,
+  bandits$bandit_stat[[1]] <- switch(algorithm,
     "Thompson" = rlang::set_names(rep(1 / length(conditions), length(conditions)), conditions),
     "UCB1" = tibble::tibble(mab_condition = conditions, ucb = rep(0, length(conditions))),
     rlang::abort("Invalid Algorithm: Valid Algorithms are `Thompson` and `UCB`")
   )
-  bandits[["assignment_prob"]][[1]] <- rlang::set_names(rep(1 / length(conditions), length(conditions)), conditions)
+  bandits$assignment_prob[[1]] <- rlang::set_names(rep(1 / length(conditions), length(conditions)), conditions)
 
   verbose_log(verbose, "Starting Bandit Trial")
   for (i in 2:periods) {
@@ -54,7 +54,7 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
     prior <- create_prior(prior_periods = prior_periods, current_period = i)
 
     current_data <- data[data$period_number == i, ]
-    prior_data <- data[data$period_number < i, ]
+    prior_data <- data[data$period_number %in% prior, ]
 
     past_results <- get_past_results(
       current_data = current_data,
@@ -72,8 +72,8 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       control_augment = control_augment
     )
 
-    bandits[["assignment_prob"]][[i]] <- bandit[[2]]
-    bandits[["bandit_stat"]][[i]] <- bandit[[1]]
+    bandits$assignment_prob[[i]] <- bandit[[2]]
+    bandits$bandit_stat[[i]] <- bandit[[1]]
 
     current_data <- assign_treatments(
       current_data = current_data,
@@ -88,11 +88,11 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
 
     # Creating block for imputing
     if (blocking) {
-      current_data[["impute_block"]] <- do.call(
+      current_data$impute_block <- do.call(
         paste, c(current_data[, c("mab_condition", block_cols$name)], sep = "_")
       )
     } else {
-      current_data[["impute_block"]] <- current_data$mab_condition
+      current_data$impute_block <- current_data$mab_condition
     }
 
 
@@ -141,11 +141,11 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
     current_period = (periods + 1),
     control_augment = control_augment
   )
-  bandits[["bandit_stat"]][[(periods + 1)]] <- final_bandit[[1]]
+  bandits$bandit_stat[[(periods + 1)]] <- final_bandit[[1]]
 
   bandit_stats <- switch(algorithm,
     "Thompson" = {
-      dplyr::bind_rows(bandits[["bandit_stat"]], .id = "period_number") |>
+      dplyr::bind_rows(bandits$bandit_stat, .id = "period_number") |>
         dplyr::mutate(
           period_number = base::as.numeric(period_number),
           dplyr::across(-period_number, ~ dplyr::lead(., n = 1L, default = NA))
@@ -153,7 +153,7 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
         dplyr::slice(base::seq_len(periods))
     },
     "UCB1" = {
-      dplyr::bind_rows(bandits[["bandit_stat"]], .id = "period_number") |>
+      dplyr::bind_rows(bandits$bandit_stat, .id = "period_number") |>
         dplyr::select(ucb, mab_condition, period_number) |>
         tidyr::pivot_wider(values_from = "ucb", names_from = c("mab_condition")) |>
         dplyr::mutate(
