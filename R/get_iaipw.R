@@ -98,10 +98,14 @@ get_iaipw.tbl_df <- function(data, assignment_probs, periods, conditions, verbos
 #' @inheritParams get_aipw
 get_iaipw.data.frame <- function(data, assignment_probs, periods, algorithm, conditions, verbose) {
   return(
-    get_iaipw.tbl_df(data = tibble::as_tibble(data),
-                     assignment_probs = tibble::as.tibble(assignment_probs),
-                     periods = periods, algorithm = algorithm.)
+    get_iaipw.tbl_df(
+      data = tibble::as_tibble(data),
+      assignment_probs = tibble::as.tibble(assignment_probs),
+      periods = periods, conditions = conditions,
+      verbose = verbose
+    )
   )
+}
 
 # ------------------------------------------------------------------------------
 #' @method get_iaipw data.table
@@ -109,7 +113,5 @@ get_iaipw.data.frame <- function(data, assignment_probs, periods, algorithm, con
 #' @inheritParams get_iaipw
 #'
 get_iaipw.data.table <- function(data, assignment_probs, periods, algorithm, conditions, verbose) {
-
-
-
+  return(0)
 }

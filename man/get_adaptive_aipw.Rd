@@ -4,14 +4,7 @@
 \alias{get_adaptive_aipw}
 \title{Compute Adaptive AIPW Estimates of Treatment Success}
 \usage{
-get_adaptive_aipw(
-  data,
-  assignment_probs,
-  periods,
-  conditions,
-  algorithm,
-  verbose
-)
+get_adaptive_aipw(data, assignment_probs, periods, conditions, verbose)
 }
 \arguments{
 \item{data}{\code{final_data} object from \code{\link[=run_mab_trial]{run_mab_trial()}}. Contains results of Multi-Arm-Bandit Simulation}
@@ -23,8 +16,6 @@ of receiving each treatment at each treatment period in the simulated trial.}
 
 \item{conditions}{Named Character vector containing treatment conditions.
 Control condition, must be named "Control" when 'control_augment' > 0.}
-
-\item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
 
 \item{verbose}{Logical; Whether or not to print iteration number. FALSE by default.}
 }

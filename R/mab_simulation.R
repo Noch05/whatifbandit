@@ -66,7 +66,7 @@ mab_simulation <- function(data,
     data = sim_results$final_data,
     assignment_probs = sim_results$assignment_probs,
     periods = base::max(sim_results$final_data$period_number, na.rm = TRUE),
-    conditions = conditions, algorithm = algorithm,
+    conditions = conditions,
     verbose = verbose
   )
   results <- list(

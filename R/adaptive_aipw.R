@@ -18,7 +18,7 @@
 #' * [mab_simulation()]
 #-------------------------------------------------------------------------------
 ## Adaptive AIPW Weights from Hadad et. al (2021) Using Constant Allocation Rate
-adaptive_aipw <- function(data, assignment_probs, conditions, periods, algorithm, verbose) {
+adaptive_aipw <- function(data, assignment_probs, conditions, periods, verbose) {
   verbose_log(verbose, "Aggregating AIPW Estimates")
   base::UseMethod("adaptive_aipw")
 }
@@ -27,7 +27,7 @@ adaptive_aipw <- function(data, assignment_probs, conditions, periods, algorithm
 #' @method adaptive_aipw tbl_df
 #' @inheritParams adaptive_aipw
 #'
-adaptive_aipw.tbl_df <- function(data, assignment_probs, conditions, periods, algorithm, verbose) {
+adaptive_aipw.tbl_df <- function(data, assignment_probs, conditions, periods, verbose) {
   estimates <- purrr::map(
     conditions, ~ {
       results <- data |>
@@ -73,14 +73,13 @@ adaptive_aipw.tbl_df <- function(data, assignment_probs, conditions, periods, al
 #' @method adaptive_aipw data.frame
 #' @inheritParams adaptive_aipw
 adaptive_aipw.data.frame <- function(data, assignment_probs, conditions,
-                                     periods, algorithm, verbose) {
+                                     periods, verbose) {
   return(
     adaptive_aipw.tbl_df(
       data = tibble::as_tibble(data),
       assignment_probs = tibble::as_tibble(assignment_probs),
       conditions = conditions,
       periods = periods,
-      algorithm = algorithm,
       verbose = verbose
     )
   )
@@ -90,7 +89,7 @@ adaptive_aipw.data.frame <- function(data, assignment_probs, conditions,
 #' @method adaptive_aipw data.table
 #' @inheritParams adaptive_aipw
 adaptive_aipw.data.table <- function(data, assignment_probs, conditions,
-                                     periods, algorithm, verbose) {
+                                     periods, verbose) {
   estimates <- purrr::map(
     conditions, ~ {
       results <- data[, .(

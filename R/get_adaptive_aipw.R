@@ -26,12 +26,11 @@
 
 
 get_adaptive_aipw <- function(data, assignment_probs, periods,
-                              conditions, algorithm, verbose) {
+                              conditions, verbose) {
   data <- get_iaipw(
     data = data,
     assignment_probs = assignment_probs,
     conditions = conditions,
-    algorithm = algorithm,
     periods = periods,
     verbose = verbose
   )
@@ -40,7 +39,7 @@ get_adaptive_aipw <- function(data, assignment_probs, periods,
     assignment_probs = assignment_probs,
     periods = periods,
     conditions = conditions,
-    algorithm = algorithm, verbose = verbose
+    verbose = verbose
   )
 
   results <- list(

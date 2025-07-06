@@ -4,7 +4,7 @@
 \alias{get_iaipw}
 \title{Calculate Individual AIPW For Each Treatment Condition}
 \usage{
-get_iaipw(data, assignment_probs, periods, algorithm, conditions, verbose)
+get_iaipw(data, assignment_probs, periods, conditions, verbose)
 }
 \arguments{
 \item{data}{\code{final_data} object from \code{\link[=run_mab_trial]{run_mab_trial()}}. Contains results of Multi-Arm-Bandit Simulation}
@@ -13,8 +13,6 @@ get_iaipw(data, assignment_probs, periods, algorithm, conditions, verbose)
 of receiving each treatment at each treatment period in the simulated trial.}
 
 \item{periods}{Numeric; number of treatment waves.}
-
-\item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
 
 \item{conditions}{Named Character vector containing treatment conditions.
 Control condition, must be named "Control" when 'control_augment' > 0.}
