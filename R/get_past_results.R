@@ -80,7 +80,7 @@ get_past_results.tbl_df <- function(current_data, prior_data, perfect_assignment
 get_past_results.data.table <- function(current_data, current_period,
                                         prior,
                                         perfect_assignment, assignment_date_col = NULL,
-                                        conditions) {
+                                        conditions, prior_data) {
   if (!perfect_assignment) {
     current_date <- base::max(current_data[
       period_number == current_period,
@@ -97,7 +97,7 @@ get_past_results.data.table <- function(current_data, current_period,
     rlang::abort("Specify Logical for `perfect_assignment`")
   }
 
-  past_results <- current_data[, .(
+  past_results <- current_data[period_number %in% prior, .(
     successes = base::sum(known_success, na.rm = TRUE),
     success_rate = base::mean(known_success, na.rm = TRUE),
     n = .N

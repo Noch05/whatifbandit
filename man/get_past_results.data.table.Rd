@@ -10,7 +10,8 @@
   prior,
   perfect_assignment,
   assignment_date_col = NULL,
-  conditions
+  conditions,
+  prior_data
 )
 }
 \arguments{
@@ -30,6 +31,8 @@ on the dates treatments would have been assigned for each wave.}
 
 \item{conditions}{Named Character vector containing treatment conditions.
 Control condition, must be named "Control" when 'control_augment' > 0.}
+
+\item{prior_data}{Data with only the observations from the prior index; only used when \code{data} is not a data.table}
 }
 \description{
 \code{\link[=get_past_results]{get_past_results()}} for data.tables

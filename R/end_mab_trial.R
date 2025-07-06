@@ -118,10 +118,9 @@ end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditio
 
   bandit_stats <- switch(algorithm,
     "Thompson" = {
-      x <- data.table::rbindlist(bandits$bandit_stat,
-        use.names = TRUE,
-        idcol = "period_number"
-      )
+      x <- data.table::as.data.table(dplyr::bind_rows(bandits$bandit_stat,
+        .id = "period_number"
+      ))
       x[, period_number := base::as.numeric(period_number)]
 
       x[, (conditions) := lapply(.SD, function(col) {
@@ -138,11 +137,12 @@ end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditio
     "UCB1" = {
       x <- data.table::rbindlist(bandits$bandit_stat,
         use.names = TRUE,
+        fill = TRUE,
         idcol = "period_number"
       )
       x <- data.table::dcast(
         data = x[, .(ucb, mab_condition, period_number)],
-        formula = period_number ~ mab_condition, value.var = ucb
+        formula = period_number ~ mab_condition, value.var = "ucb"
       )
 
       x[, period_number := base::as.numeric(period_number)]
@@ -161,8 +161,7 @@ end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditio
     rlang::abort("Invalid Algorithm: valid algorithsm are `Thompson`, and `UCB1`")
   )
 
-
-  assignment_probs <- data.table::rbindlist(bandits$assignment_prob, idcol = "period_number")
+  assignment_probs <- data.table::as.data.table(dplyr::bind_rows(bandits$assignment_prob, .id = "period_number"))
   assignment_probs[, period_number := base::as.numeric(period_number)]
 
   return(list(

@@ -103,7 +103,7 @@ impute_success.data.table <- function(current_data, imputation_info, id_col,
                                       success_date_col, current_period) {
   ## Imputing success randomly based on previously calculated Probabilities
 
-  if (base::any(current_data[impute_req == 1 & period_number == current_period], na.rm = TRUE)) {
+  if (current_data[impute_req == 1 & period_number == current_period, .N] > 0) {
     blocks <- current_data[impute_req == 1 & period_number == current_period, impute_block]
     clusters <- current_data[impute_req == 1 & period_number == current_period, base::get(id_col$name)]
 

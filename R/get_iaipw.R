@@ -18,7 +18,7 @@
 #' * [get_adaptive_aipw()]
 #' * [single_mab_simulation()]
 #'
-get_iaipw <- function(data, assignment_probs, periods, algorithm, conditions, verbose) {
+get_iaipw <- function(data, assignment_probs, periods, conditions, verbose) {
   verbose_log(verbose, "Computing Individual AIPW Estimates")
   base::UseMethod("get_iaipw")
 }
@@ -30,7 +30,7 @@ get_iaipw <- function(data, assignment_probs, periods, algorithm, conditions, ve
 #' [get_iaipw()] for tibbles
 #' @inheritParams get_iaipw
 
-get_iaipw.tbl_df <- function(data, assignment_probs, periods, algorithm, conditions, verbose) {
+get_iaipw.tbl_df <- function(data, assignment_probs, periods, conditions, verbose) {
   new_cols <- paste0("aipw_", conditions)
   data[new_cols] <- NA_real_
 
@@ -91,11 +91,25 @@ get_iaipw.tbl_df <- function(data, assignment_probs, periods, algorithm, conditi
   }
   return(data)
 }
+#-------------------------------------------------------------------------------
+
+#' @method get_iaipw data.frame
+#' @title [get_aipw()] for data.frames
+#' @inheritParams get_aipw
+get_iaipw.data.frame <- function(data, assignment_probs, periods, algorithm, conditions, verbose) {
+  return(
+    get_iaipw.tbl_df(data = tibble::as_tibble(data),
+                     assignment_probs = tibble::as.tibble(assignment_probs),
+                     periods = periods, algorithm = algorithm.)
+  )
+
 # ------------------------------------------------------------------------------
 #' @method get_iaipw data.table
 #' @title [get_iaipw()] for data.tables
 #' @inheritParams get_iaipw
 #'
 get_iaipw.data.table <- function(data, assignment_probs, periods, algorithm, conditions, verbose) {
-  return(0)
+
+
+
 }

@@ -64,7 +64,8 @@ get_bandit.UCB1 <- function(past_results, conditions, current_period) {
     past_results[, ucb := success_rate + base::sqrt(
       (2 * base::log(current_period - 1)) / (n + correction)
     )]
-    best_condition <- base::as.character(bandit[order(ucb)][1, mab_condition])
+
+    best_condition <- base::as.character(past_results[order(ucb)][1, mab_condition])
   } else {
     past_results <- past_results |>
       dplyr::mutate(

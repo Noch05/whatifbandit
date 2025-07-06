@@ -17,11 +17,11 @@ impute_loop_prep <- function(current_data, block_cols, imputation_information, c
   if (inherits(current_data, "data.table")) {
     if (blocking) {
       current_data[period_number == current_period,
-        impute_block = do.call(paste, c(.SD, sep = "_")),
+        impute_block := do.call(paste, c(.SD, sep = "_")),
         .SDcols = c("mab_condition", block_cols$name)
       ]
     } else {
-      current_data[period_number == current_period, impute_block = mab_condition]
+      current_data[period_number == current_period, impute_block := mab_condition]
     }
   } else {
     if (blocking) {
