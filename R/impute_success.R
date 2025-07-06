@@ -18,11 +18,19 @@
 #'* [imputation_prep()]
 #'* [randomizr::block_and_cluster_ra()]
 #'* [randomizr::cluster_ra()]
-
-
 impute_success <- function(current_data, imputation_info, id_col,
-                           success_col, prior_data, perfect_assignment, dates = NULL,
+                           success_col, prior_data = NULL, perfect_assignment, dates = NULL,
                            success_date_col) {
+  base::UseMethod("impute_success")
+}
+#' @inheritParams impute_success
+#' @method impute_success tbl_df
+#' @title [impute_success()] for tibbles
+#'
+
+impute_success.tbl_df <- function(current_data, imputation_info, id_col,
+                                  success_col, prior_data, perfect_assignment, dates = NULL,
+                                  success_date_col) {
   ## Imputing success randomly based on previously calculated Probabilities
   ##
 
@@ -56,10 +64,6 @@ impute_success <- function(current_data, imputation_info, id_col,
     imputed$mab_success <- imputed[[success_col$name]]
   }
 
-  # Recert Date for newly imputed success as average of recert date in the period from experimental data, grouped by original treatment
-  # Used for judging cases when simulating lack of information due to time constraints, without this,
-  # Those who changed treatment, and resulted in success when before were failures will not have a recert date
-  #
   if (!perfect_assignment) {
     imputed$new_success_date <- dplyr::case_when(
       imputed$impute_req == 0 | (imputed[[success_col$name]] == 0 & imputed$mab_success == 1) ~ imputed[[success_date_col$name]],
@@ -67,8 +71,26 @@ impute_success <- function(current_data, imputation_info, id_col,
       imputed$mab_success == 0 | TRUE ~ base::as.Date(NA)
     )
   }
-
   data <- dplyr::rows_update(prior_data, imputed, by = id_col$name)
-
   return(data)
 }
+#-------------------------------------------------------------------------------
+#' @inheritParams impute_success
+#' @method impute_success data.frame
+#' @title [impute_success()] for data.frames
+impute_success.data.frame <- function(current_data, imputation_info, id_col,
+                                      success_col, prior_data, perfect_assignment, dates = NULL,
+                                      success_date_col) {
+  return(
+    impute_success.tbl_df(
+      current_data = tibble::astibble(current_data),
+      imputation_info = tibble::as_tibble(imputation_info),
+      prior_data = tibble::as.tibble(prior_data),
+      success_col = success_col,
+      perfect_assignment = perfect_assignment,
+      dates = dates,
+      success_date_col = success_date_col
+    )
+  )
+}
+#-------------------------------------------------------------------------------

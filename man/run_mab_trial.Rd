@@ -74,11 +74,10 @@ for each treatment block to impute from.}
 }
 \value{
 A named list containing:
-\itemize {
+\itemize{
 \item \code{final_data}: Processed data with new treatment assignments and imputed outcomes labelled with "mab_" prefix.
 \item \code{bandits}: Thompson Probability or UCB1 statistic for each treatment arm at each period of the simulation.
-\item \code{assignment_probs}: Assignment probabilities for each treatment arm at each period of the simulation.
-}
+\item \code{assignment_probs}: Assignment probabilities for each treatment arm at each period of the simulation.}
 }
 \description{
 Performs a full Multi-Arm Bandit (MAB) trial using Thompson Sampling or UCB1.
