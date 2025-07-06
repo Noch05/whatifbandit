@@ -100,5 +100,76 @@ end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditio
 #' @inheritParams end_mab_trial
 #' @title [end_mab_trial()] for data.tables
 end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditions) {
-  return(0)
+  final_summary <- data[, .(
+    successes = base::sum(mab_success, na.rm = TRUE),
+    success_rate = base::mean(mab_success, na.rm = TRUE),
+    n = .N
+  ), by = mab_condition]
+
+  final_bandit <- get_bandit(
+    past_results = final_summary,
+    algorithm = algorithm,
+    conditions = conditions,
+    current_period = (periods + 1),
+    control_augment = 0
+  )
+
+  bandits$bandit_stat[[(periods + 1)]] <- final_bandit[[1]]
+
+  bandit_stats <- switch(algorithm,
+    "Thompson" = {
+      x <- data.table::rbindlist(bandits$bandit_stat,
+        use.names = TRUE,
+        idcol = "period_number"
+      )
+      x[, period_number := base::as.numeric(period_number)]
+      cols <- base::setdiff(names(x), "period_number")
+
+      x[, (cols) := lapply(.SD, function(col) {
+        data.table::shift(col,
+          n = 1L,
+          type = "lead",
+          fill = NA
+        )
+      }),
+      .SDcols = cols
+      ]
+      x[base::seq_len(periods), ]
+    },
+    "UCB1" = {
+      x <- data.table::rbindlist(bandits$bandit_stat,
+        use.names = TRUE,
+        idcol = "period_number"
+      )
+      x <- data.table::dcast(
+        data = x[, .(ucb, mab_condition, period_number)],
+        formula = period_number ~ mab_condition
+      )
+
+      x[, period_number := base::as.numeric(period_number)]
+      cols <- base::setdiff(names(x), "period_number")
+
+      x[, (cols) := lapply(.SD, function(col) {
+        data.table::shift(col,
+          n = 1L,
+          type = "lead",
+          fill = NA
+        )
+      }),
+      .SDcols = cols
+      ]
+      x[base::seq_len(periods), ]
+    },
+    rlang::abort("Invalid Algorithm: valid algorithsm are `Thompson`, and `UCB1`")
+  )
+
+
+  assignment_probs <- data.table::rbindlist(bandits$assignment_prob, idcol = "period_number")
+  assignment_probs[, period_number := base::as.numeric(period_number)]
+
+  return(list(
+    final_data = data,
+    bandits = bandit_stats,
+    assignment_probs = assignment_probs
+  ))
 }
