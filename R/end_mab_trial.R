@@ -7,7 +7,7 @@
 #' @param periods Numeric scalar; total number of periods in Multi-Arm-Bandit trial.
 #' @inheritParams single_mab_simulation
 #' @return  A named list containing:
-#' \itemize {
+#' \itemize{
 #' \item `final_data`: Processed data with new treatment assignments and imputed outcomes labelled with "mab_" prefix.
 #' \item `bandits`: Thompson Probability or UCB1 statistic for each treatment arm at each period of the simulation.
 #' \item `assignment_probs`: Assignment probabilities for each treatment arm at each period of the simulation.

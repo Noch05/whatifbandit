@@ -83,7 +83,7 @@ impute_success.data.frame <- function(current_data, imputation_info, id_col,
                                       success_date_col, current_period) {
   return(
     impute_success.tbl_df(
-      current_data = tibble::astibble(current_data),
+      current_data = tibble::as_tibble(current_data),
       imputation_info = tibble::as_tibble(imputation_info),
       prior_data = tibble::as.tibble(prior_data),
       success_col = success_col,
