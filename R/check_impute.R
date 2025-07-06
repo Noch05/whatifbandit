@@ -4,8 +4,9 @@
 #' contains all the info needed, important when blocking or using small assignment waves
 #'
 #' @name check_impute
-#' @param current_data data.frame, contains data from the period currently being imputed
-#' @param imputation_information data.frame created by [imputation_prep()].
+#' @inheritParams get_past_results
+#' @param imputation_information `success` element of the `imputation_information`
+#' list created by [imputation_prep()].
 
 
 check_impute <- function(imputation_information, current_data) {

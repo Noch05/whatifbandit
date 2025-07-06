@@ -4,7 +4,13 @@
 \alias{impute_loop_prep}
 \title{Outcome imputation preparation}
 \usage{
-impute_loop_prep(current_data, block_cols, imputation_information)
+impute_loop_prep(
+  current_data,
+  block_cols,
+  imputation_information,
+  current_period,
+  whole_experiment
+)
 }
 \arguments{
 \item{current_data}{Data with only observations from the current sampling period; if \code{data} is a data.table,
@@ -14,6 +20,11 @@ this is the whole dataset.}
 
 \item{imputation_information}{Object created by \code{\link[=imputation_prep]{imputation_prep()}} containing the conditional means and success dates
 for each treatment block to impute from.}
+
+\item{current_period}{current_period of the simulation.}
+
+\item{whole_experiment}{Logical; if TRUE, uses all past experimental data for imputing outcomes.
+If FALSE, uses only data available up to the current period.}
 }
 \value{
 A named list containing:

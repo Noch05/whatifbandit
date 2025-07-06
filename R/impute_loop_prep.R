@@ -11,34 +11,50 @@
 #'
 #' }
 
-impute_loop_prep <- function(current_data, block_cols, imputation_information) {
+impute_loop_prep <- function(current_data, block_cols, imputation_information, current_period,
+                             whole_experiment) {
   # Creating block for imputing
-  if (blocking) {
-    current_data$impute_block <- do.call(
-      paste, c(current_data[, c("mab_condition", block_cols$name)], sep = "_")
-    )
+  if (inherits(current_data, "data.table")) {
+    if (blocking) {
+      current_data[period_number == current_period,
+        impute_block = do.call(paste, c(.SD, sep = "_")),
+        .SDcols = c("mab_condition", block_cols$name)
+      ]
+    } else {
+      current_data[period_number == current_period, impute_block = mab_condition]
+    }
   } else {
-    current_data$impute_block <- current_data$mab_condition
+    if (blocking) {
+      current_data$impute_block <- do.call(
+        paste, c(current_data[, c("mab_condition", block_cols$name)], sep = "_")
+      )
+    } else {
+      current_data$impute_block <- current_data$mab_condition
+    }
   }
 
 
   if (whole_experiment) {
-    impute_info <- imputation_information[["success"]]
+    impute_success <- imputation_information[["success"]]
   } else {
-    impute_info <- imputation_information[["success"]][[i]]
+    impute_success <- imputation_information[["success"]][[current_period]]
   }
   if (!perfect_assignment) {
     dates <- rlang::set_names(
-      base::as.Date(base::as.numeric(imputation_information[["dates"]][i, -1])),
-      base::names(imputation_information[["dates"]][i, -1])
+      base::as.Date(base::as.numeric(imputation_information[["dates"]][current_period, -1])),
+      base::names(imputation_information[["dates"]][current_period, -1])
     )
   }
 
-  imputation_info <- check_impute(
-    imputation_information = impute_info,
+  impute_success <- check_impute(
+    imputation_information = impute_success,
     current_data = current_data
   )
+
+
   return(list(
     current_data = current_data,
+    impute_success = impute_success,
+    impute_dates = dates
   ))
 }

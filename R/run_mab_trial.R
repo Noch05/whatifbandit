@@ -96,7 +96,13 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       success_col = data_cols$success_col,
       current_period = i
     )
-    prepped_impute <- impute_loop_prep(current_data = current_data, )
+    prepped_impute <- impute_loop_prep(
+      current_data = current_data,
+      current_period = i,
+      whole_experiment = whole_experiment,
+      imputation_information = imputation_information,
+      block_cols = block_cols
+    )
 
     data <- impute_success(
       current_data = current_data,
