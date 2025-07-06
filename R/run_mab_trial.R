@@ -124,56 +124,10 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       success_date_col = data_cols$success_date_col
     )
   }
-  final_summary <- data |>
-    dplyr::group_by(mab_condition) |>
-    dplyr::summarize(
-      successes = base::sum(mab_success, na.rm = TRUE),
-      success_rate = base::mean(mab_success, na.rm = TRUE),
-      n = dplyr::n(),
-      .groups = "drop"
-    ) |>
-    dplyr::ungroup()
 
-  final_bandit <- get_bandit(
-    past_results = final_summary,
-    algorithm = algorithm,
-    conditions = conditions,
-    current_period = (periods + 1),
-    control_augment = control_augment
-  )
-  bandits$bandit_stat[[(periods + 1)]] <- final_bandit[[1]]
-
-  bandit_stats <- switch(algorithm,
-    "Thompson" = {
-      dplyr::bind_rows(bandits$bandit_stat, .id = "period_number") |>
-        dplyr::mutate(
-          period_number = base::as.numeric(period_number),
-          dplyr::across(-period_number, ~ dplyr::lead(., n = 1L, default = NA))
-        ) |>
-        dplyr::slice(base::seq_len(periods))
-    },
-    "UCB1" = {
-      dplyr::bind_rows(bandits$bandit_stat, .id = "period_number") |>
-        dplyr::select(ucb, mab_condition, period_number) |>
-        tidyr::pivot_wider(values_from = "ucb", names_from = c("mab_condition")) |>
-        dplyr::mutate(
-          period_number = base::as.numeric(period_number),
-          dplyr::across(-period_number, ~ dplyr::lead(., n = 1L, default = NA))
-        ) |>
-        dplyr::slice(base::seq_len(periods))
-    },
-    rlang::abort("Invalid Algorithm: valid algorithsm are `Thompson`, and `UCB1`")
-  )
-
-
-  assignment_probs <- dplyr::bind_rows(bandits[["assignment_prob"]], .id = "period_number") |>
-    dplyr::mutate(period_number = base::as.numeric(period_number))
+  results <- end_mab_trial(data = data, bandits = bandits)
 
 
 
-  return(list(
-    final_data = data,
-    bandits = bandit_stats,
-    assignment_probs = assignment_probs
-  ))
+  return(results)
 }
