@@ -17,8 +17,8 @@
 #' \itemize{
 #' \item `final_data`: Processed data with new treatment assignments and imputed outcomes labelled with "mab_" prefix.
 #' \item `bandits`: Thompson Probability or UCB1 statistic for each treatment arm at each period of the simulation.
-#' \item `assignment_probs`: Assignment probabilities for each treatment arm at each period of the simulation.}
-#'
+#' \item `assignment_probs`: Assignment probabilities for each treatment arm at each period of the simulation.
+#' }
 #' @seealso
 #' * [single_mab_simulation()]
 #' * [mab_simulation()]
@@ -113,7 +113,8 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       success_col = data_cols$success_col,
       prior_data = data,
       perfect_assignment = perfect_assignment,
-      success_date_col = data_cols$success_date_col
+      success_date_col = data_cols$success_date_col,
+      current_period = i
     )
   }
 

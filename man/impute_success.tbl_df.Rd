@@ -12,7 +12,8 @@
   prior_data,
   perfect_assignment,
   dates = NULL,
-  success_date_col
+  success_date_col,
+  current_period
 )
 }
 \arguments{
@@ -32,10 +33,12 @@ Created by \code{\link[=imputation_prep]{imputation_prep()}}}
 If FALSE, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.}
 
-\item{dates}{Named date vector; Contains average date by treatment block to impute new success dates for
+\item{dates}{Named date vector; Contains average success date by treatment block to impute new success dates for
 observations whose change in treatment changes their outcome from failure to success.}
 
 \item{success_date_col}{Column in data, contains original dates each success occurred; only necessary when 'perfect_assignment' = FALSE.}
+
+\item{current_period}{current_period of the simulation.}
 }
 \description{
 \code{\link[=impute_success]{impute_success()}} for tibbles
