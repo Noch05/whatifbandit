@@ -9,7 +9,9 @@ impute_loop_prep(
   block_cols,
   imputation_information,
   current_period,
-  whole_experiment
+  whole_experiment,
+  blocking,
+  perfect_assignment
 )
 }
 \arguments{
@@ -25,6 +27,13 @@ for each treatment block to impute from.}
 
 \item{whole_experiment}{Logical; if TRUE, uses all past experimental data for imputing outcomes.
 If FALSE, uses only data available up to the current period.}
+
+\item{blocking}{Logical; Whether or not to use treatment blocking.}
+
+\item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
+(i.e., all outcomes are observed regardless of the date).
+If FALSE, hides outcomes not yet theoretically observed, based
+on the dates treatments would have been assigned for each wave.}
 }
 \value{
 A named list containing:

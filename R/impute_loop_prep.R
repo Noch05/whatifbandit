@@ -12,7 +12,7 @@
 #' }
 
 impute_loop_prep <- function(current_data, block_cols, imputation_information, current_period,
-                             whole_experiment) {
+                             whole_experiment, blocking, perfect_assignment) {
   # Creating block for imputing
   if (inherits(current_data, "data.table")) {
     if (blocking) {
@@ -35,15 +35,17 @@ impute_loop_prep <- function(current_data, block_cols, imputation_information, c
 
 
   if (whole_experiment) {
-    impute_success <- imputation_information[["success"]]
+    impute_success <- imputation_information[[1]]
   } else {
-    impute_success <- imputation_information[["success"]][[current_period]]
+    impute_success <- imputation_information[[1]][[current_period]]
   }
   if (!perfect_assignment) {
     dates <- rlang::set_names(
-      base::as.Date(base::as.numeric(imputation_information[["dates"]][current_period, -1])),
-      base::names(imputation_information[["dates"]][current_period, -1])
+      base::as.Date(base::as.numeric(imputation_information[[2]][current_period, -1])),
+      base::names(imputation_information[[2]][current_period, -1])
     )
+  } else {
+    dates <- NULL
   }
 
   impute_success <- check_impute(

@@ -101,13 +101,15 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       current_period = i,
       whole_experiment = whole_experiment,
       imputation_information = imputation_information,
-      block_cols = block_cols
+      block_cols = block_cols,
+      blocking = blocking,
+      perfect_assignment
     )
 
     data <- impute_success(
-      current_data = current_data,
-      imputation_info = imputation_info,
-      dates = dates,
+      current_data = prepped_impute$current_data,
+      imputation_info = prepped_impute$impute_success,
+      dates = prepped_impute$impute_dates,
       id_col = data_cols$id_col,
       success_col = data_cols$success_col,
       prior_data = data,

@@ -28,7 +28,7 @@ check_impute.tbl_df <- function(imputation_information, current_data, current_pe
     addition <- tibble::tibble(
       treatment_block = missing_blocks,
       success_rate = mean_rate,
-      failure_rate <- 1 - mean_rate
+      failure_rate = 1 - mean_rate
     )
 
     imputation_information <- dplyr::bind_rows(imputation_information, addition)
@@ -73,7 +73,7 @@ check_impute.data.table <- function(imputation_information, current_data, curren
     addition <- data.table::data.table(
       treatment_block = missing_blocks,
       success_rate = mean_rate,
-      failure_rate <- 1 - mean_rate
+      failure_rate = 1 - mean_rate
     )
 
     imputation_information <- data.table::rbindlist(list(imputation_information, addition))
@@ -85,7 +85,6 @@ check_impute.data.table <- function(imputation_information, current_data, curren
 
   imputation_information <- imputation_information[!duplicated(treatment_block)]
   data.table::setorder(imputation_information, treatment_block)
-
 
   return(invisible(imputation_information))
 }
