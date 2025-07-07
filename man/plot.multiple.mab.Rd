@@ -26,9 +26,6 @@
 
 \item{estimator}{Estimator to plot; Either "AIPW", "Sample" or "Both"; used by \code{hist} and \code{estimate}.}
 
-\item{standard_error}{String; type of standard error to use, the "resampled" distribution or the "normal" approximation. Only
-used when type = "estimate".}
-
 \item{level}{Confidence Interval Width (i.e 0.90, .95, 0.99)}
 
 \item{save}{Logical; Whether or not to save the plot to disk; FALSE by default.}
@@ -36,6 +33,9 @@ used when type = "estimate".}
 \item{path}{String; File directory to save file.}
 
 \item{...}{arguments to pass to \verb{ggplot2:geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, \code{bins} etc.)}
+
+\item{cdf}{String; specifies the type of CDF to use when analyzing the estimates.
+valid cdfs are the \code{empirical} cdf, the \code{normal} cdf. Used when type = \code{estimate}.}
 }
 \value{
 Minimal ggplot object, that can be customized and added to with \code{+} (To change, scales, labels, legend, theme, etc.)

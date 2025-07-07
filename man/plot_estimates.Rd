@@ -4,7 +4,7 @@
 \alias{plot_estimates}
 \title{Plot AIPW/Sample Estimates}
 \usage{
-plot_estimates(x, estimator, standard_error, level, ...)
+plot_estimates(x, estimator, level = 0.95, ...)
 }
 \arguments{
 \item{x}{\code{mab} class object created by \code{\link[=single_mab_trial]{single_mab_trial()}}}

@@ -2,18 +2,17 @@
 % Please edit documentation in R/plot.methods.R
 \name{plot_mult_estimates}
 \alias{plot_mult_estimates}
-\alias{plot_estimates}
 \title{Plots AIPW/Sample Estimates for each Arm}
 \usage{
-plot_estimates(x, estimator, standard_error, level, ...)
+plot_mult_estimates(x, estimator, cdf, level, ...)
 }
 \arguments{
 \item{x}{\code{multiple.mab} class object created by \code{\link[=multiple_mab_trial]{multiple_mab_trial()}}}
 
 \item{estimator}{Estimator to plot; Either "AIPW", "Sample" or "Both"; used by \code{hist} and \code{estimate}.}
 
-\item{standard_error}{String; type of standard error to use, the "resampled" distribution or the "normal" approximation. Only
-used when type = "estimate".}
+\item{cdf}{String; specifies the type of CDF to use when analyzing the estimates.
+valid cdfs are the \code{empirical} cdf, the \code{normal} cdf. Used when type = \code{estimate}.}
 
 \item{level}{Confidence Interval Width (i.e 0.90, .95, 0.99)}
 
