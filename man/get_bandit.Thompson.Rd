@@ -4,7 +4,7 @@
 \alias{get_bandit.Thompson}
 \title{Thompson Sampling Algorithm}
 \usage{
-\method{get_bandit}{Thompson}(past_results, conditions)
+\method{get_bandit}{Thompson}(past_results, conditions, iterator)
 }
 \arguments{
 \item{past_results}{\code{data} object containing summary of prior periods.

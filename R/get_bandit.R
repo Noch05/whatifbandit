@@ -18,7 +18,7 @@
 
 get_bandit <- function(past_results, algorithm, conditions, current_period = NULL, control_augment = 0) {
   bandit <- switch(algorithm,
-    "Thompson" = get_bandit.Thompson(past_results = past_results, conditions = conditions),
+    "Thompson" = get_bandit.Thompson(past_results = past_results, conditions = conditions, iterator = 0),
     "UCB1" = get_bandit.UCB1(past_results = past_results, conditions = conditions, current_period = current_period),
     rlang::abort("Invalid `algorithm`. Valid Algorithms: 'Thomspon', 'UCB1'")
   )
@@ -40,13 +40,23 @@ get_bandit <- function(past_results, algorithm, conditions, current_period = NUL
 #' @inheritParams get_bandit
 #' @returns Named Numeric Vector of Posterior Probabilities
 
-get_bandit.Thompson <- function(past_results, conditions) {
+get_bandit.Thompson <- function(past_results, conditions, iterator) {
   bandit <- rlang::set_names(bandit::best_binomial_bandit(
     x = past_results$successes,
     n = past_results$n,
     alpha = 1,
     beta = 1
   ), conditions)
+
+  if (base::sum(bandit) == 0 & iterator < 50) {
+    # When best_binomial_bandit fails due to numerical instability,
+    # this preserves proportions and reruns the process
+    past_results$successes <- (past_results$successes / 2)
+    past_results$n <- (past_results$n / 2)
+
+    bandit <- get_bandit.Thompson(past_results = past_results, conditions = conditions, iterator = iterator + 1)[[1]]
+  }
+
 
   return(list(bandit, assignment_prob = bandit))
 }
