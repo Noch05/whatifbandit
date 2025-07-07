@@ -2,18 +2,18 @@
 % Please edit documentation in R/plot.methods.R
 \name{plot.mab}
 \alias{plot.mab}
-\title{Plot Generic for mab objects}
+\title{Plot Generic for \code{mab} objects}
 \usage{
 \method{plot}{mab}(x, type, estimator = NULL, save = FALSE, path = NULL, ...)
 }
 \arguments{
-\item{x}{mab class object created by}
+\item{x}{\code{mab} class object created by \code{\link[=single_mab_trial]{single_mab_trial()}}}
 
 \item{type}{String; Type of plot requested; valid types are:
 \itemize{
-\item {arm}:  Shows Thompson Probability or UCB1 Statistic over the trial period.
-\item {assign}:  Shows Assignment Probability/Proportion over trial period.
-\item {estimate}: Shows AIPW Estimates with 95\% Normal Confidence Intervals based on their estimated variance.
+\item \code{arm}: Shows Thompson Probability or UCB1 Statistic over the trial period.
+\item \code{assign}: Shows Assignment Probability/Proportion over trial period.
+\item \code{estimate}: Shows proportion of success estimates with 95\% Normal Confidence Intervals based on their estimated variance.
 }}
 
 \item{estimator}{Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type}

@@ -7,7 +7,7 @@
 plot_estimates(x, estimator, ...)
 }
 \arguments{
-\item{x}{mab class object created by}
+\item{x}{\code{mab} class object created by \code{\link[=single_mab_trial]{single_mab_trial()}}}
 
 \item{estimator}{Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type}
 

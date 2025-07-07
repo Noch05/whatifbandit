@@ -52,26 +52,24 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
   upper_level <- 1 - lower_level
 
   quantiles <- object$estimates |>
-    dplyr::filter(estimator == "AIPW") |>
-    dplyr::group_by(mab_condition) |>
+    dplyr::group_by(mab_condition, estimator) |>
     dplyr::summarize(
       lower = stats::quantile(mean, lower_level),
       upper = stats::quantile(mean, upper_level)
     )
 
   estimate <- object$estimates |>
-    dplyr::filter(estimator == "AIPW") |>
-    dplyr::group_by(mab_condition) |>
+    dplyr::group_by(mab_condition, estimator) |>
     dplyr::summarize(
-      avg_AIPW = base::mean(mean, na.rm = TRUE),
+      estimate_avg = base::mean(mean, na.rm = TRUE),
       variance_avg = base::mean(variance, na.rm = TRUE),
       variance_resample = stats::var(mean), .groups = "drop",
     ) |>
     dplyr::mutate(
-      lower = avg_AIPW + qnorm(lower_level) * base::sqrt(variance_avg),
-      upper = avg_AIPW + qnorm(upper_level) * base::sqrt(variance_avg)
+      lower = estimate_avg + qnorm(lower_level) * base::sqrt(variance_avg),
+      upper = estimate_avg + qnorm(upper_level) * base::sqrt(variance_avg)
     ) |>
-    left_join(quantiles, by = "mab_condition", suffix = c("_normal", "_empirical"))
+    left_join(quantiles, by = c("mab_condition", "estimator"), suffix = c("_normal", "_empirical"))
 
   bandits <- object$bandits |>
     dplyr::group_by(trial) |>
@@ -84,7 +82,7 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
     dplyr::ungroup() |>
     dplyr::count(mab_condition)
 
-  summary <- dplyr::left_join(estimate, bandits, by = "mab_condition") |>
+  summary <- dplyr::left_join(estimate, bandits, by = c("mab_condition", "estimator")) |>
     dplyr::rename(times_best = "n") |>
     dplyr::mutate(
       times_best = dplyr::if_else(base::is.na(times_best), 0, times_best),

@@ -1,14 +1,14 @@
-#' Plot Generic for mab objects
+#' Plot Generic for `mab` objects
 #' @description Uses [ggplot2::ggplot()] to summarize the results of a single
 #' Multi-Arm Bandit Trial
 #'
 #' @method plot mab
-#' @param x mab class object created by
+#' @param x `mab` class object created by [single_mab_trial()]
 #' @param type String; Type of plot requested; valid types are:
 #' \itemize{
-#' \item {arm}:  Shows Thompson Probability or UCB1 Statistic over the trial period.
-#' \item {assign}:  Shows Assignment Probability/Proportion over trial period.
-#' \item {estimate}: Shows AIPW Estimates with 95% Normal Confidence Intervals based on their estimated variance.
+#' \item `arm`: Shows Thompson Probability or UCB1 Statistic over the trial period.
+#' \item `assign`: Shows Assignment Probability/Proportion over trial period.
+#' \item `estimate`: Shows proportion of success estimates with 95% Normal Confidence Intervals based on their estimated variance.
 #' }
 #' @param save Logical; Whether or not to save the plot to disk; FALSE by default.
 #' @param path String; File directory to save file.
@@ -116,4 +116,38 @@ plot_estimates <- function(x, estimator, ...) {
       title = "AIPW Estimates of Success"
     ) +
     ggplot2::theme_minimal()
+}
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+#' Plot Generic for `multiple.mab` objects
+#' @description Uses [ggplot2::ggplot()] to summarize the results of multiple
+#' Multi-Arm Bandit Trials
+#'
+#' @method plot multple.mab
+#' @param x `multple.mab` class object created by [multiple_mab_trial()]
+#' @param type String; Type of plot requested; valid types are:
+#' \itemize{
+#' \item `summary`: Shows the number of times each arm was selected as the highest chance of being the best.
+#' \item `hist`: Shows histograms for each treatment conditions proportion of success across trials.
+#' }
+#' @param estimator Estimator to plot; Either "AIPW", "Sample" or "Both"; used by `hist` and ``
+#' @param save Logical; Whether or not to save the plot to disk; FALSE by default.
+#' @param path String; File directory to save file.
+#' @param ... arguments to pass to `ggplot2:geom_*` function (e.g. `color`, `linewidth`, `alpha`, etc.)
+#' @export
+#' @returns ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
+
+plot.multiple.mab <- function(x, type, estimator = NULL, save = FALSE, path = NULL, ...) {
+  plot <- switch(type,
+    "summary" = 0,
+    "hist" = 0,
+    "estimate" = 0,
+    rlang::abort("Invalid Type: ")
+  )
+
+  if (save) {
+    ggplot2::ggsave(plot, filename = path)
+  }
+
+  return(plot)
 }
