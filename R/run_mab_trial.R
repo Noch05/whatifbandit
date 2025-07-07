@@ -55,19 +55,12 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
 
     prior <- create_prior(prior_periods = prior_periods, current_period = i)
 
-    if (!inherits(data, "data.table")) {
-      current_data <- data[data$period_number == i, ]
-      prior_data <- data[data$period_number %in% prior, ]
-    } else {
-      current_data <- data
-      prior_data <- NULL
-    }
+    current_data <- data[data$period_number == i, ]
+    prior_data <- data[data$period_number %in% prior, ]
 
     past_results <- get_past_results(
       current_data = current_data,
       prior_data = prior_data,
-      current_period = i,
-      prior = prior,
       perfect_assignment = perfect_assignment,
       assignment_date_col = data_cols$assignment_date_col,
       conditions = conditions
@@ -92,17 +85,16 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       id_col = data_cols$id_col,
       conditions = conditions,
       condition_col = data_cols$condition_col,
-      success_col = data_cols$success_col,
-      current_period = i
+      success_col = data_cols$success_col
     )
     prepped_impute <- impute_loop_prep(
       current_data = current_data,
-      current_period = i,
       whole_experiment = whole_experiment,
       imputation_information = imputation_information,
       block_cols = block_cols,
       blocking = blocking,
-      perfect_assignment
+      perfect_assignment,
+      current_period = i
     )
 
     data <- impute_success(

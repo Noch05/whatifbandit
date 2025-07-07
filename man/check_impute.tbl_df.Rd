@@ -10,10 +10,7 @@
 \item{imputation_information}{\code{success} element of the \code{imputation_information}
 list created by \code{\link[=imputation_prep]{imputation_prep()}}.}
 
-\item{current_data}{Data with only observations from the current sampling period; if \code{data} is a data.table,
-this is the whole dataset.}
-
-\item{current_period}{current_period of the simulation.}
+\item{current_data}{Data with only observations from the current sampling period.}
 }
 \description{
 \code{\link[=check_impute]{check_impute()}} for tibbles

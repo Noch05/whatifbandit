@@ -38,7 +38,7 @@ observations whose change in treatment changes their outcome from failure to suc
 
 \item{success_date_col}{Column in data, contains original dates each success occurred; only necessary when 'perfect_assignment' = FALSE.}
 
-\item{current_period}{current_period of the simulation.}
+\item{current_period}{Numeric scalar; current treatment wave of the simulation.}
 }
 \description{
 \code{\link[=impute_success]{impute_success()}} for data.tables

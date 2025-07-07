@@ -15,12 +15,7 @@
 )
 }
 \arguments{
-\item{current_data}{Data with only observations from the current sampling period; if \code{data} is a data.table,
-this is the whole dataset.}
-
-\item{current_period}{current_period of the simulation.}
-
-\item{prior}{vector of prior periods to use for bandit calculations.}
+\item{current_data}{Data with only observations from the current sampling period.}
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
@@ -32,7 +27,7 @@ on the dates treatments would have been assigned for each wave.}
 \item{conditions}{Named Character vector containing treatment conditions.
 Control condition, must be named "Control" when 'control_augment' > 0.}
 
-\item{prior_data}{Data with only the observations from the prior index; only used when \code{data} is not a data.table}
+\item{prior_data}{Data with only the observations from the prior index.}
 }
 \description{
 \code{\link[=get_past_results]{get_past_results()}} for data.tables

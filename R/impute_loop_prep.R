@@ -6,22 +6,23 @@
 #' column to `current_data`
 #' @inheritParams get_past_results
 #' @inheritParams run_mab_trial
+#' @inheritParams impute_success
 #' @returns A named list containing:
 #' \itemize{
 #'
 #' }
 
-impute_loop_prep <- function(current_data, block_cols, imputation_information, current_period,
-                             whole_experiment, blocking, perfect_assignment) {
+impute_loop_prep <- function(current_data, block_cols, imputation_information,
+                             whole_experiment, blocking, perfect_assignment, current_period) {
   # Creating block for imputing
   if (inherits(current_data, "data.table")) {
     if (blocking) {
-      current_data[period_number == current_period,
+      current_data[,
         impute_block := do.call(paste, c(.SD, sep = "_")),
         .SDcols = c("mab_condition", block_cols$name)
       ]
     } else {
-      current_data[period_number == current_period, impute_block := mab_condition]
+      current_data[, impute_block := mab_condition]
     }
   } else {
     if (blocking) {

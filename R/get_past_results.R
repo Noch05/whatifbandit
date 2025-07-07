@@ -5,11 +5,8 @@
 #' @inheritParams single_mab_simulation
 #' @inheritParams create_prior
 #' @inheritParams cols
-#' @param current_data Data with only observations from the current sampling period; if `data` is a data.table,
-#' this is the whole dataset.
-#' @param prior_data Data with only the observations from the prior index; only used when `data` is not a data.table
-#' @param current_period current_period of the simulation.
-#' @param prior vector of prior periods to use for bandit calculations.
+#' @param current_data Data with only observations from the current sampling period.
+#' @param prior_data Data with only the observations from the prior index.
 #' @returns A data.frame, containing the number of successes, and number of people for each
 #' treatment condition.
 #'
@@ -19,8 +16,8 @@
 #' *[get_bandit()]
 #'
 #'
-get_past_results <- function(current_data, prior_data = NULL, perfect_assignment, assignment_date_col = NULL,
-                             conditions, current_period = NULL, prior = NULL) {
+get_past_results <- function(current_data, prior_data, perfect_assignment, assignment_date_col = NULL,
+                             conditions) {
   base::UseMethod("get_past_results")
 }
 
@@ -32,7 +29,7 @@ get_past_results <- function(current_data, prior_data = NULL, perfect_assignment
 
 
 get_past_results.tbl_df <- function(current_data, prior_data, perfect_assignment, assignment_date_col = NULL,
-                                    conditions, current_period = NULL, prior = NULL) {
+                                    conditions) {
   if (!perfect_assignment) {
     current_date <- base::max(current_data[[assignment_date_col$name]])
 
@@ -82,28 +79,24 @@ get_past_results.data.table <- function(current_data, current_period,
                                         perfect_assignment, assignment_date_col = NULL,
                                         conditions, prior_data) {
   if (!perfect_assignment) {
-    current_date <- base::max(current_data[
-      period_number == current_period,
-      base::get(assignment_date_col$name)
-    ])
+    current_date <- base::max(current_data[, base::get(assignment_date_col$name)])
 
-    current_data[period_number %in% prior, known_success := data.table::fifelse(
+    prior_data[, known_success := data.table::fifelse(
       current_date >= new_success_date &
         !is.na(new_success_date), 1, 0
     )]
   } else if (perfect_assignment) {
-    current_data[period_number %in% prior, known_success := mab_success]
+    prior_data[, known_success := mab_success]
   } else {
     rlang::abort("Specify Logical for `perfect_assignment`")
   }
 
-  past_results <- current_data[period_number %in% prior, .(
+  past_results <- prior_data[, .(
     successes = base::sum(known_success, na.rm = TRUE),
     success_rate = base::mean(known_success, na.rm = TRUE),
     n = .N
   ), by = mab_condition]
 
-  current_data[, known_success := NULL]
 
 
   if (base::nrow(past_results) != base::length(conditions)) {

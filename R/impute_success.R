@@ -10,6 +10,7 @@
 #' Created by [imputation_prep()]
 #' @param dates Named date vector; Contains average success date by treatment block to impute new success dates for
 #' observations whose change in treatment changes their outcome from failure to success.
+#' @param current_period Numeric scalar; current treatment wave of the simulation.
 #' @inheritParams get_past_results
 #' @inheritParams single_mab_simulation
 #' @inheritParams cols
@@ -103,9 +104,11 @@ impute_success.data.table <- function(current_data, imputation_info, id_col,
                                       success_date_col, current_period) {
   ## Imputing success randomly based on previously calculated Probabilities
 
-  if (current_data[impute_req == 1 & period_number == current_period, .N] > 0) {
-    blocks <- current_data[impute_req == 1 & period_number == current_period, impute_block]
-    clusters <- current_data[impute_req == 1 & period_number == current_period, base::get(id_col$name)]
+  if (current_data[impute_req == 1, .N] > 0) {
+    filtered_data <- current_data[impute_req == 1]
+
+    blocks <- filtered_data[, impute_block]
+    clusters <- filtered_data[, base::get(id_col$name)]
 
 
     imputations <- randomizr::block_and_cluster_ra(
@@ -118,14 +121,21 @@ impute_success.data.table <- function(current_data, imputation_info, id_col,
     )
 
     # Joining Data Together and Returning
-    current_data[impute_req == 1 & period_number == current_period, mab_success := imputations]
-    current_data[impute_req == 0 & period_number == current_period, mab_success := base::get(success_col$name)]
+    current_data[impute_req == 1, mab_success := imputations]
+    current_data[impute_req == 0, mab_success := base::get(success_col$name)]
   } else {
-    current_data[period_number == current_period, mab_success := base::get(success_col$name)]
+    current_data[, mab_success := base::get(success_col$name)]
   }
 
+  prior_data[period_number == current_period, `:=`(
+    mab_condition = current_data[, mab_condition],
+    impute_req = current_data[, impute_req],
+    impute_block = current_data[, impute_block],
+    mab_success = current_data[, mab_success]
+  )]
+
   if (!perfect_assignment) {
-    current_data[
+    prior_data[
       period_number == current_period,
       new_success_date := data.table::fcase(
         impute_req == 0 | (get(success_col$name) == 0 & mab_success == 1), get(success_date_col$name),
@@ -135,5 +145,5 @@ impute_success.data.table <- function(current_data, imputation_info, id_col,
     ]
   }
 
-  return(invisible(current_data))
+  return(invisible(prior_data))
 }

@@ -8,22 +8,19 @@ impute_loop_prep(
   current_data,
   block_cols,
   imputation_information,
-  current_period,
   whole_experiment,
   blocking,
-  perfect_assignment
+  perfect_assignment,
+  current_period
 )
 }
 \arguments{
-\item{current_data}{Data with only observations from the current sampling period; if \code{data} is a data.table,
-this is the whole dataset.}
+\item{current_data}{Data with only observations from the current sampling period.}
 
 \item{block_cols}{Character Vector of variables to block by.}
 
 \item{imputation_information}{Object created by \code{\link[=imputation_prep]{imputation_prep()}} containing the conditional means and success dates
 for each treatment block to impute from.}
-
-\item{current_period}{current_period of the simulation.}
 
 \item{whole_experiment}{Logical; if TRUE, uses all past experimental data for imputing outcomes.
 If FALSE, uses only data available up to the current period.}
@@ -34,6 +31,8 @@ If FALSE, uses only data available up to the current period.}
 (i.e., all outcomes are observed regardless of the date).
 If FALSE, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.}
+
+\item{current_period}{Numeric scalar; current treatment wave of the simulation.}
 }
 \value{
 A named list containing:

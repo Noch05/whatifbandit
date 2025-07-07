@@ -23,13 +23,13 @@
 
 assign_treatments <- function(current_data, probs, blocking = NULL,
                               algorithm, id_col, conditions, condition_col,
-                              success_col, current_period) {
+                              success_col) {
   # Performing Randomized Treatment Assignment
   if (inherits(current_data, "data.table")) {
     if (blocking) {
-      blocks <- current_data[period_number == current_period, block]
+      blocks <- current_data[, block]
     }
-    clusters <- current_data[period_number == current_period, get(id_col$name)]
+    clusters <- current_data[, base::get(id_col$name)]
   } else {
     if (blocking) {
       blocks <- current_data$block
@@ -59,7 +59,7 @@ assign_treatments <- function(current_data, probs, blocking = NULL,
 
 
   if (inherits(current_data, "data.table")) {
-    current_data[period_number == current_period, mab_condition := new_treatments][
+    current_data[, mab_condition := new_treatments][
       , impute_req := data.table::fifelse(
         base::as.character(mab_condition) != base::as.character(base::get(condition_col$name)),
         1, 0

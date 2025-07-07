@@ -61,7 +61,7 @@ check_impute.data.frame <- function(imputation_information, current_data) {
 check_impute.data.table <- function(imputation_information, current_data, current_period) {
   mean_rate <- base::mean(imputation_information$success_rate)
 
-  current_blocks <- stats::na.omit(current_data[impute_req == 1 & period_number == current_period, impute_block])
+  current_blocks <- stats::na.omit(current_data[impute_req == 1, impute_block])
 
   imputation_blocks <- stats::na.omit(imputation_information$treatment_block)
 
