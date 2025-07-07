@@ -44,6 +44,14 @@ multiple_mab_simulation <- function(data,
                                     block_cols = NULL,
                                     verbose = FALSE,
                                     keep_data = FALSE) {
+  if ((object.size(data) / (1024^2) > 500)) {
+    rlang::warn(c(
+      "i" = "`furrr::future_map()` has a serialization limit of 500 MB. If your data
+    is larger than that, you have to set the `options(\"future_globals.maxSize\")`
+    manually to change it. This has been known to cause failures"
+    ))
+  }
+
   if (!is.numeric(times) || times < 1 || floor(times) != times) {
     rlang::abort("Argument 'times' must be an integer value greater than or equal to 1")
   }

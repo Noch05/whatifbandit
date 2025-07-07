@@ -123,8 +123,8 @@ plot_estimates <- function(x, estimator, ...) {
 #' @description Uses [ggplot2::ggplot()] to summarize the results of multiple
 #' Multi-Arm Bandit Trials
 #'
-#' @method plot multple.mab
-#' @param x `multple.mab` class object created by [multiple_mab_trial()]
+#' @method plot multiple.mab
+#' @param x `multiple.mab` class object created by [multiple_mab_trial()]
 #' @param type String; Type of plot requested; valid types are:
 #' \itemize{
 #' \item `summary`: Shows the number of times each arm was selected as the highest chance of being the best.

@@ -4,10 +4,10 @@
 \alias{plot.multiple.mab}
 \title{Plot Generic for \code{multiple.mab} objects}
 \usage{
-\method{plot}{multple.mab}(x, type, estimator = NULL, save = FALSE, path = NULL, ...)
+\method{plot}{multiple.mab}(x, type, estimator = NULL, save = FALSE, path = NULL, ...)
 }
 \arguments{
-\item{x}{\code{multple.mab} class object created by \code{\link[=multiple_mab_trial]{multiple_mab_trial()}}}
+\item{x}{\code{multiple.mab} class object created by \code{\link[=multiple_mab_trial]{multiple_mab_trial()}}}
 
 \item{type}{String; Type of plot requested; valid types are:
 \itemize{
