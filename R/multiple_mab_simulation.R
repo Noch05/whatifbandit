@@ -38,12 +38,12 @@ multiple_mab_simulation <- function(data,
                                     data_cols,
                                     times,
                                     seeds,
-                                    keep_data = FALSE,
                                     control_augment = 0,
                                     time_unit = NULL,
                                     period_length = NULL,
                                     block_cols = NULL,
-                                    verbose = FALSE) {
+                                    verbose = FALSE,
+                                    keep_data = FALSE) {
   if (!is.numeric(times) || times < 1) {
     stop("Argument 'times' must be a numeric value greater than or equal to 1.
          Please provide a valid value.")

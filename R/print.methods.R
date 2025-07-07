@@ -61,7 +61,7 @@ print_mab <- function(mab) {
     }
   }
 
-  base::cat("Total Periods:        ", length(mab$bandits), "\n")
-  base::cat("Prior Periods:        ", settings$prior_periods, "\n")
-  base::cat("Conditions:           ", base::paste(settings$conditions, collapse = ", "), "\n")
+  base::cat("Total Periods:        ", length(mab$bandits), "periods\n")
+  base::cat("Prior Periods:        ", settings$prior_periods, "periods\n")
+  base::cat("Treatments:           ", length(settings$conditions), "treatment arms\n")
 }

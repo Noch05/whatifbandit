@@ -16,12 +16,12 @@ multiple_mab_simulation(
   data_cols,
   times,
   seeds,
-  keep_data = FALSE,
   control_augment = 0,
   time_unit = NULL,
   period_length = NULL,
   block_cols = NULL,
-  verbose = FALSE
+  verbose = FALSE,
+  keep_data = FALSE
 )
 }
 \arguments{
@@ -63,9 +63,6 @@ Used to simulate imperfect information on part of researchers conducting an adap
 
 \item{seeds}{Numeric vector of \code{length(times)} containing valid seeds to define random state for each trial.}
 
-\item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets
-.}
-
 \item{control_augment}{Number \eqn{\in} [0,1]; Proportion of each wave guaranteed to get "Control" treatment.
 Default is 0.}
 
@@ -80,6 +77,9 @@ If assignment methods is "Batch", this refers to the number of people in each ba
 \item{block_cols}{Character Vector of variables to block by.}
 
 \item{verbose}{Logical; Toggles progress bar from \link[furrr:future_map]{furrr::future_map}.}
+
+\item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets
+.}
 }
 \value{
 \code{multiple.mab} class object, which is a named list containing:
