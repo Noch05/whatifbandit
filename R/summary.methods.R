@@ -27,8 +27,8 @@ summary.mab <- function(object, level = 0.95, ...) {
     dplyr::select(-period_number) |>
     dplyr::left_join(estimates, by = c("Treatment_Arm" = "mab_condition")) |>
     dplyr::mutate(
-      Lower_Bound = mean - normalq * sqrt(variance),
-      Upper_Bound = mean + normalq * sqrt(variance)
+      lower_bound = mean - normalq * sqrt(variance),
+      upper_bound = mean + normalq * sqrt(variance)
     ) |>
     dplyr::select(-variance, -estimator) |>
     dplyr::rename("AIPW" = "mean") |>
@@ -63,13 +63,13 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
     dplyr::filter(estimator == "AIPW") |>
     dplyr::group_by(mab_condition) |>
     dplyr::summarize(
-      avg_estimate = base::mean(mean, na.rm = TRUE),
+      avg_AIPW = base::mean(mean, na.rm = TRUE),
       variance_avg = base::mean(variance, na.rm = TRUE),
       variance_resample = stats::var(mean), .groups = "drop",
     ) |>
     dplyr::mutate(
-      lower = avg_estimate - qnorm(upper_level) * variance_avg,
-      upper = avg_estimate + qnorm(lower_level) * variance_avg
+      lower = avg_AIPW + qnorm(lower_level) * base::sqrt(variance_avg),
+      upper = avg_AIPW + qnorm(upper_level) * base::sqrt(variance_avg)
     ) |>
     left_join(quantiles, by = "mab_condition", suffix = c("_normal", "_empirical"))
 
@@ -86,6 +86,9 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
 
   summary <- dplyr::left_join(estimate, bandits, by = "mab_condition") |>
     dplyr::rename(times_best = "n") |>
-    dplyr::mutate(times_best = dplyr::if_else(base::is.na(times_best), 0, times_best))
+    dplyr::mutate(
+      times_best = dplyr::if_else(base::is.na(times_best), 0, times_best),
+      level = level
+    )
   return(summary)
 }
