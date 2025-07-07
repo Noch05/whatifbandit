@@ -100,11 +100,11 @@ adaptive_aipw.data.table <- function(data, assignment_probs, conditions,
       ]
       results[, time_weights := assign_prob / periods]
 
-      estimate <- (base::sum(results$avg * results$time_weights, na.rm = TRUE)) /
-        (base::sum(results$time_weights, na.rm = TRUE))
+      estimate <- (base::sum(results[, avg] * results[, time_weights], na.rm = TRUE)) /
+        (base::sum(results[, time_weights], na.rm = TRUE))
 
-      variance <- base::sum((results$time_weights^2) * (results$avg - estimate)^2) /
-        (base::sum(results$time_weights)^2)
+      variance <- base::sum((results[, time_weights]^2) * (results[, avg] - estimate)^2) /
+        (base::sum(results[, time_weights])^2)
 
       return(data.table::data.table(
         mean = estimate,
