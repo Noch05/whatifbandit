@@ -12,16 +12,17 @@
 #' }
 #' @param save Logical; Whether or not to save the plot to disk; FALSE by default.
 #' @param path String; File directory to save file.
+#' @inheritParams summary.mab
 #' @param estimator Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type
 #' @param ... arguments to pass to `ggplot2:geom_*` function (e.g. `color`, `linewidth`, `alpha`, etc.)
 #' @export
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
 
-plot.mab <- function(x, type, estimator = NULL, save = FALSE, path = NULL, ...) {
+plot.mab <- function(x, type, estimator = NULL, level = .95, save = FALSE, path = NULL, ...) {
   plot <- switch(type,
     "arm" = plot_arms(x = x, object = "bandits", ...),
     "assign" = plot_arms(x = x, object = "assignment_probs", ...),
-    "estimate" = plot_estimates(x = x, estimator = estimator, ...),
+    "estimate" = plot_estimates(x = x, estimator = estimator, level = level, ...),
     rlang::abort("Invalid Type: Specify `arm`, `assign`, or `estimate`")
   )
   if (save) {
@@ -86,12 +87,12 @@ plot_arms <- function(x, object, ...) {
 }
 
 #' @name plot_estimates
-#' @title Plot AIPW Estimates
+#' @title Plot AIPW/Sample Estimates
 #' @inheritParams plot.mab
 #' @description
 #' Plot Summary of AIPW estimates and variances for Each Treatment Arm
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)`
-plot_estimates <- function(x, estimator, ...) {
+plot_estimates <- function(x, estimator, level = 0.95, ...) {
   if (base::is.null(estimator)) rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")
 
   estimator_arg <- switch(estimator,
@@ -100,13 +101,13 @@ plot_estimates <- function(x, estimator, ...) {
     "Sample" = c("Sample"),
     rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")
   )
-
+  normalq <- base::abs(stats::qnorm((1 - level) / 2))
 
   x$estimates |>
     dplyr::filter(estimator %in% estimator_arg) |>
     ggplot2::ggplot(ggplot2::aes(x = mean, y = mab_condition)) +
-    ggplot2::geom_pointrange(
-      ggplot2::aes(xmin = mean - 1.96 * sqrt(variance), xmax = mean + 1.96 * sqrt(variance)),
+    ggplot2::geom_errorbarh(
+      ggplot2::aes(xmin = mean - normalq * sqrt(variance), xmax = mean + normalq * sqrt(variance)),
       ...
     ) +
     ggplot2::scale_x_continuous(breaks = base::seq(0, 1, 0.05), limits = base::range(0, 1)) +
@@ -129,21 +130,27 @@ plot_estimates <- function(x, estimator, ...) {
 #' @param type String; Type of plot requested; valid types are:
 #' \itemize{
 #' \item `summary`: Shows the number of times each arm was selected as the highest chance of being the best.
-#' \item `hist`: Shows histograms for each treatment conditions proportion of success across trials.
+#' \item `hist`: Shows histograms for each treatment condition's proportion of success across trials.
 #' }
-#' @param estimator Estimator to plot; Either "AIPW", "Sample" or "Both"; used by `hist` and ``
+#' @param estimator Estimator to plot; Either "AIPW", "Sample" or "Both"; used by `hist` and `estimate`.
 #' @param save Logical; Whether or not to save the plot to disk; FALSE by default.
 #' @param path String; File directory to save file.
-#' @param ... arguments to pass to `ggplot2:geom_*` function (e.g. `color`, `linewidth`, `alpha`, etc.)
+#' @param ... arguments to pass to `ggplot2:geom_*` function (e.g. `color`, `linewidth`, `alpha`, `bins` etc.)
+#' @param standard_error String; type of standard error to use, the "resampled" distribution or the "normal" approximation. Only
+#' used when type = "estimate".
+#' @inheritParams summary.multiple.mab
 #' @export
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
 
-plot.multiple.mab <- function(x, type, estimator = NULL, save = FALSE, path = NULL, ...) {
+plot.multiple.mab <- function(x, type, estimator = NULL, standard_error = NULL, level = 0.95, save = FALSE, path = NULL, ...) {
   plot <- switch(type,
     "summary" = plot_summary(x = x, ...),
-    "hist" = 0,
-    "estimate" = 0,
-    rlang::abort("Invalid Type: ")
+    "hist" = plot_hist(x = x, estimator = estimator),
+    "estimate" = plot_mult_estimates(
+      x = x, estimator = estimator, standard_error = standard_error,
+      level = level
+    ),
+    rlang::abort("Invalid Type: Valid types are `hist`, `summary`, estimate`.")
   )
 
   if (save) {
@@ -174,3 +181,51 @@ plot_summary <- function(x, ...) {
 
 
 #------------------------------------------------------------------------------
+#
+#' @name plot_hist
+#' @title Plots Distribution of AIPW and Sample estimates over trials
+#' @description
+#' Plots Distribution of AIPW and Sample estimates over trials for [plot.multiple.mab()]
+#' @inheritParams plot.multiple.mab
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
+plot_hist <- function(x, estimator, ...) {
+  if (base::is.null(estimator)) rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")
+
+  estimator_arg <- switch(estimator,
+    "Both" = c("Sample", "AIPW"),
+    "AIPW" = c("AIPW"),
+    "Sample" = c("Sample"),
+    rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")
+  )
+
+  x$estimates |>
+    ggplot2::ggplot(ggplot2::aes(x = mean, y = ggplot2::after_stat(density))) +
+    ggplot2::geom_histogram(...) +
+    ggplot2::facet_grid(~ mab_condition + estimator) +
+    ggplot2::labs(
+      x = "Estimate", y = "Density",
+      title = "Estimate Distributions Across Trials"
+    ) +
+    ggplot2::theme_minimal()
+}
+
+#-------------------------------------------------------------------------------
+#' @name plot_mult_estimates
+#' @title Plots AIPW/Sample Estimates for each Arm
+#' @description
+#' Plots AIPW/Sample Estimates for each arm using variance from the repeated trials.
+#' @inheritParams plot.multiple.mab
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
+
+
+plot_estimates <- function(x, estimator, standard_error, level, ...) {
+  if (base::is.null(estimator)) rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")
+
+  estimator_arg <- switch(estimator,
+    "Both" = c("Sample", "AIPW"),
+    "AIPW" = c("AIPW"),
+    "Sample" = c("Sample"),
+    rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")
+  )
+  return(0)
+}

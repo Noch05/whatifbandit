@@ -2,14 +2,16 @@
 % Please edit documentation in R/plot.methods.R
 \name{plot_estimates}
 \alias{plot_estimates}
-\title{Plot AIPW Estimates}
+\title{Plot AIPW/Sample Estimates}
 \usage{
-plot_estimates(x, estimator, ...)
+plot_estimates(x, estimator, standard_error, level, ...)
 }
 \arguments{
 \item{x}{\code{mab} class object created by \code{\link[=single_mab_trial]{single_mab_trial()}}}
 
 \item{estimator}{Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type}
+
+\item{level}{Confidence Interval Width (i.e 0.90, .95, 0.99)}
 
 \item{...}{arguments to pass to \verb{ggplot2:geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, etc.)}
 }

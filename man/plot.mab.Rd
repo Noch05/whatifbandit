@@ -4,7 +4,7 @@
 \alias{plot.mab}
 \title{Plot Generic for \code{mab} objects}
 \usage{
-\method{plot}{mab}(x, type, estimator = NULL, save = FALSE, path = NULL, ...)
+\method{plot}{mab}(x, type, estimator = NULL, level = 0.95, save = FALSE, path = NULL, ...)
 }
 \arguments{
 \item{x}{\code{mab} class object created by \code{\link[=single_mab_trial]{single_mab_trial()}}}
@@ -17,6 +17,8 @@
 }}
 
 \item{estimator}{Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type}
+
+\item{level}{Confidence Interval Width (i.e 0.90, .95, 0.99)}
 
 \item{save}{Logical; Whether or not to save the plot to disk; FALSE by default.}
 
