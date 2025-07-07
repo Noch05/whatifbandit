@@ -59,9 +59,9 @@ If FALSE, uses only data available up to the current period.}
 Used to simulate imperfect information on part of researchers conducting an adaptive trial.
 }}
 
-\item{times}{Numeric; number of simulations to conduct.}
+\item{times}{Integer; number of simulations to conduct.}
 
-\item{seeds}{Numeric vector of \code{length(times)} containing valid seeds to define random state for each trial.}
+\item{seeds}{Integer vector of \code{length(times)} containing valid seeds to define random state for each trial.}
 
 \item{control_augment}{Number \eqn{\in} [0,1]; Proportion of each wave guaranteed to get "Control" treatment.
 Default is 0.}

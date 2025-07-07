@@ -93,6 +93,9 @@ check_args <- function(data,
       rlang::abort("`prior_periods` must be a positive integer or 'All'.")
     }
   }
+  if (assignment_method == "Batch" && period_length > nrow(data)) {
+    rlang::abort("`period_length` cannot be larger than data size")
+  }
 
   # Checking Column Proper Columns are Provided
 

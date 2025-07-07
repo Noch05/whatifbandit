@@ -7,8 +7,8 @@
 #'
 #' @inheritParams single_mab_simulation
 #' @param verbose Logical; Toggles progress bar from [furrr::future_map].
-#' @param times Numeric; number of simulations to conduct.
-#' @param seeds Numeric vector of `length(times)` containing valid seeds to define random state for each trial.
+#' @param times Integer; number of simulations to conduct.
+#' @param seeds Integer vector of `length(times)` containing valid seeds to define random state for each trial.
 #' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets
 #' .
 #' @returns `multiple.mab` class object, which is a named list containing:
@@ -44,15 +44,17 @@ multiple_mab_simulation <- function(data,
                                     block_cols = NULL,
                                     verbose = FALSE,
                                     keep_data = FALSE) {
-  if (!is.numeric(times) || times < 1) {
-    stop("Argument 'times' must be a numeric value greater than or equal to 1.
-         Please provide a valid value.")
+  if (!is.numeric(times) || times < 1 || floor(times) != times) {
+    rlang::abort("Argument 'times' must be an integer value greater than or equal to 1")
   }
-  if (!is.numeric(seeds) || length(seeds) != times) {
-    stop("Argument 'seeds' must be numeric vector of length equal to `times`. Please provide a valid vector.")
+  if (!is.integer(seeds) || length(seeds) != times) {
+    rlang::abort(c("Argument 'seeds' must be an integer vector of length equal to `times`. Please provide a valid vector.",
+      "x" = sprintf("You passed a %s vector.", base::typeof(seeds)),
+      "i" = "Reccomended to use `sample.int()` to create proper vector"
+    ))
   }
   if (!is.logical(keep_data)) {
-    stop("Argument 'keep_data' must logical. Please enter `TRUE` or `FALSE`")
+    rlang::abort("Argument 'keep_data' must logical. Please enter `TRUE` or `FALSE`")
   }
 
   data_name <- deparse(substitute(data))
