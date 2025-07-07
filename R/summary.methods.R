@@ -82,7 +82,7 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
     dplyr::ungroup() |>
     dplyr::count(mab_condition)
 
-  summary <- dplyr::left_join(estimate, bandits, by = c("mab_condition", "estimator")) |>
+  summary <- dplyr::left_join(estimate, bandits, by = c("mab_condition")) |>
     dplyr::rename(times_best = "n") |>
     dplyr::mutate(
       times_best = dplyr::if_else(base::is.na(times_best), 0, times_best),

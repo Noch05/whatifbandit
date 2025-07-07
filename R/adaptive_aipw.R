@@ -59,7 +59,7 @@ adaptive_aipw.tbl_df <- function(data, assignment_probs, conditions, periods, ve
     dplyr::group_by(mab_condition) |>
     dplyr::summarize(
       mean = base::mean(mab_success, na.rm = TRUE),
-      variance = stats::var(mab_success, na.rm = TRUE)
+      variance = ((mean * (1 - mean) / dplyr::n()))
     ) |>
     dplyr::mutate(estimator = "Sample")
 
@@ -120,7 +120,7 @@ adaptive_aipw.data.table <- function(data, assignment_probs, conditions,
 
   sample <- data[, .(
     mean = base::mean(mab_success, na.rm = TRUE),
-    variance = stats::var(mab_success, na.rm = TRUE)
+    variance = ((mean(mab_success) * (1 - mean(mab_success))) / .N)
   ),
   by = mab_condition
   ]
