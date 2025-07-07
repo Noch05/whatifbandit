@@ -14,7 +14,7 @@ plot_estimates(x, estimator, ...)
 \item{...}{arguments to pass to \verb{ggplot2:geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, etc.)}
 }
 \value{
-ggplot2 object that can be added to with \code{+}
+Minimal ggplot object, that can be customized and added to with \code{+} (To change, scales, labels, legend, theme, etc.)`
 }
 \description{
 Plot Summary of AIPW estimates and variances for Each Treatment Arm

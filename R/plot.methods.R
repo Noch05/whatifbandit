@@ -15,7 +15,7 @@
 #' @param estimator Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type
 #' @param ... arguments to pass to `ggplot2:geom_*` function (e.g. `color`, `linewidth`, `alpha`, etc.)
 #' @export
-#' @returns ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
 
 plot.mab <- function(x, type, estimator = NULL, save = FALSE, path = NULL, ...) {
   plot <- switch(type,
@@ -40,6 +40,7 @@ plot.mab <- function(x, type, estimator = NULL, save = FALSE, path = NULL, ...) 
 #' @inheritParams plot.mab
 #' @param object, String; Location to gather treatment arm data from, either
 #' "bandits" or "assignment_probs"
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
 
 plot_arms <- function(x, object, ...) {
   data <- x[[object]]
@@ -89,7 +90,7 @@ plot_arms <- function(x, object, ...) {
 #' @inheritParams plot.mab
 #' @description
 #' Plot Summary of AIPW estimates and variances for Each Treatment Arm
-#' @returns ggplot2 object that can be added to with `+`
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)`
 plot_estimates <- function(x, estimator, ...) {
   if (base::is.null(estimator)) rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")
 
@@ -135,11 +136,11 @@ plot_estimates <- function(x, estimator, ...) {
 #' @param path String; File directory to save file.
 #' @param ... arguments to pass to `ggplot2:geom_*` function (e.g. `color`, `linewidth`, `alpha`, etc.)
 #' @export
-#' @returns ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
 
 plot.multiple.mab <- function(x, type, estimator = NULL, save = FALSE, path = NULL, ...) {
   plot <- switch(type,
-    "summary" = 0,
+    "summary" = plot_summary(x = x, ...),
     "hist" = 0,
     "estimate" = 0,
     rlang::abort("Invalid Type: ")
@@ -151,3 +152,25 @@ plot.multiple.mab <- function(x, type, estimator = NULL, save = FALSE, path = NU
 
   return(plot)
 }
+#-------------------------------------------------------------------------------
+#' @name plot_summary
+#' @title Plot treatment Arms over multiple trials
+#' @description
+#' Plots Summary Results for [plot.multiple.mab()]
+#' @inheritParams plot.multiple.mab
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
+
+plot_summary <- function(x, ...) {
+  summary(x) |>
+    ggplot2::ggplot(ggplot2::aes(x = mab_condition, y = times_best)) +
+    ggplot2::geom_bar(stat = "identity", ...) +
+    ggplot2::labs(
+      x = "Treatment Arm",
+      y = "Times Selected as Best Arm",
+      title = "Treatment Arm Success Over Repeated Trials"
+    ) +
+    ggplot2::theme_minimal()
+}
+
+
+#------------------------------------------------------------------------------

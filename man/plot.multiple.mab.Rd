@@ -24,7 +24,7 @@
 \item{...}{arguments to pass to \verb{ggplot2:geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, etc.)}
 }
 \value{
-ggplot object, that can be customized and added to with \code{+} (To change, scales, labels, legend, theme, etc.)
+Minimal ggplot object, that can be customized and added to with \code{+} (To change, scales, labels, legend, theme, etc.)
 }
 \description{
 Uses \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} to summarize the results of multiple
