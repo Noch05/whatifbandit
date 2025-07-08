@@ -16,6 +16,7 @@
 #' @param estimator Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type
 #' @param ... arguments to pass to `ggplot2:geom_*` function (e.g. `color`, `linewidth`, `alpha`, etc.)
 #' @export
+#' @example inst/examples/plot.mab_example.R
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
 
 plot.mab <- function(x, type, estimator = NULL, level = .95, save = FALSE, path = NULL, ...) {

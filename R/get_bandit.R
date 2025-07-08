@@ -23,10 +23,12 @@ get_bandit <- function(past_results, algorithm, conditions, current_period = NUL
     rlang::abort("Invalid `algorithm`. Valid Algorithms: 'Thomspon', 'UCB1'")
   )
 
-  bandit[[2]] <- augment_prob(
-    assignment_probs = bandit[[2]], control_augment = control_augment,
-    conditions = conditions, algorithm = algorithm
-  )
+  if (control_augment > 0) {
+    bandit[[2]] <- augment_prob(
+      assignment_probs = bandit[[2]], control_augment = control_augment,
+      conditions = conditions, algorithm = algorithm
+    )
+  }
 
   if (base::sum(bandit[[2]]) != 1) {
     bandit[[2]] <- bandit[[2]] / base::sum(bandit[[2]])
