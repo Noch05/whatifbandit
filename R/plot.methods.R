@@ -19,7 +19,6 @@
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
 
 plot.mab <- function(x, type, estimator = NULL, level = .95, save = FALSE, path = NULL, ...) {
-  rlang::check_installed("ggplot2")
   plot <- switch(type,
     "arm" = plot_arms(x = x, object = "bandits", ...),
     "assign" = plot_arms(x = x, object = "assignment_probs", ...),
@@ -144,7 +143,6 @@ plot_estimates <- function(x, estimator, level = 0.95, ...) {
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
 
 plot.multiple.mab <- function(x, type, estimator = NULL, cdf = NULL, level = 0.95, save = FALSE, path = NULL, ...) {
-  rlang::check_installed("ggplot2")
   plot <- switch(type,
     "summary" = plot_summary(x = x, ...),
     "hist" = plot_hist(x = x, estimator = estimator, ...),
