@@ -7,7 +7,7 @@
 plot_summary(x, ...)
 }
 \arguments{
-\item{x}{\code{multiple.mab} class object created by \code{\link[=multiple_mab_trial]{multiple_mab_trial()}}}
+\item{x}{\code{multiple.mab} class object created by \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}}
 
 \item{...}{arguments to pass to \verb{ggplot2:geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, \code{bins} etc.)}
 }

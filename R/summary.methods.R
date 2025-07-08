@@ -66,10 +66,10 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
       variance_resample = stats::var(mean), .groups = "drop",
     ) |>
     dplyr::mutate(
-      lower = estimate_avg + qnorm(lower_level) * base::sqrt(variance_avg),
-      upper = estimate_avg + qnorm(upper_level) * base::sqrt(variance_avg)
+      lower = estimate_avg + stats::qnorm(lower_level) * base::sqrt(variance_avg),
+      upper = estimate_avg + stats::qnorm(upper_level) * base::sqrt(variance_avg)
     ) |>
-    left_join(quantiles, by = c("mab_condition", "estimator"), suffix = c("_normal", "_empirical"))
+    dplyr::left_join(quantiles, by = c("mab_condition", "estimator"), suffix = c("_normal", "_empirical"))
 
   bandits <- object$bandits |>
     dplyr::group_by(trial) |>

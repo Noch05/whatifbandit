@@ -6,7 +6,7 @@
 #'
 #'
 #' @inheritParams single_mab_simulation
-#' @param verbose Logical; Toggles progress bar from [furrr::future_map].
+#' @param verbose Logical; Toggles progress bar from [furrr::future_map()].
 #' @param times Integer; number of simulations to conduct.
 #' @param seeds Integer vector of `length(times)` containing valid seeds to define random state for each trial.
 #' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets
@@ -26,7 +26,7 @@
 #' * [mab_simulation()]
 #' * [pre_mab_simulation()]
 #' * [furrr::future_map()]
-#' * [future::plan]
+#' * [future::plan()]
 #' @export
 
 multiple_mab_simulation <- function(data,
@@ -46,7 +46,7 @@ multiple_mab_simulation <- function(data,
                                     block_cols = NULL,
                                     verbose = FALSE,
                                     keep_data = FALSE) {
-  if ((object.size(data) / (1024^2) > 500)) {
+  if ((utils::object.size(data) / (1024^2) > 500)) {
     rlang::warn(c(
       "i" = "`furrr::future_map()` has a serialization limit of 500 MB. If your data
     is larger than that, you have to set the `options(\"future_globals.maxSize\")`
@@ -140,12 +140,12 @@ multiple_mab_simulation <- function(data,
   return(results)
 }
 #' @name condense_results
-#' @title Condenses results into a list for [multiple_mab_trial()]
+#' @title Condenses results into a list for [multiple_mab_simulation()]
 #' @description
-#' Takes the output from [furrr:future_map()] in [multiple_mab_trial()]
+#' Takes the output from [furrr::future_map()] in [multiple_mab_simulation()]
 #' and condenses it to return to the user
 #' @inheritParams multiple_mab_simulation
-#' @param mabs output from [furrr:future_map()] in [multiple_mab_trial()]
+#' @param mabs output from [furrr::future_map()] in [multiple_mab_simulation()]
 #' @returns `multiple.mab` class object, which is a named list containing:
 #' \itemize{
 #' \item `final_data_nest:` Data.frame containing a nested data.frame with the final data from each trial
@@ -176,7 +176,7 @@ condense_results <- function(data, keep_data, mabs, times) {
   } else {
     results <- purrr::map(items, function(item) {
       result <- purrr::map(seq_len(times), function(i) mabs[[i]][[item]]) |>
-        dplyr::bind_rows(.id = "trial") %>%
+        dplyr::bind_rows(.id = "trial") |>
         dplyr::mutate(trial = as.numeric(trial))
       return(result)
     })

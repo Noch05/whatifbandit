@@ -11,6 +11,8 @@ check_impute(imputation_information, current_data, current_period)
 list created by \code{\link[=imputation_prep]{imputation_prep()}}.}
 
 \item{current_data}{Data with only observations from the current sampling period.}
+
+\item{current_period}{Numeric scalar; current treatment wave of the simulation.}
 }
 \description{
 Ensures the Imputation Info in the current iteration of \code{\link[=run_mab_trial]{run_mab_trial()}},

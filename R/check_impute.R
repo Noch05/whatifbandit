@@ -5,6 +5,7 @@
 #'
 #' @name check_impute
 #' @inheritParams get_past_results
+#' @inheritParams impute_success
 #' @param imputation_information `success` element of the `imputation_information`
 #' list created by [imputation_prep()].
 check_impute <- function(imputation_information, current_data, current_period) {

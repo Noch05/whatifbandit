@@ -76,7 +76,7 @@ If assignment methods is "Batch", this refers to the number of people in each ba
 
 \item{block_cols}{Character Vector of variables to block by.}
 
-\item{verbose}{Logical; Toggles progress bar from \link[furrr:future_map]{furrr::future_map}.}
+\item{verbose}{Logical; Toggles progress bar from \code{\link[furrr:future_map]{furrr::future_map()}}.}
 
 \item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets
 .}
@@ -103,6 +103,6 @@ random states. Allows for parallel processing using \code{\link[future:plan]{fut
 \item \code{\link[=mab_simulation]{mab_simulation()}}
 \item \code{\link[=pre_mab_simulation]{pre_mab_simulation()}}
 \item \code{\link[furrr:future_map]{furrr::future_map()}}
-\item \link[future:plan]{future::plan}
+\item \code{\link[future:plan]{future::plan()}}
 }
 }

@@ -9,9 +9,7 @@
   prior_data,
   perfect_assignment,
   assignment_date_col = NULL,
-  conditions,
-  current_period = NULL,
-  prior = NULL
+  conditions
 )
 }
 \arguments{

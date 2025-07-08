@@ -37,6 +37,7 @@ get_bandit <- function(past_results, algorithm, conditions, current_period = NUL
 #-------------------------------------------------------------------
 #' @method get_bandit Thompson
 #' @title Thompson Sampling Algorithm
+#' @param iterator counter variable; keeps track of recursive calls to prevent infinite recursion.
 #' @inheritParams get_bandit
 #' @returns Named Numeric Vector of Posterior Probabilities
 

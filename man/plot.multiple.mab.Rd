@@ -8,7 +8,7 @@
   x,
   type,
   estimator = NULL,
-  standard_error = NULL,
+  cdf = NULL,
   level = 0.95,
   save = FALSE,
   path = NULL,
@@ -16,7 +16,7 @@
 )
 }
 \arguments{
-\item{x}{\code{multiple.mab} class object created by \code{\link[=multiple_mab_trial]{multiple_mab_trial()}}}
+\item{x}{\code{multiple.mab} class object created by \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}}
 
 \item{type}{String; Type of plot requested; valid types are:
 \itemize{
@@ -26,6 +26,9 @@
 
 \item{estimator}{Estimator to plot; Either "AIPW", "Sample" or "Both"; used by \code{hist} and \code{estimate}.}
 
+\item{cdf}{String; specifies the type of CDF to use when analyzing the estimates.
+valid cdfs are the \code{empirical} cdf, the \code{normal} cdf. Used when type = \code{estimate}.}
+
 \item{level}{Confidence Interval Width (i.e 0.90, .95, 0.99)}
 
 \item{save}{Logical; Whether or not to save the plot to disk; FALSE by default.}
@@ -33,9 +36,6 @@
 \item{path}{String; File directory to save file.}
 
 \item{...}{arguments to pass to \verb{ggplot2:geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, \code{bins} etc.)}
-
-\item{cdf}{String; specifies the type of CDF to use when analyzing the estimates.
-valid cdfs are the \code{empirical} cdf, the \code{normal} cdf. Used when type = \code{estimate}.}
 }
 \value{
 Minimal ggplot object, that can be customized and added to with \code{+} (To change, scales, labels, legend, theme, etc.)

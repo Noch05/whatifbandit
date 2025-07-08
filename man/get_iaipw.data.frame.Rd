@@ -2,9 +2,9 @@
 % Please edit documentation in R/get_iaipw.R
 \name{get_iaipw.data.frame}
 \alias{get_iaipw.data.frame}
-\title{\code{\link[=get_aipw]{get_aipw()}} for data.frames}
+\title{\code{\link[=get_iaipw]{get_iaipw()}} for data.frames}
 \usage{
-\method{get_iaipw}{data.frame}(data, assignment_probs, periods, algorithm, conditions, verbose)
+\method{get_iaipw}{data.frame}(data, assignment_probs, periods, conditions, verbose)
 }
 \arguments{
 \item{data}{\code{final_data} object from \code{\link[=run_mab_trial]{run_mab_trial()}}. Contains results of Multi-Arm-Bandit Simulation}
@@ -20,5 +20,5 @@ Control condition, must be named "Control" when 'control_augment' > 0.}
 \item{verbose}{Logical; Whether or not to print iteration number. FALSE by default.}
 }
 \description{
-\code{\link[=get_aipw]{get_aipw()}} for data.frames
+\code{\link[=get_iaipw]{get_iaipw()}} for data.frames
 }

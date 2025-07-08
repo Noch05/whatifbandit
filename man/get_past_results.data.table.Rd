@@ -6,8 +6,6 @@
 \usage{
 \method{get_past_results}{data.table}(
   current_data,
-  current_period,
-  prior,
   perfect_assignment,
   assignment_date_col = NULL,
   conditions,

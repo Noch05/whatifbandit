@@ -3,7 +3,7 @@
 #' Multi-Arm Bandit Trial
 #'
 #' @method plot mab
-#' @param x `mab` class object created by [single_mab_trial()]
+#' @param x `mab` class object created by [single_mab_simulation()]
 #' @param type String; Type of plot requested; valid types are:
 #' \itemize{
 #' \item `arm`: Shows Thompson Probability or UCB1 Statistic over the trial period.
@@ -126,7 +126,7 @@ plot_estimates <- function(x, estimator, level = 0.95, ...) {
 #' Multi-Arm Bandit Trials
 #'
 #' @method plot multiple.mab
-#' @param x `multiple.mab` class object created by [multiple_mab_trial()]
+#' @param x `multiple.mab` class object created by [multiple_mab_simulation()]
 #' @param type String; Type of plot requested; valid types are:
 #' \itemize{
 #' \item `summary`: Shows the number of times each arm was selected as the highest chance of being the best.
@@ -142,12 +142,12 @@ plot_estimates <- function(x, estimator, level = 0.95, ...) {
 #' @export
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
 
-plot.multiple.mab <- function(x, type, estimator = NULL, standard_error = NULL, level = 0.95, save = FALSE, path = NULL, ...) {
+plot.multiple.mab <- function(x, type, estimator = NULL, cdf = NULL, level = 0.95, save = FALSE, path = NULL, ...) {
   plot <- switch(type,
     "summary" = plot_summary(x = x, ...),
     "hist" = plot_hist(x = x, estimator = estimator, ...),
     "estimate" = plot_mult_estimates(
-      x = x, estimator = estimator, standard_error = standard_error,
+      x = x, estimator = estimator, cdf = cdf,
       level = level, ...
     ),
     rlang::abort("Invalid Type: Valid types are `hist`, `summary`, estimate`.")
@@ -201,7 +201,7 @@ plot_hist <- function(x, estimator, ...) {
 
   x$estimates |>
     dplyr::filter(estimator %in% estimator_arg) |>
-    ggplot2::ggplot(ggplot2::aes(x = mean, y = ggplot2::after_stat(density))) +
+    ggplot2::ggplot(ggplot2::aes(x = mean, y = ggplot2::after_stat(stats::density))) +
     ggplot2::geom_histogram(...) +
     ggplot2::facet_grid(~ mab_condition + estimator) +
     ggplot2::labs(

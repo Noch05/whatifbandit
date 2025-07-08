@@ -7,7 +7,7 @@
 plot_mult_estimates(x, estimator, cdf, level, ...)
 }
 \arguments{
-\item{x}{\code{multiple.mab} class object created by \code{\link[=multiple_mab_trial]{multiple_mab_trial()}}}
+\item{x}{\code{multiple.mab} class object created by \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}}
 
 \item{estimator}{Estimator to plot; Either "AIPW", "Sample" or "Both"; used by \code{hist} and \code{estimate}.}
 

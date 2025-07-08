@@ -4,7 +4,7 @@
 \alias{get_iaipw.data.table}
 \title{\code{\link[=get_iaipw]{get_iaipw()}} for data.tables}
 \usage{
-\method{get_iaipw}{data.table}(data, assignment_probs, periods, algorithm, conditions, verbose)
+\method{get_iaipw}{data.table}(data, assignment_probs, periods, conditions, verbose)
 }
 \arguments{
 \item{data}{\code{final_data} object from \code{\link[=run_mab_trial]{run_mab_trial()}}. Contains results of Multi-Arm-Bandit Simulation}

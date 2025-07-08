@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiple_mab_simulation.R
 \name{condense_results}
 \alias{condense_results}
-\title{Condenses results into a list for \code{\link[=multiple_mab_trial]{multiple_mab_trial()}}}
+\title{Condenses results into a list for \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}}
 \usage{
 condense_results(data, keep_data, mabs, times)
 }
@@ -12,7 +12,7 @@ condense_results(data, keep_data, mabs, times)
 \item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets
 .}
 
-\item{mabs}{output from \code{\link[=furrr:future_map]{furrr:future_map()}} in \code{\link[=multiple_mab_trial]{multiple_mab_trial()}}}
+\item{mabs}{output from \code{\link[furrr:future_map]{furrr::future_map()}} in \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}}
 
 \item{times}{Integer; number of simulations to conduct.}
 }
@@ -26,6 +26,6 @@ condense_results(data, keep_data, mabs, times)
 }
 }
 \description{
-Takes the output from \code{\link[=furrr:future_map]{furrr:future_map()}} in \code{\link[=multiple_mab_trial]{multiple_mab_trial()}}
+Takes the output from \code{\link[furrr:future_map]{furrr::future_map()}} in \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}
 and condenses it to return to the user
 }

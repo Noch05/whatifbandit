@@ -12,6 +12,8 @@ Created by \code{\link[=get_past_results]{get_past_results()}}.}
 
 \item{conditions}{Named Character vector containing treatment conditions.
 Control condition, must be named "Control" when 'control_augment' > 0.}
+
+\item{iterator}{counter variable; keeps track of recursive calls to prevent infinite recursion.}
 }
 \value{
 Named Numeric Vector of Posterior Probabilities

@@ -7,7 +7,7 @@
 \method{plot}{mab}(x, type, estimator = NULL, level = 0.95, save = FALSE, path = NULL, ...)
 }
 \arguments{
-\item{x}{\code{mab} class object created by \code{\link[=single_mab_trial]{single_mab_trial()}}}
+\item{x}{\code{mab} class object created by \code{\link[=single_mab_simulation]{single_mab_simulation()}}}
 
 \item{type}{String; Type of plot requested; valid types are:
 \itemize{
