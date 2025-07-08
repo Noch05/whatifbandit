@@ -39,16 +39,7 @@ pre_mab_simulation <- function(data,
                                period_length,
                                block_cols,
                                verbose) {
-  if (inherits(data, "data.table")) {
-    if (rlang::is_installed("data.table")) {
-      data <- data.table::copy(data)
-    } else {
-      data <- tibble::as_tibble(data)
-      rlang::warn("You passed a `data.table` but the `data.table` package is not installed.
-                  `data` has been coerced to a `tibble`, if you wish to use the `data.table` functionality,
-                  install the package, using `install.packages(\"data.table\")`")
-    }
-  }
+  if (inherits(data, "data.table")) data <- data.table::copy(data)
   data_cols <- purrr::map(data_cols, ~ list(
     name = .x, symbol = rlang::sym(.x)
   )) |>
