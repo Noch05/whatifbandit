@@ -94,6 +94,103 @@ If assignment methods is "Batch", this refers to the number of people in each ba
 Repeated Multi-Arm Bandit Simulations with the same settings in different
 random states. Allows for parallel processing using \code{\link[future:plan]{future::plan()}} and \code{\link[furrr:future_map]{furrr::future_map()}}.
 }
+\examples{
+# Multiple_mab_simulation() is a useful tool for running multiple trials
+# using the same configuration settings, in different random states
+#
+data(tanf)
+# Subsetting to make the example faster
+tanf <- tanf[1:15, ]
+
+# The seeds passed must be integers, so it is highly recommended to create them
+# before using `sample.int()`
+set.seed(1)
+seeds <- sample.int(10000, 15)
+conditions <- c("no_letter", "open_appt", "specific_appt")
+
+# For this example, period_length is set a large interval and
+# times is low to keep run time short.
+start <- proc.time()
+x <- multiple_mab_simulation(
+  data = tanf,
+  assignment_method = "Batch",
+  period_length = 5,
+  whole_experiment = TRUE,
+  blocking = FALSE,
+  perfect_assignment = TRUE,
+  algorithm = "Thompson",
+  prior_periods = "All",
+  control_augment = 0,
+  conditions = conditions,
+  data_cols = c(
+    condition_col = "condition",
+    id_col = "id",
+    success_col = "success"
+  ),
+  verbose = FALSE, times = 15, seeds = seeds, keep_data = FALSE
+)
+seq_time <- proc.time() - start
+print(x)
+
+# Its Recommenced to set keep_data at FALSE unless necessary to avoid
+# the output from taking up to much memory
+y <- multiple_mab_simulation(
+  data = tanf,
+  assignment_method = "Batch",
+  period_length = 5,
+  whole_experiment = TRUE,
+  blocking = FALSE,
+  perfect_assignment = TRUE,
+  algorithm = "Thompson",
+  prior_periods = "All",
+  control_augment = 0,
+  conditions = conditions,
+  data_cols = c(
+    condition_col = "condition",
+    id_col = "id",
+    success_col = "success"
+  ),
+  verbose = FALSE, times = 15, seeds = seeds, keep_data = TRUE
+)
+
+# Keeping data results in a larger object size
+# Keep FALSE
+object.size(x)
+# Keep TRUE
+object.size(y)
+
+# You can also run simulations in parallel using future
+# Check out future documentation for details, but if on Linux or MacOS
+# you probably should set future::plan("multicore") instead
+start <- proc.time()
+future::plan("multisession", workers = 2)
+multiple_mab_simulation(
+  data = tanf,
+  assignment_method = "Batch",
+  period_length = 5,
+  whole_experiment = TRUE,
+  blocking = FALSE,
+  perfect_assignment = TRUE,
+  algorithm = "Thompson",
+  prior_periods = "All",
+  control_augment = 0,
+  conditions = conditions,
+  data_cols = c(
+    condition_col = "condition",
+    id_col = "id",
+    success_col = "success"
+  ),
+  verbose = FALSE, times = 15, seeds = seeds, keep_data = FALSE
+)
+parallel_time <- proc.time() - start
+future::plan("sequential")
+# Here it runs slower, but with larger datasets or more simulations
+# parallel becomes useful at reducing compute time if the memory is available
+# Sequential
+seq_time
+# Parallel
+parallel_time
+}
 \seealso{
 \itemize{
 \item \code{\link[=run_mab_trial]{run_mab_trial()}}

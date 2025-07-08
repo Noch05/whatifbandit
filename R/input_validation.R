@@ -40,13 +40,13 @@ check_args <- function(data,
   }
 
   if (!algorithm %in% c("Thompson", "UCB1")) {
-    rlang::abort("'algorithm' must be 'Thompson' or 'UCB1'.")
+    rlang::abort(c("'algorithm' must be 'Thompson' or 'UCB1'.",
+      "x" = paste0("You passed: ", algorithm)
+    ))
   }
-
   if (is.null(conditions) || !is.character(conditions)) {
     rlang::abort("`conditions`, must be provided as a character vector.")
   }
-
   # Checking Logical values
   logical_args <- base::list(
     verbose = verbose,
@@ -73,7 +73,9 @@ check_args <- function(data,
     rlang::abort("`period_length`, must be provided when Date or Batch assignment is used.")
   }
   if (is.null(control_augment) || !is.numeric(control_augment) || control_augment < 0 || control_augment > 1) {
-    rlang::abort("`control_augment` must be a non-null double between 0 and 1")
+    rlang::abort(c("`control_augment` must be a non-null double between 0 and 1",
+      "x" = paste0("You passed: ", control_augment)
+    ))
   }
 
   if (control_augment > 0 && !"Control" %in% names(conditions)) {
@@ -81,20 +83,28 @@ check_args <- function(data,
     when control augmentation is used.")
   }
   if ((period_length %% 1 != 0 || period_length < 0) && !is.null(period_length)) {
-    rlang::abort("`period_length` must be a positive integer.")
+    rlang::abort(c("`period_length` must be a positive integer.",
+      x = paste0("You passed: ", period_length)
+    ))
   }
 
   if (is.numeric(prior_periods)) {
     if (prior_periods %% 1 != 0 || prior_periods < 0) {
-      rlang::abort("`prior_periods` must be a positive integer or 'All'.")
+      rlang::abort(c("`prior_periods` must be a positive integer or 'All'.",
+        "x" = paste0("You passed: ", prior_periods)
+      ))
     }
   } else {
     if (prior_periods != "All") {
-      rlang::abort("`prior_periods` must be a positive integer or 'All'.")
+      rlang::abort(c("`prior_periods` must be a positive integer or 'All'.",
+        "x" = paste0("You passed: ", prior_periods)
+      ))
     }
   }
   if (assignment_method == "Batch" && period_length > nrow(data)) {
-    rlang::abort("`period_length` cannot be larger than data size")
+    rlang::abort(c("`period_length` cannot be larger than data size",
+      "x" = sprintf("You data has %d, and your batch size is %d", nrow(data), period_length)
+    ))
   }
 
   # Checking Column Proper Columns are Provided

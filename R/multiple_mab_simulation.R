@@ -18,6 +18,7 @@
 #' \item `estimates:` Data.frame containing the AIPW statistics across all treatments, and trials
 #' \item `settings`: A list of the configuration settings used in the trial.
 #' }
+#' @example inst/examples/multiple_mab_simulation_example.R
 #' @seealso
 #' * [run_mab_trial()]
 #' * [get_adaptive_aipw()]
@@ -55,7 +56,9 @@ multiple_mab_simulation <- function(data,
   }
 
   if (!is.numeric(times) || times < 1 || floor(times) != times) {
-    rlang::abort("Argument 'times' must be an integer value greater than or equal to 1")
+    rlang::abort(c("Argument 'times' must be an integer value greater than or equal to 1"),
+      "x" = paste0("You Passed: ", times)
+    )
   }
   if (!is.integer(seeds) || length(seeds) != times) {
     rlang::abort(c("Argument 'seeds' must be an integer vector of length equal to `times`. Please provide a valid vector.",
