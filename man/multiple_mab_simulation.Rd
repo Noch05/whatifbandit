@@ -83,10 +83,12 @@ If assignment methods is "Batch", this refers to the number of people in each ba
 }
 \value{
 \code{multiple.mab} class object, which is a named list containing:
-\item{final_data_nest}{Data.frame containing a nested data.frame with the final data from each trial}
-\item{bandits}{Data.frame containing the Thompson/UCB1 statitics across all treatments, periods, and trials}
-\item{estimates}{Data.frame containing the AIPW statitics across all treatments, and trials}
-\item{settings}{A list of the configuration settings used in the trial.}
+\itemize{
+\item \verb{final_data_nest:} Data.frame containing a nested data.frame with the final data from each trial
+\item \verb{bandits:} Data.frame containing the Thompson/UCB1 statistics across all treatments, periods, and trials
+\item \verb{estimates:} Data.frame containing the AIPW statistics across all treatments, and trials
+\item \code{settings}: A list of the configuration settings used in the trial.
+}
 }
 \description{
 Repeated Multi-Arm Bandit Simulations with the same settings in different

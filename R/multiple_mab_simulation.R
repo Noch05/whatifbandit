@@ -12,10 +12,12 @@
 #' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets
 #' .
 #' @returns `multiple.mab` class object, which is a named list containing:
-#' \item{final_data_nest}{Data.frame containing a nested data.frame with the final data from each trial}
-#' \item{bandits}{Data.frame containing the Thompson/UCB1 statitics across all treatments, periods, and trials}
-#' \item{estimates}{Data.frame containing the AIPW statitics across all treatments, and trials}
-#' \item{settings}{A list of the configuration settings used in the trial.}
+#' \itemize{
+#' \item `final_data_nest:` Data.frame containing a nested data.frame with the final data from each trial
+#' \item `bandits:` Data.frame containing the Thompson/UCB1 statistics across all treatments, periods, and trials
+#' \item `estimates:` Data.frame containing the AIPW statistics across all treatments, and trials
+#' \item `settings`: A list of the configuration settings used in the trial.
+#' }
 #' @seealso
 #' * [run_mab_trial()]
 #' * [get_adaptive_aipw()]
@@ -113,52 +115,85 @@ multiple_mab_simulation <- function(data,
   ),
   .progress = verbose
   )
+  results <- condense_results(
+    data = data, keep_data = keep_data, mabs = mabs,
+    times = times
+  )
 
+  results$settings <- base::list(
+    data = data_name,
+    assignment_method = assignment_method,
+    control_augment = control_augment,
+    time_unit = time_unit,
+    perfect_assignment = perfect_assignment,
+    algorithm = algorithm,
+    period_length = period_length,
+    prior_periods = prior_periods,
+    whole_experiment = whole_experiment,
+    conditions = conditions,
+    blocking = blocking,
+    block_cols = prepped$block_cols$name,
+    trials = times,
+    keep_data = keep_data
+  )
 
-  bandits <- dplyr::bind_rows(
-    lapply(mabs[base::seq_len(times)], `[[`, "bandits"),
-    .id = "trial"
-  ) |>
-    dplyr::mutate(trial = base::as.numeric(trial))
+  return(results)
+}
+#' @name condense_results
+#' @title Condenses results into a list for [multiple_mab_trial()]
+#' @description
+#' Takes the output from [furrr:future_map()] in [multiple_mab_trial()]
+#' and condenses it to return to the user
+#' @inheritParams multiple_mab_simulation
+#' @param mabs output from [furrr:future_map()] in [multiple_mab_trial()]
+#' @returns `multiple.mab` class object, which is a named list containing:
+#' \itemize{
+#' \item `final_data_nest:` Data.frame containing a nested data.frame with the final data from each trial
+#' \item `bandits:` Data.frame containing the Thompson/UCB1 statistics across all treatments, periods, and trials
+#' \item `estimates:` Data.frame containing the AIPW statistics across all treatments, and trials
+#' \item `settings`: A list of the configuration settings used in the trial.
+#' }
 
+condense_results <- function(data, keep_data, mabs, times) {
+  items <- c("bandits", "estimates", "assignment_probs")
 
-  estimates <- dplyr::bind_rows(base::lapply(mabs[base::seq_len(times)], `[[`, "estimates"), .id = "trial") |>
-    dplyr::mutate(trial = base::as.numeric(trial))
-
-
-  if (keep_data) {
-    final_data_nest <- tibble::tibble(
-      trial = base::seq_len(times),
-      data = base::lapply(mabs[seq_len(times)], `[[`, "final_data")
-    )
+  if (inherits(data, "data.table")) {
+    results <- lapply(items, \(item) {
+      all <- lapply(seq_len(times), function(i) mabs[[i]][[item]])
+      result <- data.table::rbindlist(all, idcol = "trial")
+      result[, trial := as.numeric(trial)]
+      return(result)
+    })
+    names(results) <- items
+    if (keep_data) {
+      results$final_data_nest <- data.table::data.table(
+        trial = base::seq_len(times),
+        data = purrr::map(mabs, ~ .x$final_data)
+      )
+    } else {
+      results$final_data_nest <- NULL
+    }
   } else {
-    final_data_nest <- NULL
+    results <- purrr::map(items, function(item) {
+      result <- purrr::map(seq_len(times), function(i) mabs[[i]][[item]]) |>
+        dplyr::bind_rows(.id = "trial") %>%
+        dplyr::mutate(trial = as.numeric(trial))
+      return(result)
+    })
+    names(results) <- items
+
+    if (keep_data) {
+      results$final_data_nest <- tibble::tibble(
+        trial = base::seq_len(times),
+        data = purrr::map(mabs, ~ .x$final_data)
+      )
+    } else {
+      results$final_data_nest <- NULL
+    }
   }
 
 
-  results <- base::list(
-    final_data_nest = final_data_nest,
-    bandits = bandits,
-    estimates = estimates,
-    settings = list(
-      data = data_name,
-      assignment_method = assignment_method,
-      control_augment = control_augment,
-      time_unit = time_unit,
-      perfect_assignment = perfect_assignment,
-      algorithm = algorithm,
-      period_length = period_length,
-      prior_periods = prior_periods,
-      whole_experiment = whole_experiment,
-      conditions = conditions,
-      blocking = blocking,
-      block_cols = prepped$block_cols$name,
-      trials = times,
-      keep_data = keep_data
-    )
-  )
 
   base::class(results) <- c("multiple.mab", class(results))
-
   return(results)
 }
