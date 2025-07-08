@@ -20,7 +20,6 @@ Imports:
     bandit,
     dplyr,
     furrr,
-    ggplot2,
     lubridate,
     purrr,
     randomizr,
@@ -29,9 +28,10 @@ Imports:
     tidyr,
     tidyselect,
     utils
+Suggests: 
+    data.table,
+    ggplot2
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
-Suggests: 
-    data.table

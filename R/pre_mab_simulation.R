@@ -44,9 +44,9 @@ pre_mab_simulation <- function(data,
       data <- data.table::copy(data)
     } else {
       data <- tibble::as_tibble(data)
-      rlang::warn("You passed a `data.table` but the `data.table` package is not installed.
-                  `data` has been coerced to a `tibble`, if you wish to use the `data.table` functionality,
-                  install the package, using `install.packages(\"data.table\")`")
+      rlang::warn("You passed a `data.table` but the `data.table` package is not installed so it was
+                  coerced to a `tibble`, if you wish to use the `data.table` functionality,
+                  install the package using `install.packages(\"data.table\")`")
     }
   }
   data_cols <- purrr::map(data_cols, ~ list(
