@@ -14,7 +14,7 @@ check_cols(
 )
 }
 \arguments{
-\item{assignment_method}{String; "Date" or "Batch" to define the assignment into treatment waves.}
+\item{assignment_method}{String; "Date", "Batch" or "Individual" to define the assignment into treatment waves.}
 
 \item{time_unit}{A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'.
 Acceptable values are "Day", "Week", or "Month".}

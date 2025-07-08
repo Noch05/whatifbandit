@@ -30,3 +30,6 @@ summary(x)
 
 # We can also change the confidence level to anything valid
 summary(x, level = 0.7)
+
+# Invalid levels throw an error
+try(summary(x, level = 5))

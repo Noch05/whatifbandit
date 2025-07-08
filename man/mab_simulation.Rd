@@ -67,7 +67,7 @@ Used to simulate imperfect information on part of researchers conducting an adap
 
 \item{verbose}{Logical; Whether or not to print iteration number. FALSE by default.}
 
-\item{assignment_method}{String; "Date" or "Batch" to define the assignment into treatment waves.}
+\item{assignment_method}{String; "Date", "Batch" or "Individual" to define the assignment into treatment waves.}
 
 \item{control_augment}{Number \eqn{\in} [0,1]; Proportion of each wave guaranteed to get "Control" treatment.
 Default is 0.}

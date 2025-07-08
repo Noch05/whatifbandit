@@ -48,3 +48,18 @@ verbose_log <- function(log, message) {
     base::cat(message, "\n")
   }
 }
+
+#' Check Level
+#' @description
+#' Shorthand for Checking if the `level` argument in the S3 generic methods
+#' is valid for a confidence interval.
+#' @name check_level
+#' @inheritParams plot.mab
+#' @returns Throws an error if `level` is invalid, else does nothing
+check_level <- function(level) {
+  if (!is.numeric(level) || (level < 0 || level > 1)) {
+    rlang::abort(c("`level` must be a number between 0 and 1",
+      "x" = paste0("You passed: ", level)
+    ))
+  }
+}

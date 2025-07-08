@@ -59,7 +59,7 @@ multiple_mab_simulation <- function(data,
   }
   if (!is.integer(seeds) || length(seeds) != times) {
     rlang::abort(c("Argument 'seeds' must be an integer vector of length equal to `times`. Please provide a valid vector.",
-      "x" = sprintf("You passed a %s vector.", base::typeof(seeds)),
+      "x" = sprintf("You passed a %s vector of length %d, while times is %d.", base::typeof(seeds), base::length(seeds), times),
       "i" = "Reccomended to use `sample.int()` to create proper vector"
     ))
   }
@@ -115,6 +115,7 @@ multiple_mab_simulation <- function(data,
   ),
   .progress = verbose
   )
+  verbose_log(verbose, "Collating Results")
   results <- condense_results(
     data = data, keep_data = keep_data, mabs = mabs,
     times = times

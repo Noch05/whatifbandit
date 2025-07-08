@@ -6,9 +6,11 @@
 #' @param ... additional arguments.
 #' @method summary mab
 #' @export
+#' @example inst/examples/summary.mab_example.R
 #' @returns data.frame containg each treatment, the final Thompson/UCB1 Statistic,
 #' the AIPW estimate and Normal CI based on user supplied level.
 summary.mab <- function(object, level = 0.95, ...) {
+  check_level(level)
   periods <- base::max(object$bandits$period_number)
   col2 <- switch(object$settings$algorithm,
     "UCB1" = "UCB1_Statistic",
@@ -48,6 +50,7 @@ summary.mab <- function(object, level = 0.95, ...) {
 #' @export
 
 summary.multiple.mab <- function(object, level = 0.95, ...) {
+  check_level(level)
   lower_level <- (1 - level) / 2
   upper_level <- 1 - lower_level
 

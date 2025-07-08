@@ -32,7 +32,7 @@ If assignment method is "Date", this refers to the
 length of periods by your specified \code{time_unit} (i.e., if "Day", 10 would be 10 days).
 If assignment methods is "Batch", this refers to the number of people in each batch.}
 
-\item{assignment_method}{String; "Date" or "Batch" to define the assignment into treatment waves.}
+\item{assignment_method}{String; "Date", "Batch" or "Individual" to define the assignment into treatment waves.}
 
 \item{time_unit}{A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'.
 Acceptable values are "Day", "Week", or "Month".}

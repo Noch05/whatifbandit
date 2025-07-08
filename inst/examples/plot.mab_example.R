@@ -29,9 +29,11 @@ x <- single_mab_simulation(
 y <- plot(x, type = "arm")
 y
 # These can be added to like any ggplot2 object
-library(ggplot2)
-y + labs(title = "Your New Title")
+
+y + ggplot2::labs(title = "Your New Title")
 
 # We can also plot the Augmented Inverse Probability Estimates.
 # by default it provides 95% Normal Confidence Intervals but this can be adjusted
-plot(x, type = "estimate", estimator = "AIPW")
+# This method only specifies 1 `geom*` so any arguments for that geom can be added.
+# Changing the height for `geom_errorbarh`
+plot(x, type = "estimate", estimator = "AIPW", height = 0.4)

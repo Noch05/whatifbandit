@@ -39,7 +39,7 @@
 #' }
 #' @param blocking Logical; Whether or not to use treatment blocking.
 #' @param block_cols Character Vector of variables to block by.
-#' @param assignment_method String; "Date" or "Batch" to define the assignment into treatment waves.
+#' @param assignment_method String; "Date", "Batch" or "Individual" to define the assignment into treatment waves.
 #' @param control_augment Number \eqn{\in} \[0,1\]; Proportion of each wave guaranteed to get "Control" treatment.
 #' Default is 0.
 #' @param verbose Logical; Whether or not to print iteration number. FALSE by default.

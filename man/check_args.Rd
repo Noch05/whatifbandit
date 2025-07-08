@@ -24,7 +24,7 @@ check_args(
 \arguments{
 \item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
 
-\item{assignment_method}{String; "Date" or "Batch" to define the assignment into treatment waves.}
+\item{assignment_method}{String; "Date", "Batch" or "Individual" to define the assignment into treatment waves.}
 
 \item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
 

@@ -94,6 +94,7 @@ plot_arms <- function(x, object, ...) {
 #' Plot Summary of AIPW estimates and variances for Each Treatment Arm
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)`
 plot_estimates <- function(x, estimator, level = 0.95, ...) {
+  check_level(level)
   if (base::is.null(estimator)) rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")
 
   estimator_arg <- switch(estimator,
@@ -222,6 +223,7 @@ plot_hist <- function(x, estimator, ...) {
 
 
 plot_mult_estimates <- function(x, estimator, cdf, level, ...) {
+  check_level(level)
   if (base::is.null(estimator)) {
     rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")
   }
