@@ -63,3 +63,25 @@ check_level <- function(level) {
     ))
   }
 }
+
+#' Check Estimator
+#' @description
+#' Shorthand for checking if the `estimator` passed to
+#' plot.mab and plot.multiple.mab are valid
+#' @name check_estimator
+#' @inheritParams plot.mab
+#' @returns Throws an error if the argument is invalid; returns character vector
+#' with the user's selection based on the argument
+check_estimator <- function(estimator) {
+  if (base::is.null(estimator)) {
+    rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")
+  } else {
+    estimator_arg <- switch(estimator,
+      "Both" = c("Sample", "AIPW"),
+      "AIPW" = c("AIPW"),
+      "Sample" = c("Sample"),
+      rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")
+    )
+  }
+  return(estimator_arg)
+}

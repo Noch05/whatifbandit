@@ -95,14 +95,7 @@ plot_arms <- function(x, object, ...) {
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)`
 plot_estimates <- function(x, estimator, level = 0.95, ...) {
   check_level(level)
-  if (base::is.null(estimator)) rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")
-
-  estimator_arg <- switch(estimator,
-    "Both" = c("Sample", "AIPW"),
-    "AIPW" = c("AIPW"),
-    "Sample" = c("Sample"),
-    rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")
-  )
+  estimator_arg <- check_estimator(estimator)
   normalq <- base::abs(stats::qnorm((1 - level) / 2))
 
   x$estimates |>
@@ -194,14 +187,7 @@ plot_summary <- function(x, ...) {
 #' @inheritParams plot.multiple.mab
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
 plot_hist <- function(x, estimator, ...) {
-  if (base::is.null(estimator)) rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")
-
-  estimator_arg <- switch(estimator,
-    "Both" = c("Sample", "AIPW"),
-    "AIPW" = c("AIPW"),
-    "Sample" = c("Sample"),
-    rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")
-  )
+  estimator_arg <- check_estimator(estimator)
 
   x$estimates |>
     dplyr::filter(estimator %in% estimator_arg) |>
@@ -226,24 +212,14 @@ plot_hist <- function(x, estimator, ...) {
 
 plot_mult_estimates <- function(x, estimator, cdf, level, ...) {
   check_level(level)
-  if (base::is.null(estimator)) {
-    rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")
-  }
-
-  estimator_arg <- switch(estimator,
-    "Both" = c("Sample", "AIPW"),
-    "AIPW" = c("AIPW"),
-    "Sample" = c("Sample"),
-    rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")
-  )
-
+  estimator_arg <- check_estimator(estimator)
   if (base::is.null(cdf)) {
     rlang::abort("Invalid Estimator: Valid Estimators are, empirical`, and `normal`")
   }
   cols <- switch(cdf,
-    ,
     "empirical" = c("upper_empirical", "lower_empirical"),
-    "normal" = c("upper_normal", "lower_normal")
+    "normal" = c("upper_normal", "lower_normal"),
+    rlang::abort("Invalid `cdf`: valid cdfs are `normal` or `empirical`")
   )
 
   summary(x, level = level) |>
