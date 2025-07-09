@@ -55,7 +55,14 @@ object.size(x)
 
 if (requireNamespace("future", quietly = TRUE)) {
   start <- proc.time()
-  future::plan("multisession", workers = 2)
+  
+  if(.Platform$OS.type == "unix") {
+    future::plan("multicore", workers = 2)
+  }
+  else {
+    future::plan("multisession", workers = 2)
+  }
+  
   multiple_mab_simulation(
     data = tanf,
     assignment_method = "Batch",
