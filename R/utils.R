@@ -3,7 +3,7 @@
 #' @importFrom data.table :=
 #' @importFrom data.table .I
 #' @importFrom data.table .N
-#'
+#' @importFrom stats density
 #'
 
 utils::globalVariables(c(
