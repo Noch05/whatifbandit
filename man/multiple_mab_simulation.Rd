@@ -100,12 +100,12 @@ random states. Allows for parallel processing using \code{\link[future:plan]{fut
 #
 data(tanf)
 # Subsetting to make the example faster
-tanf <- tanf[1:15, ]
+tanf <- tanf[1:10, ]
 
 # The seeds passed must be integers, so it is highly recommended to create them
 # before using `sample.int()`
 set.seed(1)
-seeds <- sample.int(10000, 15)
+seeds <- sample.int(10000, 10)
 conditions <- c("no_letter", "open_appt", "specific_appt")
 
 # For this example, period_length is set a large interval and
@@ -127,7 +127,7 @@ x <- multiple_mab_simulation(
     id_col = "id",
     success_col = "success"
   ),
-  verbose = FALSE, times = 15, seeds = seeds, keep_data = FALSE
+  verbose = FALSE, times = 10, seeds = seeds, keep_data = FALSE
 )
 seq_time <- proc.time() - start
 print(x)
@@ -150,7 +150,7 @@ y <- multiple_mab_simulation(
     id_col = "id",
     success_col = "success"
   ),
-  verbose = FALSE, times = 15, seeds = seeds, keep_data = TRUE
+  verbose = FALSE, times = 10, seeds = seeds, keep_data = TRUE
 )
 
 # Keeping data results in a larger object size
@@ -180,7 +180,7 @@ multiple_mab_simulation(
     id_col = "id",
     success_col = "success"
   ),
-  verbose = FALSE, times = 15, seeds = seeds, keep_data = FALSE
+  verbose = FALSE, times = 10, seeds = seeds, keep_data = FALSE
 )
 parallel_time <- proc.time() - start
 future::plan("sequential")
