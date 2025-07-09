@@ -144,42 +144,33 @@ object.size(x)
 # Simply run your preferred plan and number of cores before multiple_mab_simulation.
 # Like: 
 \dontrun{
-  future::plan("multisession", workers = n)
-  multiple_mab_simulation(...)
-  future::plan("sequential")
-}
-# Check the future and furrr documentation for more details on possible options
 
-if (requireNamespace("future", quietly = TRUE)) {
-  start <- proc.time()
-  future::plan("multisession", workers = 2)
-  multiple_mab_simulation(
-    data = tanf,
-    assignment_method = "Batch",
-    period_length = 25,
-    whole_experiment = TRUE,
-    blocking = FALSE,
-    perfect_assignment = TRUE,
-    algorithm = "Thompson",
-    prior_periods = "All",
-    control_augment = 0,
-    conditions = conditions,
-    data_cols = c(
-      condition_col = "condition",
-      id_col = "id",
-      success_col = "success"
-    ),
-    verbose = FALSE, times = 5, seeds = seeds, keep_data = FALSE
+  future::plan("plan", workers = n)
+  multiple_mab_simulation(data = tanf,
+                          assignment_method = "Batch",
+                          period_length = 25,
+                          whole_experiment = TRUE,
+                          blocking = FALSE,
+                          perfect_assignment = TRUE,
+                          algorithm = "Thompson",
+                          prior_periods = "All",
+                          control_augment = 0,
+                          conditions = conditions,
+                          data_cols = c(
+                            condition_col = "condition",
+                            id_col = "id",
+                            success_col = "success"
+                          ),
+                          verbose = FALSE, times = 5, seeds = seeds, keep_data = TRUE
   )
-  parallel_time <- proc.time() - start
   future::plan("sequential")
-  # Here it runs slower, but with larger datasets or more simulations
-  # parallel becomes useful at reducing compute time if the memory is available
-  # Sequential
-  seq_time
-  # Parallel
-  parallel_time
 }
+# If your on Windows plan needs to be multisession
+# If your on Unix (MacOS/Linux) you can use multicore or multisession
+# If your running the code on a high performance cluster, look into
+# using the future.batchtools API for whichever scheduler is used
+
+# Check the future and furrr documentation for more details on possible options
 }
 \seealso{
 \itemize{
