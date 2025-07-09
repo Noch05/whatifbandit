@@ -8,7 +8,7 @@
 #' \itemize{
 #' \item `arm`: Shows Thompson Probability or UCB1 Statistic over the trial period.
 #' \item `assign`: Shows Assignment Probability/Proportion over trial period.
-#' \item `estimate`: Shows proportion of success estimates with 95% Normal Confidence Intervals based on their estimated variance.
+#' \item `estimate`: Shows proportion of success estimates with user specified Normal Confidence Intervals based on their estimated variance.
 #' }
 #' @param save Logical; Whether or not to save the plot to disk; FALSE by default.
 #' @param path String; File directory to save file.
@@ -133,6 +133,7 @@ plot_estimates <- function(x, estimator, level = 0.95, ...) {
 #' \itemize{
 #' \item `summary`: Shows the number of times each arm was selected as the highest chance of being the best.
 #' \item `hist`: Shows histograms for each treatment condition's proportion of success across trials.
+#' \item `estimate`: Shows proportion of success estimates user specified normal or empirical confidence intervals.
 #' }
 #' @param estimator Estimator to plot; Either "AIPW", "Sample" or "Both"; used by `hist` and `estimate`.
 #' @param save Logical; Whether or not to save the plot to disk; FALSE by default.
@@ -141,6 +142,7 @@ plot_estimates <- function(x, estimator, level = 0.95, ...) {
 #' @param cdf String; specifies the type of CDF to use when analyzing the estimates.
 #' valid cdfs are the `empirical` cdf, the `normal` cdf. Used when type = `estimate`.
 #' @inheritParams summary.multiple.mab
+#' @example inst/examples/plot.multiple.mab_example.R
 #' @export
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
 
@@ -203,7 +205,7 @@ plot_hist <- function(x, estimator, ...) {
 
   x$estimates |>
     dplyr::filter(estimator %in% estimator_arg) |>
-    ggplot2::ggplot(ggplot2::aes(x = mean, y = ggplot2::after_stat(stats::density))) +
+    ggplot2::ggplot(ggplot2::aes(x = mean, y = ggplot2::after_stat(density))) +
     ggplot2::geom_histogram(...) +
     ggplot2::facet_grid(~ mab_condition + estimator) +
     ggplot2::labs(

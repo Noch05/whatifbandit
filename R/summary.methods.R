@@ -47,6 +47,7 @@ summary.mab <- function(object, level = 0.95, ...) {
 #' @param level Confidence Interval Width (i.e 0.90, .95, 0.99)
 #' @param ... additional arguments.
 #' @method summary multiple.mab
+#' @example inst/examples/summary.multiple.mab_example.R
 #' @export
 
 summary.multiple.mab <- function(object, level = 0.95, ...) {
