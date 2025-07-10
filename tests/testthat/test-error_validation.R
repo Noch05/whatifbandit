@@ -47,50 +47,49 @@ test_that("Throws Proper Error when arguments are invalid", {
     period_length = list(50, -1, "text", NA),
     conditions = list(c("1", "2", "3", "4"), rep(NA, 3))
   )
-  test_invalid_arg <- function(x, y) {
-    args <- list(
-      data = data,
-      algorithm = "Thompson",
-      assignment_method = "Batch",
-      period_length = 1,
-      verbose = TRUE,
-      conditions = unique(as.character(data$condition)),
-      control_augment = 0,
-      blocking = FALSE,
-      perfect_assignment = TRUE,
-      whole_experiment = FALSE,
-      data_cols = c(
-        condition_col = "condition",
-        id_col = "id",
-        success_col = "success"
-      ),
-      prior_periods = "All"
-    )
-    if (y == "time_unit") {
-      args$assignment_method <- "Date"
-      args$data_cols <- c(
-        condition_col = "condition",
-        id_col = "id",
-        success_col = "success",
-        date_col = "date"
-      )
-    }
-    if (y == "perfect_assignment") {
-      args$data_cols <- c(
-        condition_col = "condition",
-        id_col = "id",
-        success_col = "success",
-        success_date_col = "success_date",
-        assignment_date_col = "assignment_date"
-      )
-    }
+  args <- list(
+    data = data,
+    algorithm = "Thompson",
+    assignment_method = "Batch",
+    period_length = 1,
+    verbose = TRUE,
+    conditions = unique(as.character(data$condition)),
+    control_augment = 0,
+    blocking = FALSE,
+    perfect_assignment = TRUE,
+    whole_experiment = FALSE,
+    data_cols = c(
+      condition_col = "condition",
+      id_col = "id",
+      success_col = "success"
+    ),
+    prior_periods = "All"
+  )
 
-    args[[y]] <- x
-
-    expect_snapshot_error(do.call(single_mab_simulation, args))
-  }
   purrr::walk2(invalid_args_exs, names(invalid_args_exs), \(x, y) {
-    purrr::walk(x, ~ test_invalid_arg(.x, y))
+    purrr::walk(x, ~ {
+      if (y == "time_unit") {
+        args$assignment_method <- "Date"
+        args$data_cols <- c(
+          condition_col = "condition",
+          id_col = "id",
+          success_col = "success",
+          date_col = "date"
+        )
+      }
+      if (y == "perfect_assignment") {
+        args$data_cols <- c(
+          condition_col = "condition",
+          id_col = "id",
+          success_col = "success",
+          success_date_col = "success_date",
+          assignment_date_col = "assignment_date"
+        )
+      }
+
+      args[[y]] <- .x
+      expect_snapshot_error(do.call(single_mab_simulation, args))
+    })
   })
 })
 #-------------------------------------------------------------------------------
