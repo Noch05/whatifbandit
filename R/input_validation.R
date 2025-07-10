@@ -56,7 +56,7 @@ check_args <- function(data,
   )
 
   purrr::walk2(logical_args, names(logical_args), ~ {
-    if (!is.logical(.x)) {
+    if (!is.logical(.x) || length(.x) != 1) {
       rlang::abort(sprintf("`%s` must be logical (TRUE or FALSE).", .y))
     }
   })
@@ -146,7 +146,7 @@ check_args <- function(data,
   }
 
   if (control_augment > 0 && !"Control" %in% names(conditions)) {
-    rlang::abort("Condtions vector must have a at least one condition named 'Control'
+    rlang::abort("Conditions vector must have a at least one condition named 'Control'
     when control augmentation is used.")
   }
 
@@ -156,22 +156,23 @@ check_args <- function(data,
         "x" = sprintf("You passed: %d ", prior_periods)
       ))
     }
+  } else if (prior_periods != "All") {
+    rlang::abort(c("`prior_periods` must be a positive integer or 'All'.",
+      "x" = paste0("You passed: ", prior_periods)
+    ))
   } else {
-    if (prior_periods != "All") {
-      rlang::abort(c("`prior_periods` must be a positive integer or 'All'.",
-        "x" = paste0("You passed: ", prior_periods)
-      ))
-    }
+    rlang::abort(c("`prior_periods` must be a positive integer or 'All'.",
+      "x" = paste0("You passed: ", prior_periods)
+    ))
   }
+
+
   if (assignment_method == "Batch" && period_length > nrow(data)) {
     rlang::abort(c("`period_length` cannot be larger than data size",
       "x" = sprintf("You data has %d, and your batch size is %d", nrow(data), period_length)
     ))
   }
 }
-
-
-
 
 
 
