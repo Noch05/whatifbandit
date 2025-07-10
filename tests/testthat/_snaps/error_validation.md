@@ -14,6 +14,11 @@
 
 ---
 
+    'algorithm' must be 'Thompson' or 'UCB1'.
+    x You passed: NA
+
+---
+
     Invalid `assignment_method`
     x you passed: not
     i Valid methods are `Individual`, `Batch`, `Date`
@@ -26,10 +31,9 @@
 
 ---
 
-    i In index: 1.
-    i With name: verbose.
-    Caused by error in `.f()`:
-    ! `verbose` must be logical (TRUE or FALSE).
+    Invalid `assignment_method`
+    x you passed: NA
+    i Valid methods are `Individual`, `Batch`, `Date`
 
 ---
 
@@ -37,6 +41,23 @@
     i With name: verbose.
     Caused by error in `.f()`:
     ! `verbose` must be logical (TRUE or FALSE).
+    x You Passed: 456
+
+---
+
+    i In index: 1.
+    i With name: verbose.
+    Caused by error in `.f()`:
+    ! `verbose` must be logical (TRUE or FALSE).
+    x You Passed: text
+
+---
+
+    i In index: 1.
+    i With name: verbose.
+    Caused by error in `.f()`:
+    ! `verbose` must be logical (TRUE or FALSE).
+    x You Passed: NA
 
 ---
 
@@ -64,6 +85,7 @@
     i With name: blocking.
     Caused by error in `.f()`:
     ! `blocking` must be logical (TRUE or FALSE).
+    x You Passed: 654
 
 ---
 
@@ -71,6 +93,15 @@
     i With name: blocking.
     Caused by error in `.f()`:
     ! `blocking` must be logical (TRUE or FALSE).
+    x You Passed: text
+
+---
+
+    i In index: 2.
+    i With name: blocking.
+    Caused by error in `.f()`:
+    ! `blocking` must be logical (TRUE or FALSE).
+    x You Passed: NA
 
 ---
 
@@ -90,6 +121,7 @@
     i With name: perfect_assignment.
     Caused by error in `.f()`:
     ! `perfect_assignment` must be logical (TRUE or FALSE).
+    x You Passed: 45
 
 ---
 
@@ -97,6 +129,15 @@
     i With name: perfect_assignment.
     Caused by error in `.f()`:
     ! `perfect_assignment` must be logical (TRUE or FALSE).
+    x You Passed: text
+
+---
+
+    i In index: 4.
+    i With name: perfect_assignment.
+    Caused by error in `.f()`:
+    ! `perfect_assignment` must be logical (TRUE or FALSE).
+    x You Passed: NA
 
 ---
 
@@ -104,6 +145,7 @@
     i With name: whole_experiment.
     Caused by error in `.f()`:
     ! `whole_experiment` must be logical (TRUE or FALSE).
+    x You Passed: 546
 
 ---
 
@@ -111,6 +153,15 @@
     i With name: whole_experiment.
     Caused by error in `.f()`:
     ! `whole_experiment` must be logical (TRUE or FALSE).
+    x You Passed: text
+
+---
+
+    i In index: 3.
+    i With name: whole_experiment.
+    Caused by error in `.f()`:
+    ! `whole_experiment` must be logical (TRUE or FALSE).
+    x You Passed: NA
 
 ---
 
@@ -121,6 +172,11 @@
 
     `prior_periods` must be a positive integer or 'All'.
     x You passed: text
+
+---
+
+    `prior_periods` must be a positive integer or 'All'.
+    x You passed: NA
 
 ---
 
@@ -135,12 +191,22 @@
 ---
 
     `period_length` must be a positive integer.
+    x You passed: text
+
+---
+
+    `period_length` must be a positive integer.
+    x You passed: NA
 
 ---
 
     Conditions passed must be same length as number of unique conditions
     x You passed a vector of length 4
     x Your data has 3 unique treatments
+
+---
+
+    `conditions`, must be provided as a character vector.
 
 # Throws proper error when columns do not exist or not declared
 

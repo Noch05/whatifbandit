@@ -35,17 +35,17 @@ test_that("Throws Proper Error when arguments are invalid", {
     date = rep(lubridate::ymd("2024-01-01"), 10)
   )
   invalid_args_exs <- list(
-    algorithm = list("not", 76),
-    assignment_method = list("not", 45),
-    verbose = list(456, "text"),
+    algorithm = list("not", 76, NA),
+    assignment_method = list("not", 45, NA),
+    verbose = list(456, "text", NA),
     control_augment = list(-1, 2, NA, 0.5),
-    blocking = list(654, "text"),
+    blocking = list(654, "text", NA),
     time_unit = list("Weeks", 5),
-    perfect_assignment = list(45, "text"),
-    whole_experiment = list(546, "text"),
-    prior_periods = list(-5, "text"),
-    period_length = list(50, -1, "text"),
-    conditions = list(c("1", "2", "3", "4"))
+    perfect_assignment = list(45, "text", NA),
+    whole_experiment = list(546, "text", NA),
+    prior_periods = list(-5, "text", NA),
+    period_length = list(50, -1, "text", NA),
+    conditions = list(c("1", "2", "3", "4"), rep(NA, 3))
   )
   test_invalid_arg <- function(x, y) {
     args <- list(

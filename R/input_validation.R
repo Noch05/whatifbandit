@@ -57,7 +57,9 @@ check_args <- function(data,
 
   purrr::walk2(logical_args, names(logical_args), ~ {
     if (!is.logical(.x) || length(.x) != 1 || is.na(.x)) {
-      rlang::abort(sprintf("`%s` must be logical (TRUE or FALSE).", .y))
+      rlang::abort(c(sprintf("`%s` must be logical (TRUE or FALSE).", .y),
+        "x" = paste0("You Passed: ", .x)
+      ))
     }
   })
   if (!assignment_method %in% c("Individual", "Batch", "Date")) {
@@ -121,11 +123,13 @@ check_args <- function(data,
       rlang::abort(c("`period_length`, must be provided when Date or Batch assignment is used."))
     }
     if (!is.numeric(period_length)) {
-      rlang::abort(c("`period_length` must be a positive integer."))
+      rlang::abort(c("`period_length` must be a positive integer.",
+        "x" = paste0("You passed: ", period_length)
+      ))
     }
     if (period_length %% 1 != 0 || period_length < 0) {
       rlang::abort(c("`period_length` must be a positive integer.",
-        "x" = sprintf("You passed: %d", period_length)
+        "x" = paste0("You passed: ", period_length)
       ))
     }
   }
@@ -156,7 +160,7 @@ check_args <- function(data,
         "x" = sprintf("You passed: %d ", prior_periods)
       ))
     }
-  } else if (prior_periods != "All") {
+  } else if (prior_periods != "All" || is.na(prior_periods)) {
     rlang::abort(c("`prior_periods` must be a positive integer or 'All'.",
       "x" = paste0("You passed: ", prior_periods)
     ))
