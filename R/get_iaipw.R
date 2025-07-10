@@ -65,7 +65,7 @@ get_iaipw.tbl_df <- function(data, assignment_probs, periods, conditions, verbos
       names_prefix = "prior_rate_"
     ) |>
     dplyr::right_join(data, by = "period_number") |>
-    dplyr::select(tidyselect::all_of(names(data)), tidyselect::everything()) |>
+    dplyr::select(!!!rlang::syms(names(data)), tidyr::starts_with("prior_rate_")) |>
     dplyr::left_join(assignment_probs, by = "period_number")
 
   for (i in base::seq_along(conditions)) {
