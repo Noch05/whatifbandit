@@ -160,11 +160,8 @@ check_args <- function(data,
     rlang::abort(c("`prior_periods` must be a positive integer or 'All'.",
       "x" = paste0("You passed: ", prior_periods)
     ))
-  } else {
-    rlang::abort(c("`prior_periods` must be a positive integer or 'All'.",
-      "x" = paste0("You passed: ", prior_periods)
-    ))
   }
+
 
 
   if (assignment_method == "Batch" && period_length > nrow(data)) {
