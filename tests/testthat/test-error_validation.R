@@ -175,7 +175,7 @@ test_that("Multiple Simulation Specific Error Checks work", {
 
   args_change <- list(
     times = list(-5, NA, "t"),
-    seeds = list(rep(1, 5), rep("5", 5)),
+    seeds = list(rep(1, 5), rep("5", 5), sample.int(2134, 4), rnorm(5)),
     keep_data = list(NA, "text", 6543)
   )
   ##

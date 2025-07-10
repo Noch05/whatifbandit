@@ -347,6 +347,18 @@
 
 ---
 
+    Argument 'seeds' must be an integer vector of length equal to `times`. Please provide a valid vector.
+    x You passed a integer vector of length 4, while times is 5.
+    i Reccomended to use `sample.int()` to create proper vector
+
+---
+
+    Argument 'seeds' must be an integer vector of length equal to `times`. Please provide a valid vector.
+    x You passed a double vector of length 5, while times is 5.
+    i Reccomended to use `sample.int()` to create proper vector
+
+---
+
     Argument 'keep_data' must logical. Please enter `TRUE` or `FALSE`
 
 ---
