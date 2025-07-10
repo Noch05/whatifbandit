@@ -97,7 +97,7 @@ check_args <- function(data,
   if (unique_ids != nrow(data)) {
     rlang::abort(paste(data_cols$id$name, "is not a unique identifier, a unique id for each observation is required"))
   }
-
+  # Checking Assignment Method Arguments
   if (assignment_method == "Date") {
     if (is.null(time_unit)) {
       rlang::abort("`time_unit` must be provided when assignment method is `Date`.")
@@ -116,18 +116,29 @@ check_args <- function(data,
       ))
     }
   }
-
-  # Checking Arguments are properly provided
-  if (assignment_method == "Date" && is.null(time_unit)) {
-
+  if (assignment_method %in% c("Batch", "Date")) {
+    if (is.null(period_length)) {
+      rlang::abort(c("`period_length`, must be provided when Date or Batch assignment is used."))
+    }
+    if (!is.numeric(period_length)) {
+      rlang::abort(c("`period_length` must be a positive integer."))
+    }
+    if (period_length %% 1 != 0 || period_length < 0) {
+      rlang::abort(c("`period_length` must be a positive integer.",
+        "x" = sprintf("You passed: %d", period_length)
+      ))
+    }
   }
 
-  if (assignment_method != "Date" && !is.null(time_unit)) {
-    if (verbose) rlang::warn(c("i" = "`time_unit` is not required when assignment method is not `Date`. It will be ignored"))
+  if (!assignment_method %in% c("Batch", "Date")) {
+    if (verbose) {
+      if (!is.null(period_length)) {
+        rlang::warn(c("i" = "`time_unit` is not required when assignment method is not `Date`. It will be ignored"))
+      }
+    }
   }
-  if (assignment_method %in% c("Date", "Batch") && is.null(period_length)) {
-    rlang::abort("`period_length`, must be provided when Date or Batch assignment is used.")
-  }
+
+  # Checking Other Arguments
   if (is.null(control_augment) || !is.numeric(control_augment) || control_augment < 0 || control_augment > 1) {
     rlang::abort(c("`control_augment` must be a non-null double between 0 and 1",
       "x" = paste0("You passed: ", control_augment)
@@ -138,16 +149,11 @@ check_args <- function(data,
     rlang::abort("Condtions vector must have a at least one condition named 'Control'
     when control augmentation is used.")
   }
-  if ((period_length %% 1 != 0 || period_length < 0) && !is.null(period_length)) {
-    rlang::abort(c("`period_length` must be a positive integer.",
-      x = paste0("You passed: ", period_length)
-    ))
-  }
 
   if (is.numeric(prior_periods)) {
     if (prior_periods %% 1 != 0 || prior_periods < 0) {
       rlang::abort(c("`prior_periods` must be a positive integer or 'All'.",
-        "x" = paste0("You passed: ", prior_periods)
+        "x" = sprintf("You passed: %d ", prior_periods)
       ))
     }
   } else {
