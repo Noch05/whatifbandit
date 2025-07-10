@@ -18,7 +18,6 @@
 #'
 get_past_results <- function(current_data, prior_data, perfect_assignment, assignment_date_col = NULL,
                              conditions) {
-  current_data <- check_dt(current_data, tibble::as.tibble)
   base::UseMethod("get_past_results", current_data)
 }
 
@@ -79,7 +78,7 @@ get_past_results.data.table <- function(current_data,
                                         perfect_assignment, assignment_date_col = NULL,
                                         conditions, prior_data) {
   if (!perfect_assignment) {
-    current_date <- base::max(current_data[, base::get(assignment_date_col$name)])
+    current_date <- base::max(current_data[[assignment_date_col$name]])
 
     prior_data[, known_success := data.table::fifelse(
       current_date >= new_success_date &

@@ -160,7 +160,6 @@ multiple_mab_simulation <- function(data,
 
 condense_results <- function(data, keep_data, mabs, times) {
   items <- c("bandits", "estimates", "assignment_probs")
-  data <- check_dt(data, tibble::as.tibble)
 
   if (inherits(data, "data.table")) {
     results <- lapply(items, \(item) {

@@ -2,6 +2,9 @@
 #' @importFrom rlang !!
 #' @importFrom rlang !!!
 #' @importFrom stats density
+#' @importFrom data.table .N
+#' @importFrom data.table :=
+#' @importFrom data.table .I
 #'
 
 utils::globalVariables(c(
@@ -14,7 +17,7 @@ utils::globalVariables(c(
   "treatment_block", "trials", "ucb",
   ".I", ".N", ":=", "period_number",
   "mab_condition", "month_date",
-  "success_rate", "failure_rate",
+  "current_date", "success_rate", "failure_rate",
   "mab_success", "variance", "probs",
   "prior_period_success_rate", "estimator",
   "cumulative_trials", "cumulative_count",
@@ -82,21 +85,4 @@ check_estimator <- function(estimator) {
     )
   }
   return(estimator_arg)
-}
-
-#' Check data.table
-#' @description
-#' Shorthand for checking if user has data.table package installed properly,
-#' when passing a data.table
-#' @name check_dt
-#' @param data `data` object passed into the function
-#' @param FUN function that is called when `data` is a data.table but the package
-#' is not properly installed.
-#' @param ... arguments required for `FUN`.
-#' @returns Nothing if `data` is a data.table else, `data` coerced to a tibble
-check_dt <- function(data, FUN, ...) {
-  if (inherits(data, "data.table") && !rlang::is_installed("data.table")) {
-    return(FUN(data, ...))
-  }
-  return(data)
 }

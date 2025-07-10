@@ -47,7 +47,6 @@ create_cutoff <- function(data, data_cols, period_length = NULL,
 #' @inheritParams cols
 #'
 create_cutoff.Day <- function(data, date_col, period_length) {
-  data <- check_dt(data, tibble::as.tibble)
   start_date <- base::min(data[[date_col$name]])
   if (inherits(data, "data.table")) {
     data[, period_number := base::floor(
@@ -71,8 +70,6 @@ create_cutoff.Day <- function(data, date_col, period_length) {
 #' @inheritParams create_cutoff
 #' @inheritParams cols
 create_cutoff.Week <- function(data, date_col, period_length) {
-  data <- check_dt(data, tibble::as.tibble)
-
   if (inherits(data, "data.table")) {
     start_date <- base::min(data[, get(date_col$name)])
 
@@ -102,7 +99,6 @@ create_cutoff.Week <- function(data, date_col, period_length) {
 #' @inheritParams cols
 #'
 create_cutoff.Month <- function(data, date_col, month_col, period_length) {
-  data <- check_dt(data, tibble::as.tibble)
   start_date <- base::min(data[[date_col$name]])
 
   if (inherits(data, "data.table")) {
@@ -150,7 +146,6 @@ create_cutoff.Month <- function(data, date_col, month_col, period_length) {
 #' @inheritParams create_cutoff
 #'
 create_cutoff.Individual <- function(data) {
-  data <- check_dt(data, tibble::as.tibble)
   if (inherits(data, "data.table")) {
     data[, period_number := .I]
     data.table::setkey(data, period_number)
@@ -167,7 +162,6 @@ create_cutoff.Individual <- function(data) {
 #' @inheritParams create_cutoff
 #'
 create_cutoff.Batch <- function(data, period_length) {
-  data <- check_dt(data, tibble::as.tibble)
   if (inherits(data, "data.table")) {
     data[, period_number := base::ceiling((.I / period_length))]
     data.table::setkey(data, period_number)

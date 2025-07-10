@@ -16,7 +16,6 @@
 #'* [run_mab_trial()]
 
 end_mab_trial <- function(data, bandits, algorithm, periods, conditions) {
-  data <- check_dt(data, tibble::as.tibble)
   base::UseMethod("end_mab_trial", data)
 }
 

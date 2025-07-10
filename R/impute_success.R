@@ -23,7 +23,6 @@
 impute_success <- function(current_data, imputation_info, id_col,
                            success_col, prior_data = NULL, perfect_assignment, dates = NULL,
                            success_date_col, current_period = NULL) {
-  current_data <- check_dt(current_data, tibble::as.tibble)
   base::UseMethod("impute_success", current_data)
 }
 #' @inheritParams impute_success

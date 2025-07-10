@@ -72,7 +72,7 @@ get_bandit.Thompson <- function(past_results, conditions, iterator) {
 
 get_bandit.UCB1 <- function(past_results, conditions, current_period) {
   correction <- 1e-10
-  past_results <- check_dt(past_results, tibble::as.tibble)
+
   if (inherits(past_results, "data.table")) {
     past_results[, ucb := success_rate + base::sqrt(
       (2 * base::log(current_period - 1)) / (n + correction)
