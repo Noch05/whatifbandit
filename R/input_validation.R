@@ -1,4 +1,4 @@
-#' @title Validates Inputs For [single_mab_simulation()] and [multiple_mab_simulation].
+#' @title Validates Inputs For [single_mab_simulation()] and [multiple_mab_simulation()]
 #' @name check_args
 #'
 #'

@@ -77,7 +77,7 @@ check_estimator <- function(estimator) {
     rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")
   } else {
     estimator_arg <- switch(estimator,
-      "Both" = c("Sample", "AIPW"),
+      "both" = c("Sample", "AIPW"),
       "AIPW" = c("AIPW"),
       "Sample" = c("Sample"),
       rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")

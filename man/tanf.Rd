@@ -3,7 +3,7 @@
 \docType{data}
 \name{tanf}
 \alias{tanf}
-\title{Public TANF Recipient Data From Washington D.C.}
+\title{Public TANF Recipient Data From Washington D.C\.}
 \format{
 An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 3520 rows and 22 columns.
 }

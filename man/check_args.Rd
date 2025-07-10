@@ -2,7 +2,7 @@
 % Please edit documentation in R/input_validation.R
 \name{check_args}
 \alias{check_args}
-\title{Validates Inputs For \code{\link[=single_mab_simulation]{single_mab_simulation()}} and \link{multiple_mab_simulation}.}
+\title{Validates Inputs For \code{\link[=single_mab_simulation]{single_mab_simulation()}} and \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}}
 \usage{
 check_args(
   data,

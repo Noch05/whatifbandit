@@ -1,4 +1,4 @@
-#' Public TANF Recipient Data From Washington D.C.
+#' Public TANF Recipient Data From Washington D.C
 #'
 #' A modified version of the data set used in <https://thelabprojects.dc.gov/benefits-reminder-letter>
 #' with one additional column added for analysis.

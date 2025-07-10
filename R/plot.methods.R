@@ -214,7 +214,7 @@ plot_mult_estimates <- function(x, estimator, cdf, level, ...) {
   check_level(level)
   estimator_arg <- check_estimator(estimator)
   if (base::is.null(cdf)) {
-    rlang::abort("Invalid Estimator: Valid Estimators are, empirical`, and `normal`")
+    rlang::abort("Invalid Estimator: Valid CDF's are, empirical`, and `normal`")
   }
   cols <- switch(cdf,
     "empirical" = c("upper_empirical", "lower_empirical"),
@@ -224,7 +224,7 @@ plot_mult_estimates <- function(x, estimator, cdf, level, ...) {
 
   summary(x, level = level) |>
     dplyr::filter(estimator %in% estimator_arg) |>
-    dplyr::select(tidyselect::all_of(cols), estimator, mab_condition, estimate_avg) |>
+    dplyr::select(!!!rlang::syms(cols), estimator, mab_condition, estimate_avg) |>
     ggplot2::ggplot(ggplot2::aes(x = estimate_avg, y = mab_condition)) +
     ggplot2::geom_errorbarh(ggplot2::aes_string(xmin = cols[[1]], xmax = cols[[2]])) +
     ggplot2::facet_grid(~estimator) +
