@@ -158,3 +158,24 @@
     ! Required column `success_col` is not found in provided `data`.
     x reason: it is always required
 
+---
+
+    i In index: 3.
+    Caused by error in `.f()`:
+    ! Required column `condition_col` is not declared in `data_cols`.
+    x reason: it is always required
+
+---
+
+    i In index: 1.
+    Caused by error in `.f()`:
+    ! Required column `id_col` is not declared in `data_cols`.
+    x reason: it is always required
+
+---
+
+    i In index: 2.
+    Caused by error in `.f()`:
+    ! Required column `success_col` is not declared in `data_cols`.
+    x reason: it is always required
+

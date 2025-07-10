@@ -23,6 +23,8 @@ test_that("Throws Proper Error when ID's are not unique", {
   ))
 })
 
+#-------------------------------------------------------------------------------
+
 test_that("Throws Proper Error when arguments are invalid", {
   data <- tibble::tibble(
     id = seq(1, 10, 1),
@@ -91,7 +93,7 @@ test_that("Throws Proper Error when arguments are invalid", {
     purrr::walk(x, ~ test_invalid_arg(.x, y))
   })
 })
-
+#-------------------------------------------------------------------------------
 
 test_that("Columns that do not exist in data are found", {
   data <- tibble::tibble(
@@ -110,7 +112,9 @@ test_that("Columns that do not exist in data are found", {
     dplyr::mutate(fake_count = sum(dplyr::c_across(dplyr::everything()) == "fake_colname")) |>
     dplyr::filter(fake_count == 1) |>
     dplyr::ungroup() |>
-    select(-fake_count)
+    dplyr::select(-fake_count)
+
+  col_args <- rbind(col_args, col_args)
 
   conditions <- as.character(unique(data$condition))
 
@@ -119,6 +123,10 @@ test_that("Columns that do not exist in data are found", {
       as.character(col_args[.x, ]),
       names(col_args)
     )
+    if (.x > nrow(col_args) / 2) {
+      ind <- .x - (nrow(col_args) / 2)
+      data_cols <- data_cols[-ind]
+    }
     expect_snapshot_error(single_mab_simulation(
       data = tanf,
       assignment_method = "Individual",
@@ -132,3 +140,4 @@ test_that("Columns that do not exist in data are found", {
     ))
   })
 })
+#-------------------------------------------------------------------------------
