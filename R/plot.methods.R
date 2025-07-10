@@ -46,6 +46,7 @@ plot.mab <- function(x, type, estimator = NULL, level = .95, save = FALSE, path 
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
 
 plot_arms <- function(x, object, ...) {
+  rlang::check_installed("ggplot2")
   data <- x[[object]]
   periods <- base::max(data$period_number)
 
@@ -95,6 +96,7 @@ plot_arms <- function(x, object, ...) {
 #' Plot Summary of AIPW estimates and variances for Each Treatment Arm
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)`
 plot_estimates <- function(x, estimator, level = 0.95, ...) {
+  rlang::check_installed("ggplot2")
   check_level(level)
   estimator_arg <- check_estimator(estimator)
   normalq <- base::abs(stats::qnorm((1 - level) / 2))
@@ -167,6 +169,7 @@ plot.multiple.mab <- function(x, type, estimator = NULL, cdf = NULL, level = 0.9
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
 
 plot_summary <- function(x, ...) {
+  rlang::check_installed("ggplot2")
   summary(x) |>
     dplyr::filter(estimator == "AIPW") |>
     ggplot2::ggplot(ggplot2::aes(x = mab_condition, y = times_best)) +
@@ -189,6 +192,7 @@ plot_summary <- function(x, ...) {
 #' @inheritParams plot.multiple.mab
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
 plot_hist <- function(x, estimator, ...) {
+  rlang::check_installed("ggplot2")
   estimator_arg <- check_estimator(estimator)
 
   x$estimates |>
@@ -213,6 +217,7 @@ plot_hist <- function(x, estimator, ...) {
 
 
 plot_mult_estimates <- function(x, estimator, cdf, level, ...) {
+  rlang::check_installed("ggplot2")
   check_level(level)
   estimator_arg <- check_estimator(estimator)
   if (base::is.null(cdf)) {

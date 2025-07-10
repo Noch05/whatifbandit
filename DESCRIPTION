@@ -23,16 +23,15 @@ Imports:
     bandit,
     dplyr,
     furrr,
-    ggplot2,
     lubridate,
     purrr,
     randomizr,
     rlang,
     tibble,
     tidyr,
-    data.table,
-    tidyselect
+    data.table
 Suggests: 
     future,
+    ggplot2,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
