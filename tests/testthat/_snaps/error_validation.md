@@ -55,6 +55,11 @@
 
 ---
 
+    Conditions vector must have a at least one condition named 'Control'
+        when control augmentation is used.
+
+---
+
     i In index: 2.
     i With name: blocking.
     Caused by error in `.f()`:
@@ -137,12 +142,17 @@
     x You passed a vector of length 4
     x Your data has 3 unique treatments
 
-# Columns that do not exist in data are found
+# Throws proper error when columns do not exist or not declared
+
+    `block2 is not in the data, but was chosen as a block.
+
+---
 
     i In index: 3.
     Caused by error in `.f()`:
     ! Required column `condition_col` is not found in provided `data`.
     x reason: it is always required
+    x Your column: fake_colname
 
 ---
 
@@ -150,6 +160,7 @@
     Caused by error in `.f()`:
     ! Required column `id_col` is not found in provided `data`.
     x reason: it is always required
+    x Your column: fake_colname
 
 ---
 
@@ -157,6 +168,43 @@
     Caused by error in `.f()`:
     ! Required column `success_col` is not found in provided `data`.
     x reason: it is always required
+    x Your column: fake_colname
+
+---
+
+    i In index: 6.
+    Caused by error in `.f()`:
+    ! Required column `success_date_col` is not found in provided `data`.
+    x reason: perfect_assignment is FALSE
+    x Your column: fake_colname
+
+---
+
+    i In index: 7.
+    Caused by error in `.f()`:
+    ! Required column `assignment_date_col` is not found in provided `data`.
+    x reason: perfect_assignment is FALSE
+    x Your column: fake_colname
+
+---
+
+    i In index: 4.
+    Caused by error in `.f()`:
+    ! Required column `date_col` is not found in provided `data`.
+    x reason: assignment_method is 'Date'
+    x Your column: fake_colname
+
+---
+
+    i In index: 5.
+    Caused by error in `.f()`:
+    ! Required column `month_col` is not found in provided `data`.
+    x reason: time_unit is 'Month'
+    x Your column: fake_colname
+
+---
+
+    block_cols must be provided when blocking = TRUE.
 
 ---
 
@@ -178,4 +226,32 @@
     Caused by error in `.f()`:
     ! Required column `success_col` is not declared in `data_cols`.
     x reason: it is always required
+
+---
+
+    i In index: 6.
+    Caused by error in `.f()`:
+    ! Required column `success_date_col` is not declared in `data_cols`.
+    x reason: perfect_assignment is FALSE
+
+---
+
+    i In index: 7.
+    Caused by error in `.f()`:
+    ! Required column `assignment_date_col` is not declared in `data_cols`.
+    x reason: perfect_assignment is FALSE
+
+---
+
+    i In index: 4.
+    Caused by error in `.f()`:
+    ! Required column `date_col` is not declared in `data_cols`.
+    x reason: assignment_method is 'Date'
+
+---
+
+    i In index: 5.
+    Caused by error in `.f()`:
+    ! Required column `month_col` is not declared in `data_cols`.
+    x reason: time_unit is 'Month'
 
