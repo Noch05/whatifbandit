@@ -255,3 +255,39 @@
     ! Required column `month_col` is not declared in `data_cols`.
     x reason: time_unit is 'Month'
 
+# Multiple Simulation Specific Error Checks work
+
+    Argument 'times' must be an integer value greater than or equal to 1
+
+---
+
+    Argument 'times' must be an integer value greater than or equal to 1
+
+---
+
+    Argument 'times' must be an integer value greater than or equal to 1
+
+---
+
+    Argument 'seeds' must be an integer vector of length equal to `times`. Please provide a valid vector.
+    x You passed a double vector of length 5, while times is 5.
+    i Reccomended to use `sample.int()` to create proper vector
+
+---
+
+    Argument 'seeds' must be an integer vector of length equal to `times`. Please provide a valid vector.
+    x You passed a character vector of length 5, while times is 5.
+    i Reccomended to use `sample.int()` to create proper vector
+
+---
+
+    Argument 'keep_data' must logical. Please enter `TRUE` or `FALSE`
+
+---
+
+    Argument 'keep_data' must logical. Please enter `TRUE` or `FALSE`
+
+---
+
+    Argument 'keep_data' must logical. Please enter `TRUE` or `FALSE`
+

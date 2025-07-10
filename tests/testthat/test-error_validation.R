@@ -161,3 +161,50 @@ test_that("Throws proper error when columns do not exist or not declared", {
   })
 })
 #-------------------------------------------------------------------------------
+test_that("Multiple Simulation Specific Error Checks work", {
+  data <- tibble::tibble(
+    id = seq(1, 10, 1),
+    success = rbinom(10, 1, .5),
+    condition = sample(c(1, 2, 3), 10, replace = TRUE),
+    success_date = rep(lubridate::ymd("2025-01-01"), 10),
+    assignment_date = rep(lubridate::ymd("2025-01-01"), 10),
+    apt_date = rep(lubridate::ymd("2024-01-01"), 10),
+    month = sample(c("June", "July"), replace = TRUE, size = 10),
+    block = rbinom(10, 1, 0.3)
+  )
+
+  args_change <- list(
+    times = list(-5, NA, "t"),
+    seeds = list(rep(1, 5), rep("5", 5)),
+    keep_data = list(NA, "text", 6543)
+  )
+  ##
+  args <- list(
+    data = data,
+    algorithm = "Thompson",
+    assignment_method = "Batch",
+    period_length = 1,
+    verbose = TRUE,
+    conditions = unique(as.character(data$condition)),
+    control_augment = 0,
+    blocking = FALSE,
+    perfect_assignment = TRUE,
+    whole_experiment = FALSE,
+    data_cols = c(
+      condition_col = "condition",
+      id_col = "id",
+      success_col = "success"
+    ),
+    prior_periods = "All",
+    times = 5,
+    seeds = sample.int(1000, 5),
+    keep_data = FALSE
+  )
+
+  purrr::walk2(args_change, names(args_change), \(x, y){
+    purrr::walk(x, ~ {
+      args[[y]] <- .x
+      expect_snapshot_error(do.call(multiple_mab_simulation, args))
+    })
+  })
+})

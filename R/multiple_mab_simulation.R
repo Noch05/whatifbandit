@@ -66,7 +66,7 @@ multiple_mab_simulation <- function(data,
       "i" = "Reccomended to use `sample.int()` to create proper vector"
     ))
   }
-  if (!is.logical(keep_data)) {
+  if (!is.logical(keep_data) || is.na(keep_data)) {
     rlang::abort("Argument 'keep_data' must logical. Please enter `TRUE` or `FALSE`")
   }
 
