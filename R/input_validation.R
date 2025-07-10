@@ -56,13 +56,13 @@ check_args <- function(data,
   )
 
   purrr::walk2(logical_args, names(logical_args), ~ {
-    if (!is.logical(.x) || length(.x) != 1) {
+    if (!is.logical(.x) || length(.x) != 1 || is.na(.x)) {
       rlang::abort(sprintf("`%s` must be logical (TRUE or FALSE).", .y))
     }
   })
   if (!assignment_method %in% c("Individual", "Batch", "Date")) {
     rlang::abort(c("Invalid `assignment_method`",
-      "x" = paste0("you passed:", assignment_method),
+      "x" = paste0("you passed: ", assignment_method),
       "i" = "Valid methods are `Individual`, `Batch`, `Date`"
     ))
   }
@@ -99,7 +99,7 @@ check_args <- function(data,
   }
   # Checking Assignment Method Arguments
   if (assignment_method == "Date") {
-    if (is.null(time_unit)) {
+    if (is.null(time_unit) || length(time_unit) != 1 || isTRUE(is.na(time_unit))) {
       rlang::abort("`time_unit` must be provided when assignment method is `Date`.")
     }
     if (!time_unit %in% c("Day", "Week", "Month")) {
@@ -108,7 +108,7 @@ check_args <- function(data,
         "i" = "valid units are `Day`, `Month`, `Week`"
       ))
     }
-    if (!is.Date(data[[data_cols$date$name]])) {
+    if (!lubridate::is.Date(data[[data_cols$date$name]])) {
       rlang::abort(c(
         "date_col must be dates",
         "x" = sprintf("you passed: %s ", typeof(data[[data_cols$date$name]])),
@@ -162,7 +162,12 @@ check_args <- function(data,
     ))
   }
 
-
+  if (length(conditions) != length(unique(data[[data_cols$condition_col$name]]))) {
+    rlang::abort(c("Conditions passed must be same length as number of unique conditions",
+      "x" = sprintf("You passed a vector of length %d", length(conditions)),
+      "x" = sprintf("Your data has %d unique treatments", length(unique(data[[data_cols$condition_col$name]])))
+    ))
+  }
 
   if (assignment_method == "Batch" && period_length > nrow(data)) {
     rlang::abort(c("`period_length` cannot be larger than data size",
@@ -195,12 +200,13 @@ check_args <- function(data,
 #'
 check_cols <- function(assignment_method, time_unit, perfect_assignment, data_cols, data, verbose) {
   # All possible columns
-  all_cols <- c("id_col", "success_col", "date_col", "month_col", "success_date_col", "assignment_date_col")
+  all_cols <- c("id_col", "success_col", "condition_col", "date_col", "month_col", "success_date_col", "assignment_date_col")
 
   # Reason each column might be required
   all_reasons <- list(
     id_col = "it is always required",
     success_col = "it is always required",
+    condition_col = "it is always required",
     date_col = "assignment_method is 'Date'",
     month_col = "time_unit is 'Month'",
     success_date_col = "perfect_assignment is FALSE",
@@ -208,7 +214,7 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, data_co
   )
 
   # Determine required columns based on settings
-  required_cols <- c("id_col", "success_col")
+  required_cols <- c("id_col", "success_col", "condition_col")
 
   if (assignment_method == "Date") {
     required_cols <- c(required_cols, "date_col")
@@ -234,7 +240,8 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, data_co
     missing_data <- !data_cols[[.x]]$name %in% names(data)
     if (missing_data) {
       rlang::abort(c(sprintf("Required column `%s` is not found in provided `data`.", .x),
-        "x" = paste0("reason: ", .y)
+        "x" = paste0("reason: ", .y),
+        "x" = paste0("Your column: ", data_cols[[.x]]$name)
       ))
     }
   })

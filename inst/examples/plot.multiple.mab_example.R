@@ -10,7 +10,7 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
   # Simulating a few trials
 
   seeds <- sample.int(100, 5)
-  conditions <- c("no_letter", "open_appt", "specific_appt")
+  conditions <- as.character(unique(tanf$condition))
   x <- multiple_mab_simulation(
     data = tanf,
     assignment_method = "Batch",
