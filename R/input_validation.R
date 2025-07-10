@@ -60,10 +60,66 @@ check_args <- function(data,
       rlang::abort(sprintf("`%s` must be logical (TRUE or FALSE).", .y))
     }
   })
+  if (!assignment_method %in% c("Individual", "Batch", "Date")) {
+    rlang::abort(c("Invalid `assignment_method`",
+      "x" = paste0("you passed:", assignment_method),
+      "i" = "Valid methods are `Individual`, `Batch`, `Date`"
+    ))
+  }
+
+  # Checking Column Proper Columns are Provided
+  check_cols(
+    data = data,
+    assignment_method = assignment_method, time_unit = time_unit,
+    perfect_assignment = perfect_assignment,
+    data_cols = data_cols, verbose = verbose
+  )
+  if (blocking) {
+    if (is.null(block_cols)) {
+      rlang::abort("block_cols must be provided when blocking = TRUE.")
+    } else {
+      for (i in base::seq_along(block_cols$name)) {
+        if (!block_cols$name[[i]] %in% names(data)) {
+          rlang::abort(sprintf("`%s is not in the data, but was chosen as a block.", block_cols$name[[i]]))
+        }
+      }
+    }
+  }
+  if (!blocking && !is.null(block_cols) && verbose) {
+    rlang::warn(c(
+      "i" = "Blocking is FALsE, arguments passed to `block_cols` will be ignored."
+    ))
+  }
+
+  unique_ids <- length(unique(data[[data_cols$id$name]]))
+
+
+  if (unique_ids != nrow(data)) {
+    rlang::abort(paste(data_cols$id$name, "is not a unique identifier, a unique id for each observation is required"))
+  }
+
+  if (assignment_method == "Date") {
+    if (is.null(time_unit)) {
+      rlang::abort("`time_unit` must be provided when assignment method is `Date`.")
+    }
+    if (!time_unit %in% c("Day", "Week", "Month")) {
+      rlang::abort(c("Invalid Time Unit",
+        "x" = paste0("you passed: ", time_unit),
+        "i" = "valid units are `Day`, `Month`, `Week`"
+      ))
+    }
+    if (!is.Date(data[[data_cols$date$name]])) {
+      rlang::abort(c(
+        "date_col must be dates",
+        "x" = sprintf("you passed: %s ", typeof(data[[data_cols$date$name]])),
+        "i" = "Consider parsing your data to dates"
+      ))
+    }
+  }
 
   # Checking Arguments are properly provided
   if (assignment_method == "Date" && is.null(time_unit)) {
-    rlang::abort("`time_unit` must be provided when assignment method is `Date`.")
+
   }
 
   if (assignment_method != "Date" && !is.null(time_unit)) {
@@ -106,39 +162,11 @@ check_args <- function(data,
       "x" = sprintf("You data has %d, and your batch size is %d", nrow(data), period_length)
     ))
   }
-
-  # Checking Column Proper Columns are Provided
-
-  check_cols(
-    data = data,
-    assignment_method = assignment_method, time_unit = time_unit,
-    perfect_assignment = perfect_assignment,
-    data_cols = data_cols, verbose = verbose
-  )
-  if (blocking) {
-    if (is.null(block_cols)) {
-      rlang::abort("block_cols must be provided when blocking = TRUE.")
-    } else {
-      for (i in base::seq_along(block_cols$name)) {
-        if (!block_cols$name[[i]] %in% names(data)) {
-          rlang::abort(sprintf("`%s is not in the data, but was chosen as a block.", block_cols$name[[i]]))
-        }
-      }
-    }
-  }
-  if (!blocking && !is.null(block_cols) && verbose) {
-    rlang::warn(c(
-      "i" = "Blocking is FALsE, arguments passed to `block_cols` will be ignored."
-    ))
-  }
-
-  unique_ids <- length(unique(data[[data_cols$id$name]]))
-
-
-  if (unique_ids != nrow(data)) {
-    rlang::abort(paste(data_cols$id$name, "is not a unique identifier, a unique id for each observation is required"))
-  }
 }
+
+
+
+
 
 
 
@@ -229,3 +257,5 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, data_co
     })
   }
 }
+
+#------------------------------------------------------------------------------
