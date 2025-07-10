@@ -5,7 +5,6 @@
 #' @importFrom data.table .N
 #' @importFrom data.table :=
 #' @importFrom data.table .I
-#'
 
 utils::globalVariables(c(
   ".SD", "assignment_method", "avg", "bandit",
