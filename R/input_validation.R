@@ -132,11 +132,7 @@ check_args <- function(data,
     ))
   }
 
-  if (inherits(data, "data.table")) {
-    unique_ids <- length(unique(data[, get(data_cols$id$name)]))
-  } else {
-    unique_ids <- length(unique(data[[data_cols$id$name]]))
-  }
+  unique_ids <- length(unique(data[[data_cols$id$name]]))
 
 
   if (unique_ids != nrow(data)) {

@@ -40,7 +40,15 @@ pre_mab_simulation <- function(data,
                                block_cols,
                                verbose) {
   if (inherits(data, "data.table")) {
-    data <- data.table::copy(data)
+    rlang::check_installed("data.table")
+
+    if (rlang::is_installed("data.table")) {
+      data <- data.table::copy(data)
+    } else {
+      data <- tibble::as_tibble(data)
+      rlang::warn("You passed a data.table but do not have the package,
+                  it has been coereced to a tibble.")
+    }
   }
 
   data_cols <- purrr::map(data_cols, ~ list(

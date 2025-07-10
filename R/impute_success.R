@@ -23,7 +23,8 @@
 impute_success <- function(current_data, imputation_info, id_col,
                            success_col, prior_data = NULL, perfect_assignment, dates = NULL,
                            success_date_col, current_period = NULL) {
-  base::UseMethod("impute_success")
+  current_data <- check_dt(current_data, tibble::as.tibble)
+  base::UseMethod("impute_success", current_data)
 }
 #' @inheritParams impute_success
 #' @method impute_success tbl_df
@@ -107,8 +108,8 @@ impute_success.data.table <- function(current_data, imputation_info, id_col,
   if (current_data[impute_req == 1, .N] > 0) {
     filtered_data <- current_data[impute_req == 1]
 
-    blocks <- filtered_data[, impute_block]
-    clusters <- filtered_data[, base::get(id_col$name)]
+    blocks <- filtered_data$impute_block
+    clusters <- filtered_data[[id_col$name]]
 
 
     imputations <- randomizr::block_and_cluster_ra(

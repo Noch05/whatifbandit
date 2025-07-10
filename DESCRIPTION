@@ -28,9 +28,9 @@ Imports:
     randomizr,
     rlang,
     tibble,
-    tidyr,
-    data.table
+    tidyr
 Suggests: 
+    data.table,
     future,
     ggplot2,
     testthat (>= 3.0.0)

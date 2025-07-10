@@ -18,7 +18,8 @@
 #'
 get_past_results <- function(current_data, prior_data, perfect_assignment, assignment_date_col = NULL,
                              conditions) {
-  base::UseMethod("get_past_results")
+  current_data <- check_dt(current_data, tibble::as.tibble)
+  base::UseMethod("get_past_results", current_data)
 }
 
 #----------------------------------------------------------------------------------

@@ -20,7 +20,8 @@
 #'
 
 imputation_prep <- function(data, whole_experiment, perfect_assignment, data_cols) {
-  base::UseMethod("imputation_prep")
+  data <- check_dt(data, tibble::as.tibble)
+  base::UseMethod("imputation_prep", data)
 }
 #-------------------------------------------------------------------------------
 

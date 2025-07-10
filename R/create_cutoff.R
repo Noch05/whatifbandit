@@ -47,17 +47,15 @@ create_cutoff <- function(data, data_cols, period_length = NULL,
 #' @inheritParams cols
 #'
 create_cutoff.Day <- function(data, date_col, period_length) {
+  data <- check_dt(data, tibble::as.tibble)
+  start_date <- base::min(data[[date_col$name]])
   if (inherits(data, "data.table")) {
-    start_date <- base::min(data[, get(date_col$name)])
-
     data[, period_number := base::floor(
       lubridate::interval(start_date, base::get(date_col$name)) / lubridate::days(1) / period_length
     ) + 1]
 
     return(invisible(data))
   } else {
-    start_date <- base::min(dplyr::pull(data, !!date_col$sym), na.rm = TRUE)
-
     data <- data |>
       dplyr::mutate(
         period_number = base::floor(
@@ -73,6 +71,8 @@ create_cutoff.Day <- function(data, date_col, period_length) {
 #' @inheritParams create_cutoff
 #' @inheritParams cols
 create_cutoff.Week <- function(data, date_col, period_length) {
+  data <- check_dt(data, tibble::as.tibble)
+
   if (inherits(data, "data.table")) {
     start_date <- base::min(data[, get(date_col$name)])
 
@@ -102,9 +102,10 @@ create_cutoff.Week <- function(data, date_col, period_length) {
 #' @inheritParams cols
 #'
 create_cutoff.Month <- function(data, date_col, month_col, period_length) {
-  if (inherits(data, "data.table")) {
-    start_date <- base::min(data[, get(date_col$name)])
+  data <- check_dt(data, tibble::as.tibble)
+  start_date <- base::min(data[[date_col$name]])
 
+  if (inherits(data, "data.table")) {
     first_month <- data[order(base::get(date_col$name)), base::get(month_col$name)][1]
 
     start_month <- lubridate::ymd(base::paste0(lubridate::year(start_date), "-", first_month, "-01"))
@@ -121,7 +122,6 @@ create_cutoff.Month <- function(data, date_col, month_col, period_length) {
 
     return(invisible(data))
   } else {
-    start_date <- base::min(dplyr::pull(data, !!date_col$sym), na.rm = TRUE)
     first_month <- data |>
       dplyr::slice_min(order_by = !!date_col$sym, n = 1, with_ties = FALSE) |>
       dplyr::pull(!!month_col$sym)
@@ -150,6 +150,7 @@ create_cutoff.Month <- function(data, date_col, month_col, period_length) {
 #' @inheritParams create_cutoff
 #'
 create_cutoff.Individual <- function(data) {
+  data <- check_dt(data, tibble::as.tibble)
   if (inherits(data, "data.table")) {
     data[, period_number := .I]
     data.table::setkey(data, period_number)
@@ -166,6 +167,7 @@ create_cutoff.Individual <- function(data) {
 #' @inheritParams create_cutoff
 #'
 create_cutoff.Batch <- function(data, period_length) {
+  data <- check_dt(data, tibble::as.tibble)
   if (inherits(data, "data.table")) {
     data[, period_number := base::ceiling((.I / period_length))]
     data.table::setkey(data, period_number)

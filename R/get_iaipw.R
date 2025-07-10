@@ -20,7 +20,8 @@
 #'
 get_iaipw <- function(data, assignment_probs, periods, conditions, verbose) {
   verbose_log(verbose, "Computing Individual AIPW Estimates")
-  base::UseMethod("get_iaipw")
+  data <- check_dt(data, tibble::as.tibble)
+  base::UseMethod("get_iaipw", data)
 }
 #-------------------------------------------------------------------------------
 

@@ -9,7 +9,9 @@
 #' @param imputation_information `success` element of the `imputation_information`
 #' list created by [imputation_prep()].
 check_impute <- function(imputation_information, current_data, current_period) {
-  base::UseMethod("check_impute")
+  imputation_information <- check_dt(imputation_information, tibble::as.tibble)
+  current_data <- check_dt(current_data, tibble::as.tibble)
+  base::UseMethod("check_impute", imputation_information)
 }
 #' @method check_impute tbl_df
 #' @title [check_impute()] for tibbles

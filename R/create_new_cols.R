@@ -27,7 +27,8 @@ create_new_cols <- function(data,
                             block_cols,
                             blocking,
                             perfect_assignment) {
-  base::UseMethod("create_new_cols")
+  data <- check_dt(data, tibble::as.tibble)
+  base::UseMethod("create_new_cols", data)
 }
 # --------------------------------------------------
 

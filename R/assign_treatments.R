@@ -25,17 +25,10 @@ assign_treatments <- function(current_data, probs, blocking = NULL,
                               algorithm, id_col, conditions, condition_col,
                               success_col) {
   # Performing Randomized Treatment Assignment
-  if (inherits(current_data, "data.table")) {
-    if (blocking) {
-      blocks <- current_data[, block]
-    }
-    clusters <- current_data[, base::get(id_col$name)]
-  } else {
-    if (blocking) {
-      blocks <- current_data$block
-    }
-    clusters <- current_data[[id_col$name]]
+  if (blocking) {
+    blocks <- current_data$block
   }
+  clusters <- current_data[[id_col$name]]
 
 
   if (blocking) {

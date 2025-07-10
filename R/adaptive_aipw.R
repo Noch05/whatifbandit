@@ -20,7 +20,8 @@
 ## Adaptive AIPW Weights from Hadad et. al (2021) Using Constant Allocation Rate
 adaptive_aipw <- function(data, assignment_probs, conditions, periods, verbose) {
   verbose_log(verbose, "Aggregating AIPW Estimates")
-  base::UseMethod("adaptive_aipw")
+  data <- check_dt(data, tibble::as.tibble)
+  base::UseMethod("adaptive_aipw", data)
 }
 #-------------------------------------------------------------------------------
 #' @title Adaptive AIPW Estimates for Tibbles

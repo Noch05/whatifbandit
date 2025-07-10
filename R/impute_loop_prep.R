@@ -15,6 +15,8 @@
 impute_loop_prep <- function(current_data, block_cols, imputation_information,
                              whole_experiment, blocking, perfect_assignment, current_period) {
   # Creating block for imputing
+  data <- check_dt(data, tibble::as.tibble)
+
   if (inherits(current_data, "data.table")) {
     if (blocking) {
       current_data[,
