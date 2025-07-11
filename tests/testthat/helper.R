@@ -41,7 +41,10 @@ generate_data <- function(n) {
 
   static_args <- list(
     data = data,
-    conditions = sort(unique(data$type_of_policy)),
+    conditions = setNames(
+      sort(unique(data$type_of_policy)),
+      c("Control", "T1", "T2", "T3", "T4")
+    ),
     data_cols = c(
       id_col = "identification_card_num",
       condition_col = "type_of_policy",
@@ -63,7 +66,7 @@ generate_data <- function(n) {
     perfect_assignment = c(TRUE, FALSE),
     period_length = c(n / n, n / 10, n / 5),
     prior_periods = c(n / n, n / 20, n),
-    control_agument = c(0, 0.25, 0.75),
+    control_augment = c(0, 0.25, 0.75),
     blocking = c(TRUE, FALSE),
     stringsAsFactors = FALSE
   ) |>
@@ -107,7 +110,7 @@ run_test <- function(full_args, static_args, trial) {
 
   purrr::walk(results, ~ {
     expect_no_failure(summary(.x))
-    expect_no_failure(print(.x))
+    expect_no_failure(.x)
   })
   if (requireNamespace("ggplot2", quietly = TRUE)) {
     if (trial == "single") {

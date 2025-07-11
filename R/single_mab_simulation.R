@@ -31,9 +31,9 @@
 #' \item `id_col`: Column in data, contains unique id as a key.
 #' \item `success_col`: Column in data; Binary successes from original experiment.
 #' \item `condition_col`: Column in data; Original Treatment condition for each observation.
-#' \item `date_col`: Column in data, contains original date of event/trial; only ncessary when assigning by 'Date'.
+#' \item `date_col`: Column in data, contains original date of event/trial; only necessary when assigning by 'Date'.
 #' \item `month_col`: Column in data, contains month of treatment; only necessary when time_unit = 'Month'.
-#' \item `success_date_col`: Column in data, contains original dates each success occured; only necessary when 'perfect_assignment' = FALSE.
+#' \item `success_date_col`: Column in data, contains original dates each success occurred; only necessary when 'perfect_assignment' = FALSE.
 #' \item `assignment_date_col`: Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
 #' Used to simulate imperfect information on part of researchers conducting an adaptive trial.
 #' }
