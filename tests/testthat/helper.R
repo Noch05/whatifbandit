@@ -137,9 +137,9 @@ run_test <- function(full_args, static_args, trial) {
       purrr::walk(results, ~ plot(.x, type = "summary"))
       purrr::walk(results, \(x) {
         purrr::walk(estimators, \(y) {
-          plot(x, type = "hist", estimators = y)
+          expect_no_failure(plot(x, type = "hist", estimator = y))
           purrr::walk(cdfs, \(z) {
-            plot(x, type = "estimate", estimators = y, cdf = z)
+            expect_no_failure(plot(x, type = "estimate", estimator = y, cdf = z))
           })
         })
       })
