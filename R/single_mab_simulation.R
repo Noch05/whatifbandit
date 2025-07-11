@@ -78,8 +78,6 @@ single_mab_simulation <- function(data,
                                   period_length = NULL,
                                   block_cols = NULL,
                                   verbose = FALSE) {
-  data_name <- deparse(substitute(data))
-
   prepped <- pre_mab_simulation(
     data = data, assignment_method = assignment_method,
     algorithm = algorithm, conditions = conditions,
@@ -110,7 +108,7 @@ single_mab_simulation <- function(data,
     control_augment = control_augment,
     imputation_information = prepped$imputation_information
   )
-  results$settings$data <- data_name
+  results$settings$original_data <- data
 
   return(results)
 }

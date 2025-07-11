@@ -70,7 +70,6 @@ multiple_mab_simulation <- function(data,
     rlang::abort("Argument 'keep_data' must logical. Please enter `TRUE` or `FALSE`")
   }
 
-  data_name <- deparse(substitute(data))
 
   prepped <- pre_mab_simulation(
     data = data, assignment_method = assignment_method,
@@ -125,7 +124,7 @@ multiple_mab_simulation <- function(data,
   )
 
   results$settings <- base::list(
-    data = data_name,
+    original_data = data,
     assignment_method = assignment_method,
     control_augment = control_augment,
     time_unit = time_unit,

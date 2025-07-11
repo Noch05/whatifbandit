@@ -1,5 +1,5 @@
 # Helper Function to Generate Data Sets
-generate_data <- function(n) {
+generate_data <- function(n, k) {
   data <- tibble::tibble(
     type_of_policy = sample(
       c(
@@ -65,7 +65,7 @@ generate_data <- function(n) {
     whole_experiment = c(TRUE, FALSE),
     perfect_assignment = c(TRUE, FALSE),
     period_length = c(n / n, n / 10, n / 5),
-    prior_periods = c(n / n, n / 20, n),
+    prior_periods = c(n / n, n / 10, n),
     control_augment = c(0, 0.25, 0.75),
     blocking = c(TRUE, FALSE),
     stringsAsFactors = FALSE
@@ -79,7 +79,7 @@ generate_data <- function(n) {
     ) |>
     dplyr::distinct(.keep_all = TRUE) |>
     dplyr::group_by(algorithm, assignment_method) |>
-    dplyr::slice_sample(n = 3) |>
+    dplyr::slice_sample(n = k) |>
     dplyr::ungroup()
   return(list(
     full_args = full_args,
@@ -110,7 +110,7 @@ run_test <- function(full_args, static_args, trial) {
 
   purrr::walk(results, ~ {
     expect_no_failure(summary(.x))
-    expect_no_failure(.x)
+    expect_no_failure(invisible(.x))
   })
   if (requireNamespace("ggplot2", quietly = TRUE)) {
     if (trial == "single") {

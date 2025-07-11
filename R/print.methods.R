@@ -38,7 +38,6 @@ print_mab <- function(mab) {
 
   base::cat("Summary for MAB Procedure: \n ----------------------------------------------------- \n")
 
-  base::cat("Data:                 ", base::toupper(settings$data), "\n")
   base::cat("Bandit Algorithm:     ", settings$algorithm, "\n")
   base::cat("Control Augmentation: ", settings$control_augment, "\n")
   base::cat("Perfect Assignment:   ", settings$perfect_assignment, "\n")
