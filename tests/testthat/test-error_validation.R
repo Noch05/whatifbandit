@@ -107,7 +107,7 @@ test_that("Throws proper error when columns do not exist or not declared", {
   )
 
   col_args <- expand.grid(
-    block_cols = list(block_cols = c("block"), block_cols = c("block", "block2")),
+    block_cols = c(block_cols = c("block"), block_cols = c("block", "block2")),
     condition_col = c(condition_col = "condition", condition_col = "fake_colname"),
     id_col = c(id_col = "id", id_col = "fake_colname"),
     success_col = c(success_col = "success", success_col = "fake_colname"),

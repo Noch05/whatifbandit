@@ -79,7 +79,6 @@ pre_mab_simulation <- function(data,
       blocking = blocking,
       block_cols = block_cols
     )
-
   # Pre-computing Important values to be accessed for the simulation
   verbose_log(verbose, "Precomputing")
 

@@ -30,7 +30,6 @@ assign_treatments <- function(current_data, probs, blocking = NULL,
   }
   clusters <- current_data[[id_col$name]]
 
-
   if (blocking) {
     new_treatments <- randomizr::block_and_cluster_ra(
       clusters = clusters,

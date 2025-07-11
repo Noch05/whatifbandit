@@ -77,7 +77,9 @@ check_impute.data.table <- function(imputation_information, current_data, curren
       failure_rate = 1 - mean_rate
     )
 
-    imputation_information <- data.table::rbindlist(list(imputation_information, addition))
+    imputation_information <- data.table::rbindlist(list(imputation_information, addition),
+      use.names = TRUE
+    )
   }
 
   if (base::length(blocks_to_remove) > 0) {

@@ -55,8 +55,13 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
 
     prior <- create_prior(prior_periods = prior_periods, current_period = i)
 
-    current_data <- data[data$period_number == i, ]
-    prior_data <- data[data$period_number %in% prior, ]
+    if (inherits(data, "data.table")) {
+      current_data <- data[period_number == i, ]
+      prior_data <- data[period_number %in% prior, ]
+    } else {
+      current_data <- data[data$period_number == i, ]
+      prior_data <- data[data$period_number %in% prior, ]
+    }
 
     past_results <- get_past_results(
       current_data = current_data,

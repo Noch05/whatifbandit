@@ -130,6 +130,7 @@ imputation_prep.data.table <- function(data, whole_experiment, perfect_assignmen
     original_summary[, failure_rate := 1 - success_rate]
 
     original_summary <- split(original_summary, by = "period_number")
+    original_summary <- lapply(original_summary, \(x) x[, period_number := NULL])
   } else {
     rlang::abort("Specify Logical for `whole_experiment`")
   }

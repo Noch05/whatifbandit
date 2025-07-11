@@ -155,9 +155,9 @@ check_args <- function(data,
   }
 
   if (is.numeric(prior_periods)) {
-    if (prior_periods %% 1 != 0 || prior_periods < 0) {
+    if (prior_periods %% 1 != 0 || prior_periods <= 0) {
       rlang::abort(c("`prior_periods` must be a positive integer or 'All'.",
-        "x" = sprintf("You passed: %d ", prior_periods)
+        "x" = sprintf("You passed: %g ", prior_periods)
       ))
     }
   } else if (prior_periods != "All" || is.na(prior_periods)) {
