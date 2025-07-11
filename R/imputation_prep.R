@@ -24,11 +24,11 @@ imputation_prep <- function(data, whole_experiment, perfect_assignment, data_col
 }
 #-------------------------------------------------------------------------------
 
-#' @method imputation_prep tbl_df
-#' @title imputation Prep for Tibbles
+#' @method imputation_prep data.frame
+#' @title imputation Prep for data.frames
 #' @inheritParams imputation_prep
 
-imputation_prep.tbl_df <- function(data, whole_experiment, perfect_assignment, data_cols) {
+imputation_prep.data.frame <- function(data, whole_experiment, perfect_assignment, data_cols) {
   # Choosing Whether to use all the data from the experiment or only up to the current treatment period
 
   if (whole_experiment) {
@@ -74,21 +74,6 @@ imputation_prep.tbl_df <- function(data, whole_experiment, perfect_assignment, d
   return(imputation_information)
 }
 #-------------------------------------------------------------------------------
-#' @method imputation_prep data.frame
-#' @title
-#' imputation Prep for data.frames
-#' @inheritParams imputation_prep
-
-imputation_prep.data.frame <- function(data, whole_experiment, perfect_assignment, data_cols) {
-  return(
-    imputation_prep.tbl_df(
-      data = tibble::as_tibble(data),
-      data_cols = data_cols,
-      whole_experiment = whole_experiment,
-      perfect_assignment = perfect_assignment
-    )
-  )
-}
 #-------------------------------------------------------------------------------
 #' @method imputation_prep data.table
 #' @title

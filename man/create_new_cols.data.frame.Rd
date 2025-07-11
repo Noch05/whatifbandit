@@ -2,9 +2,9 @@
 % Please edit documentation in R/create_new_cols.R
 \name{create_new_cols.data.frame}
 \alias{create_new_cols.data.frame}
-\title{\code{\link[=create_new_cols]{create_new_cols()}} for Data.frames}
+\title{\code{\link[=create_new_cols]{create_new_cols()}} for data.frames and tibbles}
 \usage{
-\method{create_new_cols}{data.frame}(data, data_cols, blocking, block_cols, perfect_assignment)
+\method{create_new_cols}{data.frame}(data, data_cols, block_cols, blocking, perfect_assignment)
 }
 \arguments{
 \item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
@@ -21,9 +21,9 @@
 Used to simulate imperfect information on part of researchers conducting an adaptive trial.
 }}
 
-\item{blocking}{Logical; Whether or not to use treatment blocking.}
-
 \item{block_cols}{Character Vector of variables to block by.}
+
+\item{blocking}{Logical; Whether or not to use treatment blocking.}
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
@@ -31,5 +31,5 @@ If FALSE, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.}
 }
 \description{
-\code{\link[=create_new_cols]{create_new_cols()}} for Data.frames
+\code{\link[=create_new_cols]{create_new_cols()}} for data.frames and tibbles
 }

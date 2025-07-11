@@ -26,13 +26,13 @@ impute_success <- function(current_data, imputation_info, id_col,
   base::UseMethod("impute_success", current_data)
 }
 #' @inheritParams impute_success
-#' @method impute_success tbl_df
-#' @title [impute_success()] for tibbles
+#' @method impute_success data.frame
+#' @title [impute_success()] for data.frames
 #'
 
-impute_success.tbl_df <- function(current_data, imputation_info, id_col,
-                                  success_col, prior_data, perfect_assignment, dates = NULL,
-                                  success_date_col, current_period) {
+impute_success.data.frame <- function(current_data, imputation_info, id_col,
+                                      success_col, prior_data, perfect_assignment, dates = NULL,
+                                      success_date_col, current_period) {
   ## Imputing success randomly based on previously calculated Probabilities
 
   if (base::any(current_data$impute_req == 1, na.rm = TRUE)) {
@@ -76,25 +76,6 @@ impute_success.tbl_df <- function(current_data, imputation_info, id_col,
   return(data)
 }
 #-------------------------------------------------------------------------------
-#' @inheritParams impute_success
-#' @method impute_success data.frame
-#' @title [impute_success()] for data.frames
-impute_success.data.frame <- function(current_data, imputation_info, id_col,
-                                      success_col, prior_data, perfect_assignment, dates = NULL,
-                                      success_date_col, current_period) {
-  return(
-    impute_success.tbl_df(
-      current_data = tibble::as_tibble(current_data),
-      imputation_info = tibble::as_tibble(imputation_info),
-      prior_data = tibble::as.tibble(prior_data),
-      success_col = success_col,
-      perfect_assignment = perfect_assignment,
-      dates = dates,
-      success_date_col = success_date_col,
-      current_period = current_period
-    )
-  )
-}
 #-------------------------------------------------------------------------------
 #' @inheritParams impute_success
 #' @method impute_success data.table

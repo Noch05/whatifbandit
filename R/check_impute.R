@@ -11,11 +11,11 @@
 check_impute <- function(imputation_information, current_data, current_period) {
   base::UseMethod("check_impute", imputation_information)
 }
-#' @method check_impute tbl_df
-#' @title [check_impute()] for tibbles
+#' @method check_impute data.frame
+#' @title [check_impute()] for data.frames
 #' @inheritParams check_impute
 
-check_impute.tbl_df <- function(imputation_information, current_data, current_period) {
+check_impute.data.frame <- function(imputation_information, current_data, current_period) {
   mean_rate <- base::mean(imputation_information$success_rate)
 
   current_blocks <- stats::na.omit(current_data$impute_block[current_data$impute_req == 1])
@@ -45,17 +45,6 @@ check_impute.tbl_df <- function(imputation_information, current_data, current_pe
   return(imputation_information)
 }
 #-------------------------------------------------------------------------------
-#' @method check_impute data.frame
-#' @title [check_impute()] for data.frames
-#' @inheritParams check_impute
-check_impute.data.frame <- function(imputation_information, current_data) {
-  return(
-    check_impute.tbl_df(
-      tibble::as_tibble(imputation_information),
-      tibble::as_tibble(current_data)
-    )
-  )
-}
 #' @method check_impute data.table
 #' @title [check_impute()] for data.tables
 #' @inheritParams check_impute

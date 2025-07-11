@@ -24,11 +24,11 @@ adaptive_aipw <- function(data, assignment_probs, conditions, periods, verbose) 
   base::UseMethod("adaptive_aipw", data)
 }
 #-------------------------------------------------------------------------------
-#' @title Adaptive AIPW Estimates for Tibbles
-#' @method adaptive_aipw tbl_df
+#' @title Adaptive AIPW Estimates for data.frames
+#' @method adaptive_aipw data.frame
 #' @inheritParams adaptive_aipw
 #'
-adaptive_aipw.tbl_df <- function(data, assignment_probs, conditions, periods, verbose) {
+adaptive_aipw.data.frame <- function(data, assignment_probs, conditions, periods, verbose) {
   estimates <- purrr::map(
     conditions, ~ {
       results <- data |>
@@ -70,21 +70,6 @@ adaptive_aipw.tbl_df <- function(data, assignment_probs, conditions, periods, ve
   return(returns)
 }
 #-------------------------------------------------------------------------------
-#' @title Adaptive AIPW Estimates for data.frames
-#' @method adaptive_aipw data.frame
-#' @inheritParams adaptive_aipw
-adaptive_aipw.data.frame <- function(data, assignment_probs, conditions,
-                                     periods, verbose) {
-  return(
-    adaptive_aipw.tbl_df(
-      data = tibble::as_tibble(data),
-      assignment_probs = tibble::as_tibble(assignment_probs),
-      conditions = conditions,
-      periods = periods,
-      verbose = verbose
-    )
-  )
-}
 #------------------------------------------------------------------------------
 #' @title Adaptive AIPW Estimates for data.tables
 #' @method adaptive_aipw data.table

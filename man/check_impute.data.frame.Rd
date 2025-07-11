@@ -4,13 +4,15 @@
 \alias{check_impute.data.frame}
 \title{\code{\link[=check_impute]{check_impute()}} for data.frames}
 \usage{
-\method{check_impute}{data.frame}(imputation_information, current_data)
+\method{check_impute}{data.frame}(imputation_information, current_data, current_period)
 }
 \arguments{
 \item{imputation_information}{\code{success} element of the \code{imputation_information}
 list created by \code{\link[=imputation_prep]{imputation_prep()}}.}
 
 \item{current_data}{Data with only observations from the current sampling period.}
+
+\item{current_period}{Numeric scalar; current treatment wave of the simulation.}
 }
 \description{
 \code{\link[=check_impute]{check_impute()}} for data.frames

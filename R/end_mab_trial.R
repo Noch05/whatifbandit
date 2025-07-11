@@ -22,11 +22,11 @@ end_mab_trial <- function(data, bandits, algorithm, periods, conditions) {
 
 #-------------------------------------------------------------------------------
 #
-#' @method end_mab_trial tbl_df
+#' @method end_mab_trial data.frame
 #' @inheritParams end_mab_trial
-#' @title [end_mab_trial()] for tibbles
+#' @title [end_mab_trial()] for data.frames
 
-end_mab_trial.tbl_df <- function(data, bandits, algorithm, periods, conditions) {
+end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditions) {
   final_summary <- data |>
     dplyr::group_by(mab_condition) |>
     dplyr::summarize(
@@ -81,20 +81,6 @@ end_mab_trial.tbl_df <- function(data, bandits, algorithm, periods, conditions) 
   ))
 }
 #-------------------------------------------------------------------------------
-#' @method end_mab_trial data.frame
-#' @inheritParams end_mab_trial
-#' @title [end_mab_trial()] for data.frames
-end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditions) {
-  return(
-    end_mab_trial.tbl_df(
-      data = tibble::as_tibble(data),
-      bandits = bandits,
-      algorithm = algorithm,
-      periods = periods,
-      conditions = conditions
-    )
-  )
-}
 #-------------------------------------------------------------------------------
 #' @method end_mab_trial data.table
 #' @inheritParams end_mab_trial

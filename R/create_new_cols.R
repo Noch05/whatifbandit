@@ -31,15 +31,15 @@ create_new_cols <- function(data,
 }
 # --------------------------------------------------
 
-#' @title [create_new_cols()] for Tibbles
-#' @method create_new_cols tbl_df
+#' @title [create_new_cols()] for data.frames and tibbles
+#' @method create_new_cols data.frame
 #' @inheritParams create_new_cols
 
-create_new_cols.tbl_df <- function(data,
-                                   data_cols,
-                                   block_cols,
-                                   blocking,
-                                   perfect_assignment) {
+create_new_cols.data.frame <- function(data,
+                                       data_cols,
+                                       block_cols,
+                                       blocking,
+                                       perfect_assignment) {
   data <- data |>
     dplyr::mutate(
       period_number = base::match(period_number, base::sort(base::unique(period_number))),
@@ -74,25 +74,6 @@ create_new_cols.tbl_df <- function(data,
   return(data)
 }
 #---------------------------------------------------------------------------------
-#' @title [create_new_cols()] for Data.frames
-#' @method create_new_cols data.frame
-#' @inheritParams create_new_cols
-#'
-create_new_cols.data.frame <- function(data,
-                                       data_cols,
-                                       blocking,
-                                       block_cols,
-                                       perfect_assignment) {
-  data <- create_new_cols.tbl_df(
-    tibble::as_tibble(data),
-    data_cols = data_cols,
-    blocking = blocking,
-    block_cols = block_cols,
-    perfect_assignment = perfect_assignment
-  )
-
-  return(data)
-}
 #---------------------------------------------------------------------------------
 #' @title [create_new_cols()] for Data.tables
 #' @method create_new_cols data.table

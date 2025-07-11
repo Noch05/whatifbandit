@@ -25,12 +25,12 @@ get_iaipw <- function(data, assignment_probs, periods, conditions, verbose) {
 #-------------------------------------------------------------------------------
 
 #'
-#' @method get_iaipw tbl_df
+#' @method get_iaipw data.frame
 #' @title
-#' [get_iaipw()] for tibbles
+#' [get_iaipw()] for data.frames
 #' @inheritParams get_iaipw
 
-get_iaipw.tbl_df <- function(data, assignment_probs, periods, conditions, verbose) {
+get_iaipw.data.frame <- function(data, assignment_probs, periods, conditions, verbose) {
   new_cols <- paste0("aipw_", conditions)
   data[new_cols] <- NA_real_
 
@@ -92,21 +92,6 @@ get_iaipw.tbl_df <- function(data, assignment_probs, periods, conditions, verbos
   return(data)
 }
 #-------------------------------------------------------------------------------
-
-#' @method get_iaipw data.frame
-#' @title [get_iaipw()] for data.frames
-#' @inheritParams get_iaipw
-get_iaipw.data.frame <- function(data, assignment_probs, periods, conditions, verbose) {
-  return(
-    get_iaipw.tbl_df(
-      data = tibble::as_tibble(data),
-      assignment_probs = tibble::as.tibble(assignment_probs),
-      periods = periods, conditions = conditions,
-      verbose = verbose
-    )
-  )
-}
-
 # ------------------------------------------------------------------------------
 #' @method get_iaipw data.table
 #' @title [get_iaipw()] for data.tables

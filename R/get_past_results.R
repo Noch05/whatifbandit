@@ -22,14 +22,14 @@ get_past_results <- function(current_data, prior_data, perfect_assignment, assig
 }
 
 #----------------------------------------------------------------------------------
-#' @method get_past_results tbl_df
+#' @method get_past_results data.frame
 #' @title
-#' [get_past_results()] for tibbles
+#' [get_past_results()] for data.frames
 #' @inheritParams get_past_results
 
 
-get_past_results.tbl_df <- function(current_data, prior_data, perfect_assignment, assignment_date_col = NULL,
-                                    conditions) {
+get_past_results.data.frame <- function(current_data, prior_data, perfect_assignment, assignment_date_col = NULL,
+                                        conditions) {
   if (!perfect_assignment) {
     current_date <- base::max(current_data[[assignment_date_col$name]])
 
@@ -115,19 +115,3 @@ get_past_results.data.table <- function(current_data,
 }
 
 #-------------------------------------------------------------------------------
-#' @method get_past_results data.frame
-#' @title
-#' [get_past_results()] for data.frames
-#' @inheritParams get_past_results
-get_past_results.data.frame <- function(current_data, prior_data,
-                                        perfect_assignment, assignment_date_col = NULL,
-                                        conditions) {
-  past_results <- get_past_results.tbl_df(
-    current_data = tibble::as_tibble(current_data),
-    prior_data = tibble::as_tibble(prior_data),
-    perfect_assignment = perfect_assignment,
-    assignment_date_col = assignment_date_col,
-    conditions = conditions
-  )
-  return(past_results)
-}

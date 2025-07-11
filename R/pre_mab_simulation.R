@@ -41,6 +41,8 @@ pre_mab_simulation <- function(data,
                                verbose) {
   if (inherits(data, "data.table")) {
     data <- data.table::copy(data)
+  } else {
+    data <- tibble::as_tibble(data)
   }
 
   data_cols <- purrr::map(data_cols, ~ list(
