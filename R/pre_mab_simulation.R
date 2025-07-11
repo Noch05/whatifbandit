@@ -39,9 +39,12 @@ pre_mab_simulation <- function(data,
                                period_length,
                                block_cols,
                                verbose) {
+  if (base::is.null(data) || !base::is.data.frame(data)) {
+    rlang::abort("Input 'data' must be a non-null data.frame.")
+  }
   if (inherits(data, "data.table")) {
     data <- data.table::copy(data)
-  } else {
+  } else if (!inherits(data, "tbl_df")) {
     data <- tibble::as_tibble(data)
   }
 

@@ -35,9 +35,6 @@ check_args <- function(data,
                        control_augment,
                        verbose) {
   # Basic Checks for Data and algorithm
-  if (base::is.null(data) || !base::is.data.frame(data)) {
-    rlang::abort("Input 'data' must be a non-null data.frame.")
-  }
 
   if (!algorithm %in% c("Thompson", "UCB1")) {
     rlang::abort(c("'algorithm' must be 'Thompson' or 'UCB1'.",
