@@ -1,4 +1,5 @@
 test_that("Throws Proper Error when ID's are not unique", {
+  set.seed(53912)
   data <- data.frame(
     id = rep(1, 10),
     success = rbinom(10, 1, .5),
@@ -26,6 +27,7 @@ test_that("Throws Proper Error when ID's are not unique", {
 #-------------------------------------------------------------------------------
 
 test_that("Throws Proper Error when arguments are invalid", {
+  set.seed(52304)
   data <- tibble::tibble(
     id = seq(1, 10, 1),
     success = rbinom(10, 1, .5),
@@ -95,6 +97,7 @@ test_that("Throws Proper Error when arguments are invalid", {
 #-------------------------------------------------------------------------------
 
 test_that("Throws proper error when columns do not exist or not declared", {
+  set.seed(4234324)
   data <- tibble::tibble(
     id = seq(1, 10, 1),
     success = rbinom(10, 1, .5),
@@ -119,9 +122,10 @@ test_that("Throws proper error when columns do not exist or not declared", {
   ) |>
     dplyr::rowwise() |>
     dplyr::mutate(fake_count = sum(dplyr::c_across(dplyr::everything()) == "fake_colname")) |>
-    dplyr::filter(fake_count <= 1 & any(block_cols != c("block", "block2"))) |>
+    dplyr::filter(fake_count <= 1 & block_cols != "block2") |>
     dplyr::ungroup() |>
-    dplyr::select(-fake_count)
+    dplyr::select(-fake_count) |>
+    dplyr::distinct(.keep_all = TRUE)
   col_args$block_cols[1] <- list(c("block", "block2"))
   col_args <- rbind(col_args, col_args)
 
@@ -138,11 +142,9 @@ test_that("Throws proper error when columns do not exist or not declared", {
       if (.x == (1 + (nrow(col_args) / 2))) {
         block_col <- NULL
       } else {
-        data_cols <- data_cols[-(.x - nrow(col_args) / 2)]
+        data_cols <- data_cols[-(.x - (nrow(col_args) / 2))]
       }
     }
-
-
     expect_snapshot_error(single_mab_simulation(
       data = data,
       assignment_method = "Date",
@@ -161,6 +163,7 @@ test_that("Throws proper error when columns do not exist or not declared", {
 })
 #-------------------------------------------------------------------------------
 test_that("Multiple Simulation Specific Error Checks work", {
+  set.seed(243401)
   data <- tibble::tibble(
     id = seq(1, 10, 1),
     success = rbinom(10, 1, .5),
