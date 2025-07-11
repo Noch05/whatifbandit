@@ -63,6 +63,7 @@ generate_data <- function(n) {
     perfect_assignment = c(TRUE, FALSE),
     period_length = c(n / n, n / 10, n / 5),
     prior_periods = c(n / n, n / 20, n),
+    control_agument = c(0, 0.25, 0.75),
     blocking = c(TRUE, FALSE),
     stringsAsFactors = FALSE
   ) |>
@@ -85,33 +86,60 @@ generate_data <- function(n) {
 
 # Function to conduct the test
 #
-run_test <- function(full_args, static_args) {
+run_test <- function(full_args, static_args, trial) {
+  FUN <- switch(trial,
+    "single" = expression(single_mab_simulation),
+    "multiple" = expression(multiple_mab_simulation)
+  )
+  class <- switch(trial,
+    "single" = "mab",
+    "multiple" = "multiple.mab"
+  )
+
   results <- purrr::map(seq_len(nrow(full_args)), \(x) {
     args <- c(as.list(full_args[x, ]), static_args)
     expect_no_failure({
-      output <- do.call(single_mab_simulation, args)
+      output <- do.call(eval(FUN), args)
     })
-    expect_s3_class(output, "mab")
+    expect_s3_class(output, class)
     return(output)
   })
 
   purrr::walk(results, ~ {
     expect_no_failure(summary(.x))
+    expect_no_failure(print(.x))
   })
   if (requireNamespace("ggplot2", quietly = TRUE)) {
-    simple_types <- c("arm", "assign")
-    purrr::walk(results, \(x) {
-      purrr::walk(simple_types, \(type) {
-        expect_no_failure(plot(x, type = type))
+    if (trial == "single") {
+      types <- c("arm", "assign")
+      purrr::walk(results, \(x) {
+        purrr::walk(types, \(type) {
+          expect_no_failure(plot(x, type = type))
+        })
       })
-    })
 
-    levels <- runif(3)
-    estimators <- c("AIPW", "Sample", "both")
-    purrr::walk(results, \(x) {
-      purrr::walk2(estimators, levels, \(est, level) {
-        expect_no_failure(plot(x, type = "estimate", estimator = est, level = level))
+      levels <- runif(3)
+      estimators <- c("AIPW", "Sample", "both")
+      purrr::walk(results, \(x) {
+        purrr::walk2(estimators, levels, \(est, level) {
+          expect_no_failure(plot(x, type = "estimate", estimator = est, level = level))
+        })
       })
-    })
+    }
+    if (trial == "multiple") {
+      types <- c("hist", "estimate")
+      cdfs <- c("normal", "empirical")
+      estimators <- c("AIPW", "Sample")
+
+      purrr::walk(results, ~ plot(.x, type = "summary"))
+      purrr::walk(results, \(x) {
+        purrr::walk(estimators, \(y) {
+          plot(x, type = "hist", estimators = y)
+          purrr::walk(cdfs, \(z) {
+            plot(x, type = "estimate", estimators = y, cdf = z)
+          })
+        })
+      })
+    }
   }
 }
