@@ -99,3 +99,4 @@ bandit strategy.
 \item \code{\link[=impute_success]{impute_success()}}
 }
 }
+\keyword{internal}

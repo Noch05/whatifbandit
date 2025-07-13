@@ -32,3 +32,4 @@ estimate for each treatment condition.
 \item \code{\link[=mab_simulation]{mab_simulation()}}
 }
 }
+\keyword{internal}

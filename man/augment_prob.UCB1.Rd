@@ -19,3 +19,4 @@ Control condition, must be named "Control" when 'control_augment' > 0.}
 \description{
 Augment Prob For UCB1
 }
+\keyword{internal}

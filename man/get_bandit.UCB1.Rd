@@ -21,3 +21,4 @@ Data.frame containing UCB and Success Rate for each condition
 \description{
 UCB1 Sampling Algorithm
 }
+\keyword{internal}

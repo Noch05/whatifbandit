@@ -25,3 +25,4 @@ Named numeric vector with updated probabilities
 Adjusts Probabilities of Assignment to match a control augmentation framework.
 If probability threshold is not meant, values are adjusted uniformly to augment the control probability.
 }
+\keyword{internal}

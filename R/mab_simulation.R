@@ -24,7 +24,7 @@
 #'* [run_mab_trial()]
 #'* [get_adaptive_aipw()]
 #'* [pre_mab_simulation()]
-#'
+#' @keywords internal
 #'
 
 

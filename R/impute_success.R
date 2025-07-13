@@ -20,15 +20,17 @@
 #'* [imputation_prep()]
 #'* [randomizr::block_and_cluster_ra()]
 #'* [randomizr::cluster_ra()]
+#' @keywords internal
 impute_success <- function(current_data, imputation_info, id_col,
                            success_col, prior_data = NULL, perfect_assignment, dates = NULL,
                            success_date_col, current_period = NULL) {
   base::UseMethod("impute_success", current_data)
 }
+#-------------------------------------------------------------------------------
 #' @inheritParams impute_success
 #' @method impute_success data.frame
 #' @title [impute_success()] for data.frames
-#'
+#' @noRd
 
 impute_success.data.frame <- function(current_data, imputation_info, id_col,
                                       success_col, prior_data, perfect_assignment, dates = NULL,
@@ -80,6 +82,7 @@ impute_success.data.frame <- function(current_data, imputation_info, id_col,
 #' @inheritParams impute_success
 #' @method impute_success data.table
 #' @title [impute_success()] for data.tables
+#' @noRd
 impute_success.data.table <- function(current_data, imputation_info, id_col,
                                       success_col, prior_data, perfect_assignment, dates = NULL,
                                       success_date_col, current_period) {

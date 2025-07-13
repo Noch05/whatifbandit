@@ -35,3 +35,4 @@ success for each treatment condition provided.
 \item \code{\link[=single_mab_simulation]{single_mab_simulation()}}
 }
 }
+\keyword{internal}

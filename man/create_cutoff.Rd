@@ -49,3 +49,4 @@ on user-supplied specifications, and user supplied data from
 \seealso{
 *\code{\link[=pre_mab_simulation]{pre_mab_simulation()}}
 }
+\keyword{internal}

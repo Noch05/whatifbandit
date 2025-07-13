@@ -52,3 +52,4 @@ the column they provide is not present in their data.
 *\code{\link[=single_mab_simulation]{single_mab_simulation()}}
 *\code{\link[=check_args]{check_args()}}
 }
+\keyword{internal}

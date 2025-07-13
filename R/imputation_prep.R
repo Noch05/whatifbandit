@@ -17,7 +17,7 @@
 #' @seealso
 #' *[impute_success()]
 #' *[run_mab_trial()]
-#'
+#' @keywords internal
 
 imputation_prep <- function(data, whole_experiment, perfect_assignment, data_cols) {
   base::UseMethod("imputation_prep", data)
@@ -27,6 +27,7 @@ imputation_prep <- function(data, whole_experiment, perfect_assignment, data_col
 #' @method imputation_prep data.frame
 #' @title imputation Prep for data.frames
 #' @inheritParams imputation_prep
+#' @noRd
 
 imputation_prep.data.frame <- function(data, whole_experiment, perfect_assignment, data_cols) {
   # Choosing Whether to use all the data from the experiment or only up to the current treatment period
@@ -79,6 +80,7 @@ imputation_prep.data.frame <- function(data, whole_experiment, perfect_assignmen
 #' @title
 #' imputation Prep for data.tables
 #' @inheritParams imputation_prep
+#' @noRd
 
 imputation_prep.data.table <- function(data, whole_experiment, perfect_assignment, data_cols) {
   if (whole_experiment) {

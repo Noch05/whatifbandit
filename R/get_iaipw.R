@@ -17,7 +17,7 @@
 #' * [run_mab_trial()]
 #' * [get_adaptive_aipw()]
 #' * [single_mab_simulation()]
-#'
+#' @keywords internal
 get_iaipw <- function(data, assignment_probs, periods, conditions, verbose) {
   verbose_log(verbose, "Computing Individual AIPW Estimates")
   base::UseMethod("get_iaipw", data)
@@ -29,6 +29,7 @@ get_iaipw <- function(data, assignment_probs, periods, conditions, verbose) {
 #' @title
 #' [get_iaipw()] for data.frames
 #' @inheritParams get_iaipw
+#' @noRd
 
 get_iaipw.data.frame <- function(data, assignment_probs, periods, conditions, verbose) {
   new_cols <- paste0("aipw_", conditions)
@@ -96,6 +97,7 @@ get_iaipw.data.frame <- function(data, assignment_probs, periods, conditions, ve
 #' @method get_iaipw data.table
 #' @title [get_iaipw()] for data.tables
 #' @inheritParams get_iaipw
+#' @noRd
 
 get_iaipw.data.table <- function(data, assignment_probs, periods, conditions, verbose) {
   new_cols <- paste0("aipw_", conditions)

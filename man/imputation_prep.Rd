@@ -45,3 +45,4 @@ treatment block to impute them in \code{\link[=mab_simulation]{mab_simulation()}
 *\code{\link[=impute_success]{impute_success()}}
 *\code{\link[=run_mab_trial]{run_mab_trial()}}
 }
+\keyword{internal}

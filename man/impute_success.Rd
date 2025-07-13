@@ -52,3 +52,4 @@ Uses\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra} to im
 \item \code{\link[randomizr:cluster_ra]{randomizr::cluster_ra()}}
 }
 }
+\keyword{internal}

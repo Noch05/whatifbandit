@@ -20,6 +20,8 @@
 #' * [get_iaipw()]
 #' * [adaptive_aipw()]
 #' * \href{https://www.pnas.org/doi/pdf/10.1073/pnas.2014602118}{Hadad et. al (2021)}
+#'
+#' @keywords internal
 
 
 

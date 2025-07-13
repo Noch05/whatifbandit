@@ -35,3 +35,4 @@ manageable structure.
 \item \code{\link[=run_mab_trial]{run_mab_trial()}}
 }
 }
+\keyword{internal}

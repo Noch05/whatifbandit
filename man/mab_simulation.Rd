@@ -100,3 +100,4 @@ been preprocessed by \code{\link[=pre_mab_simulation]{pre_mab_simulation()}}.
 \item \code{\link[=pre_mab_simulation]{pre_mab_simulation()}}
 }
 }
+\keyword{internal}

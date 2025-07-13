@@ -14,6 +14,7 @@
 #' @seealso
 #'* [run_mab_trial()]
 #'* [get_past_results()]
+#' @keywords internal
 
 
 get_bandit <- function(past_results, algorithm, conditions, current_period = NULL, control_augment = 0) {
@@ -42,6 +43,7 @@ get_bandit <- function(past_results, algorithm, conditions, current_period = NUL
 #' @param iterator counter variable; keeps track of recursive calls to prevent infinite recursion.
 #' @inheritParams get_bandit
 #' @returns Named Numeric Vector of Posterior Probabilities
+#' @keywords internal
 
 get_bandit.Thompson <- function(past_results, conditions, iterator) {
   bandit <- rlang::set_names(bandit::best_binomial_bandit(
@@ -68,7 +70,7 @@ get_bandit.Thompson <- function(past_results, conditions, iterator) {
 #' @title UCB1 Sampling Algorithm
 #' @inheritParams get_bandit
 #' @returns Data.frame containing UCB and Success Rate for each condition
-#'
+#' @keywords internal
 
 get_bandit.UCB1 <- function(past_results, conditions, current_period) {
   correction <- 1e-10
@@ -108,6 +110,7 @@ get_bandit.UCB1 <- function(past_results, conditions, current_period) {
 #' @param assignment_probs Named numeric vector; contains probabilities of
 #' assignment with the control condition named "Control".
 #' @returns Named numeric vector with updated probabilities
+#' @keywords internal
 
 augment_prob <- function(assignment_probs, control_augment, conditions, algorithm) {
   assignment_probs <- switch(algorithm,
@@ -127,6 +130,7 @@ augment_prob <- function(assignment_probs, control_augment, conditions, algorith
 #' @method augment_prob Thompson
 #' @title Augment Prob For Thompson Sampling
 #' @inheritParams augment_prob
+#' @keywords internal
 augment_prob.Thompson <- function(assignment_probs, control_augment, conditions) {
   ctrl <- base::names(conditions) == "Control"
 
@@ -152,6 +156,7 @@ augment_prob.Thompson <- function(assignment_probs, control_augment, conditions)
 #' @method augment_prob UCB1
 #' @title Augment Prob For UCB1
 #' @inheritParams augment_prob
+#' @keywords internal
 augment_prob.UCB1 <- function(assignment_probs, control_augment, conditions) {
   ctrl <- base::names(conditions) == "Control"
   selected <- assignment_probs == 1
@@ -174,6 +179,7 @@ augment_prob.UCB1 <- function(assignment_probs, control_augment, conditions) {
 #' @param iter, iteration tracker, stops function if it reaches the limit of
 #' @inheritParams single_mab_simulation
 #' @returns Named Numeric Vector; Containing probabilities of treatment assignment, all positive.
+#' @keywords internal
 
 fix_negatives <- function(assignment_probs, conditions, iter = 1) {
   negatives <- assignment_probs < 0

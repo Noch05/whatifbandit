@@ -18,7 +18,7 @@
 #'* [run_mab_trial()]
 #'* [randomizr::block_and_cluster_ra()]
 #'* [randomizr::cluster_ra()]
-#'
+#' @keywords internal
 
 
 assign_treatments <- function(current_data, probs, blocking = NULL,

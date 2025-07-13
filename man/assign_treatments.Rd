@@ -48,3 +48,4 @@ Probabilities passed to \code{\link[randomizr:block_and_cluster_ra]{randomizr::b
 \item \code{\link[randomizr:cluster_ra]{randomizr::cluster_ra()}}
 }
 }
+\keyword{internal}

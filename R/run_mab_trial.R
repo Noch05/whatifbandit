@@ -28,7 +28,7 @@
 #' * [check_impute()]
 #' * [get_past_results()]
 #' * [impute_success()]
-#'
+#' @keywords internal
 #'
 run_mab_trial <- function(data, time_unit, period_length = NULL,
                           data_cols, block_cols, blocking,

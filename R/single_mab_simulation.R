@@ -109,3 +109,18 @@ single_mab_simulation <- function(data,
 
   return(results)
 }
+#------------------------------------------------------------------------------
+#' @name cols
+#' @title Column arguments shared across functions
+#' @description Topic holding common arguments across many functions,
+#' used to inherit from in documentation to keep definitions consistent. Not a
+#' function.
+#' @param id_col Column in data, contains unique id as a key.
+#' @param success_col  Column in data; Binary successes from original experiment.
+#' @param condition_col Column in data; Original Treatment condition for each observation.
+#' @param date_col  Column in data, contains original date of event/trial; only necessary when assigning by 'Date'.
+#' @param month_col  Column in data, contains month of treatment; only necessary when time_unit = 'Month'.
+#' @param success_date_col  Column in data, contains original dates each success occurred; only necessary when 'perfect_assignment' = FALSE.
+#' @param assignment_date_col  Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
+#' @keywords internal
+NULL

@@ -86,3 +86,4 @@ with informative error messages so they can quickly fix their usage of the funct
 *\code{\link[=single_mab_simulation]{single_mab_simulation()}}
 *\code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}
 }
+\keyword{internal}

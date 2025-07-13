@@ -18,3 +18,4 @@ list created by \code{\link[=imputation_prep]{imputation_prep()}}.}
 Ensures the Imputation Info in the current iteration of \code{\link[=run_mab_trial]{run_mab_trial()}},
 contains all the info needed, important when blocking or using small assignment waves
 }
+\keyword{internal}

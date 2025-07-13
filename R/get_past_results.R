@@ -14,7 +14,7 @@
 #' *[run_mab_trial()]
 #' *[single_mab_simulation()]
 #' *[get_bandit()]
-#'
+#' @keywords internal
 #'
 get_past_results <- function(current_data, prior_data, perfect_assignment, assignment_date_col = NULL,
                              conditions) {
@@ -26,6 +26,7 @@ get_past_results <- function(current_data, prior_data, perfect_assignment, assig
 #' @title
 #' [get_past_results()] for data.frames
 #' @inheritParams get_past_results
+#' @noRd
 
 
 get_past_results.data.frame <- function(current_data, prior_data, perfect_assignment, assignment_date_col = NULL,
@@ -72,6 +73,7 @@ get_past_results.data.frame <- function(current_data, prior_data, perfect_assign
 #' @title
 #' [get_past_results()] for data.tables
 #' @inheritParams get_past_results
+#' @noRd
 
 
 get_past_results.data.table <- function(current_data,

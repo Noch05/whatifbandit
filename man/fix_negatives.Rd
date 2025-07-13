@@ -20,3 +20,4 @@ Named Numeric Vector; Containing probabilities of treatment assignment, all posi
 \description{
 Redistributes Probabilities when control augmentation produces negatives
 }
+\keyword{internal}

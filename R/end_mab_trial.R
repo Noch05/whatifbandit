@@ -14,6 +14,7 @@
 #' }
 #' @seealso
 #'* [run_mab_trial()]
+#' @keywords internal
 
 end_mab_trial <- function(data, bandits, algorithm, periods, conditions) {
   base::UseMethod("end_mab_trial", data)
@@ -25,6 +26,7 @@ end_mab_trial <- function(data, bandits, algorithm, periods, conditions) {
 #' @method end_mab_trial data.frame
 #' @inheritParams end_mab_trial
 #' @title [end_mab_trial()] for data.frames
+#' @noRd
 
 end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditions) {
   final_summary <- data |>
@@ -85,6 +87,7 @@ end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditio
 #' @method end_mab_trial data.table
 #' @inheritParams end_mab_trial
 #' @title [end_mab_trial()] for data.tables
+#' @noRd
 end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditions) {
   final_summary <- data[, .(
     successes = base::sum(mab_success, na.rm = TRUE),

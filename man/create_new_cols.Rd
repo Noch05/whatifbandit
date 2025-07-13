@@ -50,3 +50,4 @@ the adaptive trial.
 *\code{\link[=create_cutoff]{create_cutoff()}}
 *\code{\link[=pre_mab_simulation]{pre_mab_simulation()}}
 }
+\keyword{internal}

@@ -16,6 +16,7 @@
 #' * [get_iaipw()]
 #' * [get_adaptive_aipw()]
 #' * [mab_simulation()]
+#' @keywords internal
 #-------------------------------------------------------------------------------
 ## Adaptive AIPW Weights from Hadad et. al (2021) Using Constant Allocation Rate
 adaptive_aipw <- function(data, assignment_probs, conditions, periods, verbose) {
@@ -27,6 +28,7 @@ adaptive_aipw <- function(data, assignment_probs, conditions, periods, verbose) 
 #' @title Adaptive AIPW Estimates for data.frames
 #' @method adaptive_aipw data.frame
 #' @inheritParams adaptive_aipw
+#' @noRd
 #'
 adaptive_aipw.data.frame <- function(data, assignment_probs, conditions, periods, verbose) {
   estimates <- purrr::map(
@@ -74,6 +76,7 @@ adaptive_aipw.data.frame <- function(data, assignment_probs, conditions, periods
 #' @title Adaptive AIPW Estimates for data.tables
 #' @method adaptive_aipw data.table
 #' @inheritParams adaptive_aipw
+#' @noRd
 adaptive_aipw.data.table <- function(data, assignment_probs, conditions,
                                      periods, verbose) {
   estimates <- purrr::map(

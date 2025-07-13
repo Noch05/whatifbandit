@@ -48,3 +48,4 @@ Prepares necessary data to be passed to\code{\link[=impute_success]{impute_succe
 impute outcomes properly. Subsets pre-computations and adds the \code{impute_block},
 column to \code{current_data}
 }
+\keyword{internal}

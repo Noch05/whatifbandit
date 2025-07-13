@@ -33,6 +33,7 @@ print.multiple.mab <- function(x, ...) {
 #' @name print_mab
 #' @param mab `mab` or `multiple.mab` object to derive settings from
 #' @returns Text summary of settings used for the Multi-Arm Bandit trial.
+#' @noRd
 print_mab <- function(mab) {
   settings <- mab$settings
 

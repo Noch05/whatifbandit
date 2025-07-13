@@ -8,12 +8,15 @@
 #' @inheritParams impute_success
 #' @param imputation_information `success` element of the `imputation_information`
 #' list created by [imputation_prep()].
+#' @keywords internal
 check_impute <- function(imputation_information, current_data, current_period) {
   base::UseMethod("check_impute", imputation_information)
 }
+#--------------------------------------------------------------------------------
 #' @method check_impute data.frame
 #' @title [check_impute()] for data.frames
 #' @inheritParams check_impute
+#' @noRd
 
 check_impute.data.frame <- function(imputation_information, current_data, current_period) {
   mean_rate <- base::mean(imputation_information$success_rate)
@@ -48,6 +51,7 @@ check_impute.data.frame <- function(imputation_information, current_data, curren
 #' @method check_impute data.table
 #' @title [check_impute()] for data.tables
 #' @inheritParams check_impute
+#' @noRd
 check_impute.data.table <- function(imputation_information, current_data, current_period) {
   mean_rate <- base::mean(imputation_information$success_rate)
 

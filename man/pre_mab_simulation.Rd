@@ -95,3 +95,4 @@ check for valid arguments, prepare data and pre-compute key values.
 *\code{\link[=create_new_cols]{create_new_cols()}}
 *\code{\link[=imputation_prep]{imputation_prep()}}
 }
+\keyword{internal}

@@ -18,6 +18,7 @@
 #' @export
 #' @example inst/examples/plot.mab_example.R
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
+#' @noRd
 
 plot.mab <- function(x, type, estimator = NULL, level = .95, save = FALSE, path = NULL, ...) {
   rlang::check_installed("ggplot2")
@@ -44,6 +45,7 @@ plot.mab <- function(x, type, estimator = NULL, level = .95, save = FALSE, path 
 #' @param object, String; Location to gather treatment arm data from, either
 #' "bandits" or "assignment_probs"
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
+#' @noRd
 
 plot_arms <- function(x, object, ...) {
   rlang::check_installed("ggplot2")
@@ -95,6 +97,7 @@ plot_arms <- function(x, object, ...) {
 #' @description
 #' Plot Summary of AIPW estimates and variances for Each Treatment Arm
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)`
+#' @noRd
 plot_estimates <- function(x, estimator, level = 0.95, ...) {
   rlang::check_installed("ggplot2")
   check_level(level)
@@ -167,6 +170,7 @@ plot.multiple.mab <- function(x, type, estimator = NULL, cdf = NULL, level = 0.9
 #' Plots Summary Results for [plot.multiple.mab()]
 #' @inheritParams plot.multiple.mab
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
+#' @noRd
 
 plot_summary <- function(x, ...) {
   rlang::check_installed("ggplot2")
@@ -191,6 +195,7 @@ plot_summary <- function(x, ...) {
 #' Plots Distribution of AIPW and Sample estimates over trials for [plot.multiple.mab()]
 #' @inheritParams plot.multiple.mab
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
+#' @noRd
 plot_hist <- function(x, estimator, ...) {
   rlang::check_installed("ggplot2")
   estimator_arg <- check_estimator(estimator)
@@ -214,7 +219,7 @@ plot_hist <- function(x, estimator, ...) {
 #' Plots AIPW/Sample Estimates for each arm using variance from the repeated trials.
 #' @inheritParams plot.multiple.mab
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
-
+#' @noRd
 
 plot_mult_estimates <- function(x, estimator, cdf, level, ...) {
   rlang::check_installed("ggplot2")

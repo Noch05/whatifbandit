@@ -17,7 +17,7 @@
 #' @seealso
 #' *[single_mab_simulation()]
 #' *[multiple_mab_simulation()]
-#'
+#' @keywords internal
 #'
 #'
 check_args <- function(data,
@@ -197,7 +197,7 @@ check_args <- function(data,
 #' @seealso
 #' *[single_mab_simulation()]
 #' *[check_args()]
-#'
+#' @keywords internal
 #'
 check_cols <- function(assignment_method, time_unit, perfect_assignment, data_cols, data, verbose) {
   # All possible columns

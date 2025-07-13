@@ -14,7 +14,7 @@
 #' impute outcomes.
 #' \item `impute_dates`: Named Date Vector by treatment condition, containing the dates of success
 #' to impute if perfect_assignment is FALSE.}
-#'
+#' @keywords internal
 
 impute_loop_prep <- function(current_data, block_cols, imputation_information,
                              whole_experiment, blocking, perfect_assignment, current_period) {

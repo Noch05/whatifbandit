@@ -39,3 +39,4 @@ Summarizes results of prior periods to use for the current Multi-Arm-Bandit assi
 *\code{\link[=single_mab_simulation]{single_mab_simulation()}}
 *\code{\link[=get_bandit]{get_bandit()}}
 }
+\keyword{internal}

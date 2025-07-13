@@ -23,6 +23,7 @@
 #' *[create_cutoff()]
 #' *[create_new_cols()]
 #' *[imputation_prep()]
+#' @keywords internal
 
 
 pre_mab_simulation <- function(data,

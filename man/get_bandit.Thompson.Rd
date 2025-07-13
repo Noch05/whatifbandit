@@ -21,3 +21,4 @@ Named Numeric Vector of Posterior Probabilities
 \description{
 Thompson Sampling Algorithm
 }
+\keyword{internal}

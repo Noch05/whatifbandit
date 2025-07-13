@@ -26,22 +26,15 @@ utils::globalVariables(c(
 
 NULL
 
-#' @name cols
-#' @title Column arguments shared across functions
-#' @param id_col Column in data, contains unique id as a key.
-#' @param success_col  Column in data; Binary successes from original experiment.
-#' @param condition_col Column in data; Original Treatment condition for each observation.
-#' @param date_col  Column in data, contains original date of event/trial; only necessary when assigning by 'Date'.
-#' @param month_col  Column in data, contains month of treatment; only necessary when time_unit = 'Month'.
-#' @param success_date_col  Column in data, contains original dates each success occurred; only necessary when 'perfect_assignment' = FALSE.
-#' @param assignment_date_col  Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
-NULL
-
 #' Verbose Printer
-#' @description Shorthand Function for checking `verbose` and then printing. Takes verbose from higher scope
+#' @description Shorthand Function for checking `verbose` and then printing if TRUE
 #' @name verbose_log
 #' @param message The message to be printed to screen, as a string.
-#' @param log Logical; Whether or not to print the message
+#' @param log Logical; Whether or not to print the message, this will always be
+#' the `verbose` argument passed from higher functions.
+#' @returns Text output of `message` to the console when `log` is TRUE. If
+#' `log` is FALSE, returns nothing.
+#' @noRd
 
 verbose_log <- function(log, message) {
   if (log) {
@@ -55,7 +48,8 @@ verbose_log <- function(log, message) {
 #' is valid for a confidence interval.
 #' @name check_level
 #' @inheritParams plot.mab
-#' @returns Throws an error if `level` is invalid, else does nothing
+#' @returns Throws an error if `level` is invalid, else does nothing.
+#' @noRd
 check_level <- function(level) {
   if (!is.numeric(level) || (level < 0 || level > 1)) {
     rlang::abort(c("`level` must be a number between 0 and 1",
@@ -67,11 +61,12 @@ check_level <- function(level) {
 #' Check Estimator
 #' @description
 #' Shorthand for checking if the `estimator` passed to
-#' plot.mab and plot.multiple.mab are valid
+#' [plot.mab()] and [plot.multiple.mab()] are valid.
 #' @name check_estimator
 #' @inheritParams plot.mab
 #' @returns Throws an error if the argument is invalid; returns character vector
-#' with the user's selection based on the argument
+#' with the user's selection based on the argument.
+#' @noRd
 check_estimator <- function(estimator) {
   if (base::is.null(estimator)) {
     rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")

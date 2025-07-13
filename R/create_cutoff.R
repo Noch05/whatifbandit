@@ -10,6 +10,7 @@
 #' representing an observation's new assignment period.
 #' @seealso
 #' *[pre_mab_simulation()]
+#' @keywords internal
 #------------------------------------------------------------------------------------------
 create_cutoff <- function(data, data_cols, period_length = NULL,
                           assignment_method, time_unit) {
@@ -45,6 +46,7 @@ create_cutoff <- function(data, data_cols, period_length = NULL,
 #' @title [create_cutoff()] Day Based Periods
 #' @inheritParams create_cutoff
 #' @inheritParams cols
+#' @noRd
 #'
 create_cutoff.Day <- function(data, date_col, period_length) {
   start_date <- base::min(data[[date_col$name]])
@@ -69,6 +71,7 @@ create_cutoff.Day <- function(data, date_col, period_length) {
 #' @title [create_cutoff()] Week Based Periods
 #' @inheritParams create_cutoff
 #' @inheritParams cols
+#' @noRd
 create_cutoff.Week <- function(data, date_col, period_length) {
   if (inherits(data, "data.table")) {
     start_date <- base::min(data[, get(date_col$name)])
@@ -97,6 +100,7 @@ create_cutoff.Week <- function(data, date_col, period_length) {
 #' @title [create_cutoff()] Month Based Periods
 #' @inheritParams create_cutoff
 #' @inheritParams cols
+#' @noRd
 #'
 create_cutoff.Month <- function(data, date_col, month_col, period_length) {
   start_date <- base::min(data[[date_col$name]])
@@ -144,6 +148,7 @@ create_cutoff.Month <- function(data, date_col, month_col, period_length) {
 #' @method create_cutoff Individual
 #' @title [create_cutoff()] Individual Periods
 #' @inheritParams create_cutoff
+#' @noRd
 #'
 create_cutoff.Individual <- function(data) {
   if (inherits(data, "data.table")) {
@@ -160,6 +165,7 @@ create_cutoff.Individual <- function(data) {
 #' @method create_cutoff Batch
 #' @title [create_cutoff()] Batch Based Periods
 #' @inheritParams create_cutoff
+#' @noRd
 #'
 create_cutoff.Batch <- function(data, period_length) {
   if (inherits(data, "data.table")) {

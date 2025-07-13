@@ -10,6 +10,7 @@
 #'
 #' @seealso
 #' *[run_mab_trial()]
+#' @keywords internal
 
 create_prior <- function(prior_periods, current_period) {
   if (prior_periods == "All") {

@@ -38,3 +38,4 @@ Calculates the best treatment for a given period using either a UCB1 or Thompson
 \item \code{\link[=get_past_results]{get_past_results()}}
 }
 }
+\keyword{internal}
