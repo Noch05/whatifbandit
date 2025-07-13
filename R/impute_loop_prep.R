@@ -9,8 +9,12 @@
 #' @inheritParams impute_success
 #' @returns A named list containing:
 #' \itemize{
+#' \item `current_data`: `data` object containing `impute_block` column to guide the outcome imputations
+#' \item `impute_success`: `data` object containing probabilities of success by `treatment_block` to be used to
+#' impute outcomes.
+#' \item `impute_dates`: Named Date Vector by treatment condition, containing the dates of success
+#' to impute if perfect_assignment is FALSE.}
 #'
-#' }
 
 impute_loop_prep <- function(current_data, block_cols, imputation_information,
                              whole_experiment, blocking, perfect_assignment, current_period) {

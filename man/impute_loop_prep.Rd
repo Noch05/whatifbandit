@@ -37,8 +37,11 @@ on the dates treatments would have been assigned for each wave.}
 \value{
 A named list containing:
 \itemize{
-
-}
+\item \code{current_data}: \code{data} object containing \code{impute_block} column to guide the outcome imputations
+\item \code{impute_success}: \code{data} object containing probabilities of success by \code{treatment_block} to be used to
+impute outcomes.
+\item \code{impute_dates}: Named Date Vector by treatment condition, containing the dates of success
+to impute if perfect_assignment is FALSE.}
 }
 \description{
 Prepares necessary data to be passed to\code{\link[=impute_success]{impute_success()}} to

@@ -60,10 +60,7 @@
 #' * [mab_simulation()]
 #' * [pre_mab_simulation()]
 #' @example inst/examples/single_mab_simulation_example.R
-
-#'
 #' @export
-
 single_mab_simulation <- function(data,
                                   assignment_method,
                                   algorithm,
