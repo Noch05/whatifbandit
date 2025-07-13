@@ -29,3 +29,4 @@ condense_results(data, keep_data, mabs, times)
 Takes the output from \code{\link[furrr:future_map]{furrr::future_map()}} in \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}
 and condenses it to return to the user
 }
+\keyword{internal}

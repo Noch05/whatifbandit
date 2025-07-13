@@ -156,6 +156,7 @@ multiple_mab_simulation <- function(data,
 #' \item `estimates:` Data.frame containing the AIPW statistics across all treatments, and trials
 #' \item `settings`: A list of the configuration settings used in the trial.
 #' }
+#' @keywords internal
 
 condense_results <- function(data, keep_data, mabs, times) {
   items <- c("bandits", "estimates", "assignment_probs")
