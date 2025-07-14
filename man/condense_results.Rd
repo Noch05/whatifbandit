@@ -15,7 +15,7 @@ of a traditional Randomized Controlled Trial (RCT). data.frames will be converte
 
 \item{mabs}{output from \code{\link[furrr:future_map]{furrr::future_map()}} in \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}}
 
-\item{times}{Integer; number of simulations to conduct.}
+\item{times}{A numeric value of length 1, the number of simulations to conducts.}
 }
 \value{
 \code{multiple.mab} class object, which is a named list containing:

@@ -1,46 +1,88 @@
-#' Conducts Multiple Multi-Arm Bandit Trials with Adaptive Inference in Parallel
-#'
+#' Run Multiple Multi-Arm-Bandit Trials with Inference in Parallel
 #' @name multiple_mab_simulation
-#' @description Repeated Multi-Arm Bandit Simulations with the same settings in different
-#' random states. Allows for parallel processing using [future::plan()] and [furrr::future_map()].
+#' @description Performs multiple Multi-Arm Bandit Trials using the same
+#' simulation and inference backend as [single_mab_simulation()]. Allows for
+#' easy execution of multiple trials under the same settings to gauge the variance
+#' of the procedure across execution states. Additionally supports parallel processing
+#' through the \href{https://cran.r-project.org/web/packages/future/index.html}{future} and
+#' \href{https://cran.r-project.org/web/packages/furrr/index.html}{furrr} packages.
 #'
 #'
 #' @inheritParams single_mab_simulation
-#' @param verbose Logical; Toggles progress bar from [furrr::future_map()].
-#' @param times Integer; number of simulations to conduct.
-#' @param seeds Integer vector of `length(times)` containing valid seeds to define random state for each trial.
+#' @param verbose Logical; Toggles progress bar from [furrr::future_map()] and other intermidate messages.
+#' @param times A numeric value of length 1, the number of simulations to conducts.
+#' @param seeds An integer vector of `length(times)` containing valid seeds to define random state for each trial.
 #' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets
 #' .
 #' @returns `multiple.mab` class object, which is a named list containing:
 #' \itemize{
-#' \item `final_data_nest:` Data.frame containing a nested data.frame with the final data from each trial
-#' \item `bandits:` Data.frame containing the Thompson/UCB1 statistics across all treatments, periods, and trials
-#' \item `estimates:` Data.frame containing the AIPW statistics across all treatments, and trials
-#' \item `settings`: A list of the configuration settings used in the trial.
+#' \item `final_data_nest:` tibble or data.table containing the nested tibbles/data.tables from each trial. Only provided when `keep_data` is TRUE.
+#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period of each trial.
+#' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period of each trial.
+#' \item `estimates`: A tibble or data.table containing the
+#' AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
+#' sample means and variances, for each treatment arm, in each trial.
+#' \item `settings`: A named list of the configuration settings used in the trial.
+#' \item `original_data`: The original `data` object passed to the function (data.frame, tibble, or data.table).
 #' }
 #' @example inst/examples/multiple_mab_simulation_example.R
-#' @seealso
-#' * [run_mab_trial()]
-#' * [get_adaptive_aipw()]
-#' * [check_args()]
-#' * [single_mab_simulation()]
-#' * [mab_simulation()]
-#' * [pre_mab_simulation()]
-#' * [furrr::future_map()]
-#' * [future::plan()]
-#' @export
-#' @references
-#' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
-#' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
-#' (15): e2014602118. \url{https://doi.org/10.1073/pnas.2014602118}.
+#' @details
+#' This function simulates multiple adaptive Multi-Arm-Bandit Trials, using experimental
+#' data from a traditional randomized experiment. It follows the same core procedure as
+#' [single_mab_simulation()] (see @details, there for a description), but conducts
+#' more than one simulation. This allows researchers to gauge the variance
+#' of the simulation procedure itself, and use that to form an empirical sampling distribution
+#' of the AIPW estimates, instead of relying around asymptotic normality (Hadad et al. 2021) for inference.
 #'
-#' Loecher, Thomas Lotze and Markus. 2022.
-#' “Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis.”
+#' The settings specified here have the same meaning as in [single_mab_simulation()], outside of the additional
+#' parameters like `times` and `seeds` which define the number of multiple trials and random seeds to ensure reproducibility.
+#' An important note is that `seeds` can only take integer values, so they bust be declared or coerced as valid integers,
+#' passing doubles (even ones that are mathematical integers) will result in an error. It is recommended to use `sample.int()`,
+#' with a known seed beforehand to generate the values. Additionally, it is highly recommended to
+#' set `keep_data` to FALSE as the memory used by the function will exponentially increase. This can cause
+#' significant performance issues, especially if your system must swap to disk because memory is full.
+#'
+#' The function provides support for parallel processing via the \href{https://cran.r-project.org/web/packages/future/index.html}{future} and
+#' \href{https://cran.r-project.org/web/packages/furrr/index.html}{furrr} packages. When conducting a large
+#' number of simulations, parallelization can improve performance if sufficient system resources are available.
+#' Parallel processing must be explicitly set by the user, through `future::plan()`.
+#' Windows users should set the plan to "multisession", while Linux and MacOS users can use "multicore" or "multisession".
+#' Users running in a High Performance Computing environment (HPC), are encouraged to use
+#' \href{https://cran.r-project.org/web/packages/future.batchtools/index.html}{future.batchtools},
+#' for their respective HPC scheduler.
+#' Note that parallel processing is not guaranteed to work on all systems, and may require additional setup or debugging effort
+#' from the user. For any issues, users are encouraged to consult the documentation of the above packages.
+#' @references
+#' Bengtsson, Henrik. 2025. “Future: Unified Parallel and Distributed Processing in R for Everyone.”
+#' \url{https://cran.r-project.org/web/packages/future/index.html}.
+#'
+#' Bengtsson, Henrik. 2025. “Future.Batchtools: A Future API for Parallel and Distributed Processing Using ‘Batchtools.’”
+#' \url{https://cran.r-project.org/web/packages/future.batchtools/index.html}.
+#'
+#' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
+#' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.”
+#' Proceedings of the National Academy of Sciences of the United States of America 118 (15):
+#' e2014602118. \url{https://doi.org/10.1073/pnas.2014602118}.
+#'
+#' Kuleshov, Volodymyr, and Doina Precup. 2014. “Algorithms for Multi-Armed Bandit Problems.”
+#' arXiv. https://doi.org/10.48550/arXiv.1402.6028.
+#'
+#' Loecher, Thomas Lotze and Markus. 2022. “Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis.”
 #' \url{https://cran.r-project.org/web/packages/bandit/index.html}.
 #'
 #' Offer‐Westort, Molly, Alexander Coppock, and Donald P. Green. 2021.
 #' “Adaptive Experimental Design: Prospects and Applications in Political Science.”
 #' American Journal of Political Science 65 (4): 826–44. \url{https://doi.org/10.1111/ajps.12597}.
+#'
+#' Slivkins, Aleksandrs. 2024. “Introduction to Multi-Armed Bandits.”
+#' arXiv. \url{https://doi.org/10.48550/arXiv.1904.07272}.
+#'
+#' Vaughan, Davis, Matt Dancho, and RStudio. 2022.
+#' “Furrr: Apply Mapping Functions in Parallel Using Futures.”
+#' \url{https://cran.r-project.org/web/packages/furrr/index.html}.
+#'
+#' @seealso [single_mab_simulation()], \href{https://furrr.futureverse.org}{furrr}, \href{https://future.futureverse.org}{future}
+#' @export
 
 multiple_mab_simulation <- function(data,
                                     assignment_method,
@@ -62,8 +104,8 @@ multiple_mab_simulation <- function(data,
   if ((utils::object.size(data) / (1024^2) > 500)) {
     rlang::warn(c(
       "i" = "`furrr::future_map()` has a serialization limit of 500 MB. If your data
-    is larger than that, you have to set the `options(\"future_globals.maxSize\")`
-    manually to change it. This has been known to cause failures"
+    is larger than that, you may have to set the `options(\"future_globals.maxSize\")`
+    manually to change it."
     ))
   }
 
@@ -95,39 +137,63 @@ multiple_mab_simulation <- function(data,
   )
   verbose_log(verbose, "Starting Simulations")
 
-  mabs <- furrr::future_map(seq_len(times), ~ {
-    set.seed(seeds[.x])
-    results <- mab_simulation(
-      data = prepped$data,
-      time_unit = time_unit,
-      period_length = period_length,
-      prior_periods = prior_periods,
-      algorithm = algorithm,
-      whole_experiment = whole_experiment,
-      perfect_assignment = perfect_assignment,
-      conditions = conditions,
-      blocking = blocking,
-      block_cols = prepped$block_cols,
-      data_cols = prepped$data_cols,
-      verbose = FALSE,
-      assignment_method = assignment_method,
-      control_augment = control_augment,
-      imputation_information = prepped$imputation_information
-    )
-    if (!keep_data) {
-      results <- results[names(results) != "final_data"]
-    }
-    results <- results[names(results) != "settings"]
-  },
-  .options = furrr::furrr_options(
-    seed = TRUE,
-    packages = c(
-      "whatifbandit", "dplyr", "rlang",
-      "tidyr", "bandit", "tibble", "lubridate",
-      "purrr", "furrr", "randomizr", "data.table"
-    )
-  ),
-  .progress = verbose
+  mabs <- furrr::future_map(
+    seeds,
+    function(x) {
+      set.seed(x)
+
+      results <- mab_simulation(
+        data = prepped$data,
+        time_unit = time_unit,
+        period_length = period_length,
+        prior_periods = prior_periods,
+        algorithm = algorithm,
+        whole_experiment = whole_experiment,
+        perfect_assignment = perfect_assignment,
+        conditions = conditions,
+        blocking = blocking,
+        block_cols = prepped$block_cols,
+        data_cols = prepped$data_cols,
+        verbose = FALSE,
+        assignment_method = assignment_method,
+        control_augment = control_augment,
+        imputation_information = prepped$imputation_information
+      )
+
+      if (!keep_data) {
+        results$final_data <- NULL
+      }
+      results$settings <- NULL
+
+      results
+    },
+    .options = furrr::furrr_options(
+      globals = list(
+        mab_simulation = mab_simulation,
+        data = prepped$data,
+        block_cols = prepped$block_cols,
+        data_cols = prepped$data_cols,
+        imputation_information = prepped$imputation_information,
+        time_unit = time_unit,
+        period_length = period_length,
+        prior_periods = prior_periods,
+        algorithm = algorithm,
+        whole_experiment = whole_experiment,
+        perfect_assignment = perfect_assignment,
+        conditions = conditions,
+        blocking = blocking,
+        assignment_method = assignment_method,
+        control_augment = control_augment,
+        keep_data = keep_data
+      ),
+      packages = c(
+        "whatifbandit", "dplyr", "rlang",
+        "tidyr", "bandit", "tibble", "lubridate",
+        "purrr", "furrr", "randomizr", "data.table"
+      ),
+      seed = TRUE
+    ),
+    .progress = verbose
   )
   verbose_log(verbose, "Collating Results")
   results <- condense_results(
@@ -136,7 +202,6 @@ multiple_mab_simulation <- function(data,
   )
 
   results$settings <- base::list(
-    original_data = data,
     assignment_method = assignment_method,
     control_augment = control_augment,
     time_unit = time_unit,
@@ -151,6 +216,7 @@ multiple_mab_simulation <- function(data,
     trials = times,
     keep_data = keep_data
   )
+  results$original_data <- data
 
   return(results)
 }

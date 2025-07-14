@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiple_mab_simulation.R
 \name{multiple_mab_simulation}
 \alias{multiple_mab_simulation}
-\title{Conducts Multiple Multi-Arm Bandit Trials with Adaptive Inference in Parallel}
+\title{Run Multiple Multi-Arm-Bandit Trials with Inference in Parallel}
 \usage{
 multiple_mab_simulation(
   data,
@@ -77,9 +77,9 @@ containing the names or numbers of months.
 Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type \code{Date}, not a character string.
 }}
 
-\item{times}{Integer; number of simulations to conduct.}
+\item{times}{A numeric value of length 1, the number of simulations to conducts.}
 
-\item{seeds}{Integer vector of \code{length(times)} containing valid seeds to define random state for each trial.}
+\item{seeds}{An integer vector of \code{length(times)} containing valid seeds to define random state for each trial.}
 
 \item{control_augment}{A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.
 Default is 0.}
@@ -97,7 +97,7 @@ If you have a large dataset, consider passing it as a \code{data.table}.}
 
 \item{block_cols}{A character vector of variables to block by. This vector should not be named.}
 
-\item{verbose}{Logical; Toggles progress bar from \code{\link[furrr:future_map]{furrr::future_map()}}.}
+\item{verbose}{Logical; Toggles progress bar from \code{\link[furrr:future_map]{furrr::future_map()}} and other intermidate messages.}
 
 \item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets
 .}
@@ -105,15 +105,50 @@ If you have a large dataset, consider passing it as a \code{data.table}.}
 \value{
 \code{multiple.mab} class object, which is a named list containing:
 \itemize{
-\item \verb{final_data_nest:} Data.frame containing a nested data.frame with the final data from each trial
-\item \verb{bandits:} Data.frame containing the Thompson/UCB1 statistics across all treatments, periods, and trials
-\item \verb{estimates:} Data.frame containing the AIPW statistics across all treatments, and trials
-\item \code{settings}: A list of the configuration settings used in the trial.
+\item \verb{final_data_nest:} tibble or data.table containing the nested tibbles/data.tables from each trial. Only provided when \code{keep_data} is TRUE.
+\item \code{bandits}: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period of each trial.
+\item \code{assignment_probs}: A tibble or data.table containing the probability of being assigned each treatment arm at a given period of each trial.
+\item \code{estimates}: A tibble or data.table containing the
+AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
+sample means and variances, for each treatment arm, in each trial.
+\item \code{settings}: A named list of the configuration settings used in the trial.
+\item \code{original_data}: The original \code{data} object passed to the function (data.frame, tibble, or data.table).
 }
 }
 \description{
-Repeated Multi-Arm Bandit Simulations with the same settings in different
-random states. Allows for parallel processing using \code{\link[future:plan]{future::plan()}} and \code{\link[furrr:future_map]{furrr::future_map()}}.
+Performs multiple Multi-Arm Bandit Trials using the same
+simulation and inference backend as \code{\link[=single_mab_simulation]{single_mab_simulation()}}. Allows for
+easy execution of multiple trials under the same settings to gauge the variance
+of the procedure across execution states. Additionally supports parallel processing
+through the \href{https://cran.r-project.org/web/packages/future/index.html}{future} and
+\href{https://cran.r-project.org/web/packages/furrr/index.html}{furrr} packages.
+}
+\details{
+This function simulates multiple adaptive Multi-Arm-Bandit Trials, using experimental
+data from a traditional randomized experiment. It follows the same core procedure as
+\code{\link[=single_mab_simulation]{single_mab_simulation()}} (see @details, there for a description), but conducts
+more than one simulation. This allows researchers to gauge the variance
+of the simulation procedure itself, and use that to form an empirical sampling distribution
+of the AIPW estimates, instead of relying around asymptotic normality (Hadad et al. 2021) for inference.
+
+The settings specified here have the same meaning as in \code{\link[=single_mab_simulation]{single_mab_simulation()}}, outside of the additional
+parameters like \code{times} and \code{seeds} which define the number of multiple trials and random seeds to ensure reproducibility.
+An important note is that \code{seeds} can only take integer values, so they bust be declared or coerced as valid integers,
+passing doubles (even ones that are mathematical integers) will result in an error. It is recommended to use \code{sample.int()},
+with a known seed beforehand to generate the values. Additionally, it is highly recommended to
+set \code{keep_data} to FALSE as the memory used by the function will exponentially increase. This can cause
+significant performance issues, especially if your system must swap to disk because memory is full.
+
+The function provides support for parallel processing via the \href{https://cran.r-project.org/web/packages/future/index.html}{future} and
+\href{https://cran.r-project.org/web/packages/furrr/index.html}{furrr} packages. When conducting a large
+number of simulations, parallelization can improve performance if sufficient system resources are available.
+Parallel processing must be explicitly set by the user, through \code{future::plan()}.
+Windows users should set the plan to "multisession", while Linux and MacOS users can use "multicore" or "multisession".
+Users running in a High Performance Computing environment (HPC), are encouraged to use
+\href{https://cran.r-project.org/web/packages/future.batchtools/index.html}{future.batchtools},
+for their respective HPC scheduler.
+Note that parallel processing is not guaranteed to work on all systems, and may require additional setup or debugging effort
+from the user. For any issues, users are encouraged to consult the documentation of the above packages.
 }
 \examples{
 # Multiple_mab_simulation() is a useful tool for running multiple trials
@@ -194,27 +229,34 @@ object.size(x)
 # Check the future and furrr documentation for more details on possible options
 }
 \references{
-Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
-“Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
-(15): e2014602118. \url{https://doi.org/10.1073/pnas.2014602118}.
+Bengtsson, Henrik. 2025. “Future: Unified Parallel and Distributed Processing in R for Everyone.”
+\url{https://cran.r-project.org/web/packages/future/index.html}.
 
-Loecher, Thomas Lotze and Markus. 2022.
-“Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis.”
+Bengtsson, Henrik. 2025. “Future.Batchtools: A Future API for Parallel and Distributed Processing Using ‘Batchtools.’”
+\url{https://cran.r-project.org/web/packages/future.batchtools/index.html}.
+
+Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
+“Confidence Intervals for Policy Evaluation in Adaptive Experiments.”
+Proceedings of the National Academy of Sciences of the United States of America 118 (15):
+e2014602118. \url{https://doi.org/10.1073/pnas.2014602118}.
+
+Kuleshov, Volodymyr, and Doina Precup. 2014. “Algorithms for Multi-Armed Bandit Problems.”
+arXiv. https://doi.org/10.48550/arXiv.1402.6028.
+
+Loecher, Thomas Lotze and Markus. 2022. “Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis.”
 \url{https://cran.r-project.org/web/packages/bandit/index.html}.
 
 Offer‐Westort, Molly, Alexander Coppock, and Donald P. Green. 2021.
 “Adaptive Experimental Design: Prospects and Applications in Political Science.”
 American Journal of Political Science 65 (4): 826–44. \url{https://doi.org/10.1111/ajps.12597}.
+
+Slivkins, Aleksandrs. 2024. “Introduction to Multi-Armed Bandits.”
+arXiv. \url{https://doi.org/10.48550/arXiv.1904.07272}.
+
+Vaughan, Davis, Matt Dancho, and RStudio. 2022.
+“Furrr: Apply Mapping Functions in Parallel Using Futures.”
+\url{https://cran.r-project.org/web/packages/furrr/index.html}.
 }
 \seealso{
-\itemize{
-\item \code{\link[=run_mab_trial]{run_mab_trial()}}
-\item \code{\link[=get_adaptive_aipw]{get_adaptive_aipw()}}
-\item \code{\link[=check_args]{check_args()}}
-\item \code{\link[=single_mab_simulation]{single_mab_simulation()}}
-\item \code{\link[=mab_simulation]{mab_simulation()}}
-\item \code{\link[=pre_mab_simulation]{pre_mab_simulation()}}
-\item \code{\link[furrr:future_map]{furrr::future_map()}}
-\item \code{\link[future:plan]{future::plan()}}
-}
+\code{\link[=single_mab_simulation]{single_mab_simulation()}}, \href{https://furrr.futureverse.org}{furrr}, \href{https://future.futureverse.org}{future}
 }

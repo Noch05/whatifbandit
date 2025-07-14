@@ -147,7 +147,9 @@ depends on the relative size of each period, number of periods, and overall size
 supports \code{data.table} objects, which are used when passed, but otherwise a combination of \code{dplyr} and base R is used.
 In general, smaller batches run faster under base R, while larger ones could benefit from the performance
 and memory efficiencies provided by \code{data.table}. An example dataset with 3,520 observations under individual assignment
-takes 20-30 seconds under Base R and 40-50 seconds under \code{data.table}
+takes 20-30 seconds under Base R and 40-50 seconds under \code{data.table}. It has also been observed, that larger datasets
+at least over a  3 million rows, can cause numerical instability in the calculations. Internal safeguards exist
+to prevent this, but to best way to preempt any issues, is to set \code{prior_periods} to a low number.
 }
 \examples{
  # Loading Example Data and defining conditions
