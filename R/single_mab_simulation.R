@@ -1,12 +1,12 @@
 #' @title
-#' Running Multi-Arm Bandit Trial and Adaptive Inference
+#' Running a Single Multi-Arm Bandit Trial with Adaptive Inference
 #' @name single_mab_simulation
 #'
 #' @description Performs a single Multi-Arm Bandit (MAB) trial using experimental data from
 #' an original randomized controlled trial, and adaptive inference strategies as described in
-#' Hadad et al. (2021). This function wraps around [run_mab_trial()] and [get_adaptive_aipw()],
-#' completing the full MAB pipeline: treatment assignment, success imputation, and estimation.
-#'
+#' Hadad et al. (2021). Wraps around the internal implementation functions, and performs the full
+#' MAB pipeline: Prepping inputs, assigning treatments and imputing successes, and adapatively weighted
+#' estimation.
 #'
 #' @param data A data frame, tibble or data.table that provides the input data for the trial.
 #' @param time_unit A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'.
@@ -52,13 +52,21 @@
 #' \item `estimates`: AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances.
 #' \item `settings`: A list of the configuration settings used in the trial.
 #' }
+#' @seealso [mab_simulation()], [pre_mab_simulation()]
+#' @references
+#' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
+#' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
+#' (15): e2014602118. \url{https://doi.org/10.1073/pnas.2014602118}.
 #'
-#' @seealso
-#' * [run_mab_trial()]
-#' * [get_adaptive_aipw()]
-#' * [check_args()]
-#' * [mab_simulation()]
-#' * [pre_mab_simulation()]
+#' Loecher, Thomas Lotze and Markus. 2022.
+#' “Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis.”
+#' \url{https://cran.r-project.org/web/packages/bandit/index.html}.
+#'
+#' Offer‐Westort, Molly, Alexander Coppock, and Donald P. Green. 2021.
+#' “Adaptive Experimental Design: Prospects and Applications in Political Science.”
+#' American Journal of Political Science 65 (4): 826–44. \url{https://doi.org/10.1111/ajps.12597}.
+
+#'
 #' @example inst/examples/single_mab_simulation_example.R
 #' @export
 single_mab_simulation <- function(data,

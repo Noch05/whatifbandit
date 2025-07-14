@@ -29,6 +29,18 @@
 #' * [furrr::future_map()]
 #' * [future::plan()]
 #' @export
+#' @references
+#' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
+#' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
+#' (15): e2014602118. \url{https://doi.org/10.1073/pnas.2014602118}.
+#'
+#' Loecher, Thomas Lotze and Markus. 2022.
+#' “Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis.”
+#' \url{https://cran.r-project.org/web/packages/bandit/index.html}.
+#'
+#' Offer‐Westort, Molly, Alexander Coppock, and Donald P. Green. 2021.
+#' “Adaptive Experimental Design: Prospects and Applications in Political Science.”
+#' American Journal of Political Science 65 (4): 826–44. \url{https://doi.org/10.1111/ajps.12597}.
 
 multiple_mab_simulation <- function(data,
                                     assignment_method,
