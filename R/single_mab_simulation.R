@@ -217,3 +217,19 @@ single_mab_simulation <- function(data,
 #' Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type `Date`, not a character string.
 #' @keywords internal
 NULL
+
+#' Verbose Printer
+#' @description Shorthand Function for checking `verbose` and then printing if TRUE
+#' @name verbose_log
+#' @param message The message to be printed to screen, as a string.
+#' @param log Logical; Whether or not to print the message, this will always be
+#' the `verbose` argument passed from higher functions.
+#' @returns Text output of `message` to the console when `log` is TRUE. If
+#' `log` is FALSE, returns nothing.
+#' @keywords internal
+
+verbose_log <- function(log, message) {
+  if (log) {
+    base::cat(message, "\n")
+  }
+}

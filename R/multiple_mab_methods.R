@@ -1,126 +1,73 @@
-#' Plot Generic for `mab` objects
-#' @description Uses [ggplot2::ggplot()] to summarize the results of a single
-#' Multi-Arm Bandit Trial
-#'
-#' @method plot mab
-#' @param x `mab` class object created by [single_mab_simulation()]
-#' @param type String; Type of plot requested; valid types are:
-#' \itemize{
-#' \item `arm`: Shows Thompson Probability or UCB1 Statistic over the trial period.
-#' \item `assign`: Shows Assignment Probability/Proportion over trial period.
-#' \item `estimate`: Shows proportion of success estimates with user specified Normal Confidence Intervals based on their estimated variance.
-#' }
-#' @param save Logical; Whether or not to save the plot to disk; FALSE by default.
-#' @param path String; File directory to save file.
-#' @inheritParams summary.mab
-#' @param estimator Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type
-#' @param ... arguments to pass to `ggplot2:geom_*` function (e.g. `color`, `linewidth`, `alpha`, etc.)
+#' Print Generic For `multiple.mab`
+#' @description Custom Print Display for `multiple.mab`` objects returned by [multiple_mab_simulation()].
+#' @method print multiple.mab
+#' @param x `multiple.mab` class object
+#' @param ... further arguments passed to or from other methods
+#' @returns Text summary of settings used for the Multi-Arm Bandit trials.
 #' @export
-#' @example inst/examples/plot.mab_example.R
-#' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
-
-plot.mab <- function(x, type, estimator = NULL, level = .95, save = FALSE, path = NULL, ...) {
-  rlang::check_installed("ggplot2")
-  plot <- switch(type,
-    "arm" = plot_arms(x = x, object = "bandits", ...),
-    "assign" = plot_arms(x = x, object = "assignment_probs", ...),
-    "estimate" = plot_estimates(x = x, estimator = estimator, level = level, ...),
-    rlang::abort("Invalid Type: Specify `arm`, `assign`, or `estimate`")
-  )
-  if (save) {
-    ggplot2::ggsave(plot, filename = path)
-  }
-  return(plot)
+print.multiple.mab <- function(x, ...) {
+  settings <- x$settings
+  print_mab(x)
+  base::cat("Trials Conducted:     ", settings$trials, "trials\n")
+  base::cat("Keep Final Data:      ", settings$keep_data, "\n")
+  base::cat("----------------------------------------------------- \n")
 }
-
-#-------------------------------------------------------------------------------
-#' @name plot_arms
-#' @title Plot Treatment Arms Over Time
+#------------------------------------------------------------------------------
+#' Summary Generic for "multiple.mab" class
 #' @description
-#' Helper to [plot.mab()]. Plots Treatment Arms over Time.
-#' @returns ggplot object
-#' @param x, mab object passed from [plot.mab()]
-#' @inheritParams plot.mab
-#' @param object, String; Location to gather treatment arm data from, either
-#' "bandits" or "assignment_probs"
-#' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
-#'
+#' Summarizes results of of multiple Multi-Arm Bandit Trials
+#' @param object `multiple.mab` object created by [multiple_mab_simulation]
+#' @param level Confidence Interval Width (i.e 0.90, .95, 0.99)
+#' @param ... additional arguments.
+#' @method summary multiple.mab
+#' @example inst/examples/summary.multiple.mab_example.R
+#' @export
 
-plot_arms <- function(x, object, ...) {
-  rlang::check_installed("ggplot2")
-  data <- x[[object]]
-  periods <- base::max(data$period_number)
-
-  if (object == "bandits") {
-    if (x$settings$algorithm == "UCB1") {
-      ylab <- "UCB1 Statistic"
-      title <- "UCB1 Sampling Over Time"
-    }
-    if (x$settings$algorithm == "Thompson") {
-      ylab <- "Posterior Probability of Being Best Arm"
-      title <- "Thompson Sampling Over Time"
-    }
-  }
-  if (object == "assignment_probs") {
-    ylab <- "Probability of Assignment"
-    title <- "Assignment Probabilities Over Time"
-  }
-  data |>
-    tidyr::pivot_longer(
-      cols = -period_number,
-      names_to = "condition",
-      values_to = "probs"
-    ) |>
-    ggplot2::ggplot(ggplot2::aes(
-      x = period_number, y = probs,
-      color = condition
-    )) +
-    ggplot2::geom_line(...) +
-    ggplot2::scale_y_continuous(breaks = base::seq(0, 1, 0.1), limits = base::range(0, 1)) +
-    ggplot2::scale_x_continuous(
-      breaks = base::seq(0, periods, 1),
-      limits = range(1, periods)
-    ) +
-    ggplot2::labs(
-      x = "Assignment Period",
-      y = ylab,
-      title = title,
-      color = "Treatment Arm"
-    ) +
-    ggplot2::theme_minimal()
-}
-
-#' @name plot_estimates
-#' @title Plot AIPW/Sample Estimates
-#' @inheritParams plot.mab
-#' @description
-#' Plot Summary of AIPW estimates and variances for Each Treatment Arm
-#' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)`
-#' @keywords internal
-plot_estimates <- function(x, estimator, level = 0.95, ...) {
-  rlang::check_installed("ggplot2")
+summary.multiple.mab <- function(object, level = 0.95, ...) {
   check_level(level)
-  estimator_arg <- check_estimator(estimator)
-  normalq <- base::abs(stats::qnorm((1 - level) / 2))
+  lower_level <- (1 - level) / 2
+  upper_level <- 1 - lower_level
 
-  x$estimates |>
-    dplyr::filter(estimator %in% estimator_arg) |>
-    ggplot2::ggplot(ggplot2::aes(x = mean, y = mab_condition)) +
-    ggplot2::geom_errorbarh(
-      ggplot2::aes(xmin = mean - normalq * sqrt(variance), xmax = mean + normalq * sqrt(variance)),
-      ...
-    ) +
-    ggplot2::scale_x_continuous(breaks = base::seq(0, 1, 0.05), limits = base::range(0, 1)) +
-    ggplot2::facet_wrap(~estimator) +
-    ggplot2::labs(
-      x = "Probability of Success (AIPW)",
-      y = "Treatment Condition",
-      title = "AIPW Estimates of Success"
-    ) +
-    ggplot2::theme_minimal()
+  quantiles <- object$estimates |>
+    dplyr::group_by(mab_condition, estimator) |>
+    dplyr::summarize(
+      lower = stats::quantile(mean, lower_level),
+      upper = stats::quantile(mean, upper_level)
+    )
+
+  estimate <- object$estimates |>
+    dplyr::group_by(mab_condition, estimator) |>
+    dplyr::summarize(
+      estimate_avg = base::mean(mean, na.rm = TRUE),
+      variance_avg = base::mean(variance, na.rm = TRUE),
+      variance_resample = stats::var(mean), .groups = "drop",
+    ) |>
+    dplyr::mutate(
+      lower = estimate_avg + stats::qnorm(lower_level) * base::sqrt(variance_avg),
+      upper = estimate_avg + stats::qnorm(upper_level) * base::sqrt(variance_avg)
+    ) |>
+    dplyr::left_join(quantiles, by = c("mab_condition", "estimator"), suffix = c("_normal", "_empirical"))
+
+  bandits <- object$bandits |>
+    dplyr::group_by(trial) |>
+    dplyr::filter(period_number == max(period_number)) |>
+    tidyr::pivot_longer(
+      cols = c(-trial, -period_number), names_to = "mab_condition",
+      values_to = "bandit"
+    ) |>
+    dplyr::slice_max(order_by = bandit) |>
+    dplyr::ungroup() |>
+    dplyr::count(mab_condition)
+
+  summary <- dplyr::left_join(estimate, bandits, by = c("mab_condition")) |>
+    dplyr::rename(times_best = "n") |>
+    dplyr::mutate(
+      times_best = dplyr::if_else(base::is.na(times_best), 0, times_best),
+      level = level
+    )
+  return(summary)
 }
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
+
 #' Plot Generic for `multiple.mab` objects
 #' @description Uses [ggplot2::ggplot()] to summarize the results of multiple
 #' Multi-Arm Bandit Trials
