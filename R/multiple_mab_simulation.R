@@ -9,10 +9,10 @@
 #'
 #'
 #' @inheritParams single_mab_simulation
-#' @param verbose Logical; Toggles progress bar from [furrr::future_map()] and other intermidate messages.
-#' @param times A numeric value of length 1, the number of simulations to conducts.
+#' @param verbose Logical; Toggles progress bar from [furrr::future_map()] and other intermediate messages.
+#' @param times A numeric value of length 1, the number of simulations to conduct.
 #' @param seeds An integer vector of `length(times)` containing valid seeds to define random state for each trial.
-#' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets
+#' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets.
 #' .
 #' @returns `multiple.mab` class object, which is a named list containing:
 #' \itemize{
@@ -224,16 +224,27 @@ multiple_mab_simulation <- function(data,
 #' @title Condenses results into a list for [multiple_mab_simulation()]
 #' @description
 #' Takes the output from [furrr::future_map()] in [multiple_mab_simulation()]
-#' and condenses it to return to the user
+#' and condenses it to return to the user.
 #' @inheritParams multiple_mab_simulation
 #' @param mabs output from [furrr::future_map()] in [multiple_mab_simulation()]
 #' @returns `multiple.mab` class object, which is a named list containing:
 #' \itemize{
-#' \item `final_data_nest:` Data.frame containing a nested data.frame with the final data from each trial
-#' \item `bandits:` Data.frame containing the Thompson/UCB1 statistics across all treatments, periods, and trials
-#' \item `estimates:` Data.frame containing the AIPW statistics across all treatments, and trials
+#' \item `final_data_nest:` tibble or data.table containing the nested tibbles/data.tables from each trial. Only provided when `keep_data` is TRUE.
+#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period of each trial.
+#' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period of each trial.
+#' \item `estimates`: A tibble or data.table containing the
+#' AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
+#' sample means and variances, for each treatment arm, in each trial.
+#' \item `settings`: A named list of the configuration settings used in the trial.
 #' \item `settings`: A list of the configuration settings used in the trial.
 #' }
+#' @details
+#' This function iterates over every element in the output from [furrr::future_map()]
+#' and extracts the required element to place to condense into the final list, outputted to the user
+#' in [multiple_mab_simulation]. It condenses the long list into tibbles or data.tables, keeping each element
+#' together. For example it extracts all the `bandits` objects from the output lists, across all trials, and
+#' binds them into a single tibble/data.table.
+#'
 #' @keywords internal
 
 condense_results <- function(data, keep_data, mabs, times) {

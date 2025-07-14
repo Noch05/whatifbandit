@@ -10,24 +10,35 @@ condense_results(data, keep_data, mabs, times)
 \item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.}
 
-\item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets
+\item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets.
 .}
 
 \item{mabs}{output from \code{\link[furrr:future_map]{furrr::future_map()}} in \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}}
 
-\item{times}{A numeric value of length 1, the number of simulations to conducts.}
+\item{times}{A numeric value of length 1, the number of simulations to conduct.}
 }
 \value{
 \code{multiple.mab} class object, which is a named list containing:
 \itemize{
-\item \verb{final_data_nest:} Data.frame containing a nested data.frame with the final data from each trial
-\item \verb{bandits:} Data.frame containing the Thompson/UCB1 statistics across all treatments, periods, and trials
-\item \verb{estimates:} Data.frame containing the AIPW statistics across all treatments, and trials
+\item \verb{final_data_nest:} tibble or data.table containing the nested tibbles/data.tables from each trial. Only provided when \code{keep_data} is TRUE.
+\item \code{bandits}: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period of each trial.
+\item \code{assignment_probs}: A tibble or data.table containing the probability of being assigned each treatment arm at a given period of each trial.
+\item \code{estimates}: A tibble or data.table containing the
+AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
+sample means and variances, for each treatment arm, in each trial.
+\item \code{settings}: A named list of the configuration settings used in the trial.
 \item \code{settings}: A list of the configuration settings used in the trial.
 }
 }
 \description{
 Takes the output from \code{\link[furrr:future_map]{furrr::future_map()}} in \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}
-and condenses it to return to the user
+and condenses it to return to the user.
+}
+\details{
+This function iterates over every element in the output from \code{\link[furrr:future_map]{furrr::future_map()}}
+and extracts the required element to place to condense into the final list, outputted to the user
+in \link{multiple_mab_simulation}. It condenses the long list into tibbles or data.tables, keeping each element
+together. For example it extracts all the \code{bandits} objects from the output lists, across all trials, and
+binds them into a single tibble/data.table.
 }
 \keyword{internal}

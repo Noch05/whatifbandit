@@ -77,7 +77,7 @@ containing the names or numbers of months.
 Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type \code{Date}, not a character string.
 }}
 
-\item{times}{A numeric value of length 1, the number of simulations to conducts.}
+\item{times}{A numeric value of length 1, the number of simulations to conduct.}
 
 \item{seeds}{An integer vector of \code{length(times)} containing valid seeds to define random state for each trial.}
 
@@ -97,9 +97,9 @@ If you have a large dataset, consider passing it as a \code{data.table}.}
 
 \item{block_cols}{A character vector of variables to block by. This vector should not be named.}
 
-\item{verbose}{Logical; Toggles progress bar from \code{\link[furrr:future_map]{furrr::future_map()}} and other intermidate messages.}
+\item{verbose}{Logical; Toggles progress bar from \code{\link[furrr:future_map]{furrr::future_map()}} and other intermediate messages.}
 
-\item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets
+\item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets.
 .}
 }
 \value{
