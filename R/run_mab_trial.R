@@ -114,13 +114,13 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       current_period = i
     )
   }
-
   results <- end_mab_trial(
-    data = data, bandits = bandits, algorithm = algorithm,
-    conditions = conditions, periods = periods
+    data = data,
+    bandits = bandits,
+    algorithm = algorithm,
+    conditions = conditions,
+    periods = periods
   )
-
-
 
   return(results)
 }

@@ -1,19 +1,14 @@
 #' @title Validates Inputs For [single_mab_simulation()] and [multiple_mab_simulation()]
 #' @name check_args
-#'
-#'
 #' @description This function provides input validation,
 #' checking to ensure that all required function arguments have been entered,
 #' and that they do not conflict with one another. The goal is to provide the user
 #' with informative error messages so they can quickly fix their usage of the function.
-#'
 #' @inheritParams single_mab_simulation
 #' @inheritParams cols
-#'
 #' @returns No return value. Throws an error
 #' if problems exist before running [single_mab_simulation]
 #' or [multiple_mab_simulation()].
-#'
 #' @seealso
 #' *[single_mab_simulation()]
 #' *[multiple_mab_simulation()]

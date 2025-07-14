@@ -7,7 +7,6 @@
 #' through the \href{https://cran.r-project.org/web/packages/future/index.html}{future} and
 #' \href{https://cran.r-project.org/web/packages/furrr/index.html}{furrr} packages.
 #'
-#'
 #' @inheritParams single_mab_simulation
 #' @param verbose Logical; Toggles progress bar from [furrr::future_map()] and other intermediate messages.
 #' @param times A numeric value of length 1, the number of simulations to conduct.
@@ -136,6 +135,9 @@ multiple_mab_simulation <- function(data,
     verbose = verbose
   )
   verbose_log(verbose, "Starting Simulations")
+
+  ## Initial Sort for Consistency in calling by numeric indexes
+  conditions <- base::sort(conditions)
 
   mabs <- furrr::future_map(
     seeds,

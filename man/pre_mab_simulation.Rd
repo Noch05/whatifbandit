@@ -2,7 +2,7 @@
 % Please edit documentation in R/pre_mab_simulation.R
 \name{pre_mab_simulation}
 \alias{pre_mab_simulation}
-\title{Pre-Simulation Setup for \code{\link[=mab_simulation]{mab_simulation()}}}
+\title{Pre-Simulation Setup for an adaptive Multi-Arm-Bandit Trial}
 \usage{
 pre_mab_simulation(
   data,
@@ -86,7 +86,7 @@ length of periods by your specified \code{time_unit} (i.e., if "Day", 10 would b
 If assignment method is "Batch", this refers to the number of people in each batch. This factor
 contributes most to the computational cost of calling the function, as large batch sizes make each iteration of
 the simulation run slower, while each additional period adds time because of the extra iterations.
-If you have a large dataset, consider passing it as a \code{data.table}.}
+If you have a large dataset, consider passing it as a data.table.}
 
 \item{block_cols}{A character vector of variables to block by. This vector should not be named.}
 
@@ -97,7 +97,8 @@ Named list containing:
 \itemize{
 \item \code{data_cols}: List of necessary columns in \code{data} as strings and symbols.
 \item \code{block_cols}: List of columns to block by in \code{data} as strings and symbols.
-\item \code{data}: Prepared \code{data} object the same class as inputted. Contains all
+\item \code{data}: Prepared tibble/data.table containing all the necessary columns to
+conduct the adaptive trial simulation.
 columns required for \code{\link[=mab_simulation]{mab_simulation()}}.
 \item \code{imputation_information}: List containing necessary information
 for outcome and date imputation for \code{\link[=mab_simulation]{mab_simulation()}}.
@@ -105,15 +106,12 @@ for outcome and date imputation for \code{\link[=mab_simulation]{mab_simulation(
 }
 \description{
 Common function for all the actions that need to take place before
-running the Multi-Arm-Bandit Simulation. Intakes data and column names,
-check for valid arguments, prepare data and pre-compute key values.
+running the Multi-Arm-Bandit simulation. Intakes the data and column names to
+check for valid arguments, format and create new columns as needed, and pre-compute
+key values to avoid doing so within the simulation loop.
 }
 \seealso{
 *\code{\link[=single_mab_simulation]{single_mab_simulation()}}
 *\code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}
-*\code{\link[=check_args]{check_args()}}
-*\code{\link[=create_cutoff]{create_cutoff()}}
-*\code{\link[=create_new_cols]{create_new_cols()}}
-*\code{\link[=imputation_prep]{imputation_prep()}}
 }
 \keyword{internal}

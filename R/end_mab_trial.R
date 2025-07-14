@@ -19,15 +19,12 @@
 end_mab_trial <- function(data, bandits, algorithm, periods, conditions) {
   base::UseMethod("end_mab_trial", data)
 }
-
-
 #-------------------------------------------------------------------------------
 #
 #' @method end_mab_trial data.frame
 #' @inheritParams end_mab_trial
 #' @title [end_mab_trial()] for data.frames
 #' @noRd
-
 end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditions) {
   final_summary <- data |>
     dplyr::group_by(mab_condition) |>

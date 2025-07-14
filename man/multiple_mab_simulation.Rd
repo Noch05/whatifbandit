@@ -93,7 +93,7 @@ length of periods by your specified \code{time_unit} (i.e., if "Day", 10 would b
 If assignment method is "Batch", this refers to the number of people in each batch. This factor
 contributes most to the computational cost of calling the function, as large batch sizes make each iteration of
 the simulation run slower, while each additional period adds time because of the extra iterations.
-If you have a large dataset, consider passing it as a \code{data.table}.}
+If you have a large dataset, consider passing it as a data.table.}
 
 \item{block_cols}{A character vector of variables to block by. This vector should not be named.}
 

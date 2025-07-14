@@ -86,7 +86,7 @@ length of periods by your specified \code{time_unit} (i.e., if "Day", 10 would b
 If assignment method is "Batch", this refers to the number of people in each batch. This factor
 contributes most to the computational cost of calling the function, as large batch sizes make each iteration of
 the simulation run slower, while each additional period adds time because of the extra iterations.
-If you have a large dataset, consider passing it as a \code{data.table}.}
+If you have a large dataset, consider passing it as a data.table.}
 
 \item{block_cols}{A character vector of variables to block by. This vector should not be named.}
 
@@ -144,10 +144,10 @@ the constant allocation rate adaptive schema. These estimators are unbiased and 
 
 This procedure has the potential to be computationally expensive and time-consuming. Performance
 depends on the relative size of each period, number of periods, and overall size of the dataset. This function
-supports \code{data.table} objects, which are used when passed, but otherwise a combination of \code{dplyr} and base R is used.
+supports  data.tables, which are used when passed, but otherwise a combination of dplyr and base R is used.
 In general, smaller batches run faster under base R, while larger ones could benefit from the performance
-and memory efficiencies provided by \code{data.table}. An example dataset with 3,520 observations under individual assignment
-takes 20-30 seconds under Base R and 40-50 seconds under \code{data.table}. It has also been observed, that larger datasets
+and memory efficiencies provided by data.table. An example dataset with 3,520 observations under individual assignment
+takes 20-30 seconds under Base R and 40-50 seconds under data.table. It has also been observed, that larger datasets
 at least over a  3 million rows, can cause numerical instability in the calculations. Internal safeguards exist
 to prevent this, but to best way to preempt any issues, is to set \code{prior_periods} to a low number.
 }

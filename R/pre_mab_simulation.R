@@ -1,16 +1,18 @@
 #' @name pre_mab_simulation
 #' @inheritParams single_mab_simulation
-#' @title Pre-Simulation Setup for [mab_simulation()]
-
+#' @title Pre-Simulation Setup for an adaptive Multi-Arm-Bandit Trial
 
 #' @description Common function for all the actions that need to take place before
-#' running the Multi-Arm-Bandit Simulation. Intakes data and column names,
-#' check for valid arguments, prepare data and pre-compute key values.
+#' running the Multi-Arm-Bandit simulation. Intakes the data and column names to
+#' check for valid arguments, format and create new columns as needed, and pre-compute
+#' key values to avoid doing so within the simulation loop.
+#'
 #' @returns Named list containing:
 #' \itemize{
 #' \item `data_cols`: List of necessary columns in `data` as strings and symbols.
 #' \item `block_cols`: List of columns to block by in `data` as strings and symbols.
-#' \item `data`: Prepared `data` object the same class as inputted. Contains all
+#' \item `data`: Prepared tibble/data.table containing all the necessary columns to
+#' conduct the adaptive trial simulation.
 #' columns required for [mab_simulation()].
 #' \item `imputation_information`: List containing necessary information
 #' for outcome and date imputation for [mab_simulation()].
@@ -19,10 +21,6 @@
 #' @seealso
 #' *[single_mab_simulation()]
 #' *[multiple_mab_simulation()]
-#' *[check_args()]
-#' *[create_cutoff()]
-#' *[create_new_cols()]
-#' *[imputation_prep()]
 #' @keywords internal
 
 

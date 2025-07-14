@@ -21,9 +21,6 @@
 #' @seealso
 #'* [single_mab_simulation()]
 #'* [multiple_mab_simulation()]
-#'* [run_mab_trial()]
-#'* [get_adaptive_aipw()]
-#'* [pre_mab_simulation()]
 #' @keywords internal
 #'
 
@@ -42,9 +39,6 @@ mab_simulation <- function(data,
                            verbose,
                            assignment_method, control_augment,
                            imputation_information) {
-  conditions <- base::sort(conditions)
-
-  # Run the main MAB trial with all required arguments
   sim_results <- run_mab_trial(
     data = data,
     time_unit = time_unit,
@@ -61,19 +55,28 @@ mab_simulation <- function(data,
     control_augment = control_augment,
     imputation_information = imputation_information
   )
+  periods <- base::max(sim_results$final_data$period_number)
 
-  inference_results <- get_adaptive_aipw(
+  sim_results$final_data <- get_iaipw(
     data = sim_results$final_data,
     assignment_probs = sim_results$assignment_probs,
-    periods = base::max(sim_results$final_data$period_number, na.rm = TRUE),
+    conditions = conditions,
+    periods = periods,
+    verbose = verbose
+  )
+  estimates <- adaptive_aipw(
+    data = sim_results$final_data,
+    assignment_probs = sim_results$assignment_probss,
+    periods = periods,
     conditions = conditions,
     verbose = verbose
   )
+
   results <- list(
-    final_data = inference_results$final_data,
+    final_data = sim_results$final_data,
     bandits = sim_results$bandits,
     assignment_probs = sim_results$assignment_probs,
-    estimates = inference_results$estimates,
+    estimates = estimates,
     settings = list(
       data = NULL,
       assignment_method = assignment_method,

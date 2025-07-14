@@ -30,7 +30,7 @@
 #' If assignment method is "Batch", this refers to the number of people in each batch. This factor
 #' contributes most to the computational cost of calling the function, as large batch sizes make each iteration of
 #' the simulation run slower, while each additional period adds time because of the extra iterations.
-#' If you have a large dataset, consider passing it as a `data.table`.
+#' If you have a large dataset, consider passing it as a data.table.
 #'
 #' @param prior_periods A numeric value of length 1, or the character string "All"; number of previous periods to use
 #' in the treatment assignment model. This is used to implement the stationary/non-stationary bandit.
@@ -122,10 +122,10 @@
 #'
 #' This procedure has the potential to be computationally expensive and time-consuming. Performance
 #' depends on the relative size of each period, number of periods, and overall size of the dataset. This function
-#' supports `data.table` objects, which are used when passed, but otherwise a combination of `dplyr` and base R is used.
+#' supports  data.tables, which are used when passed, but otherwise a combination of dplyr and base R is used.
 #' In general, smaller batches run faster under base R, while larger ones could benefit from the performance
-#' and memory efficiencies provided by `data.table`. An example dataset with 3,520 observations under individual assignment
-#' takes 20-30 seconds under Base R and 40-50 seconds under `data.table`. It has also been observed, that larger datasets
+#' and memory efficiencies provided by data.table. An example dataset with 3,520 observations under individual assignment
+#' takes 20-30 seconds under Base R and 40-50 seconds under data.table. It has also been observed, that larger datasets
 #' at least over a  3 million rows, can cause numerical instability in the calculations. Internal safeguards exist
 #' to prevent this, but to best way to preempt any issues, is to set `prior_periods` to a low number.
 #'
@@ -174,6 +174,8 @@ single_mab_simulation <- function(data,
     period_length = period_length,
     verbose = verbose
   )
+  ## Initial Sort for Consistency in calling by numeric indexes
+  conditions <- base::sort(conditions)
 
 
   # Simulating the MAB Trial

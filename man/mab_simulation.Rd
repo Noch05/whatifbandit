@@ -45,7 +45,7 @@ length of periods by your specified \code{time_unit} (i.e., if "Day", 10 would b
 If assignment method is "Batch", this refers to the number of people in each batch. This factor
 contributes most to the computational cost of calling the function, as large batch sizes make each iteration of
 the simulation run slower, while each additional period adds time because of the extra iterations.
-If you have a large dataset, consider passing it as a \code{data.table}.}
+If you have a large dataset, consider passing it as a data.table.}
 
 \item{prior_periods}{A numeric value of length 1, or the character string "All"; number of previous periods to use
 in the treatment assignment model. This is used to implement the stationary/non-stationary bandit.
@@ -116,9 +116,6 @@ been preprocessed by \code{\link[=pre_mab_simulation]{pre_mab_simulation()}}.
 \itemize{
 \item \code{\link[=single_mab_simulation]{single_mab_simulation()}}
 \item \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}
-\item \code{\link[=run_mab_trial]{run_mab_trial()}}
-\item \code{\link[=get_adaptive_aipw]{get_adaptive_aipw()}}
-\item \code{\link[=pre_mab_simulation]{pre_mab_simulation()}}
 }
 }
 \keyword{internal}

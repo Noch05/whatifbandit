@@ -8,17 +8,7 @@
 #'
 #' @inheritParams get_adaptive_aipw
 #' @inheritParams single_mab_simulation
-#'
-#'
-#'
-#'
-#' @seealso
-#' * [get_iaipw()]
-#' * [get_adaptive_aipw()]
-#' * [mab_simulation()]
 #' @keywords internal
-#-------------------------------------------------------------------------------
-## Adaptive AIPW Weights from Hadad et. al (2021) Using Constant Allocation Rate
 adaptive_aipw <- function(data, assignment_probs, conditions, periods, verbose) {
   verbose_log(verbose, "Aggregating AIPW Estimates")
 

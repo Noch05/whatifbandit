@@ -28,11 +28,4 @@ and assigns each estimate an adaptive weight based on a constant allocation rate
 \href{https://www.pnas.org/doi/pdf/10.1073/pnas.2014602118}{Hadad et. al (2021)} to calculate a final
 estimate for each treatment condition.
 }
-\seealso{
-\itemize{
-\item \code{\link[=get_iaipw]{get_iaipw()}}
-\item \code{\link[=get_adaptive_aipw]{get_adaptive_aipw()}}
-\item \code{\link[=mab_simulation]{mab_simulation()}}
-}
-}
 \keyword{internal}
