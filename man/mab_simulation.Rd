@@ -90,7 +90,7 @@ Used to simulate imperfect information on the part of researchers conducting an 
 groups are assigned correctly. For "Date", observations will be considered in chronological order.
 "Individual" assignment can be time-consuming for larger datasets.}
 
-\item{control_augment}{A numeric value in \link{0, 1}; proportion of each wave guaranteed to receive the "Control" treatment.
+\item{control_augment}{A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.
 Default is 0.}
 
 \item{imputation_information}{Object created by \code{\link[=imputation_prep]{imputation_prep()}} containing the conditional means and success dates

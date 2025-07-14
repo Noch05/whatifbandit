@@ -10,7 +10,7 @@
 \item{assignment_probs}{Named numeric vector; contains probabilities of
 assignment with the control condition named "Control".}
 
-\item{control_augment}{A numeric value in \link{0, 1}; proportion of each wave guaranteed to receive the "Control" treatment.
+\item{control_augment}{A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.
 Default is 0.}
 
 \item{conditions}{A named character vector containing treatment conditions. The elements

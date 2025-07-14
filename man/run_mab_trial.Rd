@@ -84,7 +84,7 @@ of the trial in this vector must have the name "Control".}
 
 \item{verbose}{A logical value; whether or not to print intermediate messages. Default is FALSE.}
 
-\item{control_augment}{A numeric value in \link{0, 1}; proportion of each wave guaranteed to receive the "Control" treatment.
+\item{control_augment}{A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.
 Default is 0.}
 
 \item{imputation_information}{Object created by \code{\link[=imputation_prep]{imputation_prep()}} containing the conditional means and success dates

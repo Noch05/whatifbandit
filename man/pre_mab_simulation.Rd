@@ -74,7 +74,7 @@ containing the names or numbers of months.
 Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type \code{Date}, not a character string.
 }}
 
-\item{control_augment}{A numeric value in \link{0, 1}; proportion of each wave guaranteed to receive the "Control" treatment.
+\item{control_augment}{A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.
 Default is 0.}
 
 \item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "Date".

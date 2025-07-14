@@ -87,7 +87,7 @@ contributes most to the computational cost of calling the function, as large bat
 the simulation run slower, while each additional period adds time because of the extra iterations.
 If you have a large dataset, consider passing it as a \code{data.table}.}
 
-\item{control_augment}{A numeric value in \link{0, 1}; proportion of each wave guaranteed to receive the "Control" treatment.
+\item{control_augment}{A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.
 Default is 0.}
 
 \item{verbose}{A logical value; whether or not to print intermediate messages. Default is FALSE.}

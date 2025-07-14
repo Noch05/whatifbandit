@@ -74,7 +74,7 @@ containing the names or numbers of months.
 Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type \code{Date}, not a character string.
 }}
 
-\item{control_augment}{A numeric value in \link{0, 1}; proportion of each wave guaranteed to receive the "Control" treatment.
+\item{control_augment}{A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.
 Default is 0.}
 
 \item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "Date".
@@ -122,8 +122,9 @@ At each period, either the Thompson Probabilities or UCB1 statistics are calcula
 the outcomes from the number of \code{prior_periods} specified. New treatments are then assigned randomly using the Thompson
 Probabilities via the \href{https://cran.r-project.org/web/packages/randomizr/index.html}{randomizr}
 package, or as the treatment with the  highest UCB1 statistic, while implementing the specific
-treatment blocking and control augmentation specified. More details on bandit algorithms can in \href{
-https://doi.org/10.48550/arXiv.1402.6028}{Kuleshov and Precup 2014} and \href{https://doi.org/10.48550/arXiv.1904.07272}{Slivkins 2024}.
+treatment blocking and control augmentation specified. More details on bandit algorithms can in
+\href{https://doi.org/10.48550/arXiv.1402.6028}{Kuleshov and Precup 2014} and
+\href{https://doi.org/10.48550/arXiv.1904.07272}{Slivkins 2024}.
 
 If \code{perfect_assignment} is FALSE, at this step, some of the successes may be masked, if they occurred after
 the specified treatment assignment date for that given period, but these will be unmasked in later periods.
