@@ -14,31 +14,39 @@ check_cols(
 )
 }
 \arguments{
-\item{assignment_method}{String; "Date", "Batch" or "Individual" to define the assignment into treatment waves.}
+\item{assignment_method}{A character string; one of "Date", "Batch", or "Individual", to define the assignment into treatment waves. When using
+"Batch" or "Individual", ensure your dataset is pre-arranged in the proper order observations should be considered so that
+groups are assigned correctly. For "Date", observations will be considered in chronological order.
+"Individual" assignment can be time-consuming for larger datasets.}
 
-\item{time_unit}{A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'.
+\item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "Date".
 Acceptable values are "Day", "Week", or "Month".}
 
-\item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
+\item{perfect_assignment}{A logical value; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
 If FALSE, hides outcomes not yet theoretically observed, based
-on the dates treatments would have been assigned for each wave.}
+on the dates treatments would have been assigned for each wave.
+This is useful when simulating batch-based assignment where treatments were assigned
+on a given day whether or not all the information from a prior batch was available and
+you have exact dates treatments were assigned.}
 
-\item{data_cols}{Named Character vector containing the names of columns in data as strings:
+\item{data_cols}{A named character vector containing the names of columns in \code{data} as strings:
 \itemize{
-\item \code{id_col}: Column in data, contains unique id as a key.
-\item \code{success_col}: Column in data; Binary successes from original experiment.
-\item \code{condition_col}: Column in data; Original Treatment condition for each observation.
-\item \code{date_col}: Column in data, contains original date of event/trial; only necessary when assigning by 'Date'.
-\item \code{month_col}: Column in data, contains month of treatment; only necessary when time_unit = 'Month'.
-\item \code{success_date_col}: Column in data, contains original dates each success occurred; only necessary when 'perfect_assignment' = FALSE.
-\item \code{assignment_date_col}: Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
-Used to simulate imperfect information on part of researchers conducting an adaptive trial.
+\item \code{id_col}: Column in \code{data}; contains unique ID as a key.
+\item \code{success_col}: Column in \code{data}; binary successes from the original experiment.
+\item \code{condition_col}: Column in \code{data}; original treatment condition for each observation.
+\item \code{date_col}: Column in \code{data}; contains original date of event/trial. Only necessary when assigning by "Date". Must be of type \code{Date}, not a character string.
+\item \code{month_col}: Column in \code{data}; contains month of treatment. Only necessary when \code{time_unit = "Month"}. This can be a string or factor variable
+containing the names or numbers of months.
+\item \code{success_date_col}: Column in \code{data}; contains original dates each success occurred. Only necessary when \code{perfect_assignment = FALSE}. Must be of type \code{Date}, not a character string.
+\item \code{assignment_date_col}: Column in \code{data}; contains original dates treatments were assigned to observations. Only necessary when \code{perfect_assignment = FALSE}.
+Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type \code{Date}, not a character string.
 }}
 
-\item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
+\item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
+of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.}
 
-\item{verbose}{Logical; Whether or not to print iteration number. FALSE by default.}
+\item{verbose}{A logical value; whether or not to print intermediate messages. Default is FALSE.}
 }
 \value{
 Throws an error if columns are not properly declared or in data

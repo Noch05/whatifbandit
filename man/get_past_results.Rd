@@ -17,15 +17,21 @@ get_past_results(
 
 \item{prior_data}{Data with only the observations from the prior index.}
 
-\item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
+\item{perfect_assignment}{A logical value; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
 If FALSE, hides outcomes not yet theoretically observed, based
-on the dates treatments would have been assigned for each wave.}
+on the dates treatments would have been assigned for each wave.
+This is useful when simulating batch-based assignment where treatments were assigned
+on a given day whether or not all the information from a prior batch was available and
+you have exact dates treatments were assigned.}
 
 \item{assignment_date_col}{Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.}
 
-\item{conditions}{Named Character vector containing treatment conditions.
-Control condition, must be named "Control" when 'control_augment' > 0.}
+\item{conditions}{A named character vector containing treatment conditions. The elements
+of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
+\code{unique(df$cond)}. The names of each element are used to reference the contents but are not inherently important;
+choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
+of the trial in this vector must have the name "Control".}
 }
 \value{
 A data.frame, containing the number of successes, and number of people for each

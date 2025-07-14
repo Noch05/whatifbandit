@@ -23,53 +23,74 @@ mab_simulation(
 )
 }
 \arguments{
-\item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
+\item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
+of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.}
 
-\item{time_unit}{A string specifying the unit of time for assigning periods when 'assignment_method` is 'date'.
+\item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "Date".
 Acceptable values are "Day", "Week", or "Month".}
 
-\item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
+\item{perfect_assignment}{A logical value; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
 If FALSE, hides outcomes not yet theoretically observed, based
-on the dates treatments would have been assigned for each wave.}
+on the dates treatments would have been assigned for each wave.
+This is useful when simulating batch-based assignment where treatments were assigned
+on a given day whether or not all the information from a prior batch was available and
+you have exact dates treatments were assigned.}
 
-\item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
+\item{algorithm}{A character string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
 
-\item{period_length}{Numeric; length of each treatment period.
+\item{period_length}{A numeric value of length 1; represents the length of each treatment period.
 If assignment method is "Date", this refers to the
 length of periods by your specified \code{time_unit} (i.e., if "Day", 10 would be 10 days).
-If assignment methods is "Batch", this refers to the number of people in each batch.}
+If assignment method is "Batch", this refers to the number of people in each batch. This factor
+contributes most to the computational cost of calling the function, as large batch sizes make each iteration of
+the simulation run slower, while each additional period adds time because of the extra iterations.
+If you have a large dataset, consider passing it as a \code{data.table}.}
 
-\item{prior_periods}{Numeric; number of previous periods to use in the treatment assignment model
-or specify string "All" to use all previous periods.}
+\item{prior_periods}{A numeric value of length 1, or the character string "All"; number of previous periods to use
+in the treatment assignment model. This is used to implement the stationary/non-stationary bandit.
+For example, a non-stationary bandit assumes the true probability of success for each treatment changes over time, so to
+account for that, not all prior data should be used when making decisions because it could be "out of date".}
 
-\item{whole_experiment}{Logical; if TRUE, uses all past experimental data for imputing outcomes.
-If FALSE, uses only data available up to the current period.}
+\item{whole_experiment}{A logical value; if TRUE, uses all past experimental data for imputing outcomes.
+If FALSE, uses only data available up to the current period. In large datasets or with a high number
+of periods, setting this to FALSE can be more computationally intensive, though not a significant
+contributor to total runtime.}
 
-\item{conditions}{Named Character vector containing treatment conditions.
-Control condition, must be named "Control" when 'control_augment' > 0.}
+\item{conditions}{A named character vector containing treatment conditions. The elements
+of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
+\code{unique(df$cond)}. The names of each element are used to reference the contents but are not inherently important;
+choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
+of the trial in this vector must have the name "Control".}
 
-\item{blocking}{Logical; Whether or not to use treatment blocking.}
+\item{blocking}{A logical value; whether or not to use treatment blocking. Treatment blocking is used to ensure an even-enough
+distribution of treatment conditions across blocks. For example, blocking by gender would mean the randomized assignment should
+split treatments evenly not just throughout the sample (so for 4 arms, 25-25-25-25), but also within each block, so 25\% of men
+would receive each treatment and 25\% of women the same.}
 
-\item{block_cols}{Character Vector of variables to block by.}
+\item{block_cols}{A character vector of variables to block by. This vector should not be named.}
 
-\item{data_cols}{Named Character vector containing the names of columns in data as strings:
+\item{data_cols}{A named character vector containing the names of columns in \code{data} as strings:
 \itemize{
-\item \code{id_col}: Column in data, contains unique id as a key.
-\item \code{success_col}: Column in data; Binary successes from original experiment.
-\item \code{condition_col}: Column in data; Original Treatment condition for each observation.
-\item \code{date_col}: Column in data, contains original date of event/trial; only necessary when assigning by 'Date'.
-\item \code{month_col}: Column in data, contains month of treatment; only necessary when time_unit = 'Month'.
-\item \code{success_date_col}: Column in data, contains original dates each success occurred; only necessary when 'perfect_assignment' = FALSE.
-\item \code{assignment_date_col}: Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
-Used to simulate imperfect information on part of researchers conducting an adaptive trial.
+\item \code{id_col}: Column in \code{data}; contains unique ID as a key.
+\item \code{success_col}: Column in \code{data}; binary successes from the original experiment.
+\item \code{condition_col}: Column in \code{data}; original treatment condition for each observation.
+\item \code{date_col}: Column in \code{data}; contains original date of event/trial. Only necessary when assigning by "Date". Must be of type \code{Date}, not a character string.
+\item \code{month_col}: Column in \code{data}; contains month of treatment. Only necessary when \code{time_unit = "Month"}. This can be a string or factor variable
+containing the names or numbers of months.
+\item \code{success_date_col}: Column in \code{data}; contains original dates each success occurred. Only necessary when \code{perfect_assignment = FALSE}. Must be of type \code{Date}, not a character string.
+\item \code{assignment_date_col}: Column in \code{data}; contains original dates treatments were assigned to observations. Only necessary when \code{perfect_assignment = FALSE}.
+Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type \code{Date}, not a character string.
 }}
 
-\item{verbose}{Logical; Whether or not to print iteration number. FALSE by default.}
+\item{verbose}{A logical value; whether or not to print intermediate messages. Default is FALSE.}
 
-\item{assignment_method}{String; "Date", "Batch" or "Individual" to define the assignment into treatment waves.}
+\item{assignment_method}{A character string; one of "Date", "Batch", or "Individual", to define the assignment into treatment waves. When using
+"Batch" or "Individual", ensure your dataset is pre-arranged in the proper order observations should be considered so that
+groups are assigned correctly. For "Date", observations will be considered in chronological order.
+"Individual" assignment can be time-consuming for larger datasets.}
 
-\item{control_augment}{Number \eqn{\in} [0,1]; Proportion of each wave guaranteed to get "Control" treatment.
+\item{control_augment}{A numeric value in \link{0, 1}; proportion of each wave guaranteed to receive the "Control" treatment.
 Default is 0.}
 
 \item{imputation_information}{Object created by \code{\link[=imputation_prep]{imputation_prep()}} containing the conditional means and success dates

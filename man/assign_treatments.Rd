@@ -20,14 +20,20 @@ assign_treatments(
 
 \item{probs}{Named Numeric Vector; Probability of Assignment for each treatment condition.}
 
-\item{blocking}{Logical; Whether or not to use treatment blocking.}
+\item{blocking}{A logical value; whether or not to use treatment blocking. Treatment blocking is used to ensure an even-enough
+distribution of treatment conditions across blocks. For example, blocking by gender would mean the randomized assignment should
+split treatments evenly not just throughout the sample (so for 4 arms, 25-25-25-25), but also within each block, so 25\% of men
+would receive each treatment and 25\% of women the same.}
 
-\item{algorithm}{A string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
+\item{algorithm}{A character string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
 
 \item{id_col}{Column in data, contains unique id as a key.}
 
-\item{conditions}{Named Character vector containing treatment conditions.
-Control condition, must be named "Control" when 'control_augment' > 0.}
+\item{conditions}{A named character vector containing treatment conditions. The elements
+of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
+\code{unique(df$cond)}. The names of each element are used to reference the contents but are not inherently important;
+choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
+of the trial in this vector must have the name "Control".}
 
 \item{condition_col}{Column in data; Original Treatment condition for each observation.}
 

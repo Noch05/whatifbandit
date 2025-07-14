@@ -10,11 +10,14 @@
 \item{assignment_probs}{Named numeric vector; contains probabilities of
 assignment with the control condition named "Control".}
 
-\item{control_augment}{Number \eqn{\in} [0,1]; Proportion of each wave guaranteed to get "Control" treatment.
+\item{control_augment}{A numeric value in \link{0, 1}; proportion of each wave guaranteed to receive the "Control" treatment.
 Default is 0.}
 
-\item{conditions}{Named Character vector containing treatment conditions.
-Control condition, must be named "Control" when 'control_augment' > 0.}
+\item{conditions}{A named character vector containing treatment conditions. The elements
+of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
+\code{unique(df$cond)}. The names of each element are used to reference the contents but are not inherently important;
+choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
+of the trial in this vector must have the name "Control".}
 }
 \description{
 Augment Prob For UCB1

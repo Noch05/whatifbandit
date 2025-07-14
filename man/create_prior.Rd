@@ -7,8 +7,10 @@
 create_prior(prior_periods, current_period)
 }
 \arguments{
-\item{prior_periods}{Numeric; number of previous periods to use in the treatment assignment model
-or specify string "All" to use all previous periods.}
+\item{prior_periods}{A numeric value of length 1, or the character string "All"; number of previous periods to use
+in the treatment assignment model. This is used to implement the stationary/non-stationary bandit.
+For example, a non-stationary bandit assumes the true probability of success for each treatment changes over time, so to
+account for that, not all prior data should be used when making decisions because it could be "out of date".}
 
 \item{current_period}{The current period of the simulation. Defined by loop structure inside \code{\link[=run_mab_trial]{run_mab_trial()}}.}
 }

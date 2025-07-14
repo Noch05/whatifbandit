@@ -28,10 +28,13 @@ Created by \code{\link[=imputation_prep]{imputation_prep()}}}
 
 \item{prior_data}{\code{data} object from previous periods. Joined together at the end for the next iteration of the simulation.}
 
-\item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
+\item{perfect_assignment}{A logical value; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
 If FALSE, hides outcomes not yet theoretically observed, based
-on the dates treatments would have been assigned for each wave.}
+on the dates treatments would have been assigned for each wave.
+This is useful when simulating batch-based assignment where treatments were assigned
+on a given day whether or not all the information from a prior batch was available and
+you have exact dates treatments were assigned.}
 
 \item{dates}{Named date vector; Contains average success date by treatment block to impute new success dates for
 observations whose change in treatment changes their outcome from failure to success.}

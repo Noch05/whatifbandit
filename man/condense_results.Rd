@@ -7,7 +7,8 @@
 condense_results(data, keep_data, mabs, times)
 }
 \arguments{
-\item{data}{A data frame, tibble or data.table that provides the input data for the trial.}
+\item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
+of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.}
 
 \item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets
 .}

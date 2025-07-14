@@ -14,10 +14,13 @@ of receiving each treatment at each treatment period in the simulated trial.}
 
 \item{periods}{Numeric; number of treatment waves.}
 
-\item{conditions}{Named Character vector containing treatment conditions.
-Control condition, must be named "Control" when 'control_augment' > 0.}
+\item{conditions}{A named character vector containing treatment conditions. The elements
+of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
+\code{unique(df$cond)}. The names of each element are used to reference the contents but are not inherently important;
+choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
+of the trial in this vector must have the name "Control".}
 
-\item{verbose}{Logical; Whether or not to print iteration number. FALSE by default.}
+\item{verbose}{A logical value; whether or not to print intermediate messages. Default is FALSE.}
 }
 \value{
 A data frame containing the data used in the MAB trial

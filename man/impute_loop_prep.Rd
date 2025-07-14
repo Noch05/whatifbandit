@@ -17,20 +17,28 @@ impute_loop_prep(
 \arguments{
 \item{current_data}{Data with only observations from the current sampling period.}
 
-\item{block_cols}{Character Vector of variables to block by.}
+\item{block_cols}{A character vector of variables to block by. This vector should not be named.}
 
 \item{imputation_information}{Object created by \code{\link[=imputation_prep]{imputation_prep()}} containing the conditional means and success dates
 for each treatment block to impute from.}
 
-\item{whole_experiment}{Logical; if TRUE, uses all past experimental data for imputing outcomes.
-If FALSE, uses only data available up to the current period.}
+\item{whole_experiment}{A logical value; if TRUE, uses all past experimental data for imputing outcomes.
+If FALSE, uses only data available up to the current period. In large datasets or with a high number
+of periods, setting this to FALSE can be more computationally intensive, though not a significant
+contributor to total runtime.}
 
-\item{blocking}{Logical; Whether or not to use treatment blocking.}
+\item{blocking}{A logical value; whether or not to use treatment blocking. Treatment blocking is used to ensure an even-enough
+distribution of treatment conditions across blocks. For example, blocking by gender would mean the randomized assignment should
+split treatments evenly not just throughout the sample (so for 4 arms, 25-25-25-25), but also within each block, so 25\% of men
+would receive each treatment and 25\% of women the same.}
 
-\item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
+\item{perfect_assignment}{A logical value; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
 If FALSE, hides outcomes not yet theoretically observed, based
-on the dates treatments would have been assigned for each wave.}
+on the dates treatments would have been assigned for each wave.
+This is useful when simulating batch-based assignment where treatments were assigned
+on a given day whether or not all the information from a prior batch was available and
+you have exact dates treatments were assigned.}
 
 \item{current_period}{Numeric scalar; current treatment wave of the simulation.}
 }
