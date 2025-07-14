@@ -25,11 +25,12 @@ This is useful when simulating batch-based assignment where treatments were assi
 on a given day whether or not all the information from a prior batch was available and
 you have exact dates treatments were assigned.}
 
-\item{assignment_date_col}{Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.}
+\item{assignment_date_col}{Column in \code{data}; contains original dates treatments were assigned to observations. Only necessary when \code{perfect_assignment = FALSE}.
+Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type \code{Date}, not a character string.}
 
 \item{conditions}{A named character vector containing treatment conditions. The elements
 of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
-\code{unique(df$cond)}. The names of each element are used to reference the contents but are not inherently important;
+\code{unique(df[[condition_col_name]])}. The names of each element are used to reference the contents but are not inherently important;
 choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
 of the trial in this vector must have the name "Control".}
 }

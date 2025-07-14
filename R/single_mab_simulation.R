@@ -44,7 +44,7 @@
 #'
 #' @param conditions A named character vector containing treatment conditions. The elements
 #' of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
-#' `unique(df$cond)`. The names of each element are used to reference the contents but are not inherently important;
+#' `unique(df[[condition_col_name]])`. The names of each element are used to reference the contents but are not inherently important;
 #' choose names that are meaningful and consistent. If `control_augment` > 0, then the control condition
 #' of the trial in this vector must have the name "Control".
 #'
@@ -122,7 +122,7 @@
 #' This procedure has the potential to be computationally expensive and time-consuming. Performance
 #' depends on the relative size of each period, number of periods, and overall size of the dataset. This function
 #' supports `data.table` objects, which are used when passed, but otherwise a combination of `dplyr` and base R is used.
-#' In general, smaller batches run faster under Base R, while larger ones could benefit from the performance
+#' In general, smaller batches run faster under base R, while larger ones could benefit from the performance
 #' and memory efficiencies provided by `data.table`. An example dataset with 3,520 observations under individual assignment
 #' takes 20-30 seconds under Base R and 40-50 seconds under `data.table`
 #'
@@ -201,12 +201,14 @@ single_mab_simulation <- function(data,
 #' @description Topic holding common arguments across many functions,
 #' used to inherit from in documentation to keep definitions consistent. Not a
 #' function.
-#' @param id_col Column in data, contains unique id as a key.
-#' @param success_col  Column in data; Binary successes from original experiment.
-#' @param condition_col Column in data; Original Treatment condition for each observation.
-#' @param date_col  Column in data, contains original date of event/trial; only necessary when assigning by 'Date'.
-#' @param month_col  Column in data, contains month of treatment; only necessary when time_unit = 'Month'.
-#' @param success_date_col  Column in data, contains original dates each success occurred; only necessary when 'perfect_assignment' = FALSE.
-#' @param assignment_date_col  Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.
+#' @param id_col Column in `data`; contains unique ID as a key.
+#' @param success_col Column in `data`; binary successes from the original experiment.
+#' @param condition_col Column in `data`; original treatment condition for each observation.
+#' @param date_col Column in `data`; contains original date of event/trial. Only necessary when assigning by "Date". Must be of type `Date`, not a character string.
+#' @param month_col Column in `data`; contains month of treatment. Only necessary when `time_unit = "Month"`. This can be a string or factor variable
+#' containing the names or numbers of months.
+#' @param success_date_col Column in `data`; contains original dates each success occurred. Only necessary when `perfect_assignment = FALSE`. Must be of type `Date`, not a character string.
+#' @param assignment_date_col Column in `data`; contains original dates treatments were assigned to observations. Only necessary when `perfect_assignment = FALSE`.
+#' Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type `Date`, not a character string.
 #' @keywords internal
 NULL

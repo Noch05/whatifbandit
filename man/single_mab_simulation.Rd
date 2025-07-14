@@ -34,7 +34,7 @@ groups are assigned correctly. For "Date", observations will be considered in ch
 
 \item{conditions}{A named character vector containing treatment conditions. The elements
 of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
-\code{unique(df$cond)}. The names of each element are used to reference the contents but are not inherently important;
+\code{unique(df[[condition_col_name]])}. The names of each element are used to reference the contents but are not inherently important;
 choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
 of the trial in this vector must have the name "Control".}
 
@@ -144,7 +144,7 @@ the constant allocation rate adaptive schema. These estimators are unbiased and 
 This procedure has the potential to be computationally expensive and time-consuming. Performance
 depends on the relative size of each period, number of periods, and overall size of the dataset. This function
 supports \code{data.table} objects, which are used when passed, but otherwise a combination of \code{dplyr} and base R is used.
-In general, smaller batches run faster under Base R, while larger ones could benefit from the performance
+In general, smaller batches run faster under base R, while larger ones could benefit from the performance
 and memory efficiencies provided by \code{data.table}. An example dataset with 3,520 observations under individual assignment
 takes 20-30 seconds under Base R and 40-50 seconds under \code{data.table}
 }

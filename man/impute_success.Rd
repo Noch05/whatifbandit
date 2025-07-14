@@ -22,9 +22,9 @@ impute_success(
 \item{imputation_info}{\code{data} object containing probabilities of success from the original experiment, to impute outcomes from.
 Created by \code{\link[=imputation_prep]{imputation_prep()}}}
 
-\item{id_col}{Column in data, contains unique id as a key.}
+\item{id_col}{Column in \code{data}; contains unique ID as a key.}
 
-\item{success_col}{Column in data; Binary successes from original experiment.}
+\item{success_col}{Column in \code{data}; binary successes from the original experiment.}
 
 \item{prior_data}{\code{data} object from previous periods. Joined together at the end for the next iteration of the simulation.}
 
@@ -39,7 +39,7 @@ you have exact dates treatments were assigned.}
 \item{dates}{Named date vector; Contains average success date by treatment block to impute new success dates for
 observations whose change in treatment changes their outcome from failure to success.}
 
-\item{success_date_col}{Column in data, contains original dates each success occurred; only necessary when 'perfect_assignment' = FALSE.}
+\item{success_date_col}{Column in \code{data}; contains original dates each success occurred. Only necessary when \code{perfect_assignment = FALSE}. Must be of type \code{Date}, not a character string.}
 
 \item{current_period}{Numeric scalar; current treatment wave of the simulation.}
 }

@@ -27,17 +27,17 @@ would receive each treatment and 25\% of women the same.}
 
 \item{algorithm}{A character string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
 
-\item{id_col}{Column in data, contains unique id as a key.}
+\item{id_col}{Column in \code{data}; contains unique ID as a key.}
 
 \item{conditions}{A named character vector containing treatment conditions. The elements
 of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
-\code{unique(df$cond)}. The names of each element are used to reference the contents but are not inherently important;
+\code{unique(df[[condition_col_name]])}. The names of each element are used to reference the contents but are not inherently important;
 choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
 of the trial in this vector must have the name "Control".}
 
-\item{condition_col}{Column in data; Original Treatment condition for each observation.}
+\item{condition_col}{Column in \code{data}; original treatment condition for each observation.}
 
-\item{success_col}{Column in data; Binary successes from original experiment.}
+\item{success_col}{Column in \code{data}; binary successes from the original experiment.}
 }
 \value{
 Updated \code{data} object with the new treatment conditions. If this treatment is different

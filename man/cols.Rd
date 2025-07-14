@@ -4,19 +4,21 @@
 \alias{cols}
 \title{Column arguments shared across functions}
 \arguments{
-\item{id_col}{Column in data, contains unique id as a key.}
+\item{id_col}{Column in \code{data}; contains unique ID as a key.}
 
-\item{success_col}{Column in data; Binary successes from original experiment.}
+\item{success_col}{Column in \code{data}; binary successes from the original experiment.}
 
-\item{condition_col}{Column in data; Original Treatment condition for each observation.}
+\item{condition_col}{Column in \code{data}; original treatment condition for each observation.}
 
-\item{date_col}{Column in data, contains original date of event/trial; only necessary when assigning by 'Date'.}
+\item{date_col}{Column in \code{data}; contains original date of event/trial. Only necessary when assigning by "Date". Must be of type \code{Date}, not a character string.}
 
-\item{month_col}{Column in data, contains month of treatment; only necessary when time_unit = 'Month'.}
+\item{month_col}{Column in \code{data}; contains month of treatment. Only necessary when \code{time_unit = "Month"}. This can be a string or factor variable
+containing the names or numbers of months.}
 
-\item{success_date_col}{Column in data, contains original dates each success occurred; only necessary when 'perfect_assignment' = FALSE.}
+\item{success_date_col}{Column in \code{data}; contains original dates each success occurred. Only necessary when \code{perfect_assignment = FALSE}. Must be of type \code{Date}, not a character string.}
 
-\item{assignment_date_col}{Column in data, contains original dates treatments are assigned to observations; only necessary when 'perfect_assignment' = FALSE.}
+\item{assignment_date_col}{Column in \code{data}; contains original dates treatments were assigned to observations. Only necessary when \code{perfect_assignment = FALSE}.
+Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type \code{Date}, not a character string.}
 }
 \description{
 Topic holding common arguments across many functions,
