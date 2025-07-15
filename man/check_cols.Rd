@@ -49,15 +49,13 @@ of a traditional Randomized Controlled Trial (RCT). data.frames will be converte
 \item{verbose}{A logical value; whether or not to print intermediate messages. Default is FALSE.}
 }
 \value{
-Throws an error if columns are not properly declared or in data
+Throws an error if columns which are required have not been declared
+or are not present in the data. Additionally throws warning messages,
+if unnecessary columns have been provided.
 }
 \description{
-Takes the user's settings as input, and checks the required columns against
-which ones are provided, and throws in error if the user did not provide a required column, or
-the column they provide is not present in their data.
-}
-\seealso{
-*\code{\link[=single_mab_simulation]{single_mab_simulation()}}
-*\code{\link[=check_args]{check_args()}}
+Helper to \code{\link[=check_args]{check_args()}}. This function accepts the user's
+settings for the Multi-Arm-Bandit trial, and checks whether columns in the data have been properly
+specified based on these settings.
 }
 \keyword{internal}

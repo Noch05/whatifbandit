@@ -83,7 +83,6 @@ print_mab <- function(mab) {
 #' this provides a simple shortcut, which is useful when testing many
 #' different simulations.
 #'
-
 #' @references
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
 #' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
@@ -124,8 +123,11 @@ summary.mab <- function(object, level = 0.95, ...) {
 }
 #------------------------------------------------------------------------------
 #' Plot Generic for `mab` objects
-#' @description Uses [ggplot2::ggplot()] to summarize the results of a single
-#' Multi-Arm Bandit Trial
+#' @description Uses [ggplot2::ggplot()] to plot the results of a single
+#' Multi-Arm-Bandit trial. Provides options to select the type of plot,
+#' and to change how the plot looks. Objects created can be added to
+#' with `+` like any other ggplot plot, but arguments to change
+#' the underlying geom must be passed to the function initially.
 #'
 #' @method plot mab
 #' @param x `mab` class object created by [single_mab_simulation()]
@@ -133,13 +135,33 @@ summary.mab <- function(object, level = 0.95, ...) {
 #' \itemize{
 #' \item `arm`: Shows Thompson Probability or UCB1 Statistic over the trial period.
 #' \item `assign`: Shows Assignment Probability/Proportion over trial period.
-#' \item `estimate`: Shows proportion of success estimates with user specified Normal Confidence Intervals based on their estimated variance.
+#' \item `estimate`: Shows proportion of success estimates with user
+#' specified normal confidence intervals based on their estimated variance.
 #' }
 #' @param save Logical; Whether or not to save the plot to disk; FALSE by default.
 #' @param path String; File directory to save file.
 #' @inheritParams summary.mab
 #' @param estimator Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type
 #' @param ... arguments to pass to `ggplot2:geom_*` function (e.g. `color`, `linewidth`, `alpha`, etc.)
+#' @details
+#' The plot generic requires \href{https://cran.r-project.org/web/packages/ggplot2/index.html}{ggplot2}
+#' which is not required by the package, so it must be installed manually if necessary.
+#'
+#' This function provides minimalist plots to quickly view the results of any
+#' Multi-Arm-Bandit trial, and has the ability to be customized through the `...`
+#' in the call and `+` afterwords. However, all the data necessary is
+#' provided in the output of [single_mab_simulation()] for extreme
+#' customization or professional plots, it is highly recommended
+#' to start completely from scratch and not use the generic.
+#'
+#' The confidence intervals applied follow a standard normal distribution
+#' because it is assumed the AIPW estimators are asymptotically normal as shown
+#' in \href{https://doi.org/10.1073/pnas.2014602118}{Hadad et al. (2021)}
+#'
+#' @references
+#' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
+#' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
+#' (15): e2014602118. \url{https://doi.org/10.1073/pnas.2014602118}.
 #' @export
 #' @example inst/examples/plot.mab_example.R
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
@@ -167,7 +189,7 @@ plot.mab <- function(x, type, estimator = NULL, level = .95, save = FALSE, path 
 #' @param x, mab object passed from [plot.mab()]
 #' @inheritParams plot.mab
 #' @param object, String; Location to gather treatment arm data from, either
-#' "bandits" or "assignment_probs"
+#' "bandits" or "assignment_probs".
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
 #'
 
@@ -219,7 +241,7 @@ plot_arms <- function(x, object, ...) {
 #' @title Plot AIPW/Sample Estimates
 #' @inheritParams plot.mab
 #' @description
-#' Plot Summary of AIPW estimates and variances for Each Treatment Arm
+#' Plot Summary of AIPW estimates and variances for Each Treatment Arm.
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)`
 #' @keywords internal
 plot_estimates <- function(x, estimator, level = 0.95, ...) {

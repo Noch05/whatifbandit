@@ -94,14 +94,14 @@ Default is 0.}
 }
 \value{
 No return value. Throws an error
-if problems exist before running \link{single_mab_simulation}
-or \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}.
+if an argument is missing or misspecified.
 }
 \description{
-This function provides input validation,
-checking to ensure that all required function arguments have been entered,
-and that they do not conflict with one another. The goal is to provide the user
-with informative error messages so they can quickly fix their usage of the function.
+This function checks to ensure that all required arguments
+have been properly passed to the function before continuing with the simulation. When
+errors are thrown, user-friendly messages are provided to indicate which argument
+was misspecified. Additionally, when \code{verbose} = TRUE, additional warning
+messages may be shown if unnecessary arguments are passed.
 }
 \seealso{
 *\code{\link[=single_mab_simulation]{single_mab_simulation()}}
