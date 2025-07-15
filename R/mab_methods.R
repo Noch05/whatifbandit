@@ -191,7 +191,7 @@ plot.mab <- function(x, type, estimator = NULL, level = .95, save = FALSE, path 
 #' @param object, String; Location to gather treatment arm data from, either
 #' "bandits" or "assignment_probs".
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
-#'
+#' @keywords internal
 
 plot_arms <- function(x, object, ...) {
   rlang::check_installed("ggplot2")
