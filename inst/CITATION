@@ -1,7 +1,0 @@
-bibentry(
-  bibtype  = "Manual",
-  title    = "whatifbandit: Analyzing Randomized Experiments as Multi-Arm Bandits",
-  author   = "Noah Ochital, Ryan T. Moore",
-  year     = "2025",
-  note     = "R-Package"
-)
