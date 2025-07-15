@@ -10,7 +10,7 @@ check_impute(imputation_information, current_data, current_period)
 \item{imputation_information}{\code{original_summary} element of the \code{imputation_information}
 list created by \code{\link[=imputation_precompute]{imputation_precompute()}} for the given period.}
 
-\item{current_data}{Data with only observations from the current sampling period.}
+\item{current_data}{tibble/data.table with only observations from the current sampling period.}
 
 \item{current_period}{Numeric value of length 1; current treatment wave of the simulation.}
 }

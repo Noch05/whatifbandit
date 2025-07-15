@@ -13,9 +13,9 @@ get_past_results(
 )
 }
 \arguments{
-\item{current_data}{Data with only observations from the current sampling period.}
+\item{current_data}{tibble/data.table with only observations from the current sampling period.}
 
-\item{prior_data}{Data with only the observations from the prior index.}
+\item{prior_data}{tibble/data.table with only the observations from the prior index.}
 
 \item{perfect_assignment}{A logical value; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
@@ -35,11 +35,21 @@ choose names that are meaningful and consistent. If \code{control_augment} > 0, 
 of the trial in this vector must have the name "Control".}
 }
 \value{
-A data.frame, containing the number of successes, and number of people for each
+A tibble/data.table containing the number of successes, and number of people for each
 treatment condition.
 }
 \description{
-Summarizes results of prior periods to use for the current Multi-Arm-Bandit assignment.
+Summarizes results of prior periods to use for the current Multi-Arm-Bandit assignment. This function
+calculates the number of success under each treatment, the total number of observations assigned to each treatment,
+and the success rate my treatment, to be used for UCB1 or Thompson Sampling.
+}
+\details{
+When \code{perfect_assignment} is FALSE, the maximum value from the specified
+\code{assignment_date_col} in the current data is taken as the last possible date
+the researchers conducting the experiment could have learned about a treatment outcome.
+All successes that occur past this date are masked and treated as failures for the purposes
+of assigning this treatments periods, as it simulates the researchers not having
+recieved that information yet.
 }
 \seealso{
 *\code{\link[=run_mab_trial]{run_mab_trial()}}

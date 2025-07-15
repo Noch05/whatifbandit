@@ -9,12 +9,29 @@
 \arguments{
 \item{object}{\code{multiple.mab} object created by \link{multiple_mab_simulation}}
 
-\item{level}{Confidence Interval Width (i.e 0.90, .95, 0.99)}
+\item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
+Defaults to 0.95}
 
 \item{...}{additional arguments.}
 }
 \description{
 Summarizes results of of multiple Multi-Arm Bandit Trials
+}
+\details{
+This summary provides the number of times each treatment arm was
+selected as the best, chosen by the highest UCB1 or Thompson Probability
+from the end of each trial.
+
+Additional it provides the average of the AIPW and sample estimates
+across all trials, while also providing 2 distinct variances and intervals.
+One interval is based on the average of the variances, and uses a normal distribution,
+while the other empirical distribution had its variance estimated
+using the sample of AIPW estimates which is used to construct
+empirical confidence intervals. These empirical
+variances represent the variation in each simulation due to the random state
+
+#' \code{...} is provided to be compatible with \code{summary()}, these arguments do
+not change anything.
 }
 \examples{
 # Objects returned by `multiple_mab_simulation()` have a `multiple.mab` class.

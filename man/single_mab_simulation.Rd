@@ -78,7 +78,13 @@ Used to simulate imperfect information on the part of researchers conducting an 
 Default is 0.}
 
 \item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "Date".
-Acceptable values are "Day", "Week", or "Month".}
+Acceptable values are "Day", "Week", or "Month". "Month" is a special case that is useful when an experiment
+defines the months differently then the genuine dates, i.e. an experiment considers August as starting
+the in the second half of July, or when exact calender months are required for the periods, not just
+a lengths of time in the month range. As such it requires an additional column to be provided,
+with the exact month desired for each observation, and it treats each observation
+as occurring on the first of that month. It is also useful when dates are not provided, here
+synthetic dates should be created placing each observation on the first on its specified month.}
 
 \item{period_length}{A numeric value of length 1; represents the length of each treatment period.
 If assignment method is "Date", this refers to the
@@ -121,10 +127,13 @@ The input data should come from a randomized trial to ensure the assumptions mad
 At each period, either the Thompson Probabilities or UCB1 statistics are calculated based on
 the outcomes from the number of \code{prior_periods} specified. New treatments are then assigned randomly using the Thompson
 Probabilities via the \href{https://cran.r-project.org/web/packages/randomizr/index.html}{randomizr}
-package, or as the treatment with the  highest UCB1 statistic, while implementing the specific
+package, or as the treatment with the highest UCB1 statistic, while implementing the specific
 treatment blocking and control augmentation specified. More details on bandit algorithms can in
 \href{https://doi.org/10.48550/arXiv.1402.6028}{Kuleshov and Precup 2014} and
-\href{https://doi.org/10.48550/arXiv.1904.07272}{Slivkins 2024}.This is NOT a Contextual bandit,
+\href{https://doi.org/10.48550/arXiv.1904.07272}{Slivkins 2024}. When control augmentation is used
+it requires at least the specified proportion be allocated to the control group, at which case the
+probabilities of being assigned to each treatment are adjusted to achieve this, while also ensuring
+that no probability becomes negative. This is NOT a Contextual bandit,
 and as such the package does not support the acceptance of any covariate information nor use
 any when performing the bandit-based assignment.
 
@@ -277,6 +286,7 @@ Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 20
 
 Kuleshov, Volodymyr, and Doina Precup. 2014. “Algorithms for Multi-Armed Bandit Problems.”
 arXiv. \url{https://doi.org/10.48550/arXiv.1402.6028}.
+
 Loecher, Thomas Lotze and Markus. 2022.
 “Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis.”
 \url{https://cran.r-project.org/web/packages/bandit/index.html}.

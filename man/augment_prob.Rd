@@ -28,4 +28,13 @@ Named numeric vector with updated probabilities
 Adjusts Probabilities of Assignment to match a control augmentation framework.
 If probability threshold is not meant, values are adjusted uniformly to augment the control probability.
 }
+\details{
+Control Augmentation is performed by checking if the condition
+named "Control" is below the threshold if so, the other probabilities
+are taken form evenly to make up the difference. If this causes any
+probability to become negative, the difference to make it positive
+is split between the non-negative non-control treatments, and added. This negative
+checking is recursively called at most 50 times, when this limit is reached,
+all negative probabilities are turned to 0 with not redistribution.
+}
 \keyword{internal}

@@ -29,7 +29,6 @@
 #' \item{success}{Binary variable indicating successful recertification based on recert_status (newly added column).}
 #' }
 #'
-#'
 #' @source <https://github.com/thelabdc/DHS-TANFRecertification-Public/blob/main/data/df_replication_anonymized.csv>
 #'
 #' @docType data

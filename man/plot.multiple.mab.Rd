@@ -22,15 +22,18 @@
 \itemize{
 \item \code{summary}: Shows the number of times each arm was selected as the highest chance of being the best.
 \item \code{hist}: Shows histograms for each treatment condition's proportion of success across trials.
-\item \code{estimate}: Shows proportion of success estimates user specified normal or empirical confidence intervals.
+\item \code{estimate}: Shows proportion of success estimates using specified normal or empirical confidence intervals.
 }}
 
 \item{estimator}{Estimator to plot; Either "AIPW", "Sample" or "Both"; used by \code{hist} and \code{estimate}.}
 
 \item{cdf}{String; specifies the type of CDF to use when analyzing the estimates.
-valid cdfs are the \code{empirical} cdf, the \code{normal} cdf. Used when type = \code{estimate}.}
+valid CDFs are the 'empirical' CDF, the 'normal' CDF. Used when type = \code{estimate}. The 'normal' CDF uses the fact
+that the AIPW estimates are asymptotically normal, while the empirical CDF estimates the CDF from the sample
+of AIPW estimates.}
 
-\item{level}{Confidence Interval Width (i.e 0.90, .95, 0.99)}
+\item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
+Defaults to 0.95}
 
 \item{save}{Logical; Whether or not to save the plot to disk; FALSE by default.}
 
@@ -42,8 +45,19 @@ valid cdfs are the \code{empirical} cdf, the \code{normal} cdf. Used when type =
 Minimal ggplot object, that can be customized and added to with \code{+} (To change, scales, labels, legend, theme, etc.)
 }
 \description{
-Uses \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} to summarize the results of multiple
+Uses \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} to plot the results of multiple
 Multi-Arm Bandit Trials
+}
+\details{
+The plot generic requires \href{https://cran.r-project.org/web/packages/ggplot2/index.html}{ggplot2}
+which is not required by the package, so it must be installed manually if necessary.
+
+This function provides minimalist plots to quickly view the results of the procedure
+and has the ability to be customized through the \code{...}
+in the call and \code{+} afterwords. However, all the data necessary is
+provided in the output of \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}} for extreme
+customization or professional plots, it is highly recommended
+to start completely from scratch and not use the generic.
 }
 \examples{
 # Objects returned by `single_mab_simulation()` have a `mab` class.

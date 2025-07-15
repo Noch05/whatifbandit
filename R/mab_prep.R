@@ -1,15 +1,32 @@
 #' Create Treatment Wave Cutoffs
 #' @name create_cutoff
-#' @description Used during [pre_mab_simulation()] to assign each observation a new treatment assignment period, based
+#' @description Used to assign each observation a new treatment assignment period, based
 #' on user-supplied specifications, and user supplied data from
-#' `date_col` and `month_col` in `data_cols`.
+#' `date_col` and `month_col` in `data_cols`, and the `period_length`. Creates a new
+#' column indicating with period each observation belongs to, used for future subsetting.
+#'
 #' @inheritParams single_mab_simulation
 #' @inheritParams cols
+#' @details
+#' The assignment periods do not strictly have to line up with the original experiment, it
+#' is up to the researcher to test the possible options.
 #'
-#' @return Updated `data` object with the new `period_number` column. `period_number` is an integer
+#' Month based assignment is a special case to be used when an experimenter wants
+#' their periods to line up exactly with the calendar months, not just the length of a month.
+#' This is useful for experiments that only track months, or define the calendar months differently
+#' than the dates. For example if an experiment defines August as starting on July 17th, or
+#' one where the passing of specific months is meaningful outside of time passed.
+#' In this specification, an additional column must be provided that specifies the desired month
+#' for each observation and each one is treated as if it occurred on the first of each month.
+#' If only months are available, a synthetic date column will have to be provided,
+#' simply make a date vector using the appropriate months with the proper year.
+#'
+#' If months is simply the length of time wished for the period it would
+#' be better to use day or week based, and set the `period_length` to an appropriate
+#' 30-31 days, or 4 weeks.
+#'
+#' @returns Updated tibble/data.table with the new `period_number` column. `period_number` is an integer
 #' representing an observation's new assignment period.
-#' @seealso
-#' *[pre_mab_simulation()]
 #' @keywords internal
 #------------------------------------------------------------------------------------------
 create_cutoff <- function(data, data_cols, period_length = NULL,
@@ -181,26 +198,22 @@ create_cutoff.Batch <- function(data, period_length) {
 #------------------------------------------------------------------------------------
 #' @title Create Necessary Columns for Multi-Arm Bandit Trial
 #' @name create_new_cols
-#' @description Initializes partially empty columns in `data`, to ensure compatibility with, [mab_simulation()].
-#' These are initialized as `NA` except for observations with `period_number` = 1, whose are the starting point for
-#' the adaptive trial.
+#' @description Initializes partially empty columns in `data` to initialize them for the simulation.
+#' These are initialized as `NA` except for observations with `period_number` = 1, whose values are copied
+#' from the provided columns, and used as the starting point for the simulation.
 #'
 #' @inheritParams single_mab_simulation
 #'
 #'
-#' @returns Updated `data` object of same class with 6 new columns:
+#' @returns Updated tibble/data.table with 6 new columns:
 #' \itemize{
-#' \item mab_success: New variable to hold new success from Multi-arm bandit procedure, NA until assigned.
-#' \item mab_condition: New variable to hold new treatment condition from Multi-arm bandit procedure, NA until assigned.
-#' \item impute_req: Binary indicator for imputation requirement, NA until assigned.
-#' \item new_success_date: New variable to new recertification date from Multi-arm bandit procedure, NA until assigned.
-#' \item block New variable indicating the variables to block by for assignment.
-#' \item treatment_block New variable combining block with original treatment condition.
+#' \item `mab_success`: New variable to hold new success from Multi-arm bandit procedure, NA until assigned.
+#' \item `mab_condition`: New variable to hold new treatment condition from Multi-arm bandit procedure, NA until assigned.
+#' \item `impute_req`: Binary indicator for imputation requirement, NA until assigned.
+#' \item `new_success_date`: New variable to hold the new success date under Multi-arm bandit procedure, NA until assigned.
+#' \item `block`: New variable indicating the variables to block by for assignment.
+#' \item `treatment_block`: New variable combining block with original treatment condition.
 #' }
-#'
-#' @seealso
-#' *[create_cutoff()]
-#' *[pre_mab_simulation()]
 #'
 #' @keywords internal
 create_new_cols <- function(data,

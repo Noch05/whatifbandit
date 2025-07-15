@@ -39,23 +39,19 @@ on a given day whether or not all the information from a prior batch was availab
 you have exact dates treatments were assigned.}
 }
 \value{
-Updated \code{data} object of same class with 6 new columns:
+Updated tibble/data.table with 6 new columns:
 \itemize{
-\item mab_success: New variable to hold new success from Multi-arm bandit procedure, NA until assigned.
-\item mab_condition: New variable to hold new treatment condition from Multi-arm bandit procedure, NA until assigned.
-\item impute_req: Binary indicator for imputation requirement, NA until assigned.
-\item new_success_date: New variable to new recertification date from Multi-arm bandit procedure, NA until assigned.
-\item block New variable indicating the variables to block by for assignment.
-\item treatment_block New variable combining block with original treatment condition.
+\item \code{mab_success}: New variable to hold new success from Multi-arm bandit procedure, NA until assigned.
+\item \code{mab_condition}: New variable to hold new treatment condition from Multi-arm bandit procedure, NA until assigned.
+\item \code{impute_req}: Binary indicator for imputation requirement, NA until assigned.
+\item \code{new_success_date}: New variable to hold the new success date under Multi-arm bandit procedure, NA until assigned.
+\item \code{block}: New variable indicating the variables to block by for assignment.
+\item \code{treatment_block}: New variable combining block with original treatment condition.
 }
 }
 \description{
-Initializes partially empty columns in \code{data}, to ensure compatibility with, \code{\link[=mab_simulation]{mab_simulation()}}.
-These are initialized as \code{NA} except for observations with \code{period_number} = 1, whose are the starting point for
-the adaptive trial.
-}
-\seealso{
-*\code{\link[=create_cutoff]{create_cutoff()}}
-*\code{\link[=pre_mab_simulation]{pre_mab_simulation()}}
+Initializes partially empty columns in \code{data} to initialize them for the simulation.
+These are initialized as \code{NA} except for observations with \code{period_number} = 1, whose values are copied
+from the provided columns, and used as the starting point for the simulation.
 }
 \keyword{internal}

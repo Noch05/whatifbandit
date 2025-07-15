@@ -13,8 +13,8 @@ get_bandit(
 )
 }
 \arguments{
-\item{past_results}{\code{data} object containing summary of prior periods.
-Created by \code{\link[=get_past_results]{get_past_results()}}.}
+\item{past_results}{tibble/data.table containing summary of prior periods, with
+successes, number of observations, and success rates, which is created by \code{\link[=get_past_results]{get_past_results()}}.}
 
 \item{algorithm}{A character string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
 
@@ -30,15 +30,36 @@ of the trial in this vector must have the name "Control".}
 Default is 0.}
 }
 \value{
-The bandit object for the given period.
+A list of length 2 containing:
+\itemize{
+\item \code{bandit}: Bandit object, either a named numeric vector of Thompson Probabilities or a
+tibble/data.table of UCB1 statistics.
+\item \verb{assignment_probabilities:} Named numeric vector with a value for each condition
+containing the probability of being assigned that treatment.}
 }
 \description{
 Calculates the best treatment for a given period using either a UCB1 or Thompson Sampling Algorithm.
+Thompson Sampling is done using \code{\link[bandit:best_binomial_bandit]{bandit::best_binomial_bandit()}} from the \href{https://cran.r-project.org/web/packages/bandit/index.html}{bandit}
+package and UCB1 statistic are calculated using the a well-defined formula that can be found
+in \href{https://doi.org/10.48550/arXiv.1402.6028}{(Kuleshov and Precup 2014)}.
 }
-\seealso{
-\itemize{
-\item \code{\link[=run_mab_trial]{run_mab_trial()}}
-\item \code{\link[=get_past_results]{get_past_results()}}
+\details{
+The Thompson  \code{assignment_probabilities} is the same as the \code{bandit} except
+for that that \code{assignment_probabilities} are forced to sum exactly to 1 (not 0.99999),
+and the \code{assignment_probabilities} takes into account the control augmentation if used.
+
+For UCB1, the \code{assignment_probabilities} will always be of the have all 0
+components expect for one 1, because the UCB1 algorithm chooses only 1
+option at each period, based on the highest UCB1 statistic. When
+control augmentation is used, the probabilities will reflect that as well
+so it may be a vector like (0.2, 0, 0.8), if \code{control_augmentation} = 0.2.
 }
+\references{
+#' Kuleshov, Volodymyr, and Doina Precup. 2014. “Algorithms for Multi-Armed Bandit Problems.”
+arXiv. \url{https://doi.org/10.48550/arXiv.1402.6028}.
+
+#' Loecher, Thomas Lotze and Markus. 2022.
+“Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis.”
+\url{https://cran.r-project.org/web/packages/bandit/index.html}.
 }
 \keyword{internal}

@@ -15,11 +15,11 @@ imputation_preparation(
 )
 }
 \arguments{
-\item{current_data}{Data with only observations from the current sampling period.}
+\item{current_data}{tibble/data.table with only observations from the current sampling period.}
 
 \item{block_cols}{A character vector of variables to block by. This vector should not be named.}
 
-\item{imputation_information}{Object created by \code{\link[=imputation_prep]{imputation_prep()}} containing the conditional means and success dates
+\item{imputation_information}{Object created by \code{\link[=imputation_precompute]{imputation_precompute()}} containing the conditional means and success dates
 for each treatment block to impute from.}
 
 \item{whole_experiment}{A logical value; if TRUE, uses all past experimental data for imputing outcomes.

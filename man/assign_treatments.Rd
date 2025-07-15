@@ -16,7 +16,7 @@ assign_treatments(
 )
 }
 \arguments{
-\item{current_data}{Data with only observations from the current sampling period.}
+\item{current_data}{tibble/data.table with only observations from the current sampling period.}
 
 \item{probs}{Named Numeric Vector; Probability of Assignment for each treatment condition.}
 
@@ -40,16 +40,22 @@ of the trial in this vector must have the name "Control".}
 \item{success_col}{Column in \code{data}; binary successes from the original experiment.}
 }
 \value{
-Updated \code{data} object with the new treatment conditions. If this treatment is different
+Updated tibble/data.table with the new treatment conditions for each observation. If this treatment is different
 then from under the original experiment, they are labelled as imputation required.
 }
 \description{
-Assigns new treatments for an assignment wave based on the assignment probabilities provided.
-Probabilities passed to \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}} or \code{\link[randomizr:cluster_ra]{randomizr::cluster_ra()}} for random assignment.
+Assigns new treatments for an assignment wave based on the assignment probabilities provided from
+\code{\link[=get_bandit]{get_bandit()}}.
+Probabilities are passed to \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}} or \code{\link[randomizr:cluster_ra]{randomizr::cluster_ra()}} from the
+\href{https://cran.r-project.org/web/packages/randomizr/index.html}{randomizr} package for random assignment.
+}
+\details{
+The unique identifier for each row is used as the cluster in the for the
+randomizr package functions to ensure that each observation is only
+treated once, and is returned in the same order as provided.
 }
 \seealso{
 \itemize{
-\item \code{\link[=run_mab_trial]{run_mab_trial()}}
 \item \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}}
 \item \code{\link[randomizr:cluster_ra]{randomizr::cluster_ra()}}
 }

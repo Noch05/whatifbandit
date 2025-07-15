@@ -15,12 +15,20 @@ of this vector should be the names of each treatment as seen in your data, so to
 choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
 of the trial in this vector must have the name "Control".}
 
-\item{iter, }{iteration tracker, stops function if it reaches the limit of}
+\item{iter, }{iteration tracker, stops function if it reaches the limit of 50}
 }
 \value{
 Named Numeric Vector; Containing probabilities of treatment assignment, all positive.
 }
 \description{
 Redistributes Probabilities when control augmentation produces negatives
+}
+\details{
+Redistributes the difference in making a probability positive to preserve the distribution
+Calculates the difference required and takes it uniformly from every other treatment arm
+but the control arm to then add to the negative probability
+
+Called recursively until no probabilities are negative of the max iterations of 50
+is hit, and all negative probabilities are made 0 with no redistribution
 }
 \keyword{internal}

@@ -7,8 +7,8 @@
 \method{get_bandit}{Thompson}(past_results, conditions, iterator)
 }
 \arguments{
-\item{past_results}{\code{data} object containing summary of prior periods.
-Created by \code{\link[=get_past_results]{get_past_results()}}.}
+\item{past_results}{tibble/data.table containing summary of prior periods, with
+successes, number of observations, and success rates, which is created by \code{\link[=get_past_results]{get_past_results()}}.}
 
 \item{conditions}{A named character vector containing treatment conditions. The elements
 of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
@@ -16,12 +16,19 @@ of this vector should be the names of each treatment as seen in your data, so to
 choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
 of the trial in this vector must have the name "Control".}
 
-\item{iterator}{counter variable; keeps track of recursive calls to prevent infinite recursion.}
+\item{iterator}{Counter variable; keeps track of recursive calls to prevent infinite recursion.}
 }
 \value{
 Named Numeric Vector of Posterior Probabilities
 }
 \description{
 Thompson Sampling Algorithm
+}
+\details{
+Thompson Sampling is calculated using the \href{https://cran.r-project.org/web/packages/bandit/index.html}{bandit}
+package, and has some issues with numerical stability with extremely large numbers, in the case of instability
+where it returns a vector of 0's or NaNs, the process is redone after dividing all the
+success and total vectors for treatment arm by 2, preserving the proportions. This is implemented
+recursively and executes a max of 50 times.
 }
 \keyword{internal}

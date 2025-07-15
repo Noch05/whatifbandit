@@ -15,11 +15,12 @@ account for that, not all prior data should be used when making decisions becaus
 \item{current_period}{The current period of the simulation. Defined by loop structure inside \code{\link[=run_mab_trial]{run_mab_trial()}}.}
 }
 \value{
-Numeric vector containing the prior treatment periods to be used for UCB1 and Thompson algorithms to
-assign treatments
+Numeric vector containing the prior treatment periods to be used when aggregating
+the results for the current treatment assignment period.
 }
 \description{
-Used during \code{\link[=run_mab_trial]{run_mab_trial()}} to create a vector of prior periods dynamically.
+Used during \code{\link[=run_mab_trial]{run_mab_trial()}} to create a vector of prior periods dynamically. Used to create
+the proper vector when \code{prior_periods} is not "All" and therefore not all the periods less than the current one.
 }
 \seealso{
 *\code{\link[=run_mab_trial]{run_mab_trial()}}

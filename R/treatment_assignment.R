@@ -1,14 +1,24 @@
 #' Gather Past Results for Given Assignment Period
 #' @name get_past_results
-#' @description Summarizes results of prior periods to use for the current Multi-Arm-Bandit assignment.
+#' @description Summarizes results of prior periods to use for the current Multi-Arm-Bandit assignment. This function
+#' calculates the number of success under each treatment, the total number of observations assigned to each treatment,
+#' and the success rate my treatment, to be used for UCB1 or Thompson Sampling.
 #'
 #' @inheritParams single_mab_simulation
 #' @inheritParams create_prior
 #' @inheritParams cols
-#' @param current_data Data with only observations from the current sampling period.
-#' @param prior_data Data with only the observations from the prior index.
-#' @returns A data.frame, containing the number of successes, and number of people for each
+#' @param current_data tibble/data.table with only observations from the current sampling period.
+#' @param prior_data tibble/data.table with only the observations from the prior index.
+#' @returns A tibble/data.table containing the number of successes, and number of people for each
 #' treatment condition.
+#'
+#' @details
+#' When `perfect_assignment` is FALSE, the maximum value from the specified
+#' `assignment_date_col` in the current data is taken as the last possible date
+#' the researchers conducting the experiment could have learned about a treatment outcome.
+#' All successes that occur past this date are masked and treated as failures for the purposes
+#' of assigning this treatments periods, as it simulates the researchers not having
+#' recieved that information yet.
 #'
 #' @seealso
 #' *[run_mab_trial()]
@@ -119,20 +129,43 @@ get_past_results.data.table <- function(current_data,
 #-------------------------------------------------------------------------------
 #' Calculate Multi-Arm Bandit Decision Based on Algorithm
 #' @description Calculates the best treatment for a given period using either a UCB1 or Thompson Sampling Algorithm.
+#' Thompson Sampling is done using [bandit::best_binomial_bandit()] from the \href{https://cran.r-project.org/web/packages/bandit/index.html}{bandit}
+#' package and UCB1 statistic are calculated using the a well-defined formula that can be found
+#' in \href{https://doi.org/10.48550/arXiv.1402.6028}{(Kuleshov and Precup 2014)}.
 #'
 #' @name get_bandit
 #'
 #' @inheritParams single_mab_simulation
-#' @param past_results `data` object containing summary of prior periods.
-#' Created by [get_past_results()].
+#' @param past_results tibble/data.table containing summary of prior periods, with
+#' successes, number of observations, and success rates, which is created by [get_past_results()].
 #' @param current_period Numeric scalar; current period of the adaptive trial simulation.
 #'
+#' @returns A list of length 2 containing:
+#' \itemize{
+#' \item `bandit`: Bandit object, either a named numeric vector of Thompson Probabilities or a
+#' tibble/data.table of UCB1 statistics.
+#' \item `assignment_probabilities:` Named numeric vector with a value for each condition
+#' containing the probability of being assigned that treatment.}
 #'
-#' @returns The bandit object for the given period.
+#' @details
+#' The Thompson  `assignment_probabilities` is the same as the `bandit` except
+#' for that that `assignment_probabilities` are forced to sum exactly to 1 (not 0.99999),
+#' and the `assignment_probabilities` takes into account the control augmentation if used.
 #'
-#' @seealso
-#'* [run_mab_trial()]
-#'* [get_past_results()]
+#' For UCB1, the `assignment_probabilities` will always be of the have all 0
+#' components expect for one 1, because the UCB1 algorithm chooses only 1
+#' option at each period, based on the highest UCB1 statistic. When
+#' control augmentation is used, the probabilities will reflect that as well
+#' so it may be a vector like (0.2, 0, 0.8), if `control_augmentation` = 0.2.
+#'
+#'
+#' @references
+#' #' Kuleshov, Volodymyr, and Doina Precup. 2014. “Algorithms for Multi-Armed Bandit Problems.”
+#' arXiv. \url{https://doi.org/10.48550/arXiv.1402.6028}.
+#'
+#' #' Loecher, Thomas Lotze and Markus. 2022.
+#' “Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis.”
+#' \url{https://cran.r-project.org/web/packages/bandit/index.html}.
 #' @keywords internal
 
 
@@ -159,8 +192,15 @@ get_bandit <- function(past_results, algorithm, conditions, current_period = NUL
 #-------------------------------------------------------------------
 #' @method get_bandit Thompson
 #' @title Thompson Sampling Algorithm
-#' @param iterator counter variable; keeps track of recursive calls to prevent infinite recursion.
+#' @param iterator Counter variable; keeps track of recursive calls to prevent infinite recursion.
 #' @inheritParams get_bandit
+#' @details
+#' Thompson Sampling is calculated using the \href{https://cran.r-project.org/web/packages/bandit/index.html}{bandit}
+#' package, and has some issues with numerical stability with extremely large numbers, in the case of instability
+#' where it returns a vector of 0's or NaNs, the process is redone after dividing all the
+#' success and total vectors for treatment arm by 2, preserving the proportions. This is implemented
+#' recursively and executes a max of 50 times.
+#'
 #' @returns Named Numeric Vector of Posterior Probabilities
 #' @keywords internal
 
@@ -172,7 +212,7 @@ get_bandit.Thompson <- function(past_results, conditions, iterator) {
     beta = 1
   ), conditions)
 
-  if (base::sum(bandit) == 0 & iterator < 50) {
+  if ((base::sum(bandit) == 0 | any(is.na(bandit))) & iterator < 50) {
     # When best_binomial_bandit fails due to numerical instability,
     # this preserves proportions and reruns the process
     past_results$successes <- (past_results$successes / 2)
@@ -187,8 +227,12 @@ get_bandit.Thompson <- function(past_results, conditions, iterator) {
 #-------------------------------------------------------------------
 #' @method get_bandit UCB1
 #' @title UCB1 Sampling Algorithm
+#' @description
+#' Utilizes the well established UCB1 formula to calculate Upper
+#' Confidence Bounds for each treatment arm.
+#'
 #' @inheritParams get_bandit
-#' @returns Data.frame containing UCB and Success Rate for each condition
+#' @returns tibble/data.table containing UCB1 and Success Rate for each condition
 #' @keywords internal
 
 get_bandit.UCB1 <- function(past_results, conditions, current_period) {
@@ -229,6 +273,15 @@ get_bandit.UCB1 <- function(past_results, conditions, current_period) {
 #' @param assignment_probs Named numeric vector; contains probabilities of
 #' assignment with the control condition named "Control".
 #' @returns Named numeric vector with updated probabilities
+#' @details
+#' Control Augmentation is performed by checking if the condition
+#' named "Control" is below the threshold if so, the other probabilities
+#' are taken form evenly to make up the difference. If this causes any
+#' probability to become negative, the difference to make it positive
+#' is split between the non-negative non-control treatments, and added. This negative
+#' checking is recursively called at most 50 times, when this limit is reached,
+#' all negative probabilities are turned to 0 with not redistribution.
+#'
 #' @keywords internal
 
 augment_prob <- function(assignment_probs, control_augment, conditions, algorithm) {
@@ -295,9 +348,17 @@ augment_prob.UCB1 <- function(assignment_probs, control_augment, conditions) {
 #' @description Redistributes Probabilities when control augmentation produces negatives
 #' @name fix_negatives
 #' @param assignment_probs Named Numeric Vector; Containing probabilities of treatment assignment
-#' @param iter, iteration tracker, stops function if it reaches the limit of
+#' @param iter, iteration tracker, stops function if it reaches the limit of 50
 #' @inheritParams single_mab_simulation
 #' @returns Named Numeric Vector; Containing probabilities of treatment assignment, all positive.
+#' @details
+#' Redistributes the difference in making a probability positive to preserve the distribution
+#' Calculates the difference required and takes it uniformly from every other treatment arm
+#' but the control arm to then add to the negative probability
+#'
+#' Called recursively until no probabilities are negative of the max iterations of 50
+#' is hit, and all negative probabilities are made 0 with no redistribution
+#'
 #' @keywords internal
 
 fix_negatives <- function(assignment_probs, conditions, iter = 1) {
@@ -327,23 +388,27 @@ fix_negatives <- function(assignment_probs, conditions, iter = 1) {
 }
 #-------------------------------------------------------------------------------
 #' Adaptively Assign Treatments in a Period
-#'
-#' @description Assigns new treatments for an assignment wave based on the assignment probabilities provided.
-#' Probabilities passed to [randomizr::block_and_cluster_ra()] or [randomizr::cluster_ra()] for random assignment.
-#'
+#' @description Assigns new treatments for an assignment wave based on the assignment probabilities provided from
+#' [get_bandit()].
+#' Probabilities are passed to [randomizr::block_and_cluster_ra()] or [randomizr::cluster_ra()] from the
+#' \href{https://cran.r-project.org/web/packages/randomizr/index.html}{randomizr} package for random assignment.
 #' @name assign_treatments
-#'
 #' @inheritParams single_mab_simulation
 #' @inheritParams create_prior
 #' @inheritParams cols
 #' @param probs Named Numeric Vector; Probability of Assignment for each treatment condition.
 #' @inheritParams get_past_results
 #'
-#' @returns Updated `data` object with the new treatment conditions. If this treatment is different
+#' @returns Updated tibble/data.table with the new treatment conditions for each observation. If this treatment is different
 #' then from under the original experiment, they are labelled as imputation required.
 #'
+#' @details
+#' The unique identifier for each row is used as the cluster in the for the
+#' randomizr package functions to ensure that each observation is only
+#' treated once, and is returned in the same order as provided.
+#'
+#'
 #' @seealso
-#'* [run_mab_trial()]
 #'* [randomizr::block_and_cluster_ra()]
 #'* [randomizr::cluster_ra()]
 #' @keywords internal
@@ -352,7 +417,6 @@ fix_negatives <- function(assignment_probs, conditions, iter = 1) {
 assign_treatments <- function(current_data, probs, blocking = NULL,
                               algorithm, id_col, conditions, condition_col,
                               success_col) {
-  # Performing Randomized Treatment Assignment
   if (blocking) {
     blocks <- current_data$block
   }

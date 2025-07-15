@@ -43,18 +43,40 @@ groups are assigned correctly. For "Date", observations will be considered in ch
 "Individual" assignment can be time-consuming for larger datasets.}
 
 \item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "Date".
-Acceptable values are "Day", "Week", or "Month".}
+Acceptable values are "Day", "Week", or "Month". "Month" is a special case that is useful when an experiment
+defines the months differently then the genuine dates, i.e. an experiment considers August as starting
+the in the second half of July, or when exact calender months are required for the periods, not just
+a lengths of time in the month range. As such it requires an additional column to be provided,
+with the exact month desired for each observation, and it treats each observation
+as occurring on the first of that month. It is also useful when dates are not provided, here
+synthetic dates should be created placing each observation on the first on its specified month.}
 }
 \value{
-Updated \code{data} object with the new \code{period_number} column. \code{period_number} is an integer
+Updated tibble/data.table with the new \code{period_number} column. \code{period_number} is an integer
 representing an observation's new assignment period.
 }
 \description{
-Used during \code{\link[=pre_mab_simulation]{pre_mab_simulation()}} to assign each observation a new treatment assignment period, based
+Used to assign each observation a new treatment assignment period, based
 on user-supplied specifications, and user supplied data from
-\code{date_col} and \code{month_col} in \code{data_cols}.
+\code{date_col} and \code{month_col} in \code{data_cols}, and the \code{period_length}. Creates a new
+column indicating with period each observation belongs to, used for future subsetting.
 }
-\seealso{
-*\code{\link[=pre_mab_simulation]{pre_mab_simulation()}}
+\details{
+The assignment periods do not strictly have to line up with the original experiment, it
+is up to the researcher to test the possible options.
+
+Month based assignment is a special case to be used when an experimenter wants
+their periods to line up exactly with the calendar months, not just the length of a month.
+This is useful for experiments that only track months, or define the calendar months differently
+than the dates. For example if an experiment defines August as starting on July 17th, or
+one where the passing of specific months is meaningful outside of time passed.
+In this specification, an additional column must be provided that specifies the desired month
+for each observation and each one is treated as if it occurred on the first of each month.
+If only months are available, a synthetic date column will have to be provided,
+simply make a date vector using the appropriate months with the proper year.
+
+If months is simply the length of time wished for the period it would
+be better to use day or week based, and set the \code{period_length} to an appropriate
+30-31 days, or 4 weeks.
 }
 \keyword{internal}

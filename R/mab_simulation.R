@@ -17,6 +17,11 @@
 #' \item `imputation_information`: List containing necessary information
 #' for outcome and date imputation for [mab_simulation()].
 #' }
+#' @details
+#' If a data.frame is passed, as input data it is internally converted into
+#' a tibble. If a data.table is passed it is copied to avoid modifying the
+#' original dataset in the users environment.
+
 #'
 #' @seealso
 #' *[single_mab_simulation()]
@@ -111,15 +116,15 @@ pre_mab_simulation <- function(data,
 #' @inheritParams single_mab_simulation
 #' @inheritParams run_mab_trial
 #'
-#'
-#'
-#' @return `mab` class object, which is named list containing:
+#' @returns:
 #' \itemize{
-#' \item  `final_data`: The processed data with treatment assignments and imputed outcomes, labelled with "mab_" prefix.
-#' \item `bandits`: Either the UCB1 statistics or Thompson Sampling posterior distributions.
-#' \item `assignment_probs`: Probability of being assigned each treatment arm at a given period
-#' \item `estimates`: AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances.
-#' \item `settings`: A list of the configuration settings used in the trial.
+#' \item `final_data`: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
+#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period.
+#' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
+#' \item `estimates`: A tibble or data.table containing the
+#' AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
+#' sample means and variances, for each treatment arm.
+#' \item `settings`: A named list of the configuration settings used in the trial.
 #' }
 #' @seealso
 #'* [single_mab_simulation()]

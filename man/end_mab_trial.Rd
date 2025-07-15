@@ -7,13 +7,13 @@
 end_mab_trial(data, bandits, algorithm, periods, conditions)
 }
 \arguments{
-\item{data}{finalized data from \code{\link[=run_mab_trial]{run_mab_trial()}}.}
+\item{data}{Finalized data from \code{\link[=run_mab_trial]{run_mab_trial()}}.}
 
 \item{bandits}{Finalized bandits list from \code{\link[=run_mab_trial]{run_mab_trial()}}.}
 
 \item{algorithm}{A character string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
 
-\item{periods}{Numeric scalar; total number of periods in Multi-Arm-Bandit trial.}
+\item{periods}{Numeric value of length 1; total number of periods in Multi-Arm-Bandit trial.}
 
 \item{conditions}{A named character vector containing treatment conditions. The elements
 of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
@@ -24,14 +24,26 @@ of the trial in this vector must have the name "Control".}
 \value{
 A named list containing:
 \itemize{
-\item \code{final_data}: Processed data with new treatment assignments and imputed outcomes labelled with "mab_" prefix.
-\item \code{bandits}: Thompson Probability or UCB1 statistic for each treatment arm at each period of the simulation.
-\item \code{assignment_probs}: Assignment probabilities for each treatment arm at each period of the simulation.
+\item \code{final_data}: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
+\item \code{bandits}: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period.
+\item \code{assignment_probs}: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
 }
 }
 \description{
 Condenses output from \code{\link[=run_mab_trial]{run_mab_trial()}} into
 manageable structure.
+}
+\details{
+Takes the bandit lists provided, and condenses them using \code{\link[dplyr:bind_rows]{dplyr::bind_rows()}}
+into tibbles or data.tables, and then pivots the table
+to wide format where each treatment arm is a column, and the rows
+represent periods.
+
+At this step the final UCB1 or Thompson Probabilities are calculated,
+and the whole table is lead by one to have each period be represented
+by the calculation that occurred just after completing the period, so
+period 11 now means the bandit that was calculated after period 11 was
+simulated.
 }
 \seealso{
 \itemize{

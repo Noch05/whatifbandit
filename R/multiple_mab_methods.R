@@ -1,9 +1,17 @@
 #' Print Generic For `multiple.mab`
 #' @description Custom Print Display for `multiple.mab`` objects returned by [multiple_mab_simulation()].
+#' Prevents the large list output from being printed to the R console, and provides
+#' useful information about the settings for the trials
 #' @method print multiple.mab
 #' @param x `multiple.mab` class object
 #' @param ... further arguments passed to or from other methods
 #' @returns Text summary of settings used for the Multi-Arm Bandit trials.
+#' @details
+#' The items used to create the text summary can be found in the settings
+#' element of the output object.
+#'
+#' `...` is provided to be compatible with `print()`, these arguments do
+#' not change anything.
 #' @export
 print.multiple.mab <- function(x, ...) {
   settings <- x$settings
@@ -17,9 +25,25 @@ print.multiple.mab <- function(x, ...) {
 #' @description
 #' Summarizes results of of multiple Multi-Arm Bandit Trials
 #' @param object `multiple.mab` object created by [multiple_mab_simulation]
-#' @param level Confidence Interval Width (i.e 0.90, .95, 0.99)
+#' @param level Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
+#' Defaults to 0.95
 #' @param ... additional arguments.
 #' @method summary multiple.mab
+#' @details
+#' This summary provides the number of times each treatment arm was
+#' selected as the best, chosen by the highest UCB1 or Thompson Probability
+#' from the end of each trial.
+#'
+#' Additional it provides the average of the AIPW and sample estimates
+#' across all trials, while also providing 2 distinct variances and intervals.
+#' One interval is based on the average of the variances, and uses a normal distribution,
+#' while the other empirical distribution had its variance estimated
+#' using the sample of AIPW estimates which is used to construct
+#' empirical confidence intervals. These empirical
+#' variances represent the variation in each simulation due to the random state
+#'
+#' #' `...` is provided to be compatible with `summary()`, these arguments do
+#' not change anything.
 #' @example inst/examples/summary.multiple.mab_example.R
 #' @export
 
@@ -69,7 +93,7 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
 }
 
 #' Plot Generic for `multiple.mab` objects
-#' @description Uses [ggplot2::ggplot()] to summarize the results of multiple
+#' @description Uses [ggplot2::ggplot()] to plot the results of multiple
 #' Multi-Arm Bandit Trials
 #'
 #' @method plot multiple.mab
@@ -78,15 +102,27 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
 #' \itemize{
 #' \item `summary`: Shows the number of times each arm was selected as the highest chance of being the best.
 #' \item `hist`: Shows histograms for each treatment condition's proportion of success across trials.
-#' \item `estimate`: Shows proportion of success estimates user specified normal or empirical confidence intervals.
+#' \item `estimate`: Shows proportion of success estimates using specified normal or empirical confidence intervals.
 #' }
 #' @param estimator Estimator to plot; Either "AIPW", "Sample" or "Both"; used by `hist` and `estimate`.
 #' @param save Logical; Whether or not to save the plot to disk; FALSE by default.
 #' @param path String; File directory to save file.
 #' @param ... arguments to pass to `ggplot2:geom_*` function (e.g. `color`, `linewidth`, `alpha`, `bins` etc.)
 #' @param cdf String; specifies the type of CDF to use when analyzing the estimates.
-#' valid cdfs are the `empirical` cdf, the `normal` cdf. Used when type = `estimate`.
+#' valid CDFs are the 'empirical' CDF, the 'normal' CDF. Used when type = `estimate`. The 'normal' CDF uses the fact
+#' that the AIPW estimates are asymptotically normal, while the empirical CDF estimates the CDF from the sample
+#' of AIPW estimates.
 #' @inheritParams summary.multiple.mab
+#' @details
+#' The plot generic requires \href{https://cran.r-project.org/web/packages/ggplot2/index.html}{ggplot2}
+#' which is not required by the package, so it must be installed manually if necessary.
+#'
+#' This function provides minimalist plots to quickly view the results of the procedure
+#' and has the ability to be customized through the `...`
+#' in the call and `+` afterwords. However, all the data necessary is
+#' provided in the output of [multiple_mab_simulation()] for extreme
+#' customization or professional plots, it is highly recommended
+#' to start completely from scratch and not use the generic.
 #' @example inst/examples/plot.multiple.mab_example.R
 #' @export
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
@@ -162,7 +198,7 @@ plot_hist <- function(x, estimator, ...) {
 #' @name plot_mult_estimates
 #' @title Plots AIPW/Sample Estimates for each Arm
 #' @description
-#' Plots AIPW/Sample Estimates for each arm using variance from the repeated trials.
+#' Plots AIPW/Sample Estimates for each arm using variance from the repeated trials for [plot.multiple.mab()]
 #' @inheritParams plot.multiple.mab
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
 #' @keywords internal
@@ -177,7 +213,7 @@ plot_mult_estimates <- function(x, estimator, cdf, level, ...) {
   cols <- switch(cdf,
     "empirical" = c("upper_empirical", "lower_empirical"),
     "normal" = c("upper_normal", "lower_normal"),
-    rlang::abort("Invalid `cdf`: valid cdfs are `normal` or `empirical`")
+    rlang::abort("Invalid `CDF`: valid CDFs are `normal` or `empirical`")
   )
 
   summary(x, level = level) |>

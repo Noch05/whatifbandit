@@ -26,7 +26,13 @@ run_mab_trial(
 of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.}
 
 \item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "Date".
-Acceptable values are "Day", "Week", or "Month".}
+Acceptable values are "Day", "Week", or "Month". "Month" is a special case that is useful when an experiment
+defines the months differently then the genuine dates, i.e. an experiment considers August as starting
+the in the second half of July, or when exact calender months are required for the periods, not just
+a lengths of time in the month range. As such it requires an additional column to be provided,
+with the exact month desired for each observation, and it treats each observation
+as occurring on the first of that month. It is also useful when dates are not provided, here
+synthetic dates should be created placing each observation on the first on its specified month.}
 
 \item{period_length}{A numeric value of length 1; represents the length of each treatment period.
 If assignment method is "Date", this refers to the
@@ -87,34 +93,27 @@ of the trial in this vector must have the name "Control".}
 \item{control_augment}{A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.
 Default is 0.}
 
-\item{imputation_information}{Object created by \code{\link[=imputation_prep]{imputation_prep()}} containing the conditional means and success dates
+\item{imputation_information}{Object created by \code{\link[=imputation_precompute]{imputation_precompute()}} containing the conditional means and success dates
 for each treatment block to impute from.}
 }
 \value{
 A named list containing:
 \itemize{
-\item \code{final_data}: Processed data with new treatment assignments and imputed outcomes labelled with "mab_" prefix.
-\item \code{bandits}: Thompson Probability or UCB1 statistic for each treatment arm at each period of the simulation.
-\item \code{assignment_probs}: Assignment probabilities for each treatment arm at each period of the simulation.
+\item \code{final_data}: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
+\item \code{bandits}: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period.
+\item \code{assignment_probs}: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
 }
 }
 \description{
 Performs a full Multi-Arm Bandit (MAB) trial using Thompson Sampling or UCB1.
 The function provides loop around each step of the process for each treatment wave, performing adaptive
-treatment assignment, and outcome imputation. Supports flexible customization in treatment blocking strategy,
+treatment assignment, and outcome imputation. Supports flexible customization passed
+from \code{\link[=single_mab_simulation]{single_mab_simulation()}} and \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}} in treatment blocking strategy,
 the size of each treatment wave, and information availability to simulate both a real experiment, and non-stationary
 bandit strategy.
 }
-\seealso{
-\itemize{
-\item \code{\link[=single_mab_simulation]{single_mab_simulation()}}
-\item \code{\link[=mab_simulation]{mab_simulation()}}
-\item \code{\link[=create_prior]{create_prior()}}
-\item \code{\link[=get_bandit]{get_bandit()}}
-\item \code{\link[=assign_treatments]{assign_treatments()}}
-\item \code{\link[=check_impute]{check_impute()}}
-\item \code{\link[=get_past_results]{get_past_results()}}
-\item \code{\link[=impute_success]{impute_success()}}
-}
+\details{
+The first period is used to start the trial, so the MAB loop
+starts at period number 2.
 }
 \keyword{internal}

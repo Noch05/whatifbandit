@@ -16,4 +16,13 @@ Text summary of settings used for the Multi-Arm Bandit trials.
 }
 \description{
 Custom Print Display for `multiple.mab`` objects returned by \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}.
+Prevents the large list output from being printed to the R console, and provides
+useful information about the settings for the trials
+}
+\details{
+The items used to create the text summary can be found in the settings
+element of the output object.
+
+\code{...} is provided to be compatible with \code{print()}, these arguments do
+not change anything.
 }

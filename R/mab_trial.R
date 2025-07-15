@@ -3,31 +3,27 @@
 #'
 #' @description Performs a full Multi-Arm Bandit (MAB) trial using Thompson Sampling or UCB1.
 #' The function provides loop around each step of the process for each treatment wave, performing adaptive
-#' treatment assignment, and outcome imputation. Supports flexible customization in treatment blocking strategy,
+#' treatment assignment, and outcome imputation. Supports flexible customization passed
+#' from [single_mab_simulation()] and [multiple_mab_simulation()] in treatment blocking strategy,
 #' the size of each treatment wave, and information availability to simulate both a real experiment, and non-stationary
 #' bandit strategy.
 #'
 #' @inheritParams single_mab_simulation
-#' @param imputation_information Object created by [imputation_prep()] containing the conditional means and success dates
+#' @param imputation_information Object created by [imputation_precompute()] containing the conditional means and success dates
 #' for each treatment block to impute from.
 #' @inheritParams cols
 #'
 #'
-#' @return  A named list containing:
+#' @returns  A named list containing:
 #' \itemize{
-#' \item `final_data`: Processed data with new treatment assignments and imputed outcomes labelled with "mab_" prefix.
-#' \item `bandits`: Thompson Probability or UCB1 statistic for each treatment arm at each period of the simulation.
-#' \item `assignment_probs`: Assignment probabilities for each treatment arm at each period of the simulation.
+#' \item `final_data`: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
+#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period.
+#' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
 #' }
-#' @seealso
-#' * [single_mab_simulation()]
-#' * [mab_simulation()]
-#' * [create_prior()]
-#' * [get_bandit()]
-#' * [assign_treatments()]
-#' * [check_impute()]
-#' * [get_past_results()]
-#' * [impute_success()]
+#' @details
+#' The first period is used to start the trial, so the MAB loop
+#' starts at period number 2.
+#'
 #' @keywords internal
 #'
 run_mab_trial <- function(data, time_unit, period_length = NULL,
@@ -131,16 +127,28 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
 #' @title Ends Multi-Arm Bandit Trial
 #' @description Condenses output from [run_mab_trial()] into
 #' manageable structure.
-#' @param data finalized data from [run_mab_trial()].
+#' @param data Finalized data from [run_mab_trial()].
 #' @param bandits Finalized bandits list from [run_mab_trial()].
-#' @param periods Numeric scalar; total number of periods in Multi-Arm-Bandit trial.
+#' @param periods Numeric value of length 1; total number of periods in Multi-Arm-Bandit trial.
 #' @inheritParams single_mab_simulation
-#' @return  A named list containing:
+#' @returns  A named list containing:
 #' \itemize{
-#' \item `final_data`: Processed data with new treatment assignments and imputed outcomes labelled with "mab_" prefix.
-#' \item `bandits`: Thompson Probability or UCB1 statistic for each treatment arm at each period of the simulation.
-#' \item `assignment_probs`: Assignment probabilities for each treatment arm at each period of the simulation.
+#' \item `final_data`: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
+#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period.
+#' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
 #' }
+#' @details
+#' Takes the bandit lists provided, and condenses them using [dplyr::bind_rows()]
+#' into tibbles or data.tables, and then pivots the table
+#' to wide format where each treatment arm is a column, and the rows
+#' represent periods.
+#'
+#' At this step the final UCB1 or Thompson Probabilities are calculated,
+#' and the whole table is lead by one to have each period be represented
+#' by the calculation that occurred just after completing the period, so
+#' period 11 now means the bandit that was calculated after period 11 was
+#' simulated.
+#'
 #' @seealso
 #'* [run_mab_trial()]
 #' @keywords internal
@@ -288,13 +296,15 @@ end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditio
 #------------------------------------------------------------------------------
 #' Create Prior Periods
 #' @name create_prior
-#' @description Used during [run_mab_trial()] to create a vector of prior periods dynamically.
+#' @description Used during [run_mab_trial()] to create a vector of prior periods dynamically. Used to create
+#' the proper vector when `prior_periods` is not "All" and therefore not all the periods less than the current one.
 #'
 #' @inheritParams single_mab_simulation
 #' @param current_period The current period of the simulation. Defined by loop structure inside [run_mab_trial()].
 #'
-#' @return Numeric vector containing the prior treatment periods to be used for UCB1 and Thompson algorithms to
-#' assign treatments
+#'
+#' @returns Numeric vector containing the prior treatment periods to be used when aggregating
+#' the results for the current treatment assignment period.
 #'
 #' @seealso
 #' *[run_mab_trial()]

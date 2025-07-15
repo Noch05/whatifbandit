@@ -12,9 +12,12 @@ plot_mult_estimates(x, estimator, cdf, level, ...)
 \item{estimator}{Estimator to plot; Either "AIPW", "Sample" or "Both"; used by \code{hist} and \code{estimate}.}
 
 \item{cdf}{String; specifies the type of CDF to use when analyzing the estimates.
-valid cdfs are the \code{empirical} cdf, the \code{normal} cdf. Used when type = \code{estimate}.}
+valid CDFs are the 'empirical' CDF, the 'normal' CDF. Used when type = \code{estimate}. The 'normal' CDF uses the fact
+that the AIPW estimates are asymptotically normal, while the empirical CDF estimates the CDF from the sample
+of AIPW estimates.}
 
-\item{level}{Confidence Interval Width (i.e 0.90, .95, 0.99)}
+\item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
+Defaults to 0.95}
 
 \item{...}{arguments to pass to \verb{ggplot2:geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, \code{bins} etc.)}
 }
@@ -22,6 +25,6 @@ valid cdfs are the \code{empirical} cdf, the \code{normal} cdf. Used when type =
 Minimal ggplot object, that can be customized and added to with \code{+} (To change, scales, labels, legend, theme, etc.)
 }
 \description{
-Plots AIPW/Sample Estimates for each arm using variance from the repeated trials.
+Plots AIPW/Sample Estimates for each arm using variance from the repeated trials for \code{\link[=plot.multiple.mab]{plot.multiple.mab()}}
 }
 \keyword{internal}
