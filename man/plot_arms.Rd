@@ -22,3 +22,4 @@ Minimal ggplot object, that can be customized and added to with \code{+} (To cha
 \description{
 Helper to \code{\link[=plot.mab]{plot.mab()}}. Plots Treatment Arms over Time.
 }
+\keyword{internal}
