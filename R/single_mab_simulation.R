@@ -102,7 +102,9 @@
 #' package, or as the treatment with the  highest UCB1 statistic, while implementing the specific
 #' treatment blocking and control augmentation specified. More details on bandit algorithms can in
 #' \href{https://doi.org/10.48550/arXiv.1402.6028}{Kuleshov and Precup 2014} and
-#' \href{https://doi.org/10.48550/arXiv.1904.07272}{Slivkins 2024}.
+#' \href{https://doi.org/10.48550/arXiv.1904.07272}{Slivkins 2024}.This is NOT a Contextual bandit,
+#' and as such the package does not support the acceptance of any covariate information nor use
+#' any when performing the bandit-based assignment.
 #'
 #' If `perfect_assignment` is FALSE, at this step, some of the successes may be masked, if they occurred after
 #' the specified treatment assignment date for that given period, but these will be unmasked in later periods.

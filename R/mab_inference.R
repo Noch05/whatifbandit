@@ -1,30 +1,42 @@
 #' Calculate Individual AIPW For Each Treatment Condition
 #' @name get_iaipw
 #' @description Calculates the individual Augmented Inverse Probability Weighted Estimate (AIPW) of treatment
-#' success for each treatment condition provided.
+#' success for each treatment condition provided. This method scales the estimated probabilities of success by
+#' the probability of being assigned the treatment, and weighted  by a the conditional expectation of success
+#' from prior periods of an adaptive trial. The condition expectation function is a grouped mean by
+#' treatment arm.
 #'
-#'
-#' @inheritParams get_adaptive_aipw
 #' @inheritParams single_mab_simulation
-
+#' @param periods Numeric value of length 1; number of total periods in the simulation
+#' @param assignment_probs tibble/data.table containing the probabilities of being
+#' assigned each treatment at a given period
 #'
+#' @returns A tibble/data.frame, containing the data used in the Multi-Arm-Bandit, with
+#' new columns pertaining to the individual AIPW estimate for each person and condition, and
+#' probability of assignment for each treatment at each period.
 #'
-#' @returns A data frame containing the data used in the MAB trial
-#' with new columns corresponding to the individual AIPW estimate for each treatment condition, and
-#' the probability of being assigned a given treatment condition.
+#' @details
+#' The specification for the Individual AIPW estimates can be found
+#' in \href{https://doi.org/10.1073/pnas.2014602118}{Hadad et al. (2021)}. These
+#' formulas in equation 5, formed the basis for this function's calculations. Here
+#' the regression adjustment used is the grouped mean of success by treatment, up until
+#' the current period of estimation (so at period 5, the grouped mean was calculated
+#' using data from periods 1 through 4).
 #'
-#' @seealso
-#' * [run_mab_trial()]
-#' * [get_adaptive_aipw()]
-#' * [single_mab_simulation()]
+#' The AIPW estimator makes corrections for the non-random method of assigning treatment,
+#' and is both unbiased and asymptotically normal, so can be used fo statistical
+#' inference, while the sample mean in this case cannot.
+#' @references
+#' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
+#' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
+#' (15): e2014602118. \url{https://doi.org/10.1073/pnas.2014602118}.
+#'
 #' @keywords internal
 get_iaipw <- function(data, assignment_probs, periods, conditions, verbose) {
   verbose_log(verbose, "Computing Individual AIPW Estimates")
   base::UseMethod("get_iaipw", data)
 }
 #-------------------------------------------------------------------------------
-
-#'
 #' @method get_iaipw data.frame
 #' @title
 #' [get_iaipw()] for data.frames
@@ -92,7 +104,6 @@ get_iaipw.data.frame <- function(data, assignment_probs, periods, conditions, ve
   }
   return(data)
 }
-#-------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 #' @method get_iaipw data.table
 #' @title [get_iaipw()] for data.tables
@@ -176,11 +187,30 @@ get_iaipw.data.table <- function(data, assignment_probs, periods, conditions, ve
 #'
 #' @description Takes the average of the individual AIPW scores created by [get_iaipw()] for each period,
 #' and assigns each estimate an adaptive weight based on a constant allocation rate across periods defined by
-#' \href{https://www.pnas.org/doi/pdf/10.1073/pnas.2014602118}{Hadad et. al (2021)} to calculate a final
-#' estimate for each treatment condition.
+#' \href{https://doi.org/10.1073/pnas.2014602118}{Hadad et. al (2021)} to calculate a final
+#' AIPW estimate and variance for each treatment condition. Sample proportions are also provided
+#' for comparison.
 #'
-#' @inheritParams get_adaptive_aipw
+#' @inheritParams get_iaipw
 #' @inheritParams single_mab_simulation
+#' @returns tibble/data.table containing the AIPW estimate of treatment success, AIPW variance,
+#' sample proportion of successful treatments (sample mean), and sample proportion variance.
+#' @details
+#' The formulas for the calculations in this function can be found in
+#' \href{https://doi.org/10.1073/pnas.2014602118}{Hadad et al. (2021)} at
+#' equation 5 (estimate), equation 11 (variance), equation 15 (allocation rate).
+#'
+#' The formulas specified assume that each period is 1 observation but in the cases
+#' for this simulation where periods contain multiple observations the individual estimates
+#' from each period are averaged before being used in the final calculations.
+#'
+#' The AIPW estimator makes corrections for the non-random method of assigning treatment,
+#' and is both unbiased and asymptotically normal, so can be used fo statistical
+#' inference, while the sample mean which is still provided for comparison, cannot be.
+#' @references
+#' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
+#' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
+#' (15): e2014602118. \url{https://doi.org/10.1073/pnas.2014602118}.
 #' @keywords internal
 adaptive_aipw <- function(data, assignment_probs, conditions, periods, verbose) {
   verbose_log(verbose, "Aggregating AIPW Estimates")

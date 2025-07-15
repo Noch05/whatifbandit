@@ -1,20 +1,18 @@
 #' @title Validates Inputs For [single_mab_simulation()] and [multiple_mab_simulation()]
 #' @name check_args
-#' @description This function provides input validation,
-#' checking to ensure that all required function arguments have been entered,
-#' and that they do not conflict with one another. The goal is to provide the user
-#' with informative error messages so they can quickly fix their usage of the function.
+#' @description This function checks to ensure that all required arguments
+#' have been properly passed to the function before continuing with the simulation. When
+#' errors are thrown, user-friendly messages are provided to indicate which argument
+#' was misspecified. Additionally, when `verbose` = TRUE, additional warning
+#' messages may be shown if unnecessary arguments are passed.
 #' @inheritParams single_mab_simulation
 #' @inheritParams cols
 #' @returns No return value. Throws an error
-#' if problems exist before running [single_mab_simulation]
-#' or [multiple_mab_simulation()].
+#' if an argument is missing or misspecified.
 #' @seealso
 #' *[single_mab_simulation()]
 #' *[multiple_mab_simulation()]
 #' @keywords internal
-#'
-#'
 check_args <- function(data,
                        assignment_method,
                        algorithm,
@@ -178,20 +176,15 @@ check_args <- function(data,
 #--------------------------------------------------------------------------------------------------------------
 #' @title Checking existence and declaration of columns
 #' @name check_cols
-#'
-#'
-#' @description Takes the user's settings as input, and checks the required columns against
-#' which ones are provided, and throws in error if the user did not provide a required column, or
-#' the column they provide is not present in their data.
+#' @description Helper to [check_args()]. This function accepts the user's
+#' settings for the Multi-Arm-Bandit trial, and checks whether columns in the data have been properly
+#' specified based on these settings.
 #'
 #' @inheritParams single_mab_simulation
 #' @inheritParams cols
-#'
-#' @returns Throws an error if columns are not properly declared or in data
-#'
-#' @seealso
-#' *[single_mab_simulation()]
-#' *[check_args()]
+#' @returns Throws an error if columns which are required have not been declared
+#' or are not present in the data. Additionally throws warning messages,
+#' if unnecessary columns have been provided.
 #' @keywords internal
 #'
 check_cols <- function(assignment_method, time_unit, perfect_assignment, data_cols, data, verbose) {

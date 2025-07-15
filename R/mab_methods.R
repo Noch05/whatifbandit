@@ -1,11 +1,19 @@
 #' Print Generic For `mab`
 #' @description
 #' Custom Print Display for objects of `mab` class returned by [single_mab_simulation()].
+#' Prevents the large list from being printed directly to the R console, and provides
+#' useful information about the settings of each trial.
 #' @param x `mab` class object created by [single_mab_simulation()]
 #' @param ... further arguments passed to or from other methods
 #' @method print mab
 #' @name print.mab
 #' @returns Text summary of settings used for the Multi-Arm Bandit trial.
+#' @details
+#' The items used to create the text summary can be found in the settings
+#' element of the output object.
+#'
+#' `...` is provided to be compatible with `print()`, these arguments do
+#' not change anything.
 #' @export
 print.mab <- function(x, ...) {
   print_mab(x)
@@ -53,14 +61,36 @@ print_mab <- function(mab) {
 #------------------------------------------------------------------------------
 ##' Summary Generic for "mab" class
 #' @description
-#' Summarizes the Results of a Single Multi-Arm Bandit Trial.
-#' @param object "mab" class object created by [single_mab_simulation()].
-#' @param level Confidence Interval Width (i.e 0.90, .95, 0.99)
+#' Summarizes the Results of a Single Multi-Arm Bandit Trial. Provides
+#' confidence intervals around the AIPW estimates, and the final calculations
+#' of the Thompson Probabilities or UCB1 statistics for each arm.
+#' @param object `mab`` class object created by [single_mab_simulation()].
+#' @param level Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
+#' Defaults to 0.95
 #' @param ... additional arguments.
 #' @method summary mab
 #' @export
+#' @details
+#' The confidence intervals applied follow a standard normal distribution
+#' because it is assumed the AIPW estimators are asymptotically normal as shown
+#' in \href{https://doi.org/10.1073/pnas.2014602118}{Hadad et al. (2021)}
+#'
+#' `...` is provided to be compatibile with `summary()` it does not change
+#' anything in the execution.
+#'
+#' All of the data provided to create a table like this is present in the object
+#' created by [single_mab_simulation] but
+#' this provides a simple shortcut, which is useful when testing many
+#' different simulations.
+#'
+
+#' @references
+#' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
+#' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
+#' (15): e2014602118. \url{https://doi.org/10.1073/pnas.2014602118}.
+#'
 #' @example inst/examples/summary.mab_example.R
-#' @returns data.frame containg each treatment, the final Thompson/UCB1 Statistic,
+#' @returns tibble containg each treatment, the final Thompson/UCB1 Statistic,
 #' the AIPW estimate and Normal CI based on user supplied level.
 summary.mab <- function(object, level = 0.95, ...) {
   check_level(level)
