@@ -220,6 +220,12 @@ get_bandit.Thompson <- function(past_results, conditions, iterator) {
 
     bandit <- get_bandit.Thompson(past_results = past_results, conditions = conditions, iterator = iterator + 1)[[1]]
   }
+  if (iterator > 0) {
+    rlang::warn(c("Thompson Sampling this period produced NaNs, all values were divided by 2
+                        to restore numerical stability",
+      "i" = sprintf("This Period required %d divisions", iterator)
+    ))
+  }
 
 
   return(list(bandit, assignment_prob = bandit))

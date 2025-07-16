@@ -186,7 +186,7 @@ mab_simulation <- function(data,
     assignment_probs = sim_results$assignment_probs,
     estimates = estimates,
     settings = list(
-      data = NULL,
+      original_data = NULL,
       assignment_method = assignment_method,
       control_augment = control_augment,
       time_unit = time_unit,
