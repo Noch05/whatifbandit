@@ -4,7 +4,7 @@
 \alias{get_bandit.Thompson}
 \title{Thompson Sampling Algorithm}
 \usage{
-\method{get_bandit}{Thompson}(past_results, conditions, iterator)
+\method{get_bandit}{Thompson}(past_results, conditions, iterator, current_period)
 }
 \arguments{
 \item{past_results}{tibble/data.table containing summary of prior periods, with
@@ -17,6 +17,8 @@ choose names that are meaningful and consistent. If \code{control_augment} > 0, 
 of the trial in this vector must have the name "Control".}
 
 \item{iterator}{Counter variable; keeps track of recursive calls to prevent infinite recursion.}
+
+\item{current_period}{Numeric scalar; current period of the adaptive trial simulation.}
 }
 \value{
 Named Numeric Vector of Posterior Probabilities

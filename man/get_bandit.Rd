@@ -8,7 +8,7 @@ get_bandit(
   past_results,
   algorithm,
   conditions,
-  current_period = NULL,
+  current_period,
   control_augment = 0
 )
 }

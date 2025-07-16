@@ -169,12 +169,23 @@ get_past_results.data.table <- function(current_data,
 #' @keywords internal
 
 
-get_bandit <- function(past_results, algorithm, conditions, current_period = NULL, control_augment = 0) {
+get_bandit <- function(past_results, algorithm, conditions, current_period, control_augment = 0) {
   bandit <- switch(algorithm,
-    "Thompson" = get_bandit.Thompson(past_results = past_results, conditions = conditions, iterator = 0),
+    "Thompson" = get_bandit.Thompson(
+      past_results = past_results, conditions = conditions, iterator = 0, current_period =
+        current_period
+    ),
     "UCB1" = get_bandit.UCB1(past_results = past_results, conditions = conditions, current_period = current_period),
     rlang::abort("Invalid `algorithm`. Valid Algorithms: 'Thomspon', 'UCB1'")
   )
+
+  if (bandit$iterator > 0) {
+    rlang::warn(c("Thompson Sampling this period produced NaNs, all values were divided by 2
+                        to restore numerical stability.",
+      "i" = sprintf("Period %d required %d divisions", current_period, iterator)
+    ))
+  }
+  bandit$iterator <- NULL
 
   if (control_augment > 0) {
     bandit[[2]] <- augment_prob(
@@ -204,7 +215,7 @@ get_bandit <- function(past_results, algorithm, conditions, current_period = NUL
 #' @returns Named Numeric Vector of Posterior Probabilities
 #' @keywords internal
 
-get_bandit.Thompson <- function(past_results, conditions, iterator) {
+get_bandit.Thompson <- function(past_results, conditions, iterator, current_period) {
   bandit <- rlang::set_names(bandit::best_binomial_bandit(
     x = past_results$successes,
     n = past_results$n,
@@ -218,17 +229,20 @@ get_bandit.Thompson <- function(past_results, conditions, iterator) {
     past_results$successes <- (past_results$successes / 2)
     past_results$n <- (past_results$n / 2)
 
-    bandit <- get_bandit.Thompson(past_results = past_results, conditions = conditions, iterator = iterator + 1)[[1]]
+    bandit <- get_bandit.Thompson(
+      past_results = past_results, conditions = conditions, iterator = iterator + 1,
+      current_period = current_period
+    )[[1]]
   }
+
   if (iterator > 0) {
     rlang::warn(c("Thompson Sampling this period produced NaNs, all values were divided by 2
-                        to restore numerical stability",
-      "i" = sprintf("This Period required %d divisions", iterator)
+                        to restore numerical stability.",
+      "i" = sprintf("Period %d required %d divisions", current_period, iterator)
     ))
   }
 
-
-  return(list(bandit, assignment_prob = bandit))
+  return(list(bandit, assignment_prob = bandit, iterator = iterator))
 }
 #-------------------------------------------------------------------
 #' @method get_bandit UCB1
@@ -313,19 +327,8 @@ augment_prob.Thompson <- function(assignment_probs, control_augment, conditions)
   ctrl <- base::names(conditions) == "Control"
 
   if (assignment_probs[ctrl] < control_augment) {
-    diff <- control_augment - assignment_probs[ctrl]
-
-    sub_from <- diff / base::length(conditions)
-
-    assignment_probs[ctrl] <- assignment_probs[ctrl] + diff
-
-    assignment_probs[!ctrl] <- assignment_probs[!ctrl] - sub_from
-  }
-  if (any(assignment_probs < 0)) {
-    assignment_probs <- fix_negatives(
-      assignment_probs = assignment_probs,
-      conditions = conditions
-    )
+    assignment_probs[ctrl] <- control_augment
+    assignment_probs[-ctrl] <- (assignment_probs[-ctrl] / sum(assignment_probs[-ctrl])) * (1 - control_augment)
   }
 
   return(assignment_probs)
@@ -348,50 +351,6 @@ augment_prob.UCB1 <- function(assignment_probs, control_augment, conditions) {
   return(assignment_probs)
 }
 
-
-
-#' @title Ensure Non-Zero Probabilities of Assignment
-#' @description Redistributes Probabilities when control augmentation produces negatives
-#' @name fix_negatives
-#' @param assignment_probs Named Numeric Vector; Containing probabilities of treatment assignment
-#' @param iter, iteration tracker, stops function if it reaches the limit of 50
-#' @inheritParams single_mab_simulation
-#' @returns Named Numeric Vector; Containing probabilities of treatment assignment, all positive.
-#' @details
-#' Redistributes the difference in making a probability positive to preserve the distribution
-#' Calculates the difference required and takes it uniformly from every other treatment arm
-#' but the control arm to then add to the negative probability
-#'
-#' Called recursively until no probabilities are negative of the max iterations of 50
-#' is hit, and all negative probabilities are made 0 with no redistribution
-#'
-#' @keywords internal
-
-fix_negatives <- function(assignment_probs, conditions, iter = 1) {
-  negatives <- assignment_probs < 0
-  take_from <- assignment_probs > 0 & base::names(conditions) != "Control"
-
-  amount_to_make_up <- sum(assignment_probs[negatives])
-
-  assignment_probs[negatives] <- assignment_probs[negatives] - assignment_probs[negatives]
-
-  sub_from <- amount_to_make_up / base::length(assignment_probs[take_from])
-
-  assignment_probs[take_from] <- assignment_probs[take_from] - sub_from
-
-  # Recursive Process that ends once an acceptable degree of precision is met
-
-  if ((-1 * sum(assignment_probs[assignment_probs < 0]) > 1e-10) && iter < 50) {
-    assignment_probs <- fix_negatives(
-      assignment_probs = assignment_probs, conditions = conditions,
-      iter = iter + 1
-    )
-  } else {
-    assignment_probs[assignment_probs < 0] <- 1e-10
-  }
-
-  return(assignment_probs)
-}
 #-------------------------------------------------------------------------------
 #' Adaptively Assign Treatments in a Period
 #' @description Assigns new treatments for an assignment wave based on the assignment probabilities provided from
