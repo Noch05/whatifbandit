@@ -178,6 +178,7 @@ get_bandit <- function(past_results, algorithm, conditions, current_period, cont
     "UCB1" = get_bandit.UCB1(past_results = past_results, conditions = conditions, current_period = current_period),
     rlang::abort("Invalid `algorithm`. Valid Algorithms: 'Thomspon', 'UCB1'")
   )
+
   if (algorithm == "Thompson") {
     if (bandit$iterator > 0) {
       rlang::warn(c("Thompson Sampling this period produced NaNs, all values were divided by 2
@@ -188,19 +189,20 @@ get_bandit <- function(past_results, algorithm, conditions, current_period, cont
     bandit$iterator <- NULL
   }
 
-  ctrl <- base::names(conditions) == "Control"
   assignment_prob <- bandit[["assignment_prob"]]
-  if (control_augment > 0 & (assignment_prob[ctrl] < control_augment)) {
-    assignment_prob[ctrl] <- control_augment
-    assignment_prob[-ctrl] <-
-      (assignment_prob[-ctrl] / sum(assignment_prob[-ctrl])) * (1 - control_augment)
-  }
+  if (control_augment > 0) {
+    ctrl <- base::which(base::names(conditions) == "Control")
 
+    if (assignment_prob[ctrl] < control_augment) {
+      assignment_prob[ctrl] <- control_augment
+      assignment_prob[-ctrl] <-
+        (assignment_prob[-ctrl] / sum(assignment_prob[-ctrl])) * (1 - control_augment)
+    }
+  }
   if (!isTRUE(all.equal(sum(assignment_prob), 1))) {
     assignment_prob <- assignment_prob / sum(assignment_prob)
   }
   bandit[["assignment_prob"]] <- assignment_prob
-
 
 
   return(bandit)
