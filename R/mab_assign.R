@@ -204,7 +204,6 @@ get_bandit <- function(past_results, algorithm, conditions, current_period, cont
   }
   bandit[["assignment_prob"]] <- assignment_prob
 
-
   return(bandit)
 }
 #-------------------------------------------------------------------
@@ -244,7 +243,7 @@ get_bandit.Thompson <- function(past_results, conditions, iterator, current_peri
     )[[1]]
   }
 
-  return(list(bandit, assignment_prob = bandit, iterator = iterator))
+  return(list(bandit = bandit, assignment_prob = bandit, iterator = iterator))
 }
 #-------------------------------------------------------------------
 #' @method get_bandit UCB1

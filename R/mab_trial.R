@@ -78,6 +78,8 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
     bandits$bandit_stat[[i]] <- bandit[["bandit"]]
     bandits$assignment_prob[[i]] <- bandit[["assignment_prob"]]
 
+
+
     current_data <- assign_treatments(
       current_data = current_data,
       probs = bandit[[2]],
@@ -88,6 +90,7 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       condition_col = data_cols$condition_col,
       success_col = data_cols$success_col
     )
+
     prepped_impute <- imputation_preparation(
       current_data = current_data,
       whole_experiment = whole_experiment,
@@ -117,7 +120,6 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
     conditions = conditions,
     periods = periods
   )
-
   return(results)
 }
 
