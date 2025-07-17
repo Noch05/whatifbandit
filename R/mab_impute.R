@@ -328,7 +328,8 @@ check_impute.data.table <- function(imputation_information, current_data, curren
 #' Uses [randomizr::block_and_cluster_ra()] to impute the outcomes for observations
 #' who were assigned new treatments. The probabilities used to guide the imputation
 #' of the outcomes are pre-computed using the existing data from the original randomized experiment.
-#' @param current_data Updated tibble/data.frame object containing new treatments from [assign_treatments()] to impute outcomes for
+#' @param current_data Updated tibble/data.frame object containing new treatments from [assign_treatments()]
+#' to impute outcomes from.
 #' @inheritParams run_mab_trial
 #' @param prior_data tibble/data.frame containing all the data from previous periods. Used to join together at the end for the next iteration of the simulation.
 #' @param imputation_info tibble/data.frame containing conditional probability of success by treatment block, for each

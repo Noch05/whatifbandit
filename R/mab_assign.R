@@ -292,11 +292,9 @@ get_bandit.UCB1 <- function(past_results, conditions, current_period) {
 #' \href{https://cran.r-project.org/web/packages/randomizr/index.html}{randomizr} package for random assignment.
 #' @name assign_treatments
 #' @inheritParams single_mab_simulation
-#' @inheritParams create_prior
 #' @inheritParams cols
 #' @param probs Named Numeric Vector; Probability of Assignment for each treatment condition.
 #' @inheritParams get_past_results
-#'
 #' @returns Updated tibble/data.table with the new treatment conditions for each observation. If this treatment is different
 #' then from under the original experiment, they are labelled as imputation required.
 #'

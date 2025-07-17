@@ -17,7 +17,8 @@ impute_success(
 )
 }
 \arguments{
-\item{current_data}{Updated tibble/data.frame object containing new treatments from \code{\link[=assign_treatments]{assign_treatments()}} to impute outcomes for}
+\item{current_data}{Updated tibble/data.frame object containing new treatments from \code{\link[=assign_treatments]{assign_treatments()}}
+to impute outcomes from.}
 
 \item{imputation_info}{tibble/data.frame containing conditional probability of success by treatment block, for each
 combination that exists in \code{current_data}, calculated from the original experiment.
