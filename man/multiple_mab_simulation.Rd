@@ -21,7 +21,8 @@ multiple_mab_simulation(
   period_length = NULL,
   block_cols = NULL,
   verbose = FALSE,
-  keep_data = FALSE
+  keep_data = FALSE,
+  ndraws = NULL
 )
 }
 \arguments{
@@ -107,6 +108,12 @@ If you have a large dataset, consider passing it as a data.table.}
 
 \item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets.
 .}
+
+\item{ndraws}{A logical value; If TRUE, numerical corrections are made to the input
+vector of success and total trials to when the Thompson Sampling procedure returns a vector
+of 0's or NaN's due to overflow. The vectors are divided by 2, maintaining the proportions of
+success to total trials in each arm, but this may impact the variance of the distribution. This occurs
+recursively a maximum of 50 times before throwing an error. By default this is FALSE.}
 }
 \value{
 \code{multiple.mab} class object, which is a named list containing:

@@ -199,7 +199,6 @@ get_bandit <- function(past_results, algorithm, conditions, current_period, cont
 #-------------------------------------------------------------------
 #' @method get_bandit Thompson
 #' @title Thompson Sampling Algorithm
-#' @param iterator Counter variable; keeps track of recursive calls to prevent infinite recursion.
 #' @inheritParams get_bandit
 #' @details
 #' Thompson Sampling is calculated using the \href{https://cran.r-project.org/web/packages/bandit/index.html}{bandit}
@@ -246,7 +245,7 @@ get_bandit.Thompson <- function(past_results, conditions, current_period, ndraws
 #' @description Checks if the Thompson Probabilities either sum arbitrarily close
 #' to 0 or if any of them are NA, signs that overflow occurred
 #' @param bandit a numeric vector of Thompson Probabilities passed from
-#' [get.bandit.Thompson()].
+#' [get_bandit.Thompson()].
 #' @returns Logical; TRUE if the vector is invalid, FALSE if valid
 #' @keywords internal
 bandit_invalid <- function(bandit) {
@@ -319,7 +318,7 @@ get_bandit.UCB1 <- function(past_results, conditions, current_period) {
 
 assign_treatments <- function(current_data, probs, blocking = NULL,
                               algorithm, id_col, conditions, condition_col,
-                              success_col) {
+                              success_col, random_prop) {
   if (blocking) {
     blocks <- current_data$block
   }

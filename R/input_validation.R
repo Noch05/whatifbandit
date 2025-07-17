@@ -1,5 +1,5 @@
 #' @title Validates Inputs For [single_mab_simulation()] and [multiple_mab_simulation()]
-#' @name check_inputs
+#' @name check_args
 #' @description This function checks to ensure that all required arguments
 #' have been properly passed to the function before continuing with the simulation. When
 #' errors are thrown, user-friendly messages are provided to indicate which argument
@@ -13,21 +13,21 @@
 #' *[single_mab_simulation()]
 #' *[multiple_mab_simulation()]
 #' @keywords internal
-check_inputs <- function(data,
-                         assignment_method,
-                         algorithm,
-                         conditions,
-                         prior_periods,
-                         perfect_assignment,
-                         whole_experiment,
-                         blocking,
-                         data_cols,
-                         block_cols,
-                         time_unit,
-                         period_length,
-                         control_augment,
-                         verbose,
-                         ndraws) {
+check_args <- function(data,
+                       assignment_method,
+                       algorithm,
+                       conditions,
+                       prior_periods,
+                       perfect_assignment,
+                       whole_experiment,
+                       blocking,
+                       data_cols,
+                       block_cols,
+                       time_unit,
+                       period_length,
+                       control_augment,
+                       verbose,
+                       ndraws) {
   # Basic Checks for Data and algorithm
 
   if (!algorithm %in% c("Thompson", "UCB1")) {
@@ -172,46 +172,11 @@ check_inputs <- function(data,
 }
 
 
-
-
-#--------------------------------------------------------------------------------------------------------------
-#' @title Checking for Positive Integer or valid string
-#' @name check_arg
-#' @description Checking if the input is a valid positive integer value or
-#' an appropriate string accepted by [single_mab_simulation()]
-#' @params arg value passed to be checked.
-#' @param argname name of the argument
-#' @string string to check arg against if arg is a string
-#' @returns Throws an error if arg is not a positive integer, nor a valid
-#' string argument
-#' @keywords internal
-
-check_arg <- function(arg, argname, string) {
-  if (is.numeric(arg)) {
-    if (arg %% 1 != 0 || arg <= 0) {
-      rlang::abort(c(
-        sprintf(
-          "\`%s\` must be a positive integer or '%s'.",
-          argname, string
-        ),
-        "x" = sprintf("You passed: %f ", arg)
-      ))
-    }
-  } else if (arg != string || is.na(arg)) {
-    rlang::abort(c(
-      sprintf(
-        "\`%s\` must be a positive integer or '%s'.",
-        argname, string
-      ),
-      "x" = sprintf("You passed: %s ", arg)
-    ))
-  }
-}
 #---------------------------------------------------------------------------------------
 #'
 #' @title Checking existence and declaration of columns
 #' @name check_cols
-#' @description Helper to [check_inputs()]. This function accepts the user's
+#' @description Helper to [check_args()]. This function accepts the user's
 #' settings for the Multi-Arm-Bandit trial, and checks whether columns in the data have been properly
 #' specified based on these settings.
 #'

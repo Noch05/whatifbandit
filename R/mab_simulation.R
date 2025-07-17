@@ -63,7 +63,7 @@ pre_mab_simulation <- function(data,
   }
 
   # Input Validation
-  check_inputs(
+  check_args(
     data = data, time_unit = time_unit,
     perfect_assignment = perfect_assignment,
     algorithm = algorithm, period_length = period_length,

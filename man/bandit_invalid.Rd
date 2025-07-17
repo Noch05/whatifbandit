@@ -8,7 +8,7 @@ bandit_invalid(bandit)
 }
 \arguments{
 \item{bandit}{a numeric vector of Thompson Probabilities passed from
-\code{\link[=get.bandit.Thompson]{get.bandit.Thompson()}}.}
+\code{\link[=get_bandit.Thompson]{get_bandit.Thompson()}}.}
 }
 \value{
 Logical; TRUE if the vector is invalid, FALSE if valid
