@@ -19,7 +19,7 @@ run_mab_trial(
   verbose,
   control_augment,
   imputation_information,
-  numeric_correction
+  ndraws
 )
 }
 \arguments{
@@ -97,7 +97,7 @@ Default is 0.}
 \item{imputation_information}{Object created by \code{\link[=imputation_precompute]{imputation_precompute()}} containing the conditional means and success dates
 for each treatment block to impute from.}
 
-\item{numeric_correction}{A logical value; If TRUE, numerical corrections are made to the input
+\item{ndraws}{A logical value; If TRUE, numerical corrections are made to the input
 vector of success and total trials to when the Thompson Sampling procedure returns a vector
 of 0's or NaN's due to overflow. The vectors are divided by 2, maintaining the proportions of
 success to total trials in each arm, but this may impact the variance of the distribution. This occurs

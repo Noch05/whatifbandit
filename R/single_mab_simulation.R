@@ -84,7 +84,7 @@
 #'
 #' @param verbose A logical value; whether or not to print intermediate messages. Default is FALSE.
 #'
-#' @param numeric_correction A logical value; If TRUE, numerical corrections are made to the input
+#' @param ndraws A logical value; If TRUE, numerical corrections are made to the input
 #' vector of success and total trials to when the Thompson Sampling procedure returns a vector
 #' of 0's or NaN's due to overflow. The vectors are divided by 2, maintaining the proportions of
 #' success to total trials in each arm, but this may impact the variance of the distribution. This occurs
@@ -181,7 +181,7 @@ single_mab_simulation <- function(data,
                                   period_length = NULL,
                                   block_cols = NULL,
                                   verbose = FALSE,
-                                  numeric_correction = FALSE) {
+                                  ndraws = NULL) {
   prepped <- pre_mab_simulation(
     data = data, assignment_method = assignment_method,
     algorithm = algorithm, conditions = conditions,
@@ -190,7 +190,7 @@ single_mab_simulation <- function(data,
     block_cols = block_cols, data_cols = data_cols,
     control_augment = control_augment, time_unit = time_unit,
     period_length = period_length,
-    verbose = verbose, numeric_correction = numeric_correction
+    verbose = verbose, ndraws = ndraws
   )
   ## Initial Sort for Consistency in calling by numeric indexes
   conditions <- base::sort(conditions)
@@ -213,7 +213,7 @@ single_mab_simulation <- function(data,
     assignment_method = assignment_method,
     control_augment = control_augment,
     imputation_information = prepped$imputation_information,
-    numeric_correction = numeric_correction
+    ndraws = ndraws
   )
   results$settings$original_data <- data
 

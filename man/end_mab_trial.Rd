@@ -4,14 +4,7 @@
 \alias{end_mab_trial}
 \title{Ends Multi-Arm Bandit Trial}
 \usage{
-end_mab_trial(
-  data,
-  bandits,
-  algorithm,
-  periods,
-  conditions,
-  numeric_correction
-)
+end_mab_trial(data, bandits, algorithm, periods, conditions, ndraws)
 }
 \arguments{
 \item{data}{Finalized data from \code{\link[=run_mab_trial]{run_mab_trial()}}.}
@@ -28,7 +21,7 @@ of this vector should be the names of each treatment as seen in your data, so to
 choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
 of the trial in this vector must have the name "Control".}
 
-\item{numeric_correction}{A logical value; If TRUE, numerical corrections are made to the input
+\item{ndraws}{A logical value; If TRUE, numerical corrections are made to the input
 vector of success and total trials to when the Thompson Sampling procedure returns a vector
 of 0's or NaN's due to overflow. The vectors are divided by 2, maintaining the proportions of
 success to total trials in each arm, but this may impact the variance of the distribution. This occurs

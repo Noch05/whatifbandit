@@ -43,7 +43,7 @@ pre_mab_simulation <- function(data,
                                period_length,
                                block_cols,
                                verbose,
-                               numeric_correction) {
+                               ndraws) {
   if (base::is.null(data) || !base::is.data.frame(data)) {
     rlang::abort("Input 'data' must be a non-null data.frame.")
   }
@@ -63,14 +63,14 @@ pre_mab_simulation <- function(data,
   }
 
   # Input Validation
-  check_args(
+  check_inputs(
     data = data, time_unit = time_unit,
     perfect_assignment = perfect_assignment,
     algorithm = algorithm, period_length = period_length,
     whole_experiment = whole_experiment, prior_periods = prior_periods,
     data_cols = data_cols, block_cols = block_cols, conditions = conditions, blocking = blocking,
     assignment_method = assignment_method, verbose = verbose,
-    control_augment = control_augment, numeric_correction = numeric_correction
+    control_augment = control_augment, ndraws = ndraws
   )
 
   # Preparing Data to be simulated
@@ -148,7 +148,7 @@ mab_simulation <- function(data,
                            verbose,
                            assignment_method, control_augment,
                            imputation_information,
-                           numeric_correction) {
+                           ndraws) {
   sim_results <- run_mab_trial(
     data = data,
     time_unit = time_unit,
@@ -164,7 +164,7 @@ mab_simulation <- function(data,
     verbose = verbose,
     control_augment = control_augment,
     imputation_information = imputation_information,
-    numeric_correction = numeric_correction
+    ndraws = ndraws
   )
   periods <- base::max(sim_results$final_data$period_number)
 

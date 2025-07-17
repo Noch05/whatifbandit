@@ -169,11 +169,11 @@ get_past_results.data.table <- function(current_data,
 #' @keywords internal
 
 
-get_bandit <- function(past_results, algorithm, conditions, current_period, control_augment = 0, numeric_correction) {
+get_bandit <- function(past_results, algorithm, conditions, current_period, control_augment = 0, ndraws) {
   bandit <- switch(algorithm,
     "Thompson" = get_bandit.Thompson(
       past_results = past_results, conditions = conditions, current_period =
-        current_period, numeric_correction = numeric_correction
+        current_period, ndraws = ndraws
     ),
     "UCB1" = get_bandit.UCB1(past_results = past_results, conditions = conditions, current_period = current_period),
     rlang::abort("Invalid `algorithm`. Valid Algorithms: 'Thomspon', 'UCB1'")
@@ -211,7 +211,7 @@ get_bandit <- function(past_results, algorithm, conditions, current_period, cont
 #' @returns Named Numeric Vector of Posterior Probabilities
 #' @keywords internal
 
-get_bandit.Thompson <- function(past_results, conditions, current_period, numeric_correction) {
+get_bandit.Thompson <- function(past_results, conditions, current_period, ndraws) {
   bandit <- rlang::set_names(bandit::best_binomial_bandit(
     x = past_results$successes,
     n = past_results$n,
@@ -225,7 +225,7 @@ get_bandit.Thompson <- function(past_results, conditions, current_period, numeri
       n = past_results$n,
       alpha = 1,
       beta = 1,
-      ndraws = numeric_correction
+      ndraws = ndraws
     ), conditions)
 
     rlang::warn(c("Thompson Sampling calculation overflowed; simulation based posterior estimate
