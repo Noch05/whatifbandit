@@ -26,7 +26,8 @@ check_args <- function(data,
                        time_unit,
                        period_length,
                        control_augment,
-                       verbose) {
+                       verbose,
+                       numeric_correction) {
   # Basic Checks for Data and algorithm
 
   if (!algorithm %in% c("Thompson", "UCB1")) {
@@ -42,7 +43,8 @@ check_args <- function(data,
     verbose = verbose,
     blocking = blocking,
     whole_experiment = whole_experiment,
-    perfect_assignment = perfect_assignment
+    perfect_assignment = perfect_assignment,
+    numeric_correction = numeric_correction
   )
 
   purrr::walk2(logical_args, names(logical_args), ~ {

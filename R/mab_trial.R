@@ -31,7 +31,7 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
                           prior_periods, algorithm,
                           whole_experiment, perfect_assignment, conditions,
                           verbose, control_augment,
-                          imputation_information) {
+                          imputation_information, numeric_correction) {
   periods <- base::max(data$period_number)
 
   bandits <- base::vector(mode = "list", length = 2)
@@ -72,7 +72,8 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       algorithm = algorithm,
       conditions = conditions,
       current_period = i,
-      control_augment = control_augment
+      control_augment = control_augment,
+      numeric_correction = numeric_correction
     )
 
     bandits$bandit_stat[[i]] <- bandit[["bandit"]]
@@ -118,7 +119,8 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
     bandits = bandits,
     algorithm = algorithm,
     conditions = conditions,
-    periods = periods
+    periods = periods,
+    numeric_correction = numeric_correction
   )
   return(results)
 }
@@ -155,7 +157,7 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
 #'* [run_mab_trial()]
 #' @keywords internal
 
-end_mab_trial <- function(data, bandits, algorithm, periods, conditions) {
+end_mab_trial <- function(data, bandits, algorithm, periods, conditions, numeric_correction) {
   base::UseMethod("end_mab_trial", data)
 }
 #-------------------------------------------------------------------------------
@@ -164,7 +166,7 @@ end_mab_trial <- function(data, bandits, algorithm, periods, conditions) {
 #' @inheritParams end_mab_trial
 #' @title [end_mab_trial()] for data.frames
 #' @noRd
-end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditions) {
+end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditions, numeric_correction) {
   final_summary <- data |>
     dplyr::group_by(mab_condition) |>
     dplyr::summarize(
@@ -180,7 +182,8 @@ end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditio
     algorithm = algorithm,
     conditions = conditions,
     current_period = (periods + 1),
-    control_augment = 0
+    control_augment = 0,
+    numeric_correction = numeric_correction
   )
 
 
@@ -224,7 +227,7 @@ end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditio
 #' @inheritParams end_mab_trial
 #' @title [end_mab_trial()] for data.tables
 #' @noRd
-end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditions) {
+end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditions, numeric_correction) {
   final_summary <- data[, .(
     successes = base::sum(mab_success, na.rm = TRUE),
     success_rate = base::mean(mab_success, na.rm = TRUE),
@@ -236,7 +239,8 @@ end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditio
     algorithm = algorithm,
     conditions = conditions,
     current_period = (periods + 1),
-    control_augment = 0
+    control_augment = 0,
+    numeric_correction = numeric_correction
   )
 
   bandits$bandit_stat[[(periods + 1)]] <- final_bandit[[1]]

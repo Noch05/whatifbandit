@@ -9,7 +9,8 @@ get_bandit(
   algorithm,
   conditions,
   current_period,
-  control_augment = 0
+  control_augment = 0,
+  numeric_correction
 )
 }
 \arguments{
@@ -28,6 +29,12 @@ of the trial in this vector must have the name "Control".}
 
 \item{control_augment}{A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.
 Default is 0.}
+
+\item{numeric_correction}{A logical value; If TRUE, numerical corrections are made to the input
+vector of success and total trials to when the Thompson Sampling procedure returns a vector
+of 0's or NaN's due to overflow. The vectors are divided by 2, maintaining the proportions of
+success to total trials in each arm, but this may impact the variance of the distribution. This occurs
+recursively a maximum of 50 times before throwing an error. By default this is FALSE.}
 }
 \value{
 A list of length 2 containing:

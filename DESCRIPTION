@@ -4,11 +4,11 @@ Version: 0.0.0.9000
 Authors@R: c(
     person("Noah", "Ochital",
     email = "noahochital@icloud.com", role = c("aut", "cre"),
-    comment = c(ORCID = "0009-0009-0398-2963"),
+    comment = c(ORCID = "0009-0009-0398-2963")),
     person("Ryan T", "Moore",
     email = "rtm@american.edu", role = "ctb",
-    comment = c(ORCID = "0000-0002-3916-8113")
-  )
+    comment = c(ORCID = "0000-0002-3916-8113"))
+    )
 Description: Simulates the results of completed randomized controlled
     trials, as if they had been conducted as adaptive Multi-Arm Bandit
     (MAB) trials instead. Augmented inverse probability weighted estimation (AIPW) is used 

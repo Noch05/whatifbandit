@@ -18,7 +18,8 @@ run_mab_trial(
   conditions,
   verbose,
   control_augment,
-  imputation_information
+  imputation_information,
+  numeric_correction
 )
 }
 \arguments{
@@ -95,6 +96,12 @@ Default is 0.}
 
 \item{imputation_information}{Object created by \code{\link[=imputation_precompute]{imputation_precompute()}} containing the conditional means and success dates
 for each treatment block to impute from.}
+
+\item{numeric_correction}{A logical value; If TRUE, numerical corrections are made to the input
+vector of success and total trials to when the Thompson Sampling procedure returns a vector
+of 0's or NaN's due to overflow. The vectors are divided by 2, maintaining the proportions of
+success to total trials in each arm, but this may impact the variance of the distribution. This occurs
+recursively a maximum of 50 times before throwing an error. By default this is FALSE.}
 }
 \value{
 A named list containing:
