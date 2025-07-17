@@ -79,7 +79,7 @@ print_mab <- function(mab) {
 #' anything in the execution.
 #'
 #' All of the data provided to create a table like this is present in the object
-#' created by [single_mab_simulation] but
+#' created by [single_mab_simulation()] but
 #' this provides a simple shortcut, which is useful when testing many
 #' different simulations.
 #'

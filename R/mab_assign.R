@@ -194,9 +194,11 @@ get_bandit <- function(past_results, algorithm, conditions, current_period, cont
     )
   }
 
-  if (base::sum(bandit[[2]]) != 1) {
-    bandit[[2]] <- bandit[[2]] / base::sum(bandit[[2]])
+  if (!isTRUE(all.equal(sum(bandit[[2]]), 1))) {
+    bandit[[2]] <- bandit[[2]] / sum(bandit[[2]])
   }
+
+
 
   return(bandit)
 }

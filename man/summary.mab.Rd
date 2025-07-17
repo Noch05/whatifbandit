@@ -32,7 +32,7 @@ in \href{https://doi.org/10.1073/pnas.2014602118}{Hadad et al. (2021)}
 anything in the execution.
 
 All of the data provided to create a table like this is present in the object
-created by \link{single_mab_simulation} but
+created by \code{\link[=single_mab_simulation]{single_mab_simulation()}} but
 this provides a simple shortcut, which is useful when testing many
 different simulations.
 }
