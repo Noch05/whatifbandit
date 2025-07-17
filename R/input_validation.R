@@ -43,8 +43,7 @@ check_args <- function(data,
     verbose = verbose,
     blocking = blocking,
     whole_experiment = whole_experiment,
-    perfect_assignment = perfect_assignment,
-    numeric_correction = numeric_correction
+    perfect_assignment = perfect_assignment
   )
 
   purrr::walk2(logical_args, names(logical_args), ~ {

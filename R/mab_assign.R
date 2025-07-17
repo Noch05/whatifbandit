@@ -172,22 +172,12 @@ get_past_results.data.table <- function(current_data,
 get_bandit <- function(past_results, algorithm, conditions, current_period, control_augment = 0, numeric_correction) {
   bandit <- switch(algorithm,
     "Thompson" = get_bandit.Thompson(
-      past_results = past_results, conditions = conditions, iterator = 0, current_period =
+      past_results = past_results, conditions = conditions, current_period =
         current_period, numeric_correction = numeric_correction
     ),
     "UCB1" = get_bandit.UCB1(past_results = past_results, conditions = conditions, current_period = current_period),
     rlang::abort("Invalid `algorithm`. Valid Algorithms: 'Thomspon', 'UCB1'")
   )
-
-  if (algorithm == "Thompson" & numeric_correction) {
-    if (bandit$iterator > 0) {
-      rlang::warn(c("Thompson Sampling overflowed this period. All values were divided by 2
-                        to restore numerical stability.",
-        "i" = sprintf("Period %d required %d divisions", current_period, bandit$iterator)
-      ))
-    }
-    bandit$iterator <- NULL
-  }
 
   assignment_prob <- bandit[["assignment_prob"]]
   if (control_augment > 0) {
@@ -221,7 +211,7 @@ get_bandit <- function(past_results, algorithm, conditions, current_period, cont
 #' @returns Named Numeric Vector of Posterior Probabilities
 #' @keywords internal
 
-get_bandit.Thompson <- function(past_results, conditions, iterator, current_period, numeric_correction) {
+get_bandit.Thompson <- function(past_results, conditions, current_period, numeric_correction) {
   bandit <- rlang::set_names(bandit::best_binomial_bandit(
     x = past_results$successes,
     n = past_results$n,
@@ -229,28 +219,38 @@ get_bandit.Thompson <- function(past_results, conditions, iterator, current_peri
     beta = 1
   ), conditions)
 
-  if (isTRUE(all.equal(base::sum(bandit), 0)) | any(is.na(bandit))) {
-    if (numeric_correction & iterator < 50) {
-      # When best_binomial_bandit fails due to numerical instability,
-      # this preserves proportions and reruns the process
-      past_results$successes <- (past_results$successes / 2)
-      past_results$n <- (past_results$n / 2)
+  if (bandit_invalid(bandit)) {
+    bandit <- rlang::set_names(bandit::best_binomial_bandit_sim(
+      x = past_results$successes,
+      n = past_results$n,
+      alpha = 1,
+      beta = 1,
+      ndraws = numeric_correction
+    ), conditions)
 
-      iterator <- iterator + 1
-      bandit <- get_bandit.Thompson(
-        past_results = past_results, conditions = conditions, iterator = iterator,
-        current_period = current_period, numeric_correction = numeric_correction
-      )[["bandit"]]
-    } else {
-      rlang::abort(c("Thompson Sampling Overflow",
-        "x" = paste0("Bandit Result is: ", paste0(bandit, collapse = " ")),
-        "i" = "Consider Setting `numeric_correction` = TRUE, or reducing
-                     `prior_periods`."
-      ))
-    }
+    rlang::warn(c("Thompson Sampling calculation overflowed; simulation based posterior estimate
+    was used instead", "i" = sprintf("Period: %d", current_period)))
+  }
+  if (bandit_invalid(bandit)) {
+    rlang::abort(c("Thompson Sampling simulation overflowed",
+      "x" = paste0("Most Recent Result:", paste0(bandit, collapse = " ")),
+      "i" = "Consider setting `ndraws` higher or reducing `prior_periods`."
+    ))
   }
 
-  return(list(bandit = bandit, assignment_prob = bandit, iterator = iterator))
+
+  return(list(bandit = bandit, assignment_prob = bandit))
+}
+#' @name bandit_invalid
+#' @title Checks Validity of Thompson Probabilities
+#' @description Checks if the Thompson Probabilities either sum arbitrarily close
+#' to 0 or if any of them are NA, signs that overflow occurred
+#' @param bandit a numeric vector of Thompson Probabilities passed from
+#' [get.bandit.Thompson()].
+#' @returns Logical; TRUE if the vector is invalid, FALSE if valid
+#' @keywords internal
+bandit_invalid <- function(bandit) {
+  return(isTRUE(all.equal(base::sum(bandit), 0)) | any(is.na(bandit)))
 }
 #-------------------------------------------------------------------
 #' @method get_bandit UCB1
