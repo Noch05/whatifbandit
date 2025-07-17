@@ -182,7 +182,7 @@ get_bandit <- function(past_results, algorithm, conditions, current_period, cont
   if (bandit$iterator > 0) {
     rlang::warn(c("Thompson Sampling this period produced NaNs, all values were divided by 2
                         to restore numerical stability.",
-      "i" = sprintf("Period %d required %d divisions", current_period, iterator)
+      "i" = sprintf("Period %d required %d divisions", current_period, bandit$iterator)
     ))
   }
   bandit$iterator <- NULL
@@ -223,23 +223,18 @@ get_bandit.Thompson <- function(past_results, conditions, iterator, current_peri
     beta = 1
   ), conditions)
 
-  if ((base::sum(bandit) == 0 | any(is.na(bandit))) & iterator < 50) {
+  if ((dplyr::near(base::sum(bandit), 0) | any(is.na(bandit))) & iterator < 50) {
     # When best_binomial_bandit fails due to numerical instability,
     # this preserves proportions and reruns the process
     past_results$successes <- (past_results$successes / 2)
     past_results$n <- (past_results$n / 2)
 
+    iterator <- iterator + 1
+
     bandit <- get_bandit.Thompson(
-      past_results = past_results, conditions = conditions, iterator = iterator + 1,
+      past_results = past_results, conditions = conditions, iterator = iterator,
       current_period = current_period
     )[[1]]
-  }
-
-  if (iterator > 0) {
-    rlang::warn(c("Thompson Sampling this period produced NaNs, all values were divided by 2
-                        to restore numerical stability.",
-      "i" = sprintf("Period %d required %d divisions", current_period, iterator)
-    ))
   }
 
   return(list(bandit, assignment_prob = bandit, iterator = iterator))
