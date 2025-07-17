@@ -178,25 +178,28 @@ get_bandit <- function(past_results, algorithm, conditions, current_period, cont
     "UCB1" = get_bandit.UCB1(past_results = past_results, conditions = conditions, current_period = current_period),
     rlang::abort("Invalid `algorithm`. Valid Algorithms: 'Thomspon', 'UCB1'")
   )
-
-  if (bandit$iterator > 0) {
-    rlang::warn(c("Thompson Sampling this period produced NaNs, all values were divided by 2
+  if (algorithm == "Thompson") {
+    if (bandit$iterator > 0) {
+      rlang::warn(c("Thompson Sampling this period produced NaNs, all values were divided by 2
                         to restore numerical stability.",
-      "i" = sprintf("Period %d required %d divisions", current_period, bandit$iterator)
-    ))
-  }
-  bandit$iterator <- NULL
-
-  if (control_augment > 0) {
-    bandit[[2]] <- augment_prob(
-      assignment_probs = bandit[[2]], control_augment = control_augment,
-      conditions = conditions, algorithm = algorithm
-    )
+        "i" = sprintf("Period %d required %d divisions", current_period, bandit$iterator)
+      ))
+    }
+    bandit$iterator <- NULL
   }
 
-  if (!isTRUE(all.equal(sum(bandit[[2]]), 1))) {
-    bandit[[2]] <- bandit[[2]] / sum(bandit[[2]])
+  ctrl <- base::names(conditions) == "Control"
+  assignment_prob <- bandit[["assignment_prob"]]
+  if (control_augment > 0 & (assignment_prob[ctrl] < control_augment)) {
+    assignment_prob[ctrl] <- control_augment
+    assignment_prob[-ctrl] <-
+      (assignment_prob[-ctrl] / sum(assignment_prob[-ctrl])) * (1 - control_augment)
   }
+
+  if (!isTRUE(all.equal(sum(assignment_prob), 1))) {
+    assignment_prob <- assignment_prob / sum(assignment_prob)
+  }
+  bandit[["assignment_prob"]] <- assignment_prob
 
 
 
@@ -278,76 +281,8 @@ get_bandit.UCB1 <- function(past_results, conditions, current_period) {
 
   assignment_probs[[best_condition]] <- 1
 
-  return(invisible(list(past_results, assignment_probs)))
+  return(invisible(list(bandit = past_results, assignment_prob = assignment_probs)))
 }
-
-#' @name augment_prob
-#' @title Control Augmentation for Treatment Assignment
-#' @description
-#' Adjusts Probabilities of Assignment to match a control augmentation framework.
-#' If probability threshold is not meant, values are adjusted uniformly to augment the control probability.
-#' @inheritParams single_mab_simulation
-#' @param assignment_probs Named numeric vector; contains probabilities of
-#' assignment with the control condition named "Control".
-#' @returns Named numeric vector with updated probabilities
-#' @details
-#' Control Augmentation is performed by checking if the condition
-#' named "Control" is below the threshold if so, the other probabilities
-#' are taken form evenly to make up the difference. If this causes any
-#' probability to become negative, the difference to make it positive
-#' is split between the non-negative non-control treatments, and added. This negative
-#' checking is recursively called at most 50 times, when this limit is reached,
-#' all negative probabilities are turned to 0 with not redistribution.
-#'
-#' @keywords internal
-
-augment_prob <- function(assignment_probs, control_augment, conditions, algorithm) {
-  assignment_probs <- switch(algorithm,
-    "Thompson" = augment_prob.Thompson(
-      assignment_probs = assignment_probs,
-      control_augment = control_augment,
-      conditions = conditions
-    ),
-    "UCB1" = augment_prob.UCB1(
-      assignment_probs = assignment_probs,
-      control_augment = control_augment,
-      conditions = conditions
-    ),
-    rlang::abort("Invalid `algorithm`. Valid Algorithms: 'Thomspon', 'UCB1'")
-  )
-}
-#' @method augment_prob Thompson
-#' @title Augment Prob For Thompson Sampling
-#' @inheritParams augment_prob
-#' @keywords internal
-augment_prob.Thompson <- function(assignment_probs, control_augment, conditions) {
-  ctrl <- base::names(conditions) == "Control"
-
-  if (assignment_probs[ctrl] < control_augment) {
-    assignment_probs[ctrl] <- control_augment
-    assignment_probs[-ctrl] <- (assignment_probs[-ctrl] / sum(assignment_probs[-ctrl])) * (1 - control_augment)
-  }
-
-  return(assignment_probs)
-}
-
-#' @method augment_prob UCB1
-#' @title Augment Prob For UCB1
-#' @inheritParams augment_prob
-#' @keywords internal
-augment_prob.UCB1 <- function(assignment_probs, control_augment, conditions) {
-  ctrl <- base::names(conditions) == "Control"
-  selected <- assignment_probs == 1
-
-  if (assignment_probs[ctrl] < control_augment) {
-    diff <- control_augment - assignment_probs[ctrl]
-    assignment_probs[ctrl] <- assignment_probs[ctrl] + diff
-    assignment_probs[selected] <- assignment_probs[selected] - diff
-  }
-
-  return(assignment_probs)
-}
-
 #-------------------------------------------------------------------------------
 #' Adaptively Assign Treatments in a Period
 #' @description Assigns new treatments for an assignment wave based on the assignment probabilities provided from

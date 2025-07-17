@@ -75,8 +75,8 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       control_augment = control_augment
     )
 
-    bandits$bandit_stat[[i]] <- bandit[[1]]
-    bandits$assignment_prob[[i]] <- bandit[[2]]
+    bandits$bandit_stat[[i]] <- bandit[["bandit"]]
+    bandits$assignment_prob[[i]] <- bandit[["assignment_prob"]]
 
     current_data <- assign_treatments(
       current_data = current_data,
