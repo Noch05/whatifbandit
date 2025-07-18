@@ -181,7 +181,7 @@ single_mab_simulation <- function(data,
                                   period_length = NULL,
                                   block_cols = NULL,
                                   verbose = FALSE,
-                                  ndraws = NULL,
+                                  ndraws = 5000,
                                   random_assign_prop = 0) {
   prepped <- pre_mab_simulation(
     data = data, assignment_method = assignment_method,

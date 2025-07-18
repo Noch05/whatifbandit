@@ -100,7 +100,8 @@ multiple_mab_simulation <- function(data,
                                     block_cols = NULL,
                                     verbose = FALSE,
                                     keep_data = FALSE,
-                                    ndraws = NULL) {
+                                    ndraws = 5000,
+                                    random_assign_prop = 0) {
   if ((utils::object.size(data) / (1024^2) > 500)) {
     rlang::warn(c(
       "i" = "`furrr::future_map()` has a serialization limit of 500 MB. If your data
@@ -133,7 +134,7 @@ multiple_mab_simulation <- function(data,
     block_cols = block_cols, data_cols = data_cols,
     control_augment = control_augment, time_unit = time_unit,
     period_length = period_length,
-    verbose = verbose, ndraws = ndraws
+    verbose = verbose, ndraws = ndraws, random_assign_prop = random_assign_prop
   )
   verbose_log(verbose, "Starting Simulations")
 
@@ -161,7 +162,8 @@ multiple_mab_simulation <- function(data,
         assignment_method = assignment_method,
         control_augment = control_augment,
         imputation_information = prepped$imputation_information,
-        ndraws = ndraws
+        ndraws = ndraws,
+        random_assign_prop = random_assign_prop
       )
 
       if (!keep_data) {
@@ -189,7 +191,8 @@ multiple_mab_simulation <- function(data,
         assignment_method = assignment_method,
         control_augment = control_augment,
         keep_data = keep_data,
-        ndraws = ndraws
+        ndraws = ndraws,
+        random_assign_prop = random_assign_prop
       ),
       packages = c(
         "whatifbandit", "dplyr", "rlang",

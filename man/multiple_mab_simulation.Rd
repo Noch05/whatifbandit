@@ -22,7 +22,8 @@ multiple_mab_simulation(
   block_cols = NULL,
   verbose = FALSE,
   keep_data = FALSE,
-  ndraws = NULL
+  ndraws = 5000,
+  random_assign_prop = 0
 )
 }
 \arguments{
