@@ -33,6 +33,8 @@ print_mab <- function(mab) {
 
   base::cat("Bandit Algorithm:     ", settings$algorithm, "\n")
   base::cat("Control Augmentation: ", settings$control_augment, "\n")
+  base::cat("Bandit Assignment:    ", 1 - settings$random_assing_prob, "\n")
+  base::cat("Randomized Assignment: ", settings$random_assign_prob, "\n")
   base::cat("Perfect Assignment:   ", settings$perfect_assignment, "\n")
   base::cat("Whole Experiment:     ", settings$whole_experiment, "\n")
   base::cat("Blocking Variables:   ", settings$block_cols, "\n")
@@ -111,6 +113,7 @@ summary.mab <- function(object, level = 0.95, ...) {
     dplyr::select(-period_number) |>
     dplyr::left_join(estimates, by = c("Treatment_Arm" = "mab_condition")) |>
     dplyr::mutate(
+      SE = sqrt(variance),
       lower_bound = mean - normalq * sqrt(variance),
       upper_bound = mean + normalq * sqrt(variance)
     ) |>

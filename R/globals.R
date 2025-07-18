@@ -21,7 +21,8 @@ utils::globalVariables(c(
   "prior_period_success_rate", "estimator",
   "cumulative_trials", "cumulative_count",
   "condition", "cumulative_success", "cumulative_successes",
-  "trial", ".", "variance_avg", "times_best", "estimate_avg"
+  "trial", ".", "SE_avg", "SE_empirical", "times_best", "estimate_avg",
+  "assignment_type"
 ))
 
 NULL

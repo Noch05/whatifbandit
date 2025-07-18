@@ -63,12 +63,12 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
     dplyr::group_by(mab_condition, estimator) |>
     dplyr::summarize(
       estimate_avg = base::mean(mean, na.rm = TRUE),
-      variance_avg = base::mean(variance, na.rm = TRUE),
-      variance_resample = stats::var(mean), .groups = "drop",
+      SE_avg = sqrt(base::mean(variance, na.rm = TRUE)),
+      SE_empirical = sqrt(stats::var(mean)), .groups = "drop",
     ) |>
     dplyr::mutate(
-      lower = estimate_avg + stats::qnorm(lower_level) * base::sqrt(variance_avg),
-      upper = estimate_avg + stats::qnorm(upper_level) * base::sqrt(variance_avg)
+      lower = estimate_avg + stats::qnorm(lower_level) * SE_avg,
+      upper = estimate_avg + stats::qnorm(upper_level) * SE_empirical
     ) |>
     dplyr::left_join(quantiles, by = c("mab_condition", "estimator"), suffix = c("_normal", "_empirical"))
 
