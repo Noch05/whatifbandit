@@ -146,6 +146,10 @@ check_args <- function(data,
       "x" = paste0("You passed: ", random_assign_prop)
     ))
   }
+  if (control_augment > 0 && random_assign_prob > 0) {
+    rlang::warn(c("It is not reccomended to use control augmentation and hybrid assignment, as control augmentation
+                  only reflects in the bandit assignments and not the subsample of random assignments."))
+  }
 
   if (is.numeric(ndraws)) {
     if (ndraws %% 1 != 0 || ndraws <= 0) {
