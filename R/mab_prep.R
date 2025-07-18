@@ -242,7 +242,7 @@ create_new_cols.data.frame <- function(data,
       mab_condition = dplyr::if_else(period_number == 1, !!data_cols$condition_col$sym, NA_character_),
       impute_req = dplyr::if_else(period_number == 1, 0, NA_real_),
       impute_block = NA_character_,
-      assignment_type = NA_character_
+      assignment_type = dplyr::if_else(period_number == 1, "initial", NA_character_)
     )
 
   if (!perfect_assignment) {
@@ -286,7 +286,7 @@ create_new_cols.data.table <- function(data,
       mab_condition = base::get(data_cols$condition_col$name),
       impute_req = 0,
       impute_block = NA_character_,
-      assignment_type = NA_character_
+      assignment_type = "initial"
     )
   ]
   if (!perfect_assignment) {

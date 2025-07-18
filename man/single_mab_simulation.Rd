@@ -106,7 +106,7 @@ of 0's or NaN's due to overflow. The vectors are divided by 2, maintaining the p
 success to total trials in each arm, but this may impact the variance of the distribution. This occurs
 recursively a maximum of 50 times before throwing an error. By default this is FALSE.}
 
-\item{random_assing_prob}{To be Filled in}
+\item{random_assign_prob}{To be Filled in}
 }
 \value{
 An object of class \code{mab}, which is a named list containing:
