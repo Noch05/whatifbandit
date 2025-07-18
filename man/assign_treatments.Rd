@@ -39,6 +39,8 @@ of the trial in this vector must have the name "Control".}
 \item{condition_col}{Column in \code{data}; original treatment condition for each observation.}
 
 \item{success_col}{Column in \code{data}; binary successes from the original experiment.}
+
+\item{random_assign_prop}{To be Filled in}
 }
 \value{
 Updated tibble/data.table with the new treatment conditions for each observation. If this treatment is different

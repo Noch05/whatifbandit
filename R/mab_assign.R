@@ -263,7 +263,7 @@ bandit_invalid <- function(bandit) {
 #' @keywords internal
 
 get_bandit.UCB1 <- function(past_results, conditions, current_period) {
-  correction <- 1e-10
+  correction <- 1e-10 ## Prevents Division by 0 when n = 0
 
   if (inherits(past_results, "data.table")) {
     past_results[, ucb := success_rate + base::sqrt(
@@ -272,16 +272,10 @@ get_bandit.UCB1 <- function(past_results, conditions, current_period) {
 
     best_condition <- base::as.character(past_results[order(ucb)][1, mab_condition])
   } else {
-    past_results <- past_results |>
-      dplyr::mutate(
-        ucb = success_rate + base::sqrt(
-          (2 * base::log(current_period - 1)) / (n + correction)
-        )
-      )
-    best_condition <- past_results |>
-      dplyr::slice_max(order_by = ucb, n = 1, with_ties = FALSE) |>
-      dplyr::ungroup() |>
-      dplyr::pull(mab_condition)
+    past_results$ucb <- past_results$success_rate +
+      base::sqrt((2 * base::log(current_period - 1)) / (past_results$n + correction))
+
+    best_condition <- past_results$mab_condition[base::which.max(past_results$ucb)]
   }
 
   assignment_probs <- rlang::set_names(rep_len(0, length.out = length(conditions)), conditions)
