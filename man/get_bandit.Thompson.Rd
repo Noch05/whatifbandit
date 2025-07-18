@@ -31,9 +31,7 @@ Thompson Sampling Algorithm
 }
 \details{
 Thompson Sampling is calculated using the \href{https://cran.r-project.org/web/packages/bandit/index.html}{bandit}
-package, and has some issues with numerical stability with extremely large numbers, in the case of instability
-where it returns a vector of 0's or NaNs, the process is redone after dividing all the
-success and total vectors for treatment arm by 2, preserving the proportions. This is implemented
-recursively and executes a max of 50 times.
+package using R's integrate function which can overflow. If overflow errors occur, the Thompson Sampling
+probabilities will be calculated by simulating draws from the posterior instead of direct calculations.
 }
 \keyword{internal}

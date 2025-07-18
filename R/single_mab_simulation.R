@@ -234,7 +234,7 @@ single_mab_simulation <- function(data,
     whole_experiment = whole_experiment,
     conditions = conditions,
     blocking = blocking,
-    block_cols = block_cols$name,
+    block_cols = prepped$block_cols$name,
     ndraws = ndraws
   )
   class(results) <- c("mab", class(results))

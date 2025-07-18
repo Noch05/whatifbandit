@@ -47,7 +47,9 @@ test_that("Throws Proper Error when arguments are invalid", {
     whole_experiment = list(546, "text", NA),
     prior_periods = list(-5, "text", NA),
     period_length = list(50, -1, "text", NA),
-    conditions = list(c("1", "2", "3", "4"), rep(NA, 3))
+    conditions = list(c("1", "2", "3", "4"), rep(NA, 3)),
+    ndraws = list(-234432, NA, "text"),
+    random_assign_prop = list(23, -0.4, NA, "text")
   )
   args <- list(
     data = data,

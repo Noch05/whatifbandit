@@ -208,6 +208,41 @@
 
     `conditions`, must be provided as a character vector.
 
+---
+
+    `ndraws` must be a positive integer.
+    x You passed: -234432
+
+---
+
+    `ndraws` must be a positive integer.
+    x You passed: NA
+
+---
+
+    `ndraws` must be a positive integer.
+    x You passed: text
+
+---
+
+    `random_assign_prop` must be a non-null double between 0 and 1
+    x You passed: 23
+
+---
+
+    `random_assign_prop` must be a non-null double between 0 and 1
+    x You passed: -0.4
+
+---
+
+    `random_assign_prop` must be a non-null double between 0 and 1
+    x You passed: NA
+
+---
+
+    `random_assign_prop` must be a non-null double between 0 and 1
+    x You passed: text
+
 # Throws proper error when columns do not exist or not declared
 
     `block2 is not in the data, but was chosen as a block.

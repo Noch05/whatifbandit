@@ -55,7 +55,8 @@ generate_data <- function(n, k) {
       month_col = "treat_month"
     ),
     block_cols = c("city", "male"),
-    verbose = FALSE
+    verbose = FALSE,
+    ndraws = 500
   )
 
   full_args <- expand.grid(
@@ -67,12 +68,14 @@ generate_data <- function(n, k) {
     period_length = c(n / n, n / 10, n / 5),
     prior_periods = c(n / n, n / 10, n),
     control_augment = c(0, 0.25, 0.75),
+    random_assign_prop = c(0, 0.25, 0.75),
     blocking = c(TRUE, FALSE),
     stringsAsFactors = FALSE
   ) |>
     dplyr::filter(!(assignment_method == "Batch" & period_length == 1) &
       !(time_unit == "Month" & period_length > 1) &
-      !(assignment_method == "Individual" & prior_periods != "All")) |>
+      !(assignment_method == "Individual" & prior_periods != "All") &
+      !(control_augment > 0 & random_assign_prop > 0)) |>
     dplyr::mutate(
       time_unit = dplyr::if_else(assignment_method == "Date", time_unit, NA_character_),
       period_length = dplyr::if_else(assignment_method == "Individual", NA_real_, period_length)

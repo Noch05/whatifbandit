@@ -51,7 +51,7 @@ then from under the original experiment, they are labelled as imputation require
 }
 \description{
 Assigns new treatments for an assignment wave based on the assignment probabilities provided from
-\code{\link[=get_bandit]{get_bandit()}}.
+\code{\link[=get_bandit]{get_bandit()}}, and the proportion of randomly assigned observations from specified in \code{random_assign_prop}
 Probabilities are passed to \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}} or \code{\link[randomizr:cluster_ra]{randomizr::cluster_ra()}} from the
 \href{https://cran.r-project.org/web/packages/randomizr/index.html}{randomizr} package for random assignment.
 }
