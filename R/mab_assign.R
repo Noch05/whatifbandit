@@ -327,16 +327,16 @@ assign_treatments.data.frame <- function(current_data, probs, blocking = NULL,
                                          algorithm, id_col, conditions, condition_col,
                                          success_col, random_assign_prop) {
   rows <- nrow(current_data)
-  random_rows <- round(rows * random_assign_prop, 0)
+  random_rows <- rows * random_assign_prop
   rand_idx <- sample(x = rows, size = random_rows, replace = FALSE)
   num_conditions <- length(conditions)
   random_probs <- rep_len(1 / num_conditions, length.out = num_conditions)
 
-  bandit_clusters <- current_data[[id_col$name]][!rand_idx]
+  bandit_clusters <- current_data[[id_col$name]][-rand_idx]
   random_clusters <- current_data[[id_col$name]][rand_idx]
 
   if (blocking) {
-    bandit_blocks <- current_data$block[!rand_idx]
+    bandit_blocks <- current_data$block[-rand_idx]
     random_blocks <- current_data$block[rand_idx]
     current_data$mab_condition[rand_idx] <- randomizr::block_and_cluster_ra(
       clusters = random_clusters,
@@ -346,12 +346,12 @@ assign_treatments.data.frame <- function(current_data, probs, blocking = NULL,
       check_inputs = FALSE
     )
 
-    current_data$mab_condition[!rand_idx] <- randomizr::block_and_cluster_ra(
+    current_data$mab_condition[-rand_idx] <- randomizr::block_and_cluster_ra(
       clusters = bandit_clusters,
       blocks = bandit_blocks,
       prob_each = probs,
       conditions = conditions,
-      check_inputes = FALSE
+      check_inputs = FALSE
     )
   } else {
     current_data$mab_condition[rand_idx] <- randomizr::cluster_ra(
@@ -361,19 +361,22 @@ assign_treatments.data.frame <- function(current_data, probs, blocking = NULL,
       check_inputs = FALSE
     )
 
-    current_data$mab_condition[!rand_idx] <- randomizr::block_and_cluster_ra(
+    current_data$mab_condition[-rand_idx] <- randomizr::cluster_ra(
       clusters = bandit_clusters,
       prob_each = probs,
       conditions = conditions,
-      check_inputes = FALSE
+      check_inputs = FALSE
     )
   }
+
   current_data$assignment_type <- "bandit"
   current_data$assignment_type[rand_idx] <- "random"
+
   current_data$impute_req <- base::ifelse(
     base::as.character(current_data$mab_condition) !=
       base::as.character(current_data[[condition_col$name]]), 1, 0
   )
+
 
   return(current_data)
 }

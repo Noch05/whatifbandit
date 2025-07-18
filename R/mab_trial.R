@@ -94,10 +94,8 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       success_col = data_cols$success_col,
       random_assign_prop = random_assign_prop
     )
-    print(bandit[[assignment_prob]])
-    bandits$assignment_prob[[i]] <-
-      (bandit[["assignment_prob"]] * (1 - random_assign_prop)) + ((1 / num_conditions) * random_assign_prop)
-    print(bandits$assignment_prob[[i]])
+
+    bandits$assignment_prob[[i]] <- (bandit[["assignment_prob"]] * (1 - random_assign_prop)) + ((1 / num_conditions) * random_assign_prop)
 
     prepped_impute <- imputation_preparation(
       current_data = current_data,
