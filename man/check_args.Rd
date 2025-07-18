@@ -96,17 +96,19 @@ the simulation run slower, while each additional period adds time because of the
 If you have a large dataset, consider passing it as a data.table.}
 
 \item{control_augment}{A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.
-Default is 0.}
+Default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}}
 
 \item{verbose}{A logical value; whether or not to print intermediate messages. Default is FALSE.}
 
-\item{ndraws}{A logical value; If TRUE, numerical corrections are made to the input
-vector of success and total trials to when the Thompson Sampling procedure returns a vector
-of 0's or NaN's due to overflow. The vectors are divided by 2, maintaining the proportions of
-success to total trials in each arm, but this may impact the variance of the distribution. This occurs
-recursively a maximum of 50 times before throwing an error. By default this is FALSE.}
+\item{ndraws}{A numeric value; When Thompson Sampling direct calculations fail, draws from a simulated posterior
+will be used to approximate the Thompson Sampling probabilities. This is the number of simulations to use, the default
+is 5000 to match the default parameter \code{\link[bandit:best_binomial_bandit_sim]{bandit::best_binomial_bandit_sim()}}, but might need to be raised or lowered depending on perfomance and accuracy
+concerns.}
 
-\item{random_assign_prop}{To be Filled in}
+\item{random_assign_prop}{a numeric value ranging from 0 to 1; proportion of each wave to be assigned new treatments randomly,
+(1 - \code{random_assign_prop}) is the proportion assigned through the bandit procedure. For example if this is set to 0.1, then
+for each wave 10\% of the observations will be randomly assigned to a new treatment, while the remaining 90\% will be assigned according
+to UCB1 or Thompson result. It is not recommended to use this in conjunction with \code{control_augment}.}
 }
 \value{
 No return value. Throws an error

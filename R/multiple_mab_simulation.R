@@ -169,9 +169,7 @@ multiple_mab_simulation <- function(data,
       if (!keep_data) {
         results$final_data <- NULL
       }
-      results$settings <- NULL
-
-      results
+      return(results)
     },
     .options = furrr::furrr_options(
       globals = list(
@@ -210,8 +208,10 @@ multiple_mab_simulation <- function(data,
   )
 
   results$settings <- base::list(
+    original_data = data,
     assignment_method = assignment_method,
     control_augment = control_augment,
+    random_assign_prop = random_assign_prop,
     time_unit = time_unit,
     perfect_assignment = perfect_assignment,
     algorithm = algorithm,
@@ -221,10 +221,11 @@ multiple_mab_simulation <- function(data,
     conditions = conditions,
     blocking = blocking,
     block_cols = prepped$block_cols$name,
+    ndraws = ndraws,
     trials = times,
     keep_data = keep_data
   )
-  results$original_data <- data
+  base::class(results) <- c("multiple.mab", class(results))
 
   return(results)
 }
@@ -293,8 +294,5 @@ condense_results <- function(data, keep_data, mabs, times) {
     }
   }
 
-
-
-  base::class(results) <- c("multiple.mab", class(results))
   return(results)
 }

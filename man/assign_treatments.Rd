@@ -40,7 +40,10 @@ of the trial in this vector must have the name "Control".}
 
 \item{success_col}{Column in \code{data}; binary successes from the original experiment.}
 
-\item{random_assign_prop}{To be Filled in}
+\item{random_assign_prop}{a numeric value ranging from 0 to 1; proportion of each wave to be assigned new treatments randomly,
+(1 - \code{random_assign_prop}) is the proportion assigned through the bandit procedure. For example if this is set to 0.1, then
+for each wave 10\% of the observations will be randomly assigned to a new treatment, while the remaining 90\% will be assigned according
+to UCB1 or Thompson result. It is not recommended to use this in conjunction with \code{control_augment}.}
 }
 \value{
 Updated tibble/data.table with the new treatment conditions for each observation. If this treatment is different

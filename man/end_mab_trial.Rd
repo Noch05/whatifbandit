@@ -21,11 +21,10 @@ of this vector should be the names of each treatment as seen in your data, so to
 choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
 of the trial in this vector must have the name "Control".}
 
-\item{ndraws}{A logical value; If TRUE, numerical corrections are made to the input
-vector of success and total trials to when the Thompson Sampling procedure returns a vector
-of 0's or NaN's due to overflow. The vectors are divided by 2, maintaining the proportions of
-success to total trials in each arm, but this may impact the variance of the distribution. This occurs
-recursively a maximum of 50 times before throwing an error. By default this is FALSE.}
+\item{ndraws}{A numeric value; When Thompson Sampling direct calculations fail, draws from a simulated posterior
+will be used to approximate the Thompson Sampling probabilities. This is the number of simulations to use, the default
+is 5000 to match the default parameter \code{\link[bandit:best_binomial_bandit_sim]{bandit::best_binomial_bandit_sim()}}, but might need to be raised or lowered depending on perfomance and accuracy
+concerns.}
 }
 \value{
 A named list containing:

@@ -135,9 +135,27 @@ check_args <- function(data,
   }
 
   # Checking Other Arguments
+  #
   if (is.null(control_augment) || !is.numeric(control_augment) || control_augment < 0 || control_augment > 1) {
     rlang::abort(c("`control_augment` must be a non-null double between 0 and 1",
       "x" = paste0("You passed: ", control_augment)
+    ))
+  }
+  if (is.null(random_assign_prop) || !is.numeric(random_assign_prop) || random_assign_prop < 0 || random_assign_prop > 1) {
+    rlang::abort(c("`random_assign_prop` must be a non-null double between 0 and 1",
+      "x" = paste0("You passed: ", random_assign_prop)
+    ))
+  }
+
+  if (is.numeric(ndraws)) {
+    if (ndraws %% 1 != 0 || ndraws <= 0) {
+      rlang::abort(c("`ndraws` must be a positive integer.",
+        "x" = sprintf("You passed: %g", ndraws)
+      ))
+    }
+  } else {
+    rlang::abort(c("`ndraws` must be a positive integer.",
+      "x" = paste0("You passed: ", ndraws)
     ))
   }
 

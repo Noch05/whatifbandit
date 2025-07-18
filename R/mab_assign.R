@@ -202,10 +202,8 @@ get_bandit <- function(past_results, algorithm, conditions, current_period, cont
 #' @inheritParams get_bandit
 #' @details
 #' Thompson Sampling is calculated using the \href{https://cran.r-project.org/web/packages/bandit/index.html}{bandit}
-#' package, and has some issues with numerical stability with extremely large numbers, in the case of instability
-#' where it returns a vector of 0's or NaNs, the process is redone after dividing all the
-#' success and total vectors for treatment arm by 2, preserving the proportions. This is implemented
-#' recursively and executes a max of 50 times.
+#' package using R's integrate function which can overflow. If overflow errors occur, the Thompson Sampling
+#' probabilities will be calculated by simulating draws from the posterior instead of direct calculations.
 #'
 #' @returns Named Numeric Vector of Posterior Probabilities
 #' @keywords internal
@@ -287,7 +285,7 @@ get_bandit.UCB1 <- function(past_results, conditions, current_period) {
 #-------------------------------------------------------------------------------
 #' Adaptively Assign Treatments in a Period
 #' @description Assigns new treatments for an assignment wave based on the assignment probabilities provided from
-#' [get_bandit()].
+#' [get_bandit()], and the proportion of randomly assigned observations from specified in `random_assign_prop`
 #' Probabilities are passed to [randomizr::block_and_cluster_ra()] or [randomizr::cluster_ra()] from the
 #' \href{https://cran.r-project.org/web/packages/randomizr/index.html}{randomizr} package for random assignment.
 #' @name assign_treatments
