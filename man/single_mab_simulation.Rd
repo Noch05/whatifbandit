@@ -19,7 +19,8 @@ single_mab_simulation(
   period_length = NULL,
   block_cols = NULL,
   verbose = FALSE,
-  ndraws = NULL
+  ndraws = NULL,
+  random_assign_prop = 0
 )
 }
 \arguments{

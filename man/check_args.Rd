@@ -19,7 +19,8 @@ check_args(
   period_length,
   control_augment,
   verbose,
-  ndraws
+  ndraws,
+  random_assign_prop
 )
 }
 \arguments{

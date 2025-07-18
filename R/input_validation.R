@@ -27,7 +27,8 @@ check_args <- function(data,
                        period_length,
                        control_augment,
                        verbose,
-                       ndraws) {
+                       ndraws,
+                       random_assign_prop) {
   # Basic Checks for Data and algorithm
 
   if (!algorithm %in% c("Thompson", "UCB1")) {

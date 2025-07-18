@@ -31,19 +31,24 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
                           prior_periods, algorithm,
                           whole_experiment, perfect_assignment, conditions,
                           verbose, control_augment,
-                          imputation_information, ndraws) {
+                          imputation_information, ndraws, random_assign_prop) {
   periods <- base::max(data$period_number)
 
   bandits <- base::vector(mode = "list", length = 2)
   bandits$bandit_stat <- base::vector(mode = "list", length = (periods + 1))
   bandits$assignment_prob <- base::vector(mode = "list", length = periods)
+  num_conditions <- length(conditions)
 
   bandits$bandit_stat[[1]] <- switch(algorithm,
-    "Thompson" = rlang::set_names(rep(1 / length(conditions), length(conditions)), conditions),
-    "UCB1" = tibble::tibble(mab_condition = conditions, ucb = rep(0, length(conditions))),
+    "Thompson" = rlang::set_names(rep_len(1 / num_conditions,
+      length.out = num_conditions
+    ), conditions),
+    "UCB1" = tibble::tibble(mab_condition = conditions, ucb = rep_len(0, num_conditions)),
     rlang::abort("Invalid Algorithm: Valid Algorithms are `Thompson` and `UCB`")
   )
-  bandits$assignment_prob[[1]] <- rlang::set_names(rep(1 / length(conditions), length(conditions)), conditions)
+  bandits$assignment_prob[[1]] <- rlang::set_names(rep_len(1 / num_conditions,
+    length.out = num_conditions
+  ), conditions)
 
   verbose_log(verbose, "Starting Bandit Trial")
   for (i in 2:periods) {
@@ -77,20 +82,22 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
     )
 
     bandits$bandit_stat[[i]] <- bandit[["bandit"]]
-    bandits$assignment_prob[[i]] <- bandit[["assignment_prob"]]
-
-
 
     current_data <- assign_treatments(
       current_data = current_data,
-      probs = bandit[[2]],
+      probs = bandit[["assignment_prob"]],
       blocking = blocking,
       algorithm = algorithm,
       id_col = data_cols$id_col,
       conditions = conditions,
       condition_col = data_cols$condition_col,
-      success_col = data_cols$success_col
+      success_col = data_cols$success_col,
+      random_assign_prop = random_assign_prop
     )
+    print(bandit[[assignment_prob]])
+    bandits$assignment_prob[[i]] <-
+      (bandit[["assignment_prob"]] * (1 - random_assign_prop)) + ((1 / num_conditions) * random_assign_prop)
+    print(bandits$assignment_prob[[i]])
 
     prepped_impute <- imputation_preparation(
       current_data = current_data,

@@ -20,7 +20,8 @@ mab_simulation(
   assignment_method,
   control_augment,
   imputation_information,
-  ndraws
+  ndraws,
+  random_assign_prop
 )
 }
 \arguments{

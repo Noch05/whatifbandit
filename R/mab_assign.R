@@ -284,7 +284,7 @@ get_bandit.UCB1 <- function(past_results, conditions, current_period) {
       dplyr::pull(mab_condition)
   }
 
-  assignment_probs <- rlang::set_names(rep(0, length(conditions)), conditions)
+  assignment_probs <- rlang::set_names(rep_len(0, length.out = length(conditions)), conditions)
 
   assignment_probs[[best_condition]] <- 1
 
@@ -315,50 +315,65 @@ get_bandit.UCB1 <- function(past_results, conditions, current_period) {
 #'* [randomizr::cluster_ra()]
 #' @keywords internal
 
-
 assign_treatments <- function(current_data, probs, blocking = NULL,
                               algorithm, id_col, conditions, condition_col,
-                              success_col, random_prop) {
-  if (blocking) {
-    blocks <- current_data$block
-  }
-  clusters <- current_data[[id_col$name]]
+                              success_col, random_assign_prop) {
+  base::UseMethod("assign_treatments", current_data)
+}
+#' @method assign_treatments data.frame
+#' @title [assign_treatments()] for data.frames
+#' @noRd
+assign_treatments.data.frame <- function(current_data, probs, blocking = NULL,
+                                         algorithm, id_col, conditions, condition_col,
+                                         success_col, random_assign_prop) {
+  rows <- nrow(current_data)
+  random_rows <- round(rows * random_assign_prop, 0)
+  rand_idx <- sample(x = rows, size = random_rows, replace = FALSE)
+  num_conditions <- length(conditions)
+  random_probs <- rep_len(1 / num_conditions, length.out = num_conditions)
+
+  bandit_clusters <- current_data[[id_col$name]][!rand_idx]
+  random_clusters <- current_data[[id_col$name]][rand_idx]
 
   if (blocking) {
-    new_treatments <- randomizr::block_and_cluster_ra(
-      clusters = clusters,
-      blocks = blocks,
-      prob_each = probs,
+    bandit_blocks <- current_data$block[!rand_idx]
+    random_blocks <- current_data$block[rand_idx]
+    current_data$mab_condition[rand_idx] <- randomizr::block_and_cluster_ra(
+      clusters = random_clusters,
+      blocks = random_blocks,
+      prob_each = random_probs,
       conditions = conditions,
       check_inputs = FALSE
     )
-  } else if (!blocking) {
-    new_treatments <- randomizr::cluster_ra(
-      clusters = clusters,
+
+    current_data$mab_condition[!rand_idx] <- randomizr::block_and_cluster_ra(
+      clusters = bandit_clusters,
+      blocks = bandit_blocks,
       prob_each = probs,
+      conditions = conditions,
+      check_inputes = FALSE
+    )
+  } else {
+    current_data$mab_condition[rand_idx] <- randomizr::cluster_ra(
+      clusters = random_clusters,
+      prob_each = random_probs,
       conditions = conditions,
       check_inputs = FALSE
     )
-  } else {
-    rlang::abort("Invalid: Specify TRUE or FALSE for blocking")
-  }
 
-
-  if (inherits(current_data, "data.table")) {
-    current_data[, mab_condition := new_treatments][
-      , impute_req := data.table::fifelse(
-        base::as.character(mab_condition) != base::as.character(base::get(condition_col$name)),
-        1, 0
-      )
-    ]
-    return(invisible(current_data))
-  } else {
-    current_data$mab_condition <- new_treatments
-    current_data$impute_req <- base::ifelse(
-      base::as.character(current_data$mab_condition) !=
-        base::as.character(current_data[[condition_col$name]]), 1, 0
+    current_data$mab_condition[!rand_idx] <- randomizr::block_and_cluster_ra(
+      clusters = bandit_clusters,
+      prob_each = probs,
+      conditions = conditions,
+      check_inputes = FALSE
     )
-
-    return(current_data)
   }
+  current_data$assignment_type <- "bandit"
+  current_data$assignment_type[rand_idx] <- "random"
+  current_data$impute_req <- base::ifelse(
+    base::as.character(current_data$mab_condition) !=
+      base::as.character(current_data[[condition_col$name]]), 1, 0
+  )
+
+  return(current_data)
 }

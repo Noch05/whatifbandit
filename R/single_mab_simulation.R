@@ -181,7 +181,8 @@ single_mab_simulation <- function(data,
                                   period_length = NULL,
                                   block_cols = NULL,
                                   verbose = FALSE,
-                                  ndraws = NULL) {
+                                  ndraws = NULL,
+                                  random_assign_prop = 0) {
   prepped <- pre_mab_simulation(
     data = data, assignment_method = assignment_method,
     algorithm = algorithm, conditions = conditions,
@@ -190,7 +191,7 @@ single_mab_simulation <- function(data,
     block_cols = block_cols, data_cols = data_cols,
     control_augment = control_augment, time_unit = time_unit,
     period_length = period_length,
-    verbose = verbose, ndraws = ndraws
+    verbose = verbose, ndraws = ndraws, random_assign_prop = random_assign_prop
   )
   ## Initial Sort for Consistency in calling by numeric indexes
   conditions <- base::sort(conditions)
@@ -213,7 +214,8 @@ single_mab_simulation <- function(data,
     assignment_method = assignment_method,
     control_augment = control_augment,
     imputation_information = prepped$imputation_information,
-    ndraws = ndraws
+    ndraws = ndraws,
+    random_assign_prop = random_assign_prop
   )
   results$settings$original_data <- data
 

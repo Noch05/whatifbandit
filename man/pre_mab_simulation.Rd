@@ -19,7 +19,8 @@ pre_mab_simulation(
   period_length,
   block_cols,
   verbose,
-  ndraws
+  ndraws,
+  random_assign_prop
 )
 }
 \arguments{

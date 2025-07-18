@@ -13,7 +13,7 @@ assign_treatments(
   conditions,
   condition_col,
   success_col,
-  random_prop
+  random_assign_prop
 )
 }
 \arguments{
