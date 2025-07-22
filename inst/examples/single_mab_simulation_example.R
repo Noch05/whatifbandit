@@ -17,7 +17,7 @@
    perfect_assignment = FALSE,
    data_cols = c(
      condition_col = "condition",
-     id_col = "id",
+     id_col = "ic_case_id",
      success_col = "success",
      success_date_col = "date_of_recert",
      assignment_date_col = "letter_sent_date"
@@ -44,7 +44,7 @@
    control_augment = 0.25,
    data_cols = c(
      condition_col = "condition",
-     id_col = "id",
+     id_col = "ic_case_id",
      success_col = "success",
      date_col = "appt_date",
      month_col = "recert_month"
@@ -67,7 +67,7 @@
    conditions = conditions,
    data_cols = c(
      condition_col = "condition",
-     id_col = "id",
+     id_col = "ic_case_id",
      success_col = "success",
      date_col = "appt_date"
    )
@@ -89,7 +89,7 @@
    control_augment = 0,
    data_cols = c(
      condition_col = "condition",
-     id_col = "id",
+     id_col = "ic_case_id",
      success_col = "success",
      date_col = "appt_date"
    )
@@ -110,6 +110,6 @@
    control_augment = 0,
    data_cols = c(
      condition_col = "condition",
-     id_col = "service_center"
+     id_col = "ic_case_id"
    )
  ))

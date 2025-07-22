@@ -78,7 +78,7 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
     ),
     data_cols = c(
       condition_col = "condition",
-      id_col = "id",
+      id_col = "ic_case_id",
       success_col = "success"
     )
   )

@@ -56,7 +56,7 @@ x <- multiple_mab_simulation(
   conditions = conditions,
   data_cols = c(
     condition_col = "condition",
-    id_col = "id",
+    id_col = "ic_case_id",
     success_col = "success"
   ),
   verbose = FALSE, times = 5, seeds = seeds, keep_data = FALSE

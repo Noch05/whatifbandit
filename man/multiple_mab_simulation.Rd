@@ -197,7 +197,7 @@ x <- multiple_mab_simulation(
   conditions = conditions,
   data_cols = c(
     condition_col = "condition",
-    id_col = "id",
+    id_col = "ic_case_id",
     success_col = "success"
   ),
   verbose = FALSE, times = 5, seeds = seeds, keep_data = TRUE
@@ -219,7 +219,7 @@ object.size(x)
 # Like: 
 \dontrun{
 
-  future::plan("plan", workers = n)
+  future::plan("multisession", workers = 6)
   multiple_mab_simulation(data = tanf,
                           assignment_method = "Batch",
                           period_length = 25,
@@ -232,7 +232,7 @@ object.size(x)
                           conditions = conditions,
                           data_cols = c(
                             condition_col = "condition",
-                            id_col = "id",
+                            id_col = "ic_case_id",
                             success_col = "success"
                           ),
                           verbose = FALSE, times = 5, seeds = seeds, keep_data = TRUE
