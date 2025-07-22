@@ -539,3 +539,4 @@ rsconnect/
 /*_files/
 
 # End of https://www.toptal.com/developers/gitignore/api/python,latex,r
+inst/doc
