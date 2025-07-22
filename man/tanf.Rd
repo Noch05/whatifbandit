@@ -5,7 +5,7 @@
 \alias{tanf}
 \title{Public TANF Recipient Data From Washington D.C}
 \format{
-An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 3520 rows and 22 columns.
+An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 3517 rows and 22 columns.
 }
 \source{
 \url{https://github.com/thelabdc/DHS-TANFRecertification-Public/blob/main/data/df_replication_anonymized.csv}
