@@ -1,8 +1,9 @@
 ---
-title: "Introduction to `whatifbandit`"
+title: "Introduction to whatifbandit"
 output: rmarkdown::html_vignette
+bibliography: "../inst/REFERENCES.bib"
 vignette: >
-  %\VignetteIndexEntry{Introduction to `whatifbandit`}
+  %\VignetteIndexEntry{Introduction to whatifbandit}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -12,8 +13,30 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+library(whatifbandit)
 ```
 
+whatifbandit allows researchers to re-simulate their randomized experiments under adaptive experimental conditions. Running experiments can be costly and time-consuming, so this simulation tool allows researchers to explore what their results could have looked like under an adaptive experimental design. These re-analyses can inform the planning for future studies, allowing a researcher to justify an adaptive design for a future project, before running a costly experiment.
+
+Adaptive experimental designs tend to shift more participants over time to more promising treatment arms, which are more efficient at honing in on the best treatment. These designs can shine in situations such as:
+
+* Simple random assignment produces sample sizes too small to detect treatment effects.
+* A researcher wants to test a many treatments.
+* An experiment occurs over a long period of time.
+* Finding the absolute best treatment takes precedence over gauging the effects of all treatments.
+
+This vignette introduces the key functions of the whatifbandit package and how they to use them effectively. All that's required is data from a previous randomized experiment containing information about which treatment each observation was originally assigned too, and the original outcome. For a more detailed view of the exact adaptive procedures, and implementation, please refer to the function documentation instead.
+
+## Data
+
+To explore the functionality of whatifbandit, we will use the tanf data set that
+comes with the package. This data contains the results of a randomized experiment, which tested the impact
+of several different letter/notice types on re-certification for the Temporary Assistance for Needy Families (TANF) program in Washington D.C [@moore2022]. It is a good candidate for this re-analysis because the experiment
+tests 3 different conditions over the course 5 months. 
+
 ```{r setup}
-library(whatifbandit)
+data(tanf)
+str(tanf)
+dim(tanf)
+
 ```
