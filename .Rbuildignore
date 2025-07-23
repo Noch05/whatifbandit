@@ -4,3 +4,5 @@
 ^\whatifbandit.pdf$
 ^LICENSE.md$
 
+^doc$
+^Meta$
