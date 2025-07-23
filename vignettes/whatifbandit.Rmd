@@ -1,7 +1,7 @@
 ---
 title: "Introduction to whatifbandit"
 output: rmarkdown::html_vignette
-bibliography: "../inst/REFERENCES.bib"
+bibliography: "REFERENCES.bib"
 vignette: >
   %\VignetteIndexEntry{Introduction to whatifbandit}
   %\VignetteEngine{knitr::rmarkdown}
@@ -51,7 +51,7 @@ $$
 
 ## Adaptive Inference
 
-Statistical inference under adaptive designs requires careful consideration. The sample mean cannot be used, $\bar{x} = \frac{1}{n}\Sigma_i^n x_i$, because observations are no longer independently identically distributed(i.i.d.) as we have not assigned randomly. Instead we utilize an augmented inverse probability weighted estimator (AIPW), with a constant allocation rate across periods formulated by Hadad et. al (2021), whose formulas we use in the package. These estimators are asymptotically normal, so a normal distribution can be used by inference. Additionally, whatifbandit also allows for multiple simulations to easily estimate the variance of the procedure, and build an empirical distribution of the AIPW estimates, instead of just relying on the normal approximation. The estimator is calculated by weighting the outcome against the probability of being assigned the treatment, and a conditional expectation/regression estimate based on the previous periods of assignment, then aggregating based on an adaptive weight. In the package the condition expectation is estimated via a grouped mean, and the adaptive weight uses the constant allocation rate described in the paper [@hadad2021a].
+Statistical inference under adaptive designs requires careful consideration. The sample mean cannot be used, $\bar{x} = \frac{1}{n}\Sigma_i^n x_i$, because observations are no longer independently identically distributed(i.i.d.) as we have not assigned randomly. Instead we utilize an augmented inverse probability weighted estimator (AIPW), with a constant allocation rate across periods formulated by Hadad et. al (2021), whose formulas we use in the package. These estimators are asymptotically normal, so a normal distribution can be used by inference. Additionally, whatifbandit also allows for multiple simulations to easily estimate the variance of the procedure, and build an empirical distribution of the AIPW estimates, instead of just relying on the normal approximation. 
 
 $$ 
 \hat{\Gamma}^{AIPW}_t = \frac{\mathbb{I}\{W_t = w\}}{e_t(w)} Y_t + \left(1 - \frac{\mathbb{I}\{W_t = w\}}{e_t(w)} \right)\hat{m}(w) \tag {ITE} \\
@@ -69,6 +69,7 @@ $$
 $$
 \hat{m}(w) = \frac{1}{t - 1} \sum_{s=1}^{t-1} \left( \frac{1}{n(w)_s} \sum_{i=1}^{n(w)_s} x_i(w) \right) \tag{Grouped Mean}
 $$
+The estimator is calculated by weighting the outcome against the probability of being assigned the treatment, and a conditional expectation/regression estimate based on the previous periods of assignment, then aggregating based on an adaptive weight. In the package the condition expectation is estimated via a grouped mean, and the adaptive weight uses the constant allocation rate described in the paper [@hadad2021a].
 
 ## Data
 
