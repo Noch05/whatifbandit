@@ -273,9 +273,14 @@ time <- system.time(
 ```
 
 Executing those 100 simulations took `r as.numeric(time["elapsed"])` seconds. To speed up this process `multiple_mab_simulation()` supports parallel processing via the furrr and future packages. To run the function in parallel, all you need to do is call `future::plan()` before running it and specify the number of cores you want to use.
+```{r}
+#| echo: FALSE
+
+load("parallel.RData")
+```
 
 ```{r}
-#| cache: TRUE
+#| eval: FALSE
 set.seed(532454)
 seeds <- sample.int(1000000, 100, replace = FALSE)
 plan("multisession", workers = 4)
