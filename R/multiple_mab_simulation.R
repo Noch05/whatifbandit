@@ -257,7 +257,7 @@ multiple_mab_simulation <- function(data,
 #' @keywords internal
 
 condense_results <- function(data, keep_data, mabs, times) {
-  items <- c("bandits", "estimates", "assignment_probs")
+  items <- c("bandits", "assignment_probs", "estimates")
 
   if (inherits(data, "data.table")) {
     results <- lapply(items, \(item) {
