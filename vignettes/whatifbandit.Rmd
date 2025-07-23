@@ -21,9 +21,9 @@ library(ggplot2)
 library(tidyr)
 library(whatifbandit)
 
-
-
 ```
+
+
 
 whatifbandit allows researchers to re-simulate their randomized experiments under adaptive experimental conditions. Running experiments can be costly and time-consuming, so this simulation tool allows researchers to explore what their results could have looked like under an adaptive experimental design. These re-analyses can inform the planning for future studies, allowing a researcher to justify an adaptive design for a future project, before running a costly experiment.
 
@@ -52,20 +52,20 @@ $$
 
 ## Adaptive Inference
 
-Statistical inference under adaptive designs requires careful consideration. The sample mean cannot be used, $\bar{x} = \frac{1}{n}\Sigma_i^n x_i$, because observations are no longer independently identically distributed(i.i.d.) as we have not assigned randomly. Instead we utilize an augmented inverse probability weighted estimator (AIPW), with a constant allocation of the variance across periods formulated by Hadad et. al (2021), whose formulas we use in the package. These estimators are unbiased and asymptotically normal under adaptive trials, so a normal distribution can be used by inference. Additionally, whatifbandit also allows for multiple simulations to easily estimate the variance of the procedure, and build an empirical distribution of the unbiased AIPW estimates, instead of just relying on the normal approximation. 
+Statistical inference under adaptive designs requires careful consideration. The sample mean cannot be used, $\left(\bar{x} = \frac{1}{n}\sum_i^n x_i \right)$, because observations are no longer independently identically distributed(i.i.d.) as we have not assigned randomly. Instead we utilize an augmented inverse probability weighted estimator (AIPW), with a constant allocation of the variance across periods formulated by Hadad et. al (2021), whose formulas we use in the package. These estimators are unbiased and asymptotically normal under adaptive trials, so a normal distribution can be used by inference. Additionally, whatifbandit also allows for multiple simulations to easily estimate the variance of the procedure, and build an empirical distribution of the unbiased AIPW estimates, instead of just relying on the normal approximation. 
 
 $$ 
-\hat{\Gamma}^{AIPW}_t = \frac{\mathbb{I}\{W_t = w\}}{e_t(w)} Y_t + \left(1 - \frac{\mathbb{I}\{W_t = w\}}{e_t(w)} \right)\hat{m}(w) \tag {ITE} \\
+\widehat{\Gamma}^{AIPW}_t = \frac{\mathbb{I}\{W_t = w\}}{e_t(w)} Y_t + \left(1 - \frac{\mathbb{I}\{W_t = w\}}{e_t(w)} \right)\hat{m}(w) \tag {Individual} \\
 $$
 
 $$
-\hat{Q}^h_t(W) = \frac{\sum_{t=1}^Th_t(w)\hat{\Gamma}^{AIPW}_t}{\sum_{t=1}^Th_t(w)} \tag{ATE}
+\widehat{Q}^h_t(W) = \frac{\sum_{t=1}^Th_t(w)\widehat{\Gamma}^{AIPW}_t}{\sum_{t=1}^Th_t(w)} \tag{Average}
 $$
 $$
 h_t(w) = \sqrt{\frac{e_t}{T}} \tag{Adaptive Weight} \\
 $$
 $$
-e_t(w) = P(W_t = w) \tag{Probability}
+e_t(w) = Pr(W_t = w) \tag{Probability}
 $$
 $$
 \hat{m}(w) = \frac{1}{t - 1} \sum_{s=1}^{t-1} \left( \frac{1}{n(w)_s} \sum_{i=1}^{n(w)_s} x_i(w) \right) \tag{Grouped Mean}
@@ -85,13 +85,13 @@ glimpse(tanf)
 
 whatifbandit provides 2 main functions for conducting simulations, `single_mab_simulation()` and `multiple_mab_simulation()`. Like their names suggest `single_mab_simulation()` runs only 1 simulation while `multiple_mab_simulation()` runs a user specified number of simulations. Internally both functions are similar, and share the same arguments except for the few additional ones `multiple_mab_simulation()` has to control the repeated trials. 
 
-### Single Simulations
+## Single Simulations
 
 `single_mab_simulation()` is a catch-all function for running the adaptive simulations, where each of its arguments tunes the settings of the simulation. All that's required for a simulation is a data.frame, containing a unique ID for every row, that row's original treatment, and their original outcome. These column names are passed to the function as strings. 
 
 ```{r}
 #| eval: FALSE
-single_mab_simulation(data = tanf,
+sim <- single_mab_simulation(data = tanf,
                       assignment_method = "Batch",
                       period_length = 1000,
                       algorithm = "UCB1",
@@ -150,14 +150,14 @@ Control augmentation ensures that the marked control group meets the specified p
 
 The hybrid approach sets aside a percentage of the dataset to be assigned randomly, so if I set `random_assign_prop = 0.2`, then I'm allocating 20% of each period to be assigned to treatments randomly, while 80% are assigned via the bandit algorithms.
 
-Both of these options are valid, and depend on the circumstances, but its recommended to not use them together, if you set `control_augment = 0.1`, and `random_assign_prop = 0.2`, then the minimum true threshold for the control group is not really 10%, because it will be assigned randomly in the other group. Here lets use `control_augment = 0.2`, and because of this I need to mark the control group by naming the `conditions` character vector, the other names don't matter, they just cannot be NA or NULL.
+Whichever option to choose is up to you, but its recommended not to use them together. If there are 3 conditions, like in the TANF experiment, and you set `control_augment = 0.1`, and `random_assign_prop = 0.21`, then the minimum assignment probability for the control group is not 10% but 14.9% instead (0.1 * 0.79 + 0.21/3 = 0.149). Here lets use  `control_augment = 0.2`, and because of this I need to mark the control group by naming the `conditions` character vector, the other names don't matter, they just cannot be NA or NULL. If I chose to use `random_assign_prob` instead the conditions vector can remain unnamed. 
 
 ```{r}
 #| eval: FALSE
 tanf <- arrange(tanf, appt_date)
 conditions <- setNames(levels(tanf$condition), c("Control", "T1", "T2"))
 
-single_mab_simulation(data = tanf,
+sim <- single_mab_simulation(data = tanf,
                       assignment_method = "Individual",
                       algorithm = "Thompson",
                       conditions = conditions,
@@ -170,54 +170,72 @@ single_mab_simulation(data = tanf,
                       control_augment = 0.2
                       )
 ```
-```
+### Analysis
+`single_mab_simulation()` returns a condensed list with information pertinent to the analysis in 4 components:
 
+* `final_data` is the transformed input containing the new assignments, new successes, and other new columns such as the 
+probability being assigned each treatment at each period, and the regression adjustment $\hat{m}(W)$ for the AIPW estimates.
+* `bandits` contains either the Thompson Sampling or UCB1 statistics from each period in the trial, the chart should be interpreted as the bandit calculation after that period occurred.
+* `assignment_probs` contains the probability of assignment from each period in the trial, the chart should be interpreted as the probability for that specific period.
+* `estimates` contains the AIPW and Sample estimates with variances for each treatment arm
+* `settings` contains the configuration for the simulation.
 
-#### Output
-
-The function's output contains all the information pertinent to an analysis: \* `final_data` is the transformed input data with all the new columns created. \* `bandits` contains the either Thompson Sampling or UCB1 statistics, characterizing which arm is the best at each point in the trial \* `assignment_probs` contains the probability of assignment for each treatment group at each period of the simulation \* `estimates` contains estimates for the probability of success of each treatment arm \* `settings` contains the settings for the simulation.
-
-```{r}
-names(sim)
-```
-
-#### Analysis
-
-The function's output is a `mab` class object with its set of unique functions to speed up analysis. A print method is provided which displays the settings of the trial, and a summary method which quickly aggregates the results.
+This object is also a custom `mab` class, that comes with several generic functions to speed up analysis. A `print()` method is provided which displays the settings of the trial, and a `summary()` method which quickly aggregates the results.
 
 ```{r}
 class(sim)
 sim
-summary(sim) |> print(width = Inf)
 ```
+The summary method presents the final Thompson/UCB1 calculation from after the trial concluded, the AIPW, its standard error and a 95% two tailed confidence interval based on a normal distribution.
 
-A plot summary with several options is also provided for quick visualization of the results using ggplot2. The `type` argument can take "arm", "assign" or "estimate", each providing different information about the results. These plots can be added to with `+` like any ggplot2 object.
+```{r}
+sim_summary <- summary(sim)
+print(sim_summary, width = Inf)
+```
+The width of the confidence intervals can be changed in the `level` argument of the summary method, but can also be calculated by hand using the standard error. This time, lets specify 80% confidence intervals or an $\alpha$ = 0.2.
+```{r}
+# Inside Summary Call
+summary(sim, level = 0.8) |> select(AIPW, SE, lower_bound, upper_bound, level) |> print(width = Inf)
+# By hand
+quantile <- qnorm(0.2/2, lower.tail = FALSE)
+sim_summary |>
+  mutate(lower_bound = AIPW - SE*quantile,
+         upper_bound = AIPW + SE*quantile) |>
+  select(AIPW, SE, lower_bound, upper_bound)
 
-"arm" provides a view of each arm overtime, its relative probability of being the best, or UCB1 statistic.
+
+```
+#### Plotting
+You can also quickly create plots of the results using the plot method. This method uses ggplot2 to create visualizations to the package must be installed. `mab` supports 3 plot types, `"arm"`, `"assign"` and `"estimate"`, each providing different information about the results. These plots can be added to with `+` like any ggplot2 object, and arguments to the main `geom*` can be specified through the `...` argument. The geoms used are `geom_line()`, and `geom_errorbarh()`
+
+`type = "arm"` provides a view of each arm overtime, its relative probability of being the best, or UCB1 statistic.
 
 ```{r}
 #| fig.width: 5
 plot(sim, type = "arm")
 ```
 
-"assign" showcases the assignment probability for that arm overtime
+`type = "assign"` showcases the assignment probability for that arm overtime.
 
 ```{r}
 #| fig.width: 5
 plot(sim, type = "assign")
 ```
 
-"estimate" shows error bars on the AIPW or sample estimates using the associated variances.
+`type = "estimate"` shows error bars on the AIPW or sample estimates using the associated variances. Just like the `summary()`, the confidence level can be specified.
 
 ```{r}
 #| fig.width: 5
-plot(sim, type = "estimate", estimator = "AIPW", height = 0.4) + 
+plot(sim, type = "estimate", estimator = "AIPW", level = 0.9, height = 0.4) + 
   scale_x_continuous(breaks = seq(0, 1, .1), limits = range(0, 1))
 ```
 
-#### Error Handling
+All of the data used to create these plots and summary statistics is present in the original output, so you can easily create your own more detailed versions. Additionally, the information provided should also let you calculate other adaptive estimators, if you do not want to use the AIPW from Hadad et. al (2021) or want to specify another one of their proposed adaptive variance allocation methods.
 
-If the a required column is not passed or any of the arguments are mispsecified, a helpful error will be thrown to notify the user of any issues. Here the condition is missing:
+### Error Handling
+`single_mab_simulation()` can have up to 20 arguments, so its easy to make a typo when calling the function. As a result, we provide helpful error messages to help you deduce what has gone wrong with your execution of the function. If the a required column is not properly entered, or any of the arguments or any of the arguments are invalid, a helpful error will be thrown to notify the user of any issues. 
+
+Here the condition column is missing:
 
 ```{r}
 try(single_mab_simulation(data = tanf,
@@ -232,8 +250,28 @@ try(single_mab_simulation(data = tanf,
                                     success_col = "success")
                       ))
 ```
+While here `control_augment > 1`:
 
-However the function won't catch if the wrong columns were passed. Be careful when typing, as an error resulting from this mistake will be harder to deduce based on the message.
+```{r}
+try(single_mab_simulation(data = tanf,
+                      assignment_method = "Batch",
+                      period_length = 1000,
+                      algorithm = "Thompson",
+                      conditions = levels(tanf$condition),
+                      whole_experiment = FALSE, perfect_assignment = TRUE,
+                      prior_periods = "All",
+                      blocking = FALSE, 
+                      data_cols = c(id_col = "ic_case_id",
+                                    success_col = "success",
+                                    condition_col = "condition"),
+                      control_augment = 1.5
+                      
+                      ))
+```
+
+However the function won't catch if the columns or other arguments are swapped, but are still valid. Be careful when typing, as an error resulting from this mistake will be harder to deduce based on the message.
+
+Here the `success_col` is specified to an existing numeric column, but it does not contain the required information:
 
 ```{r}
 try(single_mab_simulation(data = tanf,
@@ -249,25 +287,7 @@ try(single_mab_simulation(data = tanf,
                                     condition_col = "condition")
                       ))
 ```
-
-An easy way to avoid this is to place this argument into a character vector before passing it, so it does not have to be retyped.
-
-```{r}
-#| eval: FALSE
-cols <- c(id_col = "ic_case_id", success_col = "success", condition_col = "condition")
-single_mab_simulation(data = tanf,
-                      assignment_method = "Batch",
-                      period_length = 1000,
-                      algorithm = "Thompson",
-                      conditions = levels(tanf$condition),
-                      whole_experiment = FALSE, perfect_assignment = TRUE,
-                      prior_periods = "All",
-                      blocking = FALSE, 
-                      data_cols = cols)
-
-```
-
-### Multiple Simulations
+## Multiple Simulations
 
 `multiple_mab_simulation()` is a shorthand function for executing multiple trials under the same settings. It is used to estimate the variance in the outcomes that occurs from the simulation process. Depending on the dataset size and the number of trials,
 
