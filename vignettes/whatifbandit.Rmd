@@ -2,7 +2,6 @@
 title: "Introduction to whatifbandit"
 output: rmarkdown::html_vignette
 bibliography: "REFERENCES.bib"
-cache: TRUE
 vignette: >
   %\VignetteIndexEntry{Introduction to whatifbandit}
   %\VignetteEngine{knitr::rmarkdown}
@@ -173,14 +172,13 @@ sim <- single_mab_simulation(data = tanf,
 ### Analysis
 `single_mab_simulation()` returns a condensed list with information pertinent to the analysis in 4 components:
 
-* `final_data` is the transformed input containing the new assignments, new successes, and other new columns such as the 
-probability being assigned each treatment at each period, and the regression adjustment $\hat{m}(W)$ for the AIPW estimates.
+* `final_data` is the transformed input containing the treatment assignments and outcomes from the simulation, along with other new columns such as the probability of being assigned each treatment at each period, and the regression adjustment $\hat{m}(W)$ for the AIPW estimates.
 * `bandits` contains either the Thompson Sampling or UCB1 statistics from each period in the trial, the chart should be interpreted as the bandit calculation after that period occurred.
 * `assignment_probs` contains the probability of assignment from each period in the trial, the chart should be interpreted as the probability for that specific period.
 * `estimates` contains the AIPW and Sample estimates with variances for each treatment arm
 * `settings` contains the configuration for the simulation.
 
-This object is also a custom `mab` class, that comes with several generic functions to speed up analysis. A `print()` method is provided which displays the settings of the trial, and a `summary()` method which quickly aggregates the results.
+This object is also a custom `mab` class, that comes with several generic functions to speed up analysis. The `print()` method displays the settings of the trial, and the `summary()` method aggregates the results.
 
 ```{r}
 class(sim)
@@ -232,8 +230,114 @@ plot(sim, type = "estimate", estimator = "AIPW", level = 0.9, height = 0.4) +
 
 All of the data used to create these plots and summary statistics is present in the original output, so you can easily create your own more detailed versions. Additionally, the information provided should also let you calculate other adaptive estimators, if you do not want to use the AIPW from Hadad et. al (2021) or want to specify another one of their proposed adaptive variance allocation methods.
 
+
+## Multiple Simulations
+
+`multiple_mab_simulation()` is a shorthand function for executing multiple trials under the same settings. It is used to estimate the variance in the outcomes that occurs from the simulation process. Depending on the number of trials specified and the size of your dataset, running multiple simulations can be memory intensive, and have a long run time, so we recommend that you run a single simulation first to estimate how long multiple simulations would take.
+
+`multiple_mab_simulation()` has 3 new arguments but is otherwise the same as `single_mab_simulation()`. These arguments are:
+
+* `times`: The number of times to run the simulation
+* `seeds`: A numeric vector of random seeds, where `length(seeds) = times`. Required to make results reproducible, and we encourage setting them before hand using `sample.int()`.
+* `keep_data`: A logical value, whether or not to keep the `final_data` object from each simulation. Default is FALSE,
+to reduce memory load of execution.
+
+Lets revisit the re-simulation of the TANF experiment but with 100 trials this time: 
+
+```{r}
+#| cache: TRUE
+set.seed(532454)
+seeds <- sample.int(1000000, 100, replace = FALSE)
+
+time <- system.time(
+  multiple_sims <- multiple_mab_simulation(data = tanf,
+                      assignment_method = "Date",
+                      time_unit = "Month",
+                      period_length = 1,
+                      algorithm = "Thompson",
+                      conditions = levels(tanf$condition),
+                      whole_experiment = FALSE, perfect_assignment = TRUE,
+                      prior_periods = "All",
+                      blocking = TRUE, block_cols = c("service_center"),
+                      data_cols = c(id_col = "ic_case_id",
+                                    date_col = "appt_date",
+                                    success_col = "success",
+                                    condition_col = "condition",
+                                    month_col = "recert_month",
+                                    success_date_col = "date_of_recert",
+                                    assignment_date_col = "letter_sent_date"),
+                      keep_data = FALSE, times = 100, seeds = seeds
+                      )
+)
+
+```
+
+Executing those 100 simulations took `r as.numeric(time["elapsed"])` seconds. To speed up this process `multiple_mab_simulation()` supports parallel processing via the furrr and future packages. To run the function in parallel, all you need to do is call `future::plan()` before running it and specify the number of cores you want to use.
+
+```{r}
+#| cache: TRUE
+set.seed(532454)
+seeds <- sample.int(1000000, 100, replace = FALSE)
+plan("multisession", workers = 4)
+parallel_time <- system.time(
+  multiple_sims <- multiple_mab_simulation(data = tanf,
+                      assignment_method = "Date",
+                      time_unit = "Month",
+                      period_length = 1,
+                      algorithm = "Thompson",
+                      conditions = levels(tanf$condition),
+                      whole_experiment = FALSE, perfect_assignment = TRUE,
+                      prior_periods = "All",
+                      blocking = TRUE, block_cols = c("service_center"),
+                      data_cols = c(id_col = "ic_case_id",
+                                    date_col = "appt_date",
+                                    success_col = "success",
+                                    condition_col = "condition",
+                                    month_col = "recert_month",
+                                    success_date_col = "date_of_recert",
+                                    assignment_date_col = "letter_sent_date"),
+                      keep_data = FALSE, times = 100, seeds = seeds
+                      )
+)
+
+
+```
+Using 4 cores, it only takes `r as.numeric(parallel_time["elapsed"])` seconds to run 100 simulations. Your core usage is determined by your system requirements. To see how many cores are available on your system simply call `future::availableCores()`. 
+
+Using future comes with some new complexities. Windows users must use `plan("multisession")`, while Linux and MacOS users
+can use `plan("multisession")` or `plan("multicore")`. If your using a High Performance Computing Cluster, the future.batchtools API should be used instead to specify the proper plan for the scheduler of your HPC. See the future, furrr, and future.batchtools package documentation for more details on parallel processing.
+
+### Analyzing Repeated Simulations
+`multiple_mab_simulation()` returns the same elements as `single_mab_simulation()` except for `final_data`. When
+`keep_data = TRUE` the `final_data` element is a nested data.frame of all the `final_data` from each trial, and when
+`keep_data = FALSE` is is simply removed leaving only `bandits`, `assignment_probs`, `estimates`, and `settings`.
+
+The object is also a custom `multiple.mab` class containing similar generic methods as the `mab` class, like `print()` and `summary()`.
+
+```{r}
+class(multiple_sims)
+print(multiple_sims)
+```
+For `multiple.mab` objects, `summary()` returns the average for AIPW estimates and 2 estimates of their standard error. One estimate is the average of the standard errors across each trial, with the variances averaged first $\left(\sqrt{\frac{1}{\text{n}}\sum_1^n\mathbb{V}[\text{Estimate}_i]}\right)$. The other estimate, is the sample variance of all of the AIPW estimates across the trials (`SE_empirical`). 95% confidence intervals are provided using both the empirical cumulative distribution function (eCDF), and the normal CDF using the average standard errors. Additionally the number of times each treatment arm was selected as the best is displayed, with the best being the highest Thompson probability or UCB1 statistic at the end of the trial. 
+```{r}
+summary(multiple_sims)
+```
+
+Just like with `mab` objects, the level of these confidence intervals can be changed in the `summary()` call.
+
+```{r}
+summary(multiple_sims, level = 0.75)
+```
+
+
+
+## Additional Features
+
+### Data.table
+
+
 ### Error Handling
-`single_mab_simulation()` can have up to 20 arguments, so its easy to make a typo when calling the function. As a result, we provide helpful error messages to help you deduce what has gone wrong with your execution of the function. If the a required column is not properly entered, or any of the arguments or any of the arguments are invalid, a helpful error will be thrown to notify the user of any issues. 
+`single_mab_simulation()` can have up to 20 arguments, so its easy to make a typo when calling the function. As a result, we provide helpful error messages to help you deduce what has gone wrong with your execution of the function. If the a required column is not properly entered, or any of the arguments or any of the arguments are invalid, a helpful error will be thrown to notify the user of any issues. `multiple_mab_simulation()` has all the same errors in addition to the ones for its unique arguments.
 
 Here the condition column is missing:
 
@@ -287,11 +391,6 @@ try(single_mab_simulation(data = tanf,
                                     condition_col = "condition")
                       ))
 ```
-## Multiple Simulations
-
-`multiple_mab_simulation()` is a shorthand function for executing multiple trials under the same settings. It is used to estimate the variance in the outcomes that occurs from the simulation process. Depending on the dataset size and the number of trials,
-
-## Additional Features
 
 
 
