@@ -22,31 +22,59 @@ whatifbandit allows researchers to re-simulate their randomized experiments unde
 
 Adaptive experimental designs tend to shift more participants over time to more promising treatment arms, which are more efficient at honing in on the best treatment. These designs can shine in situations such as:
 
-* Simple random assignment produces sample sizes too small to detect treatment effects.
-* A researcher wants to test a many treatments.
-* An experiment occurs over a long period of time.
-* Finding the absolute best treatment takes precedence over gauging the effects of all treatments.
+-   Simple random assignment produces sample sizes too small to detect treatment effects.
+-   A researcher wants to test a many treatments.
+-   An experiment occurs over a long period of time.
+-   Finding the absolute best treatment takes precedence over gauging the effects of all treatments.
 
 This vignette introduces the key functions of the whatifbandit package and how they to use them effectively. All that's required is data from a previous randomized experiment containing information about which treatment each observation was originally assigned too, and the original outcome. For a more detailed view of the exact adaptive procedures, and implementation, please refer to the function documentation instead.
 
+## Multi-Arm-Bandits: Adaptive Assignment
+
+Adaptive experiments are a form of Multi-Arm-Bandit problem, where each treatment arm has an unknown probability of success, and a balance must be achieved between exploration and exploitation. In an applied setting, like an experiment, we want a design that explores the space of possible treatment options to find the best treatment, then exploit that best treatment. If we do too much exploitation, we have the chance to miss the true best treatment, but if we do too much exploration, instead of narrowing down the best treatments, then we miss out on the rewards from that treatment. Additionally, these unknown probabilities can change overtime in what is called a non-stationary bandit problem. The precise details of this problem is not important, but solutions to these bandit problems, in the form of decision algorithms, provide the basis for how whatifbandit simulates an adaptive trial.
+
+whatifbandit supports 2 decision algorithms, Thompson Sampling and UCB1. Thompson Sampling calculates the probability of each treatment being the best treatment arm, then we probability match to assign the treatment arms. In the bernouii case, which whatifbandit uses, this can be calculated from a beta distribution. UCB1 instead calculates an upper confidence bound on the expected reward of each arm, and selects the maximum value [@kuleshov2014; @slivkins2024; @offer-westort2021]. A full treatment of these issues, is beyond the scope of this vignette, but this introduction hopefully allowed you to understand what is going on behind the whatifbandit simulation.
+
+
+$$
+\hat{\theta}^k_i=\mathbb{E}[\text{Beta}(1 + \text{successes}_i, 1 + \text{failures}_i)] \tag{Thompson}
+$$
+$$
+\arg\max_i  \left(\mathbb{E}[\text{Reward}_i] + \sqrt{\frac{2 \ln t}{n_i}} \right) \tag{UCB1}
+$$
+
+## Adaptive Inference
+
+Statistical inference under adaptive designs requires careful consideration. The sample mean cannot be used, $\bar{x} = \frac{1}{n}\Sigma_i^n x_i$, because observations are no longer independently identically distributed(i.i.d.) as we have not assigned randomly. Instead we utilize an augmented inverse probability weighted estimator (AIPW), with a constant allocation rate across periods formulated by Hadad et. al (2021), whose formulas we use in the package. These estimators are asymptotically normal, so a normal distribution can be used by inference. Additionally, whatifbandit also allows for multiple simulations to easily estimate the variance of the procedure, and build an empirical distribution of the AIPW estimates, instead of just relying on the normal approximation. The estimator is calculated by weighting the outcome against the probability of being assigned the treatment, and a conditional expectation/regression estimate based on the previous periods of assignment, then aggregating based on an adaptive weight. In the package the condition expectation is estimated via a grouped mean, and the adaptive weight uses the constant allocation rate described in the paper [@hadad2021a].
+
+$$ 
+\hat{\Gamma}^{AIPW}_t = \frac{\mathbb{I}\{W_t = w\}}{e_t(w)} Y_t + \left(1 - \frac{\mathbb{I}\{W_t = w\}}{e_t(w)} \right)\hat{m}(w) \tag {ITE}
+$$
+
+$$
+\hat{Q}^h_t(W) = \frac{\Sigma_{t=1}^Th_t(w)\hat{\Gamma}^{AIPW}_t}{\Sigma_{t=1}^Th_t(w)} \tag{ATE}
+$$
+$$
+h_t(w) = \sqrt{\frac{e_t}{T}} \tag{Adaptive Weight}
+$$
+
 ## Data
 
-To explore the functionality of whatifbandit, we will use the tanf data set that
-comes with the package. This data contains the results of a randomized experiment, which tested the impact
-of different letter/notices on re-certification for the Temporary Assistance for Needy Families (TANF) program in Washington D.C. [@moore2022]. The original experiment tests 3 different conditions, over the course
-of 5 months.
+To explore the functionality of whatifbandit, we will use the tanf data set that comes with the package. This data contains the results of a randomized experiment, which tested the impact of different letter/notices on re-certification for the Temporary Assistance for Needy Families (TANF) program in Washington D.C. [@moore2022]. The original experiment tests 3 different conditions, over the course of 5 months.
+
 ```{r data}
 data(tanf)
 glimpse(tanf)
 ```
+
 ## Core Functions
 
-whatifbandit provides 2 main functions for conducting simulations, `single_mab_simulation()` and
-`multiple_mab_simulation()`. Like their names suggest `single_mab_simulation()` runs only 1 simulation
-while `multiple_mab_simulation()` runs a user specified number of simulations. Internally both functions are similar, and share the same arguments except for the few additional ones `multiple_mab_simulation()` has to control the repeated trials. 
+whatifbandit provides 2 main functions for conducting simulations, `single_mab_simulation()` and `multiple_mab_simulation()`. Like their names suggest `single_mab_simulation()` runs only 1 simulation while `multiple_mab_simulation()` runs a user specified number of simulations. Internally both functions are similar, and share the same arguments except for the few additional ones `multiple_mab_simulation()` has to control the repeated trials.
 
 ### Single Simulations
-`single_mab_simulation()` is a catch all function for running the adaptive simulations, where each of its arguments tunes the settings of the simulation. All that's required for a simulation is a data, containing a unique ID for every row, that row's original treatment, and their original outcome. These column names are passed to the function as strings.
+
+`single_mab_simulation()` is a catch-all function for running the adaptive simulations, where each of its arguments tunes the settings of the simulation. All that's required for a simulation is a data, containing a unique ID for every row, that row's original treatment, and their original outcome. These column names are passed to the function as strings.
+
 ```{r}
 sim <- single_mab_simulation(data = tanf,
                       assignment_method = "Batch",
@@ -61,9 +89,11 @@ sim <- single_mab_simulation(data = tanf,
                                     condition_col = "condition")
                       )
 ```
-Additionally the function contains arguments which can be used to tweak the simulation to the specification of the experiment. 
 
-For example in the tanf data, treatment assignment was blocked by D.C. Community and Human Services service centers ensuring each center got a comparable number of participants in each group. This form of blocking is implemented and be specified through the `blocking` and `block_cols` arguments.
+Additionally, the function contains arguments which can be used to tweak the simulation to the specification of the experiment.
+
+For example in the tanf data, treatment assignment was blocked by D.C. Community and Human Services service centers ensuring each center got a comparable number of participants in each group. We can specify this blocking is implemented and be specified through the `blocking = TRUE` and `block_cols` arguments.
+
 ```{r}
 #| eval: FALSE
 single_mab_simulation(data = tanf,
@@ -80,22 +110,22 @@ single_mab_simulation(data = tanf,
                       )
 ```
 
+Other important options include:
 
+-   `assignment_method`, `period_legnth`, and `time_unit` which specify how the treatment waves for the simulation are determined. We have support for batch-based, individual, or date based, with `period_legnth` representing the number of rows in each batch, or the specific amount of time for each period, which can be days, weeks, or months, as specified in `time_unit`. If batching/individual, data must be properly arranged for accurate results.
+
+-   `algorithm` which can be Thompson Sampling or UCB1. These are Multi-Arm-Bandit algorithms that define the adaptive treatment assignment process.
 
 #### Output
-The function's output contains all the information pertinent to an analysis:
-* `final_data` is the transformed input data with all the new columns created.
-* `bandits` contains the either Thompson Sampling or UCB1 statistics, characterizing which arm is 
-the best at each point in the trial
-* `assignment_probs` contains the probability of assignment for each treatment group at each period of the simulation
-* `estimates` contains estimates for the probability of success of each treatment arm
-* `settings` contains the settings for the simulation.
+
+The function's output contains all the information pertinent to an analysis: \* `final_data` is the transformed input data with all the new columns created. \* `bandits` contains the either Thompson Sampling or UCB1 statistics, characterizing which arm is the best at each point in the trial \* `assignment_probs` contains the probability of assignment for each treatment group at each period of the simulation \* `estimates` contains estimates for the probability of success of each treatment arm \* `settings` contains the settings for the simulation.
+
 ```{r}
 names(sim)
 ```
 
-
 #### Analysis
+
 The function's output is a `mab` class object with its set of unique functions to speed up analysis. A print method is provided which displays the settings of the trial, and a summary method which quickly aggregates the results.
 
 ```{r}
@@ -103,20 +133,25 @@ class(sim)
 sim
 summary(sim) |> print(width = Inf)
 ```
+
 A plot summary with several options is also provided for quick visualization of the results using ggplot2. The `type` argument can take "arm", "assign" or "estimate", each providing different information about the results. These plots can be added to with `+` like any ggplot2 object.
-* "arm" provides a view of each arm overtime, its relative probability of being the best, or UCB1 statistic. 
+
+"arm" provides a view of each arm overtime, its relative probability of being the best, or UCB1 statistic.
+
 ```{r}
 #| fig.width: 5
 plot(sim, type = "arm")
 ```
 
-* "assign" showcases the assignment probability for that arm overtime
+"assign" showcases the assignment probability for that arm overtime
+
 ```{r}
 #| fig.width: 5
 plot(sim, type = "assign")
 ```
 
-* "estimate" shows error bars on the AIPW or sample estimates using the associated variances.
+"estimate" shows error bars on the AIPW or sample estimates using the associated variances.
+
 ```{r}
 #| fig.width: 5
 plot(sim, type = "estimate", estimator = "AIPW", height = 0.4) + 
@@ -124,7 +159,9 @@ plot(sim, type = "estimate", estimator = "AIPW", height = 0.4) +
 ```
 
 #### Error Handling
+
 If the a required column is not passed or any of the arguments are mispsecified, a helpful error will be thrown to notify the user of any issues. Here the condition is missing:
+
 ```{r}
 try(single_mab_simulation(data = tanf,
                       assignment_method = "Batch",
@@ -138,7 +175,9 @@ try(single_mab_simulation(data = tanf,
                                     success_col = "success")
                       ))
 ```
+
 However the function won't catch if the wrong columns were passed. Be careful when typing, as an error resulting from this mistake will be harder to deduce based on the message.
+
 ```{r}
 try(single_mab_simulation(data = tanf,
                       assignment_method = "Batch",
@@ -153,7 +192,9 @@ try(single_mab_simulation(data = tanf,
                                     condition_col = "condition")
                       ))
 ```
+
 An easy way to avoid this is to place this argument into a character vector before passing it, so it does not have to be retyped.
+
 ```{r}
 #| eval: FALSE
 cols <- c(id_col = "ic_case_id", success_col = "success", condition_col = "condition")
@@ -168,17 +209,11 @@ single_mab_simulation(data = tanf,
                       data_cols = cols)
 
 ```
-`single_mab_simulation()` provides a plethora of options to tune.
-#### Options
-The object returned by `single_mab_simulation()` has its own class, and several generic functions associated with it to speed up analysis
 
-
-
+`single_mab_simulation()` provides a plethora of options to tune. \#### Options The object returned by `single_mab_simulation()` has its own class, and several generic functions associated with it to speed up analysis
 
 ### Multiple Simulations
-`multiple_mab_simulation()` is a shorthand function for executing multiple trials under the same settings. It is used to estimate the variance in the outcomes that occurs from the simulation process. Depending on the data set size and the number of trials, 
 
-
-
+`multiple_mab_simulation()` is a shorthand function for executing multiple trials under the same settings. It is used to estimate the variance in the outcomes that occurs from the simulation process. Depending on the data set size and the number of trials,
 
 ## References {.appendix}
