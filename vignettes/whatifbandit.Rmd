@@ -18,7 +18,6 @@ library(dplyr)
 library(future)
 library(ggplot2)
 library(whatifbandit)
-
 ```
 
 whatifbandit allows researchers to re-simulate their randomized experiments under adaptive experimental conditions. Running experiments can be costly and time-consuming, so this simulation tool allows researchers to explore what their results could have looked like under an adaptive experimental design. These re-analyses can inform the planning for future studies, allowing a researcher to justify an adaptive design for a future project, before running a costly experiment.
@@ -31,6 +30,10 @@ Adaptive experimental designs tend to shift more participants over time to more 
 -   Finding the absolute best treatment takes precedence over gauging the effects of all treatments.
 
 This vignette introduces the key functions of the whatifbandit package and how they to use them effectively. All that's required is data from a previous randomized experiment containing information about which treatment each observation was originally assigned too, and the original outcome. For a more detailed view of the exact adaptive procedures, and implementation, please refer to the function documentation instead.
+
+## Core Functions
+
+whatifbandit provides 2 main functions for conducting simulations, `single_mab_simulation()` and `multiple_mab_simulation()`. Like their names suggest `single_mab_simulation()` runs only 1 simulation while `multiple_mab_simulation()` runs a user specified number of simulations. Internally both functions are similar, and share the same arguments except for the few additional ones `multiple_mab_simulation()` has to control the repeated trials. 
 
 ## Multi-Arm-Bandits: Adaptive Assignment
 
@@ -77,28 +80,27 @@ data(tanf)
 glimpse(tanf)
 ```
 
-## Core Functions
-
-whatifbandit provides 2 main functions for conducting simulations, `single_mab_simulation()` and `multiple_mab_simulation()`. Like their names suggest `single_mab_simulation()` runs only 1 simulation while `multiple_mab_simulation()` runs a user specified number of simulations. Internally both functions are similar, and share the same arguments except for the few additional ones `multiple_mab_simulation()` has to control the repeated trials. 
-
 ## Single Simulations
 
 `single_mab_simulation()` is a catch-all function for running the adaptive simulations, where each of its arguments tunes the settings of the simulation. All that's required for a simulation is a data.frame, containing a unique ID for every row, that row's original treatment, and their original outcome. These column names are passed to the function as strings. 
 
 ```{r}
 #| eval: FALSE
-sim <- single_mab_simulation(data = tanf,
-                      assignment_method = "Batch",
-                      period_length = 1000,
-                      algorithm = "UCB1",
-                      conditions = levels(tanf$condition),
-                      whole_experiment = TRUE, perfect_assignment = TRUE,
-                      prior_periods = "All",
-                      blocking = FALSE, 
-                      data_cols = c(id_col = "ic_case_id",
-                                    success_col = "success",
-                                    condition_col = "condition")
-                      ) 
+sim <- single_mab_simulation(
+  data = tanf,
+  assignment_method = "Batch",
+  period_length = 1000,
+  algorithm = "UCB1",
+  conditions = levels(tanf$condition),
+  whole_experiment = TRUE, perfect_assignment = TRUE,
+  prior_periods = "All",
+  blocking = FALSE,
+  data_cols = c(
+    id_col = "ic_case_id",
+    success_col = "success",
+    condition_col = "condition"
+  )
+)
 ```
 
 Additionally, the function contains several options which can be used to tweak the simulation to the specification of the experiment. This current setup performs UCB1 sampling without treatment blocking with batch sizes of 1000 people, where the whole experiment is used for imputing outcomes, which is nothing like the conditions under the TANF experiment. 
@@ -114,24 +116,26 @@ The time component of the experiment must be taken into account. There is no gua
 With this configuration, if a success occurs after the date treatments are assigned, it is masked and treated as a failure. This simulates the researcher's limited information as those late outcomes would not have been observed yet.
 
 ```{r}
-
-sim <- single_mab_simulation(data = tanf,
-                      assignment_method = "Date",
-                      time_unit = "Month",
-                      period_length = 1,
-                      algorithm = "Thompson",
-                      conditions = levels(tanf$condition),
-                      whole_experiment = FALSE, perfect_assignment = TRUE,
-                      prior_periods = "All",
-                      blocking = TRUE, block_cols = c("service_center"),
-                      data_cols = c(id_col = "ic_case_id",
-                                    date_col = "appt_date",
-                                    success_col = "success",
-                                    condition_col = "condition",
-                                    month_col = "recert_month",
-                                    success_date_col = "date_of_recert",
-                                    assignment_date_col = "letter_sent_date")
-                      )
+sim <- single_mab_simulation(
+  data = tanf,
+  assignment_method = "Date",
+  time_unit = "Month",
+  period_length = 1,
+  algorithm = "Thompson",
+  conditions = levels(tanf$condition),
+  whole_experiment = FALSE, perfect_assignment = TRUE,
+  prior_periods = "All",
+  blocking = TRUE, block_cols = c("service_center"),
+  data_cols = c(
+    id_col = "ic_case_id",
+    date_col = "appt_date",
+    success_col = "success",
+    condition_col = "condition",
+    month_col = "recert_month",
+    success_date_col = "date_of_recert",
+    assignment_date_col = "letter_sent_date"
+  )
+)
 ```
 
 You don't always have to replicate the setting perfectly, reanalyzing the experiment as an adaptive trial also involves testing how the results change across different configurations, such as the size and length of periods, or the usage of `perfect_assignment` or `whole_experiment`. The only guidelines would be to use UCB1 only when the period size is a relatively small component of the dataset, and `perfect_assignment = FALSE`, when you have dates that line up the periods you have set. If this is not the case, that all the successes will simply be masked, producing strange results.
@@ -153,18 +157,21 @@ Whichever option to choose is up to you, but its recommended not to use them tog
 tanf <- arrange(tanf, appt_date)
 conditions <- setNames(levels(tanf$condition), c("Control", "T1", "T2"))
 
-sim <- single_mab_simulation(data = tanf,
-                      assignment_method = "Individual",
-                      algorithm = "Thompson",
-                      conditions = conditions,
-                      whole_experiment = FALSE, perfect_assignment = TRUE,
-                      prior_periods = 500,
-                      blocking = TRUE, block_cols = c("service_center"),
-                      data_cols = c(id_col = "ic_case_id",
-                                    success_col = "success",
-                                    condition_col = "condition"),
-                      control_augment = 0.2
-                      )
+sim <- single_mab_simulation(
+  data = tanf,
+  assignment_method = "Individual",
+  algorithm = "Thompson",
+  conditions = conditions,
+  whole_experiment = FALSE, perfect_assignment = TRUE,
+  prior_periods = 500,
+  blocking = TRUE, block_cols = c("service_center"),
+  data_cols = c(
+    id_col = "ic_case_id",
+    success_col = "success",
+    condition_col = "condition"
+  ),
+  control_augment = 0.2
+)
 ```
 ### Analysis
 `single_mab_simulation()` returns a condensed list with information pertinent to the analysis in 4 components:
@@ -190,15 +197,17 @@ print(sim_summary, width = Inf)
 The width of the confidence intervals can be changed in the `level` argument of the summary method, but can also be calculated by hand using the standard error. This time, lets specify 80% confidence intervals or an $\alpha$ = 0.2.
 ```{r}
 # Inside Summary Call
-summary(sim, level = 0.8) |> select(AIPW, SE, lower_bound, upper_bound, level) |> print(width = Inf)
+summary(sim, level = 0.8) |>
+  select(AIPW, SE, lower_bound, upper_bound, level) |>
+  print(width = Inf)
 # By hand
-quantile <- qnorm(0.2/2, lower.tail = FALSE)
+quantile <- qnorm(0.2 / 2, lower.tail = FALSE)
 sim_summary |>
-  mutate(lower_bound = AIPW - SE*quantile,
-         upper_bound = AIPW + SE*quantile) |>
+  mutate(
+    lower_bound = AIPW - SE * quantile,
+    upper_bound = AIPW + SE * quantile
+  ) |>
   select(AIPW, SE, lower_bound, upper_bound)
-
-
 ```
 #### Plotting
 You can also quickly create plots of the results using the plot method. This method uses ggplot2 to create visualizations to the package must be installed. `mab` supports 3 plot types, `"arm"`, `"assign"` and `"estimate"`, each providing different information about the results. These plots can be added to with `+` like any ggplot2 object, and arguments to the main `geom*` can be specified through the `...` argument. The geoms used are `geom_line()`, and `geom_errorbarh()`
@@ -221,7 +230,7 @@ plot(sim, type = "assign")
 
 ```{r}
 #| fig.width: 5
-plot(sim, type = "estimate", estimator = "AIPW", level = 0.9, height = 0.4) + 
+plot(sim, type = "estimate", estimator = "AIPW", level = 0.9, height = 0.4) +
   scale_x_continuous(breaks = seq(0, 1, .1), limits = range(0, 1))
 ```
 
@@ -247,29 +256,31 @@ set.seed(532454)
 seeds <- sample.int(1000000, 100, replace = FALSE)
 
 time <- system.time(
-  multiple_sims <- multiple_mab_simulation(data = tanf,
-                      assignment_method = "Date",
-                      time_unit = "Month",
-                      period_length = 1,
-                      algorithm = "Thompson",
-                      conditions = levels(tanf$condition),
-                      whole_experiment = FALSE, perfect_assignment = TRUE,
-                      prior_periods = "All",
-                      blocking = TRUE, block_cols = c("service_center"),
-                      data_cols = c(id_col = "ic_case_id",
-                                    date_col = "appt_date",
-                                    success_col = "success",
-                                    condition_col = "condition",
-                                    month_col = "recert_month",
-                                    success_date_col = "date_of_recert",
-                                    assignment_date_col = "letter_sent_date"),
-                      keep_data = FALSE, times = 100, seeds = seeds
-                      )
+  multiple_sims <- multiple_mab_simulation(
+    data = tanf,
+    assignment_method = "Date",
+    time_unit = "Month",
+    period_length = 1,
+    algorithm = "Thompson",
+    conditions = levels(tanf$condition),
+    whole_experiment = FALSE, perfect_assignment = TRUE,
+    prior_periods = "All",
+    blocking = TRUE, block_cols = c("service_center"),
+    data_cols = c(
+      id_col = "ic_case_id",
+      date_col = "appt_date",
+      success_col = "success",
+      condition_col = "condition",
+      month_col = "recert_month",
+      success_date_col = "date_of_recert",
+      assignment_date_col = "letter_sent_date"
+    ),
+    keep_data = FALSE, times = 100, seeds = seeds
+  )
 )
-
 ```
 
-Executing those 100 simulations took `r as.numeric(time["elapsed"])` seconds. To speed up this process `multiple_mab_simulation()` supports parallel processing via the furrr and future packages. To run the function in parallel, all you need to do is call `future::plan()` before running it and specify the number of cores you want to use.
+Executing those 100 simulations took `r as.numeric(time["elapsed"])` seconds. To speed up this process `multiple_mab_simulation()` supports parallel processing via the [furrr](https://furrr.futureverse.org/) and [future](https://furrr.futureverse.org/) packages. To run the function in parallel, all you need to do is call `future::plan()` before running it and specify the number of cores you want to use.
 ```{r}
 #| echo: FALSE
 
@@ -282,32 +293,33 @@ set.seed(532454)
 seeds <- sample.int(1000000, 100, replace = FALSE)
 plan("multisession", workers = 4)
 parallel_time <- system.time(
-  multiple_sims <- multiple_mab_simulation(data = tanf,
-                      assignment_method = "Date",
-                      time_unit = "Month",
-                      period_length = 1,
-                      algorithm = "Thompson",
-                      conditions = levels(tanf$condition),
-                      whole_experiment = FALSE, perfect_assignment = TRUE,
-                      prior_periods = "All",
-                      blocking = TRUE, block_cols = c("service_center"),
-                      data_cols = c(id_col = "ic_case_id",
-                                    date_col = "appt_date",
-                                    success_col = "success",
-                                    condition_col = "condition",
-                                    month_col = "recert_month",
-                                    success_date_col = "date_of_recert",
-                                    assignment_date_col = "letter_sent_date"),
-                      keep_data = FALSE, times = 100, seeds = seeds
-                      )
+  multiple_sims <- multiple_mab_simulation(
+    data = tanf,
+    assignment_method = "Date",
+    time_unit = "Month",
+    period_length = 1,
+    algorithm = "Thompson",
+    conditions = levels(tanf$condition),
+    whole_experiment = FALSE, perfect_assignment = TRUE,
+    prior_periods = "All",
+    blocking = TRUE, block_cols = c("service_center"),
+    data_cols = c(
+      id_col = "ic_case_id",
+      date_col = "appt_date",
+      success_col = "success",
+      condition_col = "condition",
+      month_col = "recert_month",
+      success_date_col = "date_of_recert",
+      assignment_date_col = "letter_sent_date"
+    ),
+    keep_data = FALSE, times = 100, seeds = seeds
+  )
 )
-
-
+plan("sequential")
 ```
 Using 4 cores, it only takes `r as.numeric(parallel_time["elapsed"])` seconds to run 100 simulations. Your core usage is determined by your system requirements. To see how many cores are available on your system simply call `future::availableCores()`. 
 
-Using future comes with some new complexities. Windows users must use `plan("multisession")`, while Linux and MacOS users
-can use `plan("multisession")` or `plan("multicore")`. If your using a High Performance Computing Cluster, the future.batchtools API should be used instead to specify the proper plan for the scheduler of your HPC. See the future, furrr, and future.batchtools package documentation for more details on parallel processing.
+Using future comes with some new complexities. Generally, Windows users should use `plan("multisession")`, while Linux and MacOS users should use `plan("multisession")` or `plan("multicore")`. If your using a High Performance Computing Cluster, the future.batchtools API should be used, with the proper plan for your HPC scheduler. A full treatment of futures it beyond the scope of this vignette. For details on how futures work, and what future plans are available, please consult the [future](https://future.futureverse.org/) documentation.
 
 ### Analyzing Repeated Simulations
 `multiple_mab_simulation()` returns the same elements as `single_mab_simulation()` except for `final_data`. When
@@ -339,6 +351,7 @@ summary(multiple_sims, level = 0.75) |> print(width = Inf)
 #| fig.width: 5
 plot(multiple_sims, type = "summary")
 ```
+
 `type = hist` creates histograms showcasing the distribution for the AIPW, Sample, or both estimates for each
 treatment arm, over the repeated trials.
 ```{r}
@@ -349,7 +362,10 @@ plot(multiple_sims, type = "hist", estimator = "AIPW", bins = 50)
 `type = estimate` is the same as for `mab`, but now the spread can be shown using either empirical or normal CDF.
 ```{r}
 #| fig.width: 5
-plot(multiple_sims, type = "estimate", estimator = "AIPW", cdf = "empirical", level = 0.99, height = 0.4) + 
+plot(multiple_sims,
+  type = "estimate", estimator = "AIPW",
+  cdf = "empirical", level = 0.99, height = 0.4
+) +
   scale_x_continuous(breaks = seq(0, 1, .1), limits = range(0, 1))
 ```
 Once again, all the data used to construct these is available in the output, so you can perform your own custom
@@ -372,13 +388,12 @@ load("datatable.RData")
 # Preparing the Dataset
 tanf_large <- tanf
 setDT(tanf_large)
-for(i in 1:8) {
+for (i in 1:9) {
   tanf_large <- rbindlist(list(tanf_large, tanf_large))
 }
 
 setorder(tanf_large, appt_date)
 tanf_large[, id := .I] # Setting ID to be row number to be unique
-
 ```
 Now tanf has `r nrow(tanf_large)` rows to simulate over instead of `r nrow(tanf)`. For this example, the batch size will be 3000 people, resulting in `r ceiling(nrow(tanf_large) / 3000)` periods. 
 
@@ -386,35 +401,42 @@ When using large datasets in conjunction with Thompson Sampling, there is a pote
 
 ```{r}
 #| eval: FALSE
-dataframe_time <- system.time(single_mab_simulation(data = as.data.frame(tanf_large),
-                      assignment_method = "Batch",
-                      period_length = 3000,
-                      algorithm = "Thompson",
-                      conditions = levels(tanf$condition),
-                      whole_experiment = FALSE, perfect_assignment = TRUE,
-                      prior_periods = "All",
-                      blocking = FALSE, 
-                      data_cols = c(id_col = "id",
-                                    success_col = "success",
-                                    condition_col = "condition")
-                      ))
+set.seed(523432453)
+dataframe_time <- system.time(single_mab_simulation(
+  data = as.data.frame(tanf_large),
+  assignment_method = "Batch",
+  period_length = 3000,
+  algorithm = "Thomspon",
+  conditions = levels(tanf$condition),
+  whole_experiment = FALSE, perfect_assignment = TRUE,
+  prior_periods = "All",
+  blocking = FALSE,
+  data_cols = c(
+    id_col = "id",
+    success_col = "success",
+    condition_col = "condition"
+  )
+))
 
-datatable_time <- system.time(single_mab_simulation(tanf_large,
-                      assignment_method = "Batch",
-                      period_length = 3000,
-                      algorithm = "Thompson",
-                      conditions = levels(tanf$condition),
-                      whole_experiment = FALSE, perfect_assignment = TRUE,
-                      prior_periods = "All",
-                      blocking = FALSE, 
-                      data_cols = c(id_col = "id",
-                                    success_col = "success",
-                                    condition_col = "condition")
-                      ))
+datatable_time <- system.time(single_mab_simulation(
+  data = tanf_large,
+  assignment_method = "Batch",
+  period_length = 3000,
+  algorithm = "UCB1",
+  conditions = levels(tanf$condition),
+  whole_experiment = FALSE, perfect_assignment = TRUE,
+  prior_periods = "All",
+  blocking = FALSE,
+  data_cols = c(
+    id_col = "id",
+    success_col = "success",
+    condition_col = "condition"
+  )
+))
 ```
-The data.table version completes in `r datatable_time` seconds while the data.frame version takes r `dataframe_time` seconds making the the data.table version `r round(((dataframe_time/datatable_time) - 1)*100, 0)`% faster in this case. 
+The data.table version completes in `r datatable_time` seconds while the data.frame version takes `r dataframe_time` seconds making the the data.table version `r round(((dataframe_time/datatable_time) - 1)*100, 0)`% faster in this case.
 
-The data.table version may not be faster in all cases. Performance is mainly dependent on the size of the data, the number of observations in each period, and the total number of periods. For simulations where each period contains < 500 observations or the total size is < 1,000,000 rows, the data.table version will likely be slower. There is no hard and fast rule, you must make the judgement based on the data you have, the simulation you want to run, and the computing power of your system.
+The data.table version may not be faster in all cases. Performance is mainly dependent on the size of the data, the number of observations in each period, and the total number of periods. For simulations where each period contains less than 500 observations or the total size is less than 1,000,000 rows, the data.table version will likely be slower. There is no hard and fast rule, you must make the judgement based on the data you have, the simulation you want to run, and the computing power of your system.
 
 The Thompson Sampling Corrections may introduce new errors, that we have not caught yet. If you get an error from an internal function call, we recommend switching to UCB1 which does not have the same issues, and reporting bug as an issue on package's [GitHub Repo](https://github.com/ryantmoore/whatifbandit).
 
@@ -424,69 +446,79 @@ The Thompson Sampling Corrections may introduce new errors, that we have not cau
 Here the condition column is missing:
 
 ```{r}
-try(single_mab_simulation(data = tanf,
-                      assignment_method = "Batch",
-                      period_length = 1000,
-                      algorithm = "Thompson",
-                      conditions = levels(tanf$condition),
-                      whole_experiment = FALSE, perfect_assignment = TRUE,
-                      prior_periods = "All",
-                      blocking = FALSE, 
-                      data_cols = c(id_col = "ic_case_id",
-                                    success_col = "success")
-                      ))
+try(single_mab_simulation(
+  data = tanf,
+  assignment_method = "Batch",
+  period_length = 1000,
+  algorithm = "Thompson",
+  conditions = levels(tanf$condition),
+  whole_experiment = FALSE, perfect_assignment = TRUE,
+  prior_periods = "All",
+  blocking = FALSE,
+  data_cols = c(
+    id_col = "ic_case_id",
+    success_col = "success"
+  )
+))
 ```
 While here `control_augment > 1`:
 ```{r}
-try(single_mab_simulation(data = tanf,
-                      assignment_method = "Batch",
-                      period_length = 1000,
-                      algorithm = "Thompson",
-                      conditions = levels(tanf$condition),
-                      whole_experiment = FALSE, perfect_assignment = TRUE,
-                      prior_periods = "All",
-                      blocking = FALSE, 
-                      data_cols = c(id_col = "ic_case_id",
-                                    success_col = "success",
-                                    condition_col = "condition"),
-                      control_augment = 1.5
-                      
-                      ))
+try(single_mab_simulation(
+  data = tanf,
+  assignment_method = "Batch",
+  period_length = 1000,
+  algorithm = "Thompson",
+  conditions = levels(tanf$condition),
+  whole_experiment = FALSE, perfect_assignment = TRUE,
+  prior_periods = "All",
+  blocking = FALSE,
+  data_cols = c(
+    id_col = "ic_case_id",
+    success_col = "success",
+    condition_col = "condition"
+  ),
+  control_augment = 1.5
+))
 ```
 Here, the seeds are not proper integers:
 ```{r}
-try(multiple_mab_simulation(data = tanf,
-                      assignment_method = "Batch",
-                      period_length = 1000,
-                      algorithm = "Thompson",
-                      conditions = levels(tanf$condition),
-                      whole_experiment = FALSE, perfect_assignment = TRUE,
-                      prior_periods = "All",
-                      blocking = FALSE, 
-                      data_cols = c(id_col = "ic_case_id",
-                                    success_col = "success",
-                                    condition_col = "condition"),
-                      times = 5, seeds = runif(5)
-                      
-                      ))
+try(multiple_mab_simulation(
+  data = tanf,
+  assignment_method = "Batch",
+  period_length = 1000,
+  algorithm = "Thompson",
+  conditions = levels(tanf$condition),
+  whole_experiment = FALSE, perfect_assignment = TRUE,
+  prior_periods = "All",
+  blocking = FALSE,
+  data_cols = c(
+    id_col = "ic_case_id",
+    success_col = "success",
+    condition_col = "condition"
+  ),
+  times = 5, seeds = runif(5)
+))
 ```
 However the function won't catch if the columns or other arguments are swapped, but are still valid. Be careful when typing, as an error resulting from this mistake will be harder to deduce based on the message.
 
 Here the `success_col` is specified to an existing numeric column, but it does not contain the required information:
 
 ```{r}
-try(single_mab_simulation(data = tanf,
-                      assignment_method = "Batch",
-                      period_length = 1000,
-                      algorithm = "Thompson",
-                      conditions = levels(tanf$condition),
-                      whole_experiment = FALSE, perfect_assignment = TRUE,
-                      prior_periods = "All",
-                      blocking = FALSE, 
-                      data_cols = c(id_col = "ic_case_id",
-                                    success_col = "recert_id",
-                                    condition_col = "condition")
-                      ))
+try(single_mab_simulation(
+  data = tanf,
+  assignment_method = "Batch",
+  period_length = 1000,
+  algorithm = "Thompson",
+  conditions = levels(tanf$condition),
+  whole_experiment = FALSE, perfect_assignment = TRUE,
+  prior_periods = "All",
+  blocking = FALSE,
+  data_cols = c(
+    id_col = "ic_case_id",
+    success_col = "recert_id",
+    condition_col = "condition"
+  )
+))
 ```
 
 ## References {.appendix}
