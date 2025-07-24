@@ -213,13 +213,12 @@ get_bandit.Thompson <- function(past_results, conditions, current_period, ndraws
   bandit <- tryCatch(
     {
       result <- rlang::set_names(
-        bandit::best_binomial_bandit(
+        as.vector(bandit::best_binomial_bandit(
           x = past_results$successes,
           n = past_results$n,
           alpha = 1,
           beta = 1
-        ),
-        conditions
+        )), conditions
       )
       if (bandit_invalid(result)) {
         stop("Invalid Bandit")
@@ -231,16 +230,17 @@ get_bandit.Thompson <- function(past_results, conditions, current_period, ndraws
         "Thompson Sampling calculation overflowed; simulation based posterior estimate was used instead",
         "i" = sprintf("Period: %d", current_period)
       ))
-      rlang::set_names(
-        bandit::best_binomial_bandit_sim(
+      result <- rlang::set_names(
+        as.vector(bandit::best_binomial_bandit_sim(
           x = past_results$successes,
           n = past_results$n,
           alpha = 1,
           beta = 1,
           ndraws = ndraws
-        ),
-        conditions
+        )), conditions
       )
+
+      result
     }
   )
 

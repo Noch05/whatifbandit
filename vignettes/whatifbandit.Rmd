@@ -17,12 +17,9 @@ library(data.table)
 library(dplyr)
 library(future)
 library(ggplot2)
-library(tidyr)
 library(whatifbandit)
 
 ```
-
-
 
 whatifbandit allows researchers to re-simulate their randomized experiments under adaptive experimental conditions. Running experiments can be costly and time-consuming, so this simulation tool allows researchers to explore what their results could have looked like under an adaptive experimental design. These re-analyses can inform the planning for future studies, allowing a researcher to justify an adaptive design for a future project, before running a costly experiment.
 
@@ -325,24 +322,104 @@ print(multiple_sims)
 ```
 For `multiple.mab` objects, `summary()` returns the average for AIPW estimates and 2 estimates of their standard error. One estimate is the average of the standard errors across each trial, with the variances averaged first $\left(\sqrt{\frac{1}{\text{n}}\sum_1^n\mathbb{V}[\text{Estimate}_i]}\right)$. The other estimate, is the sample variance of all of the AIPW estimates across the trials (`SE_empirical`). 95% confidence intervals are provided using both the empirical cumulative distribution function (eCDF), and the normal CDF using the average standard errors. Additionally the number of times each treatment arm was selected as the best is displayed, with the best being the highest Thompson probability or UCB1 statistic at the end of the trial. 
 ```{r}
-summary(multiple_sims)
+summary(multiple_sims) |> print(width = Inf)
 ```
 
 Just like with `mab` objects, the level of these confidence intervals can be changed in the `summary()` call.
 
 ```{r}
-summary(multiple_sims, level = 0.75)
+summary(multiple_sims, level = 0.75) |> print(width = Inf)
+```
+#### Plotting
+`multiple.mab` objects also have their own plot method with 3 distinct plots: "summary", "hist", and "estimate". Just like with `mab` these plots are created using ggplot2, so can be added to with `+` and arguments in `...` can be passed to the `geom*` functions inside. The geoms used are `geom_bar()`, `geom_histogram()`, and `geom_errorbarh()`.
+
+`type = summary` creates a bar graph showing how many times each treatment arm was selected as the best:
+
+```{r}
+#| fig.width: 5
+plot(multiple_sims, type = "summary")
+```
+`type = hist` creates histograms showcasing the distribution for the AIPW, Sample, or both estimates for each
+treatment arm, over the repeated trials.
+```{r}
+#| fig.width: 5
+plot(multiple_sims, type = "hist", estimator = "AIPW", bins = 50)
 ```
 
+`type = estimate` is the same as for `mab`, but now the spread can be shown using either empirical or normal CDF.
+```{r}
+#| fig.width: 5
+plot(multiple_sims, type = "estimate", estimator = "AIPW", cdf = "empirical", level = 0.99, height = 0.4) + 
+  scale_x_continuous(breaks = seq(0, 1, .1), limits = range(0, 1))
+```
+Once again, all the data used to construct these is available in the output, so you can perform your own custom
+analysis, or make more detailed plots by hand. 
 
+## Additional Topics
 
-## Additional Features
+### Large Datasets
+Both `single_mab_simulation()` and `multiple_mab_simulation()` have support for large data objects, through data.table. When working with large datasets, data.tables are faster with common operations and more memory efficient than data.frames or tibbles, so using them can result in faster simulations.
 
-### Data.table
+To turn a data.frame into a data.table simply call `data.table::setDT()` on your data.frame. Here is a quick example using the tanf dataset. To create a large object, I simply copied the object many times and bound the rows together. This should NEVER be done, as it invalidates the results and makes errors more prone, but here it okay as we just use it to gauge execution times.
+```{r}
+#| echo: FALSE
 
+load("datatable.RData")
+```
+
+```{r}
+#| eval: FALSE
+# Preparing the Dataset
+tanf_large <- tanf
+setDT(tanf_large)
+for(i in 1:8) {
+  tanf_large <- rbindlist(list(tanf_large, tanf_large))
+}
+
+setorder(tanf_large, appt_date)
+tanf_large[, id := .I] # Setting ID to be row number to be unique
+
+```
+Now tanf has `r nrow(tanf_large)` rows to simulate over instead of `r nrow(tanf)`. For this example, the batch size will be 3000 people, resulting in `r ceiling(nrow(tanf_large) / 3000)` periods. 
+
+When using large datasets in conjunction with Thompson Sampling, there is a potential for the calculation to overflow. In the event of an overflow, the Thompson sampling is then estimated by simulating draws from the posterior distribution. The number of these draws is set by `ndraws` which defaults to 5000. Another method to prevent this would be to change `prior_periods` from "All" to a specified number to limit the size of the dataset which is used for Thompson Sampling in each period. 
+
+```{r}
+#| eval: FALSE
+dataframe_time <- system.time(single_mab_simulation(data = as.data.frame(tanf_large),
+                      assignment_method = "Batch",
+                      period_length = 3000,
+                      algorithm = "Thompson",
+                      conditions = levels(tanf$condition),
+                      whole_experiment = FALSE, perfect_assignment = TRUE,
+                      prior_periods = "All",
+                      blocking = FALSE, 
+                      data_cols = c(id_col = "id",
+                                    success_col = "success",
+                                    condition_col = "condition")
+                      ))
+
+datatable_time <- system.time(single_mab_simulation(tanf_large,
+                      assignment_method = "Batch",
+                      period_length = 3000,
+                      algorithm = "Thompson",
+                      conditions = levels(tanf$condition),
+                      whole_experiment = FALSE, perfect_assignment = TRUE,
+                      prior_periods = "All",
+                      blocking = FALSE, 
+                      data_cols = c(id_col = "id",
+                                    success_col = "success",
+                                    condition_col = "condition")
+                      ))
+```
+The data.table version completes in `r datatable_time` while the data.frame version takes r ` dataframe_time` making the the data.table version `r ((dataframe_time/datatable_time) - 1)*100`% faster in this case. 
+
+The data.table version may not be faster in all cases. Performance is mainly dependent on the size of the data, the number of observations in each period, and the total number of periods. For simulations where each period contains < 500 observations or the total size is < 1,000,000 rows, the data.table version will likely be slower. There is no hard and fast rule, you must make the judgement based on the data you have, the simulation you want to run, and the computing power of your system.
+
+The Thompson Sampling Corrections may introduce new errors, that we have not caught yet. If you get an error from an internal function call, we reccomend switching to UCB1 which does not have the same issues, and reporting bug as an issue on package's [GitHub Repo](https://github.com/ryantmoore/whatifbandit).
 
 ### Error Handling
-`single_mab_simulation()` can have up to 20 arguments, so its easy to make a typo when calling the function. As a result, we provide helpful error messages to help you deduce what has gone wrong with your execution of the function. If the a required column is not properly entered, or any of the arguments or any of the arguments are invalid, a helpful error will be thrown to notify the user of any issues. `multiple_mab_simulation()` has all the same errors in addition to the ones for its unique arguments.
+`single_mab_simulation()` and `multiple_mab_simulation()` can have more than 20 arguments, so its easy to make a typo when calling the function. As a result, we provide helpful error messages to help you deduce what has gone wrong with your execution of the function. If a required column is not properly entered, or any of the arguments are invalid, a helpful error will be thrown to notify the user of any issues.
 
 Here the condition column is missing:
 
@@ -360,7 +437,6 @@ try(single_mab_simulation(data = tanf,
                       ))
 ```
 While here `control_augment > 1`:
-
 ```{r}
 try(single_mab_simulation(data = tanf,
                       assignment_method = "Batch",
@@ -377,7 +453,23 @@ try(single_mab_simulation(data = tanf,
                       
                       ))
 ```
-
+Here, the seeds are not proper integers:
+```{r}
+try(multiple_mab_simulation(data = tanf,
+                      assignment_method = "Batch",
+                      period_length = 1000,
+                      algorithm = "Thompson",
+                      conditions = levels(tanf$condition),
+                      whole_experiment = FALSE, perfect_assignment = TRUE,
+                      prior_periods = "All",
+                      blocking = FALSE, 
+                      data_cols = c(id_col = "ic_case_id",
+                                    success_col = "success",
+                                    condition_col = "condition"),
+                      times = 5, seeds = runif(5)
+                      
+                      ))
+```
 However the function won't catch if the columns or other arguments are swapped, but are still valid. Be careful when typing, as an error resulting from this mistake will be harder to deduce based on the message.
 
 Here the `success_col` is specified to an existing numeric column, but it does not contain the required information:
@@ -396,7 +488,5 @@ try(single_mab_simulation(data = tanf,
                                     condition_col = "condition")
                       ))
 ```
-
-
 
 ## References {.appendix}
