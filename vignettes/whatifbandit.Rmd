@@ -251,7 +251,6 @@ to reduce memory load of execution.
 Lets revisit the re-simulation of the TANF experiment but with 100 trials this time: 
 
 ```{r}
-#| cache: TRUE
 set.seed(532454)
 seeds <- sample.int(1000000, 100, replace = FALSE)
 
@@ -283,7 +282,6 @@ time <- system.time(
 Executing those 100 simulations took `r as.numeric(time["elapsed"])` seconds. To speed up this process `multiple_mab_simulation()` supports parallel processing via the [furrr](https://furrr.futureverse.org/) and [future](https://furrr.futureverse.org/) packages. To run the function in parallel, all you need to do is call `future::plan()` before running it and specify the number of cores you want to use.
 ```{r}
 #| echo: FALSE
-
 load("parallel.RData")
 ```
 
@@ -319,7 +317,7 @@ plan("sequential")
 ```
 Using 4 cores, it only takes `r as.numeric(parallel_time["elapsed"])` seconds to run 100 simulations. Your core usage is determined by your system requirements. To see how many cores are available on your system simply call `future::availableCores()`. 
 
-Using future comes with some new complexities. Generally, Windows users should use `plan("multisession")`, while Linux and MacOS users should use `plan("multisession")` or `plan("multicore")`. If your using a High Performance Computing Cluster, the future.batchtools API should be used, with the proper plan for your HPC scheduler. A full treatment of futures it beyond the scope of this vignette. For details on how futures work, and what future plans are available, please consult the [future](https://future.futureverse.org/) documentation.
+Using future comes with some new complexities. Generally, Windows users should use `plan("multisession")`, while Linux and MacOS users should use `plan("multisession")` or `plan("multicore")`. If your using a High Performance Computing Cluster, the `future.batchtools` API should be used, with the proper plan for your HPC scheduler. A full treatment of futures it beyond the scope of this vignette. For details on how futures work, and what future plans are available, please consult the [future](https://future.futureverse.org/) documentation.
 
 ### Analyzing Repeated Simulations
 `multiple_mab_simulation()` returns the same elements as `single_mab_simulation()` except for `final_data`. When

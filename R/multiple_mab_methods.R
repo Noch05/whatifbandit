@@ -89,7 +89,7 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
       times_best = dplyr::if_else(base::is.na(times_best), 0, times_best),
       level = level
     ) |>
-    filter(estimator == "AIPW")
+    dplyr::filter(estimator == "AIPW")
   return(summary)
 }
 
