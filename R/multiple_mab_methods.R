@@ -221,7 +221,7 @@ plot_mult_estimates <- function(x, estimator, cdf, level, ...) {
     dplyr::filter(estimator %in% estimator_arg) |>
     dplyr::select(!!!rlang::syms(cols), estimator, mab_condition, estimate_avg) |>
     ggplot2::ggplot(ggplot2::aes(x = estimate_avg, y = mab_condition)) +
-    ggplot2::geom_errorbarh(ggplot2::aes(xmax = !!rlang::sym(cols[[1]]), xmin = !!rlang::sym(cols[[2]]))) +
+    ggplot2::geom_errorbarh(ggplot2::aes(xmax = !!rlang::sym(cols[[1]]), xmin = !!rlang::sym(cols[[2]])), ...) +
     ggplot2::facet_grid(~estimator) +
     ggplot2::theme_minimal() +
     ggplot2::labs(

@@ -180,6 +180,7 @@ get_bandit <- function(past_results, algorithm, conditions, current_period, cont
   )
 
   assignment_prob <- bandit[["assignment_prob"]]
+
   if (control_augment > 0) {
     ctrl <- base::which(base::names(conditions) == "Control")
 
@@ -209,25 +210,40 @@ get_bandit <- function(past_results, algorithm, conditions, current_period, cont
 #' @keywords internal
 
 get_bandit.Thompson <- function(past_results, conditions, current_period, ndraws) {
-  bandit <- rlang::set_names(bandit::best_binomial_bandit(
-    x = past_results$successes,
-    n = past_results$n,
-    alpha = 1,
-    beta = 1
-  ), conditions)
+  bandit <- tryCatch(
+    {
+      result <- rlang::set_names(
+        bandit::best_binomial_bandit(
+          x = past_results$successes,
+          n = past_results$n,
+          alpha = 1,
+          beta = 1
+        ),
+        conditions
+      )
+      if (bandit_invalid(result)) {
+        stop("Invalid Bandit")
+      }
+      result
+    },
+    error = function(e) {
+      rlang::warn(c(
+        "Thompson Sampling calculation overflowed; simulation based posterior estimate was used instead",
+        "i" = sprintf("Period: %d", current_period)
+      ))
+      rlang::set_names(
+        bandit::best_binomial_bandit_sim(
+          x = past_results$successes,
+          n = past_results$n,
+          alpha = 1,
+          beta = 1,
+          ndraws = ndraws
+        ),
+        conditions
+      )
+    }
+  )
 
-  if (bandit_invalid(bandit)) {
-    bandit <- rlang::set_names(bandit::best_binomial_bandit_sim(
-      x = past_results$successes,
-      n = past_results$n,
-      alpha = 1,
-      beta = 1,
-      ndraws = ndraws
-    ), conditions)
-
-    rlang::warn(c("Thompson Sampling calculation overflowed; simulation based posterior estimate
-    was used instead", "i" = sprintf("Period: %d", current_period)))
-  }
   if (bandit_invalid(bandit)) {
     rlang::abort(c("Thompson Sampling simulation overflowed",
       "x" = paste0("Most Recent Result:", paste0(bandit, collapse = " ")),
