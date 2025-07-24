@@ -3,7 +3,6 @@
 ^\.github$
 ^\whatifbandit.pdf$
 ^LICENSE.md$
-^\parallel.R$
-^\datable.R$
+
 ^doc$
 ^Meta$
