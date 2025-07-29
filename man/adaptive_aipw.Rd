@@ -30,13 +30,13 @@ sample proportion of successful treatments (sample mean), and sample proportion 
 \description{
 Takes the average of the individual AIPW scores created by \code{\link[=get_iaipw]{get_iaipw()}} for each period,
 and assigns each estimate an adaptive weight based on a constant allocation rate across periods defined by
-\href{https://doi.org/10.1073/pnas.2014602118}{Hadad et. al (2021)} to calculate a final
+\href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et. al (2021)} to calculate a final
 AIPW estimate and variance for each treatment condition. Sample proportions are also provided
 for comparison.
 }
 \details{
 The formulas for the calculations in this function can be found in
-\href{https://doi.org/10.1073/pnas.2014602118}{Hadad et al. (2021)} at
+\href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)} at
 equation 5 (estimate), equation 11 (variance), equation 15 (allocation rate).
 
 The formulas specified assume that each period is 1 observation but in the cases
@@ -49,7 +49,7 @@ inference, while the sample mean which is still provided for comparison, cannot 
 }
 \references{
 Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
-“Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
+“Confidence Intervals for Policy Evaluation in Adaptive Experiments.” \emph{Proceedings of the National Academy of Sciences of the United States of America} 118
 (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 }
 \keyword{internal}

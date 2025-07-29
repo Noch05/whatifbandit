@@ -141,8 +141,8 @@ the outcomes from the number of \code{prior_periods} specified. New treatments a
 Probabilities via the \href{https://cran.r-project.org/package=randomizr}{randomizr}
 package, or as the treatment with the highest UCB1 statistic, while implementing the specific
 treatment blocking and control augmentation specified. More details on bandit algorithms can in
-\href{https://doi.org/10.48550/arXiv.1402.6028}{Kuleshov and Precup 2014} and
-\href{https://doi.org/10.48550/arXiv.1904.07272}{Slivkins 2024}. When control augmentation is used
+\href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
+\href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}. When control augmentation is used
 it requires at least the specified proportion be allocated to the control group, at which case the
 probabilities of being assigned to each treatment are adjusted to achieve this, while also ensuring
 that no probability becomes negative. This is NOT a Contextual bandit,
@@ -293,11 +293,11 @@ to prevent this, but to best way to preempt any issues, is to set \code{prior_pe
 }
 \references{
 Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
-“Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
+“Confidence Intervals for Policy Evaluation in Adaptive Experiments.” \emph{Proceedings of the National Academy of Sciences of the United States of America} 118
 (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 
 Kuleshov, Volodymyr, and Doina Precup. 2014. “Algorithms for Multi-Armed Bandit Problems.”
-arXiv. \doi{10.48550/arXiv.1402.6028}.
+\emph{arXiv}. \doi{10.48550/arXiv.1402.6028}.
 
 Loecher, Thomas Lotze and Markus. 2022.
 “Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis.”
@@ -305,9 +305,9 @@ Loecher, Thomas Lotze and Markus. 2022.
 
 Offer‐Westort, Molly, Alexander Coppock, and Donald P. Green. 2021.
 “Adaptive Experimental Design: Prospects and Applications in Political Science.”
-American Journal of Political Science 65 (4): 826–44. \doi{doi.org/10.1111/ajps.12597}.
+\emph{American Journal of Political Science} 65 (4): 826–44. \doi{10.1111/ajps.12597}.
 
-Slivkins, Aleksandrs. 2024. “Introduction to Multi-Armed Bandits.” arXiv. \doi{10.48550/arXiv.1904.07272}.
+Slivkins, Aleksandrs. 2024. “Introduction to Multi-Armed Bandits.” \emph{arXiv}. \doi{10.48550/arXiv.1904.07272}.
 }
 \seealso{
 \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}, \code{\link[=summary.mab]{summary.mab()}}, \code{\link[=plot.mab]{plot.mab()}}.

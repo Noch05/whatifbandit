@@ -18,7 +18,7 @@
 #' the researchers conducting the experiment could have learned about a treatment outcome.
 #' All successes that occur past this date are masked and treated as failures for the purposes
 #' of assigning this treatments periods, as it simulates the researchers not having
-#' recieved that information yet.
+#' received that information yet.
 #'
 #' @seealso
 #' *[run_mab_trial()]
@@ -160,8 +160,8 @@ get_past_results.data.table <- function(current_data,
 #'
 #'
 #' @references
-#' #' Kuleshov, Volodymyr, and Doina Precup. 2014. “Algorithms for Multi-Armed Bandit Problems.”
-#' arXiv. \doi{10.48550/arXiv.1402.6028}.
+#' Kuleshov, Volodymyr, and Doina Precup. 2014. “Algorithms for Multi-Armed Bandit Problems.”
+#' \emph{arXiv}. \doi{10.48550/arXiv.1402.6028}.
 #'
 #' #' Loecher, Thomas Lotze and Markus. 2022.
 #' “Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis.”

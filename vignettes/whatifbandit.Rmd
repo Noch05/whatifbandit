@@ -434,7 +434,7 @@ datatable_time <- system.time(single_mab_simulation(
 ```
 The data.table version completes in `r datatable_time` seconds while the data.frame version takes `r dataframe_time` seconds making the the data.table version `r round(((dataframe_time/datatable_time) - 1)*100, 0)`% faster in this case.
 
-The data.table version may not be faster in all cases. Performance is mainly dependent on the size of the data, the number of observations in each period, and the total number of periods. For simulations where each period contains less than 500 observations or the total size is less than 1,000,000 rows, the data.table version will likely be slower. There is no hard and fast rule, you must make the judgement based on the data you have, the simulation you want to run, and the computing power of your system.
+The data.table version may not be faster in all cases. Performance is mainly dependent on the size of the data, the number of observations in each period, and the total number of periods. For simulations where each period contains less than 500 observations or the total size is less than 1,000,000 rows, the data.table version will likely be slower. There is no hard and fast rule, you must make the judgment based on the data you have, the simulation you want to run, and the computing power of your system.
 
 The Thompson Sampling Corrections may introduce new errors, that we have not caught yet. If you get an error from an internal function call, we recommend switching to UCB1 which does not have the same issues, and reporting bug as an issue on package's [GitHub Repo](https://github.com/ryantmoore/whatifbandit).
 

@@ -37,7 +37,7 @@ treatment arm.
 }
 \details{
 The specification for the Individual AIPW estimates can be found
-in \href{https://doi.org/10.1073/pnas.2014602118}{Hadad et al. (2021)}. These
+in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}. These
 formulas in equation 5, formed the basis for this function's calculations. Here
 the regression adjustment used is the grouped mean of success by treatment, up until
 the current period of estimation (so at period 5, the grouped mean was calculated
@@ -49,7 +49,7 @@ inference, while the sample mean in this case cannot.
 }
 \references{
 Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
-“Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
+“Confidence Intervals for Policy Evaluation in Adaptive Experiments.” \emph{Proceedings of the National Academy of Sciences of the United States of America} 118
 (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 }
 \keyword{internal}

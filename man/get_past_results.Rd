@@ -49,7 +49,7 @@ When \code{perfect_assignment} is FALSE, the maximum value from the specified
 the researchers conducting the experiment could have learned about a treatment outcome.
 All successes that occur past this date are masked and treated as failures for the purposes
 of assigning this treatments periods, as it simulates the researchers not having
-recieved that information yet.
+received that information yet.
 }
 \seealso{
 *\code{\link[=run_mab_trial]{run_mab_trial()}}

@@ -26,7 +26,7 @@ of the Thompson Probabilities or UCB1 statistics for each arm.
 \details{
 The confidence intervals applied follow a standard normal distribution
 because it is assumed the AIPW estimators are asymptotically normal as shown
-in \href{https://doi.org/10.1073/pnas.2014602118}{Hadad et al. (2021)}
+in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}
 
 \code{...} is provided to be compatibile with \code{summary()} it does not change
 anything in the execution.
@@ -76,6 +76,6 @@ try(summary(x, level = 5))
 }
 \references{
 Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
-“Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
+“Confidence Intervals for Policy Evaluation in Adaptive Experiments.” \emph{Proceedings of the National Academy of Sciences of the United States of America} 118
 (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 }

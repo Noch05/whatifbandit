@@ -17,7 +17,7 @@
 #'
 #' @details
 #' The specification for the Individual AIPW estimates can be found
-#' in \href{https://doi.org/10.1073/pnas.2014602118}{Hadad et al. (2021)}. These
+#' in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}. These
 #' formulas in equation 5, formed the basis for this function's calculations. Here
 #' the regression adjustment used is the grouped mean of success by treatment, up until
 #' the current period of estimation (so at period 5, the grouped mean was calculated
@@ -28,7 +28,7 @@
 #' inference, while the sample mean in this case cannot.
 #' @references
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
-#' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
+#' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” \emph{Proceedings of the National Academy of Sciences of the United States of America} 118
 #' (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 #'
 #' @keywords internal
@@ -187,7 +187,7 @@ get_iaipw.data.table <- function(data, assignment_probs, periods, conditions, ve
 #'
 #' @description Takes the average of the individual AIPW scores created by [get_iaipw()] for each period,
 #' and assigns each estimate an adaptive weight based on a constant allocation rate across periods defined by
-#' \href{https://doi.org/10.1073/pnas.2014602118}{Hadad et. al (2021)} to calculate a final
+#' \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et. al (2021)} to calculate a final
 #' AIPW estimate and variance for each treatment condition. Sample proportions are also provided
 #' for comparison.
 #'
@@ -197,7 +197,7 @@ get_iaipw.data.table <- function(data, assignment_probs, periods, conditions, ve
 #' sample proportion of successful treatments (sample mean), and sample proportion variance.
 #' @details
 #' The formulas for the calculations in this function can be found in
-#' \href{https://doi.org/10.1073/pnas.2014602118}{Hadad et al. (2021)} at
+#' \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)} at
 #' equation 5 (estimate), equation 11 (variance), equation 15 (allocation rate).
 #'
 #' The formulas specified assume that each period is 1 observation but in the cases
@@ -209,7 +209,7 @@ get_iaipw.data.table <- function(data, assignment_probs, periods, conditions, ve
 #' inference, while the sample mean which is still provided for comparison, cannot be.
 #' @references
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
-#' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
+#' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” \emph{Proceedings of the National Academy of Sciences of the United States of America} 118
 #' (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 #' @keywords internal
 adaptive_aipw <- function(data, assignment_probs, conditions, periods, verbose) {

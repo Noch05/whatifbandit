@@ -75,7 +75,7 @@ print_mab <- function(mab) {
 #' @details
 #' The confidence intervals applied follow a standard normal distribution
 #' because it is assumed the AIPW estimators are asymptotically normal as shown
-#' in \href{https://doi.org/10.1073/pnas.2014602118}{Hadad et al. (2021)}
+#' in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}
 #'
 #' `...` is provided to be compatibile with `summary()` it does not change
 #' anything in the execution.
@@ -87,7 +87,7 @@ print_mab <- function(mab) {
 #'
 #' @references
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
-#' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
+#' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” \emph{Proceedings of the National Academy of Sciences of the United States of America} 118
 #' (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 #'
 #' @example inst/examples/summary.mab_example.R
@@ -159,11 +159,11 @@ summary.mab <- function(object, level = 0.95, ...) {
 #'
 #' The confidence intervals applied follow a standard normal distribution
 #' because it is assumed the AIPW estimators are asymptotically normal as shown
-#' in \href{https://doi.org/10.1073/pnas.2014602118}{Hadad et al. (2021)}
+#' in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}
 #'
 #' @references
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
-#' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
+#' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” \emph{Proceedings of the National Academy of Sciences of the United States of America} 118
 #' (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 #' @export
 #' @example inst/examples/plot.mab_example.R

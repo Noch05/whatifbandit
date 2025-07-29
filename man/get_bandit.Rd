@@ -61,8 +61,8 @@ control augmentation is used, the probabilities will reflect that as well
 so it may be a vector like (0.2, 0, 0.8), if \code{control_augmentation} = 0.2.
 }
 \references{
-#' Kuleshov, Volodymyr, and Doina Precup. 2014. “Algorithms for Multi-Armed Bandit Problems.”
-arXiv. \doi{10.48550/arXiv.1402.6028}.
+Kuleshov, Volodymyr, and Doina Precup. 2014. “Algorithms for Multi-Armed Bandit Problems.”
+\emph{arXiv}. \doi{10.48550/arXiv.1402.6028}.
 
 #' Loecher, Thomas Lotze and Markus. 2022.
 “Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis.”
