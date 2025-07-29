@@ -45,7 +45,7 @@ containing the probability of being assigned that treatment.}
 }
 \description{
 Calculates the best treatment for a given period using either a UCB1 or Thompson Sampling Algorithm.
-Thompson Sampling is done using \code{\link[bandit:best_binomial_bandit]{bandit::best_binomial_bandit()}} from the \href{https://cran.r-project.org/web/packages/bandit/index.html}{bandit}
+Thompson Sampling is done using \code{\link[bandit:best_binomial_bandit]{bandit::best_binomial_bandit()}} from the \href{https://cran.r-project.org/package=bandit}{bandit}
 package and UCB1 statistic are calculated using the a well-defined formula that can be found
 in \href{https://doi.org/10.48550/arXiv.1402.6028}{(Kuleshov and Precup 2014)}.
 }
@@ -62,10 +62,10 @@ so it may be a vector like (0.2, 0, 0.8), if \code{control_augmentation} = 0.2.
 }
 \references{
 #' Kuleshov, Volodymyr, and Doina Precup. 2014. “Algorithms for Multi-Armed Bandit Problems.”
-arXiv. \url{https://doi.org/10.48550/arXiv.1402.6028}.
+arXiv. \doi{10.48550/arXiv.1402.6028}.
 
 #' Loecher, Thomas Lotze and Markus. 2022.
 “Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis.”
-\url{https://cran.r-project.org/web/packages/bandit/index.html}.
+\url{https://cran.r-project.org/package=bandit}.
 }
 \keyword{internal}

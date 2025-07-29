@@ -129,7 +129,7 @@ get_past_results.data.table <- function(current_data,
 #-------------------------------------------------------------------------------
 #' Calculate Multi-Arm Bandit Decision Based on Algorithm
 #' @description Calculates the best treatment for a given period using either a UCB1 or Thompson Sampling Algorithm.
-#' Thompson Sampling is done using [bandit::best_binomial_bandit()] from the \href{https://cran.r-project.org/web/packages/bandit/index.html}{bandit}
+#' Thompson Sampling is done using [bandit::best_binomial_bandit()] from the \href{https://cran.r-project.org/package=bandit}{bandit}
 #' package and UCB1 statistic are calculated using the a well-defined formula that can be found
 #' in \href{https://doi.org/10.48550/arXiv.1402.6028}{(Kuleshov and Precup 2014)}.
 #'
@@ -161,11 +161,11 @@ get_past_results.data.table <- function(current_data,
 #'
 #' @references
 #' #' Kuleshov, Volodymyr, and Doina Precup. 2014. “Algorithms for Multi-Armed Bandit Problems.”
-#' arXiv. \url{https://doi.org/10.48550/arXiv.1402.6028}.
+#' arXiv. \doi{10.48550/arXiv.1402.6028}.
 #'
 #' #' Loecher, Thomas Lotze and Markus. 2022.
 #' “Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis.”
-#' \url{https://cran.r-project.org/web/packages/bandit/index.html}.
+#' \url{https://cran.r-project.org/package=bandit}.
 #' @keywords internal
 
 
@@ -202,7 +202,7 @@ get_bandit <- function(past_results, algorithm, conditions, current_period, cont
 #' @title Thompson Sampling Algorithm
 #' @inheritParams get_bandit
 #' @details
-#' Thompson Sampling is calculated using the \href{https://cran.r-project.org/web/packages/bandit/index.html}{bandit}
+#' Thompson Sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
 #' package using R's integrate function which can overflow. If overflow errors occur, the Thompson Sampling
 #' probabilities will be calculated by simulating draws from the posterior instead of direct calculations.
 #'
@@ -303,7 +303,7 @@ get_bandit.UCB1 <- function(past_results, conditions, current_period) {
 #' @description Assigns new treatments for an assignment wave based on the assignment probabilities provided from
 #' [get_bandit()], and the proportion of randomly assigned observations from specified in `random_assign_prop`
 #' Probabilities are passed to [randomizr::block_and_cluster_ra()] or [randomizr::cluster_ra()] from the
-#' \href{https://cran.r-project.org/web/packages/randomizr/index.html}{randomizr} package for random assignment.
+#' \href{https://cran.r-project.org/package=randomizr}{randomizr} package for random assignment.
 #' @name assign_treatments
 #' @inheritParams single_mab_simulation
 #' @inheritParams cols

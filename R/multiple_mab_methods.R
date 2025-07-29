@@ -115,7 +115,7 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
 #' of AIPW estimates.
 #' @inheritParams summary.multiple.mab
 #' @details
-#' The plot generic requires \href{https://cran.r-project.org/web/packages/ggplot2/index.html}{ggplot2}
+#' The plot generic requires \href{https://cran.r-project.org/package=ggplot2}{ggplot2}
 #' which is not required by the package, so it must be installed manually if necessary.
 #'
 #' This function provides minimalist plots to quickly view the results of the procedure

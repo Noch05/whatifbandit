@@ -138,8 +138,8 @@ Performs multiple Multi-Arm Bandit Trials using the same
 simulation and inference backend as \code{\link[=single_mab_simulation]{single_mab_simulation()}}. Allows for
 easy execution of multiple trials under the same settings to gauge the variance
 of the procedure across execution states. Additionally supports parallel processing
-through the \href{https://cran.r-project.org/web/packages/future/index.html}{future} and
-\href{https://cran.r-project.org/web/packages/furrr/index.html}{furrr} packages.
+through the \href{https://cran.r-project.org/package=future}{future} and
+\href{https://cran.r-project.org/package=furrr}{furrr} packages.
 }
 \details{
 This function simulates multiple adaptive Multi-Arm-Bandit Trials, using experimental
@@ -157,13 +157,13 @@ with a known seed beforehand to generate the values. Additionally, it is highly 
 set \code{keep_data} to FALSE as the memory used by the function will exponentially increase. This can cause
 significant performance issues, especially if your system must swap to disk because memory is full.
 
-The function provides support for parallel processing via the \href{https://cran.r-project.org/web/packages/future/index.html}{future} and
-\href{https://cran.r-project.org/web/packages/furrr/index.html}{furrr} packages. When conducting a large
+The function provides support for parallel processing via the \href{https://cran.r-project.org/package=future}{future} and
+\href{https://cran.r-project.org/package=furrr}{furrr} packages. When conducting a large
 number of simulations, parallelization can improve performance if sufficient system resources are available.
 Parallel processing must be explicitly set by the user, through \code{future::plan()}.
 Windows users should set the plan to "multisession", while Linux and MacOS users can use "multicore" or "multisession".
 Users running in a High Performance Computing environment (HPC), are encouraged to use
-\href{https://cran.r-project.org/web/packages/future.batchtools/index.html}{future.batchtools},
+\href{https://cran.r-project.org/package=future.batchtools}{future.batchtools},
 for their respective HPC scheduler.
 Note that parallel processing is not guaranteed to work on all systems, and may require additional setup or debugging effort
 from the user. For any issues, users are encouraged to consult the documentation of the above packages.
@@ -248,32 +248,32 @@ object.size(x)
 }
 \references{
 Bengtsson, Henrik. 2025. “Future: Unified Parallel and Distributed Processing in R for Everyone.”
-\url{https://cran.r-project.org/web/packages/future/index.html}.
+\url{https://cran.r-project.org/package=future}.
 
 Bengtsson, Henrik. 2025. “Future.Batchtools: A Future API for Parallel and Distributed Processing Using ‘Batchtools.’”
-\url{https://cran.r-project.org/web/packages/future.batchtools/index.html}.
+\url{https://cran.r-project.org/package=future.batchtools}.
 
 Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
 “Confidence Intervals for Policy Evaluation in Adaptive Experiments.”
 Proceedings of the National Academy of Sciences of the United States of America 118 (15):
-e2014602118. \url{https://doi.org/10.1073/pnas.2014602118}.
+e2014602118. \doi{10.1073/pnas.2014602118}.
 
 Kuleshov, Volodymyr, and Doina Precup. 2014. “Algorithms for Multi-Armed Bandit Problems.”
 arXiv. https://doi.org/10.48550/arXiv.1402.6028.
 
 Loecher, Thomas Lotze and Markus. 2022. “Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis.”
-\url{https://cran.r-project.org/web/packages/bandit/index.html}.
+\url{https://cran.r-project.org/package=bandit}.
 
 Offer‐Westort, Molly, Alexander Coppock, and Donald P. Green. 2021.
 “Adaptive Experimental Design: Prospects and Applications in Political Science.”
-American Journal of Political Science 65 (4): 826–44. \url{https://doi.org/10.1111/ajps.12597}.
+American Journal of Political Science 65 (4): 826–44. \doi{10.1111/ajps.12597}.
 
 Slivkins, Aleksandrs. 2024. “Introduction to Multi-Armed Bandits.”
-arXiv. \url{https://doi.org/10.48550/arXiv.1904.07272}.
+arXiv. \doi{10.48550/arXiv.1904.07272}.
 
 Vaughan, Davis, Matt Dancho, and RStudio. 2022.
 “Furrr: Apply Mapping Functions in Parallel Using Futures.”
-\url{https://cran.r-project.org/web/packages/furrr/index.html}.
+\url{https://cran.r-project.org/package=furrr}.
 }
 \seealso{
 \code{\link[=single_mab_simulation]{single_mab_simulation()}}, \href{https://furrr.futureverse.org}{furrr}, \href{https://future.futureverse.org}{future}

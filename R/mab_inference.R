@@ -29,7 +29,7 @@
 #' @references
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
 #' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
-#' (15): e2014602118. \url{https://doi.org/10.1073/pnas.2014602118}.
+#' (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 #'
 #' @keywords internal
 get_iaipw <- function(data, assignment_probs, periods, conditions, verbose) {
@@ -210,7 +210,7 @@ get_iaipw.data.table <- function(data, assignment_probs, periods, conditions, ve
 #' @references
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
 #' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
-#' (15): e2014602118. \url{https://doi.org/10.1073/pnas.2014602118}.
+#' (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 #' @keywords internal
 adaptive_aipw <- function(data, assignment_probs, conditions, periods, verbose) {
   verbose_log(verbose, "Aggregating AIPW Estimates")

@@ -88,7 +88,7 @@ print_mab <- function(mab) {
 #' @references
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
 #' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
-#' (15): e2014602118. \url{https://doi.org/10.1073/pnas.2014602118}.
+#' (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 #'
 #' @example inst/examples/summary.mab_example.R
 #' @returns tibble containg each treatment, the final Thompson/UCB1 Statistic,
@@ -147,7 +147,7 @@ summary.mab <- function(object, level = 0.95, ...) {
 #' @param estimator Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type
 #' @param ... arguments to pass to `ggplot2:geom_*` function (e.g. `color`, `linewidth`, `alpha`, etc.)
 #' @details
-#' The plot generic requires \href{https://cran.r-project.org/web/packages/ggplot2/index.html}{ggplot2}
+#' The plot generic requires \href{https://cran.r-project.org/package=ggplot2}{ggplot2}
 #' which is not required by the package, so it must be installed manually if necessary.
 #'
 #' This function provides minimalist plots to quickly view the results of any
@@ -164,7 +164,7 @@ summary.mab <- function(object, level = 0.95, ...) {
 #' @references
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
 #' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
-#' (15): e2014602118. \url{https://doi.org/10.1073/pnas.2014602118}.
+#' (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 #' @export
 #' @example inst/examples/plot.mab_example.R
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)

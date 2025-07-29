@@ -39,7 +39,7 @@ with \code{+} like any other ggplot plot, but arguments to change
 the underlying geom must be passed to the function initially.
 }
 \details{
-The plot generic requires \href{https://cran.r-project.org/web/packages/ggplot2/index.html}{ggplot2}
+The plot generic requires \href{https://cran.r-project.org/package=ggplot2}{ggplot2}
 which is not required by the package, so it must be installed manually if necessary.
 
 This function provides minimalist plots to quickly view the results of any
@@ -110,5 +110,5 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
 \references{
 Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
 “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
-(15): e2014602118. \url{https://doi.org/10.1073/pnas.2014602118}.
+(15): e2014602118. \doi{10.1073/pnas.2014602118}.
 }

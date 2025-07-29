@@ -30,7 +30,7 @@ Named Numeric Vector of Posterior Probabilities
 Thompson Sampling Algorithm
 }
 \details{
-Thompson Sampling is calculated using the \href{https://cran.r-project.org/web/packages/bandit/index.html}{bandit}
+Thompson Sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
 package using R's integrate function which can overflow. If overflow errors occur, the Thompson Sampling
 probabilities will be calculated by simulating draws from the posterior instead of direct calculations.
 }

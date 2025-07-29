@@ -114,7 +114,7 @@
 #'
 #' At each period, either the Thompson Probabilities or UCB1 statistics are calculated based on
 #' the outcomes from the number of `prior_periods` specified. New treatments are then assigned randomly using the Thompson
-#' Probabilities via the \href{https://cran.r-project.org/web/packages/randomizr/index.html}{randomizr}
+#' Probabilities via the \href{https://cran.r-project.org/package=randomizr}{randomizr}
 #' package, or as the treatment with the highest UCB1 statistic, while implementing the specific
 #' treatment blocking and control augmentation specified. More details on bandit algorithms can in
 #' \href{https://doi.org/10.48550/arXiv.1402.6028}{Kuleshov and Precup 2014} and
@@ -129,7 +129,7 @@
 #' the specified treatment assignment date for that given period, but these will be unmasked in later periods.
 #'
 #' After treatments are assigned, observations with new treatments have their outcomes imputed, once again
-#' using the \href{https://cran.r-project.org/web/packages/bandit/index.html}{randomizr} package, with any
+#' using the \href{https://cran.r-project.org/package=randomizr}{randomizr} package, with any
 #' specified treatment blocking implemented. The probabilities of success used to impute,
 #' are estimated via the grouped means of successes from the original data, either from the whole trial, or
 #' up to that period, defined by `whole_experiment`. If `perfect_assignment` is FALSE, only for those
@@ -149,26 +149,25 @@
 #' takes 20-30 seconds under Base R and 40-50 seconds under data.table. It has also been observed, that larger datasets
 #' at least over a  3 million rows, can cause numerical instability in the calculations. Internal safeguards exist
 #' to prevent this, but to best way to preempt any issues, is to set `prior_periods` to a low number.
-#'
 #' @seealso [multiple_mab_simulation()], [summary.mab()], [plot.mab()].
 #' @references
 #'
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
 #' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
-#' (15): e2014602118. \url{https://doi.org/10.1073/pnas.2014602118}.
+#' (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 #'
 #' Kuleshov, Volodymyr, and Doina Precup. 2014. “Algorithms for Multi-Armed Bandit Problems.”
-#' arXiv. \url{https://doi.org/10.48550/arXiv.1402.6028}.
+#' arXiv. \doi{10.48550/arXiv.1402.6028}.
 #'
 #' Loecher, Thomas Lotze and Markus. 2022.
 #' “Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis.”
-#' \url{https://cran.r-project.org/web/packages/bandit/index.html}.
+#' \url{https://cran.r-project.org/package=bandit}.
 #'
 #' Offer‐Westort, Molly, Alexander Coppock, and Donald P. Green. 2021.
 #' “Adaptive Experimental Design: Prospects and Applications in Political Science.”
-#' American Journal of Political Science 65 (4): 826–44. \url{https://doi.org/10.1111/ajps.12597}.
+#' American Journal of Political Science 65 (4): 826–44. \doi{doi.org/10.1111/ajps.12597}.
 #'
-#' Slivkins, Aleksandrs. 2024. “Introduction to Multi-Armed Bandits.” arXiv. \url{https://doi.org/10.48550/arXiv.1904.07272}.
+#' Slivkins, Aleksandrs. 2024. “Introduction to Multi-Armed Bandits.” arXiv. \doi{10.48550/arXiv.1904.07272}.
 #' @example inst/examples/single_mab_simulation_example.R
 #' @export
 single_mab_simulation <- function(data,

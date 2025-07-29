@@ -77,5 +77,5 @@ try(summary(x, level = 5))
 \references{
 Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
 “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” Proceedings of the National Academy of Sciences of the United States of America 118
-(15): e2014602118. \url{https://doi.org/10.1073/pnas.2014602118}.
+(15): e2014602118. \doi{10.1073/pnas.2014602118}.
 }
