@@ -2,22 +2,22 @@ Package: whatifbandit
 Title: Analyzing Randomized Experiments as Multi-Arm Bandits
 Version: 0.0.0.9000
 Authors@R: c(
-    person("Noah", "Ochital",
-    email = "noahochital@icloud.com", role = c("aut", "cre"),
-    comment = c(ORCID = "0009-0009-0398-2963")),
-    person("Ryan T", "Moore",
-    email = "rtm@american.edu", role = "ctb",
-    comment = c(ORCID = "0000-0002-3916-8113"))
-    )
+    person("Noah", "Ochital", , "noahochital@icloud.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0009-0009-0398-2963")),
+    person("Ryan T", "Moore", , "rtm@american.edu", role = "ctb",
+           comment = c(ORCID = "0000-0002-3916-8113"))
+  )
 Description: Simulates the results of completed randomized controlled
     trials, as if they had been conducted as adaptive Multi-Arm Bandit
-    (MAB) trials instead. Augmented inverse probability weighted estimation (AIPW) is used 
-    to robustly estimate the probability of success for each treatment arm 
-    under the adaptive conditions. Provides customization options to simulate 
-    perfect/imperfect information, stationary/non-stationary bandits, 
-    treatment blocking, along with control augmentation, and hybrid strategies 
-    for assigning treatment arms.
+    (MAB) trials instead. Augmented inverse probability weighted
+    estimation (AIPW) is used to robustly estimate the probability of
+    success for each treatment arm under the adaptive conditions. Provides
+    customization options to simulate perfect/imperfect information,
+    stationary/non-stationary bandits, treatment blocking, along with
+    control augmentation, and hybrid strategies for assigning treatment
+    arms.
 License: GPL (>= 3) + file LICENSE
+BugReports: https://github.com/ryantmoore/whatifbandit/issues
 Depends: 
     R (>= 4.1.0)
 Imports: 
@@ -37,9 +37,10 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
+VignetteBuilder: 
+    knitr
 Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
-VignetteBuilder: knitr
