@@ -39,22 +39,25 @@
 
     i In index: 1.
     i With name: verbose.
-    Caused by error in `sprintf()`:
-    ! too few arguments
+    Caused by error in `.f()`:
+    ! `verbose` must be a logical (TRUE or FALSE)
+    x You Passed: 456
 
 ---
 
     i In index: 1.
     i With name: verbose.
-    Caused by error in `sprintf()`:
-    ! too few arguments
+    Caused by error in `.f()`:
+    ! `verbose` must be a logical (TRUE or FALSE)
+    x You Passed: text
 
 ---
 
     i In index: 1.
     i With name: verbose.
-    Caused by error in `sprintf()`:
-    ! too few arguments
+    Caused by error in `.f()`:
+    ! `verbose` must be a logical (TRUE or FALSE)
+    x You Passed: NA
 
 ---
 
@@ -88,22 +91,25 @@
 
     i In index: 2.
     i With name: blocking.
-    Caused by error in `sprintf()`:
-    ! too few arguments
+    Caused by error in `.f()`:
+    ! `blocking` must be a logical (TRUE or FALSE)
+    x You Passed: 654
 
 ---
 
     i In index: 2.
     i With name: blocking.
-    Caused by error in `sprintf()`:
-    ! too few arguments
+    Caused by error in `.f()`:
+    ! `blocking` must be a logical (TRUE or FALSE)
+    x You Passed: text
 
 ---
 
     i In index: 2.
     i With name: blocking.
-    Caused by error in `sprintf()`:
-    ! too few arguments
+    Caused by error in `.f()`:
+    ! `blocking` must be a logical (TRUE or FALSE)
+    x You Passed: NA
 
 ---
 
@@ -121,140 +127,54 @@
 
     i In index: 4.
     i With name: perfect_assignment.
-    Caused by error in `sprintf()`:
-    ! too few arguments
+    Caused by error in `.f()`:
+    ! `perfect_assignment` must be a logical (TRUE or FALSE)
+    x You Passed: 45
 
 ---
 
     i In index: 4.
     i With name: perfect_assignment.
-    Caused by error in `sprintf()`:
-    ! too few arguments
+    Caused by error in `.f()`:
+    ! `perfect_assignment` must be a logical (TRUE or FALSE)
+    x You Passed: text
 
 ---
 
     i In index: 4.
     i With name: perfect_assignment.
-    Caused by error in `sprintf()`:
-    ! too few arguments
+    Caused by error in `.f()`:
+    ! `perfect_assignment` must be a logical (TRUE or FALSE)
+    x You Passed: NA
 
 ---
 
     i In index: 3.
     i With name: whole_experiment.
-    Caused by error in `sprintf()`:
-    ! too few arguments
+    Caused by error in `.f()`:
+    ! `whole_experiment` must be a logical (TRUE or FALSE)
+    x You Passed: 546
 
 ---
 
     i In index: 3.
     i With name: whole_experiment.
-    Caused by error in `sprintf()`:
-    ! too few arguments
+    Caused by error in `.f()`:
+    ! `whole_experiment` must be a logical (TRUE or FALSE)
+    x You Passed: text
 
 ---
 
     i In index: 3.
     i With name: whole_experiment.
-    Caused by error in `sprintf()`:
-    ! too few arguments
-
----
-
-    i In argument: `mab_condition = dplyr::if_else(period_number == 1, condition, NA_character_)`.
-    Caused by error in `dplyr::if_else()`:
-    ! Can't combine `true` <double> and `false` <character>.
-
----
-
-    i In argument: `mab_condition = dplyr::if_else(period_number == 1, condition, NA_character_)`.
-    Caused by error in `dplyr::if_else()`:
-    ! Can't combine `true` <double> and `false` <character>.
-
----
-
-    i In argument: `mab_condition = dplyr::if_else(period_number == 1, condition, NA_character_)`.
-    Caused by error in `dplyr::if_else()`:
-    ! Can't combine `true` <double> and `false` <character>.
-
----
-
-    `period_length` cannot be larger than data size
-    x You data has 10, and your batch size is 50
-
----
-
-    ..1 used in an incorrect context, no ... to look in
-
----
-
-    `period_length` must be a positive integer.
-    x You passed: text
-
----
-
-    `period_length` must be a positive integer.
-    x You passed: NA
-
----
-
-    The number of `conditions` must match the number of unique treatment groups in the data.
-    x You passed a vector of length 4
-    x Your data has 3 unique treatments
-
----
-
-    `conditions` must be provided as a character vector.
-
----
-
-    i In argument: `mab_condition = dplyr::if_else(period_number == 1, condition, NA_character_)`.
-    Caused by error in `dplyr::if_else()`:
-    ! Can't combine `true` <double> and `false` <character>.
-
----
-
-    i In argument: `mab_condition = dplyr::if_else(period_number == 1, condition, NA_character_)`.
-    Caused by error in `dplyr::if_else()`:
-    ! Can't combine `true` <double> and `false` <character>.
-
----
-
-    i In argument: `mab_condition = dplyr::if_else(period_number == 1, condition, NA_character_)`.
-    Caused by error in `dplyr::if_else()`:
-    ! Can't combine `true` <double> and `false` <character>.
-
----
-
-    i In index: 2.
-    i With name: random_assign_prop.
     Caused by error in `.f()`:
-    ! `random_assign_prop` must be a non-null double between 0 and 1.
-    x You passed: 23
+    ! `whole_experiment` must be a logical (TRUE or FALSE)
+    x You Passed: NA
 
 ---
 
-    i In index: 2.
-    i With name: random_assign_prop.
-    Caused by error in `.f()`:
-    ! `random_assign_prop` must be a non-null double between 0 and 1.
-    x You passed: -0.4
-
----
-
-    i In index: 2.
-    i With name: random_assign_prop.
-    Caused by error in `.f()`:
-    ! `random_assign_prop` must be a non-null double between 0 and 1.
-    x You passed: NA
-
----
-
-    i In index: 2.
-    i With name: random_assign_prop.
-    Caused by error in `.f()`:
-    ! `random_assign_prop` must be a non-null double between 0 and 1.
-    x You passed: text
+    `prior_periods` must be a positive integer
+    x You passed: -5
 
 # Throws proper error when columns do not exist or not declared
 

@@ -202,9 +202,9 @@ check_logical <- function(...) {
     if (!is.logical(.x) || length(.x) != 1 || is.na(.x)) {
       rlang::abort(
         c(
-          sprintf("`%s` must be a logical (TRUE or FALSE"), .y
-        ),
-        "x" = paste0("You Passed: ", .x)
+          sprintf("`%s` must be a logical (TRUE or FALSE)", .y),
+          "x" = paste0("You Passed: ", .x)
+        )
       )
     }
   })
@@ -244,32 +244,35 @@ check_prop <- function(...) {
 #' @keywords internal
 check_posint <- function(...) {
   args <- rlang::dots_list(..., .named = TRUE)
+
   valid_strings <- list(
     ndraws = NULL,
     prior_periods = c("All")
   )
 
-  purrr::pwalk(args, names(args), valid_strings, names(valid_strings) ~ {
-    if (!posint(..1)) {
+  for (name in names(args)) {
+    val <- args[[name]]
+    valid_string <- valid_strings[[name]]
+
+    if (!is.null(valid_string) && val %in% valid_string) {
+      next
+    }
+    if (is.character(val)) {
       rlang::abort(c(
-        sprintf("`%s` must be a positive integer", ..2),
-        "x" = sprintf("you passed: %g", ..1)
+        sprintf("`%s` must be a positive integer or one of: '%s'", name, paste(valid_string, collapse = "', '")),
+        "x" = paste0("You passed: ", val)
       ))
     }
-    if (!is.numeric(..1) && (..1 %in% valid_strings[..4])) {
+    if (!posint(val)) {
       rlang::abort(c(
-        sprintf("`%s` must be a positive integer or '%s'", ..2, ..3),
-        "x" = paste0("You passed", ..1)
+        sprintf("`%s` must be a positive integer", name),
+        "x" = paste0("You passed: ", val)
       ))
     }
-  })
+  }
 }
 posint <- function(x) {
-  if (is.numeric(x) && (x >= 0 || ..1 %% x == 0)) {
-    return(TRUE)
-  } else {
-    return(FALSE)
-  }
+  return(is.numeric(x) && x > 0 && x %% 1 == 0)
 }
 #--------------------------------------------------------------------------------
 #' @title Checking if conditions vector is proper
