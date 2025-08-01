@@ -176,6 +176,93 @@
     `prior_periods` must be a positive integer
     x You passed: -5
 
+---
+
+    `prior_periods` must be a positive integer or one of: 'All'
+    x You passed: text
+
+---
+
+    `prior_periods` must be a positive integer
+    x You passed: NA
+
+---
+
+    `period_length` cannot be larger than data size
+    x You data has 10, and your batch size is 50
+
+---
+
+    `period_length` must be a positive integer.
+    x You passed: -1
+
+---
+
+    `period_length` must be a positive integer.
+    x You passed: text
+
+---
+
+    `period_length` must be a positive integer.
+    x You passed: NA
+
+---
+
+    The number of `conditions` must match the number of unique treatment groups in the data.
+    x You passed a vector of length 4
+    x Your data has 3 unique treatments
+
+---
+
+    `conditions` must be provided as a character vector.
+
+---
+
+    `ndraws` must be a positive integer
+    x You passed: -234432
+
+---
+
+    `ndraws` must be a positive integer
+    x You passed: NA
+
+---
+
+    `ndraws` must be a positive integer or one of: ''
+    x You passed: text
+
+---
+
+    i In index: 2.
+    i With name: random_assign_prop.
+    Caused by error in `.f()`:
+    ! `random_assign_prop` must be a non-null double between 0 and 1.
+    x You passed: 23
+
+---
+
+    i In index: 2.
+    i With name: random_assign_prop.
+    Caused by error in `.f()`:
+    ! `random_assign_prop` must be a non-null double between 0 and 1.
+    x You passed: -0.4
+
+---
+
+    i In index: 2.
+    i With name: random_assign_prop.
+    Caused by error in `.f()`:
+    ! `random_assign_prop` must be a non-null double between 0 and 1.
+    x You passed: NA
+
+---
+
+    i In index: 2.
+    i With name: random_assign_prop.
+    Caused by error in `.f()`:
+    ! `random_assign_prop` must be a non-null double between 0 and 1.
+    x You passed: text
+
 # Throws proper error when columns do not exist or not declared
 
     `block2 is not in the data, but was chosen as a block.
@@ -288,6 +375,62 @@
     Caused by error in `.f()`:
     ! Required column `month_col` is not declared in `data_cols`.
     x reason: time_unit is 'Month'
+
+# Throws Proper Error When Columns are Wrong Data Type
+
+    i In index: 1.
+    Caused by error in `.f()`:
+    ! Required column `id_col` is the wrong data type.
+    x Your type: complex
+    i Permissible types: numeric, logical, integer, character, factor, Date, POSIXt
+
+---
+
+    i In index: 2.
+    Caused by error in `.f()`:
+    ! Required column `success_col` is the wrong data type.
+    x Your type: character
+    i Permissible types: numeric, logical, integer
+
+---
+
+    i In index: 6.
+    Caused by error in `.f()`:
+    ! Required column `success_date_col` is the wrong data type.
+    x Your type: character
+    i Permissible types: Date, POSIXt
+
+---
+
+    i In index: 4.
+    Caused by error in `.f()`:
+    ! Required column `date_col` is the wrong data type.
+    x Your type: character
+    i Permissible types: Date, POSIXt
+
+---
+
+    i In index: 7.
+    Caused by error in `.f()`:
+    ! Required column `assignment_date_col` is the wrong data type.
+    x Your type: character
+    i Permissible types: Date, POSIXt
+
+---
+
+    i In index: 3.
+    Caused by error in `.f()`:
+    ! Required column `condition_col` is the wrong data type.
+    x Your type: POSIXct, POSIXt
+    i Permissible types: numeric, logical, integer, character, factor
+
+---
+
+    i In index: 5.
+    Caused by error in `.f()`:
+    ! Required column `month_col` is the wrong data type.
+    x Your type: complex
+    i Permissible types: numeric, integer, character, factor
 
 # Multiple Simulation Specific Error Checks work
 

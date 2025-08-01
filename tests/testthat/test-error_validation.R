@@ -163,6 +163,55 @@ test_that("Throws proper error when columns do not exist or not declared", {
     ))
   })
 })
+
+#-------------------------------------------------------------------------------
+test_that("Throws Proper Error When Columns are Wrong Data Type", {
+  set.seed(523046554)
+  data <- tibble::tibble(
+    id = seq(1, 10, 1),
+    success = rbinom(10, 1, .5),
+    condition = sample(c(1, 2, 3), 10, replace = TRUE),
+    success_date = rep(lubridate::ymd("2025-01-01"), 10),
+    assignment_date = rep(lubridate::ymd("2025-01-01"), 10),
+    date = rep(lubridate::ymd("2024-01-01"), 10) + months(id),
+    month = as.character(month(date))
+  )
+  changes <- list(
+    id = expr(new_data$id <- as.complex(new_data$id)),
+    success = expr(new_data$success <- as.character(new_data$success)),
+    success_date = expr(new_data$success_date <- as.character(new_data$success_date)),
+    date = expr(new_data$date <- as.character(new_data$date)),
+    assignment_date = expr(new_data$assignment_date <- as.character(new_data$assignment_date)),
+    condition = expr(new_data$condition <- as.POSIXct(new_data$condition)),
+    month = expr(new_data$month <- as.complex(new_data$month))
+  )
+
+  purrr::map(changes, ~ {
+    new_data <- data
+    eval(.x)
+    expect_snapshot_error(single_mab_simulation(
+      data = new_data,
+      assignment_method = "Date",
+      time_unit = "Month",
+      whole_experiment = TRUE,
+      period_length = 1,
+      blocking = FALSE,
+      perfect_assignment = FALSE,
+      algorithm = "Thompson",
+      prior_periods = "All",
+      conditions = as.character(sort(unique(data$condition))),
+      data_cols = c(
+        id_col = "id",
+        date_col = "date",
+        success_col = "success",
+        success_date_col = "success_date",
+        assignment_date_col = "assignment_date",
+        condition_col = "condition",
+        month_col = "month"
+      )
+    ))
+  })
+})
 #-------------------------------------------------------------------------------
 test_that("Multiple Simulation Specific Error Checks work", {
   set.seed(243401)

@@ -131,15 +131,16 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, data_co
     success_date_col = "perfect_assignment is FALSE",
     assignment_date_col = "perfect_assignment is FALSE"
   )
-  data_types <- c("numeric", "logical", "character", "factor", "Date", "POSIXt")
+  data_types <- c("numeric", "logical", "integer", "character", "factor", "Date", "POSIXt")
+  test_funcs <- c(is.numeric, is.logical, is.character, is.factor, lubridate::is.Date, lubridate::is.POSIXt)
   required_types <- list(
-    id_col = data_types,
-    success_col = data_types[1:2],
-    condition_col = data_types[3:4],
-    date_col = data_types[5:6],
-    month_col = data_types[5:6],
-    success_date_col = data_types[5:6],
-    assignment_date_col = data_types[5:6]
+    id_col = list(classes = data_types, tests = test_funcs),
+    success_col = list(classes = data_types[1:3], tests = test_funcs[1:2]),
+    condition_col = list(classes = data_types[1:5], tests = test_funcs[1:4]),
+    date_col = list(classes = data_types[6:7], tests = test_funcs[5:6]),
+    month_col = list(classes = data_types[c(1, 3, 4, 5)], tests = test_funcs[c(1, 3, 4)]),
+    success_date_col = list(classes = data_types[6:7], tests = test_funcs[5:6]),
+    assignment_date_col = list(classes = data_types[6:7], tests = test_funcs[5:6])
   )
 
   # Determine required columns based on settings
@@ -172,11 +173,13 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, data_co
       ))
     }
     data_type <- class(data[[data_cols[[..1]]$name]])
-    if (!data_type %in% ..3) {
+    if (!any(vapply(..3$tests, \(x) {
+      `x`(data[[data_cols[[..1]]$name]])
+    }, FUN.VALUE = logical(1)))) {
       rlang::abort(c(
         sprintf("Required column `%s` is the wrong data type.", ..1),
-        "x" = sprintf("Your type: %s", data_type),
-        "i" = sprintf("Permissible types: %s", paste(..3, collapse = ", "))
+        "x" = sprintf("Your type: %s", paste(data_type, collapse = ", ")),
+        "i" = sprintf("Permissible types: %s", paste(..3$classes, collapse = ", "))
       ))
     }
   })
