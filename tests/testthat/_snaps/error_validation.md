@@ -1,6 +1,6 @@
 # Throws Proper Error when ID's are not unique
 
-    id is not a unique identifier, a unique id for each observation is required
+    id is not a unique identifier; a unique ID for each observation is required.
 
 # Throws Proper Error when arguments are invalid
 
@@ -39,69 +39,71 @@
 
     i In index: 1.
     i With name: verbose.
-    Caused by error in `.f()`:
-    ! `verbose` must be logical (TRUE or FALSE).
-    x You Passed: 456
+    Caused by error in `sprintf()`:
+    ! too few arguments
 
 ---
 
     i In index: 1.
     i With name: verbose.
-    Caused by error in `.f()`:
-    ! `verbose` must be logical (TRUE or FALSE).
-    x You Passed: text
+    Caused by error in `sprintf()`:
+    ! too few arguments
 
 ---
 
     i In index: 1.
     i With name: verbose.
-    Caused by error in `.f()`:
-    ! `verbose` must be logical (TRUE or FALSE).
-    x You Passed: NA
+    Caused by error in `sprintf()`:
+    ! too few arguments
 
 ---
 
-    `control_augment` must be a non-null double between 0 and 1
+    i In index: 1.
+    i With name: control_augment.
+    Caused by error in `.f()`:
+    ! `control_augment` must be a non-null double between 0 and 1.
     x You passed: -1
 
 ---
 
-    `control_augment` must be a non-null double between 0 and 1
+    i In index: 1.
+    i With name: control_augment.
+    Caused by error in `.f()`:
+    ! `control_augment` must be a non-null double between 0 and 1.
     x You passed: 2
 
 ---
 
-    `control_augment` must be a non-null double between 0 and 1
+    i In index: 1.
+    i With name: control_augment.
+    Caused by error in `.f()`:
+    ! `control_augment` must be a non-null double between 0 and 1.
     x You passed: NA
 
 ---
 
-    Conditions vector must have a at least one condition named 'Control'
-        when control augmentation is used.
+    The `conditions` vector must one element named 'Control' when control augmentation is used.
 
 ---
 
     i In index: 2.
     i With name: blocking.
-    Caused by error in `.f()`:
-    ! `blocking` must be logical (TRUE or FALSE).
-    x You Passed: 654
+    Caused by error in `sprintf()`:
+    ! too few arguments
 
 ---
 
     i In index: 2.
     i With name: blocking.
-    Caused by error in `.f()`:
-    ! `blocking` must be logical (TRUE or FALSE).
-    x You Passed: text
+    Caused by error in `sprintf()`:
+    ! too few arguments
 
 ---
 
     i In index: 2.
     i With name: blocking.
-    Caused by error in `.f()`:
-    ! `blocking` must be logical (TRUE or FALSE).
-    x You Passed: NA
+    Caused by error in `sprintf()`:
+    ! too few arguments
 
 ---
 
@@ -119,64 +121,61 @@
 
     i In index: 4.
     i With name: perfect_assignment.
-    Caused by error in `.f()`:
-    ! `perfect_assignment` must be logical (TRUE or FALSE).
-    x You Passed: 45
+    Caused by error in `sprintf()`:
+    ! too few arguments
 
 ---
 
     i In index: 4.
     i With name: perfect_assignment.
-    Caused by error in `.f()`:
-    ! `perfect_assignment` must be logical (TRUE or FALSE).
-    x You Passed: text
+    Caused by error in `sprintf()`:
+    ! too few arguments
 
 ---
 
     i In index: 4.
     i With name: perfect_assignment.
-    Caused by error in `.f()`:
-    ! `perfect_assignment` must be logical (TRUE or FALSE).
-    x You Passed: NA
+    Caused by error in `sprintf()`:
+    ! too few arguments
 
 ---
 
     i In index: 3.
     i With name: whole_experiment.
-    Caused by error in `.f()`:
-    ! `whole_experiment` must be logical (TRUE or FALSE).
-    x You Passed: 546
+    Caused by error in `sprintf()`:
+    ! too few arguments
 
 ---
 
     i In index: 3.
     i With name: whole_experiment.
-    Caused by error in `.f()`:
-    ! `whole_experiment` must be logical (TRUE or FALSE).
-    x You Passed: text
+    Caused by error in `sprintf()`:
+    ! too few arguments
 
 ---
 
     i In index: 3.
     i With name: whole_experiment.
-    Caused by error in `.f()`:
-    ! `whole_experiment` must be logical (TRUE or FALSE).
-    x You Passed: NA
+    Caused by error in `sprintf()`:
+    ! too few arguments
 
 ---
 
-    `prior_periods` must be a positive integer or 'All'.
-    x You passed: -5 
+    i In argument: `mab_condition = dplyr::if_else(period_number == 1, condition, NA_character_)`.
+    Caused by error in `dplyr::if_else()`:
+    ! Can't combine `true` <double> and `false` <character>.
 
 ---
 
-    `prior_periods` must be a positive integer or 'All'.
-    x You passed: text
+    i In argument: `mab_condition = dplyr::if_else(period_number == 1, condition, NA_character_)`.
+    Caused by error in `dplyr::if_else()`:
+    ! Can't combine `true` <double> and `false` <character>.
 
 ---
 
-    `prior_periods` must be a positive integer or 'All'.
-    x You passed: NA
+    i In argument: `mab_condition = dplyr::if_else(period_number == 1, condition, NA_character_)`.
+    Caused by error in `dplyr::if_else()`:
+    ! Can't combine `true` <double> and `false` <character>.
 
 ---
 
@@ -185,8 +184,7 @@
 
 ---
 
-    `period_length` must be a positive integer.
-    x You passed: -1
+    ..1 used in an incorrect context, no ... to look in
 
 ---
 
@@ -200,47 +198,62 @@
 
 ---
 
-    Conditions passed must be same length as number of unique conditions
+    The number of `conditions` must match the number of unique treatment groups in the data.
     x You passed a vector of length 4
     x Your data has 3 unique treatments
 
 ---
 
-    `conditions`, must be provided as a character vector.
+    `conditions` must be provided as a character vector.
 
 ---
 
-    `ndraws` must be a positive integer.
-    x You passed: -234432
+    i In argument: `mab_condition = dplyr::if_else(period_number == 1, condition, NA_character_)`.
+    Caused by error in `dplyr::if_else()`:
+    ! Can't combine `true` <double> and `false` <character>.
 
 ---
 
-    `ndraws` must be a positive integer.
-    x You passed: NA
+    i In argument: `mab_condition = dplyr::if_else(period_number == 1, condition, NA_character_)`.
+    Caused by error in `dplyr::if_else()`:
+    ! Can't combine `true` <double> and `false` <character>.
 
 ---
 
-    `ndraws` must be a positive integer.
-    x You passed: text
+    i In argument: `mab_condition = dplyr::if_else(period_number == 1, condition, NA_character_)`.
+    Caused by error in `dplyr::if_else()`:
+    ! Can't combine `true` <double> and `false` <character>.
 
 ---
 
-    `random_assign_prop` must be a non-null double between 0 and 1
+    i In index: 2.
+    i With name: random_assign_prop.
+    Caused by error in `.f()`:
+    ! `random_assign_prop` must be a non-null double between 0 and 1.
     x You passed: 23
 
 ---
 
-    `random_assign_prop` must be a non-null double between 0 and 1
+    i In index: 2.
+    i With name: random_assign_prop.
+    Caused by error in `.f()`:
+    ! `random_assign_prop` must be a non-null double between 0 and 1.
     x You passed: -0.4
 
 ---
 
-    `random_assign_prop` must be a non-null double between 0 and 1
+    i In index: 2.
+    i With name: random_assign_prop.
+    Caused by error in `.f()`:
+    ! `random_assign_prop` must be a non-null double between 0 and 1.
     x You passed: NA
 
 ---
 
-    `random_assign_prop` must be a non-null double between 0 and 1
+    i In index: 2.
+    i With name: random_assign_prop.
+    Caused by error in `.f()`:
+    ! `random_assign_prop` must be a non-null double between 0 and 1.
     x You passed: text
 
 # Throws proper error when columns do not exist or not declared
