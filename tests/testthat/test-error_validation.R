@@ -174,16 +174,16 @@ test_that("Throws Proper Error When Columns are Wrong Data Type", {
     success_date = rep(lubridate::ymd("2025-01-01"), 10),
     assignment_date = rep(lubridate::ymd("2025-01-01"), 10),
     date = rep(lubridate::ymd("2024-01-01"), 10) + months(id),
-    month = as.character(month(date))
+    month = lubridate::month(date)
   )
   changes <- list(
-    id = expr(new_data$id <- as.complex(new_data$id)),
-    success = expr(new_data$success <- as.character(new_data$success)),
-    success_date = expr(new_data$success_date <- as.character(new_data$success_date)),
-    date = expr(new_data$date <- as.character(new_data$date)),
-    assignment_date = expr(new_data$assignment_date <- as.character(new_data$assignment_date)),
-    condition = expr(new_data$condition <- as.POSIXct(new_data$condition)),
-    month = expr(new_data$month <- as.complex(new_data$month))
+    id = rlang::expr(new_data$id <- as.complex(new_data$id)),
+    success = rlang::expr(new_data$success <- as.character(new_data$success)),
+    success_date = rlang::expr(new_data$success_date <- as.character(new_data$success_date)),
+    date = rlang::expr(new_data$date <- as.character(new_data$date)),
+    assignment_date = rlang::expr(new_data$assignment_date <- as.character(new_data$assignment_date)),
+    condition = rlang::expr(new_data$condition <- as.POSIXct(new_data$condition)),
+    month = rlang::expr(new_data$month <- as.complex(new_data$month))
   )
 
   purrr::map(changes, ~ {
