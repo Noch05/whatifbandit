@@ -12,8 +12,8 @@
 #' The items used to create the text summary can be found in the settings
 #' element of the output object.
 #'
-#' `...` is provided to be compatible with `print()`, these arguments do
-#' not change anything.
+#' `...` is provided to be compatible with `print()`, but no other arguments
+#' change the output.
 #' @export
 print.mab <- function(x, ...) {
   print_mab(x)
@@ -77,8 +77,8 @@ print_mab <- function(mab) {
 #' because it is assumed the AIPW estimators are asymptotically normal as shown
 #' in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}
 #'
-#' `...` is provided to be compatibile with `summary()` it does not change
-#' anything in the execution.
+#' `...` is provided to be compatible with `summary()`, the function
+#' does not have any additional arguments.
 #'
 #' All of the data provided to create a table like this is present in the object
 #' created by [single_mab_simulation()] but
@@ -91,7 +91,7 @@ print_mab <- function(mab) {
 #' (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 #'
 #' @example inst/examples/summary.mab_example.R
-#' @returns tibble containg each treatment, the final Thompson/UCB1 Statistic,
+#' @returns tibble containing each treatment, the final Thompson/UCB1 Statistic,
 #' the AIPW estimate and Normal CI based on user supplied level.
 summary.mab <- function(object, level = 0.95, ...) {
   check_level(level)
@@ -144,11 +144,11 @@ summary.mab <- function(object, level = 0.95, ...) {
 #' @param save Logical; Whether or not to save the plot to disk; FALSE by default.
 #' @param path String; File directory to save file.
 #' @inheritParams summary.mab
-#' @param estimator Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type
+#' @param estimator Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type.
 #' @param ... arguments to pass to `ggplot2:geom_*` function (e.g. `color`, `linewidth`, `alpha`, etc.)
 #' @details
 #' The plot generic requires \href{https://cran.r-project.org/package=ggplot2}{ggplot2}
-#' which is not required by the package, so it must be installed manually if necessary.
+#' which is not required by the package, so it must be installed separately.
 #'
 #' This function provides minimalist plots to quickly view the results of any
 #' Multi-Arm-Bandit trial, and has the ability to be customized through the `...`

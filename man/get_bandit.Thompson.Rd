@@ -12,7 +12,7 @@ successes, number of observations, and success rates, which is created by \code{
 
 \item{conditions}{A named character vector containing treatment conditions. The elements
 of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
-\code{unique(df[[condition_col_name]])}. The names of each element are used to reference the contents but are not inherently important;
+\code{unique(df[[condition_col]])}. The names of each element are used to reference the contents but are not inherently important;
 choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
 of the trial in this vector must have the name "Control".}
 
@@ -20,18 +20,19 @@ of the trial in this vector must have the name "Control".}
 
 \item{ndraws}{A numeric value; When Thompson Sampling direct calculations fail, draws from a simulated posterior
 will be used to approximate the Thompson Sampling probabilities. This is the number of simulations to use, the default
-is 5000 to match the default parameter \code{\link[bandit:best_binomial_bandit_sim]{bandit::best_binomial_bandit_sim()}}, but might need to be raised or lowered depending on perfomance and accuracy
+is 5000 to match the default parameter \code{\link[bandit:best_binomial_bandit_sim]{bandit::best_binomial_bandit_sim()}}, but might need to be raised or lowered depending on performance and accuracy
 concerns.}
 }
 \value{
-Named Numeric Vector of Posterior Probabilities
+a Named list with 2 elements: the named numeric vector of Thompson Posteriors,
+and a copy of the same vector as the assignment probabilities vector.
 }
 \description{
 Thompson Sampling Algorithm
 }
 \details{
 Thompson Sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
-package using R's integrate function which can overflow. If overflow errors occur, the Thompson Sampling
-probabilities will be calculated by simulating draws from the posterior instead of direct calculations.
+package but the direct calculation can result in errors or overflow. If this occurs, a simulation based method is used
+instead to estimate the posterior distribution, and the user receives a warning.
 }
 \keyword{internal}

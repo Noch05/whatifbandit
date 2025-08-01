@@ -15,7 +15,7 @@ assigned each treatment at a given period}
 
 \item{conditions}{A named character vector containing treatment conditions. The elements
 of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
-\code{unique(df[[condition_col_name]])}. The names of each element are used to reference the contents but are not inherently important;
+\code{unique(df[[condition_col]])}. The names of each element are used to reference the contents but are not inherently important;
 choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
 of the trial in this vector must have the name "Control".}
 
@@ -25,13 +25,13 @@ of the trial in this vector must have the name "Control".}
 }
 \value{
 tibble/data.table containing the AIPW estimate of treatment success, AIPW variance,
-sample proportion of successful treatments (sample mean), and sample proportion variance.
+sample proportion of successful treatments (sample mean), and sample mean variance.
 }
 \description{
 Takes the average of the individual AIPW scores created by \code{\link[=get_iaipw]{get_iaipw()}} for each period,
-and assigns each estimate an adaptive weight based on a constant allocation rate across periods defined by
+and assigns each estimate an adaptive weight based on a constant allocation rate of variance across periods defined by
 \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et. al (2021)} to calculate a final
-AIPW estimate and variance for each treatment condition. Sample proportions are also provided
+AIPW estimate and variance for each treatment condition. Sample means and variances are also provided
 for comparison.
 }
 \details{

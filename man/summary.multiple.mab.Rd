@@ -22,25 +22,22 @@ This summary provides the number of times each treatment arm was
 selected as the best, chosen by the highest UCB1 or Thompson Probability
 from the end of each trial.
 
-Additional it provides the average of the AIPW and sample estimates
+Additionally it provides the average of the AIPW and sample estimates
 across all trials, while also providing 2 distinct variances and intervals.
 One interval is based on the average of the variances, and uses a normal distribution,
-while the other empirical distribution had its variance estimated
-using the sample of AIPW estimates which is used to construct
-empirical confidence intervals. These empirical
+while an empirical distribution is estimated using the sample of estimates
+created by the repeated trials. These empirical
 variances represent the variation in each simulation due to the random state
 
-#' \code{...} is provided to be compatible with \code{summary()}, these arguments do
-not change anything.
+\code{...} is provided to be compatible with \code{summary()}, the function
+does not have any additional arguments.
 }
 \examples{
 # Objects returned by `multiple_mab_simulation()` have a `multiple.mab` class.
 # This class has a summary generic that can produce quick results of the trials
 data(tanf)
-# Subsetting to make the example faster
 tanf <- tanf[1:100, ]
 # Simulating a few trials
-
 seeds <- sample.int(10000, 5)
 conditions <- c("no_letter", "open_appt", "specific_appt")
 x <- multiple_mab_simulation(
@@ -62,15 +59,12 @@ x <- multiple_mab_simulation(
   verbose = FALSE, times = 5, seeds = seeds, keep_data = FALSE
 )
 
-# Calling `summary` Returns a summary table for the trial
-# Upper and Lower Bounds default to 95\% Confidence Intervals
-summary(x) |>
-  print(width = Inf) # calling width = Inf to so whole table prints
+# Creating summary table
+# Defaults to 95\% confidence interval
+summary(x) |> print(width = Inf)
 
-# We can also change the confidence level to anything between 0 and 1
-# This only changes the upper and lower bounds that are presented.
-summary(x, level = 0.7) |>
-  dplyr::select(lower_normal:upper_empirical)
+# Changing to 70\% confidence level
+summary(x, level = 0.7) |> dplyr::select(lower_normal:upper_empirical)
 
 # Invalid levels throw an error
 try(summary(x, level = 5))

@@ -9,7 +9,7 @@ check_conditions(conditions, data, data_cols, control_augment)
 \arguments{
 \item{conditions}{A named character vector containing treatment conditions. The elements
 of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
-\code{unique(df[[condition_col_name]])}. The names of each element are used to reference the contents but are not inherently important;
+\code{unique(df[[condition_col]])}. The names of each element are used to reference the contents but are not inherently important;
 choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
 of the trial in this vector must have the name "Control".}
 
@@ -30,14 +30,14 @@ Used to simulate imperfect information on the part of researchers conducting an 
 }}
 
 \item{control_augment}{A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.
-Default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}}
+Default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.}
 }
 \value{
 Nothing; Throws an error if the conditions vector does not meet the
 requirements for the user's specified settings.
 }
 \description{
-Helper to \code{\link[=check_args]{check_args()}}. This function accepts the conditions
+Helper to \code{\link[=validate_inputs]{validate_inputs()}}. This function accepts the conditions
 vector and checks whether it is valid based on the number of conditions in the
 vector versus the data set, and if the names have been properly assigned for
 control augmentation if used.

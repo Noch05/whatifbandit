@@ -1,5 +1,5 @@
 #' Print Generic For `multiple.mab`
-#' @description Custom Print Display for `multiple.mab`` objects returned by [multiple_mab_simulation()].
+#' @description Custom Print Display for `multiple.mab` objects returned by [multiple_mab_simulation()].
 #' Prevents the large list output from being printed to the R console, and provides
 #' useful information about the settings for the trials
 #' @method print multiple.mab
@@ -10,8 +10,8 @@
 #' The items used to create the text summary can be found in the settings
 #' element of the output object.
 #'
-#' `...` is provided to be compatible with `print()`, these arguments do
-#' not change anything.
+#' `...` is provided to be compatible with `print()`, no other arguments
+#' change output.
 #' @export
 print.multiple.mab <- function(x, ...) {
   settings <- x$settings
@@ -34,16 +34,16 @@ print.multiple.mab <- function(x, ...) {
 #' selected as the best, chosen by the highest UCB1 or Thompson Probability
 #' from the end of each trial.
 #'
-#' Additional it provides the average of the AIPW and sample estimates
+#' Additionally it provides the average of the AIPW and sample estimates
 #' across all trials, while also providing 2 distinct variances and intervals.
 #' One interval is based on the average of the variances, and uses a normal distribution,
-#' while the other empirical distribution had its variance estimated
-#' using the sample of AIPW estimates which is used to construct
-#' empirical confidence intervals. These empirical
+#' while an empirical distribution is estimated using the sample of estimates
+#' created by the repeated trials. These empirical
 #' variances represent the variation in each simulation due to the random state
 #'
-#' #' `...` is provided to be compatible with `summary()`, these arguments do
-#' not change anything.
+#' `...` is provided to be compatible with `summary()`, the function
+#' does not have any additional arguments.
+#'
 #' @example inst/examples/summary.multiple.mab_example.R
 #' @export
 
@@ -116,7 +116,7 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
 #' @inheritParams summary.multiple.mab
 #' @details
 #' The plot generic requires \href{https://cran.r-project.org/package=ggplot2}{ggplot2}
-#' which is not required by the package, so it must be installed manually if necessary.
+#' which is not required by the package, so it must be installed separately.
 #'
 #' This function provides minimalist plots to quickly view the results of the procedure
 #' and has the ability to be customized through the `...`
@@ -124,6 +124,7 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
 #' provided in the output of [multiple_mab_simulation()] for extreme
 #' customization or professional plots, it is highly recommended
 #' to start completely from scratch and not use the generic.
+#'
 #' @example inst/examples/plot.multiple.mab_example.R
 #' @export
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)

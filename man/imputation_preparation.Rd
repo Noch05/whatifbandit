@@ -25,12 +25,12 @@ for each treatment block to impute from.}
 \item{whole_experiment}{A logical value; if TRUE, uses all past experimental data for imputing outcomes.
 If FALSE, uses only data available up to the current period. In large datasets or with a high number
 of periods, setting this to FALSE can be more computationally intensive, though not a significant
-contributor to total runtime.}
+contributor to total run time.}
 
 \item{blocking}{A logical value; whether or not to use treatment blocking. Treatment blocking is used to ensure an even-enough
 distribution of treatment conditions across blocks. For example, blocking by gender would mean the randomized assignment should
 split treatments evenly not just throughout the sample (so for 4 arms, 25-25-25-25), but also within each block, so 25\% of men
-would receive each treatment and 25\% of women the same.}
+would receive each treatment and 25\% of women the same. This is most useful when the blocks are uneven or have some geographic meaning.}
 
 \item{perfect_assignment}{A logical value; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
@@ -52,17 +52,19 @@ outcomes. Subsetted from the \code{\link[=imputation_precompute]{imputation_prec
 to impute if perfect_assignment is FALSE. Subsetted from the \code{\link[=imputation_precompute]{imputation_precompute()}} output.}
 }
 \description{
-Executes the preparations necessary each iteration of the loop
-for outcomes to be imputed for observations who require it. Adds an additional
-column to the current iteration's data, subsets the necessary information from
-the \code{\link[=imputation_precompute]{imputation_precompute()}} output, and checks to ensure compatibility
-with \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}} which is used to impute outcomes.
+Executes all preparations necessary to impute outcomes for
+each iteration of the simulation loop. Adds an additional column to the current data,
+subsets necessary information from the \code{\link[=imputation_precompute]{imputation_precompute()}} output, and checks to ensure
+compatibility with \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}}.
 }
 \details{
 The goal of this function is to set up the imputation procedure and prevent
 errors from occurring. \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}} does not see the names
 of the probabilities passed per block, so the imputation information must be subsetted
 to contain only the treatment blocks which exist in a given period.
+
+These checks are not implemented in \code{tryCatch()} block because they have to happen
+in every iteration.
 
 \code{impute_block} is the observations new treatment block, combining any
 blocking variables with their new treatment assigned via the Multi-Arm-Bandit

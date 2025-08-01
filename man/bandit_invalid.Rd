@@ -7,14 +7,13 @@
 bandit_invalid(bandit)
 }
 \arguments{
-\item{bandit}{a numeric vector of Thompson Probabilities passed from
-\code{\link[=get_bandit.Thompson]{get_bandit.Thompson()}}.}
+\item{bandit}{a numeric vector of Thompson Probabilities.}
 }
 \value{
 Logical; TRUE if the vector is invalid, FALSE if valid
 }
 \description{
 Checks if the Thompson Probabilities either sum arbitrarily close
-to 0 or if any of them are NA, signs that overflow occurred
+to 0 or if any of them are NA, which are signs that overflow occurred or direct calculations failed to converge.
 }
 \keyword{internal}

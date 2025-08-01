@@ -7,7 +7,7 @@
 check_estimator(estimator)
 }
 \arguments{
-\item{estimator}{Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type}
+\item{estimator}{Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type.}
 }
 \value{
 Throws an error if the argument is invalid; returns character vector

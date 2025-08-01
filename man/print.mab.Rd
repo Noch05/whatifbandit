@@ -23,6 +23,6 @@ useful information about the settings of each trial.
 The items used to create the text summary can be found in the settings
 element of the output object.
 
-\code{...} is provided to be compatible with \code{print()}, these arguments do
-not change anything.
+\code{...} is provided to be compatible with \code{print()}, but no other arguments
+change the output.
 }

@@ -24,9 +24,8 @@ Acceptable values are "Day", "Week", or "Month". "Month" is a special case that 
 defines the months differently then the genuine dates, i.e. an experiment considers August as starting
 the in the second half of July, or when exact calender months are required for the periods, not just
 a lengths of time in the month range. As such it requires an additional column to be provided,
-with the exact month desired for each observation, and it treats each observation
-as occurring on the first of that month. It is also useful when dates are not provided, here
-synthetic dates should be created placing each observation on the first on its specified month.}
+with the exact month desired for each observation passed as an integer, character, or factor. Each
+observation is treated as occurring on the first of each month.}
 
 \item{perfect_assignment}{A logical value; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
@@ -60,7 +59,7 @@ or are not present in the data. Additionally throws warning messages,
 if unnecessary columns have been provided.
 }
 \description{
-Helper to \code{\link[=check_args]{check_args()}}. This function accepts the user's
+Helper to \code{\link[=validate_inputs]{validate_inputs()}}. This function accepts the user's
 settings for the Multi-Arm-Bandit trial, and checks whether columns in the data have been properly
 specified based on these settings.
 }

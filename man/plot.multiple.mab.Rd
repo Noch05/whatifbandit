@@ -50,7 +50,7 @@ Multi-Arm Bandit Trials
 }
 \details{
 The plot generic requires \href{https://cran.r-project.org/package=ggplot2}{ggplot2}
-which is not required by the package, so it must be installed manually if necessary.
+which is not required by the package, so it must be installed separately.
 
 This function provides minimalist plots to quickly view the results of the procedure
 and has the ability to be customized through the \code{...}
@@ -67,7 +67,6 @@ to start completely from scratch and not use the generic.
 # # These functions require ggplot2
 if (requireNamespace("ggplot2", quietly = TRUE)) {
   data(tanf)
-  # Subsetting to make the example faster
   tanf <- tanf[1:20, ]
   # Simulating a few trials
 
@@ -92,23 +91,20 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
     verbose = FALSE, times = 5, seeds = seeds, keep_data = FALSE
   )
 
-  # The plot generic has several options
-  # Specify type = summary, to get a bar graph showing each time
-  # a treatment group was selected as the best.
+  # View number of times each treatment was the best.
   plot(x, type = "summary")
 
-  # type = hist, creates a histogram of AIPW, Sample, or Both estimates for each
-  # treatment over each trial
+  # View a histogram of the AIPW estimates for each treatment.
   plot(x, type = "hist", estimator = "AIPW")
 
-  # type = estimate creates a similar error bar plot like in plot.mab()
-  # but here the empirical variance of the estimate can be used instead
+  # Plotting AIPW confidence intervals using the empirical cdf, from the simulated
+  # trials.
   plot(x, type = "estimate", estimator = "AIPW", cdf = "empirical")
 
-  # These plots can be added to like any ggplot2 object
+  # Changing the title, like any ggplot2 object.
   plot(x, type = "summary") + ggplot2::labs(title = "Your New Title")
 
-  # Each only uses 1 geom, so arguments for them can be added in the function call
+  # Changing the bin width of the histogram.
   plot(x, type = "hist", estimator = "AIPW", binwidth = 0.05)
 }
 }

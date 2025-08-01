@@ -2,10 +2,10 @@
 #' @name imputation_precompute
 #' @description Pre-computes key values required for the outcome imputation step of the Multi-Arm-Bandit
 #' procedure. Calculates the probabilities of success for each treatment block (treatment arm + any blocking specified),
-#' using the grouped means of the original experimental data. When `perfect_assignment` is FALSE, the average date of success for the period
-#' for each treatment block is also calculated.
+#' using the grouped means of the original experimental data. When `perfect_assignment` is FALSE, the average date of
+#' success is calculated for each treatment block at every period.
 #' @inheritParams single_mab_simulation
-#' @returns A list containing:
+#' @returns A named list containing:
 #' \itemize{
 #' \item `original_summary`: tibble(s)/data.table(s) containing the probability of success for each
 #' treatment block, at each period.
@@ -14,7 +14,7 @@
 #' }
 #' @details
 #' [imputation_precompute()] is an optimization, meant to reduce the cost of calculating these variables
-#' within the simulation. When `whole_experiment` is TRUE, `original_summary` is a single tibble/data.table,
+#' within the simulation loop. When `whole_experiment` is TRUE, `original_summary` is a single tibble/data.table,
 #' and used through the simulation. When `whole_experiment` is FALSE, `original_summary` is a list of tibbles/data.tables,
 #' each containing the cumulative probabilities of all periods up to the index i.
 #'
@@ -143,12 +143,10 @@ imputation_precompute.data.table <- function(data, whole_experiment, perfect_ass
 #-------------------------------------------------------------------------------
 #' @name imputation_preparation
 #' @title Outcome Imputation Preparation
-#' @description Executes the preparations necessary each iteration of the loop
-#' for outcomes to be imputed for observations who require it. Adds an additional
-#' column to the current iteration's data, subsets the necessary information from
-#' the [imputation_precompute()] output, and checks to ensure compatibility
-#' with [randomizr::block_and_cluster_ra()] which is used to impute outcomes.
-#'
+#' @description Executes all preparations necessary to impute outcomes for
+#' each iteration of the simulation loop. Adds an additional column to the current data,
+#' subsets necessary information from the [imputation_precompute()] output, and checks to ensure
+#' compatibility with [randomizr::block_and_cluster_ra()].
 #' @inheritParams get_past_results
 #' @inheritParams run_mab_trial
 #' @inheritParams impute_success
@@ -165,6 +163,9 @@ imputation_precompute.data.table <- function(data, whole_experiment, perfect_ass
 #' errors from occurring. [randomizr::block_and_cluster_ra()] does not see the names
 #' of the probabilities passed per block, so the imputation information must be subsetted
 #' to contain only the treatment blocks which exist in a given period.
+#'
+#' These checks are not implemented in `tryCatch()` block because they have to happen
+#' in every iteration.
 #'
 #' `impute_block` is the observations new treatment block, combining any
 #' blocking variables with their new treatment assigned via the Multi-Arm-Bandit
@@ -223,8 +224,7 @@ imputation_preparation <- function(current_data, block_cols, imputation_informat
 #-------------------------------------------------------------------------------
 #' Checking Imputation Info
 #' @description Subsets or adds to tibble/data.frame created by [imputation_precompute()],
-#' to ensure compatibility with [randomizr::block_and_cluster_ra()] which is used
-#' to impute outcomes.
+#' to ensure compatibility with [randomizr::block_and_cluster_ra()].
 #'
 #' @name check_impute
 #' @inheritParams get_past_results
@@ -242,7 +242,7 @@ imputation_preparation <- function(current_data, block_cols, imputation_informat
 #' the average across other blocks.
 #'
 #' When blocks are present but not required, they are removed from the
-#' tibble/data.table
+#' tibble/data.table.
 #'
 #' @keywords internal
 check_impute <- function(imputation_information, current_data, current_period) {
@@ -348,11 +348,10 @@ check_impute.data.table <- function(imputation_information, current_data, curren
 #' in the next phase and treated as failures by the Multi-Arm-Bandit assignment, because they do not have a record
 #' of occurring.
 #'
-#' Observations that were successful in the original experiment, got assigned a new treatment, then
+#' Observations that were successful in the original experiment, got assigned a new treatment, and then
 #' imputed as success again, had their original date kept. This assumes that the treatment has no individual
 #' treatment effect on the date of success, which may or may not be valid depending on the context of the
 #' experiment.
-#'
 #'
 #' @seealso
 #'* [imputation_preparation()]

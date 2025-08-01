@@ -1,5 +1,5 @@
 #' @title Validates Inputs For [single_mab_simulation()] and [multiple_mab_simulation()]
-#' @name check_args
+#' @name validate_inputs
 #' @description This function checks to ensure that all required arguments
 #' have been properly passed to the function before continuing with the simulation. When
 #' errors are thrown, user-friendly messages are provided to indicate which argument
@@ -13,22 +13,22 @@
 #' *[single_mab_simulation()]
 #' *[multiple_mab_simulation()]
 #' @keywords internal
-check_args <- function(data,
-                       assignment_method,
-                       algorithm,
-                       conditions,
-                       prior_periods,
-                       perfect_assignment,
-                       whole_experiment,
-                       blocking,
-                       data_cols,
-                       block_cols,
-                       time_unit,
-                       period_length,
-                       control_augment,
-                       verbose,
-                       ndraws,
-                       random_assign_prop) {
+validate_inputs <- function(data,
+                            assignment_method,
+                            algorithm,
+                            conditions,
+                            prior_periods,
+                            perfect_assignment,
+                            whole_experiment,
+                            blocking,
+                            data_cols,
+                            block_cols,
+                            time_unit,
+                            period_length,
+                            control_augment,
+                            verbose,
+                            ndraws,
+                            random_assign_prop) {
   # Checking Algorithm
 
   if (!algorithm %in% c("Thompson", "UCB1")) {
@@ -107,7 +107,7 @@ check_args <- function(data,
 #'
 #' @title Checking existence and declaration of columns
 #' @name check_cols
-#' @description Helper to [check_args()]. This function accepts the user's
+#' @description Helper to [validate_inputs()]. This function accepts the user's
 #' settings for the Multi-Arm-Bandit trial, and checks whether columns in the data have been properly
 #' specified based on these settings.
 #' @inheritParams single_mab_simulation
@@ -211,7 +211,7 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, data_co
 #' @title Checking if Inputs are proper Logical Values (TRUE and FALSE)
 #' @name check_logical
 #' @returns Nothing; Throws an error if any input is not TRUE or FALSE
-#' @description Helper to [check_args()]. This function accepts the user's
+#' @description Helper to [validate_inputs()]. This function accepts the user's
 #' settings for logical values in the Multi-Arm-Bandit trial, and checks whether they are valid.
 #' @param ... Arguments to check
 #' @keywords internal
@@ -232,7 +232,7 @@ check_logical <- function(...) {
 #' @title Checking if inputs are proportions
 #' @name check_prop
 #' @returns Nothing; Throws an error if any input is not a valid proportion between 0 and 1
-#' @description Helper to [check_args()]. This function accepts the user's
+#' @description Helper to [validate_inputs()]. This function accepts the user's
 #' settings for proportion arguments and checks if they are valid proportions between 0 and 1
 #' @inheritParams check_logical
 #' @keywords internal
@@ -257,7 +257,7 @@ check_prop <- function(...) {
 #' @name check_posint
 #' @returns Nothing; Throws an error if any input is not a positive whole number or
 #' a valid string.
-#' @description Helper to [check_args()]. This function accepts the user's
+#' @description Helper to [validate_inputs()]. This function accepts the user's
 #' settings for integer arguments and checks if they are valid positive
 #' integers or are a one of the valid strings for the argument.
 #' @inheritParams check_logical
@@ -299,7 +299,7 @@ posint <- function(x) {
 #' @name check_conditions
 #' @returns Nothing; Throws an error if the conditions vector does not meet the
 #' requirements for the user's specified settings.
-#' @description Helper to [check_args()]. This function accepts the conditions
+#' @description Helper to [validate_inputs()]. This function accepts the conditions
 #' vector and checks whether it is valid based on the number of conditions in the
 #' vector versus the data set, and if the names have been properly assigned for
 #' control augmentation if used.
@@ -328,8 +328,8 @@ check_conditions <- function(conditions, data, data_cols, control_augment) {
 #' @name check_data
 #' @returns Nothing; Throws an error if the data does not meet the specifications
 #' of the trial based on user settings.
-#' @description Helper to [check_args()]. This function accepts the data and checks
-#' whether it has Unique ID's and a valid date type `date_col`.
+#' @description Helper to [validate_inputs()]. This function accepts the data and checks
+#' whether it has Unique ID's whether the period length is valid.
 #' @inheritParams single_mab_simulation
 #' @keywords internal
 check_data <- function(data, data_cols, assignment_method, period_length, time_unit,
@@ -341,7 +341,7 @@ check_data <- function(data, data_cols, assignment_method, period_length, time_u
 
   if (assignment_method == "Batch" && period_length > nrow(data)) {
     rlang::abort(c("`period_length` cannot be larger than data size",
-      "x" = sprintf("You data has %d, and your batch size is %d", nrow(data), period_length)
+      "x" = sprintf("You data has %d rows, and your batch size is %d rows", nrow(data), period_length)
     ))
   }
   if (assignment_method == "Date") {
@@ -354,6 +354,7 @@ check_data <- function(data, data_cols, assignment_method, period_length, time_u
     data_interval <- lubridate::interval(
       min(data[[data_cols$date_col$name]]), max(data[[data_cols$date_col$name]])
     ) / unit
+    data_interval <- round(data_interval, 0)
 
     if (period_length > data_interval) {
       rlang::abort(c("`period_length` cannot be larger the date range of your data",
@@ -370,10 +371,9 @@ check_data <- function(data, data_cols, assignment_method, period_length, time_u
 #' @name check_assign_method
 #' @returns Nothing; Throws an error if the user is missing necessary arguments to
 #' assign treatments or passes invalid ones.
-#' @description Helper to [check_args()]. This function accepts arguments relating
+#' @description Helper to [validate_inputs()]. This function accepts arguments relating
 #' to how treatment waves are assigned, and checks if they are valid, and if all
-#' supporting arguments are passed as necessary the data and checks
-#' whether it has Unique ID's and a valid date type `date_col`.
+#' supporting arguments are passed as necessary.
 #' @inheritParams single_mab_simulation
 #' @keywords internal
 check_assign_method <- function(assignment_method, time_unit, verbose, period_length) {

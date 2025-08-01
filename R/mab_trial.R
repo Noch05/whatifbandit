@@ -5,8 +5,7 @@
 #' The function provides loop around each step of the process for each treatment wave, performing adaptive
 #' treatment assignment, and outcome imputation. Supports flexible customization passed
 #' from [single_mab_simulation()] and [multiple_mab_simulation()] in treatment blocking strategy,
-#' the size of each treatment wave, and information availability to simulate both a real experiment, and non-stationary
-#' bandit strategy.
+#' stationary/non-stationary bandits, control augmentation, and hybrid assignment.
 #'
 #' @inheritParams single_mab_simulation
 #' @param imputation_information Object created by [imputation_precompute()] containing the conditional means and success dates
@@ -156,8 +155,9 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
 #' At this step the final UCB1 or Thompson Probabilities are calculated,
 #' and the whole table is lead by one to have each period be represented
 #' by the calculation that occurred just after completing the period, so
-#' period 11 now means the bandit that was calculated after period 11 was
-#' simulated.
+#' period 11 now means the bandit calculated in period 12, using the results
+#' from period 11. The assignment probabilities are not changed in this way, so for each period
+#' they still reflect the assignment probabilities used in that period.
 #'
 #' @seealso
 #'* [run_mab_trial()]
@@ -309,7 +309,7 @@ end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditio
 #' Create Prior Periods
 #' @name create_prior
 #' @description Used during [run_mab_trial()] to create a vector of prior periods dynamically. Used to create
-#' the proper vector when `prior_periods` is not "All" and therefore not all the periods less than the current one.
+#' the proper vector when `prior_periods` is not "All".
 #'
 #' @inheritParams single_mab_simulation
 #' @param current_period The current period of the simulation. Defined by loop structure inside [run_mab_trial()].
@@ -323,23 +323,16 @@ end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditio
 #' @keywords internal
 
 create_prior <- function(prior_periods, current_period) {
-  if (prior_periods == "All") {
+  if (prior_periods == "All" || prior_periods >= current_period) {
     ## Looking at all the past periods
 
     prior <- base::seq_len(current_period - 1)
-  } else if (is.numeric(prior_periods) &
-    prior_periods >= current_period) {
-    ## Looking at all past periods until prior is less then current period
-
-    prior <- base::seq_len(current_period - 1)
-  } else if (is.numeric(prior_periods) &
-    prior_periods < current_period) {
+  } else if (prior_periods < current_period) {
     # returns x most recent periods, i.e. if prior is 3, and current is 6, returns 3:5
 
     prior <- base::seq(from = current_period - prior_periods, to = (current_period - 1), by = 1)
   } else {
     stop("Invalid Prior Cutoff, specify either a whole number or \"All\"")
   }
-
   return(prior)
 }

@@ -16,8 +16,7 @@ list created by \code{\link[=imputation_precompute]{imputation_precompute()}} fo
 }
 \description{
 Subsets or adds to tibble/data.frame created by \code{\link[=imputation_precompute]{imputation_precompute()}},
-to ensure compatibility with \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}} which is used
-to impute outcomes.
+to ensure compatibility with \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}}.
 }
 \details{
 \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}} does not see the names
@@ -30,6 +29,6 @@ to the tibble.data.table, with an estimated conditional probability of success a
 the average across other blocks.
 
 When blocks are present but not required, they are removed from the
-tibble/data.table
+tibble/data.table.
 }
 \keyword{internal}

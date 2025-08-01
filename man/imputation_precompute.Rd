@@ -13,7 +13,7 @@ of a traditional Randomized Controlled Trial (RCT). data.frames will be converte
 \item{whole_experiment}{A logical value; if TRUE, uses all past experimental data for imputing outcomes.
 If FALSE, uses only data available up to the current period. In large datasets or with a high number
 of periods, setting this to FALSE can be more computationally intensive, though not a significant
-contributor to total runtime.}
+contributor to total run time.}
 
 \item{perfect_assignment}{A logical value; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
@@ -37,7 +37,7 @@ Used to simulate imperfect information on the part of researchers conducting an 
 }}
 }
 \value{
-A list containing:
+A named list containing:
 \itemize{
 \item \code{original_summary}: tibble(s)/data.table(s) containing the probability of success for each
 treatment block, at each period.
@@ -48,12 +48,12 @@ each treatment block at each treatment period.
 \description{
 Pre-computes key values required for the outcome imputation step of the Multi-Arm-Bandit
 procedure. Calculates the probabilities of success for each treatment block (treatment arm + any blocking specified),
-using the grouped means of the original experimental data. When \code{perfect_assignment} is FALSE, the average date of success for the period
-for each treatment block is also calculated.
+using the grouped means of the original experimental data. When \code{perfect_assignment} is FALSE, the average date of
+success is calculated for each treatment block at every period.
 }
 \details{
 \code{\link[=imputation_precompute]{imputation_precompute()}} is an optimization, meant to reduce the cost of calculating these variables
-within the simulation. When \code{whole_experiment} is TRUE, \code{original_summary} is a single tibble/data.table,
+within the simulation loop. When \code{whole_experiment} is TRUE, \code{original_summary} is a single tibble/data.table,
 and used through the simulation. When \code{whole_experiment} is FALSE, \code{original_summary} is a list of tibbles/data.tables,
 each containing the cumulative probabilities of all periods up to the index i.
 

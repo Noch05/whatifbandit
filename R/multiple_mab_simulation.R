@@ -13,29 +13,31 @@
 #' @param seeds An integer vector of `length(times)` containing valid seeds to define random state for each trial.
 #' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets.
 #' .
-#' @returns `multiple.mab` class object, which is a named list containing:
+#' @returns An object of class `multiple.mab`, containing:
 #' \itemize{
 #' \item `final_data_nest:` tibble or data.table containing the nested tibbles/data.tables from each trial. Only provided when `keep_data` is TRUE.
-#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period of each trial.
-#' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period of each trial.
+#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period. Wide format,
+#' each row is a period, and each columns is a treatment.
+#' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period. Wide format,
+#' each row is a period, and each columns is a treatment.
 #' \item `estimates`: A tibble or data.table containing the
 #' AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
-#' sample means and variances, for each treatment arm, in each trial.
+#' sample means and variances, for each treatment arm. Long format, treatment arm, and estimate type are columns along with the mean
+#' and variance.
 #' \item `settings`: A named list of the configuration settings used in the trial.
-#' \item `original_data`: The original `data` object passed to the function (data.frame, tibble, or data.table).
 #' }
 #' @example inst/examples/multiple_mab_simulation_example.R
 #' @details
 #' This function simulates multiple adaptive Multi-Arm-Bandit Trials, using experimental
 #' data from a traditional randomized experiment. It follows the same core procedure as
-#' [single_mab_simulation()] (see @details, there for a description), but conducts
+#' [single_mab_simulation()] (see details, there for a description), but conducts
 #' more than one simulation. This allows researchers to gauge the variance
 #' of the simulation procedure itself, and use that to form an empirical sampling distribution
 #' of the AIPW estimates, instead of relying around asymptotic normality (Hadad et al. 2021) for inference.
 #'
 #' The settings specified here have the same meaning as in [single_mab_simulation()], outside of the additional
 #' parameters like `times` and `seeds` which define the number of multiple trials and random seeds to ensure reproducibility.
-#' An important note is that `seeds` can only take integer values, so they bust be declared or coerced as valid integers,
+#' An important note is that `seeds` can only take integer values, so they must be declared or coerced as valid integers,
 #' passing doubles (even ones that are mathematical integers) will result in an error. It is recommended to use `sample.int()`,
 #' with a known seed beforehand to generate the values. Additionally, it is highly recommended to
 #' set `keep_data` to FALSE as the memory used by the function will exponentially increase. This can cause
@@ -93,13 +95,14 @@ multiple_mab_simulation <- function(data,
                                     times,
                                     seeds,
                                     control_augment = 0,
+                                    random_assign_prop = 0,
+                                    ndraws = 5000,
                                     time_unit = NULL,
                                     period_length = NULL,
                                     block_cols = NULL,
                                     verbose = FALSE,
-                                    keep_data = FALSE,
-                                    ndraws = 5000,
-                                    random_assign_prop = 0) {
+                                    check_args = TRUE,
+                                    keep_data = FALSE) {
   if ((utils::object.size(data) / (1024^2) > 500)) {
     rlang::warn(c(
       "i" = "`furrr::future_map()` has a serialization limit of 500 MB. If your data
@@ -132,7 +135,8 @@ multiple_mab_simulation <- function(data,
     block_cols = block_cols, data_cols = data_cols,
     control_augment = control_augment, time_unit = time_unit,
     period_length = period_length,
-    verbose = verbose, ndraws = ndraws, random_assign_prop = random_assign_prop
+    verbose = verbose, ndraws = ndraws, random_assign_prop = random_assign_prop,
+    check_args = check_args
   )
   verbose_log(verbose, "Starting Simulations")
 
@@ -237,13 +241,15 @@ multiple_mab_simulation <- function(data,
 #' @returns `multiple.mab` class object, which is a named list containing:
 #' \itemize{
 #' \item `final_data_nest:` tibble or data.table containing the nested tibbles/data.tables from each trial. Only provided when `keep_data` is TRUE.
-#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period of each trial.
-#' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period of each trial.
+#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period. Wide format,
+#' each row is a period, and each columns is a treatment.
+#' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period. Wide format,
+#' each row is a period, and each columns is a treatment.
 #' \item `estimates`: A tibble or data.table containing the
 #' AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
-#' sample means and variances, for each treatment arm, in each trial.
+#' sample means and variances, for each treatment arm. Long format, treatment arm, and estimate type are columns along with the mean
+#' and variance.
 #' \item `settings`: A named list of the configuration settings used in the trial.
-#' \item `settings`: A list of the configuration settings used in the trial.
 #' }
 #' @details
 #' This function iterates over every element in the output from [furrr::future_map()]

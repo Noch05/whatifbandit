@@ -14,7 +14,7 @@ Nothing; Throws an error if any input is not a positive whole number or
 a valid string.
 }
 \description{
-Helper to \code{\link[=check_args]{check_args()}}. This function accepts the user's
+Helper to \code{\link[=validate_inputs]{validate_inputs()}}. This function accepts the user's
 settings for integer arguments and checks if they are valid positive
 integers or are a one of the valid strings for the argument.
 }

@@ -20,7 +20,7 @@ the results for the current treatment assignment period.
 }
 \description{
 Used during \code{\link[=run_mab_trial]{run_mab_trial()}} to create a vector of prior periods dynamically. Used to create
-the proper vector when \code{prior_periods} is not "All" and therefore not all the periods less than the current one.
+the proper vector when \code{prior_periods} is not "All".
 }
 \seealso{
 *\code{\link[=run_mab_trial]{run_mab_trial()}}

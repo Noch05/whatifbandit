@@ -17,7 +17,7 @@
 specified normal confidence intervals based on their estimated variance.
 }}
 
-\item{estimator}{Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type}
+\item{estimator}{Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type.}
 
 \item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
 Defaults to 0.95}
@@ -40,7 +40,7 @@ the underlying geom must be passed to the function initially.
 }
 \details{
 The plot generic requires \href{https://cran.r-project.org/package=ggplot2}{ggplot2}
-which is not required by the package, so it must be installed manually if necessary.
+which is not required by the package, so it must be installed separately.
 
 This function provides minimalist plots to quickly view the results of any
 Multi-Arm-Bandit trial, and has the ability to be customized through the \code{...}
@@ -83,27 +83,19 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
     )
   )
 
-  # The plot generic has several options
-  # specify type = arm, to plot the Thompson probabilities or UCB1 statistics
-  # over the treatment periods of the trial
+  # View best treatment arms over the simulation
   y <- plot(x, type = "arm")
   y
-  # These can be added to like any ggplot2 object
-
+  # Adding a new title
   y + ggplot2::labs(title = "Your New Title")
-
-  # type = assign creates a similar plot, but its only useful when
-  # control_augmentation is > 0.
+  # type = assign creates a similar plot, but shows probability of assignment instead
 
 
-  # Setting type = estiamte, allows for plotting of the
-  # Augmented Inverse Probability Estimates.
+  # Plotting Augmented Inverse Probability Estimates with confidence interval
   # By default it provides 95\% Normal Confidence Intervals but this can be adjusted
   plot(x, type = "estimate", estimator = "AIPW")
 
-  # Each type only uses 1 ggplot2 geom* so any arguments for the particular geom
-  # can be added into the generic call
-  # Changing the height for `geom_errorbarh`
+  # Adjusting height of internal geom* argument. (`geom_errorbarh()`)
   plot(x, type = "estimate", estimator = "AIPW", height = 0.4)
 }
 }

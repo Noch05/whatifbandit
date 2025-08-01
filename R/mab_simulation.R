@@ -18,7 +18,7 @@
 #' for outcome and date imputation for [mab_simulation()].
 #' }
 #' @details
-#' If a data.frame is passed, as input data it is internally converted into
+#' If a data.frame is passed as input data it is internally converted into
 #' a tibble. If a data.table is passed it is copied to avoid modifying the
 #' original dataset in the users environment.
 
@@ -44,7 +44,8 @@ pre_mab_simulation <- function(data,
                                block_cols,
                                verbose,
                                ndraws,
-                               random_assign_prop) {
+                               random_assign_prop,
+                               check_args) {
   if (base::is.null(data) || !base::is.data.frame(data)) {
     rlang::abort("Input 'data' must be a non-null data.frame.")
   }
@@ -64,15 +65,17 @@ pre_mab_simulation <- function(data,
   }
 
   # Input Validation
-  check_args(
-    data = data, time_unit = time_unit,
-    perfect_assignment = perfect_assignment,
-    algorithm = algorithm, period_length = period_length,
-    whole_experiment = whole_experiment, prior_periods = prior_periods,
-    data_cols = data_cols, block_cols = block_cols, conditions = conditions, blocking = blocking,
-    assignment_method = assignment_method, verbose = verbose,
-    control_augment = control_augment, ndraws = ndraws, random_assign_prop = random_assign_prop
-  )
+  if (check_args) {
+    validate_inputs(
+      data = data, time_unit = time_unit,
+      perfect_assignment = perfect_assignment,
+      algorithm = algorithm, period_length = period_length,
+      whole_experiment = whole_experiment, prior_periods = prior_periods,
+      data_cols = data_cols, block_cols = block_cols, conditions = conditions, blocking = blocking,
+      assignment_method = assignment_method, verbose = verbose,
+      control_augment = control_augment, ndraws = ndraws, random_assign_prop = random_assign_prop
+    )
+  }
 
   # Preparing Data to be simulated
   verbose_log(verbose, "Preparing Data")

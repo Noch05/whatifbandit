@@ -12,14 +12,16 @@ successes, number of observations, and success rates, which is created by \code{
 
 \item{conditions}{A named character vector containing treatment conditions. The elements
 of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
-\code{unique(df[[condition_col_name]])}. The names of each element are used to reference the contents but are not inherently important;
+\code{unique(df[[condition_col]])}. The names of each element are used to reference the contents but are not inherently important;
 choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
 of the trial in this vector must have the name "Control".}
 
 \item{current_period}{Numeric scalar; current period of the adaptive trial simulation.}
 }
 \value{
-tibble/data.table containing UCB1 and Success Rate for each condition
+A named list with 2 elements: a tibble/data.table containing UCB1 and success rate for each condition,
+and a named numeric vector of assignment probabilities, where the highest UCB1 out of the treatments
+is assigned 1, and the rest 0.
 }
 \description{
 Utilizes the well established UCB1 formula to calculate Upper

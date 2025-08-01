@@ -51,65 +51,25 @@
    )
  )
 
- ## If you misspecify or miss an argument, an appropriate error will be given
- ## I specified Month assignment but did not provide a month_column in my data
-
- try(single_mab_simulation(
+ ## 5 Day Periods with Thompson, Treatment Blocking by Service Center,
+ ## Whole experiment FALSE, and hybrid assignment 10% random, 90% bandit.
+ single_mab_simulation(
    data = tanf,
    assignment_method = "Date",
-   time_unit = "Month",
-   algorithm = "UCB1",
-   period_length = 1,
-   prior_periods = "All",
-   blocking = FALSE,
-   whole_experiment = TRUE,
-   perfect_assignment = FALSE,
-   conditions = conditions,
-   data_cols = c(
-     condition_col = "condition",
-     id_col = "ic_case_id",
-     success_col = "success",
-     date_col = "appt_date"
-   )
- ))
-
- # I specified a negative period_length
-
- try(single_mab_simulation(
-   data = tanf,
-   assignment_method = "Date",
-   time_unit = "Month",
-   algorithm = "UCB1",
-   period_length = -500,
-   prior_periods = "All",
-   blocking = FALSE,
-   whole_experiment = TRUE,
-   perfect_assignment = FALSE,
-   conditions = conditions,
-   control_augment = 0,
-   data_cols = c(
-     condition_col = "condition",
-     id_col = "ic_case_id",
-     success_col = "success",
-     date_col = "appt_date"
-   )
- ))
-
- # I forgot to add column containing the successes of the original experiment
-
- try(single_mab_simulation(
-   data = tanf,
-   assignment_method = "Batch",
+   time_unit = "Day",
    algorithm = "Thompson",
-   period_length = 500,
+   period_length = 5,
    prior_periods = "All",
-   blocking = FALSE,
+   blocking = TRUE,
+   block_cols = c("service_center"),
    whole_experiment = TRUE,
    perfect_assignment = TRUE,
    conditions = conditions,
-   control_augment = 0,
+   random_assign_prop = 0.1,
    data_cols = c(
      condition_col = "condition",
-     id_col = "ic_case_id"
+     id_col = "ic_case_id",
+     success_col = "success",
+     date_col = "appt_date"
    )
- ))
+ )

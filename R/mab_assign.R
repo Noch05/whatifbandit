@@ -2,7 +2,7 @@
 #' @name get_past_results
 #' @description Summarizes results of prior periods to use for the current Multi-Arm-Bandit assignment. This function
 #' calculates the number of success under each treatment, the total number of observations assigned to each treatment,
-#' and the success rate my treatment, to be used for UCB1 or Thompson Sampling.
+#'  to be used for UCB1 or Thompson Sampling.
 #'
 #' @inheritParams single_mab_simulation
 #' @inheritParams create_prior
@@ -129,9 +129,10 @@ get_past_results.data.table <- function(current_data,
 #-------------------------------------------------------------------------------
 #' Calculate Multi-Arm Bandit Decision Based on Algorithm
 #' @description Calculates the best treatment for a given period using either a UCB1 or Thompson Sampling Algorithm.
-#' Thompson Sampling is done using [bandit::best_binomial_bandit()] from the \href{https://cran.r-project.org/package=bandit}{bandit}
+#' Thompson Sampling is done using [bandit::best_binomial_bandit()] from
+#' the \href{https://cran.r-project.org/package=bandit}{bandit}
 #' package and UCB1 statistic are calculated using the a well-defined formula that can be found
-#' in \href{https://doi.org/10.48550/arXiv.1402.6028}{(Kuleshov and Precup 2014)}.
+#' in \href{https://arxiv.org/abs/1402.6028}{(Kuleshov and Precup 2014)}.
 #'
 #' @name get_bandit
 #'
@@ -149,21 +150,24 @@ get_past_results.data.table <- function(current_data,
 #'
 #' @details
 #' The Thompson  `assignment_probabilities` is the same as the `bandit` except
-#' for that that `assignment_probabilities` are forced to sum exactly to 1 (not 0.99999),
-#' and the `assignment_probabilities` takes into account the control augmentation if used.
+#' when control augmentation is used to alter the probabilities of assignment.
+#' Thompson Sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
+#' package but the direct calculation can result in errors or overflow. If this occurs, a simulation based method is used
+#' instead to estimate the posterior distribution, and the user receives a warning. The `ndraws` argument specifies
+#' the number of draws to make in this simulation.
 #'
-#' For UCB1, the `assignment_probabilities` will always be of the have all 0
-#' components expect for one 1, because the UCB1 algorithm chooses only 1
-#' option at each period, based on the highest UCB1 statistic. When
-#' control augmentation is used, the probabilities will reflect that as well
-#' so it may be a vector like (0.2, 0, 0.8), if `control_augmentation` = 0.2.
+#' The UCB1 algorithm only selects 1 treatment at each period, with no probability matching
+#' so `assignment_probabilities` will always have 1 element equal to 1, and the rest equal to 0.
+#' Unless control augmentation is used, then the control group will be altered to reach its
+#' threshold. If originally the vector is `(0, 0, 1)`, and `control_augment` = 0.2,
+#' the new vector is `(0.2, 0, 0.8)` assuming the first element is control.
 #'
 #'
 #' @references
 #' Kuleshov, Volodymyr, and Doina Precup. 2014. “Algorithms for Multi-Armed Bandit Problems.”
 #' \emph{arXiv}. \doi{10.48550/arXiv.1402.6028}.
 #'
-#' #' Loecher, Thomas Lotze and Markus. 2022.
+#' Loecher, Thomas Lotze and Markus. 2022.
 #' “Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis.”
 #' \url{https://cran.r-project.org/package=bandit}.
 #' @keywords internal
@@ -203,10 +207,11 @@ get_bandit <- function(past_results, algorithm, conditions, current_period, cont
 #' @inheritParams get_bandit
 #' @details
 #' Thompson Sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
-#' package using R's integrate function which can overflow. If overflow errors occur, the Thompson Sampling
-#' probabilities will be calculated by simulating draws from the posterior instead of direct calculations.
+#' package but the direct calculation can result in errors or overflow. If this occurs, a simulation based method is used
+#' instead to estimate the posterior distribution, and the user receives a warning.
 #'
-#' @returns Named Numeric Vector of Posterior Probabilities
+#' @returns a Named list with 2 elements: the named numeric vector of Thompson Posteriors,
+#' and a copy of the same vector as the assignment probabilities vector.
 #' @keywords internal
 
 get_bandit.Thompson <- function(past_results, conditions, current_period, ndraws) {
@@ -245,7 +250,7 @@ get_bandit.Thompson <- function(past_results, conditions, current_period, ndraws
   )
 
   if (bandit_invalid(bandit)) {
-    rlang::abort(c("Thompson Sampling simulation overflowed",
+    rlang::abort(c("Thompson Sampling simulation failed",
       "x" = paste0("Most Recent Result:", paste0(bandit, collapse = " ")),
       "i" = "Consider setting `ndraws` higher or reducing `prior_periods`."
     ))
@@ -257,13 +262,12 @@ get_bandit.Thompson <- function(past_results, conditions, current_period, ndraws
 #' @name bandit_invalid
 #' @title Checks Validity of Thompson Probabilities
 #' @description Checks if the Thompson Probabilities either sum arbitrarily close
-#' to 0 or if any of them are NA, signs that overflow occurred
-#' @param bandit a numeric vector of Thompson Probabilities passed from
-#' [get_bandit.Thompson()].
+#' to 0 or if any of them are NA, which are signs that overflow occurred or direct calculations failed to converge.
+#' @param bandit a numeric vector of Thompson Probabilities.
 #' @returns Logical; TRUE if the vector is invalid, FALSE if valid
 #' @keywords internal
 bandit_invalid <- function(bandit) {
-  return(isTRUE(all.equal(base::sum(bandit), 0)) | any(is.na(bandit)))
+  return(any(is.na(bandit)) || isTRUE(all.equal(base::sum(bandit), 0)))
 }
 #-------------------------------------------------------------------
 #' @method get_bandit UCB1
@@ -273,7 +277,9 @@ bandit_invalid <- function(bandit) {
 #' Confidence Bounds for each treatment arm.
 #'
 #' @inheritParams get_bandit
-#' @returns tibble/data.table containing UCB1 and Success Rate for each condition
+#' @returns A named list with 2 elements: a tibble/data.table containing UCB1 and success rate for each condition,
+#' and a named numeric vector of assignment probabilities, where the highest UCB1 out of the treatments
+#' is assigned 1, and the rest 0.
 #' @keywords internal
 
 get_bandit.UCB1 <- function(past_results, conditions, current_period) {
@@ -310,14 +316,18 @@ get_bandit.UCB1 <- function(past_results, conditions, current_period) {
 #' @param probs Named Numeric Vector; Probability of Assignment for each treatment condition.
 #' @inheritParams get_past_results
 #' @returns Updated tibble/data.table with the new treatment conditions for each observation. If this treatment is different
-#' then from under the original experiment, they are labelled as imputation required.
+#' then from under the original experiment, the column 'impute_req' is 1, and else is 0.
 #'
 #' @details
 #' The unique identifier for each row is used as the cluster in the for the
 #' randomizr package functions to ensure that each observation is only
 #' treated once, and is returned in the same order as provided.
 #'
-#'
+#' The number of rows which are randomly assigned in each period is `random_assign_prop` multiplied by
+#' the number of rows in the period. If this number is less than 1, then binomial draws are made for each row
+#' with probability `random_assign_prob` to determine if that row will be assigned randomly. Else, the number of random
+#' rows is rounded to the nearest whole number, and then that many rows are selected to be assigned through
+#' random assignment. These row selections are also random.
 #' @seealso
 #'* [randomizr::block_and_cluster_ra()]
 #'* [randomizr::cluster_ra()]
@@ -335,11 +345,11 @@ assign_treatments.data.frame <- function(current_data, probs, blocking = NULL,
                                          algorithm, id_col, conditions, condition_col,
                                          success_col, random_assign_prop) {
   rows <- base::nrow(current_data)
-  random_rows <- base::round(rows * random_assign_prop, 0)
-  if (random_rows == 0 && random_assign_prop > 0) {
+  random_rows <- rows * random_assign_prop
+  if (random_assign_prop > 0 && random_rows < 1) {
     rand_idx <- base::which(base::as.logical(stats::rbinom(rows, 1, random_assign_prop)))
   } else {
-    rand_idx <- base::sample(x = rows, size = random_rows, replace = FALSE)
+    rand_idx <- base::sample(x = rows, size = base::round(random_rows, 0), replace = FALSE)
   }
 
   num_conditions <- base::length(conditions)
@@ -407,7 +417,7 @@ assign_treatments.data.table <- function(current_data, probs, blocking = NULL,
                                          success_col, random_assign_prop) {
   rows <- base::nrow(current_data)
   random_rows <- base::round(rows * random_assign_prop, 0)
-  if (random_rows == 0 && random_assign_prop > 0) {
+  if (random_assign_prop > 0 && random_rows == 0) {
     rand_idx <- base::which(base::as.logical(stats::rbinom(rows, 1, random_assign_prop)))
   } else {
     rand_idx <- base::sample(x = rows, size = random_rows, replace = FALSE)

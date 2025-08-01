@@ -17,22 +17,25 @@ get_bandit(
 \item{past_results}{tibble/data.table containing summary of prior periods, with
 successes, number of observations, and success rates, which is created by \code{\link[=get_past_results]{get_past_results()}}.}
 
-\item{algorithm}{A character string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
+\item{algorithm}{A character string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1". Algorithm
+defines the adaptive assignment process. Mathematical details on these algorithms
+can be found in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
+\href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}
 
 \item{conditions}{A named character vector containing treatment conditions. The elements
 of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
-\code{unique(df[[condition_col_name]])}. The names of each element are used to reference the contents but are not inherently important;
+\code{unique(df[[condition_col]])}. The names of each element are used to reference the contents but are not inherently important;
 choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
 of the trial in this vector must have the name "Control".}
 
 \item{current_period}{Numeric scalar; current period of the adaptive trial simulation.}
 
 \item{control_augment}{A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.
-Default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}}
+Default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.}
 
 \item{ndraws}{A numeric value; When Thompson Sampling direct calculations fail, draws from a simulated posterior
 will be used to approximate the Thompson Sampling probabilities. This is the number of simulations to use, the default
-is 5000 to match the default parameter \code{\link[bandit:best_binomial_bandit_sim]{bandit::best_binomial_bandit_sim()}}, but might need to be raised or lowered depending on perfomance and accuracy
+is 5000 to match the default parameter \code{\link[bandit:best_binomial_bandit_sim]{bandit::best_binomial_bandit_sim()}}, but might need to be raised or lowered depending on performance and accuracy
 concerns.}
 }
 \value{
@@ -45,26 +48,30 @@ containing the probability of being assigned that treatment.}
 }
 \description{
 Calculates the best treatment for a given period using either a UCB1 or Thompson Sampling Algorithm.
-Thompson Sampling is done using \code{\link[bandit:best_binomial_bandit]{bandit::best_binomial_bandit()}} from the \href{https://cran.r-project.org/package=bandit}{bandit}
+Thompson Sampling is done using \code{\link[bandit:best_binomial_bandit]{bandit::best_binomial_bandit()}} from
+the \href{https://cran.r-project.org/package=bandit}{bandit}
 package and UCB1 statistic are calculated using the a well-defined formula that can be found
-in \href{https://doi.org/10.48550/arXiv.1402.6028}{(Kuleshov and Precup 2014)}.
+in \href{https://arxiv.org/abs/1402.6028}{(Kuleshov and Precup 2014)}.
 }
 \details{
 The Thompson  \code{assignment_probabilities} is the same as the \code{bandit} except
-for that that \code{assignment_probabilities} are forced to sum exactly to 1 (not 0.99999),
-and the \code{assignment_probabilities} takes into account the control augmentation if used.
+when control augmentation is used to alter the probabilities of assignment.
+Thompson Sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
+package but the direct calculation can result in errors or overflow. If this occurs, a simulation based method is used
+instead to estimate the posterior distribution, and the user receives a warning. The \code{ndraws} argument specifies
+the number of draws to make in this simulation.
 
-For UCB1, the \code{assignment_probabilities} will always be of the have all 0
-components expect for one 1, because the UCB1 algorithm chooses only 1
-option at each period, based on the highest UCB1 statistic. When
-control augmentation is used, the probabilities will reflect that as well
-so it may be a vector like (0.2, 0, 0.8), if \code{control_augmentation} = 0.2.
+The UCB1 algorithm only selects 1 treatment at each period, with no probability matching
+so \code{assignment_probabilities} will always have 1 element equal to 1, and the rest equal to 0.
+Unless control augmentation is used, then the control group will be altered to reach its
+threshold. If originally the vector is \verb{(0, 0, 1)}, and \code{control_augment} = 0.2,
+the new vector is \verb{(0.2, 0, 0.8)} assuming the first element is control.
 }
 \references{
 Kuleshov, Volodymyr, and Doina Precup. 2014. “Algorithms for Multi-Armed Bandit Problems.”
 \emph{arXiv}. \doi{10.48550/arXiv.1402.6028}.
 
-#' Loecher, Thomas Lotze and Markus. 2022.
+Loecher, Thomas Lotze and Markus. 2022.
 “Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis.”
 \url{https://cran.r-project.org/package=bandit}.
 }

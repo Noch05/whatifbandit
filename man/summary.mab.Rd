@@ -15,7 +15,7 @@ Defaults to 0.95}
 \item{...}{additional arguments.}
 }
 \value{
-tibble containg each treatment, the final Thompson/UCB1 Statistic,
+tibble containing each treatment, the final Thompson/UCB1 Statistic,
 the AIPW estimate and Normal CI based on user supplied level.
 }
 \description{
@@ -28,8 +28,8 @@ The confidence intervals applied follow a standard normal distribution
 because it is assumed the AIPW estimators are asymptotically normal as shown
 in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}
 
-\code{...} is provided to be compatibile with \code{summary()} it does not change
-anything in the execution.
+\code{...} is provided to be compatible with \code{summary()}, the function
+does not have any additional arguments.
 
 All of the data provided to create a table like this is present in the object
 created by \code{\link[=single_mab_simulation]{single_mab_simulation()}} but
@@ -63,12 +63,11 @@ x <- single_mab_simulation(
   )
 )
 
-# Calling `summary` Returns a summary table for the trial
+# Producing a Summary Table
 # Defaults to 95\% Normal Confidence Intervals
-# for the Augmented Inverse Probability Estimates
 summary(x)
 
-# We can also change the confidence level to anything between 0 and 1
+# Changing to 70\% Confidence Level
 summary(x, level = 0.7)
 
 # Invalid levels throw an error

@@ -17,7 +17,7 @@
 #'
 #' @details
 #' The specification for the Individual AIPW estimates can be found
-#' in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}. These
+#' in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}. The
 #' formulas in equation 5, formed the basis for this function's calculations. Here
 #' the regression adjustment used is the grouped mean of success by treatment, up until
 #' the current period of estimation (so at period 5, the grouped mean was calculated
@@ -186,15 +186,15 @@ get_iaipw.data.table <- function(data, assignment_probs, periods, conditions, ve
 #' @name adaptive_aipw
 #'
 #' @description Takes the average of the individual AIPW scores created by [get_iaipw()] for each period,
-#' and assigns each estimate an adaptive weight based on a constant allocation rate across periods defined by
+#' and assigns each estimate an adaptive weight based on a constant allocation rate of variance across periods defined by
 #' \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et. al (2021)} to calculate a final
-#' AIPW estimate and variance for each treatment condition. Sample proportions are also provided
+#' AIPW estimate and variance for each treatment condition. Sample means and variances are also provided
 #' for comparison.
 #'
 #' @inheritParams get_iaipw
 #' @inheritParams single_mab_simulation
 #' @returns tibble/data.table containing the AIPW estimate of treatment success, AIPW variance,
-#' sample proportion of successful treatments (sample mean), and sample proportion variance.
+#' sample proportion of successful treatments (sample mean), and sample mean variance.
 #' @details
 #' The formulas for the calculations in this function can be found in
 #' \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)} at

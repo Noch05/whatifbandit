@@ -22,10 +22,11 @@ library(whatifbandit)
 
 whatifbandit allows researchers to re-simulate their randomized experiments under adaptive experimental conditions. Running experiments can be costly and time-consuming, so this simulation tool allows researchers to explore what their results could have looked like under an adaptive experimental design. These re-analyses can inform the planning for future studies, allowing a researcher to justify an adaptive design for a future project, before running a costly experiment.
 
-Adaptive experimental designs tend to shift more participants over time to more promising treatment arms, which are more efficient at honing in on the best treatment. These designs can shine in situations such as:
+Adaptive experimental designs, instead of randomly assigning treatments, take into account the relative performance
+of each treatment. Usually this means that better performing treatments will be assigned more participants at each assignment period, allowing for a convergence to the best treatment arm. These designs can shine in situations such as:
 
 -   Simple random assignment produces sample sizes too small to detect treatment effects.
--   A researcher wants to test a many treatments.
+-   A researcher wants to test a many treatments, such as 20, or 100.
 -   An experiment occurs over a long period of time.
 -   Finding the absolute best treatment takes precedence over gauging the effects of all treatments.
 
@@ -37,13 +38,13 @@ whatifbandit provides 2 main functions for conducting simulations, `single_mab_s
 
 ## Multi-Arm-Bandits: Adaptive Assignment
 
-Adaptive experiments are a form of Multi-Arm-Bandit problem, where each treatment arm has an unknown probability of success, and a balance must be achieved between exploration and exploitation. In an applied setting, like an experiment, we want a design that explores the space of possible treatment options to find the best treatment, then exploit that best treatment. If we do too much exploitation, we have the chance to miss the true best treatment, but if we do too much exploration, instead of narrowing down the best treatments, then we miss out on the rewards from that treatment. Additionally, these unknown probabilities can change overtime in what is called a non-stationary bandit problem. The precise details of this problem is not important, but solutions to these bandit problems, in the form of decision algorithms, provide the basis for how whatifbandit simulates an adaptive trial.
+Adaptive experiments are a form of Multi-Arm-Bandit problem, where each treatment arm has an unknown probability of success, and a balance must be achieved between exploration and exploitation. In an applied setting, like an experiment, we want a design that explores the space of possible treatment options to find the best treatment, then exploit that best treatment. If we do too much exploitation, we have the chance to miss the true best treatment, but if we do too much exploration, then we miss out on the rewards from best treatment. Additionally, these unknown probabilities can change overtime in what is called a non-stationary bandit problem. The precise details of this problem is not important, but solutions to these bandit problems, in the form of decision algorithms, provide the basis for how whatifbandit simulates an adaptive trial.
 
-whatifbandit supports 2 decision algorithms, Thompson Sampling and UCB1. Thompson Sampling calculates the probability of each treatment being the best treatment arm, then we probability match to assign the treatment arms. In the Bernoulli case, which whatifbandit uses, this can be calculated from a beta distribution. UCB1 instead calculates an upper confidence bound on the expected reward of each arm, and selects the maximum value [@kuleshov2014; @slivkins2024; @offer-westort2021]. A full treatment of these issues, is beyond the scope of this vignette, but this introduction hopefully allowed you to understand what is going on behind the whatifbandit simulation.
+whatifbandit supports 2 decision algorithms, Thompson Sampling and UCB1. Thompson Sampling calculates the posterior probability of each treatment being the best treatment arm, and then those probabilities are matched to assign the treatment arms. In the Bernoulli case, which whatifbandit uses, this can be calculated from a beta distribution. UCB1 instead calculates an upper confidence bound on the expected reward of each arm, and selects the maximum value [@kuleshov2014; @slivkins2024; @offer-westort2021]. A full treatment of these issues, is beyond the scope of this vignette, but this introduction hopefully allowed you to understand what is going on behind the whatifbandit simulation.
 
 
 $$
-\hat{\theta}^k_i=\mathbb{E}[\text{Beta}(1 + \text{successes}_i, 1 + \text{failures}_i)] \tag{Thompson}
+\hat{\theta}^k_i=\mathbb{E}[\text{Beta}\left(1 + \text{successes}_i, 1 + \text{failures}_i\right)] \tag{Thompson}
 $$
 $$
 \arg\max_i  \left(\mathbb{E}[\text{Reward}_i] + \sqrt{\frac{2 \ln t}{n_i}} \right) \tag{UCB1}
@@ -69,7 +70,7 @@ $$
 $$
 \hat{m}(w) = \frac{1}{t - 1} \sum_{s=1}^{t-1} \left( \frac{1}{n(w)_s} \sum_{i=1}^{n(w)_s} x_i(w) \right) \tag{Grouped Mean}
 $$
-The estimator is calculated by weighting the outcome against the probability of being assigned the treatment, and a conditional expectation/regression estimate based on the previous periods of assignment, then aggregating based on an adaptive weight. In the package the condition expectation is estimated via a grouped mean, and the adaptive weight uses the constant allocation rate described in the paper [@hadad2021a].
+The estimator is calculated by weighting the outcome against the probability of being assigned the treatment, and a conditional expectation/regression estimate based on the previous periods of assignment, then aggregating based on an adaptive weight. In the package the conditional expectation is estimated via a grouped mean, and the adaptive weight uses the constant allocation rate described in the paper [@hadad2021a]. There are other allocation rates described but we did not implement any of them. These rates decide how much of the variance of the estimator should be allocated to each period of the trial, and is an important condition for the estimates to properly converge and be consistent [@hadad2021a].
 
 ## Data
 
@@ -111,7 +112,7 @@ The original experiment took place over 5 distinct months. To mirror that, we se
 
 UCB1 sampling also only chooses 1 treatment per period, but because our periods time based now and each period is a large portion of the dataset, we should use Thompson Sampling probability matching instead. This ensures that we can see the treatment assignments evolve more over a time. Set `algorithm = "Thompson"` for this. 
 
-The time component of the experiment must be taken into account. There is no guarantee, that by the time next month's letters are sent out, that all the people who would re certify had done so. Additionally, when `whole_experiment = TRUE`, the full set of original results is used for outcome imputation, while setting it to FALSE more only uses the data up to the period, which can be a closer replication. To reflect these items, set `perfect_assignment = FALSE`, and `whole_experiment = FALSE`, along with including `success_date_col` and `assignment_date_col` in `data_cols`. 
+The time component of the experiment must be taken into account. There is no guarantee, that by the time next month's letters are sent out, that all the people who would recertify had done so. Additionally, when `whole_experiment = TRUE`, the full set of original results is used for outcome imputation, while setting it to FALSE more only uses the data up to the period, which can be a closer replication. To reflect these items, set `perfect_assignment = FALSE`, and `whole_experiment = FALSE`, along with including `success_date_col` and `assignment_date_col` in `data_cols`. 
 
 With this configuration, if a success occurs after the date treatments are assigned, it is masked and treated as a failure. This simulates the researcher's limited information as those late outcomes would not have been observed yet.
 
@@ -138,7 +139,7 @@ sim <- single_mab_simulation(
 )
 ```
 
-You don't always have to replicate the setting perfectly, reanalyzing the experiment as an adaptive trial also involves testing how the results change across different configurations, such as the size and length of periods, or the usage of `perfect_assignment` or `whole_experiment`. The only guidelines would be to use UCB1 only when the period size is a relatively small component of the dataset, and `perfect_assignment = FALSE`, when you have dates that line up the periods you have set. If this is not the case, that all the successes will simply be masked, producing strange results.
+You don't always have to replicate the setting perfectly, reanalyzing the experiment as an adaptive trial also involves testing how the results change across different configurations, such as the size and length of periods, or the usage of `perfect_assignment` or `whole_experiment`. The only guidelines would be to use UCB1 only when the period size is a relatively small component of the dataset, and only set `perfect_assignment = FALSE`, when you have dates that line up the periods you have set. If this is not the case, that all the successes will simply be masked, producing strange results.
 
 For example, we can experiment with using individual assignment, by setting `assignment_method = "Individual"`. This does not follow the original experiment, and we don't have data in that form, so `perfect_assignment = TRUE` should be set for the best results. Additionally, since the date still represents the order, I need to sort my data before running the simulation, to ensure its in the proper order.
 
@@ -436,13 +437,12 @@ The data.table version completes in `r datatable_time` seconds while the data.fr
 
 The data.table version may not be faster in all cases. Performance is mainly dependent on the size of the data, the number of observations in each period, and the total number of periods. For simulations where each period contains less than 500 observations or the total size is less than 1,000,000 rows, the data.table version will likely be slower. There is no hard and fast rule, you must make the judgment based on the data you have, the simulation you want to run, and the computing power of your system.
 
-The Thompson Sampling Corrections may introduce new errors, that we have not caught yet. If you get an error from an internal function call, we recommend switching to UCB1 which does not have the same issues, and reporting bug as an issue on package's [GitHub Repo](https://github.com/ryantmoore/whatifbandit).
+The Thompson Sampling Corrections may introduce new errors, that we have not caught yet. If you get an error from an internal function call, we recommend switching to UCB1 which does not have the same issues, and reporting bug as an issue on package's [GitHub Repo](https://github.com/ryantmoore/whatifbandit/issues).
 
 ### Error Handling
-`single_mab_simulation()` and `multiple_mab_simulation()` can have more than 20 arguments, so its easy to make a typo when calling the function. As a result, we provide helpful error messages to help you deduce what has gone wrong with your execution of the function. If a required column is not properly entered, or any of the arguments are invalid, a helpful error will be thrown to notify the user of any issues.
+`single_mab_simulation()` and `multiple_mab_simulation()` can have more than 20 arguments, so its easy to make a typo when calling the function. As a result, we provide helpful error messages to help you deduce what has gone wrong with your execution of the function. If a required column is not properly entered, not present in the data, not the correct data type or any of the other arguments are invalid, a helpful error will be thrown to notify the user of any issues.
 
 Here the condition column is missing:
-
 ```{r}
 try(single_mab_simulation(
   data = tanf,
@@ -458,6 +458,67 @@ try(single_mab_simulation(
     success_col = "success"
   )
 ))
+```
+Here the date column is the wrong type:
+```{r}
+new_data <- tanf
+new_data$appt_date <- as.character(new_data$appt_date)
+try(single_mab_simulation(
+  data = new_data,
+  assignment_method = "Date",
+  time_unit = "Week",
+  period_length = 1,
+  algorithm = "Thompson",
+  conditions = levels(tanf$condition),
+  whole_experiment = FALSE, perfect_assignment = TRUE,
+  prior_periods = "All",
+  blocking = FALSE,
+  data_cols = c(
+    id_col = "ic_case_id",
+    success_col = "success",
+    condition_col = "condition",
+    date_col = "appt_date"
+  )
+))
+
+```
+Here the `period_length` is longer than the data:
+```{r}
+try(single_mab_simulation(
+  data = tanf,
+  assignment_method = "Date",
+  time_unit = "Week",
+  period_length = 1000,
+  algorithm = "Thompson",
+  conditions = levels(tanf$condition),
+  whole_experiment = FALSE, perfect_assignment = TRUE,
+  prior_periods = "All",
+  blocking = FALSE,
+  data_cols = c(
+    id_col = "ic_case_id",
+    success_col = "success",
+    condition_col = "condition",
+    date_col = "appt_date"
+  )
+))
+
+try(single_mab_simulation(
+  data = tanf,
+  assignment_method = "Batch",
+  time_unit = "Week",
+  period_length = 5000,
+  algorithm = "Thompson",
+  conditions = levels(tanf$condition),
+  whole_experiment = FALSE, perfect_assignment = TRUE,
+  prior_periods = "All",
+  blocking = FALSE,
+  data_cols = c(
+    id_col = "ic_case_id",
+    success_col = "success",
+    condition_col = "condition"
+  )
+))
+
 ```
 While here `control_augment > 1`:
 ```{r}
@@ -497,9 +558,10 @@ try(multiple_mab_simulation(
   times = 5, seeds = runif(5)
 ))
 ```
-However the function won't catch if the columns or other arguments are swapped, but are still valid. Be careful when typing, as an error resulting from this mistake will be harder to deduce based on the message.
 
-Here the `success_col` is specified to an existing numeric column, but it does not contain the required information:
+However the function won't catch if the columns or other arguments are swapped, but still contain valid data types. Be careful when typing, as an error resulting from this mistake will be harder to deduce based on the message.
+
+Here the `success_col` is specified to an existing numeric column, but it does not contain the required information, so the error is harder to decipher:
 
 ```{r}
 try(single_mab_simulation(
@@ -518,5 +580,8 @@ try(single_mab_simulation(
   )
 ))
 ```
+These checks can also be overly strict at times and despite thorough testing, may result in errors
+when the arguments should be perfectly valid. 
 
+If you encounter an issue like this, please report the bug immediately on [GitHub](https://github.com/ryantmoore/whatifbandit/issues), and set `check_args = FALSE` to skip the argument checking.
 ## References {.appendix}

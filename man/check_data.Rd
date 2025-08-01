@@ -36,21 +36,20 @@ groups are assigned correctly. For "Date", observations will be considered in ch
 "Individual" assignment can be time-consuming for larger datasets.}
 
 \item{period_length}{A numeric value of length 1; represents the length of each treatment period.
-If assignment method is "Date", this refers to the
-length of periods by your specified \code{time_unit} (i.e., if "Day", 10 would be 10 days).
+If assignment method is "Date", this length refers the number of units specified in\code{time_unit}
+(i.e., if "Day", 10 would be 10 days).
 If assignment method is "Batch", this refers to the number of people in each batch. This factor
 contributes most to the computational cost of calling the function, as large batch sizes make each iteration of
-the simulation run slower, while each additional period adds time because of the extra iterations.
-If you have a large dataset, consider passing it as a data.table.}
+the simulation run slower, while each additional period adds time because of the extra iterations, so be exercise
+caution with this argument.}
 
 \item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "Date".
 Acceptable values are "Day", "Week", or "Month". "Month" is a special case that is useful when an experiment
 defines the months differently then the genuine dates, i.e. an experiment considers August as starting
 the in the second half of July, or when exact calender months are required for the periods, not just
 a lengths of time in the month range. As such it requires an additional column to be provided,
-with the exact month desired for each observation, and it treats each observation
-as occurring on the first of that month. It is also useful when dates are not provided, here
-synthetic dates should be created placing each observation on the first on its specified month.}
+with the exact month desired for each observation passed as an integer, character, or factor. Each
+observation is treated as occurring on the first of each month.}
 
 \item{perfect_assignment}{A logical value; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
@@ -65,7 +64,7 @@ Nothing; Throws an error if the data does not meet the specifications
 of the trial based on user settings.
 }
 \description{
-Helper to \code{\link[=check_args]{check_args()}}. This function accepts the data and checks
-whether it has Unique ID's and a valid date type \code{date_col}.
+Helper to \code{\link[=validate_inputs]{validate_inputs()}}. This function accepts the data and checks
+whether it has Unique ID's whether the period length is valid.
 }
 \keyword{internal}

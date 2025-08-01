@@ -58,7 +58,7 @@ these observations do not currently have dates of success. If these values are \
 in the next phase and treated as failures by the Multi-Arm-Bandit assignment, because they do not have a record
 of occurring.
 
-Observations that were successful in the original experiment, got assigned a new treatment, then
+Observations that were successful in the original experiment, got assigned a new treatment, and then
 imputed as success again, had their original date kept. This assumes that the treatment has no individual
 treatment effect on the date of success, which may or may not be valid depending on the context of the
 experiment.

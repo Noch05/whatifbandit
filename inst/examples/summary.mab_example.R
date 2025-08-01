@@ -24,12 +24,11 @@ x <- single_mab_simulation(
   )
 )
 
-# Calling `summary` Returns a summary table for the trial
+# Producing a Summary Table
 # Defaults to 95% Normal Confidence Intervals
-# for the Augmented Inverse Probability Estimates
 summary(x)
 
-# We can also change the confidence level to anything between 0 and 1
+# Changing to 70% Confidence Level
 summary(x, level = 0.7)
 
 # Invalid levels throw an error

@@ -15,12 +15,13 @@ single_mab_simulation(
   blocking,
   data_cols,
   control_augment = 0,
+  random_assign_prop = 0,
+  ndraws = 5000,
   time_unit = NULL,
   period_length = NULL,
   block_cols = NULL,
   verbose = FALSE,
-  ndraws = 5000,
-  random_assign_prop = 0
+  check_args = TRUE
 )
 }
 \arguments{
@@ -32,11 +33,14 @@ of a traditional Randomized Controlled Trial (RCT). data.frames will be converte
 groups are assigned correctly. For "Date", observations will be considered in chronological order.
 "Individual" assignment can be time-consuming for larger datasets.}
 
-\item{algorithm}{A character string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1".}
+\item{algorithm}{A character string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1". Algorithm
+defines the adaptive assignment process. Mathematical details on these algorithms
+can be found in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
+\href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}
 
 \item{conditions}{A named character vector containing treatment conditions. The elements
 of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
-\code{unique(df[[condition_col_name]])}. The names of each element are used to reference the contents but are not inherently important;
+\code{unique(df[[condition_col]])}. The names of each element are used to reference the contents but are not inherently important;
 choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
 of the trial in this vector must have the name "Control".}
 
@@ -56,12 +60,12 @@ you have exact dates treatments were assigned.}
 \item{whole_experiment}{A logical value; if TRUE, uses all past experimental data for imputing outcomes.
 If FALSE, uses only data available up to the current period. In large datasets or with a high number
 of periods, setting this to FALSE can be more computationally intensive, though not a significant
-contributor to total runtime.}
+contributor to total run time.}
 
 \item{blocking}{A logical value; whether or not to use treatment blocking. Treatment blocking is used to ensure an even-enough
 distribution of treatment conditions across blocks. For example, blocking by gender would mean the randomized assignment should
 split treatments evenly not just throughout the sample (so for 4 arms, 25-25-25-25), but also within each block, so 25\% of men
-would receive each treatment and 25\% of women the same.}
+would receive each treatment and 25\% of women the same. This is most useful when the blocks are uneven or have some geographic meaning.}
 
 \item{data_cols}{A named character vector containing the names of columns in \code{data} as strings:
 \itemize{
@@ -77,58 +81,76 @@ Used to simulate imperfect information on the part of researchers conducting an 
 }}
 
 \item{control_augment}{A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.
-Default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}}
+Default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.}
+
+\item{random_assign_prop}{a numeric value ranging from 0 to 1; proportion of each wave to be assigned new treatments randomly,
+1 - \code{random_assign_prop} is the proportion assigned through the bandit procedure. For example if this is set to 0.1, then
+for each wave 10\% of the observations will be randomly assigned to a new treatment, while the remaining 90\% will be assigned according
+to UCB1 or Thompson result. It is not recommended to use this in conjunction with \code{control_augment}. If batch sizes are small,
+and the number of rows is calculate to be less than 1, and probability sampling approach is used where each row in the batch
+will have a \code{random_assign_prop} probability of being selected for random assignment. Otherwise the number is rounded to
+a whole number, and that many rows are selected for random assignment.}
+
+\item{ndraws}{A numeric value; When Thompson Sampling direct calculations fail, draws from a simulated posterior
+will be used to approximate the Thompson Sampling probabilities. This is the number of simulations to use, the default
+is 5000 to match the default parameter \code{\link[bandit:best_binomial_bandit_sim]{bandit::best_binomial_bandit_sim()}}, but might need to be raised or lowered depending on performance and accuracy
+concerns.}
 
 \item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "Date".
 Acceptable values are "Day", "Week", or "Month". "Month" is a special case that is useful when an experiment
 defines the months differently then the genuine dates, i.e. an experiment considers August as starting
 the in the second half of July, or when exact calender months are required for the periods, not just
 a lengths of time in the month range. As such it requires an additional column to be provided,
-with the exact month desired for each observation, and it treats each observation
-as occurring on the first of that month. It is also useful when dates are not provided, here
-synthetic dates should be created placing each observation on the first on its specified month.}
+with the exact month desired for each observation passed as an integer, character, or factor. Each
+observation is treated as occurring on the first of each month.}
 
 \item{period_length}{A numeric value of length 1; represents the length of each treatment period.
-If assignment method is "Date", this refers to the
-length of periods by your specified \code{time_unit} (i.e., if "Day", 10 would be 10 days).
+If assignment method is "Date", this length refers the number of units specified in\code{time_unit}
+(i.e., if "Day", 10 would be 10 days).
 If assignment method is "Batch", this refers to the number of people in each batch. This factor
 contributes most to the computational cost of calling the function, as large batch sizes make each iteration of
-the simulation run slower, while each additional period adds time because of the extra iterations.
-If you have a large dataset, consider passing it as a data.table.}
+the simulation run slower, while each additional period adds time because of the extra iterations, so be exercise
+caution with this argument.}
 
 \item{block_cols}{A character vector of variables to block by. This vector should not be named.}
 
 \item{verbose}{A logical value; whether or not to print intermediate messages. Default is FALSE.}
 
-\item{ndraws}{A numeric value; When Thompson Sampling direct calculations fail, draws from a simulated posterior
-will be used to approximate the Thompson Sampling probabilities. This is the number of simulations to use, the default
-is 5000 to match the default parameter \code{\link[bandit:best_binomial_bandit_sim]{bandit::best_binomial_bandit_sim()}}, but might need to be raised or lowered depending on perfomance and accuracy
-concerns.}
-
-\item{random_assign_prop}{a numeric value ranging from 0 to 1; proportion of each wave to be assigned new treatments randomly,
-(1 - \code{random_assign_prop}) is the proportion assigned through the bandit procedure. For example if this is set to 0.1, then
-for each wave 10\% of the observations will be randomly assigned to a new treatment, while the remaining 90\% will be assigned according
-to UCB1 or Thompson result. It is not recommended to use this in conjunction with \code{control_augment}.}
+\item{check_args}{Logical; Whether or not to robustly check whether arguments are valid. Default is TRUE, and recommended
+not to be changed.}
 }
 \value{
-An object of class \code{mab}, which is a named list containing:
+An object of class \code{mab}, containing:
 \itemize{
-\item \code{final_data}: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
-\item \code{bandits}: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period.
-\item \code{assignment_probs}: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
+\item \code{final_data}: The processed tibble or data.table, containing new columns pertaining to the results of the trial. Specifically Contains:
+\itemize{
+\item \code{period_number}: Assigned period for simulation.
+\item \verb{mab_*}: New treatment conditions and outcomes under the simulation.
+\item \code{impute_req}: Whether observation required an imputed outcome.
+\item \verb{*block}: variables relating to the block specified for treatment blocking, and the concatenation
+of that block with an observations original treatment, and new treatment.
+\item \verb{aipw_*} Columns containing individual Augmented Inverse Probability Weighted estimates for each observation and treatment arm.
+\item \verb{prior_rate_*}: Columns containing success rate for each treatment arm, from all periods before the observations period of the simulation.
+\item \verb{*_assign_prob}: Columns containing probability of being assigned each treatment at the given period.
+}
+\item \code{bandits}: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period. Wide format,
+each row is a period, and each columns is a treatment.
+\item \code{assignment_probs}: A tibble or data.table containing the probability of being assigned each treatment arm at a given period. Wide format,
+each row is a period, and each columns is a treatment.
 \item \code{estimates}: A tibble or data.table containing the
 AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
-sample means and variances, for each treatment arm.
+sample means and variances, for each treatment arm. Long format, treatment arm, and estimate type are columns along with the mean
+and variance.
 \item \code{settings}: A named list of the configuration settings used in the trial.
-\item \code{original_data}: The original \code{data} object passed to the function (data.frame, tibble, or data.table).
 }
 }
 \description{
 Performs a single Multi-Arm Bandit (MAB) trial using experimental data from
 an original randomized controlled trial, and adaptive inference strategies as described in
-Hadad et al. (2021). Wraps around the internal implementation functions, and performs the full
+\href{https://www.pnas.org/doi/pdf/10.1073/pnas.2014602118}{Hadad et al. (2021)}.
+Wraps around the internal implementation functions, and performs the full
 MAB pipeline: preparing inputs, assigning treatments and imputing successes, and adaptively weighted
-estimation.
+estimation. See the details and vignettes to learn more.
 }
 \details{
 This function simulates a single adaptive Multi-Arm-Bandit trial, using experimental data from
@@ -142,37 +164,41 @@ Probabilities via the \href{https://cran.r-project.org/package=randomizr}{random
 package, or as the treatment with the highest UCB1 statistic, while implementing the specific
 treatment blocking and control augmentation specified. More details on bandit algorithms can in
 \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
-\href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}. When control augmentation is used
-it requires at least the specified proportion be allocated to the control group, at which case the
-probabilities of being assigned to each treatment are adjusted to achieve this, while also ensuring
-that no probability becomes negative. This is NOT a Contextual bandit,
-and as such the package does not support the acceptance of any covariate information nor use
-any when performing the bandit-based assignment.
+\href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.
 
-If \code{perfect_assignment} is FALSE, at this step, some of the successes may be masked, if they occurred after
-the specified treatment assignment date for that given period, but these will be unmasked in later periods.
+If a hybrid assignment is specified, here is where it is implemented in the simulation.
+\code{control_augment} is a threshold probability for the control group, and the assignment probabilities
+are changed to ensure that threshold is met. The other hybrid assignment is \code{random_assign_prop}. Here, the specified
+proportion of the data is set aside to assign treatments randomly, while the rest of the data is assigned through the bandit procedure.
 
-After treatments are assigned, observations with new treatments have their outcomes imputed, once again
-using the \href{https://cran.r-project.org/package=randomizr}{randomizr} package, with any
-specified treatment blocking implemented. The probabilities of success used to impute,
-are estimated via the grouped means of successes from the original data, either from the whole trial, or
-up to that period, defined by \code{whole_experiment}. If \code{perfect_assignment} is FALSE, only for those
-who switched treatments and changed to success have their success date imputed using a grouped average from the
-treatment block in the period. However if an observation changed treatment, but had succeeded under the
-original experiment, they did not have their date changed.
+After assigning treatments, observations with new treatments have their outcomes imputed, with any
+specified treatment blocking. The probabilities of success used to impute,
+are estimated via the grouped means of successes from the original data either from the whole trial, or
+up to that period, defined by \code{whole_experiment}.
+
+If \code{perfect_assignment} is FALSE, new dates of success will be imputed using averages
+of those dates in the period, grouped by treatment block. Observations for which
+their treatment changed, but their outcome was success in the original and simulation, do not have their date changed.
+When the next period starts, the success dates are checked against the maximum/latest \code{assignment_date} for the period, and
+if any success occurs after that, it is treated as a failure for the purpose of the bandit decision algorithms.
 
 At the end of the simulation the results are aggregated together to calculate the Adaptively Weighted
 Augmented Inverse Probability Estimator (Hadad et al. 2021) using the mean and variance formulas provided, under
-the constant allocation rate adaptive schema. These estimators are unbiased and asymptotically normal.
+the constant allocation rate adaptive schema. These estimators are unbiased and asymptotically normal under the adaptive
+conditions which is why they are used. For a complete view of their properties, reading the paper is recommended.
 
 This procedure has the potential to be computationally expensive and time-consuming. Performance
-depends on the relative size of each period, number of periods, and overall size of the dataset. This function
-supports  data.tables, which are used when passed, but otherwise a combination of dplyr and base R is used.
+depends on the relative size of each period, number of periods, and overall size of the dataset. This function has
+separate support for data.frames and data.tables. If a data.frame is passed, the function uses a combination of dplyr, tidyr
+and base R to shape data, and run the simulation. However, if a data.table is passed the function exclusively uses the data.table
+code for all the same operations.
+
 In general, smaller batches run faster under base R, while larger ones could benefit from the performance
-and memory efficiencies provided by data.table. An example dataset with 3,520 observations under individual assignment
-takes 20-30 seconds under Base R and 40-50 seconds under data.table. It has also been observed, that larger datasets
-at least over a  3 million rows, can cause numerical instability in the calculations. Internal safeguards exist
-to prevent this, but to best way to preempt any issues, is to set \code{prior_periods} to a low number.
+and memory efficiencies provided by data.table. However, we've observed larger datasets can cause numerical
+instability with some calculations in the Thompson Sampling procedure. Internal safeguards exist to prevent this, but
+the best way to preempt any issues is to set \code{prior_periods} to a low number.
+
+For more information about how to use the function, please view the vignette.
 }
 \examples{
  # Loading Example Data and defining conditions
@@ -228,68 +254,28 @@ to prevent this, but to best way to preempt any issues, is to set \code{prior_pe
    )
  )
 
- ## If you misspecify or miss an argument, an appropriate error will be given
- ## I specified Month assignment but did not provide a month_column in my data
-
- try(single_mab_simulation(
+ ## 5 Day Periods with Thompson, Treatment Blocking by Service Center,
+ ## Whole experiment FALSE, and hybrid assignment 10\% random, 90\% bandit.
+ single_mab_simulation(
    data = tanf,
    assignment_method = "Date",
-   time_unit = "Month",
-   algorithm = "UCB1",
-   period_length = 1,
-   prior_periods = "All",
-   blocking = FALSE,
-   whole_experiment = TRUE,
-   perfect_assignment = FALSE,
-   conditions = conditions,
-   data_cols = c(
-     condition_col = "condition",
-     id_col = "ic_case_id",
-     success_col = "success",
-     date_col = "appt_date"
-   )
- ))
-
- # I specified a negative period_length
-
- try(single_mab_simulation(
-   data = tanf,
-   assignment_method = "Date",
-   time_unit = "Month",
-   algorithm = "UCB1",
-   period_length = -500,
-   prior_periods = "All",
-   blocking = FALSE,
-   whole_experiment = TRUE,
-   perfect_assignment = FALSE,
-   conditions = conditions,
-   control_augment = 0,
-   data_cols = c(
-     condition_col = "condition",
-     id_col = "ic_case_id",
-     success_col = "success",
-     date_col = "appt_date"
-   )
- ))
-
- # I forgot to add column containing the successes of the original experiment
-
- try(single_mab_simulation(
-   data = tanf,
-   assignment_method = "Batch",
+   time_unit = "Day",
    algorithm = "Thompson",
-   period_length = 500,
+   period_length = 5,
    prior_periods = "All",
-   blocking = FALSE,
+   blocking = TRUE,
+   block_cols = c("service_center"),
    whole_experiment = TRUE,
    perfect_assignment = TRUE,
    conditions = conditions,
-   control_augment = 0,
+   random_assign_prop = 0.1,
    data_cols = c(
      condition_col = "condition",
-     id_col = "ic_case_id"
+     id_col = "ic_case_id",
+     success_col = "success",
+     date_col = "appt_date"
    )
- ))
+ )
 }
 \references{
 Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
