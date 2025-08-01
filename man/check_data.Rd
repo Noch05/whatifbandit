@@ -4,7 +4,14 @@
 \alias{check_data}
 \title{Checking for valid input data}
 \usage{
-check_data(data, data_cols, assignment_method, period_length, time_unit)
+check_data(
+  data,
+  data_cols,
+  assignment_method,
+  period_length,
+  time_unit,
+  perfect_assignment
+)
 }
 \arguments{
 \item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
@@ -44,6 +51,14 @@ a lengths of time in the month range. As such it requires an additional column t
 with the exact month desired for each observation, and it treats each observation
 as occurring on the first of that month. It is also useful when dates are not provided, here
 synthetic dates should be created placing each observation on the first on its specified month.}
+
+\item{perfect_assignment}{A logical value; if TRUE, assumes perfect information for treatment assignment
+(i.e., all outcomes are observed regardless of the date).
+If FALSE, hides outcomes not yet theoretically observed, based
+on the dates treatments would have been assigned for each wave.
+This is useful when simulating batch-based assignment where treatments were assigned
+on a given day whether or not all the information from a prior batch was available and
+you have exact dates treatments were assigned.}
 }
 \value{
 Nothing; Throws an error if the data does not meet the specifications

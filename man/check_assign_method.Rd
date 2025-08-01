@@ -33,7 +33,7 @@ If you have a large dataset, consider passing it as a data.table.}
 }
 \value{
 Nothing; Throws an error if the user is missing necessary arguments to
-assign treatments or passes invalid ones
+assign treatments or passes invalid ones.
 }
 \description{
 Helper to \code{\link[=check_args]{check_args()}}. This function accepts arguments relating

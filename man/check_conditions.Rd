@@ -38,6 +38,8 @@ requirements for the user's specified settings.
 }
 \description{
 Helper to \code{\link[=check_args]{check_args()}}. This function accepts the conditions
-vector and checks whether it is valid.
+vector and checks whether it is valid based on the number of conditions in the
+vector versus the data set, and if the names have been properly assigned for
+control augmentation if used.
 }
 \keyword{internal}

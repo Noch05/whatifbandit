@@ -89,7 +89,8 @@ check_args <- function(data,
     data = data, data_cols = data_cols,
     assignment_method = assignment_method,
     period_length = period_length,
-    time_unit = time_unit
+    time_unit = time_unit,
+    perfect_assignment
   )
 
   # Checking Conditions Vector
@@ -109,7 +110,6 @@ check_args <- function(data,
 #' @description Helper to [check_args()]. This function accepts the user's
 #' settings for the Multi-Arm-Bandit trial, and checks whether columns in the data have been properly
 #' specified based on these settings.
-#'
 #' @inheritParams single_mab_simulation
 #' @inheritParams cols
 #' @returns Throws an error if columns which are required have not been declared
@@ -131,6 +131,16 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, data_co
     success_date_col = "perfect_assignment is FALSE",
     assignment_date_col = "perfect_assignment is FALSE"
   )
+  data_types <- c("numeric", "logical", "character", "factor", "Date", "POSIXt")
+  required_types <- list(
+    id_col = data_types,
+    success_col = data_types[1:2],
+    condition_col = data_types[3:4],
+    date_col = data_types[5:6],
+    month_col = data_types[5:6],
+    success_date_col = data_types[5:6],
+    assignment_date_col = data_types[5:6]
+  )
 
   # Determine required columns based on settings
   required_cols <- c("id_col", "success_col", "condition_col")
@@ -145,22 +155,28 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, data_co
     required_cols <- c(required_cols, "success_date_col", "assignment_date_col")
   }
   req_reasons <- all_reasons[required_cols]
+  required_types <- required_types[required_cols]
 
   # Check for missing required columns
-  #
-  purrr::walk2(required_cols, req_reasons, ~ {
-    missing_input <- !.x %in% names(data_cols)
-    if (missing_input) {
-      rlang::abort(c(sprintf("Required column `%s` is not declared in `data_cols`.", .x),
-        "x" = paste0("reason: ", .y)
+  purrr::pwalk(list(required_cols, req_reasons, required_types), ~ {
+    if (!..1 %in% names(data_cols)) {
+      rlang::abort(c(sprintf("Required column `%s` is not declared in `data_cols`.", ..1),
+        "x" = sprintf("reason: %s", ..2)
       ))
     }
-
-    missing_data <- !data_cols[[.x]]$name %in% names(data)
-    if (missing_data) {
-      rlang::abort(c(sprintf("Required column `%s` is not found in provided `data`.", .x),
-        "x" = paste0("reason: ", .y),
-        "x" = paste0("Your column: ", data_cols[[.x]]$name)
+    provided_col <- data_cols[[..1]]$name
+    if (!provided_col %in% names(data)) {
+      rlang::abort(c(sprintf("Required column `%s` is not found in provided `data`.", ..1),
+        "x" = sprintf("reason: %s", ..2),
+        "x" = sprintf("Your column: %s", provided_col)
+      ))
+    }
+    data_type <- class(data[[data_cols[[..1]]$name]])
+    if (!data_type %in% ..3) {
+      rlang::abort(c(
+        sprintf("Required column `%s` is the wrong data type.", ..1),
+        "x" = sprintf("Your type: %s", data_type),
+        "i" = sprintf("Permissible types: %s", paste(..3, collapse = ", "))
       ))
     }
   })
@@ -212,9 +228,9 @@ check_logical <- function(...) {
 #--------------------------------------------------------------------------------
 #' @title Checking if inputs are proportions
 #' @name check_prop
-#' @returns Nothing; Throws an error if any input is not a valid proportion
+#' @returns Nothing; Throws an error if any input is not a valid proportion between 0 and 1
 #' @description Helper to [check_args()]. This function accepts the user's
-#' settings for proportion arguments and checks if they are valid.
+#' settings for proportion arguments and checks if they are valid proportions between 0 and 1
 #' @inheritParams check_logical
 #' @keywords internal
 check_prop <- function(...) {
@@ -236,10 +252,11 @@ check_prop <- function(...) {
 #-------------------------------------------------------------------------------
 #' @title Checking if inputs are positive integers or a valid string
 #' @name check_posint
-#' @returns Nothing; Throws an error if any input is not a positive whole number or not
-#' a valid string
+#' @returns Nothing; Throws an error if any input is not a positive whole number or
+#' a valid string.
 #' @description Helper to [check_args()]. This function accepts the user's
-#' settings for integer arguments and check if they are valid
+#' settings for integer arguments and checks if they are valid positive
+#' integers or are a one of the valid strings for the argument.
 #' @inheritParams check_logical
 #' @keywords internal
 check_posint <- function(...) {
@@ -280,7 +297,9 @@ posint <- function(x) {
 #' @returns Nothing; Throws an error if the conditions vector does not meet the
 #' requirements for the user's specified settings.
 #' @description Helper to [check_args()]. This function accepts the conditions
-#' vector and checks whether it is valid.
+#' vector and checks whether it is valid based on the number of conditions in the
+#' vector versus the data set, and if the names have been properly assigned for
+#' control augmentation if used.
 #' @inheritParams single_mab_simulation
 #' @keywords internal
 check_conditions <- function(conditions, data, data_cols, control_augment) {
@@ -310,18 +329,13 @@ check_conditions <- function(conditions, data, data_cols, control_augment) {
 #' whether it has Unique ID's and a valid date type `date_col`.
 #' @inheritParams single_mab_simulation
 #' @keywords internal
-check_data <- function(data, data_cols, assignment_method, period_length, time_unit) {
+check_data <- function(data, data_cols, assignment_method, period_length, time_unit,
+                       perfect_assignment) {
   unique_ids <- length(unique(data[[data_cols$id$name]]))
   if (unique_ids != nrow(data)) {
     rlang::abort(paste(data_cols$id$name, "is not a unique identifier; a unique ID for each observation is required."))
   }
-  if (assignment_method == "Date" && !lubridate::is.Date(data[[data_cols$date$name]])) {
-    rlang::abort(c(
-      "`date_col` must be of type Date.",
-      "x" = sprintf("You passed: %s", typeof(data[[data_cols$date$name]])),
-      "i" = "Consider parsing your data to dates with `lubridate::parse_date_time()`."
-    ))
-  }
+
   if (assignment_method == "Batch" && period_length > nrow(data)) {
     rlang::abort(c("`period_length` cannot be larger than data size",
       "x" = sprintf("You data has %d, and your batch size is %d", nrow(data), period_length)
@@ -352,7 +366,7 @@ check_data <- function(data, data_cols, assignment_method, period_length, time_u
 #' @title Checking for valid assignment methods
 #' @name check_assign_method
 #' @returns Nothing; Throws an error if the user is missing necessary arguments to
-#' assign treatments or passes invalid ones
+#' assign treatments or passes invalid ones.
 #' @description Helper to [check_args()]. This function accepts arguments relating
 #' to how treatment waves are assigned, and checks if they are valid, and if all
 #' supporting arguments are passed as necessary the data and checks
