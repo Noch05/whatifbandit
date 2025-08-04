@@ -1,6 +1,6 @@
 Package: whatifbandit
 Title: Analyzing Randomized Experiments as Multi-Arm Bandits
-Version: 0.0.0.9000
+Version: 0.2.0
 Authors@R: c(
     person("Noah", "Ochital", , "noahochital@icloud.com", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0009-0398-2963")),
