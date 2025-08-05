@@ -2,9 +2,9 @@ Package: whatifbandit
 Title: Analyzing Randomized Experiments as Multi-Arm Bandits
 Version: 0.2.0
 Authors@R: c(
-    person("Noah", "Ochital", , "noahochital@icloud.com", role = c("aut", "cre"),
+    person("Noah", "Ochital", , "noahochital@icloud.com", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0009-0009-0398-2963")),
-    person("Ryan T", "Moore", , "rtm@american.edu", role = "ctb",
+    person("Ryan T", "Moore", , "rtm@american.edu", role = c("ctb", "cph"),
            comment = c(ORCID = "0000-0002-3916-8113"))
   )
 Description: Simulates the results of completed randomized controlled
@@ -14,7 +14,7 @@ Description: Simulates the results of completed randomized controlled
     success for each treatment arm under the adaptive conditions. Provides
     customization options to simulate perfect/imperfect information,
     stationary/non-stationary bandits, treatment blocking, along with
-    control augmentation, and hybrid strategies for assigning treatment
+    control augmentation, and other hybrid strategies for assigning treatment
     arms.
 License: GPL (>= 3) + file LICENSE
 BugReports: https://github.com/ryantmoore/whatifbandit/issues

@@ -15,6 +15,25 @@
 #' `...` is provided to be compatible with `print()`, but no other arguments
 #' change the output.
 #' @export
+#' @examples
+#' # Running a Trial
+#' x <- single_mab_simulation(
+#'   data = tanf,
+#'   algorithm = "Thompson",
+#'   assignment_method = "Batch",
+#'   period_length = 1750,
+#'   conditions = as.character(levels(tanf$condition)),
+#'   prior_periods = "All",
+#'   blocking = FALSE,
+#'   whole_experiment = TRUE,
+#'   perfect_assignment = TRUE,
+#'   data_cols = c(
+#'     id_col = "ic_case_id",
+#'     success_col = "success",
+#'     condition_col = "condition"
+#'   )
+#' )
+#' print(x)
 print.mab <- function(x, ...) {
   print_mab(x)
   base::cat("----------------------------------------------------- \n")
@@ -84,15 +103,13 @@ print_mab <- function(mab) {
 #' created by [single_mab_simulation()] but
 #' this provides a simple shortcut, which is useful when testing many
 #' different simulations.
-#'
+#' @returns Tibble containing summary information from the trial.
 #' @references
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
 #' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” \emph{Proceedings of the National Academy of Sciences of the United States of America} 118
 #' (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 #'
 #' @example inst/examples/summary.mab_example.R
-#' @returns tibble containing each treatment, the final Thompson/UCB1 Statistic,
-#' the AIPW estimate and Normal CI based on user supplied level.
 summary.mab <- function(object, level = 0.95, ...) {
   check_level(level)
   periods <- base::max(object$bandits$period_number)

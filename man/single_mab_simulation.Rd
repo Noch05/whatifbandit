@@ -157,6 +157,7 @@ This function simulates a single adaptive Multi-Arm-Bandit trial, using experime
 a traditional randomized controlled trial. It is intended to help researchers understand how an adaptive design could have performed
 but it is not a substitute for a real experiment, and for that reason it does not generate the synthetic data for the simulation.
 The input data should come from a randomized trial to ensure the assumptions made during the simulation are valid.
+\subsection{Implementation}{
 
 At each period, either the Thompson Probabilities or UCB1 statistics are calculated based on
 the outcomes from the number of \code{prior_periods} specified. New treatments are then assigned randomly using the Thompson
@@ -186,6 +187,9 @@ At the end of the simulation the results are aggregated together to calculate th
 Augmented Inverse Probability Estimator (Hadad et al. 2021) using the mean and variance formulas provided, under
 the constant allocation rate adaptive schema. These estimators are unbiased and asymptotically normal under the adaptive
 conditions which is why they are used. For a complete view of their properties, reading the paper is recommended.
+}
+
+\subsection{Performance Concerns}{
 
 This procedure has the potential to be computationally expensive and time-consuming. Performance
 depends on the relative size of each period, number of periods, and overall size of the dataset. This function has
@@ -199,6 +203,7 @@ instability with some calculations in the Thompson Sampling procedure. Internal 
 the best way to preempt any issues is to set \code{prior_periods} to a low number.
 
 For more information about how to use the function, please view the vignette.
+}
 }
 \examples{
  # Loading Example Data and defining conditions

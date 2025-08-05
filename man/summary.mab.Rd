@@ -15,8 +15,7 @@ Defaults to 0.95}
 \item{...}{additional arguments.}
 }
 \value{
-tibble containing each treatment, the final Thompson/UCB1 Statistic,
-the AIPW estimate and Normal CI based on user supplied level.
+Tibble containing summary information from the trial.
 }
 \description{
 Summarizes the Results of a Single Multi-Arm Bandit Trial. Provides

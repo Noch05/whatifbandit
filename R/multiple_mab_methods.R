@@ -13,6 +13,26 @@
 #' `...` is provided to be compatible with `print()`, no other arguments
 #' change output.
 #' @export
+#' @examples
+#' # Running Multiple Simulations
+#' x <- multiple_mab_simulation(
+#'   data = tanf,
+#'   algorithm = "Thompson",
+#'   assignment_method = "Batch",
+#'   period_length = 1750,
+#'   conditions = as.character(levels(tanf$condition)),
+#'   prior_periods = "All",
+#'   blocking = FALSE,
+#'   whole_experiment = TRUE,
+#'   perfect_assignment = TRUE,
+#'   data_cols = c(
+#'     id_col = "ic_case_id",
+#'     success_col = "success",
+#'     condition_col = "condition"
+#'   ),
+#'   times = 5, seeds = sample.int(5)
+#' )
+#' print(x)
 print.multiple.mab <- function(x, ...) {
   settings <- x$settings
   print_mab(x)
@@ -45,6 +65,7 @@ print.multiple.mab <- function(x, ...) {
 #' does not have any additional arguments.
 #'
 #' @example inst/examples/summary.multiple.mab_example.R
+#' @returns Tibble containing summary information for repeated trials.
 #' @export
 
 summary.multiple.mab <- function(object, level = 0.95, ...) {

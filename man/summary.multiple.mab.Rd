@@ -14,6 +14,9 @@ Defaults to 0.95}
 
 \item{...}{additional arguments.}
 }
+\value{
+Tibble containing summary information for repeated trials.
+}
 \description{
 Summarizes results of of multiple Multi-Arm Bandit Trials
 }

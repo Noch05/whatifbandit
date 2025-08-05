@@ -153,6 +153,11 @@ through the \href{https://cran.r-project.org/package=future}{future} and
 \href{https://cran.r-project.org/package=furrr}{furrr} packages.
 }
 \details{
+Note that when called if data.table has not been attached already it will be when \code{future.map()} runs,
+which will print a message to console. This does not mean that if you pass a tibble or data.frame, that data.table will
+used.
+\subsection{Implementation}{
+
 This function simulates multiple adaptive Multi-Arm-Bandit Trials, using experimental
 data from a traditional randomized experiment. It follows the same core procedure as
 \code{\link[=single_mab_simulation]{single_mab_simulation()}} (see details, there for a description), but conducts
@@ -167,6 +172,9 @@ passing doubles (even ones that are mathematical integers) will result in an err
 with a known seed beforehand to generate the values. Additionally, it is highly recommended to
 set \code{keep_data} to FALSE as the memory used by the function will exponentially increase. This can cause
 significant performance issues, especially if your system must swap to disk because memory is full.
+}
+
+\subsection{Parallel Processing}{
 
 The function provides support for parallel processing via the \href{https://cran.r-project.org/package=future}{future} and
 \href{https://cran.r-project.org/package=furrr}{furrr} packages. When conducting a large
@@ -178,6 +186,7 @@ Users running in a High Performance Computing environment (HPC), are encouraged 
 for their respective HPC scheduler.
 Note that parallel processing is not guaranteed to work on all systems, and may require additional setup or debugging effort
 from the user. For any issues, users are encouraged to consult the documentation of the above packages.
+}
 }
 \examples{
 # Multiple_mab_simulation() is a useful tool for running multiple trials
@@ -224,9 +233,9 @@ object.size(x)
 
 ## Parallel Execution using future: 
 ## Check the future and furrr documentation for more details on possible options
-\dontrun{
-
-  future::plan("multisession", workers = 6)
+if(requireNamespace("future", quietly = TRUE)) {
+  try(
+  future::plan("multisession", workers = 2)
   multiple_mab_simulation(data = tanf,
                           assignment_method = "Batch",
                           period_length = 25,
@@ -245,6 +254,7 @@ object.size(x)
                           verbose = FALSE, times = 5, seeds = seeds, keep_data = TRUE
   )
   future::plan("sequential")
+)
 }
 
 }

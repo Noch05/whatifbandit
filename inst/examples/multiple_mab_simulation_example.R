@@ -42,9 +42,9 @@ object.size(x)
 
 ## Parallel Execution using future: 
 ## Check the future and furrr documentation for more details on possible options
-\dontrun{
-
-  future::plan("multisession", workers = 6)
+if(requireNamespace("future", quietly = TRUE)) {
+  try(
+  future::plan("multisession", workers = 2)
   multiple_mab_simulation(data = tanf,
                           assignment_method = "Batch",
                           period_length = 25,
@@ -63,5 +63,6 @@ object.size(x)
                           verbose = FALSE, times = 5, seeds = seeds, keep_data = TRUE
   )
   future::plan("sequential")
+)
 }
 

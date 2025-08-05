@@ -133,6 +133,8 @@
 #' but it is not a substitute for a real experiment, and for that reason it does not generate the synthetic data for the simulation.
 #' The input data should come from a randomized trial to ensure the assumptions made during the simulation are valid.
 #'
+#' ## Implementation
+#'
 #' At each period, either the Thompson Probabilities or UCB1 statistics are calculated based on
 #' the outcomes from the number of `prior_periods` specified. New treatments are then assigned randomly using the Thompson
 #' Probabilities via the \href{https://cran.r-project.org/package=randomizr}{randomizr}
@@ -161,6 +163,8 @@
 #' Augmented Inverse Probability Estimator (Hadad et al. 2021) using the mean and variance formulas provided, under
 #' the constant allocation rate adaptive schema. These estimators are unbiased and asymptotically normal under the adaptive
 #' conditions which is why they are used. For a complete view of their properties, reading the paper is recommended.
+#'
+#' ## Performance Concerns
 #'
 #' This procedure has the potential to be computationally expensive and time-consuming. Performance
 #' depends on the relative size of each period, number of periods, and overall size of the dataset. This function has

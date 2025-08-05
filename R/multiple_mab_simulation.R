@@ -28,6 +28,11 @@
 #' }
 #' @example inst/examples/multiple_mab_simulation_example.R
 #' @details
+#' Note that when called if data.table has not been attached already it will be when `future.map()` runs,
+#' which will print a message to console. This does not mean that if you pass a tibble or data.frame, that data.table will
+#' used.
+#'
+#' ## Implementation
 #' This function simulates multiple adaptive Multi-Arm-Bandit Trials, using experimental
 #' data from a traditional randomized experiment. It follows the same core procedure as
 #' [single_mab_simulation()] (see details, there for a description), but conducts
@@ -42,6 +47,8 @@
 #' with a known seed beforehand to generate the values. Additionally, it is highly recommended to
 #' set `keep_data` to FALSE as the memory used by the function will exponentially increase. This can cause
 #' significant performance issues, especially if your system must swap to disk because memory is full.
+#'
+#' ## Parallel Processing
 #'
 #' The function provides support for parallel processing via the \href{https://cran.r-project.org/package=future}{future} and
 #' \href{https://cran.r-project.org/package=furrr}{furrr} packages. When conducting a large

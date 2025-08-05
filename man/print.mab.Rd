@@ -26,3 +26,23 @@ element of the output object.
 \code{...} is provided to be compatible with \code{print()}, but no other arguments
 change the output.
 }
+\examples{
+# Running a Trial
+x <- single_mab_simulation(
+  data = tanf,
+  algorithm = "Thompson",
+  assignment_method = "Batch",
+  period_length = 1750,
+  conditions = as.character(levels(tanf$condition)),
+  prior_periods = "All",
+  blocking = FALSE,
+  whole_experiment = TRUE,
+  perfect_assignment = TRUE,
+  data_cols = c(
+    id_col = "ic_case_id",
+    success_col = "success",
+    condition_col = "condition"
+  )
+)
+print(x)
+}
