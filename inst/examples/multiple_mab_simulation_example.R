@@ -40,29 +40,29 @@ x$final_data_nest <- NULL
 object.size(x)
 
 
-## Parallel Execution using future: 
+## Parallel Execution using future:
 ## Check the future and furrr documentation for more details on possible options
-if(requireNamespace("future", quietly = TRUE)) {
-  try(
-  future::plan("multisession", workers = 2)
-  multiple_mab_simulation(data = tanf,
-                          assignment_method = "Batch",
-                          period_length = 25,
-                          whole_experiment = TRUE,
-                          blocking = FALSE,
-                          perfect_assignment = TRUE,
-                          algorithm = "Thompson",
-                          prior_periods = "All",
-                          control_augment = 0,
-                          conditions = conditions,
-                          data_cols = c(
-                            condition_col = "condition",
-                            id_col = "ic_case_id",
-                            success_col = "success"
-                          ),
-                          verbose = FALSE, times = 5, seeds = seeds, keep_data = TRUE
-  )
-  future::plan("sequential")
-)
+if (requireNamespace("future", quietly = TRUE)) {
+    # Set a Proper "plan"
+    \donttest{future::plan("multisession", workers = 2)}
+    multiple_mab_simulation(
+      data = tanf,
+      assignment_method = "Batch",
+      period_length = 25,
+      whole_experiment = TRUE,
+      blocking = FALSE,
+      perfect_assignment = TRUE,
+      algorithm = "Thompson",
+      prior_periods = "All",
+      control_augment = 0,
+      conditions = conditions,
+      data_cols = c(
+        condition_col = "condition",
+        id_col = "ic_case_id",
+        success_col = "success"
+      ),
+      verbose = FALSE, times = 5, seeds = seeds, keep_data = TRUE
+    )
+    # Always Set back to sequential to close processes
+   \donttest{future::plan("sequential")}
 }
-
