@@ -10,15 +10,17 @@ Authors@R: c(
 Description: Simulates the results of completed randomized controlled
     trials, as if they had been conducted as adaptive Multi-Arm Bandit
     (MAB) trials instead. Augmented inverse probability weighted
-    estimation (AIPW), outlined by Hadad et al. (2021) doi:10.1073/pnas.2014602118,
-    is used to robustly estimate the probability of
-    success for each treatment arm under the adaptive conditions. Provides
-    customization options to simulate perfect/imperfect information,
-    stationary/non-stationary bandits, treatment blocking, along with
-    control augmentation, and other hybrid strategies for assigning treatment
-    arms. The methods used in simulation were inspired Offer-Westort et al.
-    (2021) doi:10.1111/ajps.12597.
+    estimation (AIPW), outlined by Hadad et al. (2021)
+    doi:10.1073/pnas.2014602118, is used to robustly estimate the
+    probability of success for each treatment arm under the adaptive
+    conditions. Provides customization options to simulate
+    perfect/imperfect information, stationary/non-stationary bandits,
+    treatment blocking, along with control augmentation, and other hybrid
+    strategies for assigning treatment arms. The methods used in
+    simulation were inspired Offer-Westort et al.  (2021)
+    doi:10.1111/ajps.12597.
 License: GPL (>= 3) + file LICENSE
+URL: https://github.com/ryantmoore/whatifbandit
 BugReports: https://github.com/ryantmoore/whatifbandit/issues
 Depends: 
     R (>= 4.1.0)
