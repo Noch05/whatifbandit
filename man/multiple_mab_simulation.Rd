@@ -163,7 +163,8 @@ data from a traditional randomized experiment. It follows the same core procedur
 \code{\link[=single_mab_simulation]{single_mab_simulation()}} (see details, there for a description), but conducts
 more than one simulation. This allows researchers to gauge the variance
 of the simulation procedure itself, and use that to form an empirical sampling distribution
-of the AIPW estimates, instead of relying around asymptotic normality (Hadad et al. 2021) for inference.
+of the AIPW estimates, instead of relying around asymptotic normality
+[\href{https://www.pnas.org/doi/10.1073/pnas.2014602118}{Hadad et al. (2021)}] for inference.
 
 The settings specified here have the same meaning as in \code{\link[=single_mab_simulation]{single_mab_simulation()}}, outside of the additional
 parameters like \code{times} and \code{seeds} which define the number of multiple trials and random seeds to ensure reproducibility.
@@ -231,32 +232,32 @@ x$final_data_nest <- NULL
 object.size(x)
 
 
-## Parallel Execution using future: 
+## Parallel Execution using future:
 ## Check the future and furrr documentation for more details on possible options
-if(requireNamespace("future", quietly = TRUE)) {
-  try(
-  future::plan("multisession", workers = 2)
-  multiple_mab_simulation(data = tanf,
-                          assignment_method = "Batch",
-                          period_length = 25,
-                          whole_experiment = TRUE,
-                          blocking = FALSE,
-                          perfect_assignment = TRUE,
-                          algorithm = "Thompson",
-                          prior_periods = "All",
-                          control_augment = 0,
-                          conditions = conditions,
-                          data_cols = c(
-                            condition_col = "condition",
-                            id_col = "ic_case_id",
-                            success_col = "success"
-                          ),
-                          verbose = FALSE, times = 5, seeds = seeds, keep_data = TRUE
-  )
-  future::plan("sequential")
-)
+if (requireNamespace("future", quietly = TRUE)) {
+    # Set a Proper "plan"
+    \donttest{future::plan("multisession", workers = 2)}
+    multiple_mab_simulation(
+      data = tanf,
+      assignment_method = "Batch",
+      period_length = 25,
+      whole_experiment = TRUE,
+      blocking = FALSE,
+      perfect_assignment = TRUE,
+      algorithm = "Thompson",
+      prior_periods = "All",
+      control_augment = 0,
+      conditions = conditions,
+      data_cols = c(
+        condition_col = "condition",
+        id_col = "ic_case_id",
+        success_col = "success"
+      ),
+      verbose = FALSE, times = 5, seeds = seeds, keep_data = TRUE
+    )
+    # Always Set back to sequential to close processes
+   \donttest{future::plan("sequential")}
 }
-
 }
 \references{
 Bengtsson, Henrik. 2025. “Future: Unified Parallel and Distributed Processing in R for Everyone.”

@@ -38,7 +38,8 @@
 #' [single_mab_simulation()] (see details, there for a description), but conducts
 #' more than one simulation. This allows researchers to gauge the variance
 #' of the simulation procedure itself, and use that to form an empirical sampling distribution
-#' of the AIPW estimates, instead of relying around asymptotic normality (Hadad et al. 2021) for inference.
+#' of the AIPW estimates, instead of relying around asymptotic normality
+#' \[\href{https://www.pnas.org/doi/10.1073/pnas.2014602118}{Hadad et al. (2021)}\] for inference.
 #'
 #' The settings specified here have the same meaning as in [single_mab_simulation()], outside of the additional
 #' parameters like `times` and `seeds` which define the number of multiple trials and random seeds to ensure reproducibility.
