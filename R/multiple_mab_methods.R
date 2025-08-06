@@ -43,7 +43,9 @@ print.multiple.mab <- function(x, ...) {
 #------------------------------------------------------------------------------
 #' Summary Generic for "multiple.mab" class
 #' @description
-#' Summarizes results of of multiple Multi-Arm Bandit Trials
+#' Summarizes results of of multiple Multi-Arm Bandit Trials. Provides empirically estimated
+#' and normally approximated confidence intervals on AIPW estimates for probability of success, and
+#' the number of times each arm was the chosen as the best treatment across all simulations.
 #' @param object `multiple.mab` object created by [multiple_mab_simulation]
 #' @param level Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
 #' Defaults to 0.95
@@ -110,7 +112,9 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
       times_best = dplyr::if_else(base::is.na(times_best), 0, times_best),
       level = level
     ) |>
-    dplyr::filter(estimator == "AIPW")
+    dplyr::filter(estimator == "AIPW") |>
+    dplyr::select(-estimator) |>
+    dplyr::rename("average_probability_of_success" = "estimate_avg")
   return(summary)
 }
 
@@ -126,7 +130,6 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
 #' \item `hist`: Shows histograms for each treatment condition's proportion of success across trials.
 #' \item `estimate`: Shows proportion of success estimates using specified normal or empirical confidence intervals.
 #' }
-#' @param estimator Estimator to plot; Either "AIPW", "Sample" or "Both"; used by `hist` and `estimate`.
 #' @param save Logical; Whether or not to save the plot to disk; FALSE by default.
 #' @param path String; File directory to save file.
 #' @param ... arguments to pass to `ggplot2:geom_*` function (e.g. `color`, `linewidth`, `alpha`, `bins` etc.)
@@ -150,13 +153,13 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
 #' @export
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
 
-plot.multiple.mab <- function(x, type, estimator = NULL, cdf = NULL, level = 0.95, save = FALSE, path = NULL, ...) {
+plot.multiple.mab <- function(x, type, cdf = NULL, level = 0.95, save = FALSE, path = NULL, ...) {
   rlang::check_installed("ggplot2")
   plot <- switch(type,
     "summary" = plot_summary(x = x, ...),
-    "hist" = plot_hist(x = x, estimator = estimator, ...),
+    "hist" = plot_hist(x = x, ...),
     "estimate" = plot_mult_estimates(
-      x = x, estimator = estimator, cdf = cdf,
+      x = x, cdf = cdf,
       level = level, ...
     ),
     rlang::abort("Invalid Type: Valid types are `hist`, `summary`, estimate`.")
@@ -180,7 +183,6 @@ plot.multiple.mab <- function(x, type, estimator = NULL, cdf = NULL, level = 0.9
 plot_summary <- function(x, ...) {
   rlang::check_installed("ggplot2")
   summary(x) |>
-    dplyr::filter(estimator == "AIPW") |>
     ggplot2::ggplot(ggplot2::aes(x = mab_condition, y = times_best)) +
     ggplot2::geom_bar(stat = "identity", ...) +
     ggplot2::labs(
@@ -201,15 +203,13 @@ plot_summary <- function(x, ...) {
 #' @inheritParams plot.multiple.mab
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
 #' @keywords internal
-plot_hist <- function(x, estimator, ...) {
+plot_hist <- function(x, ...) {
   rlang::check_installed("ggplot2")
-  estimator_arg <- check_estimator(estimator)
 
   x$estimates |>
-    dplyr::filter(estimator %in% estimator_arg) |>
     ggplot2::ggplot(ggplot2::aes(x = mean, y = ggplot2::after_stat(density))) +
     ggplot2::geom_histogram(...) +
-    ggplot2::facet_grid(~ mab_condition + estimator) +
+    ggplot2::facet_grid(~mab_condition) +
     ggplot2::labs(
       x = "Estimate", y = "Density",
       title = "Estimate Distributions Across Trials"
@@ -226,10 +226,9 @@ plot_hist <- function(x, estimator, ...) {
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
 #' @keywords internal
 
-plot_mult_estimates <- function(x, estimator, cdf, level, ...) {
+plot_mult_estimates <- function(x, cdf, level, ...) {
   rlang::check_installed("ggplot2")
   check_level(level)
-  estimator_arg <- check_estimator(estimator)
   if (base::is.null(cdf)) {
     rlang::abort("Invalid Estimator: Valid CDF's are, empirical`, and `normal`")
   }
@@ -240,15 +239,12 @@ plot_mult_estimates <- function(x, estimator, cdf, level, ...) {
   )
 
   summary(x, level = level) |>
-    dplyr::filter(estimator %in% estimator_arg) |>
-    dplyr::select(!!!rlang::syms(cols), estimator, mab_condition, estimate_avg) |>
-    ggplot2::ggplot(ggplot2::aes(x = estimate_avg, y = mab_condition)) +
+    dplyr::select(!!!rlang::syms(cols), mab_condition, average_probability_of_success) |>
+    ggplot2::ggplot(ggplot2::aes(x = average_probability_of_success, y = mab_condition)) +
     ggplot2::geom_errorbarh(ggplot2::aes(xmax = !!rlang::sym(cols[[1]]), xmin = !!rlang::sym(cols[[2]])), ...) +
-    ggplot2::facet_grid(~estimator) +
     ggplot2::theme_minimal() +
     ggplot2::labs(
-      x = "Estimate", y = "Treatment Arm",
+      x = "Probability of Succcess (AIPW)", y = "Treatment Arm",
       title = "Uncertainy Around Treatment Arm Estimates"
-    ) +
-    ggplot2::theme(panel.spacing = ggplot2::unit(2, "lines"))
+    )
 }

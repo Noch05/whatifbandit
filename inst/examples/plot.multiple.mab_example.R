@@ -33,15 +33,15 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
   plot(x, type = "summary")
 
   # View a histogram of the AIPW estimates for each treatment.
-  plot(x, type = "hist", estimator = "AIPW")
+  plot(x, type = "hist")
 
   # Plotting AIPW confidence intervals using the empirical cdf, from the simulated
   # trials.
-  plot(x, type = "estimate", estimator = "AIPW", cdf = "empirical")
+  plot(x, type = "estimate", cdf = "empirical")
 
   # Changing the title, like any ggplot2 object.
   plot(x, type = "summary") + ggplot2::labs(title = "Your New Title")
 
   # Changing the bin width of the histogram.
-  plot(x, type = "hist", estimator = "AIPW", binwidth = 0.05)
+  plot(x, type = "hist", binwidth = 0.05)
 }

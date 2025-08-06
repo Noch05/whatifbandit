@@ -37,8 +37,8 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
 
   # Plotting Augmented Inverse Probability Estimates with confidence interval
   # By default it provides 95% Normal Confidence Intervals but this can be adjusted
-  plot(x, type = "estimate", estimator = "AIPW")
+  plot(x, type = "estimate")
 
   # Adjusting height of internal geom* argument. (`geom_errorbarh()`)
-  plot(x, type = "estimate", estimator = "AIPW", height = 0.4)
+  plot(x, type = "estimate", height = 0.4)
 }

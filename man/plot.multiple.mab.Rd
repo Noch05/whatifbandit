@@ -4,16 +4,7 @@
 \alias{plot.multiple.mab}
 \title{Plot Generic for \code{multiple.mab} objects}
 \usage{
-\method{plot}{multiple.mab}(
-  x,
-  type,
-  estimator = NULL,
-  cdf = NULL,
-  level = 0.95,
-  save = FALSE,
-  path = NULL,
-  ...
-)
+\method{plot}{multiple.mab}(x, type, cdf = NULL, level = 0.95, save = FALSE, path = NULL, ...)
 }
 \arguments{
 \item{x}{\code{multiple.mab} class object created by \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}}
@@ -24,8 +15,6 @@
 \item \code{hist}: Shows histograms for each treatment condition's proportion of success across trials.
 \item \code{estimate}: Shows proportion of success estimates using specified normal or empirical confidence intervals.
 }}
-
-\item{estimator}{Estimator to plot; Either "AIPW", "Sample" or "Both"; used by \code{hist} and \code{estimate}.}
 
 \item{cdf}{String; specifies the type of CDF to use when analyzing the estimates.
 valid CDFs are the 'empirical' CDF, the 'normal' CDF. Used when type = \code{estimate}. The 'normal' CDF uses the fact
@@ -95,16 +84,16 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
   plot(x, type = "summary")
 
   # View a histogram of the AIPW estimates for each treatment.
-  plot(x, type = "hist", estimator = "AIPW")
+  plot(x, type = "hist")
 
   # Plotting AIPW confidence intervals using the empirical cdf, from the simulated
   # trials.
-  plot(x, type = "estimate", estimator = "AIPW", cdf = "empirical")
+  plot(x, type = "estimate", cdf = "empirical")
 
   # Changing the title, like any ggplot2 object.
   plot(x, type = "summary") + ggplot2::labs(title = "Your New Title")
 
   # Changing the bin width of the histogram.
-  plot(x, type = "hist", estimator = "AIPW", binwidth = 0.05)
+  plot(x, type = "hist", binwidth = 0.05)
 }
 }

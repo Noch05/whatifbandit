@@ -125,25 +125,21 @@ run_test <- function(full_args, static_args, trial) {
       })
 
       levels <- runif(3)
-      estimators <- c("AIPW", "Sample", "both")
       purrr::walk(results, \(x) {
-        purrr::walk2(estimators, levels, \(est, level) {
-          expect_no_failure(plot(x, type = "estimate", estimator = est, level = level))
+        purrr::walk(levels, \(level) {
+          expect_no_failure(plot(x, type = "estimate", level = level))
         })
       })
     }
     if (trial == "multiple") {
       types <- c("hist", "estimate")
       cdfs <- c("normal", "empirical")
-      estimators <- c("AIPW", "Sample")
 
       purrr::walk(results, ~ plot(.x, type = "summary"))
       purrr::walk(results, \(x) {
-        purrr::walk(estimators, \(y) {
-          expect_no_failure(plot(x, type = "hist", estimator = y))
-          purrr::walk(cdfs, \(z) {
-            expect_no_failure(plot(x, type = "estimate", estimator = y, cdf = z))
-          })
+        expect_no_failure(plot(x, type = "hist"))
+        purrr::walk(cdfs, \(z) {
+          expect_no_failure(plot(x, type = "estimate", cdf = z))
         })
       })
     }

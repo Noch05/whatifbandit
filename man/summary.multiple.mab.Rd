@@ -18,7 +18,9 @@ Defaults to 0.95}
 Tibble containing summary information for repeated trials.
 }
 \description{
-Summarizes results of of multiple Multi-Arm Bandit Trials
+Summarizes results of of multiple Multi-Arm Bandit Trials. Provides empirically estimated
+and normally approximated confidence intervals on AIPW estimates for probability of success, and
+the number of times each arm was the chosen as the best treatment across all simulations.
 }
 \details{
 This summary provides the number of times each treatment arm was
@@ -67,7 +69,7 @@ x <- multiple_mab_simulation(
 summary(x) |> print(width = Inf)
 
 # Changing to 70\% confidence level
-summary(x, level = 0.7) |> dplyr::select(lower_normal:upper_empirical)
+summary(x, level = 0.7) |> print(width = Inf)
 
 # Invalid levels throw an error
 try(summary(x, level = 5))

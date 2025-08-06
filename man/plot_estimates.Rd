@@ -4,12 +4,10 @@
 \alias{plot_estimates}
 \title{Plot AIPW/Sample Estimates}
 \usage{
-plot_estimates(x, estimator, level = 0.95, ...)
+plot_estimates(x, level = 0.95, ...)
 }
 \arguments{
 \item{x}{\code{mab} class object created by \code{\link[=single_mab_simulation]{single_mab_simulation()}}}
-
-\item{estimator}{Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type.}
 
 \item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
 Defaults to 0.95}

@@ -4,12 +4,10 @@
 \alias{plot_mult_estimates}
 \title{Plots AIPW/Sample Estimates for each Arm}
 \usage{
-plot_mult_estimates(x, estimator, cdf, level, ...)
+plot_mult_estimates(x, cdf, level, ...)
 }
 \arguments{
 \item{x}{\code{multiple.mab} class object created by \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}}
-
-\item{estimator}{Estimator to plot; Either "AIPW", "Sample" or "Both"; used by \code{hist} and \code{estimate}.}
 
 \item{cdf}{String; specifies the type of CDF to use when analyzing the estimates.
 valid CDFs are the 'empirical' CDF, the 'normal' CDF. Used when type = \code{estimate}. The 'normal' CDF uses the fact

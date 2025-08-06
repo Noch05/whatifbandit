@@ -29,7 +29,7 @@ x <- multiple_mab_simulation(
 summary(x) |> print(width = Inf)
 
 # Changing to 70% confidence level
-summary(x, level = 0.7) |> dplyr::select(lower_normal:upper_empirical)
+summary(x, level = 0.7) |> print(width = Inf)
 
 # Invalid levels throw an error
 try(summary(x, level = 5))

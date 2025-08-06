@@ -4,12 +4,10 @@
 \alias{plot_hist}
 \title{Plots Distribution of AIPW and Sample estimates over trials}
 \usage{
-plot_hist(x, estimator, ...)
+plot_hist(x, ...)
 }
 \arguments{
 \item{x}{\code{multiple.mab} class object created by \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}}
-
-\item{estimator}{Estimator to plot; Either "AIPW", "Sample" or "Both"; used by \code{hist} and \code{estimate}.}
 
 \item{...}{arguments to pass to \verb{ggplot2:geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, \code{bins} etc.)}
 }

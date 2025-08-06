@@ -135,7 +135,7 @@ summary.mab <- function(object, level = 0.95, ...) {
       upper_bound = mean + normalq * sqrt(variance)
     ) |>
     dplyr::select(-variance, -estimator) |>
-    dplyr::rename("AIPW" = "mean") |>
+    dplyr::rename("estimated_probability_of_success" = "mean") |>
     dplyr::mutate(
       level = level,
       periods = periods
@@ -155,13 +155,12 @@ summary.mab <- function(object, level = 0.95, ...) {
 #' \itemize{
 #' \item `arm`: Shows Thompson Probability or UCB1 Statistic over the trial period.
 #' \item `assign`: Shows Assignment Probability/Proportion over trial period.
-#' \item `estimate`: Shows proportion of success estimates with user
-#' specified normal confidence intervals based on their estimated variance.
+#' \item `estimate`: Shows AIPW estimates for success probability with
+#' user specified normal confidence intervals based on their estimated variance.
 #' }
 #' @param save Logical; Whether or not to save the plot to disk; FALSE by default.
 #' @param path String; File directory to save file.
 #' @inheritParams summary.mab
-#' @param estimator Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type.
 #' @param ... arguments to pass to `ggplot2:geom_*` function (e.g. `color`, `linewidth`, `alpha`, etc.)
 #' @details
 #' The plot generic requires \href{https://cran.r-project.org/package=ggplot2}{ggplot2}
@@ -186,12 +185,12 @@ summary.mab <- function(object, level = 0.95, ...) {
 #' @example inst/examples/plot.mab_example.R
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
 
-plot.mab <- function(x, type, estimator = NULL, level = .95, save = FALSE, path = NULL, ...) {
+plot.mab <- function(x, type, level = .95, save = FALSE, path = NULL, ...) {
   rlang::check_installed("ggplot2")
   plot <- switch(type,
     "arm" = plot_arms(x = x, object = "bandits", ...),
     "assign" = plot_arms(x = x, object = "assignment_probs", ...),
-    "estimate" = plot_estimates(x = x, estimator = estimator, level = level, ...),
+    "estimate" = plot_estimates(x = x, level = level, ...),
     rlang::abort("Invalid Type: Specify `arm`, `assign`, or `estimate`")
   )
   if (save) {
@@ -264,25 +263,23 @@ plot_arms <- function(x, object, ...) {
 #' Plot Summary of AIPW estimates and variances for Each Treatment Arm.
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)`
 #' @keywords internal
-plot_estimates <- function(x, estimator, level = 0.95, ...) {
+plot_estimates <- function(x, level = 0.95, ...) {
   rlang::check_installed("ggplot2")
   check_level(level)
-  estimator_arg <- check_estimator(estimator)
   normalq <- base::abs(stats::qnorm((1 - level) / 2))
 
   x$estimates |>
-    dplyr::filter(estimator %in% estimator_arg) |>
+    dplyr::filter(estimator == "AIPW") |>
     ggplot2::ggplot(ggplot2::aes(x = mean, y = mab_condition)) +
     ggplot2::geom_errorbarh(
       ggplot2::aes(xmin = mean - normalq * sqrt(variance), xmax = mean + normalq * sqrt(variance)),
       ...
     ) +
     ggplot2::scale_x_continuous(breaks = base::seq(0, 1, 0.05), limits = base::range(0, 1)) +
-    ggplot2::facet_wrap(~estimator) +
     ggplot2::labs(
       x = "Probability of Success (AIPW)",
       y = "Treatment Condition",
-      title = "AIPW Estimates of Success"
+      title = "AIPW Estimated Success Probabilities"
     ) +
     ggplot2::theme_minimal()
 }

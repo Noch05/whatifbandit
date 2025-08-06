@@ -189,7 +189,8 @@ This object is also a custom `mab` class, that comes with several generic functi
 class(sim)
 sim
 ```
-The summary method presents the final Thompson/UCB1 calculation from after the trial concluded, the AIPW, its standard error and a 95% two tailed confidence interval based on a normal distribution.
+The summary method presents the final Thompson/UCB1 calculation from after the trial concluded, the AIPW estimate
+for the probability of success, its standard error and a 95% two tailed confidence interval based on a normal distribution.
 
 ```{r}
 sim_summary <- summary(sim)
@@ -199,17 +200,18 @@ The width of the confidence intervals can be changed in the `level` argument of 
 ```{r}
 # Inside Summary Call
 summary(sim, level = 0.8) |>
-  select(AIPW, SE, lower_bound, upper_bound, level) |>
+  select(estimated_probability_of_success, SE, lower_bound, upper_bound, level) |>
   print(width = Inf)
 # By hand
 quantile <- qnorm(0.2 / 2, lower.tail = FALSE)
 sim_summary |>
   mutate(
-    lower_bound = AIPW - SE * quantile,
-    upper_bound = AIPW + SE * quantile
+    lower_bound = estimated_probability_of_success - SE * quantile,
+    upper_bound = estimated_probability_of_success + SE * quantile
   ) |>
-  select(AIPW, SE, lower_bound, upper_bound)
+  select(estimated_probability_of_success, SE, lower_bound, upper_bound)
 ```
+
 #### Plotting
 You can also quickly create plots of the results using the plot method. This method uses ggplot2 to create visualizations to the package must be installed. `mab` supports 3 plot types, `"arm"`, `"assign"` and `"estimate"`, each providing different information about the results. These plots can be added to with `+` like any ggplot2 object, and arguments to the main `geom*` can be specified through the `...` argument. The geoms used are `geom_line()`, and `geom_errorbarh()`
 
@@ -227,11 +229,11 @@ plot(sim, type = "arm")
 plot(sim, type = "assign")
 ```
 
-`type = "estimate"` shows error bars on the AIPW or sample estimates using the associated variances. Just like the `summary()`, the confidence level can be specified.
+`type = "estimate"` shows error bars on the AIPW using the estimated variances. Just like the `summary()`, the confidence level can be specified.
 
 ```{r}
 #| fig.width: 5
-plot(sim, type = "estimate", estimator = "AIPW", level = 0.9, height = 0.4) +
+plot(sim, type = "estimate", level = 0.9, height = 0.4) +
   scale_x_continuous(breaks = seq(0, 1, .1), limits = range(0, 1))
 ```
 
@@ -351,24 +353,24 @@ summary(multiple_sims, level = 0.75) |> print(width = Inf)
 plot(multiple_sims, type = "summary")
 ```
 
-`type = hist` creates histograms showcasing the distribution for the AIPW, Sample, or both estimates for each
+`type = hist` creates histograms showcasing the distribution for the AIPW for each
 treatment arm, over the repeated trials.
 ```{r}
 #| fig.width: 5
-plot(multiple_sims, type = "hist", estimator = "AIPW", bins = 50)
+plot(multiple_sims, type = "hist", bins = 50)
 ```
 
 `type = estimate` is the same as for `mab`, but now the spread can be shown using either empirical or normal CDF.
 ```{r}
 #| fig.width: 5
-plot(multiple_sims,
-  type = "estimate", estimator = "AIPW",
+plot(multiple_sims,type = "estimate",
   cdf = "empirical", level = 0.99, height = 0.4
 ) +
   scale_x_continuous(breaks = seq(0, 1, .1), limits = range(0, 1))
 ```
+
 Once again, all the data used to construct these is available in the output, so you can perform your own custom
-analysis, or make more detailed plots by hand. 
+analysis, or make more detailed plots from scratch.
 
 ## Additional Topics
 

@@ -4,7 +4,7 @@
 \alias{plot.mab}
 \title{Plot Generic for \code{mab} objects}
 \usage{
-\method{plot}{mab}(x, type, estimator = NULL, level = 0.95, save = FALSE, path = NULL, ...)
+\method{plot}{mab}(x, type, level = 0.95, save = FALSE, path = NULL, ...)
 }
 \arguments{
 \item{x}{\code{mab} class object created by \code{\link[=single_mab_simulation]{single_mab_simulation()}}}
@@ -13,11 +13,9 @@
 \itemize{
 \item \code{arm}: Shows Thompson Probability or UCB1 Statistic over the trial period.
 \item \code{assign}: Shows Assignment Probability/Proportion over trial period.
-\item \code{estimate}: Shows proportion of success estimates with user
-specified normal confidence intervals based on their estimated variance.
+\item \code{estimate}: Shows AIPW estimates for success probability with
+user specified normal confidence intervals based on their estimated variance.
 }}
-
-\item{estimator}{Estimator to plot; Either "AIPW", "Sample" or "Both"; only used by "estimate" type.}
 
 \item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
 Defaults to 0.95}
@@ -93,10 +91,10 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
 
   # Plotting Augmented Inverse Probability Estimates with confidence interval
   # By default it provides 95\% Normal Confidence Intervals but this can be adjusted
-  plot(x, type = "estimate", estimator = "AIPW")
+  plot(x, type = "estimate")
 
   # Adjusting height of internal geom* argument. (`geom_errorbarh()`)
-  plot(x, type = "estimate", estimator = "AIPW", height = 0.4)
+  plot(x, type = "estimate", height = 0.4)
 }
 }
 \references{
