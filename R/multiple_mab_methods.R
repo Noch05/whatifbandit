@@ -114,7 +114,10 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
     ) |>
     dplyr::filter(estimator == "AIPW") |>
     dplyr::select(-estimator) |>
-    dplyr::rename("average_probability_of_success" = "estimate_avg")
+    dplyr::rename(
+      "average_probability_of_success" = "estimate_avg",
+      Treatment_Arm = mab_condition
+    )
   return(summary)
 }
 
@@ -183,7 +186,7 @@ plot.multiple.mab <- function(x, type, cdf = NULL, level = 0.95, save = FALSE, p
 plot_summary <- function(x, ...) {
   rlang::check_installed("ggplot2")
   summary(x) |>
-    ggplot2::ggplot(ggplot2::aes(x = mab_condition, y = times_best)) +
+    ggplot2::ggplot(ggplot2::aes(x = Treatment_Arm, y = times_best)) +
     ggplot2::geom_bar(stat = "identity", ...) +
     ggplot2::labs(
       x = "Treatment Arm",
@@ -239,8 +242,8 @@ plot_mult_estimates <- function(x, cdf, level, ...) {
   )
 
   summary(x, level = level) |>
-    dplyr::select(!!!rlang::syms(cols), mab_condition, average_probability_of_success) |>
-    ggplot2::ggplot(ggplot2::aes(x = average_probability_of_success, y = mab_condition)) +
+    dplyr::select(!!!rlang::syms(cols), Treatment_Arm, average_probability_of_success) |>
+    ggplot2::ggplot(ggplot2::aes(x = average_probability_of_success, y = Treatment_Arm)) +
     ggplot2::geom_errorbarh(ggplot2::aes(xmax = !!rlang::sym(cols[[1]]), xmin = !!rlang::sym(cols[[2]])), ...) +
     ggplot2::theme_minimal() +
     ggplot2::labs(
