@@ -32,7 +32,7 @@ of each treatment. Usually this means that better performing treatments will be 
 
 This vignette introduces the key functions of the whatifbandit package and how they to use them effectively. All that's required is data from a previous randomized experiment containing information about which treatment each observation was originally assigned too, and the original outcome. For a more detailed view of the exact adaptive procedures, and implementation, please refer to the function documentation instead.
 
-## Core Functions
+# Core Functionality
 
 whatifbandit provides 2 main functions for conducting simulations, `single_mab_simulation()` and `multiple_mab_simulation()`. Like their names suggest `single_mab_simulation()` runs only 1 simulation while `multiple_mab_simulation()` runs a user specified number of simulations. Internally both functions are similar, and share the same arguments except for the few additional ones `multiple_mab_simulation()` has to control the repeated trials. 
 
@@ -81,7 +81,7 @@ data(tanf)
 glimpse(tanf)
 ```
 
-## Single Simulations
+# Single Simulations
 
 `single_mab_simulation()` is a catch-all function for running the adaptive simulations, where each of its arguments tunes the settings of the simulation. All that's required for a simulation is a data.frame, containing a unique ID for every row, that row's original treatment, and their original outcome. These column names are passed to the function as strings. 
 
@@ -174,7 +174,7 @@ sim <- single_mab_simulation(
   control_augment = 0.2
 )
 ```
-### Analysis
+## Analysis
 `single_mab_simulation()` returns a condensed list with information pertinent to the analysis in 4 components:
 
 * `final_data` is the transformed input containing the treatment assignments and outcomes from the simulation, along with other new columns such as the probability of being assigned each treatment at each period, and the regression adjustment $\hat{m}(W)$ for the AIPW estimates.
@@ -212,7 +212,7 @@ sim_summary |>
   select(estimated_probability_of_success, SE, lower_bound, upper_bound)
 ```
 
-#### Plotting
+## Plotting
 You can also quickly create plots of the results using the plot method. This method uses ggplot2 to create visualizations to the package must be installed. `mab` supports 3 plot types, `"arm"`, `"assign"` and `"estimate"`, each providing different information about the results. These plots can be added to with `+` like any ggplot2 object, and arguments to the main `geom*` can be specified through the `...` argument. The geoms used are `geom_line()`, and `geom_errorbarh()`
 
 `type = "arm"` provides a view of each arm overtime, its relative probability of being the best, or UCB1 statistic.
@@ -240,7 +240,7 @@ plot(sim, type = "estimate", level = 0.9, height = 0.4) +
 All of the data used to create these plots and summary statistics is present in the original output, so you can easily create your own more detailed versions. Additionally, the information provided should also let you calculate other adaptive estimators, if you do not want to use the AIPW from Hadad et. al (2021) or want to specify another one of their proposed adaptive variance allocation methods.
 
 
-## Multiple Simulations
+# Multiple Simulations
 
 `multiple_mab_simulation()` is a shorthand function for executing multiple trials under the same settings. It is used to estimate the variance in the outcomes that occurs from the simulation process. Depending on the number of trials specified and the size of your dataset, running multiple simulations can be memory intensive, and have a long run time, so we recommend that you run a single simulation first to estimate how long multiple simulations would take.
 
@@ -322,7 +322,7 @@ Using 4 cores, it only takes `r as.numeric(parallel_time["elapsed"])` seconds to
 
 Using future comes with some new complexities. Generally, Windows users should use `plan("multisession")`, while Linux and MacOS users should use `plan("multisession")` or `plan("multicore")`. If your using a High Performance Computing Cluster, the future.batchtools backend should be used, with the proper plan for your HPC scheduler. A full treatment of futures it beyond the scope of this vignette. For details on how futures work, and specific future backends, please consult the [future](https://future.futureverse.org/) documentation.
 
-### Analyzing Repeated Simulations
+## Analyzing Repeated Simulations
 `multiple_mab_simulation()` returns the same elements as `single_mab_simulation()` except for `final_data`. When
 `keep_data = TRUE` the `final_data` element is a nested data.frame of all the `final_data` from each trial, and when
 `keep_data = FALSE` is is simply removed leaving only `bandits`, `assignment_probs`, `estimates`, and `settings`.
@@ -343,7 +343,7 @@ Just like with `mab` objects, the level of these confidence intervals can be cha
 ```{r}
 summary(multiple_sims, level = 0.75) |> print(width = Inf)
 ```
-#### Plotting
+## Plotting Repeated Simulations
 `multiple.mab` objects also have their own plot method with 3 distinct plots: "summary", "hist", and "estimate". Just like with `mab` these plots are created using ggplot2, so can be added to with `+` and arguments in `...` can be passed to the `geom*` functions inside. The geoms used are `geom_bar()`, `geom_histogram()`, and `geom_errorbarh()`.
 
 `type = summary` creates a bar graph showing how many times each treatment arm was selected as the best:
@@ -372,9 +372,9 @@ plot(multiple_sims,type = "estimate",
 Once again, all the data used to construct these is available in the output, so you can perform your own custom
 analysis, or make more detailed plots from scratch.
 
-## Additional Topics
+# Additional Topics
 
-### Large Datasets
+## Large Datasets
 Both `single_mab_simulation()` and `multiple_mab_simulation()` have support for large data objects, through data.table. When working with large datasets, data.tables are faster with common operations and more memory efficient than data.frames or tibbles, so using them can result in faster simulations.
 
 To turn a data.frame into a data.table simply call `data.table::setDT()` on your data.frame. Here is a quick example using the tanf dataset. To create a large object, I simply copied the object many times and bound the rows together. This should NEVER be done, as it invalidates the results and makes errors more prone, but here it okay as we just use it to gauge execution times.
@@ -441,7 +441,7 @@ The data.table version may not be faster in all cases. Performance is mainly dep
 
 The Thompson Sampling Corrections may introduce new errors, that we have not caught yet. If you get an error from an internal function call, we recommend switching to UCB1 which does not have the same issues, and reporting bug as an issue on package's [GitHub Repo](https://github.com/ryantmoore/whatifbandit/issues).
 
-### Error Handling
+## Error Handling
 `single_mab_simulation()` and `multiple_mab_simulation()` can have more than 20 arguments, so its easy to make a typo when calling the function. As a result, we provide helpful error messages to help you deduce what has gone wrong with your execution of the function. If a required column is not properly entered, not present in the data, not the correct data type or any of the other arguments are invalid, a helpful error will be thrown to notify the user of any issues.
 
 Here the condition column is missing:
@@ -586,4 +586,7 @@ These checks can also be overly strict at times and despite thorough testing, ma
 when the arguments should be perfectly valid. 
 
 If you encounter an issue like this, please report the bug immediately on [GitHub](https://github.com/ryantmoore/whatifbandit/issues), and set `check_args = FALSE` to skip the argument checking.
-## References {.appendix}
+
+# References 
+
+

@@ -1,7 +1,7 @@
 # whatifbandit
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/ryantmoore/whatifbandit/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ryantmoore/whatifbandit/actions/workflows/R-CMD-check.yaml)
-[![Codecov test coverage](https://codecov.io/gh/ryantmoore/whatifbandit/graph/badge.svg)](https://app.codecov.io/gh/ryantmoore/whatifbandit)
+[![R-CMD-check](https://github.com/Noch05/whatifbandit/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Noch05/whatifbandit/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/Noch05/whatifbandit/graph/badge.svg)](https://app.codecov.io/gh/Noch05/whatifbandit)
 <!-- badges: end -->
 
 
@@ -56,7 +56,7 @@ and a full suite of generic functions to accelerate post simulation analysis.
 install.packages("whatifbandit")
 
 # Install most recent version from GitHub
-remotes::install_github("ryantmoore/whatifbandit")
+remotes::install_github("Noch05/whatifbandit")
 ```
 ## Usage 
 ### Running 1 Trial
@@ -152,6 +152,6 @@ future::plan("sequential")
 For more complete information about the package details, please refer to the vignette tutorial and the full documentation.
 
 If you have any specific questions about the package, feel free to send me an at <noahochital@icloud.com>, and if you encounter
-any bugs, please create an issue on [GitHub](https://github.com/ryantmoore/whatifbandit/issues) with a reproducible example.
+any bugs, please create an issue on [GitHub](https://github.com/Noch05/whatifbandit/issues) with a reproducible example.
 
 

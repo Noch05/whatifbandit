@@ -20,8 +20,8 @@ Description: Simulates the results of completed randomized controlled
     simulation were inspired Offer-Westort et al.  (2021)
     <doi:10.1111/ajps.12597>.
 License: GPL (>= 3) + file LICENSE
-URL: https://github.com/ryantmoore/whatifbandit
-BugReports: https://github.com/ryantmoore/whatifbandit/issues
+URL: https://github.com/Noch05/whatifbandit
+BugReports: https://github.com/Noch05/whatifbandit/issues
 Depends: 
     R (>= 4.1.0)
 Imports: 
