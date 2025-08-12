@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Introduction to whatifbandit</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to whatifbandit</h1>
+
+
+
+<p>whatifbandit allows researchers to re-simulate their randomized
+experiments under adaptive experimental conditions. Running experiments
+can be costly and time-consuming, so this simulation tool allows
+researchers to explore what their results could have looked like under
+an adaptive experimental design. These re-analyses can inform the
+planning for future studies, allowing a researcher to justify an
+adaptive design for a future project, before running a costly
+experiment.</p>
+<p>Adaptive experimental designs, instead of randomly assigning
+treatments, take into account the relative performance of each
+treatment. Usually this means that better performing treatments will be
+assigned more participants at each assignment period, allowing for a
+convergence to the best treatment arm. These designs can shine in
+situations such as:</p>
+<ul>
+<li>Simple random assignment produces sample sizes too small to detect
+treatment effects.</li>
+<li>A researcher wants to test a many treatments, such as 20, or
+100.</li>
+<li>An experiment occurs over a long period of time.</li>
+<li>Finding the absolute best treatment takes precedence over gauging
+the effects of all treatments.</li>
+</ul>
+<p>This vignette introduces the key functions of the whatifbandit
+package and how they to use them effectively. All that’s required is
+data from a previous randomized experiment containing information about
+which treatment each observation was originally assigned too, and the
+original outcome. For a more detailed view of the exact adaptive
+procedures, and implementation, please refer to the function
+documentation instead.</p>
+<div id="core-functionality" class="section level1">
+<h1>Core Functionality</h1>
+<p>whatifbandit provides 2 main functions for conducting simulations,
+<code>single_mab_simulation()</code> and
+<code>multiple_mab_simulation()</code>. Like their names suggest
+<code>single_mab_simulation()</code> runs only 1 simulation while
+<code>multiple_mab_simulation()</code> runs a user specified number of
+simulations. Internally both functions are similar, and share the same
+arguments except for the few additional ones
+<code>multiple_mab_simulation()</code> has to control the repeated
+trials.</p>
+<div id="multi-arm-bandits-adaptive-assignment" class="section level2">
+<h2>Multi-Arm-Bandits: Adaptive Assignment</h2>
+<p>Adaptive experiments are a form of Multi-Arm-Bandit problem, where
+each treatment arm has an unknown probability of success, and a balance
+must be achieved between exploration and exploitation. In an applied
+setting, like an experiment, we want a design that explores the space of
+possible treatment options to find the best treatment, then exploit that
+best treatment. If we do too much exploitation, we have the chance to
+miss the true best treatment, but if we do too much exploration, then we
+miss out on the rewards from best treatment. Additionally, these unknown
+probabilities can change overtime in what is called a non-stationary
+bandit problem. The precise details of this problem is not important,
+but solutions to these bandit problems, in the form of decision
+algorithms, provide the basis for how whatifbandit simulates an adaptive
+trial.</p>
+<p>whatifbandit supports 2 decision algorithms, Thompson Sampling and
+UCB1. Thompson Sampling calculates the posterior probability of each
+treatment being the best treatment arm, and then those probabilities are
+matched to assign the treatment arms. In the Bernoulli case, which
+whatifbandit uses, this can be calculated from a beta distribution. UCB1
+instead calculates an upper confidence bound on the expected reward of
+each arm, and selects the maximum value <span class="citation">(Kuleshov
+and Precup 2014; Slivkins 2024; Offer-Westort, Coppock, and Green
+2021)</span>. A full treatment of these issues, is beyond the scope of
+this vignette, but this introduction hopefully allowed you to understand
+what is going on behind the whatifbandit simulation.</p>
+<p><span class="math display">\[
+\hat{\theta}^k_i=\mathbb{E}[\text{Beta}\left(1 + \text{successes}_i, 1 +
+\text{failures}_i\right)] \tag{Thompson}
+\]</span> <span class="math display">\[
+\arg\max_i  \left(\mathbb{E}[\text{Reward}_i] + \sqrt{\frac{2 \ln
+t}{n_i}} \right) \tag{UCB1}
+\]</span></p>
+</div>
+<div id="adaptive-inference" class="section level2">
+<h2>Adaptive Inference</h2>
+<p>Statistical inference under adaptive designs requires careful
+consideration. The sample mean cannot be used, <span class="math inline">\(\left(\bar{x} = \frac{1}{n}\sum_i^n x_i
+\right)\)</span>, because observations are no longer independently
+identically distributed(i.i.d.) as we have not assigned randomly.
+Instead we utilize an augmented inverse probability weighted estimator
+(AIPW), with a constant allocation of the variance across periods
+formulated by Hadad et. al (2021), whose formulas we use in the package.
+These estimators are unbiased and asymptotically normal under adaptive
+trials, so a normal distribution can be used by inference. Additionally,
+whatifbandit also allows for multiple simulations to easily estimate the
+variance of the procedure, and build an empirical distribution of the
+unbiased AIPW estimates, instead of just relying on the normal
+approximation.</p>
+<p><span class="math display">\[
+\widehat{\Gamma}^{AIPW}_t = \frac{\mathbb{I}\{W_t = w\}}{e_t(w)} Y_t +
+\left(1 - \frac{\mathbb{I}\{W_t = w\}}{e_t(w)} \right)\hat{m}(w) \tag
+{Individual} \\
+\]</span></p>
+<p><span class="math display">\[
+\widehat{Q}^h_t(W) =
+\frac{\sum_{t=1}^Th_t(w)\widehat{\Gamma}^{AIPW}_t}{\sum_{t=1}^Th_t(w)}
+\tag{Average}
+\]</span> <span class="math display">\[
+h_t(w) = \sqrt{\frac{e_t}{T}} \tag{Adaptive Weight} \\
+\]</span> <span class="math display">\[
+e_t(w) = Pr(W_t = w) \tag{Probability}
+\]</span> <span class="math display">\[
+\hat{m}(w) = \frac{1}{t - 1} \sum_{s=1}^{t-1} \left( \frac{1}{n(w)_s}
+\sum_{i=1}^{n(w)_s} x_i(w) \right) \tag{Grouped Mean}
+\]</span> The estimator is calculated by weighting the outcome against
+the probability of being assigned the treatment, and a conditional
+expectation/regression estimate based on the previous periods of
+assignment, then aggregating based on an adaptive weight. In the package
+the conditional expectation is estimated via a grouped mean, and the
+adaptive weight uses the constant allocation rate described in the paper
+<span class="citation">(Hadad et al. 2021)</span>. There are other
+allocation rates described but we did not implement any of them. These
+rates decide how much of the variance of the estimator should be
+allocated to each period of the trial, and is an important condition for
+the estimates to properly converge and be consistent <span class="citation">(Hadad et al. 2021)</span>.</p>
+</div>
+<div id="data" class="section level2">
+<h2>Data</h2>
+<p>To explore the functionality of whatifbandit, we will use the tanf
+dataset that comes with the package. This data contains the results of a
+randomized experiment, which tested the impact of different
+letter/notices on re-certification for the Temporary Assistance for
+Needy Families (TANF) program in Washington D.C. <span class="citation">(Moore et al. 2022)</span>. The original experiment
+tests 3 different conditions, over the course of 5 months.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">data</span>(tanf)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">glimpse</span>(tanf)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt; Rows: 3,517</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co">#&gt; Columns: 21</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co">#&gt; $ ic_case_id                       &lt;chr&gt; &quot;42c43695d7d06af7f66fd072c3ee2593&quot;, &quot;…</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co">#&gt; $ service_center                   &lt;chr&gt; &quot;Anacostia&quot;, &quot;Anacostia&quot;, &quot;Congress_H…</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; $ appt_date                        &lt;date&gt; 2017-06-26, 2017-06-26, 2017-06-26, …</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; $ condition                        &lt;fct&gt; no_letter, no_letter, no_letter, no_l…</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; $ recert_month                     &lt;fct&gt; July, July, July, July, July, July, J…</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; $ letter_sent_date                 &lt;date&gt; 2017-06-19, 2017-06-19, 2017-06-19, …</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; $ recert_id                        &lt;dbl&gt; 151516, 153505, 151887, 155288, 15033…</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; $ return_to_sender                 &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, N…</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt; $ pdc_status                       &lt;chr&gt; &quot;Closed&quot;, &quot;Closed&quot;, &quot;Pending closure&quot;…</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt; $ renewal_date                     &lt;date&gt; 2017-07-31, 2017-07-31, 2017-07-31, …</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt; $ notice_date.x                    &lt;date&gt; 2017-05-29, 2017-05-29, 2017-05-29, …</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt; $ days_betwn_notice_and_recert_due &lt;dbl&gt; 63, 63, 63, 63, 63, 63, 63, 63, 63, 6…</span></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co">#&gt; $ cert_period_start                &lt;date&gt; 2016-11-01, 2017-03-07, 2016-11-01, …</span></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co">#&gt; $ cert_period_end                  &lt;date&gt; 2017-07-31, 2017-07-31, 2017-07-31, …</span></span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a><span class="co">#&gt; $ recert_status                    &lt;chr&gt; &quot;Notice Sent&quot;, &quot;Notice Sent&quot;, &quot;Notice…</span></span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a><span class="co">#&gt; $ denial_reason                    &lt;chr&gt; &quot;No response from client&quot;, &quot;No respon…</span></span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a><span class="co">#&gt; $ recert_month_year                &lt;chr&gt; &quot;July 2017&quot;, &quot;July 2017&quot;, &quot;July 2017&quot;…</span></span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a><span class="co">#&gt; $ notice_date.y                    &lt;date&gt; 2017-05-29, 2017-05-29, 2017-05-29, …</span></span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a><span class="co">#&gt; $ recert_status_dcas               &lt;chr&gt; &quot;Denied due to failure of action&quot;, &quot;D…</span></span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a><span class="co">#&gt; $ date_of_recert                   &lt;date&gt; NA, NA, NA, 2017-06-27, NA, NA, NA, …</span></span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a><span class="co">#&gt; $ success                          &lt;dbl&gt; 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0…</span></span></code></pre></div>
+</div>
+</div>
+<div id="single-simulations" class="section level1">
+<h1>Single Simulations</h1>
+<p><code>single_mab_simulation()</code> is a catch-all function for
+running the adaptive simulations, where each of its arguments tunes the
+settings of the simulation. All that’s required for a simulation is a
+data.frame, containing a unique ID for every row, that row’s original
+treatment, and their original outcome. These column names are passed to
+the function as strings.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">single_mab_simulation</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="at">data =</span> tanf,</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  <span class="at">assignment_method =</span> <span class="st">&quot;Batch&quot;</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="at">period_length =</span> <span class="dv">1000</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="at">algorithm =</span> <span class="st">&quot;UCB1&quot;</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  <span class="at">conditions =</span> <span class="fu">levels</span>(tanf<span class="sc">$</span>condition),</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  <span class="at">whole_experiment =</span> <span class="cn">TRUE</span>, <span class="at">perfect_assignment =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>  <span class="at">prior_periods =</span> <span class="st">&quot;All&quot;</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>  <span class="at">blocking =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>  <span class="at">data_cols =</span> <span class="fu">c</span>(</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>    <span class="at">id_col =</span> <span class="st">&quot;ic_case_id&quot;</span>,</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>    <span class="at">success_col =</span> <span class="st">&quot;success&quot;</span>,</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>    <span class="at">condition_col =</span> <span class="st">&quot;condition&quot;</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>  )</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>)</span></code></pre></div>
+<p>Additionally, the function contains several options which can be used
+to tweak the simulation to the specification of the experiment. This
+current setup performs UCB1 sampling without treatment blocking with
+batch sizes of 1000 people, where the whole experiment is used for
+imputing outcomes, which is nothing like the conditions under the TANF
+experiment.</p>
+<p>The TANF experiment was blocked by D.C. Community and Human Services
+service centers, ensuring each center had a comparable number of
+participants in each group. To replicate this we set
+<code>block = TRUE</code> and add the service_center column to
+<code>block_cols</code> <span class="citation">(Moore et al.
+2022)</span>.</p>
+<p>The original experiment took place over 5 distinct months. To mirror
+that, we set <code>assignment_method = &quot;Date&quot;</code>,
+<code>time_unit = &quot;Month&quot;</code>, and <code>period_length = 1</code>,
+which creates 1 month long periods. Keep in mind that now
+<code>date_col</code> needs to be provided in
+<code>data_cols</code>.</p>
+<p>UCB1 sampling also only chooses 1 treatment per period, but because
+our periods time based now and each period is a large portion of the
+dataset, we should use Thompson Sampling probability matching instead.
+This ensures that we can see the treatment assignments evolve more over
+a time. Set <code>algorithm = &quot;Thompson&quot;</code> for this.</p>
+<p>The time component of the experiment must be taken into account.
+There is no guarantee, that by the time next month’s letters are sent
+out, that all the people who would recertify had done so. Additionally,
+when <code>whole_experiment = TRUE</code>, the full set of original
+results is used for outcome imputation, while setting it to FALSE more
+only uses the data up to the period, which can be a closer replication.
+To reflect these items, set <code>perfect_assignment = FALSE</code>, and
+<code>whole_experiment = FALSE</code>, along with including
+<code>success_date_col</code> and <code>assignment_date_col</code> in
+<code>data_cols</code>.</p>
+<p>With this configuration, if a success occurs after the date
+treatments are assigned, it is masked and treated as a failure. This
+simulates the researcher’s limited information as those late outcomes
+would not have been observed yet.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">single_mab_simulation</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="at">data =</span> tanf,</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="at">assignment_method =</span> <span class="st">&quot;Date&quot;</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="at">time_unit =</span> <span class="st">&quot;Month&quot;</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  <span class="at">period_length =</span> <span class="dv">1</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  <span class="at">algorithm =</span> <span class="st">&quot;Thompson&quot;</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  <span class="at">conditions =</span> <span class="fu">levels</span>(tanf<span class="sc">$</span>condition),</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  <span class="at">whole_experiment =</span> <span class="cn">FALSE</span>, <span class="at">perfect_assignment =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>  <span class="at">prior_periods =</span> <span class="st">&quot;All&quot;</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  <span class="at">blocking =</span> <span class="cn">TRUE</span>, <span class="at">block_cols =</span> <span class="fu">c</span>(<span class="st">&quot;service_center&quot;</span>),</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>  <span class="at">data_cols =</span> <span class="fu">c</span>(</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>    <span class="at">id_col =</span> <span class="st">&quot;ic_case_id&quot;</span>,</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>    <span class="at">date_col =</span> <span class="st">&quot;appt_date&quot;</span>,</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>    <span class="at">success_col =</span> <span class="st">&quot;success&quot;</span>,</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>    <span class="at">condition_col =</span> <span class="st">&quot;condition&quot;</span>,</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>    <span class="at">month_col =</span> <span class="st">&quot;recert_month&quot;</span>,</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>    <span class="at">success_date_col =</span> <span class="st">&quot;date_of_recert&quot;</span>,</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>    <span class="at">assignment_date_col =</span> <span class="st">&quot;letter_sent_date&quot;</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>  )</span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>)</span></code></pre></div>
+<p>You don’t always have to replicate the setting perfectly, reanalyzing
+the experiment as an adaptive trial also involves testing how the
+results change across different configurations, such as the size and
+length of periods, or the usage of <code>perfect_assignment</code> or
+<code>whole_experiment</code>. The only guidelines would be to use UCB1
+only when the period size is a relatively small component of the
+dataset, and only set <code>perfect_assignment = FALSE</code>, when you
+have dates that line up the periods you have set. If this is not the
+case, that all the successes will simply be masked, producing strange
+results.</p>
+<p>For example, we can experiment with using individual assignment, by
+setting <code>assignment_method = &quot;Individual&quot;</code>. This does not
+follow the original experiment, and we don’t have data in that form, so
+<code>perfect_assignment = TRUE</code> should be set for the best
+results. Additionally, since the date still represents the order, I need
+to sort my data before running the simulation, to ensure its in the
+proper order.</p>
+<p>Its also a strong assumption, that the true probabilities of success
+for each treatment are stationary over time. To account for this, I can
+set <code>prior_periods = 500</code>, to only look at the last 500
+periods, in this case observations, in the simulation when performing
+adaptive assignment. This ensures that the oldest periods, which might
+not be representative of the true probabilities, are not considered when
+assigning new treatments.</p>
+<p>Additionally, because the goal of this experiment is also to estimate
+a treatment effect for the letters, we might not want to leave 100% of
+the assignment up to the bandit algorithms. For this we have two
+methods, either control augmentation or a hybrid approach.</p>
+<p>Control augmentation ensures that the marked control group meets the
+specified probability threshold for assignment, and if not adjusts
+accordingly. For example, if I set <code>control_augment = 0.25</code>
+then I’m allocating 25% of each period to be assigned to the control
+group, and if a period has the control group at 15%, then the
+probabilities are changed accordingly.</p>
+<p>The hybrid approach sets aside a percentage of the dataset to be
+assigned randomly, so if I set <code>random_assign_prop = 0.2</code>,
+then I’m allocating 20% of each period to be assigned to treatments
+randomly, while 80% are assigned via the bandit algorithms.</p>
+<p>Whichever option to choose is up to you, but its recommended not to
+use them together. If there are 3 conditions, like in the TANF
+experiment, and you set <code>control_augment = 0.1</code>, and
+<code>random_assign_prop = 0.21</code>, then the minimum assignment
+probability for the control group is not 10% but 14.9% instead (0.1 *
+0.79 + 0.21/3 = 0.149). Here lets use
+<code>control_augment = 0.2</code>, and because of this I need to mark
+the control group by naming the <code>conditions</code> character
+vector, the other names don’t matter, they just cannot be NA or NULL. If
+I chose to use <code>random_assign_prob</code> instead the conditions
+vector can remain unnamed.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>tanf <span class="ot">&lt;-</span> <span class="fu">arrange</span>(tanf, appt_date)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>conditions <span class="ot">&lt;-</span> <span class="fu">setNames</span>(<span class="fu">levels</span>(tanf<span class="sc">$</span>condition), <span class="fu">c</span>(<span class="st">&quot;Control&quot;</span>, <span class="st">&quot;T1&quot;</span>, <span class="st">&quot;T2&quot;</span>))</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">single_mab_simulation</span>(</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="at">data =</span> tanf,</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="at">assignment_method =</span> <span class="st">&quot;Individual&quot;</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  <span class="at">algorithm =</span> <span class="st">&quot;Thompson&quot;</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  <span class="at">conditions =</span> conditions,</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  <span class="at">whole_experiment =</span> <span class="cn">FALSE</span>, <span class="at">perfect_assignment =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>  <span class="at">prior_periods =</span> <span class="dv">500</span>,</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>  <span class="at">blocking =</span> <span class="cn">TRUE</span>, <span class="at">block_cols =</span> <span class="fu">c</span>(<span class="st">&quot;service_center&quot;</span>),</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>  <span class="at">data_cols =</span> <span class="fu">c</span>(</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>    <span class="at">id_col =</span> <span class="st">&quot;ic_case_id&quot;</span>,</span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>    <span class="at">success_col =</span> <span class="st">&quot;success&quot;</span>,</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>    <span class="at">condition_col =</span> <span class="st">&quot;condition&quot;</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>  ),</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>  <span class="at">control_augment =</span> <span class="fl">0.2</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>)</span></code></pre></div>
+<div id="analysis" class="section level2">
+<h2>Analysis</h2>
+<p><code>single_mab_simulation()</code> returns a condensed list with
+information pertinent to the analysis in 4 components:</p>
+<ul>
+<li><code>final_data</code> is the transformed input containing the
+treatment assignments and outcomes from the simulation, along with other
+new columns such as the probability of being assigned each treatment at
+each period, and the regression adjustment <span class="math inline">\(\hat{m}(W)\)</span> for the AIPW estimates.</li>
+<li><code>bandits</code> contains either the Thompson Sampling or UCB1
+statistics from each period in the trial, the chart should be
+interpreted as the bandit calculation after that period occurred.</li>
+<li><code>assignment_probs</code> contains the probability of assignment
+from each period in the trial, the chart should be interpreted as the
+probability for that specific period.</li>
+<li><code>estimates</code> contains the AIPW and Sample estimates with
+variances for each treatment arm</li>
+<li><code>settings</code> contains the configuration for the
+simulation.</li>
+</ul>
+<p>This object is also a custom <code>mab</code> class, that comes with
+several generic functions to speed up analysis. The <code>print()</code>
+method displays the settings of the trial, and the
+<code>summary()</code> method aggregates the results.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">class</span>(sim)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;mab&quot;  &quot;list&quot;</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>sim</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; Summary for MAB Procedure: </span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt;  ----------------------------------------------------- </span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; Bandit Algorithm:      Thompson </span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt; Control Augmentation:  0 </span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; Bandit Assignment:     1 </span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; Randomized Assignment: 0 </span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; Perfect Assignment:    TRUE </span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; Whole Experiment:      FALSE </span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt; Blocking Variables:    service_center </span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; Assignment Method:     Date </span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; Period Length:         1 Month</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; Total Periods:         4 periods</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt; Prior Periods:         All periods</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt; Treatments:            3 treatment arms</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt; -----------------------------------------------------</span></span></code></pre></div>
+<p>The summary method presents the final Thompson/UCB1 calculation from
+after the trial concluded, the AIPW estimate for the probability of
+success, its standard error and a 95% two tailed confidence interval
+based on a normal distribution.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>sim_summary <span class="ot">&lt;-</span> <span class="fu">summary</span>(sim)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">print</span>(sim_summary, <span class="at">width =</span> <span class="cn">Inf</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 8</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt;   Treatment_Arm Probability_Of_Best_Arm estimated_probability_of_success      SE</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;                           &lt;dbl&gt;                            &lt;dbl&gt;   &lt;dbl&gt;</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; 1 no_letter                     0.00903                            0.388 0.00469</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; 2 open_appt                     0.624                              0.442 0.00757</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; 3 specific_appt                 0.367                              0.440 0.0190 </span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt;   lower_bound upper_bound level periods</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt;         &lt;dbl&gt;       &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; 1       0.379       0.398  0.95       5</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; 2       0.428       0.457  0.95       5</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; 3       0.403       0.477  0.95       5</span></span></code></pre></div>
+<p>The width of the confidence intervals can be changed in the
+<code>level</code> argument of the summary method, but can also be
+calculated by hand using the standard error. This time, lets specify 80%
+confidence intervals or an <span class="math inline">\(\alpha\)</span> =
+0.2.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Inside Summary Call</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">summary</span>(sim, <span class="at">level =</span> <span class="fl">0.8</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="fu">select</span>(estimated_probability_of_success, SE, lower_bound, upper_bound, level) <span class="sc">|&gt;</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">width =</span> <span class="cn">Inf</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 5</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt;   estimated_probability_of_success      SE lower_bound upper_bound level</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt;                              &lt;dbl&gt;   &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; 1                            0.388 0.00469       0.382       0.394   0.8</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; 2                            0.442 0.00757       0.433       0.452   0.8</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt; 3                            0.440 0.0190        0.416       0.464   0.8</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co"># By hand</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>quantile <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(<span class="fl">0.2</span> <span class="sc">/</span> <span class="dv">2</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>sim_summary <span class="sc">|&gt;</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>    <span class="at">lower_bound =</span> estimated_probability_of_success <span class="sc">-</span> SE <span class="sc">*</span> quantile,</span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>    <span class="at">upper_bound =</span> estimated_probability_of_success <span class="sc">+</span> SE <span class="sc">*</span> quantile</span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>  <span class="fu">select</span>(estimated_probability_of_success, SE, lower_bound, upper_bound)</span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 4</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="co">#&gt;   estimated_probability_of_success      SE lower_bound upper_bound</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="co">#&gt;                              &lt;dbl&gt;   &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="co">#&gt; 1                            0.388 0.00469       0.382       0.394</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="co">#&gt; 2                            0.442 0.00757       0.433       0.452</span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="co">#&gt; 3                            0.440 0.0190        0.416       0.464</span></span></code></pre></div>
+</div>
+<div id="plotting" class="section level2">
+<h2>Plotting</h2>
+<p>You can also quickly create plots of the results using the plot
+method. This method uses ggplot2 to create visualizations to the package
+must be installed. <code>mab</code> supports 3 plot types,
+<code>&quot;arm&quot;</code>, <code>&quot;assign&quot;</code> and <code>&quot;estimate&quot;</code>,
+each providing different information about the results. These plots can
+be added to with <code>+</code> like any ggplot2 object, and arguments
+to the main <code>geom*</code> can be specified through the
+<code>...</code> argument. The geoms used are <code>geom_line()</code>,
+and <code>geom_errorbarh()</code></p>
+<p><code>type = &quot;arm&quot;</code> provides a view of each arm overtime, its
+relative probability of being the best, or UCB1 statistic.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">plot</span>(sim, <span class="at">type =</span> <span class="st">&quot;arm&quot;</span>)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<p><code>type = &quot;assign&quot;</code> showcases the assignment probability for
+that arm overtime.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">plot</span>(sim, <span class="at">type =</span> <span class="st">&quot;assign&quot;</span>)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<p><code>type = &quot;estimate&quot;</code> shows error bars on the AIPW using the
+estimated variances. Just like the <code>summary()</code>, the
+confidence level can be specified.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">plot</span>(sim, <span class="at">type =</span> <span class="st">&quot;estimate&quot;</span>, <span class="at">level =</span> <span class="fl">0.9</span>, <span class="at">height =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, .<span class="dv">1</span>), <span class="at">limits =</span> <span class="fu">range</span>(<span class="dv">0</span>, <span class="dv">1</span>))</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#&gt; Scale for x is already present.</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt; Adding another scale for x, which will replace the existing scale.</span></span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<p>All of the data used to create these plots and summary statistics is
+present in the original output, so you can easily create your own more
+detailed versions. Additionally, the information provided should also
+let you calculate other adaptive estimators, if you do not want to use
+the AIPW from Hadad et. al (2021) or want to specify another one of
+their proposed adaptive variance allocation methods.</p>
+</div>
+</div>
+<div id="multiple-simulations" class="section level1">
+<h1>Multiple Simulations</h1>
+<p><code>multiple_mab_simulation()</code> is a shorthand function for
+executing multiple trials under the same settings. It is used to
+estimate the variance in the outcomes that occurs from the simulation
+process. Depending on the number of trials specified and the size of
+your dataset, running multiple simulations can be memory intensive, and
+have a long run time, so we recommend that you run a single simulation
+first to estimate how long multiple simulations would take.</p>
+<p><code>multiple_mab_simulation()</code> has 3 new arguments but is
+otherwise the same as <code>single_mab_simulation()</code>. These
+arguments are:</p>
+<ul>
+<li><code>times</code>: The number of times to run the simulation</li>
+<li><code>seeds</code>: A numeric vector of random seeds, where
+<code>length(seeds) = times</code>. Required to make results
+reproducible, and we encourage setting them before hand using
+<code>sample.int()</code>.</li>
+<li><code>keep_data</code>: A logical value, whether or not to keep the
+<code>final_data</code> object from each simulation. Default is FALSE,
+to reduce memory load of execution.</li>
+</ul>
+<p>Lets revisit the re-simulation of the TANF experiment but with 100
+trials this time:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">532454</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>seeds <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(<span class="dv">1000000</span>, <span class="dv">100</span>, <span class="at">replace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>time <span class="ot">&lt;-</span> <span class="fu">system.time</span>(</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>  multiple_sims <span class="ot">&lt;-</span> <span class="fu">multiple_mab_simulation</span>(</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>    <span class="at">data =</span> tanf,</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>    <span class="at">assignment_method =</span> <span class="st">&quot;Date&quot;</span>,</span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>    <span class="at">time_unit =</span> <span class="st">&quot;Month&quot;</span>,</span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>    <span class="at">period_length =</span> <span class="dv">1</span>,</span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>    <span class="at">algorithm =</span> <span class="st">&quot;Thompson&quot;</span>,</span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>    <span class="at">conditions =</span> <span class="fu">levels</span>(tanf<span class="sc">$</span>condition),</span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a>    <span class="at">whole_experiment =</span> <span class="cn">FALSE</span>, <span class="at">perfect_assignment =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a>    <span class="at">prior_periods =</span> <span class="st">&quot;All&quot;</span>,</span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a>    <span class="at">blocking =</span> <span class="cn">TRUE</span>, <span class="at">block_cols =</span> <span class="fu">c</span>(<span class="st">&quot;service_center&quot;</span>),</span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a>    <span class="at">data_cols =</span> <span class="fu">c</span>(</span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a>      <span class="at">id_col =</span> <span class="st">&quot;ic_case_id&quot;</span>,</span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a>      <span class="at">date_col =</span> <span class="st">&quot;appt_date&quot;</span>,</span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a>      <span class="at">success_col =</span> <span class="st">&quot;success&quot;</span>,</span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a>      <span class="at">condition_col =</span> <span class="st">&quot;condition&quot;</span>,</span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a>      <span class="at">month_col =</span> <span class="st">&quot;recert_month&quot;</span>,</span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a>      <span class="at">success_date_col =</span> <span class="st">&quot;date_of_recert&quot;</span>,</span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a>      <span class="at">assignment_date_col =</span> <span class="st">&quot;letter_sent_date&quot;</span></span>
+<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a>    ),</span>
+<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a>    <span class="at">keep_data =</span> <span class="cn">FALSE</span>, <span class="at">times =</span> <span class="dv">100</span>, <span class="at">seeds =</span> seeds</span>
+<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a>  )</span>
+<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a>)</span></code></pre></div>
+<p>Executing those 100 simulations took 24.83 seconds. To speed up this
+process <code>multiple_mab_simulation()</code> supports parallel
+processing via the <a href="https://furrr.futureverse.org/">furrr</a>
+and <a href="https://furrr.futureverse.org/">future</a> packages. To run
+the function in parallel, all you need to do is call
+<code>future::plan()</code> before running it and specify the number of
+cores you want to use.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">532454</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>seeds <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(<span class="dv">1000000</span>, <span class="dv">100</span>, <span class="at">replace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="fu">plan</span>(<span class="st">&quot;multisession&quot;</span>, <span class="at">workers =</span> <span class="dv">4</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>parallel_time <span class="ot">&lt;-</span> <span class="fu">system.time</span>(</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>  multiple_sims <span class="ot">&lt;-</span> <span class="fu">multiple_mab_simulation</span>(</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>    <span class="at">data =</span> tanf,</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>    <span class="at">assignment_method =</span> <span class="st">&quot;Date&quot;</span>,</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>    <span class="at">time_unit =</span> <span class="st">&quot;Month&quot;</span>,</span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>    <span class="at">period_length =</span> <span class="dv">1</span>,</span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>    <span class="at">algorithm =</span> <span class="st">&quot;Thompson&quot;</span>,</span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>    <span class="at">conditions =</span> <span class="fu">levels</span>(tanf<span class="sc">$</span>condition),</span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>    <span class="at">whole_experiment =</span> <span class="cn">FALSE</span>, <span class="at">perfect_assignment =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a>    <span class="at">prior_periods =</span> <span class="st">&quot;All&quot;</span>,</span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>    <span class="at">blocking =</span> <span class="cn">TRUE</span>, <span class="at">block_cols =</span> <span class="fu">c</span>(<span class="st">&quot;service_center&quot;</span>),</span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a>    <span class="at">data_cols =</span> <span class="fu">c</span>(</span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a>      <span class="at">id_col =</span> <span class="st">&quot;ic_case_id&quot;</span>,</span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a>      <span class="at">date_col =</span> <span class="st">&quot;appt_date&quot;</span>,</span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a>      <span class="at">success_col =</span> <span class="st">&quot;success&quot;</span>,</span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a>      <span class="at">condition_col =</span> <span class="st">&quot;condition&quot;</span>,</span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a>      <span class="at">month_col =</span> <span class="st">&quot;recert_month&quot;</span>,</span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a>      <span class="at">success_date_col =</span> <span class="st">&quot;date_of_recert&quot;</span>,</span>
+<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a>      <span class="at">assignment_date_col =</span> <span class="st">&quot;letter_sent_date&quot;</span></span>
+<span id="cb12-23"><a href="#cb12-23" tabindex="-1"></a>    ),</span>
+<span id="cb12-24"><a href="#cb12-24" tabindex="-1"></a>    <span class="at">keep_data =</span> <span class="cn">FALSE</span>, <span class="at">times =</span> <span class="dv">100</span>, <span class="at">seeds =</span> seeds</span>
+<span id="cb12-25"><a href="#cb12-25" tabindex="-1"></a>  )</span>
+<span id="cb12-26"><a href="#cb12-26" tabindex="-1"></a>)</span>
+<span id="cb12-27"><a href="#cb12-27" tabindex="-1"></a><span class="fu">plan</span>(<span class="st">&quot;sequential&quot;</span>)</span></code></pre></div>
+<p>Using 4 cores, it only takes 9.67 seconds to run 100 simulations.
+Your core usage is determined by your system requirements. To see how
+many cores are available on your system simply call
+<code>future::availableCores()</code>.</p>
+<p>Using future comes with some new complexities. Generally, Windows
+users should use <code>plan(&quot;multisession&quot;)</code>, while Linux and
+MacOS users should use <code>plan(&quot;multisession&quot;)</code> or
+<code>plan(&quot;multicore&quot;)</code>. If your using a High Performance
+Computing Cluster, the future.batchtools backend should be used, with
+the proper plan for your HPC scheduler. A full treatment of futures it
+beyond the scope of this vignette. For details on how futures work, and
+specific future backends, please consult the <a href="https://future.futureverse.org/">future</a> documentation.</p>
+<div id="analyzing-repeated-simulations" class="section level2">
+<h2>Analyzing Repeated Simulations</h2>
+<p><code>multiple_mab_simulation()</code> returns the same elements as
+<code>single_mab_simulation()</code> except for <code>final_data</code>.
+When <code>keep_data = TRUE</code> the <code>final_data</code> element
+is a nested data.frame of all the <code>final_data</code> from each
+trial, and when <code>keep_data = FALSE</code> is is simply removed
+leaving only <code>bandits</code>, <code>assignment_probs</code>,
+<code>estimates</code>, and <code>settings</code>.</p>
+<p>The object is also a custom <code>multiple.mab</code> class
+containing similar generic methods as the <code>mab</code> class, like
+<code>print()</code> and <code>summary()</code>.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">class</span>(multiple_sims)</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;multiple.mab&quot; &quot;list&quot;</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="fu">print</span>(multiple_sims)</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="co">#&gt; Summary for MAB Procedure: </span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="co">#&gt;  ----------------------------------------------------- </span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="co">#&gt; Bandit Algorithm:      Thompson </span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co">#&gt; Control Augmentation:  0 </span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="co">#&gt; Bandit Assignment:     1 </span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co">#&gt; Randomized Assignment: 0 </span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#&gt; Perfect Assignment:    TRUE </span></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="co">#&gt; Whole Experiment:      FALSE </span></span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a><span class="co">#&gt; Blocking Variables:    service_center </span></span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a><span class="co">#&gt; Assignment Method:     Date </span></span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a><span class="co">#&gt; Period Length:         1 Month</span></span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a><span class="co">#&gt; Total Periods:         5 periods</span></span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a><span class="co">#&gt; Prior Periods:         All periods</span></span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a><span class="co">#&gt; Treatments:            3 treatment arms</span></span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a><span class="co">#&gt; Trials Conducted:      100 trials</span></span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a><span class="co">#&gt; Keep Final Data:       FALSE </span></span>
+<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a><span class="co">#&gt; -----------------------------------------------------</span></span></code></pre></div>
+<p>For <code>multiple.mab</code> objects, <code>summary()</code> returns
+the average for AIPW estimates and 2 estimates of their standard error.
+One estimate is the average of the standard errors across each trial,
+with the variances averaged first <span class="math inline">\(\left(\sqrt{\frac{1}{\text{n}}\sum_1^n\mathbb{V}[\text{Estimate}_i]}\right)\)</span>.
+The other estimate, is the sample variance of all of the AIPW estimates
+across the trials (<code>SE_empirical</code>). 95% confidence intervals
+are provided using both the empirical cumulative distribution function
+(eCDF), and the normal CDF using the average standard errors.
+Additionally the number of times each treatment arm was selected as the
+best is displayed, with the best being the highest Thompson probability
+or UCB1 statistic at the end of the trial.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">summary</span>(multiple_sims) <span class="sc">|&gt;</span> <span class="fu">print</span>(<span class="at">width =</span> <span class="cn">Inf</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 10</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="co">#&gt;   Treatment_Arm average_probability_of_success SE_avg SE_empirical lower_normal</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;                                  &lt;dbl&gt;  &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="co">#&gt; 1 no_letter                              0.383 0.0125      0.00943        0.359</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="co">#&gt; 2 open_appt                              0.444 0.0113      0.00541        0.422</span></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co">#&gt; 3 specific_appt                          0.422 0.0111      0.00801        0.401</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="co">#&gt;   upper_normal lower_empirical upper_empirical times_best level</span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="co">#&gt;          &lt;dbl&gt;           &lt;dbl&gt;           &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="co">#&gt; 1        0.402           0.366           0.403          0  0.95</span></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="co">#&gt; 2        0.455           0.432           0.453         98  0.95</span></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="co">#&gt; 3        0.438           0.406           0.435          2  0.95</span></span></code></pre></div>
+<p>Just like with <code>mab</code> objects, the level of these
+confidence intervals can be changed in the <code>summary()</code>
+call.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">summary</span>(multiple_sims, <span class="at">level =</span> <span class="fl">0.75</span>) <span class="sc">|&gt;</span> <span class="fu">print</span>(<span class="at">width =</span> <span class="cn">Inf</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 10</span></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="co">#&gt;   Treatment_Arm average_probability_of_success SE_avg SE_empirical lower_normal</span></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;                                  &lt;dbl&gt;  &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="co">#&gt; 1 no_letter                              0.383 0.0125      0.00943        0.369</span></span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="co">#&gt; 2 open_appt                              0.444 0.0113      0.00541        0.431</span></span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="co">#&gt; 3 specific_appt                          0.422 0.0111      0.00801        0.410</span></span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="co">#&gt;   upper_normal lower_empirical upper_empirical times_best level</span></span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="co">#&gt;          &lt;dbl&gt;           &lt;dbl&gt;           &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="co">#&gt; 1        0.394           0.374           0.394          0  0.75</span></span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a><span class="co">#&gt; 2        0.451           0.440           0.450         98  0.75</span></span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a><span class="co">#&gt; 3        0.432           0.413           0.431          2  0.75</span></span></code></pre></div>
+</div>
+<div id="plotting-repeated-simulations" class="section level2">
+<h2>Plotting Repeated Simulations</h2>
+<p><code>multiple.mab</code> objects also have their own plot method
+with 3 distinct plots: “summary”, “hist”, and “estimate”. Just like with
+<code>mab</code> these plots are created using ggplot2, so can be added
+to with <code>+</code> and arguments in <code>...</code> can be passed
+to the <code>geom*</code> functions inside. The geoms used are
+<code>geom_bar()</code>, <code>geom_histogram()</code>, and
+<code>geom_errorbarh()</code>.</p>
+<p><code>type = summary</code> creates a bar graph showing how many
+times each treatment arm was selected as the best:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">plot</span>(multiple_sims, <span class="at">type =</span> <span class="st">&quot;summary&quot;</span>)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeAAAAEgCAMAAABb4lATAAABSlBMVEUAAAAAADoAAGYAOjoAOmYAOpAAZrY6AAA6ADo6AGY6OgA6Ojo6OmY6ZmY6ZpA6ZrY6kLY6kNtNTU1NTW5NTY5Nbo5NbqtNjshZWVlmAABmOgBmOjpmOmZmZmZmkJBmkLZmkNtmtttmtv9uTU1uTW5uTY5ubo5ubqtujo5uq+SOTU2OTW6OTY6Obk2Ojm6OyP+QOgCQZgCQZjqQZmaQkDqQkLaQtpCQtraQttuQ27aQ2/+rbk2rbm6rbo6rjk2rq26ryKur5P+2ZgC2Zjq2Zma2kDq2kGa2tpC2ttu225C229u22/+2/9u2///Ijk3I5KvI/8jI/+TI///bkDrbkGbbtmbbtpDb25Db27bb29vb2//b/7bb/9vb///kq27k5Kvk///r6+v/tmb/trb/yI7/25D/27b/29v/5Kv//7b//8j//9v//+T///9LcnxGAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAPw0lEQVR4nO2d7WPbRh3H5bS2tsEenJaOlMe5K6VZR8KAsTUDVo8xti4BYroNNpdg4s2Jo///Lfe7B0mnk32Oc7pTzt/Pi0iKT7qf9PGd7mTplGQgapLQAYBmgeDIgeDIgeDIgeDIgeDIgeDIgeDIWU/w2U4i2Tpckmz642Wf1iebJANL8vlfXkqSGz8br7JpV1sayd39/tNLbL5u9+f7PTFjHsL5fndcTth1sIcNCx4t/bQ+2TDpLU893xc5X33/v70rtnTTbm200v5WV6pJfE0ErxjBGoKn6fc6j5emniRdJuTbfWtJt8G+Ka/Qlt5Z4bsiQ5x/lPRXz2CpYLGwOOf2CGYhj5Ktp7w8iBrsGav4Oj8XRa0/TfvPUrY0SZNXKL1Kxlb/5KUimdrqaOvTtJ9v9ZPKyjyF+AKc7fRkCOKYPUuTm/yDfCYPaP4Oi+eN8ozYkMqVZoQM2mgpQrFjIqzDTOTaL22ZLU2M3PTd1z5gaT+rEyxy+owvybXFZ3rAa+FC8I2UlYFpStUNHXxZnQ2U4JfZJ5136eMelVCZTNW0A00wO8LKGm31S31lzqT4NpQET1Tu+Uw1p0ExI1dWBexsh8IfZKIBUFqP7xhPIgV/N6TM8xRnOxSenltl96sf3LxbK5hy+oaW1Nr8Mz3g9XAhmHZ6vk/ftC9SKlb0rZ+yOX5Y2A6+kT0Tu0ohF8mSHu1PT6vK6AjzZpbYqr6yTPNR0nn59/8uQiDBbLuPWcK+NiNzmqavjnk8+QyHl1bBcOtQbIrPlCIsKpbSCbNIwc6jvfH846S3ePfLiTvv0ZmlVrA4hHR81Nq0pAe8Hi4Ek58pr1ilq3998ps0yQX3RBmRIatkYjV+lEuC2REW/1NbLa+sEn31TipqrkKw3G5mzLBtT9MbP/1M/EvOcHTBvOanf1UjFEjBHXbASyl4ZHz1JbtfhNHPMl2XfgjlklxbHK1ywOvhQjBNJ/Ibzg6TqJS0PRQHc9gdF8lK1WshWK7Kv/lddSzzlcuZf/EjXkoLwQO1BTlTCmhIU2pP5TNERTBlJeoPPUIBD/FZyhsCRQq5CfbdWLj7xQei/1fbyFL70R0Xa/MlLeD1cC+Y1Vsv/+6vX++sI1jVhH2bYFWhrSQ4++Ku+NYUM1n1HMy3N9SMGIKpAT+2Ca7s/iUFF2uL/5UDXg9XgvMDK+dK5+CyoyJZnWC5STrgCwXLalEUu6Gq5uuqaK1t8tWvZVsln9Fb0aTp/Z1eeT1TcCbbWCqFiIW+KUt2v/ign2n1Rp3gYu089yLgtXAlmDUm3qPeKe0razyxvgE1CXmNVXZUJCsLVj1f1UAequJTV4KHvM6aP0t5Fca7I7KRNeVfjGJG5jRJXmMF9GMqQ3JG7YDWD56mPxGtOz1CgRR8tiPaTTIFK2+v5Y2s+t0vJ2bNhvmCRlYhWK1NS5WA18KVYFUX9ctXmkaiH1x2VEpWCE4KsXw6SXqLBatLQHmfiPc8JqpDUZkpAsp7Hbm2M+1KFvtU1sNahAJVyfBWf57ibOdGKqvQRbtffFAKtv4QljpGUnA14HVwJjibssN1gzrl1LO/+R5vD99Nel9WHKlkJcGUTJShntr01ueLz8H8CnJHND3+mSavfKMudIhLAvlMHhC/XEDt33ymvKX8WvRIFi49QvlZfuKm745KwSKjSzBPl+z+uPiATqg3P7c0svK1iwsdr17FL35NugraCbWlQPAVgODIgeDIgWAQHAiOHAiOHAiOHAiOHAiOnFYI/m/oACIOAYIjDwGCIw9hqeDZ/eMsO9/dvnOSTxoh2qPbghCWCT7dvn2cXRzsZc9fV5NmiPbotiCEJYKPbn3ISvD5o2MqyXLSSAzxHt0WhGCtomcPTrLzt57IiYoFtJ2VBZ/e4WblxMFXqoZoi08LQlivBDsm2qPbghCsgnEOvt4hWAVfHDwUreiH7W9F/zAIjoJHP9gOBJtEdSULgk00wcWzX36BYKJ5wdqDUT6BYKJ5wWc7Vx32Yk0gmPBRgiE4asHZxPvZVwDBBBpZViDYRK+iLzEIlEsgmEAjywoEm6CRtUGCs+mLh41kYgOCCR9VdIJGVsyCgwHBBM7BViDYBK3oDRKcjdwMUXxpIJhAI8sKBJugkbWBgv98aFsr9E2/CwgjOPRe17NQMKunUUVfCkfB+ynBo+SKI8ivBQQTnhpZIe7agWCiacEjMTo6BEcqWF7lgOBYBfPhjAcQHK9g+dI4CI5XcKaKsW8gmPB0oUONbO8TCCb8Xcn632EjWS0Ggglci7YCwSYQDMHNA8GEtzs6/D/AAsEEBFuBYBPtWrTE+7UOCCZw050VCDZBI2uTBLMiHOKGDgjmeBA87NFbGEc4B0cqmBVgGocFreiIBZ/t9CuCn28Te3x6u+VDGUKwSeUJ/0ntXTs01OzRXiP5cyCY8DNGR6/0JmYFjTJ78UFDI80SEEyE6ybRIKTnu7yiVrG0kzCCQ+91PZcQzIeJnr3ZYClGCSZ8lOBRkgyMRwxP81FmmzoPQzDhox/c/Vr0lDSOHuZzEHytBfNu0qDaDxYVMxXjiz+gmxShYPmmBtYPvtVUQxqCCS9P+H8trnV4BoIJH40sui068T+eIQQT+LnQCgSbQPDmCB6y2pkGFPb/dBIEE00LHnbH8/1kEGJQYQgmGhbMh7njPaSJ99GyIJjw8QC4EIwf/CHYLRBMQLAVCDaB4M0RnD/ZAMExCg4JBBMQbAWCTSAYgpsHggkItgLBJhC8SYJXfrow9E2/CwgjOPRe11MrGE8XroOj4PF0oR0INrE+XegDCCYCPl3YNBBMhHu6sHEgmEA3yQoEm0DwJgmmeyrxc2G8glkja74/CDAcGgQTfka6G/ZxV2XUgke40BGvYOoBM7v+3yIMwYQHwfRQw5Def+YZCCbQTbICwSYQDMHNA8EEBFuBYBMIhuDmgWACj65YgWATfRglUotr0dEKrn9vkhwJ/Hx3Ox+z0jUQTIQSLAaovDjY48MKNwIEE/6qaG0QFjmG8Pmj42x2H2NVXm/BYqQ7/RQsRwKfPThRo1ZmuPFdI/Re11MvuAY5EjiNNlsIdgxKMBGyH3y0p5dgx0AwEWzE94wE4xwcg+C6Ed/lSOAXBw/Rir7ugusHBJcjgaMfHKtgD0AwgRHfrUCwCUZ83yjBgYBgItS1aA9AMAHBViDYpBA8yn/wxwPgUQoO8lO/AIIJNLKsQLCJ8eiK8W5KD0Aw4efhsyyEYQgm0Iq2AsEmELxBgmvvyfIBBBO4Fm0Fgk3QTYLg5oFgIuQ9WQ0DwUSge7LqY2knYQSH3ut66gTjlp21cBQ87smyA8EmuCdrkwSjHxy74EBAMAHBViDYBGN0bIrgkEAwAcFWINgElyo3SfDKlyodA8EErmRZgWATCN4gwbhUGbtgXKqMXXAgIJiAYCsQbFISPOo85hcsUUXHKZheHUx9YDSy4hRMD55l03RAbWm8GCtCwfy5FSrF1X7w7B4NRqqGjW4ECCZ8COaFVxdMA1TSgKRi2OhmgGCi8Sp6IJ8c1d/xfkrjFx7tyWGjmwGCicbH6OiO+Sl4khgDObBSLIeNVrG0kzCCQ+91PabgbEg9pPm++W5KGohUDhvt8KtVAiWYCHah43z3oZxr6jwMwUQowbN7uVYIjlCw9CuHjW4kBgjmBBJM/V9qXslhoxsBggn82GAFgk0geJME83t2/N/3DsEcPwOhjbYOR7irMlLBZ+KeWdx0F7Fg+jEYgmMVPN/v0++FQ1TRkQrOpmnSq/yY5AUIJtBNsgLBJhC8UYLxdGHcgvF0YdyC8fAZBDcDBBN4utAKBJvg6cKNEhwICCYg2AoEm1QvVWIgtIgFr94DDn1X9wLCCA691/XUCcbLKdfCUfBeSjAERy04wCUOAQQTaGRZgWCTyh0djeRhBYIJby+n9A8EE2hkWYFgE/0c/OJhI5nYgGDCRxWNIf2jFhwMCCYg2AoEm5SHUUIVHbPgkEAw4WMgtEBAMAHBViDYBIIhuHkgmMC7C61AsAlKMAQ3T0SCWxCCzsqCz3e375xc6fAvBoJdhqCzquCLg73s+etXO/4LgWCXIeiseiXr/NFxNruPsSptR7cFIeisKnj24ISP7i8IfdMvsHJZwTTabCHYMc20HxECsV4Jdky0R7cFIUR1DkYIJqsKpvc2tL4VjRBMVv49+Dr0gxGCSVQ/+CMEEwiOPAQIjjwECI48hFYIBs0BwZEDwZEDwZEDwZEDwZEDwZEDwZEDwZETXnDxKzOba+wn5/VpOCS2+YuD7V+ukslakUCwjeZDWjWH9guePfgjvWuaflu+ncdKYfN/sD8MPmWfzn7x9m23R1Zs9/zRn/ibrmUuMiIVyz1akknERIt1bU63zbxpcuvJ7P7f2eRDcRCKV3A7i8Sv4HsP+d17R2Ii/8n27YjfLiJLsFy4t7d0W5dH5Hq+e+fk9HaRSzkUuumMRSCTyImLEkw3PLHc9LzpVvPTO//hO80r6r0iFHeR+BV8n9/YRbtb3MBH/3iLvqVyR4sFt5nLXM9397KLD56UctFzYv9UScTEiWCxt2be6rxUd3ZyE0kIwTRh8Rb/5JUz1VbH2oL7zOXRzY72SrmUczri5wiZREycBMJqXKpq9bwfnGRlwQ+0O6JcRdKOEvzoWM5pC24zVyWYZUyei1yKnKikyDpEfhUclWCCTg9G3otKsLtIQgiuPQezfxTnYLHgOHd1Dn691A7QBfOlN5/IJHLiIhDK0MibTrqz+38rn4PzvNxFEkRwXSua1WAXB7f/ccBb0beeNNA7ka3ot36lWrIyl1JOz7e3f/D2nkwiJyyqq0dytG3mrVrRqvhqrWhnkYTvB3tmhcczVJPI+YMcl96ig0jCCaaeHm9s+M227mBVQgko2H0kG1eCNw0IjhwIjhwIjpw4Bc/35ZBfC17l9u1TywaKBKMAb2N1SZyCiekLj9f4qJpgvv+TQC+TcgQEL08w2fo0DTeAmANiFzx98bfJ1iFV2VQQ+Zu/+vS3P33h3VTOD0SdzhKIfw54ArGVYfcbemUn38yn2irXhOgFpz35WtVRd8zHAhttHdJH07Q7ZidY+kNfAJFA/FMk4ND77kdknjajrRJy1y5D/IIH8p2MzO53Y/F/IXggP2VLKoFazgVPuNxBObVMEm7HLkf0gunvSDSpWa07YZOOEEwfqD8qgVrOBQ5l+ddSQ3ArKAvujvm/znY6j/MSrAmWCaqC5RjLss6G4FZREjzpCB8T8jipKcEqQVWwONeyWhmC20dJ8HyfmWUSyeM07TymxpZmSyVQy3JkVvnOezaB4PZREsx7QVRIh2zyPpM3TCrKZIJ8ecivgU1lF3jUeReCQTuB4MiB4MiB4MiB4MiB4MiB4MiB4MiB4MiB4Mj5PyxvXi+5gdK8AAAAAElFTkSuQmCC" /><!-- --></p>
+<p><code>type = hist</code> creates histograms showcasing the
+distribution for the AIPW for each treatment arm, over the repeated
+trials.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="fu">plot</span>(multiple_sims, <span class="at">type =</span> <span class="st">&quot;hist&quot;</span>, <span class="at">bins =</span> <span class="dv">50</span>)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeAAAAEgCAMAAABb4lATAAABhlBMVEUAAAAAADoAAGYAOjoAOmYAOpAAZrYZGUgZGXEZSHEZSJcZcboaGho6AAA6ADo6AGY6OgA6Ojo6OmY6OpA6ZmY6ZpA6ZrY6kLY6kNtIGRlIGUhIGXFISHFISJdIcXFIl91NTU1NTW5NTY5NbqtNjshZWVlmAABmOgBmOmZmkJBmkNtmtttmtv9uTU1uTW5uTY5ubo5ubqtuq8huq+RxGRlxGUhxGXFxSBlxcUhxuv+OTU2OTW6OTY6Obk2ObquOyP+QOgCQZgCQZjqQZmaQkLaQtpCQttuQ27aQ2/+XSBmXSEiXcRmXl0iXupeX3f+rbk2rbm6rbo6rjk2r5OSr5P+2ZgC2kDq2tpC2ttu225C229u22/+2//+6cRm63Ze6/7q6/926///Ijk3I///bkDrbkGbbtmbbtpDb27bb29vb/7bb/9vb///dl0jd3Zfd///kq27k///r6+v/tmb/unH/yI7/25D/27b/29v/3Zf/5Kv//7b//7r//8j//9v//93//+T///+qqnWCAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAQW0lEQVR4nO2djX8cRR3GNyk9EHKISvUQ0SAkVZqqWF4sviS+gK0vLWoDSlOVNBSFYAtHg03aNPufM++zszv7Mrtzc7tzz/P59O5mdmZ+z853Z2b3brtJUihqJfM2AM1WABy5ADhyAXDkAuDIBcCRC4AjFwBHLlfAe4nQKJN58IOd9Hjr9H5pLVqgpKWvXyefzcq6NM0/Wh8V6tZHNDRNNpoVNHW0Lnd2eUf70dubG5ijvADeW67p7r3lUsAJ7Xyzsi5dCrg2oqHtxNJEvRYTsAWVPbOuAM87/mC8dKmydCngxjoYf60Qo6mqIEYP+Pg3SbJ0juwnOcYndG8PxpNb46WX0uk4OUN3/dZTpMBLokCafnFWzMhGS1OyiXVVrrnRXrL8Hh/BpL1HrssOJVt0RN6o2PjuUzSa8pXx/I/xhH26RRq6xJogjV9XdXWNfFUFUftRu2W47q06AGbdTGbYLOCnx2R33xzzKVxMwqIAGUg0pcaSbIlW5P/M5k6Nk9MfM8CnxryeDfBUNiqqkwlfNiR9kiNEYJqqsrTx/XzdYtUsYOlH7Vaadd2u9wOo7RpMuuVg/M198jLSKyJBeC69xWHSfSeDJFuAHugfjuWEqw6V7eUdXtlsjo55vgYn39o/foccMQqwjkiKnaOm2KcR7fxRxhcXPcWa8pWeuL7FJgzeuKyrauSrZgFLP3q3TNc9VSfAp374Hs9UgEd0wNCJi/fLf9/97TgRPA74NKm4FgGbzdHNHDDHykvlAIuu3V66xCvQBVs3pNrnC7lwkIrGdV1VI181C1j60btluu6puqzB25T0mevZ7p7Ik6Lt0/tiTpaAp/rQMFsSgIvNScD8wKAMLYDZ5Dg1NqqGmIQLdoiJmZSX1XV1DbNqmgUs/ejdMl33VJ3Ooj88y3vODpjMrU//7u8frdcAlmtwsbm2gFVDPI6IO6kArGsYVVMbYL1bpuuequtl0n9+TVY3O2DegWpVVd2ba0mdRReay14HsylyW87C1ilaA5YNpakiRCf6zBTNAcu6Zg31IVM940fvlum6p+oAeEpOftLjd0j/7IlT3DxgctZDrkToiScrsPQWuarZMtdgch0sWBWbUyOGHAH0JItMh+yaa5SqItmTLAlYN8RdcqrsGKBnDuu6rKyraphVqWyA5W6Zrnuq1t9k0YWTfeAXDpMiYHnhIgrIOXqSb2lDTtP55iRgeu3FJkHWwiNn+RVY4TJJAtYNUW0r0CPhYENSy18mZT1IFQHr3TJd91QdAPNrfHKVkB6dTUYfF0+y2PcIb7GT2LP0GuaApE+dM1taOqO+iy40p9ZgQuIb7DTmg3Fy5mM6C+siB/qLDjlFq4bSVF/BsDn+1ph9KSGpHRhfdNAa2aqiWuEkS+2W6bqnwq9JkQuAIxcARy4AjlwAHLkAOHIBcOQC4MgFwJELgCMXAEcuAI5cABy5ADhyAXDkAuDIBcCRC4AjFwBHruCA7z37vv6kE/1UUH8k2MPLK99tEtLBFwBXKbS/pvF6Avjec39cWbmYpvdfWXlMGaLeWAZ5IWLvZOu977yuy/gXD3L/tT+tPHpFpqQ9aewZmhJF+Jth3JM+Xyk6oW+PXrn37L/I2595/9CNXnzNFPAz30s/f/x2eoO/iUyyAyTjkyfkCBaJZy5WttVR3ML9Vx6//fljOmTW1/1Xr1BHooh48z+C77/2Po1tOnl4+SJx8j/WH2yivqiNdfU1U8DEBvVG9onaVJk0QTL53ujEDJ0IC/dfuZg+/MOVTEgzLMmURfjbDADzjig6kUuWbeHq4isAYPpGTOlMNjnTKel9IzFjJ6I/0xsXMyGzYW+wBUMU4W8zcEVmXDrVmk6eu51mAT93O1ujm6+5jGCSkcod0okZOpEjmLignHVIHZaODTGhiENhJiOYii4WBSdlI7irrwCArWswydBrME/M0Ilag5/InBSYgFnq21dEEfHm3xUNX3BCF917z/4zuwaryF19hQBsO4sm09TDy4/9+zI7i370yqwvSMRZ9Ks/k+euImQm7CcrK195/aIoIt6IRd+2bqwUncizaDl8jbPojr4W6pssvVDUFWlQctZOrBXcfQUDTC/n2BlFqIAW2bon56s3gH35WqgRvIgC4MgFwJELgCNXF8CfVadrNnet7uxnxn7dDQXpIAD2Vd3dEABXpp39ALCr+uA/YEAABuCgAQEYgFMA9lfd3RAAV6ad/QCwq/rgP2BAnl5bW/NlCIAr085+ANhVffAfMCAAA/AsArauzgXAjsUBuLEBAHYrDsAAbBEAOxYH4MYGANitOAADsEUA7FgcgBsbAGC34gAMwBY5Av6sL5qbIQLYmt/XDsIIdiwe+Qj2aQCA3YoDMABbBMCOxQG4sQEAdisOwABsEQA7FgfgxgYA2K04AAOwRQDsWByAGxsAYLfiAAzAFgGwY3EAbmwAgN2KAzAAWwTAjsUBuLEBAHYrDsAAbBEAOxaPCPDh+dXv30zTB2+svvCptUAf/AcMGBvgB29spnde+PTkKnl70VqiD/4DBlSABeKhAz58+dP0wc+vPfjFzfTwxzdtJfrgP2DASAGLN9lIX5TOyxADXG4ouJ8y1QNmU/Tz1+6+kAXscghhBPehg6pPsn76dm4E+zQAwG7FvQMmIgsw1mAzHQ9gOmzJ6fPJ1Qs4i86k4wGc3l1lF8C4DjbSEQGuVR/8BwwIwAA8i4Ctq3MBsGNxAG5sAIDdigMwAFsEwI7FAbixAQB2Kw7AAGwRADsWB+DGBgDYrTgAA7BFAOxYHIAbGwBgt+IADMAWAbBjcQBubACA3YoHATzvewWV5mYonrsqG9CuTmME96GDANix+JABH60vXbIWKlEf/AcMOHzAabqdJKf3reVs6oP/gAFjAExHcZJMrCWL6oP/gAHjAMwRL+9YC/s1AMBuxf0A3kuSEZmqG03UffAfMGAEgI+3kmSDfpg2GsJ98B8w4PABH603m5o9GQBgt+I+ADsM3+4GANitOAADsEUaMDm9EhpZSxbVB/8BAw4dsBrBjdUH/wEDDh+wq/rgP2DAgQMmw5d+xUGFNbgiPVjALdQH/wEDAjAAzyJg6+pcBmA+TTf+tqMP/gMGjADw9ijdW97Zw2VSRXrIgMkAPt4aqS86Tq6uPn8ND2HJpQcO+Gh9ogDvbqZ38TDSfHrIgI+3JtOlS3SipqJPQBNveBCaTq8pDQ9wejBORuq34MOX/0qnaDyM1FQGsM1QcD9lsgI2dHh+k9LFw0jN9KBHsCHr44RrIsjlqZEBAHYr7meK1l9VPviV+wPBAdh/wNbVucyTLOMKeJdN0U4PIwVg/wFbV+eq+LmQXAC7/lEOAPYfsHV1LnMEd/09WF8kNjAAwG7FPazBjW/WKYsAwP4Dtq7OZU7RXX8PBmD/AVtX5/L7cyEA+w/YujrXDACXfVcLwK0Bsy41zmAbVOcyAe8lycZe4/9fCMDdDIUHvH36I/6LYTMBcDdDwQGznws3utz4DsD+A4qgAAzAVg/GFL1Hp2j6m38zAXA3Q3M4yZrSy+CmfAG4o6E5AHYTAHczBMCV6SZ+vAacL2Ddr02rc2UBswk6af6DAwB3MxQY8PEWO3s+WscXHVXp4QKW32Adb+EsuiI9WMD6x+Cq7yprbuVT+x7spsHZR8opA9hmaLZBHaoUAOvbOfBFR1V6sCMYgAE4LwDuZqgN4AxlAAbg1ACsnrIDwBXpwQJuIQDuZmjQgIvnBFEAXlsLCzjbmwAMwBYBsFNxAAZgrwEBuEOAwQDWAuBZBgRgAPYeEIA7BADgOtUCNhkPHvBaXh0NAXBluokfrwEBGIA9BwRgtxoA7CgA7mZo3oDvrrZ5CAsA+ws4W8D04Vh3XkydHkYKwF4Dzn6KJpBdH4RW3gcA7BjQ1psZyj4Ak6Hr9DDSoqUuN4s2uSt0Vu3bVLlzM/Bj6039UqMmgA/PP38tdXoYKUawz4ABRnCLh5ECsLeAAQCnu5tYg1U6IOC17ImqTQ38cpUDFnOz68NIAdhHwBCA0zurzn+UA4A9BQwCuFYA3M3QsACv0R9IAdhTQACu9eM/IAADsLeA/QRcYqTMAACXbwbgWj/+AwIwAHsLCMC1fvwHXFTAYj9LjaiOAGAAdthc6qd1GoDzAuBuhgC4Ml3mp3UagPNaIMB0JwAYgL0FBOByP63TAJwXAHcz1EfAZff+2W4BzG5g5XzecVhhaBYq3cW8oVnHK8QtU0vAJm32qgeq/UiTB1zhgB/+CF6rGcQDHMGWFgG4rSEArkyX+WmdBuC8ABiAAbhdQAAu99M6DcB5NQGs/QwdcOmOtTZk3yx7E4BL/LROA3BeAAzAAOwcsF+Aq7ECcIuAuuXqDi0EB2AAdhQAAzAAOwfsA2DRtgNgm6/+A9bHZgjAdaEAGIAtAuCKzQAMwF0M9QSw5RkdMkAX9RWwxmb7787WHWlrqAtgS/CWgG3PqlwDYHsftwmoNCfAtudkrQGwvY/bBFSaE2CnZ1WGU9pTQ/O2odQYsNOzKl0293QEt087GwrSQY4j2KcBAO4W0BNgp2dVOhkA4G4BPQF2elalkwEA7hbQE2CnZ1U6GQDgbgF9AS5XH/wHDAjAABw0IAADcNoNMDQAAXDkAuDIBcCRC4AjFwBHLgCOXAAcuQA4cnUCrH+H4H9M+s4q1SZ7J8nszxT01i6ZIfML2w/P09ql1S35Tn7qDNX48W8oRAd1AazvxxN/TJrtCWl7d9PcnNLYmzJD5he20/sKDn90ray6Ld/FT52hGj/+DQXpoC6AzXsB+Cfq4eTta/nNhz/55abMkPmF7Xepq93NsuqWfCc/dYZq/Pg3FKSDugA27+bhBw19JVMEnUkym0/e/ttVlSHzC9tTvv9l1Yv5bn7qDNX48W8oSAd1AZy9H4/9MWl+fLJZhBxNmc13LtB5Q2TI/ML2lN8/Ula9mO/mpxjQNFTjp1i9q6EgHeRvBLNPd9XqvrupN5NPJ1UHqNhOD+0L5dUL+Y5+igHLRrDVj81vN0NBOsjfGsyW+N0LOqU385PHC6VLjNhOjvLNiuqFfEc/xYBla7DVj8VvR0NBOqjbWbS8H0/OCnyZp6mTv9w0btejR5jIkPmF7cJ+WXVbvoufYkDTUI2f4vauhoJ0kIfrYHYJIP6YtFgSsn9amh9M5Zd5envmKtFavfYvVtf4qTNU48e/oRAdhG+yIhcARy4AjlwAHLkAOHIBcORaEMDHWwnT8o7K+uJ6evDkJXtxsi0WLQzgSS6nFG7NtqEJgC0C4MEpA/hgTKbqDfo6ISAPnnyTfSIvG2IbS0zYrJ6Z0YeqhQPMRufBeIO+U8Dj0/vpXkJflneO1glk8k63HW+NyGeSP3AtDGB+kjVJD77KR6UCzAbuBsv4/z7fQLdN6ehlxIethQGspujtJCFjUwFmA1q9TMlBsMQy9+QRMXAtHmA6LhM+DecBH60vqcwIZmemRQTMpl4b4CmFOuUjmLzNy6xXLRxgtray0bpRBEwH8HiJbTveIrQjoLwwgPmSSoDxZZauxaPCGkzW56XfE7pkG6syfL6LAnhxBcCRC4AjFwBHLgCOXAAcuQA4cgFw5ALgyAXAketLCl666YnvT5UAAAAASUVORK5CYII=" /><!-- --></p>
+<p><code>type = estimate</code> is the same as for <code>mab</code>, but
+now the spread can be shown using either empirical or normal CDF.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">plot</span>(multiple_sims,<span class="at">type =</span> <span class="st">&quot;estimate&quot;</span>,</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>  <span class="at">cdf =</span> <span class="st">&quot;empirical&quot;</span>, <span class="at">level =</span> <span class="fl">0.99</span>, <span class="at">height =</span> <span class="fl">0.4</span></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>) <span class="sc">+</span></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, .<span class="dv">1</span>), <span class="at">limits =</span> <span class="fu">range</span>(<span class="dv">0</span>, <span class="dv">1</span>))</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<p>Once again, all the data used to construct these is available in the
+output, so you can perform your own custom analysis, or make more
+detailed plots from scratch.</p>
+</div>
+</div>
+<div id="additional-topics" class="section level1">
+<h1>Additional Topics</h1>
+<div id="large-datasets" class="section level2">
+<h2>Large Datasets</h2>
+<p>Both <code>single_mab_simulation()</code> and
+<code>multiple_mab_simulation()</code> have support for large data
+objects, through data.table. When working with large datasets,
+data.tables are faster with common operations and more memory efficient
+than data.frames or tibbles, so using them can result in faster
+simulations.</p>
+<p>To turn a data.frame into a data.table simply call
+<code>data.table::setDT()</code> on your data.frame. Here is a quick
+example using the tanf dataset. To create a large object, I simply
+copied the object many times and bound the rows together. This should
+NEVER be done, as it invalidates the results and makes errors more
+prone, but here it okay as we just use it to gauge execution times.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="co"># Preparing the Dataset</span></span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>tanf_large <span class="ot">&lt;-</span> tanf</span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a><span class="fu">setDT</span>(tanf_large)</span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>) {</span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>  tanf_large <span class="ot">&lt;-</span> <span class="fu">rbindlist</span>(<span class="fu">list</span>(tanf_large, tanf_large))</span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>}</span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a></span>
+<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a><span class="fu">setorder</span>(tanf_large, appt_date)</span>
+<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a>tanf_large[, id <span class="sc">:=</span> .I] <span class="co"># Setting ID to be row number to be unique</span></span></code></pre></div>
+<p>Now tanf has 1800704 rows to simulate over instead of 3517. For this
+example, the batch size will be 3000 people, resulting in 601
+periods.</p>
+<p>When using large datasets in conjunction with Thompson Sampling,
+there is a potential for the calculation to overflow. In the event of an
+overflow, the Thompson sampling is then estimated by simulating draws
+from the posterior distribution. The number of these draws is set by
+<code>ndraws</code> which defaults to 5000. Another method to prevent
+this would be to change <code>prior_periods</code> from “All” to a
+specified number to limit the size of the dataset which is used for
+Thompson Sampling in each period.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">523432453</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>dataframe_time <span class="ot">&lt;-</span> <span class="fu">system.time</span>(<span class="fu">single_mab_simulation</span>(</span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">as.data.frame</span>(tanf_large),</span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>  <span class="at">assignment_method =</span> <span class="st">&quot;Batch&quot;</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>  <span class="at">period_length =</span> <span class="dv">3000</span>,</span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a>  <span class="at">algorithm =</span> <span class="st">&quot;Thomspon&quot;</span>,</span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a>  <span class="at">conditions =</span> <span class="fu">levels</span>(tanf<span class="sc">$</span>condition),</span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a>  <span class="at">whole_experiment =</span> <span class="cn">FALSE</span>, <span class="at">perfect_assignment =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a>  <span class="at">prior_periods =</span> <span class="st">&quot;All&quot;</span>,</span>
+<span id="cb20-10"><a href="#cb20-10" tabindex="-1"></a>  <span class="at">blocking =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb20-11"><a href="#cb20-11" tabindex="-1"></a>  <span class="at">data_cols =</span> <span class="fu">c</span>(</span>
+<span id="cb20-12"><a href="#cb20-12" tabindex="-1"></a>    <span class="at">id_col =</span> <span class="st">&quot;id&quot;</span>,</span>
+<span id="cb20-13"><a href="#cb20-13" tabindex="-1"></a>    <span class="at">success_col =</span> <span class="st">&quot;success&quot;</span>,</span>
+<span id="cb20-14"><a href="#cb20-14" tabindex="-1"></a>    <span class="at">condition_col =</span> <span class="st">&quot;condition&quot;</span></span>
+<span id="cb20-15"><a href="#cb20-15" tabindex="-1"></a>  )</span>
+<span id="cb20-16"><a href="#cb20-16" tabindex="-1"></a>))</span>
+<span id="cb20-17"><a href="#cb20-17" tabindex="-1"></a></span>
+<span id="cb20-18"><a href="#cb20-18" tabindex="-1"></a>datatable_time <span class="ot">&lt;-</span> <span class="fu">system.time</span>(<span class="fu">single_mab_simulation</span>(</span>
+<span id="cb20-19"><a href="#cb20-19" tabindex="-1"></a>  <span class="at">data =</span> tanf_large,</span>
+<span id="cb20-20"><a href="#cb20-20" tabindex="-1"></a>  <span class="at">assignment_method =</span> <span class="st">&quot;Batch&quot;</span>,</span>
+<span id="cb20-21"><a href="#cb20-21" tabindex="-1"></a>  <span class="at">period_length =</span> <span class="dv">3000</span>,</span>
+<span id="cb20-22"><a href="#cb20-22" tabindex="-1"></a>  <span class="at">algorithm =</span> <span class="st">&quot;UCB1&quot;</span>,</span>
+<span id="cb20-23"><a href="#cb20-23" tabindex="-1"></a>  <span class="at">conditions =</span> <span class="fu">levels</span>(tanf<span class="sc">$</span>condition),</span>
+<span id="cb20-24"><a href="#cb20-24" tabindex="-1"></a>  <span class="at">whole_experiment =</span> <span class="cn">FALSE</span>, <span class="at">perfect_assignment =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb20-25"><a href="#cb20-25" tabindex="-1"></a>  <span class="at">prior_periods =</span> <span class="st">&quot;All&quot;</span>,</span>
+<span id="cb20-26"><a href="#cb20-26" tabindex="-1"></a>  <span class="at">blocking =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb20-27"><a href="#cb20-27" tabindex="-1"></a>  <span class="at">data_cols =</span> <span class="fu">c</span>(</span>
+<span id="cb20-28"><a href="#cb20-28" tabindex="-1"></a>    <span class="at">id_col =</span> <span class="st">&quot;id&quot;</span>,</span>
+<span id="cb20-29"><a href="#cb20-29" tabindex="-1"></a>    <span class="at">success_col =</span> <span class="st">&quot;success&quot;</span>,</span>
+<span id="cb20-30"><a href="#cb20-30" tabindex="-1"></a>    <span class="at">condition_col =</span> <span class="st">&quot;condition&quot;</span></span>
+<span id="cb20-31"><a href="#cb20-31" tabindex="-1"></a>  )</span>
+<span id="cb20-32"><a href="#cb20-32" tabindex="-1"></a>))</span></code></pre></div>
+<p>The data.table version completes in 145.34 seconds while the
+data.frame version takes 307.92 seconds making the the data.table
+version 112% faster in this case.</p>
+<p>The data.table version may not be faster in all cases. Performance is
+mainly dependent on the size of the data, the number of observations in
+each period, and the total number of periods. For simulations where each
+period contains less than 500 observations or the total size is less
+than 1,000,000 rows, the data.table version will likely be slower. There
+is no hard and fast rule, you must make the judgment based on the data
+you have, the simulation you want to run, and the computing power of
+your system.</p>
+<p>The Thompson Sampling Corrections may introduce new errors, that we
+have not caught yet. If you get an error from an internal function call,
+we recommend switching to UCB1 which does not have the same issues, and
+reporting bug as an issue on package’s <a href="https://github.com/Noch05/whatifbandit/issues">GitHub
+Repo</a>.</p>
+</div>
+<div id="error-handling" class="section level2">
+<h2>Error Handling</h2>
+<p><code>single_mab_simulation()</code> and
+<code>multiple_mab_simulation()</code> can have more than 20 arguments,
+so its easy to make a typo when calling the function. As a result, we
+provide helpful error messages to help you deduce what has gone wrong
+with your execution of the function. If a required column is not
+properly entered, not present in the data, not the correct data type or
+any of the other arguments are invalid, a helpful error will be thrown
+to notify the user of any issues.</p>
+<p>Here the condition column is missing:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">single_mab_simulation</span>(</span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>  <span class="at">data =</span> tanf,</span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>  <span class="at">assignment_method =</span> <span class="st">&quot;Batch&quot;</span>,</span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>  <span class="at">period_length =</span> <span class="dv">1000</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>  <span class="at">algorithm =</span> <span class="st">&quot;Thompson&quot;</span>,</span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a>  <span class="at">conditions =</span> <span class="fu">levels</span>(tanf<span class="sc">$</span>condition),</span>
+<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a>  <span class="at">whole_experiment =</span> <span class="cn">FALSE</span>, <span class="at">perfect_assignment =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb21-8"><a href="#cb21-8" tabindex="-1"></a>  <span class="at">prior_periods =</span> <span class="st">&quot;All&quot;</span>,</span>
+<span id="cb21-9"><a href="#cb21-9" tabindex="-1"></a>  <span class="at">blocking =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb21-10"><a href="#cb21-10" tabindex="-1"></a>  <span class="at">data_cols =</span> <span class="fu">c</span>(</span>
+<span id="cb21-11"><a href="#cb21-11" tabindex="-1"></a>    <span class="at">id_col =</span> <span class="st">&quot;ic_case_id&quot;</span>,</span>
+<span id="cb21-12"><a href="#cb21-12" tabindex="-1"></a>    <span class="at">success_col =</span> <span class="st">&quot;success&quot;</span></span>
+<span id="cb21-13"><a href="#cb21-13" tabindex="-1"></a>  )</span>
+<span id="cb21-14"><a href="#cb21-14" tabindex="-1"></a>))</span>
+<span id="cb21-15"><a href="#cb21-15" tabindex="-1"></a><span class="co">#&gt; Error in pmap(.l, .f, ..., .progress = .progress) : ℹ In index: 3.</span></span>
+<span id="cb21-16"><a href="#cb21-16" tabindex="-1"></a><span class="co">#&gt; Caused by error in `.f()`:</span></span>
+<span id="cb21-17"><a href="#cb21-17" tabindex="-1"></a><span class="co">#&gt; ! Required column `condition_col` is not declared in `data_cols`.</span></span>
+<span id="cb21-18"><a href="#cb21-18" tabindex="-1"></a><span class="co">#&gt; ✖ reason: it is always required</span></span></code></pre></div>
+<p>Here the date column is the wrong type:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a>new_data <span class="ot">&lt;-</span> tanf</span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a>new_data<span class="sc">$</span>appt_date <span class="ot">&lt;-</span> <span class="fu">as.character</span>(new_data<span class="sc">$</span>appt_date)</span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">single_mab_simulation</span>(</span>
+<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a>  <span class="at">data =</span> new_data,</span>
+<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a>  <span class="at">assignment_method =</span> <span class="st">&quot;Date&quot;</span>,</span>
+<span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a>  <span class="at">time_unit =</span> <span class="st">&quot;Week&quot;</span>,</span>
+<span id="cb22-7"><a href="#cb22-7" tabindex="-1"></a>  <span class="at">period_length =</span> <span class="dv">1</span>,</span>
+<span id="cb22-8"><a href="#cb22-8" tabindex="-1"></a>  <span class="at">algorithm =</span> <span class="st">&quot;Thompson&quot;</span>,</span>
+<span id="cb22-9"><a href="#cb22-9" tabindex="-1"></a>  <span class="at">conditions =</span> <span class="fu">levels</span>(tanf<span class="sc">$</span>condition),</span>
+<span id="cb22-10"><a href="#cb22-10" tabindex="-1"></a>  <span class="at">whole_experiment =</span> <span class="cn">FALSE</span>, <span class="at">perfect_assignment =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb22-11"><a href="#cb22-11" tabindex="-1"></a>  <span class="at">prior_periods =</span> <span class="st">&quot;All&quot;</span>,</span>
+<span id="cb22-12"><a href="#cb22-12" tabindex="-1"></a>  <span class="at">blocking =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb22-13"><a href="#cb22-13" tabindex="-1"></a>  <span class="at">data_cols =</span> <span class="fu">c</span>(</span>
+<span id="cb22-14"><a href="#cb22-14" tabindex="-1"></a>    <span class="at">id_col =</span> <span class="st">&quot;ic_case_id&quot;</span>,</span>
+<span id="cb22-15"><a href="#cb22-15" tabindex="-1"></a>    <span class="at">success_col =</span> <span class="st">&quot;success&quot;</span>,</span>
+<span id="cb22-16"><a href="#cb22-16" tabindex="-1"></a>    <span class="at">condition_col =</span> <span class="st">&quot;condition&quot;</span>,</span>
+<span id="cb22-17"><a href="#cb22-17" tabindex="-1"></a>    <span class="at">date_col =</span> <span class="st">&quot;appt_date&quot;</span></span>
+<span id="cb22-18"><a href="#cb22-18" tabindex="-1"></a>  )</span>
+<span id="cb22-19"><a href="#cb22-19" tabindex="-1"></a>))</span>
+<span id="cb22-20"><a href="#cb22-20" tabindex="-1"></a><span class="co">#&gt; Error in pmap(.l, .f, ..., .progress = .progress) : ℹ In index: 4.</span></span>
+<span id="cb22-21"><a href="#cb22-21" tabindex="-1"></a><span class="co">#&gt; Caused by error in `.f()`:</span></span>
+<span id="cb22-22"><a href="#cb22-22" tabindex="-1"></a><span class="co">#&gt; ! Required column `date_col` is the wrong data type.</span></span>
+<span id="cb22-23"><a href="#cb22-23" tabindex="-1"></a><span class="co">#&gt; ✖ Your type: character</span></span>
+<span id="cb22-24"><a href="#cb22-24" tabindex="-1"></a><span class="co">#&gt; ℹ Permissible types: Date, POSIXt</span></span></code></pre></div>
+<p>Here the <code>period_length</code> is longer than the data:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">single_mab_simulation</span>(</span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a>  <span class="at">data =</span> tanf,</span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>  <span class="at">assignment_method =</span> <span class="st">&quot;Date&quot;</span>,</span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>  <span class="at">time_unit =</span> <span class="st">&quot;Week&quot;</span>,</span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a>  <span class="at">period_length =</span> <span class="dv">1000</span>,</span>
+<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a>  <span class="at">algorithm =</span> <span class="st">&quot;Thompson&quot;</span>,</span>
+<span id="cb23-7"><a href="#cb23-7" tabindex="-1"></a>  <span class="at">conditions =</span> <span class="fu">levels</span>(tanf<span class="sc">$</span>condition),</span>
+<span id="cb23-8"><a href="#cb23-8" tabindex="-1"></a>  <span class="at">whole_experiment =</span> <span class="cn">FALSE</span>, <span class="at">perfect_assignment =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb23-9"><a href="#cb23-9" tabindex="-1"></a>  <span class="at">prior_periods =</span> <span class="st">&quot;All&quot;</span>,</span>
+<span id="cb23-10"><a href="#cb23-10" tabindex="-1"></a>  <span class="at">blocking =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb23-11"><a href="#cb23-11" tabindex="-1"></a>  <span class="at">data_cols =</span> <span class="fu">c</span>(</span>
+<span id="cb23-12"><a href="#cb23-12" tabindex="-1"></a>    <span class="at">id_col =</span> <span class="st">&quot;ic_case_id&quot;</span>,</span>
+<span id="cb23-13"><a href="#cb23-13" tabindex="-1"></a>    <span class="at">success_col =</span> <span class="st">&quot;success&quot;</span>,</span>
+<span id="cb23-14"><a href="#cb23-14" tabindex="-1"></a>    <span class="at">condition_col =</span> <span class="st">&quot;condition&quot;</span>,</span>
+<span id="cb23-15"><a href="#cb23-15" tabindex="-1"></a>    <span class="at">date_col =</span> <span class="st">&quot;appt_date&quot;</span></span>
+<span id="cb23-16"><a href="#cb23-16" tabindex="-1"></a>  )</span>
+<span id="cb23-17"><a href="#cb23-17" tabindex="-1"></a>))</span>
+<span id="cb23-18"><a href="#cb23-18" tabindex="-1"></a><span class="co">#&gt; Error in check_data(data = data, data_cols = data_cols, assignment_method = assignment_method,  : </span></span>
+<span id="cb23-19"><a href="#cb23-19" tabindex="-1"></a><span class="co">#&gt;   `period_length` cannot be larger the date range of your data</span></span>
+<span id="cb23-20"><a href="#cb23-20" tabindex="-1"></a><span class="co">#&gt; ✖ Your period length is 1000 weeks but your data only covers 20 weeks</span></span>
+<span id="cb23-21"><a href="#cb23-21" tabindex="-1"></a></span>
+<span id="cb23-22"><a href="#cb23-22" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">single_mab_simulation</span>(</span>
+<span id="cb23-23"><a href="#cb23-23" tabindex="-1"></a>  <span class="at">data =</span> tanf,</span>
+<span id="cb23-24"><a href="#cb23-24" tabindex="-1"></a>  <span class="at">assignment_method =</span> <span class="st">&quot;Batch&quot;</span>,</span>
+<span id="cb23-25"><a href="#cb23-25" tabindex="-1"></a>  <span class="at">time_unit =</span> <span class="st">&quot;Week&quot;</span>,</span>
+<span id="cb23-26"><a href="#cb23-26" tabindex="-1"></a>  <span class="at">period_length =</span> <span class="dv">5000</span>,</span>
+<span id="cb23-27"><a href="#cb23-27" tabindex="-1"></a>  <span class="at">algorithm =</span> <span class="st">&quot;Thompson&quot;</span>,</span>
+<span id="cb23-28"><a href="#cb23-28" tabindex="-1"></a>  <span class="at">conditions =</span> <span class="fu">levels</span>(tanf<span class="sc">$</span>condition),</span>
+<span id="cb23-29"><a href="#cb23-29" tabindex="-1"></a>  <span class="at">whole_experiment =</span> <span class="cn">FALSE</span>, <span class="at">perfect_assignment =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb23-30"><a href="#cb23-30" tabindex="-1"></a>  <span class="at">prior_periods =</span> <span class="st">&quot;All&quot;</span>,</span>
+<span id="cb23-31"><a href="#cb23-31" tabindex="-1"></a>  <span class="at">blocking =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb23-32"><a href="#cb23-32" tabindex="-1"></a>  <span class="at">data_cols =</span> <span class="fu">c</span>(</span>
+<span id="cb23-33"><a href="#cb23-33" tabindex="-1"></a>    <span class="at">id_col =</span> <span class="st">&quot;ic_case_id&quot;</span>,</span>
+<span id="cb23-34"><a href="#cb23-34" tabindex="-1"></a>    <span class="at">success_col =</span> <span class="st">&quot;success&quot;</span>,</span>
+<span id="cb23-35"><a href="#cb23-35" tabindex="-1"></a>    <span class="at">condition_col =</span> <span class="st">&quot;condition&quot;</span></span>
+<span id="cb23-36"><a href="#cb23-36" tabindex="-1"></a>  )</span>
+<span id="cb23-37"><a href="#cb23-37" tabindex="-1"></a>))</span>
+<span id="cb23-38"><a href="#cb23-38" tabindex="-1"></a><span class="co">#&gt; Error in check_data(data = data, data_cols = data_cols, assignment_method = assignment_method,  : </span></span>
+<span id="cb23-39"><a href="#cb23-39" tabindex="-1"></a><span class="co">#&gt;   `period_length` cannot be larger than data size</span></span>
+<span id="cb23-40"><a href="#cb23-40" tabindex="-1"></a><span class="co">#&gt; ✖ You data has 3517 rows, and your batch size is 5000 rows</span></span></code></pre></div>
+<p>While here <code>control_augment &gt; 1</code>:</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">single_mab_simulation</span>(</span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a>  <span class="at">data =</span> tanf,</span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a>  <span class="at">assignment_method =</span> <span class="st">&quot;Batch&quot;</span>,</span>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a>  <span class="at">period_length =</span> <span class="dv">1000</span>,</span>
+<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a>  <span class="at">algorithm =</span> <span class="st">&quot;Thompson&quot;</span>,</span>
+<span id="cb24-6"><a href="#cb24-6" tabindex="-1"></a>  <span class="at">conditions =</span> <span class="fu">levels</span>(tanf<span class="sc">$</span>condition),</span>
+<span id="cb24-7"><a href="#cb24-7" tabindex="-1"></a>  <span class="at">whole_experiment =</span> <span class="cn">FALSE</span>, <span class="at">perfect_assignment =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb24-8"><a href="#cb24-8" tabindex="-1"></a>  <span class="at">prior_periods =</span> <span class="st">&quot;All&quot;</span>,</span>
+<span id="cb24-9"><a href="#cb24-9" tabindex="-1"></a>  <span class="at">blocking =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb24-10"><a href="#cb24-10" tabindex="-1"></a>  <span class="at">data_cols =</span> <span class="fu">c</span>(</span>
+<span id="cb24-11"><a href="#cb24-11" tabindex="-1"></a>    <span class="at">id_col =</span> <span class="st">&quot;ic_case_id&quot;</span>,</span>
+<span id="cb24-12"><a href="#cb24-12" tabindex="-1"></a>    <span class="at">success_col =</span> <span class="st">&quot;success&quot;</span>,</span>
+<span id="cb24-13"><a href="#cb24-13" tabindex="-1"></a>    <span class="at">condition_col =</span> <span class="st">&quot;condition&quot;</span></span>
+<span id="cb24-14"><a href="#cb24-14" tabindex="-1"></a>  ),</span>
+<span id="cb24-15"><a href="#cb24-15" tabindex="-1"></a>  <span class="at">control_augment =</span> <span class="fl">1.5</span></span>
+<span id="cb24-16"><a href="#cb24-16" tabindex="-1"></a>))</span>
+<span id="cb24-17"><a href="#cb24-17" tabindex="-1"></a><span class="co">#&gt; Error in map2(.x, .y, .f, ..., .progress = .progress) : ℹ In index: 1.</span></span>
+<span id="cb24-18"><a href="#cb24-18" tabindex="-1"></a><span class="co">#&gt; ℹ With name: control_augment.</span></span>
+<span id="cb24-19"><a href="#cb24-19" tabindex="-1"></a><span class="co">#&gt; Caused by error in `.f()`:</span></span>
+<span id="cb24-20"><a href="#cb24-20" tabindex="-1"></a><span class="co">#&gt; ! `control_augment` must be a non-null double between 0 and 1.</span></span>
+<span id="cb24-21"><a href="#cb24-21" tabindex="-1"></a><span class="co">#&gt; ✖ You passed: 1.5</span></span></code></pre></div>
+<p>Here, the seeds are not proper integers:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">multiple_mab_simulation</span>(</span>
+<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>  <span class="at">data =</span> tanf,</span>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>  <span class="at">assignment_method =</span> <span class="st">&quot;Batch&quot;</span>,</span>
+<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a>  <span class="at">period_length =</span> <span class="dv">1000</span>,</span>
+<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a>  <span class="at">algorithm =</span> <span class="st">&quot;Thompson&quot;</span>,</span>
+<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a>  <span class="at">conditions =</span> <span class="fu">levels</span>(tanf<span class="sc">$</span>condition),</span>
+<span id="cb25-7"><a href="#cb25-7" tabindex="-1"></a>  <span class="at">whole_experiment =</span> <span class="cn">FALSE</span>, <span class="at">perfect_assignment =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb25-8"><a href="#cb25-8" tabindex="-1"></a>  <span class="at">prior_periods =</span> <span class="st">&quot;All&quot;</span>,</span>
+<span id="cb25-9"><a href="#cb25-9" tabindex="-1"></a>  <span class="at">blocking =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb25-10"><a href="#cb25-10" tabindex="-1"></a>  <span class="at">data_cols =</span> <span class="fu">c</span>(</span>
+<span id="cb25-11"><a href="#cb25-11" tabindex="-1"></a>    <span class="at">id_col =</span> <span class="st">&quot;ic_case_id&quot;</span>,</span>
+<span id="cb25-12"><a href="#cb25-12" tabindex="-1"></a>    <span class="at">success_col =</span> <span class="st">&quot;success&quot;</span>,</span>
+<span id="cb25-13"><a href="#cb25-13" tabindex="-1"></a>    <span class="at">condition_col =</span> <span class="st">&quot;condition&quot;</span></span>
+<span id="cb25-14"><a href="#cb25-14" tabindex="-1"></a>  ),</span>
+<span id="cb25-15"><a href="#cb25-15" tabindex="-1"></a>  <span class="at">times =</span> <span class="dv">5</span>, <span class="at">seeds =</span> <span class="fu">runif</span>(<span class="dv">5</span>)</span>
+<span id="cb25-16"><a href="#cb25-16" tabindex="-1"></a>))</span>
+<span id="cb25-17"><a href="#cb25-17" tabindex="-1"></a><span class="co">#&gt; Error in multiple_mab_simulation(data = tanf, assignment_method = &quot;Batch&quot;,  : </span></span>
+<span id="cb25-18"><a href="#cb25-18" tabindex="-1"></a><span class="co">#&gt;   Argument &#39;seeds&#39; must be an integer vector of length equal to `times`. Please provide a valid vector.</span></span>
+<span id="cb25-19"><a href="#cb25-19" tabindex="-1"></a><span class="co">#&gt; ✖ You passed a double vector of length 5, while times is 5.</span></span>
+<span id="cb25-20"><a href="#cb25-20" tabindex="-1"></a><span class="co">#&gt; ℹ Reccomended to use `sample.int()` to create proper vector</span></span></code></pre></div>
+<p>However the function won’t catch if the columns or other arguments
+are swapped, but still contain valid data types. Be careful when typing,
+as an error resulting from this mistake will be harder to deduce based
+on the message.</p>
+<p>Here the <code>success_col</code> is specified to an existing numeric
+column, but it does not contain the required information, so the error
+is harder to decipher:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">single_mab_simulation</span>(</span>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a>  <span class="at">data =</span> tanf,</span>
+<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a>  <span class="at">assignment_method =</span> <span class="st">&quot;Batch&quot;</span>,</span>
+<span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a>  <span class="at">period_length =</span> <span class="dv">1000</span>,</span>
+<span id="cb26-5"><a href="#cb26-5" tabindex="-1"></a>  <span class="at">algorithm =</span> <span class="st">&quot;Thompson&quot;</span>,</span>
+<span id="cb26-6"><a href="#cb26-6" tabindex="-1"></a>  <span class="at">conditions =</span> <span class="fu">levels</span>(tanf<span class="sc">$</span>condition),</span>
+<span id="cb26-7"><a href="#cb26-7" tabindex="-1"></a>  <span class="at">whole_experiment =</span> <span class="cn">FALSE</span>, <span class="at">perfect_assignment =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb26-8"><a href="#cb26-8" tabindex="-1"></a>  <span class="at">prior_periods =</span> <span class="st">&quot;All&quot;</span>,</span>
+<span id="cb26-9"><a href="#cb26-9" tabindex="-1"></a>  <span class="at">blocking =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb26-10"><a href="#cb26-10" tabindex="-1"></a>  <span class="at">data_cols =</span> <span class="fu">c</span>(</span>
+<span id="cb26-11"><a href="#cb26-11" tabindex="-1"></a>    <span class="at">id_col =</span> <span class="st">&quot;ic_case_id&quot;</span>,</span>
+<span id="cb26-12"><a href="#cb26-12" tabindex="-1"></a>    <span class="at">success_col =</span> <span class="st">&quot;recert_id&quot;</span>,</span>
+<span id="cb26-13"><a href="#cb26-13" tabindex="-1"></a>    <span class="at">condition_col =</span> <span class="st">&quot;condition&quot;</span></span>
+<span id="cb26-14"><a href="#cb26-14" tabindex="-1"></a>  )</span>
+<span id="cb26-15"><a href="#cb26-15" tabindex="-1"></a>))</span>
+<span id="cb26-16"><a href="#cb26-16" tabindex="-1"></a><span class="co">#&gt; Warning in dbeta(z, x[i] + alpha, n[i] - x[i] + beta): NaNs produced</span></span>
+<span id="cb26-17"><a href="#cb26-17" tabindex="-1"></a><span class="co">#&gt; Warning in pbeta(z, x[j] + alpha, n[j] - x[j] + beta): NaNs produced</span></span>
+<span id="cb26-18"><a href="#cb26-18" tabindex="-1"></a><span class="co">#&gt; Warning in pbeta(z, x[j] + alpha, n[j] - x[j] + beta): NaNs produced</span></span>
+<span id="cb26-19"><a href="#cb26-19" tabindex="-1"></a><span class="co">#&gt; Warning: Thompson Sampling calculation overflowed; simulation based posterior estimate was used instead</span></span>
+<span id="cb26-20"><a href="#cb26-20" tabindex="-1"></a><span class="co">#&gt; ℹ Period: 2</span></span>
+<span id="cb26-21"><a href="#cb26-21" tabindex="-1"></a><span class="co">#&gt; Warning in rbeta(ndraws, x[i] + alpha, no[i] + beta): NAs produced</span></span>
+<span id="cb26-22"><a href="#cb26-22" tabindex="-1"></a><span class="co">#&gt; Warning in rbeta(ndraws, x[i] + alpha, no[i] + beta): NAs produced</span></span>
+<span id="cb26-23"><a href="#cb26-23" tabindex="-1"></a><span class="co">#&gt; Warning in rbeta(ndraws, x[i] + alpha, no[i] + beta): NAs produced</span></span>
+<span id="cb26-24"><a href="#cb26-24" tabindex="-1"></a><span class="co">#&gt; Error in get_bandit.Thompson(past_results = past_results, conditions = conditions,  : </span></span>
+<span id="cb26-25"><a href="#cb26-25" tabindex="-1"></a><span class="co">#&gt;   Thompson Sampling simulation failed</span></span>
+<span id="cb26-26"><a href="#cb26-26" tabindex="-1"></a><span class="co">#&gt; ✖ Most Recent Result:NaN NaN NaN</span></span>
+<span id="cb26-27"><a href="#cb26-27" tabindex="-1"></a><span class="co">#&gt; ℹ Consider setting `ndraws` higher or reducing `prior_periods`.</span></span></code></pre></div>
+<p>These checks can also be overly strict at times and despite thorough
+testing, may result in errors when the arguments should be perfectly
+valid.</p>
+<p>If you encounter an issue like this, please report the bug
+immediately on <a href="https://github.com/Noch05/whatifbandit/issues">GitHub</a>, and set
+<code>check_args = FALSE</code> to skip the argument checking.</p>
+</div>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-hadad2021a" class="csl-entry">
+Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan
+Athey. 2021. <span>“Confidence Intervals for Policy Evaluation in
+Adaptive Experiments.”</span> <em>Proceedings of the National Academy of
+Sciences of the United States of America</em> 118 (15): e2014602118. <a href="https://doi.org/10.1073/pnas.2014602118">https://doi.org/10.1073/pnas.2014602118</a>.
+</div>
+<div id="ref-kuleshov2014" class="csl-entry">
+Kuleshov, Volodymyr, and Doina Precup. 2014. <span>“Algorithms for
+Multi-Armed Bandit Problems.”</span> arXiv. <a href="https://doi.org/10.48550/arXiv.1402.6028">https://doi.org/10.48550/arXiv.1402.6028</a>.
+</div>
+<div id="ref-moore2022" class="csl-entry">
+Moore, Ryan T., Katherine N. Gan, Karissa Minnich, and David Yokum.
+2022. <span>“Anchor Management: A Field Experiment to Encourage Families
+to Meet Critical Programme Deadlines.”</span> <em>Journal of Public
+Policy</em> 42 (4): 615–36. <a href="https://doi.org/10.1017/S0143814X21000131">https://doi.org/10.1017/S0143814X21000131</a>.
+</div>
+<div id="ref-offer-westort2021" class="csl-entry">
+Offer-Westort, Molly, Alexander Coppock, and Donald P. Green. 2021.
+<span>“Adaptive <span>Experimental Design</span>: <span>Prospects</span>
+and <span>Applications</span> in <span>Political Science</span>.”</span>
+<em>American Journal of Political Science</em> 65 (4): 826–44. <a href="https://doi.org/10.1111/ajps.12597">https://doi.org/10.1111/ajps.12597</a>.
+</div>
+<div id="ref-slivkins2024" class="csl-entry">
+Slivkins, Aleksandrs. 2024. <span>“Introduction to <span>Multi-Armed
+Bandits</span>.”</span> arXiv. <a href="https://doi.org/10.48550/arXiv.1904.07272">https://doi.org/10.48550/arXiv.1904.07272</a>.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
