@@ -6,32 +6,32 @@
 
 
 ## Overview
-whatifbandit is a package designed to answer: "*what if my experiment was a bandit trial?*"
+whatifbandit is a package designed to answer: "*What if my experiment was a bandit trial?*"
 
-Using data from the original trial and the user specified options, it re simulates
+Using data from the original trial and the user-specified options, it resimulates
 a randomized controlled trial as an adaptive experiment. Augmented Inverse Probability Weighted estimation (AIPW) is used,
 following the work of [Hadad et. al (2021)](https://pubmed.ncbi.nlm.nih.gov/33876748/), to robustly estimate the probability of success under
 the adaptive experiment.
 
 Adaptive experimental designs, instead of randomly assigning treatments, take into account the relative performance
-of each treatment. Usually this means that better performing treatments will be assigned more participants at each assignment
+of each treatment. Usually, this means that better-performing treatments will be assigned more participants at each assignment
 period, allowing for a convergence to the best treatment arm. These designs can shine in situations such as:
 
 -   Simple random assignment produces sample sizes too small to detect treatment effects.
 -   A researcher wants to test many treatments, such as 10, 20, or 100.
--   An experiment occurs over a long period of time, and a researcher wants prior results to impact future assignments.
+-   An experiment occurs over a long time, and a researcher wants prior results to impact future assignments.
 -   Finding the absolute best treatment takes precedence over gauging the effects of all treatments.
 
 This package allows researchers to showcase how their experiment could have turned out using 
 adaptive assignment, without having the go through the process of running another one. 
-This can unlock new insights in older studies, and provide justification for the future usage of adaptive 
+This can unlock new insights in older studies and justify the future usage of adaptive 
 techniques.
 
 Adaptive experiments are a Multi-Arm Bandit Problem, as each treatment arm has an unknown probability of success, and we are forced
 to assign new participants/observations based on the outcomes already occurred, while balancing the trade-off that comes with exploring
 each arm, and exploiting the current best arm. 
 
-These ideas, is what gives the package its name, whatifbandit. bandit for Multi-Arm-Bandit, and whatif for the central question 
+These ideas is what gives the package its name, whatifbandit. bandit for Multi-Arm-Bandit, and whatif for the central question 
 that the package answers.
 
 ## Features
@@ -39,16 +39,16 @@ Whatifbandit provides robust customization options to match as many experimental
 equipped to handle experiments where success is binary. Functionality for other cases may be introduced in future development.
 These major features include:
 
--   2 bandit algorithms probability matching via Thompson Sampling, and UCB1.
--   Variable length and flexible assignment periods, such as individual, batches, and date-based.
+-   2 bandit algorithms: probability matching via Thompson Sampling, and UCB1.
+-   Variable length and flexible assignment periods, such as individual, batch, and date-based.
 -   Simulation of perfect and imperfect information during re-assignment.
 -   Treatment blocking.
--   Control augmented and hybrid assignment.
+-   Control augmented and hybrid assignments.
 -   Variable length information period for re-assignment.
 
-Additionally whatifbandit supports parallel processing over multiple simulations
+Additionally, whatifbandit supports parallel processing over multiple simulations
 via [future](https://future.futureverse.org/), large data support through [data.table](https://rdatatable.gitlab.io/data.table/),
-and a full suite of generic functions to accelerate post simulation analysis.
+and a full suite of generic functions to accelerate post-simulation analysis.
 
 ## Installation
 ```
@@ -68,8 +68,8 @@ sim <- single_mab_simulation(
   period_length = 1,
   algorithm = "Thompson",
   conditions = levels(tanf$condition),
-  whole_experiment = FALSE, p
-  erfect_assignment = TRUE,
+  whole_experiment = FALSE,
+  perfect_assignment = TRUE,
   prior_periods = "All",
   blocking = TRUE, 
   block_cols = c("service_center"),
