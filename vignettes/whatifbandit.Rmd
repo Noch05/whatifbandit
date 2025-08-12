@@ -439,7 +439,7 @@ The data.table version completes in `r datatable_time` seconds while the data.fr
 
 The data.table version may not be faster in all cases. Performance is mainly dependent on the size of the data, the number of observations in each period, and the total number of periods. For simulations where each period contains less than 500 observations or the total size is less than 1,000,000 rows, the data.table version will likely be slower. There is no hard and fast rule, you must make the judgment based on the data you have, the simulation you want to run, and the computing power of your system.
 
-The Thompson Sampling Corrections may introduce new errors, that we have not caught yet. If you get an error from an internal function call, we recommend switching to UCB1 which does not have the same issues, and reporting bug as an issue on package's [GitHub Repo](https://github.com/ryantmoore/whatifbandit/issues).
+The Thompson Sampling Corrections may introduce new errors, that we have not caught yet. If you get an error from an internal function call, we recommend switching to UCB1 which does not have the same issues, and reporting bug as an issue on package's [GitHub Repo](https://github.com/Noch05/whatifbandit/issues).
 
 ## Error Handling
 `single_mab_simulation()` and `multiple_mab_simulation()` can have more than 20 arguments, so its easy to make a typo when calling the function. As a result, we provide helpful error messages to help you deduce what has gone wrong with your execution of the function. If a required column is not properly entered, not present in the data, not the correct data type or any of the other arguments are invalid, a helpful error will be thrown to notify the user of any issues.
@@ -585,7 +585,7 @@ try(single_mab_simulation(
 These checks can also be overly strict at times and despite thorough testing, may result in errors
 when the arguments should be perfectly valid. 
 
-If you encounter an issue like this, please report the bug immediately on [GitHub](https://github.com/ryantmoore/whatifbandit/issues), and set `check_args = FALSE` to skip the argument checking.
+If you encounter an issue like this, please report the bug immediately on [GitHub](https://github.com/Noch05/whatifbandit/issues), and set `check_args = FALSE` to skip the argument checking.
 
 # References 
 
