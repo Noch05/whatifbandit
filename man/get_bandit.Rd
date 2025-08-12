@@ -68,11 +68,11 @@ threshold. If originally the vector is \verb{(0, 0, 1)}, and \code{control_augme
 the new vector is \verb{(0.2, 0, 0.8)} assuming the first element is control.
 }
 \references{
-Kuleshov, Volodymyr, and Doina Precup. 2014. “Algorithms for Multi-Armed Bandit Problems.”
+Kuleshov, Volodymyr, and Doina Precup. 2014. "Algorithms for Multi-Armed Bandit Problems."
 \emph{arXiv}. \doi{10.48550/arXiv.1402.6028}.
 
 Loecher, Thomas Lotze and Markus. 2022.
-“Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis.”
+"Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis."
 \url{https://cran.r-project.org/package=bandit}.
 }
 \keyword{internal}

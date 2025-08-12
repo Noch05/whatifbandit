@@ -164,11 +164,11 @@ get_past_results.data.table <- function(current_data,
 #'
 #'
 #' @references
-#' Kuleshov, Volodymyr, and Doina Precup. 2014. “Algorithms for Multi-Armed Bandit Problems.”
+#' Kuleshov, Volodymyr, and Doina Precup. 2014. "Algorithms for Multi-Armed Bandit Problems."
 #' \emph{arXiv}. \doi{10.48550/arXiv.1402.6028}.
 #'
 #' Loecher, Thomas Lotze and Markus. 2022.
-#' “Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis.”
+#' "Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis."
 #' \url{https://cran.r-project.org/package=bandit}.
 #' @keywords internal
 

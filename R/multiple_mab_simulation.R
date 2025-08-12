@@ -62,30 +62,30 @@
 #' Note that parallel processing is not guaranteed to work on all systems, and may require additional setup or debugging effort
 #' from the user. For any issues, users are encouraged to consult the documentation of the above packages.
 #' @references
-#' Bengtsson, Henrik. 2025. “Future: Unified Parallel and Distributed Processing in R for Everyone.”
+#' Bengtsson, Henrik. 2025. "Future: Unified Parallel and Distributed Processing in R for Everyone."
 #' \url{https://cran.r-project.org/package=future}.
 #'
-#' Bengtsson, Henrik. 2025. “Future.Batchtools: A Future API for Parallel and Distributed Processing Using ‘Batchtools.’”
+#' Bengtsson, Henrik. 2025. "Future.Batchtools: A Future API for Parallel and Distributed Processing Using ‘Batchtools.’"
 #' \url{https://cran.r-project.org/package=future.batchtools}.
 #'
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
-#' “Confidence Intervals for Policy Evaluation in Adaptive Experiments.” \emph{Proceedings of the National Academy of Sciences of the United States of America} 118
+#' "Confidence Intervals for Policy Evaluation in Adaptive Experiments." \emph{Proceedings of the National Academy of Sciences of the United States of America} 118
 #' (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 #'
-#' Kuleshov, Volodymyr, and Doina Precup. 2014. “Algorithms for Multi-Armed Bandit Problems.”
+#' Kuleshov, Volodymyr, and Doina Precup. 2014. "Algorithms for Multi-Armed Bandit Problems."
 #' \emph{arXiv}. \doi{10.48550/arXiv.1402.6028}.
 #'
-#' Loecher, Thomas Lotze and Markus. 2022. “Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis.”
+#' Loecher, Thomas Lotze and Markus. 2022. "Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis."
 #' \url{https://cran.r-project.org/package=bandit}.
 #'
 #' Offer‐Westort, Molly, Alexander Coppock, and Donald P. Green. 2021.
-#' “Adaptive Experimental Design: Prospects and Applications in Political Science.”
+#' "Adaptive Experimental Design: Prospects and Applications in Political Science."
 #' \emph{American Journal of Political Science} 65 (4): 826–44. \doi{10.1111/ajps.12597}..
 #'
-#' Slivkins, Aleksandrs. 2024. “Introduction to Multi-Armed Bandits.” \emph{arXiv}. \doi{10.48550/arXiv.1904.07272}.
+#' Slivkins, Aleksandrs. 2024. "Introduction to Multi-Armed Bandits." \emph{arXiv}. \doi{10.48550/arXiv.1904.07272}.
 #'
 #' Vaughan, Davis, Matt Dancho, and RStudio. 2022.
-#' “Furrr: Apply Mapping Functions in Parallel Using Futures.”
+#' "Furrr: Apply Mapping Functions in Parallel Using Futures."
 #' \url{https://cran.r-project.org/package=furrr}.
 #'
 #' @seealso [single_mab_simulation()], \href{https://furrr.futureverse.org}{furrr}, \href{https://future.futureverse.org}{future}
