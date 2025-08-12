@@ -2,9 +2,9 @@ Package: whatifbandit
 Title: Analyzing Randomized Experiments as Multi-Arm Bandits
 Version: 0.2.0
 Authors@R: c(
-    person("Noah", "Ochital", email = "noahochital@icloud.com", role = c("aut", "cre", "cph"),
+    person(given = "Noah", family = "Ochital", email = "noahochital@icloud.com", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0009-0009-0398-2963")),
-    person("Ryan T", "Moore", email = "rtm@american.edu", role = c("ctb", "cph"),
+    person(given = "Ryan T", family = "Moore", email = "rtm@american.edu", role = c("ctb", "cph"),
            comment = c(ORCID = "0000-0002-3916-8113"))
   )
 Description: Simulates the results of completed randomized controlled
@@ -22,29 +22,20 @@ Description: Simulates the results of completed randomized controlled
 License: GPL (>= 3) + file LICENSE
 URL: https://github.com/Noch05/whatifbandit
 BugReports: https://github.com/Noch05/whatifbandit/issues
-Depends: 
-    R (>= 4.1.0)
-Imports: 
-    bandit,
-    data.table,
-    dplyr,
-    furrr,
-    lubridate,
-    purrr,
-    randomizr,
-    rlang,
-    tibble,
-    tidyr
-Suggests: 
-    future,
-    ggplot2,
-    knitr,
-    rmarkdown,
-    testthat (>= 3.0.0)
-VignetteBuilder: 
-    knitr
+Depends: R (>= 4.1.0)
+Imports: bandit, data.table, dplyr, furrr, lubridate, purrr, randomizr,
+        rlang, tibble, tidyr
+Suggests: future, ggplot2, knitr, rmarkdown, testthat (>= 3.0.0)
+VignetteBuilder: knitr
 Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
+NeedsCompilation: no
+Packaged: 2025-08-12 19:24:33 UTC; noaho
+Author: Noah Ochital [aut, cre, cph] (ORCID:
+    <https://orcid.org/0009-0009-0398-2963>),
+  Ryan T Moore [ctb, cph] (ORCID:
+    <https://orcid.org/0000-0002-3916-8113>)
+Maintainer: Noah Ochital <noahochital@icloud.com>
