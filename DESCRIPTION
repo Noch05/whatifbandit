@@ -4,7 +4,7 @@ Version: 0.2.0
 Authors@R: c(
     person(given = "Noah", family = "Ochital", email = "noahochital@icloud.com", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0009-0009-0398-2963")),
-    person(given = "Ryan T", family = "Moore", email = "rtm@american.edu", role = c("ctb", "cph"),
+    person(given = "Ryan T.", family = "Moore", email = "rtm@american.edu", role = c("ctb", "cph"),
            comment = c(ORCID = "0000-0002-3916-8113"))
   )
 Description: Simulates the results of completed randomized controlled
@@ -13,11 +13,11 @@ Description: Simulates the results of completed randomized controlled
     estimation (AIPW), outlined by Hadad et al. (2021)
     <doi:10.1073/pnas.2014602118>, is used to robustly estimate the
     probability of success for each treatment arm under the adaptive
-    conditions. Provides customization options to simulate
+    design. Provides customization options to simulate
     perfect/imperfect information, stationary/non-stationary bandits,
-    treatment blocking, along with control augmentation, and other hybrid
+    blocked treatment assignments, along with control augmentation, and other hybrid
     strategies for assigning treatment arms. The methods used in
-    simulation were inspired Offer-Westort et al.  (2021)
+    simulation were inspired by Offer-Westort et al.  (2021)
     <doi:10.1111/ajps.12597>.
 License: GPL (>= 3) + file LICENSE
 URL: https://github.com/Noch05/whatifbandit
