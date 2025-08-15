@@ -6,7 +6,7 @@
 \alias{whatifbandit-package}
 \title{whatifbandit: Analyzing Randomized Experiments as Multi-Arm Bandits}
 \description{
-Simulates the results of completed randomized controlled trials, as if they had been conducted as adaptive Multi-Arm Bandit (MAB) trials instead. Augmented inverse probability weighted estimation (AIPW), outlined by Hadad et al. (2021) \doi{10.1073/pnas.2014602118}, is used to robustly estimate the probability of success for each treatment arm under the adaptive conditions. Provides customization options to simulate perfect/imperfect information, stationary/non-stationary bandits, treatment blocking, along with control augmentation, and other hybrid strategies for assigning treatment arms. The methods used in simulation were inspired Offer-Westort et al. (2021) \doi{10.1111/ajps.12597}.
+Simulates the results of completed randomized controlled trials, as if they had been conducted as adaptive Multi-Arm Bandit (MAB) trials instead. Augmented inverse probability weighted estimation (AIPW), outlined by Hadad et al. (2021) \doi{10.1073/pnas.2014602118}, is used to robustly estimate the probability of success for each treatment arm under the adaptive design. Provides customization options to simulate perfect/imperfect information, stationary/non-stationary bandits, blocked treatment assignments, along with control augmentation, and other hybrid strategies for assigning treatment arms. The methods used in simulation were inspired by Offer-Westort et al. (2021) \doi{10.1111/ajps.12597}.
 }
 \seealso{
 Useful links:
@@ -21,7 +21,7 @@ Useful links:
 
 Other contributors:
 \itemize{
-  \item Ryan T Moore \email{rtm@american.edu} (\href{https://orcid.org/0000-0002-3916-8113}{ORCID}) [contributor, copyright holder]
+  \item Ryan T. Moore \email{rtm@american.edu} (\href{https://orcid.org/0000-0002-3916-8113}{ORCID}) [contributor, copyright holder]
 }
 
 }
