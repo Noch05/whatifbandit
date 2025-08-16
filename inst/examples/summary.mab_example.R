@@ -24,12 +24,9 @@ x <- single_mab_simulation(
   )
 )
 
-# Producing a Summary Table
-# Defaults to 95% Normal Confidence Intervals
-summary(x)
+# Creating summary table
+## Defaults to 95% confidence interval
+summary(x) |> print(width = Inf)
 
-# Changing to 70% Confidence Level
-summary(x, level = 0.7)
-
-# Invalid levels throw an error
-try(summary(x, level = 5))
+## 70% confidence level
+summary(x, level = 0.7) |> print(width = Inf)
