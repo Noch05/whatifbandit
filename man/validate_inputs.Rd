@@ -102,8 +102,8 @@ Default is 0. It is not recommended to use this in conjunction with \code{random
 
 \item{verbose}{A logical value; whether or not to print intermediate messages. Default is FALSE.}
 
-\item{ndraws}{A numeric value; When Thompson Sampling direct calculations fail, draws from a simulated posterior
-will be used to approximate the Thompson Sampling probabilities. This is the number of simulations to use, the default
+\item{ndraws}{A numeric value; When Thompson sampling direct calculations fail, draws from a simulated posterior
+will be used to approximate the Thompson sampling probabilities. This is the number of simulations to use, the default
 is 5000 to match the default parameter \code{\link[bandit:best_binomial_bandit_sim]{bandit::best_binomial_bandit_sim()}}, but might need to be raised or lowered depending on performance and accuracy
 concerns.}
 
@@ -116,8 +116,7 @@ will have a \code{random_assign_prop} probability of being selected for random a
 a whole number, and that many rows are selected for random assignment.}
 }
 \value{
-No return value. Throws an error
-if an argument is missing or misspecified.
+Throws an error if an argument is missing or misspecified.
 }
 \description{
 This function checks to ensure that all required arguments
@@ -127,7 +126,9 @@ was misspecified. Additionally, when \code{verbose} = TRUE, additional warning
 messages may be shown if unnecessary arguments are passed.
 }
 \seealso{
-*\code{\link[=single_mab_simulation]{single_mab_simulation()}}
-*\code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}
+\itemize{
+\item \code{\link[=single_mab_simulation]{single_mab_simulation()}}
+\item \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}
+}
 }
 \keyword{internal}

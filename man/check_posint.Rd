@@ -10,7 +10,7 @@ check_posint(...)
 \item{...}{Arguments to check}
 }
 \value{
-Nothing; Throws an error if any input is not a positive whole number or
+Throws an error if any input is not a positive whole number or
 a valid string.
 }
 \description{

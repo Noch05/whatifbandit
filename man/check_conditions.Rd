@@ -33,7 +33,7 @@ Used to simulate imperfect information on the part of researchers conducting an 
 Default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.}
 }
 \value{
-Nothing; Throws an error if the conditions vector does not meet the
+Throws an error if the conditions vector does not meet the
 requirements for the user's specified settings.
 }
 \description{

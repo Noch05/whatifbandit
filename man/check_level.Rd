@@ -14,7 +14,7 @@ Defaults to 0.95}
 Throws an error if \code{level} is invalid, else does nothing.
 }
 \description{
-Shorthand for Checking if the \code{level} argument in the S3 generic methods
+Checking if the \code{level} argument in the S3 generic methods
 is valid for a confidence interval.
 }
 \keyword{internal}

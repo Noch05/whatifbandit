@@ -7,7 +7,7 @@
 \method{get_bandit}{UCB1}(past_results, conditions, current_period)
 }
 \arguments{
-\item{past_results}{tibble/data.table containing summary of prior periods, with
+\item{past_results}{Tibble/data.table containing summary of prior periods, with
 successes, number of observations, and success rates, which is created by \code{\link[=get_past_results]{get_past_results()}}.}
 
 \item{conditions}{A named character vector containing treatment conditions. The elements
@@ -24,7 +24,6 @@ and a named numeric vector of assignment probabilities, where the highest UCB1 o
 is assigned 1, and the rest 0.
 }
 \description{
-Utilizes the well established UCB1 formula to calculate Upper
-Confidence Bounds for each treatment arm.
+Calculates upper confidence bounds for each treatment arm
 }
 \keyword{internal}

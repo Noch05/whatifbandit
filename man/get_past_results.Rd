@@ -41,7 +41,7 @@ treatment condition.
 \description{
 Summarizes results of prior periods to use for the current Multi-Arm-Bandit assignment. This function
 calculates the number of success under each treatment, the total number of observations assigned to each treatment,
-to be used for UCB1 or Thompson Sampling.
+to be used for UCB1 or Thompson sampling.
 }
 \details{
 When \code{perfect_assignment} is FALSE, the maximum value from the specified
@@ -52,8 +52,10 @@ of assigning this treatments periods, as it simulates the researchers not having
 received that information yet.
 }
 \seealso{
-*\code{\link[=run_mab_trial]{run_mab_trial()}}
-*\code{\link[=single_mab_simulation]{single_mab_simulation()}}
-*\code{\link[=get_bandit]{get_bandit()}}
+\itemize{
+\item \code{\link[=run_mab_trial]{run_mab_trial()}}
+\item \code{\link[=single_mab_simulation]{single_mab_simulation()}}
+\item \code{\link[=get_bandit]{get_bandit()}}
+}
 }
 \keyword{internal}

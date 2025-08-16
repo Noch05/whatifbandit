@@ -14,7 +14,7 @@ get_bandit(
 )
 }
 \arguments{
-\item{past_results}{tibble/data.table containing summary of prior periods, with
+\item{past_results}{Tibble/data.table containing summary of prior periods, with
 successes, number of observations, and success rates, which is created by \code{\link[=get_past_results]{get_past_results()}}.}
 
 \item{algorithm}{A character string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1". Algorithm
@@ -33,30 +33,30 @@ of the trial in this vector must have the name "Control".}
 \item{control_augment}{A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.
 Default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.}
 
-\item{ndraws}{A numeric value; When Thompson Sampling direct calculations fail, draws from a simulated posterior
-will be used to approximate the Thompson Sampling probabilities. This is the number of simulations to use, the default
+\item{ndraws}{A numeric value; When Thompson sampling direct calculations fail, draws from a simulated posterior
+will be used to approximate the Thompson sampling probabilities. This is the number of simulations to use, the default
 is 5000 to match the default parameter \code{\link[bandit:best_binomial_bandit_sim]{bandit::best_binomial_bandit_sim()}}, but might need to be raised or lowered depending on performance and accuracy
 concerns.}
 }
 \value{
 A list of length 2 containing:
 \itemize{
-\item \code{bandit}: Bandit object, either a named numeric vector of Thompson Probabilities or a
-tibble/data.table of UCB1 statistics.
+\item \code{bandit}: Bandit object, either a named numeric vector of Thompson sampling probabilities or a
+tibble/data.table of UCB1 valuess.
 \item \verb{assignment_probabilities:} Named numeric vector with a value for each condition
 containing the probability of being assigned that treatment.}
 }
 \description{
-Calculates the best treatment for a given period using either a UCB1 or Thompson Sampling Algorithm.
-Thompson Sampling is done using \code{\link[bandit:best_binomial_bandit]{bandit::best_binomial_bandit()}} from
+Calculates the best treatment for a given period using either a UCB1 or Thompson sampling algorithm.
+Thompson sampling is done using \code{\link[bandit:best_binomial_bandit]{bandit::best_binomial_bandit()}} from
 the \href{https://cran.r-project.org/package=bandit}{bandit}
-package and UCB1 statistic are calculated using the a well-defined formula that can be found
-in \href{https://arxiv.org/abs/1402.6028}{(Kuleshov and Precup 2014)}.
+package and UCB1 valuess are calculated using the well-defined formula that can be found
+in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup (2014)}.
 }
 \details{
 The Thompson  \code{assignment_probabilities} is the same as the \code{bandit} except
 when control augmentation is used to alter the probabilities of assignment.
-Thompson Sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
+Thompson sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
 package but the direct calculation can result in errors or overflow. If this occurs, a simulation based method is used
 instead to estimate the posterior distribution, and the user receives a warning. The \code{ndraws} argument specifies
 the number of draws to make in this simulation.

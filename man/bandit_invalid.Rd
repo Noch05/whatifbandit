@@ -2,18 +2,18 @@
 % Please edit documentation in R/mab_assign.R
 \name{bandit_invalid}
 \alias{bandit_invalid}
-\title{Checks Validity of Thompson Probabilities}
+\title{Checks Validity of Thompson sampling probabilities}
 \usage{
 bandit_invalid(bandit)
 }
 \arguments{
-\item{bandit}{a numeric vector of Thompson Probabilities.}
+\item{bandit}{a numeric vector of Thompson sampling probabilities.}
 }
 \value{
 Logical; TRUE if the vector is invalid, FALSE if valid
 }
 \description{
-Checks if the Thompson Probabilities either sum arbitrarily close
-to 0 or if any of them are NA, which are signs that overflow occurred or direct calculations failed to converge.
+Checks if the Thompson sampling probabilities either sum arbitrarily close
+to 0 or if any of them are NA, indicating the direct calculation failed or did not converge.
 }
 \keyword{internal}

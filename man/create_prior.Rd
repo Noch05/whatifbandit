@@ -23,6 +23,8 @@ Used during \code{\link[=run_mab_trial]{run_mab_trial()}} to create a vector of 
 the proper vector when \code{prior_periods} is not "All".
 }
 \seealso{
-*\code{\link[=run_mab_trial]{run_mab_trial()}}
+\itemize{
+\item \code{\link[=run_mab_trial]{run_mab_trial()}}
+}
 }
 \keyword{internal}

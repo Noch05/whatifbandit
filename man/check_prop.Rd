@@ -10,7 +10,7 @@ check_prop(...)
 \item{...}{Arguments to check}
 }
 \value{
-Nothing; Throws an error if any input is not a valid proportion between 0 and 1
+Throws an error if any input is not a valid proportion between 0 and 1
 }
 \description{
 Helper to \code{\link[=validate_inputs]{validate_inputs()}}. This function accepts the user's

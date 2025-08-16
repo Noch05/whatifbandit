@@ -24,7 +24,7 @@ the number of times each arm was the chosen as the best treatment across all sim
 }
 \details{
 This summary provides the number of times each treatment arm was
-selected as the best, chosen by the highest UCB1 or Thompson Probability
+selected as the best, chosen by the highest UCB1 or Thompson sampling probabilities
 from the end of each trial.
 
 Additionally it provides the average of the AIPW and sample estimates
@@ -65,12 +65,9 @@ x <- multiple_mab_simulation(
 )
 
 # Creating summary table
-# Defaults to 95\% confidence interval
+## Defaults to 95\% confidence interval
 summary(x) |> print(width = Inf)
 
-# Changing to 70\% confidence level
+## 70\% confidence level
 summary(x, level = 0.7) |> print(width = Inf)
-
-# Invalid levels throw an error
-try(summary(x, level = 5))
 }

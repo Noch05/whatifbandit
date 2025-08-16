@@ -60,7 +60,7 @@ on a given day whether or not all the information from a prior batch was availab
 you have exact dates treatments were assigned.}
 }
 \value{
-Nothing; Throws an error if the data does not meet the specifications
+Throws an error if the data does not meet the specifications
 of the trial based on user settings.
 }
 \description{

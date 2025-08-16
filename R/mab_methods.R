@@ -84,7 +84,7 @@ print_mab <- function(mab) {
 #' @description
 #' Summarizes the Results of a Single Multi-Arm Bandit Trial. Provides
 #' confidence intervals around the AIPW estimates, and the final calculations
-#' of the Thompson sampling probabilities or UCB1 statistics for each arm.
+#' of the Thompson sampling probabilities or UCB1 valuess for each arm.
 #' @param object `mab`` class object created by [single_mab_simulation()].
 #' @param level Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
 #' Defaults to 0.95
@@ -153,7 +153,7 @@ summary.mab <- function(object, level = 0.95, ...) {
 #' @param x `mab` class object created by [single_mab_simulation()]
 #' @param type String; Type of plot requested; valid types are:
 #' \itemize{
-#' \item `arm`: Shows Thompson Probability or UCB1 Statistic over the trial period.
+#' \item `arm`: Shows Thompson sampling probabilities or UCB1 values over the trial period.
 #' \item `assign`: Shows Assignment Probability/Proportion over trial period.
 #' \item `estimate`: Shows AIPW estimates for success probability with
 #' user specified normal confidence intervals based on their estimated variance.
@@ -209,7 +209,7 @@ plot.mab <- function(x, type, level = .95, save = FALSE, path = NULL, ...) {
 #' @inheritParams plot.mab
 #' @param object, String; Location to gather treatment arm data from, either
 #' "bandits" or "assignment_probs".
-#' @returnsMinimal Minimal ggplot object, that can be customized and added to with `+` (to change, scales, labels, legend, theme, etc.)
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change, scales, labels, legend, theme, etc.)
 #' @keywords internal
 
 plot_arms <- function(x, object, ...) {
@@ -219,7 +219,7 @@ plot_arms <- function(x, object, ...) {
 
   if (object == "bandits") {
     if (x$settings$algorithm == "UCB1") {
-      ylab <- "UCB1 Statistic"
+      ylab <- "UCB1 values"
       title <- "UCB1 Sampling Over Time"
     }
     if (x$settings$algorithm == "Thompson") {
@@ -286,7 +286,7 @@ plot_estimates <- function(x, level = 0.95, ...) {
 #-------------------------------------------------------------------------------
 #' Check Level
 #' @description
-#' Shorthand for Checking if the `level` argument in the S3 generic methods
+#' Checking if the `level` argument in the S3 generic methods
 #' is valid for a confidence interval.
 #' @name check_level
 #' @inheritParams plot.mab
@@ -298,27 +298,4 @@ check_level <- function(level) {
       "x" = paste0("You passed: ", level)
     ))
   }
-}
-
-#' Check Estimator
-#' @description
-#' Shorthand for checking if the `estimator` passed to
-#' [plot.mab()] and [plot.multiple.mab()] are valid.
-#' @name check_estimator
-#' @inheritParams plot.mab
-#' @returns Throws an error if the argument is invalid; returns character vector
-#' with the user's selection based on the argument.
-#' @keywords internal
-check_estimator <- function(estimator) {
-  if (base::is.null(estimator)) {
-    rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")
-  } else {
-    estimator_arg <- switch(estimator,
-      "both" = c("Sample", "AIPW"),
-      "AIPW" = c("AIPW"),
-      "Sample" = c("Sample"),
-      rlang::abort("Invalid Estimator: Valid Estimators are `both`, `AIPW`, and `Sample`")
-    )
-  }
-  return(estimator_arg)
 }

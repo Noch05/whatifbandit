@@ -91,8 +91,8 @@ and the number of rows is calculate to be less than 1, and probability sampling 
 will have a \code{random_assign_prop} probability of being selected for random assignment. Otherwise the number is rounded to
 a whole number, and that many rows are selected for random assignment.}
 
-\item{ndraws}{A numeric value; When Thompson Sampling direct calculations fail, draws from a simulated posterior
-will be used to approximate the Thompson Sampling probabilities. This is the number of simulations to use, the default
+\item{ndraws}{A numeric value; When Thompson sampling direct calculations fail, draws from a simulated posterior
+will be used to approximate the Thompson sampling probabilities. This is the number of simulations to use, the default
 is 5000 to match the default parameter \code{\link[bandit:best_binomial_bandit_sim]{bandit::best_binomial_bandit_sim()}}, but might need to be raised or lowered depending on performance and accuracy
 concerns.}
 
@@ -133,7 +133,7 @@ of that block with an observations original treatment, and new treatment.
 \item \verb{prior_rate_*}: Columns containing success rate for each treatment arm, from all periods before the observations period of the simulation.
 \item \verb{*_assign_prob}: Columns containing probability of being assigned each treatment at the given period.
 }
-\item \code{bandits}: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period. Wide format,
+\item \code{bandits}: A tibble or data.table containing the UCB1 valuess or Thompson sampling posterior distributions for each period. Wide format,
 each row is a period, and each columns is a treatment.
 \item \code{assignment_probs}: A tibble or data.table containing the probability of being assigned each treatment arm at a given period. Wide format,
 each row is a period, and each columns is a treatment.
@@ -159,10 +159,10 @@ but it is not a substitute for a real experiment, and for that reason it does no
 The input data should come from a randomized trial to ensure the assumptions made during the simulation are valid.
 \subsection{Implementation}{
 
-At each period, either the Thompson Probabilities or UCB1 statistics are calculated based on
+At each period, either the Thompson sampling probabilities or UCB1 valuess are calculated based on
 the outcomes from the number of \code{prior_periods} specified. New treatments are then assigned randomly using the Thompson
 Probabilities via the \href{https://cran.r-project.org/package=randomizr}{randomizr}
-package, or as the treatment with the highest UCB1 statistic, while implementing the specific
+package, or as the treatment with the highest UCB1 values, while implementing the specific
 treatment blocking and control augmentation specified. More details on bandit algorithms can in
 \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
 \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.
@@ -199,7 +199,7 @@ code for all the same operations.
 
 In general, smaller batches run faster under base R, while larger ones could benefit from the performance
 and memory efficiencies provided by data.table. However, we've observed larger datasets can cause numerical
-instability with some calculations in the Thompson Sampling procedure. Internal safeguards exist to prevent this, but
+instability with some calculations in the Thompson sampling procedure. Internal safeguards exist to prevent this, but
 the best way to preempt any issues is to set \code{prior_periods} to a low number.
 
 For more information about how to use the function, please view the vignette.
@@ -210,7 +210,7 @@ For more information about how to use the function, please view the vignette.
  data(tanf)
  conditions <- c("no_letter", "open_appt", "specific_appt")
 
- ## Running Thompson Sampling with 500 person large batches,
+ ## Running Thompson sampling with 500 person large batches,
  ## with no blocks and imperfect assignment
 
  single_mab_simulation(

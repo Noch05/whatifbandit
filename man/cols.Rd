@@ -21,8 +21,7 @@ containing the names or numbers of months.}
 Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type \code{Date}, not a character string.}
 }
 \description{
-Topic holding common arguments across many functions,
-used to inherit from in documentation to keep definitions consistent. Not a
-function.
+Topic holding common arguments across many functions. Used to expedite documentation, through
+\code{inheritParams} tag from roxygen2.
 }
 \keyword{internal}

@@ -21,7 +21,7 @@ of a traditional Randomized Controlled Trial (RCT). data.frames will be converte
 \code{multiple.mab} class object, which is a named list containing:
 \itemize{
 \item \verb{final_data_nest:} tibble or data.table containing the nested tibbles/data.tables from each trial. Only provided when \code{keep_data} is TRUE.
-\item \code{bandits}: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period. Wide format,
+\item \code{bandits}: A tibble or data.table containing the UCB1 valuess or Thompson sampling posterior distributions for each period. Wide format,
 each row is a period, and each columns is a treatment.
 \item \code{assignment_probs}: A tibble or data.table containing the probability of being assigned each treatment arm at a given period. Wide format,
 each row is a period, and each columns is a treatment.

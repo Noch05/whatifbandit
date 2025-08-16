@@ -131,7 +131,7 @@ get_past_results.data.table <- function(current_data,
 #' @description Calculates the best treatment for a given period using either a UCB1 or Thompson sampling algorithm.
 #' Thompson sampling is done using [bandit::best_binomial_bandit()] from
 #' the \href{https://cran.r-project.org/package=bandit}{bandit}
-#' package and UCB1 statistics are calculated using the well-defined formula that can be found
+#' package and UCB1 valuess are calculated using the well-defined formula that can be found
 #' in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup (2014)}.
 #'
 #' @name get_bandit
@@ -144,7 +144,7 @@ get_past_results.data.table <- function(current_data,
 #' @returns A list of length 2 containing:
 #' \itemize{
 #' \item `bandit`: Bandit object, either a named numeric vector of Thompson sampling probabilities or a
-#' tibble/data.table of UCB1 statistics.
+#' tibble/data.table of UCB1 valuess.
 #' \item `assignment_probabilities:` Named numeric vector with a value for each condition
 #' containing the probability of being assigned that treatment.}
 #'
@@ -308,13 +308,14 @@ get_bandit.UCB1 <- function(past_results, conditions, current_period) {
 #-------------------------------------------------------------------------------
 #' Adaptively Assign Treatments in a Period
 #' @description Assigns new treatments for an assignment wave based on the assignment probabilities provided from
-#' [get_bandit()], and the proportion of randomly assigned observations from specified in `random_assign_prop`
-#' Probabilities are passed to [randomizr::block_and_cluster_ra()] or [randomizr::cluster_ra()] from the
-#' \href{https://cran.r-project.org/package=randomizr}{randomizr} package for random assignment.
+#' [get_bandit()], and the proportion of randomly assigned observations specified in `random_assign_prop`.
+#' Assignments are made randomly with the given probabilities using [randomizr::block_and_cluster_ra()] or
+#' [randomizr::cluster_ra()].
+#'
 #' @name assign_treatments
 #' @inheritParams single_mab_simulation
 #' @inheritParams cols
-#' @param probs Named Numeric Vector; Probability of Assignment for each treatment condition.
+#' @param probs Named numeric Vector; probability of assignment for each treatment condition.
 #' @inheritParams get_past_results
 #' @returns Updated tibble/data.table with the new treatment conditions for each observation. If this treatment is different
 #' then from under the original experiment, the column 'impute_req' is 1, and else is 0.
@@ -325,7 +326,7 @@ get_bandit.UCB1 <- function(past_results, conditions, current_period) {
 #' treated once, and is returned in the same order as provided.
 #'
 #' The number of rows which are randomly assigned in each period is `random_assign_prop` multiplied by
-#' the number of rows in the period. If this number is less than 1, then binomial draws are made for each row
+#' the number of rows in the period. If this number is less than 1, then Bernoulli draws are made for each row
 #' with probability `random_assign_prob` to determine if that row will be assigned randomly. Else, the number of random
 #' rows is rounded to the nearest whole number, and then that many rows are selected to be assigned through
 #' random assignment. These row selections are also random.

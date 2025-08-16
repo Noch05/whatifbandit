@@ -19,7 +19,7 @@ assign_treatments(
 \arguments{
 \item{current_data}{tibble/data.table with only observations from the current sampling period.}
 
-\item{probs}{Named Numeric Vector; Probability of Assignment for each treatment condition.}
+\item{probs}{Named numeric Vector; probability of assignment for each treatment condition.}
 
 \item{blocking}{A logical value; whether or not to use treatment blocking. Treatment blocking is used to ensure an even-enough
 distribution of treatment conditions across blocks. For example, blocking by gender would mean the randomized assignment should
@@ -57,9 +57,9 @@ then from under the original experiment, the column 'impute_req' is 1, and else 
 }
 \description{
 Assigns new treatments for an assignment wave based on the assignment probabilities provided from
-\code{\link[=get_bandit]{get_bandit()}}, and the proportion of randomly assigned observations from specified in \code{random_assign_prop}
-Probabilities are passed to \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}} or \code{\link[randomizr:cluster_ra]{randomizr::cluster_ra()}} from the
-\href{https://cran.r-project.org/package=randomizr}{randomizr} package for random assignment.
+\code{\link[=get_bandit]{get_bandit()}}, and the proportion of randomly assigned observations specified in \code{random_assign_prop}.
+Assignments are made randomly with the given probabilities using \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}} or
+\code{\link[randomizr:cluster_ra]{randomizr::cluster_ra()}}.
 }
 \details{
 The unique identifier for each row is used as the cluster in the for the
@@ -67,7 +67,7 @@ randomizr package functions to ensure that each observation is only
 treated once, and is returned in the same order as provided.
 
 The number of rows which are randomly assigned in each period is \code{random_assign_prop} multiplied by
-the number of rows in the period. If this number is less than 1, then binomial draws are made for each row
+the number of rows in the period. If this number is less than 1, then Bernoulli draws are made for each row
 with probability \code{random_assign_prob} to determine if that row will be assigned randomly. Else, the number of random
 rows is rounded to the nearest whole number, and then that many rows are selected to be assigned through
 random assignment. These row selections are also random.

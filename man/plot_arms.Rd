@@ -17,7 +17,7 @@ plot_arms(x, object, ...)
 \value{
 ggplot object
 
-Minimal ggplot object, that can be customized and added to with \code{+} (To change, scales, labels, legend, theme, etc.)
+Minimal ggplot object, that can be customized and added to with \code{+} (to change, scales, labels, legend, theme, etc.)
 }
 \description{
 Helper to \code{\link[=plot.mab]{plot.mab()}}. Plots Treatment Arms over Time.

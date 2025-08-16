@@ -53,7 +53,7 @@ print.multiple.mab <- function(x, ...) {
 #' @method summary multiple.mab
 #' @details
 #' This summary provides the number of times each treatment arm was
-#' selected as the best, chosen by the highest UCB1 or Thompson Probability
+#' selected as the best, chosen by the highest UCB1 or Thompson sampling probabilities
 #' from the end of each trial.
 #'
 #' Additionally it provides the average of the AIPW and sample estimates

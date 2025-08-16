@@ -100,8 +100,8 @@ Default is 0. It is not recommended to use this in conjunction with \code{random
 \item{imputation_information}{Object created by \code{\link[=imputation_precompute]{imputation_precompute()}} containing the conditional means and success dates
 for each treatment block to impute from.}
 
-\item{ndraws}{A numeric value; When Thompson Sampling direct calculations fail, draws from a simulated posterior
-will be used to approximate the Thompson Sampling probabilities. This is the number of simulations to use, the default
+\item{ndraws}{A numeric value; When Thompson sampling direct calculations fail, draws from a simulated posterior
+will be used to approximate the Thompson sampling probabilities. This is the number of simulations to use, the default
 is 5000 to match the default parameter \code{\link[bandit:best_binomial_bandit_sim]{bandit::best_binomial_bandit_sim()}}, but might need to be raised or lowered depending on performance and accuracy
 concerns.}
 
@@ -117,12 +117,12 @@ a whole number, and that many rows are selected for random assignment.}
 A named list containing:
 \itemize{
 \item \code{final_data}: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
-\item \code{bandits}: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period.
+\item \code{bandits}: A tibble or data.table containing the UCB1 valuess or Thompson sampling posterior distributions for each period.
 \item \code{assignment_probs}: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
 }
 }
 \description{
-Performs a full Multi-Arm Bandit (MAB) trial using Thompson Sampling or UCB1.
+Performs a full Multi-Arm Bandit (MAB) trial using Thompson sampling or UCB1.
 The function provides loop around each step of the process for each treatment wave, performing adaptive
 treatment assignment, and outcome imputation. Supports flexible customization passed
 from \code{\link[=single_mab_simulation]{single_mab_simulation()}} and \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}} in treatment blocking strategy,

@@ -103,8 +103,8 @@ caution with this argument.}
 
 \item{verbose}{A logical value; whether or not to print intermediate messages. Default is FALSE.}
 
-\item{ndraws}{A numeric value; When Thompson Sampling direct calculations fail, draws from a simulated posterior
-will be used to approximate the Thompson Sampling probabilities. This is the number of simulations to use, the default
+\item{ndraws}{A numeric value; When Thompson sampling direct calculations fail, draws from a simulated posterior
+will be used to approximate the Thompson sampling probabilities. This is the number of simulations to use, the default
 is 5000 to match the default parameter \code{\link[bandit:best_binomial_bandit_sim]{bandit::best_binomial_bandit_sim()}}, but might need to be raised or lowered depending on performance and accuracy
 concerns.}
 
@@ -143,7 +143,9 @@ a tibble. If a data.table is passed it is copied to avoid modifying the
 original dataset in the users environment.
 }
 \seealso{
-*\code{\link[=single_mab_simulation]{single_mab_simulation()}}
-*\code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}
+\itemize{
+\item \code{\link[=single_mab_simulation]{single_mab_simulation()}}
+\item \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}
+}
 }
 \keyword{internal}

@@ -7,11 +7,10 @@
 #' messages may be shown if unnecessary arguments are passed.
 #' @inheritParams single_mab_simulation
 #' @inheritParams cols
-#' @returns No return value. Throws an error
-#' if an argument is missing or misspecified.
+#' @returns Throws an error if an argument is missing or misspecified.
 #' @seealso
-#' *[single_mab_simulation()]
-#' *[multiple_mab_simulation()]
+#' * [single_mab_simulation()]
+#' * [multiple_mab_simulation()]
 #' @keywords internal
 validate_inputs <- function(data,
                             assignment_method,
@@ -113,8 +112,8 @@ validate_inputs <- function(data,
 #' @inheritParams single_mab_simulation
 #' @inheritParams cols
 #' @returns Throws an error if columns which are required have not been declared
-#' or are not present in the data. Additionally throws warning messages,
-#' if unnecessary columns have been provided.
+#' or are not present in the data, or are the wrong primitive data type. Additionally throws warning messages,
+#' if unnecessary columns have been provided, only when `verbose` is TRUE.
 #' @keywords internal
 #'
 check_cols <- function(assignment_method, time_unit, perfect_assignment, data_cols, data, verbose) {
@@ -231,7 +230,7 @@ check_logical <- function(...) {
 #--------------------------------------------------------------------------------
 #' @title Checking if inputs are proportions
 #' @name check_prop
-#' @returns Nothing; Throws an error if any input is not a valid proportion between 0 and 1
+#' @returns Throws an error if any input is not a valid proportion between 0 and 1
 #' @description Helper to [validate_inputs()]. This function accepts the user's
 #' settings for proportion arguments and checks if they are valid proportions between 0 and 1
 #' @inheritParams check_logical
@@ -255,7 +254,7 @@ check_prop <- function(...) {
 #-------------------------------------------------------------------------------
 #' @title Checking if inputs are positive integers or a valid string
 #' @name check_posint
-#' @returns Nothing; Throws an error if any input is not a positive whole number or
+#' @returns Throws an error if any input is not a positive whole number or
 #' a valid string.
 #' @description Helper to [validate_inputs()]. This function accepts the user's
 #' settings for integer arguments and checks if they are valid positive
@@ -297,7 +296,7 @@ posint <- function(x) {
 #--------------------------------------------------------------------------------
 #' @title Checking if conditions vector is proper
 #' @name check_conditions
-#' @returns Nothing; Throws an error if the conditions vector does not meet the
+#' @returns Throws an error if the conditions vector does not meet the
 #' requirements for the user's specified settings.
 #' @description Helper to [validate_inputs()]. This function accepts the conditions
 #' vector and checks whether it is valid based on the number of conditions in the
@@ -326,7 +325,7 @@ check_conditions <- function(conditions, data, data_cols, control_augment) {
 #-------------------------------------------------------------------------------
 #' @title Checking for valid input data
 #' @name check_data
-#' @returns Nothing; Throws an error if the data does not meet the specifications
+#' @returns Throws an error if the data does not meet the specifications
 #' of the trial based on user settings.
 #' @description Helper to [validate_inputs()]. This function accepts the data and checks
 #' whether it has Unique ID's whether the period length is valid.
@@ -369,7 +368,7 @@ check_data <- function(data, data_cols, assignment_method, period_length, time_u
 # ----------------------------------------------------------------------------
 #' @title Checking for valid assignment methods
 #' @name check_assign_method
-#' @returns Nothing; Throws an error if the user is missing necessary arguments to
+#' @returns Throws an error if the user is missing necessary arguments to
 #' assign treatments or passes invalid ones.
 #' @description Helper to [validate_inputs()]. This function accepts arguments relating
 #' to how treatment waves are assigned, and checks if they are valid, and if all

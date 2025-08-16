@@ -12,7 +12,7 @@ plot_hist(x, ...)
 \item{...}{arguments to pass to \verb{ggplot2:geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, \code{bins} etc.)}
 }
 \value{
-Minimal ggplot object, that can be customized and added to with \code{+} (To change, scales, labels, legend, theme, etc.)
+Minimal ggplot object, that can be customized and added to with \code{+} (to change, scales, labels, legend, theme, etc.)
 }
 \description{
 Plots Distribution of AIPW and Sample estimates over trials for \code{\link[=plot.multiple.mab]{plot.multiple.mab()}}

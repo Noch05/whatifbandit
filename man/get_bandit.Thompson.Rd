@@ -2,12 +2,12 @@
 % Please edit documentation in R/mab_assign.R
 \name{get_bandit.Thompson}
 \alias{get_bandit.Thompson}
-\title{Thompson Sampling Algorithm}
+\title{Thompson sampling Algorithm}
 \usage{
 \method{get_bandit}{Thompson}(past_results, conditions, current_period, ndraws)
 }
 \arguments{
-\item{past_results}{tibble/data.table containing summary of prior periods, with
+\item{past_results}{Tibble/data.table containing summary of prior periods, with
 successes, number of observations, and success rates, which is created by \code{\link[=get_past_results]{get_past_results()}}.}
 
 \item{conditions}{A named character vector containing treatment conditions. The elements
@@ -18,21 +18,22 @@ of the trial in this vector must have the name "Control".}
 
 \item{current_period}{Numeric scalar; current period of the adaptive trial simulation.}
 
-\item{ndraws}{A numeric value; When Thompson Sampling direct calculations fail, draws from a simulated posterior
-will be used to approximate the Thompson Sampling probabilities. This is the number of simulations to use, the default
+\item{ndraws}{A numeric value; When Thompson sampling direct calculations fail, draws from a simulated posterior
+will be used to approximate the Thompson sampling probabilities. This is the number of simulations to use, the default
 is 5000 to match the default parameter \code{\link[bandit:best_binomial_bandit_sim]{bandit::best_binomial_bandit_sim()}}, but might need to be raised or lowered depending on performance and accuracy
 concerns.}
 }
 \value{
-a Named list with 2 elements: the named numeric vector of Thompson Posteriors,
-and a copy of the same vector as the assignment probabilities vector.
+A named list of length 2, with both elements, containing a reference to the named numeric vector of Thompson
+sampling probabilities. The second element is adjusted based on what the user has set for \code{control_augment} and
+\code{random_assign_prop} to reflect the probability of assignment to a given treatment at that period.
 }
 \description{
-Thompson Sampling Algorithm
+Thompson sampling Algorithm
 }
 \details{
-Thompson Sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
-package but the direct calculation can result in errors or overflow. If this occurs, a simulation based method is used
+Thompson sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
+package but the direct calculation can fail. If this occurs, a simulation based method is used
 instead to estimate the posterior distribution, and the user receives a warning.
 }
 \keyword{internal}

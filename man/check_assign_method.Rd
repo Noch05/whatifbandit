@@ -31,7 +31,7 @@ the simulation run slower, while each additional period adds time because of the
 caution with this argument.}
 }
 \value{
-Nothing; Throws an error if the user is missing necessary arguments to
+Throws an error if the user is missing necessary arguments to
 assign treatments or passes invalid ones.
 }
 \description{

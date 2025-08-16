@@ -98,8 +98,8 @@ and the number of rows is calculate to be less than 1, and probability sampling 
 will have a \code{random_assign_prop} probability of being selected for random assignment. Otherwise the number is rounded to
 a whole number, and that many rows are selected for random assignment.}
 
-\item{ndraws}{A numeric value; When Thompson Sampling direct calculations fail, draws from a simulated posterior
-will be used to approximate the Thompson Sampling probabilities. This is the number of simulations to use, the default
+\item{ndraws}{A numeric value; When Thompson sampling direct calculations fail, draws from a simulated posterior
+will be used to approximate the Thompson sampling probabilities. This is the number of simulations to use, the default
 is 5000 to match the default parameter \code{\link[bandit:best_binomial_bandit_sim]{bandit::best_binomial_bandit_sim()}}, but might need to be raised or lowered depending on performance and accuracy
 concerns.}
 
@@ -133,7 +133,7 @@ not to be changed.}
 An object of class \code{multiple.mab}, containing:
 \itemize{
 \item \verb{final_data_nest:} tibble or data.table containing the nested tibbles/data.tables from each trial. Only provided when \code{keep_data} is TRUE.
-\item \code{bandits}: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period. Wide format,
+\item \code{bandits}: A tibble or data.table containing the UCB1 valuess or Thompson sampling posterior distributions for each period. Wide format,
 each row is a period, and each columns is a treatment.
 \item \code{assignment_probs}: A tibble or data.table containing the probability of being assigned each treatment arm at a given period. Wide format,
 each row is a period, and each columns is a treatment.
@@ -197,7 +197,6 @@ tanf <- tanf[1:50, ]
 
 # The seeds passed must be integers, so it is highly recommended to create them
 # before using `sample.int()`
-set.seed(1)
 seeds <- sample.int(10000, 5)
 conditions <- c("no_letter", "open_appt", "specific_appt")
 
@@ -218,19 +217,9 @@ x <- multiple_mab_simulation(
     id_col = "ic_case_id",
     success_col = "success"
   ),
-  verbose = FALSE, times = 5, seeds = seeds, keep_data = TRUE
+  verbose = FALSE, times = 5, seeds = seeds, keep_data = FALSE
 )
 print(x)
-
-# Its Recommenced to set keep_data at FALSE unless necessary to avoid
-# the output from taking up to much memory
-# Keep TRUE
-object.size(x)
-
-x$final_data_nest <- NULL
-# Size if Keep was FALSE
-object.size(x)
-
 
 ## Parallel Execution using future:
 ## Check the future and furrr documentation for more details on possible options

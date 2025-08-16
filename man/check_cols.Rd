@@ -55,8 +55,8 @@ of a traditional Randomized Controlled Trial (RCT). data.frames will be converte
 }
 \value{
 Throws an error if columns which are required have not been declared
-or are not present in the data. Additionally throws warning messages,
-if unnecessary columns have been provided.
+or are not present in the data, or are the wrong primitive data type. Additionally throws warning messages,
+if unnecessary columns have been provided, only when \code{verbose} is TRUE.
 }
 \description{
 Helper to \code{\link[=validate_inputs]{validate_inputs()}}. This function accepts the user's

@@ -20,7 +20,7 @@ Tibble containing summary information from the trial.
 \description{
 Summarizes the Results of a Single Multi-Arm Bandit Trial. Provides
 confidence intervals around the AIPW estimates, and the final calculations
-of the Thompson Probabilities or UCB1 statistics for each arm.
+of the Thompson sampling probabilities or UCB1 valuess for each arm.
 }
 \details{
 The confidence intervals applied follow a standard normal distribution
@@ -62,15 +62,12 @@ x <- single_mab_simulation(
   )
 )
 
-# Producing a Summary Table
-# Defaults to 95\% Normal Confidence Intervals
-summary(x)
+# Creating summary table
+## Defaults to 95\% confidence interval
+summary(x) |> print(width = Inf)
 
-# Changing to 70\% Confidence Level
-summary(x, level = 0.7)
-
-# Invalid levels throw an error
-try(summary(x, level = 5))
+## 70\% confidence level
+summary(x, level = 0.7) |> print(width = Inf)
 }
 \references{
 Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.

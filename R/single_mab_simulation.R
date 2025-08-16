@@ -116,7 +116,7 @@
 #' \item `prior_rate_*`: Columns containing success rate for each treatment arm, from all periods before the observations period of the simulation.
 #' \item `*_assign_prob`: Columns containing probability of being assigned each treatment at the given period.
 #' }
-#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson sampling posterior distributions for each period. Wide format,
+#' \item `bandits`: A tibble or data.table containing the UCB1 valuess or Thompson sampling posterior distributions for each period. Wide format,
 #' each row is a period, and each columns is a treatment.
 #' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period. Wide format,
 #' each row is a period, and each columns is a treatment.
@@ -135,10 +135,10 @@
 #'
 #' ## Implementation
 #'
-#' At each period, either the Thompson sampling probabilities or UCB1 statistics are calculated based on
+#' At each period, either the Thompson sampling probabilities or UCB1 valuess are calculated based on
 #' the outcomes from the number of `prior_periods` specified. New treatments are then assigned randomly using the Thompson
 #' Probabilities via the \href{https://cran.r-project.org/package=randomizr}{randomizr}
-#' package, or as the treatment with the highest UCB1 statistic, while implementing the specific
+#' package, or as the treatment with the highest UCB1 values, while implementing the specific
 #' treatment blocking and control augmentation specified. More details on bandit algorithms can in
 #' \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
 #' \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.
@@ -273,9 +273,9 @@ single_mab_simulation <- function(data,
 #------------------------------------------------------------------------------
 #' @name cols
 #' @title Column arguments shared across functions
-#' @description Topic holding common arguments across many functions,
-#' used to inherit from in documentation to keep definitions consistent. Not a
-#' function.
+#' @description Topic holding common arguments across many functions. Used to expedite documentation, through
+#' `inheritParams` tag from roxygen2.
+#'
 #' @param id_col Column in `data`; contains unique ID as a key.
 #' @param success_col Column in `data`; binary successes from the original experiment.
 #' @param condition_col Column in `data`; original treatment condition for each observation.

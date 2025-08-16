@@ -15,7 +15,7 @@ Defaults to 0.95}
 \item{...}{arguments to pass to \verb{ggplot2:geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, etc.)}
 }
 \value{
-Minimal ggplot object, that can be customized and added to with \code{+} (To change, scales, labels, legend, theme, etc.)`
+Minimal ggplot object, that can be customized and added to with \code{+} (to change, scales, labels, legend, theme, etc.)
 }
 \description{
 Plot Summary of AIPW estimates and variances for Each Treatment Arm.

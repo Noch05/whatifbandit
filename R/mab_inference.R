@@ -8,7 +8,7 @@
 #'
 #' @inheritParams single_mab_simulation
 #' @param periods Numeric value of length 1; number of total periods in the simulation
-#' @param assignment_probs tibble/data.table containing the probabilities of being
+#' @param assignment_probs A tibble/data.table containing the probabilities of being
 #' assigned each treatment at a given period
 #'
 #' @returns A tibble/data.frame, containing the data used in the Multi-Arm-Bandit, with
@@ -199,11 +199,12 @@ get_iaipw.data.table <- function(data, assignment_probs, periods, conditions, ve
 #'
 #' The formulas specified assume that each period is 1 observation but in the cases
 #' for this simulation where periods contain multiple observations the individual estimates
-#' from each period are averaged before being used in the final calculations.
+#' from each period are averaged and weighted by size before being used in the final calculations.
 #'
-#' The AIPW estimator makes corrections for the non-random method of assigning treatment,
-#' and is both unbiased and asymptotically normal, so can be used fo statistical
-#' inference, while the sample mean which is still provided for comparison, cannot be.
+#' The AIPW estimator is unbiased, consistent, and asymptotically normal under the conditions of the simulated trial
+#' of the so can be used for valid inference with a normal distribution. The sample means and variances
+#' are provided for comparison but these are biased and inconsistent under the conditions of the simulated trial
+#'
 #' @references
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
 #' "Confidence Intervals for Policy Evaluation in Adaptive Experiments." \emph{Proceedings of the National Academy of Sciences of the United States of America} 118
@@ -221,22 +222,26 @@ adaptive_aipw <- function(data, assignment_probs, conditions, periods, verbose) 
 #' @noRd
 #'
 adaptive_aipw.data.frame <- function(data, assignment_probs, conditions, periods, verbose) {
+  rows <- nrow(data)
   estimates <- purrr::map(
     conditions, ~ {
       results <- data |>
         dplyr::group_by(period_number) |>
         dplyr::summarize(
           avg = base::mean(!!rlang::sym(base::paste0("aipw_", .x)), na.rm = TRUE),
-          assign_prob = base::unique(!!rlang::sym(base::paste0(.x, "_assign_prob")))
+          assign_prob = base::unique(!!rlang::sym(base::paste0(.x, "_assign_prob"))),
+          size = dplyr::n()
         ) |>
-        dplyr::mutate(time_weights = (assign_prob / periods))
+        dplyr::mutate(
+          time_weights = assign_prob / periods,
+          size_weights = size / rows
+        )
 
+      estimate <- (base::sum(results$avg * results$time_weights * results$size_weights, na.rm = TRUE)) /
+        (base::sum(results$time_weights * results$size_weights, na.rm = TRUE))
 
-      estimate <- (base::sum(results$avg * results$time_weights, na.rm = TRUE)) /
-        (base::sum(results$time_weights, na.rm = TRUE))
-
-      variance <- base::sum((results$time_weights^2) * (results$avg - estimate)^2) /
-        (base::sum(results$time_weights)^2)
+      variance <- base::sum((results$size_weights * results$time_weights)^2 * (results$avg - estimate)^2) /
+        (base::sum(results$time_weights * results$size_weights)^2)
 
       return(tibble::tibble(
         mean = estimate,
@@ -269,21 +274,28 @@ adaptive_aipw.data.frame <- function(data, assignment_probs, conditions, periods
 #' @noRd
 adaptive_aipw.data.table <- function(data, assignment_probs, conditions,
                                      periods, verbose) {
+  rows <- nrow(data)
+
   estimates <- purrr::map(
     conditions, ~ {
       results <- data[, .(
         avg = base::mean(base::get(base::paste0("aipw_", .x)), na.rm = TRUE),
-        assign_prob = base::unique(base::get(base::paste0(.x, "_assign_prob")))
+        assign_prob = base::unique(base::get(base::paste0(.x, "_assign_prob"))),
+        size = .N
       ),
       by = period_number
       ]
-      results[, time_weights := assign_prob / periods]
+      results[, `:=`(
+        time_weights = assign_prob / periods,
+        size_weights = size / rows
+      )]
 
-      estimate <- (base::sum(results$avg * results$time_weights, na.rm = TRUE)) /
-        (base::sum(results$time_weights, na.rm = TRUE))
+      estimate <- (base::sum(results$avg * results$time_weights * results$size_weights, na.rm = TRUE)) /
+        (base::sum(results$time_weights * results$size_weights, na.rm = TRUE))
 
-      variance <- base::sum((results$time_weights^2) * (results$avg - estimate)^2) /
-        (base::sum(results$time_weights)^2)
+      variance <- base::sum((results$size_weights * results$time_weights)^2 * (results$avg - estimate)^2) /
+        (base::sum(results$time_weights * results$size_weights)^2)
+
 
       return(data.table::data.table(
         mean = estimate,
