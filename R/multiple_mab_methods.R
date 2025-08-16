@@ -154,7 +154,7 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
 #'
 #' @example inst/examples/plot.multiple.mab_example.R
 #' @export
-#' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change, scales, labels, legend, theme, etc.)
 
 plot.multiple.mab <- function(x, type, cdf = NULL, level = 0.95, save = FALSE, path = NULL, ...) {
   rlang::check_installed("ggplot2")
@@ -180,7 +180,7 @@ plot.multiple.mab <- function(x, type, cdf = NULL, level = 0.95, save = FALSE, p
 #' @description
 #' Plots Summary Results for [plot.multiple.mab()]
 #' @inheritParams plot.multiple.mab
-#' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change, scales, labels, legend, theme, etc.)
 #' @keywords internal
 
 plot_summary <- function(x, ...) {
@@ -204,7 +204,7 @@ plot_summary <- function(x, ...) {
 #' @description
 #' Plots Distribution of AIPW and Sample estimates over trials for [plot.multiple.mab()]
 #' @inheritParams plot.multiple.mab
-#' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change, scales, labels, legend, theme, etc.)
 #' @keywords internal
 plot_hist <- function(x, ...) {
   rlang::check_installed("ggplot2")
@@ -226,7 +226,7 @@ plot_hist <- function(x, ...) {
 #' @description
 #' Plots AIPW/Sample Estimates for each arm using variance from the repeated trials for [plot.multiple.mab()]
 #' @inheritParams plot.multiple.mab
-#' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change, scales, labels, legend, theme, etc.)
 #' @keywords internal
 
 plot_mult_estimates <- function(x, cdf, level, ...) {

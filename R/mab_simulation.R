@@ -24,8 +24,8 @@
 
 #'
 #' @seealso
-#' *[single_mab_simulation()]
-#' *[multiple_mab_simulation()]
+#' * [single_mab_simulation()]
+#' * [multiple_mab_simulation()]
 #' @keywords internal
 
 

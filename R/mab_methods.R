@@ -183,7 +183,7 @@ summary.mab <- function(object, level = 0.95, ...) {
 #' (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 #' @export
 #' @example inst/examples/plot.mab_example.R
-#' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change, scales, labels, legend, theme, etc.)
 
 plot.mab <- function(x, type, level = .95, save = FALSE, path = NULL, ...) {
   rlang::check_installed("ggplot2")
@@ -209,7 +209,7 @@ plot.mab <- function(x, type, level = .95, save = FALSE, path = NULL, ...) {
 #' @inheritParams plot.mab
 #' @param object, String; Location to gather treatment arm data from, either
 #' "bandits" or "assignment_probs".
-#' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)
+#' @returnsMinimal Minimal ggplot object, that can be customized and added to with `+` (to change, scales, labels, legend, theme, etc.)
 #' @keywords internal
 
 plot_arms <- function(x, object, ...) {
@@ -261,7 +261,7 @@ plot_arms <- function(x, object, ...) {
 #' @inheritParams plot.mab
 #' @description
 #' Plot Summary of AIPW estimates and variances for Each Treatment Arm.
-#' @returns Minimal ggplot object, that can be customized and added to with `+` (To change, scales, labels, legend, theme, etc.)`
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change, scales, labels, legend, theme, etc.)
 #' @keywords internal
 plot_estimates <- function(x, level = 0.95, ...) {
   rlang::check_installed("ggplot2")
