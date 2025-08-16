@@ -2,7 +2,7 @@
 #' @name get_past_results
 #' @description Summarizes results of prior periods to use for the current Multi-Arm-Bandit assignment. This function
 #' calculates the number of success under each treatment, the total number of observations assigned to each treatment,
-#'  to be used for UCB1 or Thompson Sampling.
+#'  to be used for UCB1 or Thompson sampling.
 #'
 #' @inheritParams single_mab_simulation
 #' @inheritParams create_prior
@@ -21,9 +21,9 @@
 #' received that information yet.
 #'
 #' @seealso
-#' *[run_mab_trial()]
-#' *[single_mab_simulation()]
-#' *[get_bandit()]
+#' * [run_mab_trial()]
+#' * [single_mab_simulation()]
+#' * [get_bandit()]
 #' @keywords internal
 #'
 get_past_results <- function(current_data, prior_data, perfect_assignment, assignment_date_col = NULL,
@@ -128,22 +128,22 @@ get_past_results.data.table <- function(current_data,
 
 #-------------------------------------------------------------------------------
 #' Calculate Multi-Arm Bandit Decision Based on Algorithm
-#' @description Calculates the best treatment for a given period using either a UCB1 or Thompson Sampling Algorithm.
-#' Thompson Sampling is done using [bandit::best_binomial_bandit()] from
+#' @description Calculates the best treatment for a given period using either a UCB1 or Thompson sampling algorithm.
+#' Thompson sampling is done using [bandit::best_binomial_bandit()] from
 #' the \href{https://cran.r-project.org/package=bandit}{bandit}
-#' package and UCB1 statistic are calculated using the a well-defined formula that can be found
-#' in \href{https://arxiv.org/abs/1402.6028}{(Kuleshov and Precup 2014)}.
+#' package and UCB1 statistics are calculated using the well-defined formula that can be found
+#' in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup (2014)}.
 #'
 #' @name get_bandit
 #'
 #' @inheritParams single_mab_simulation
-#' @param past_results tibble/data.table containing summary of prior periods, with
+#' @param past_results Tibble/data.table containing summary of prior periods, with
 #' successes, number of observations, and success rates, which is created by [get_past_results()].
 #' @param current_period Numeric scalar; current period of the adaptive trial simulation.
 #'
 #' @returns A list of length 2 containing:
 #' \itemize{
-#' \item `bandit`: Bandit object, either a named numeric vector of Thompson Probabilities or a
+#' \item `bandit`: Bandit object, either a named numeric vector of Thompson sampling probabilities or a
 #' tibble/data.table of UCB1 statistics.
 #' \item `assignment_probabilities:` Named numeric vector with a value for each condition
 #' containing the probability of being assigned that treatment.}
@@ -151,7 +151,7 @@ get_past_results.data.table <- function(current_data,
 #' @details
 #' The Thompson  `assignment_probabilities` is the same as the `bandit` except
 #' when control augmentation is used to alter the probabilities of assignment.
-#' Thompson Sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
+#' Thompson sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
 #' package but the direct calculation can result in errors or overflow. If this occurs, a simulation based method is used
 #' instead to estimate the posterior distribution, and the user receives a warning. The `ndraws` argument specifies
 #' the number of draws to make in this simulation.
@@ -203,15 +203,18 @@ get_bandit <- function(past_results, algorithm, conditions, current_period, cont
 }
 #-------------------------------------------------------------------
 #' @method get_bandit Thompson
-#' @title Thompson Sampling Algorithm
+#' @title Thompson sampling Algorithm
 #' @inheritParams get_bandit
 #' @details
-#' Thompson Sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
-#' package but the direct calculation can result in errors or overflow. If this occurs, a simulation based method is used
+#' Thompson sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
+#' package but the direct calculation can fail. If this occurs, a simulation based method is used
 #' instead to estimate the posterior distribution, and the user receives a warning.
 #'
-#' @returns a Named list with 2 elements: the named numeric vector of Thompson Posteriors,
-#' and a copy of the same vector as the assignment probabilities vector.
+#'
+#' @returns A named list of length 2, with both elements, containing a reference to the named numeric vector of Thompson
+#' sampling probabilities. The second element is adjusted based on what the user has set for `control_augment` and
+#' `random_assign_prop` to reflect the probability of assignment to a given treatment at that period.
+#'
 #' @keywords internal
 
 get_bandit.Thompson <- function(past_results, conditions, current_period, ndraws) {
@@ -232,7 +235,7 @@ get_bandit.Thompson <- function(past_results, conditions, current_period, ndraws
     },
     error = function(e) {
       rlang::warn(c(
-        "Thompson Sampling calculation overflowed; simulation based posterior estimate was used instead",
+        "Thompson sampling calculation overflowed; simulation based posterior estimate was used instead",
         "i" = sprintf("Period: %d", current_period)
       ))
       result <- rlang::set_names(
@@ -250,7 +253,7 @@ get_bandit.Thompson <- function(past_results, conditions, current_period, ndraws
   )
 
   if (bandit_invalid(bandit)) {
-    rlang::abort(c("Thompson Sampling simulation failed",
+    rlang::abort(c("Thompson sampling simulation failed",
       "x" = paste0("Most Recent Result:", paste0(bandit, collapse = " ")),
       "i" = "Consider setting `ndraws` higher or reducing `prior_periods`."
     ))
@@ -260,10 +263,10 @@ get_bandit.Thompson <- function(past_results, conditions, current_period, ndraws
   return(list(bandit = bandit, assignment_prob = bandit))
 }
 #' @name bandit_invalid
-#' @title Checks Validity of Thompson Probabilities
-#' @description Checks if the Thompson Probabilities either sum arbitrarily close
-#' to 0 or if any of them are NA, which are signs that overflow occurred or direct calculations failed to converge.
-#' @param bandit a numeric vector of Thompson Probabilities.
+#' @title Checks Validity of Thompson sampling probabilities
+#' @description Checks if the Thompson sampling probabilities either sum arbitrarily close
+#' to 0 or if any of them are NA, indicating the direct calculation failed or did not converge.
+#' @param bandit a numeric vector of Thompson sampling probabilities.
 #' @returns Logical; TRUE if the vector is invalid, FALSE if valid
 #' @keywords internal
 bandit_invalid <- function(bandit) {
@@ -272,9 +275,7 @@ bandit_invalid <- function(bandit) {
 #-------------------------------------------------------------------
 #' @method get_bandit UCB1
 #' @title UCB1 Sampling Algorithm
-#' @description
-#' Utilizes the well established UCB1 formula to calculate Upper
-#' Confidence Bounds for each treatment arm.
+#' @description Calculates upper confidence bounds for each treatment arm
 #'
 #' @inheritParams get_bandit
 #' @returns A named list with 2 elements: a tibble/data.table containing UCB1 and success rate for each condition,

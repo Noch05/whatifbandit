@@ -87,8 +87,8 @@
 #'
 #' @param verbose A logical value; whether or not to print intermediate messages. Default is FALSE.
 #'
-#' @param ndraws A numeric value; When Thompson Sampling direct calculations fail, draws from a simulated posterior
-#' will be used to approximate the Thompson Sampling probabilities. This is the number of simulations to use, the default
+#' @param ndraws A numeric value; When Thompson sampling direct calculations fail, draws from a simulated posterior
+#' will be used to approximate the Thompson sampling probabilities. This is the number of simulations to use, the default
 #' is 5000 to match the default parameter [bandit::best_binomial_bandit_sim()], but might need to be raised or lowered depending on performance and accuracy
 #' concerns.
 #'
@@ -116,7 +116,7 @@
 #' \item `prior_rate_*`: Columns containing success rate for each treatment arm, from all periods before the observations period of the simulation.
 #' \item `*_assign_prob`: Columns containing probability of being assigned each treatment at the given period.
 #' }
-#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period. Wide format,
+#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson sampling posterior distributions for each period. Wide format,
 #' each row is a period, and each columns is a treatment.
 #' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period. Wide format,
 #' each row is a period, and each columns is a treatment.
@@ -135,7 +135,7 @@
 #'
 #' ## Implementation
 #'
-#' At each period, either the Thompson Probabilities or UCB1 statistics are calculated based on
+#' At each period, either the Thompson sampling probabilities or UCB1 statistics are calculated based on
 #' the outcomes from the number of `prior_periods` specified. New treatments are then assigned randomly using the Thompson
 #' Probabilities via the \href{https://cran.r-project.org/package=randomizr}{randomizr}
 #' package, or as the treatment with the highest UCB1 statistic, while implementing the specific
@@ -174,7 +174,7 @@
 #'
 #' In general, smaller batches run faster under base R, while larger ones could benefit from the performance
 #' and memory efficiencies provided by data.table. However, we've observed larger datasets can cause numerical
-#' instability with some calculations in the Thompson Sampling procedure. Internal safeguards exist to prevent this, but
+#' instability with some calculations in the Thompson sampling procedure. Internal safeguards exist to prevent this, but
 #' the best way to preempt any issues is to set `prior_periods` to a low number.
 #'
 #' For more information about how to use the function, please view the vignette.

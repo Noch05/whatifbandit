@@ -84,7 +84,7 @@ print_mab <- function(mab) {
 #' @description
 #' Summarizes the Results of a Single Multi-Arm Bandit Trial. Provides
 #' confidence intervals around the AIPW estimates, and the final calculations
-#' of the Thompson Probabilities or UCB1 statistics for each arm.
+#' of the Thompson sampling probabilities or UCB1 statistics for each arm.
 #' @param object `mab`` class object created by [single_mab_simulation()].
 #' @param level Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
 #' Defaults to 0.95
@@ -224,7 +224,7 @@ plot_arms <- function(x, object, ...) {
     }
     if (x$settings$algorithm == "Thompson") {
       ylab <- "Posterior Probability of Being Best Arm"
-      title <- "Thompson Sampling Over Time"
+      title <- "Thompson sampling Over Time"
     }
   }
   if (object == "assignment_probs") {

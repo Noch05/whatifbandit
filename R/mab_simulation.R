@@ -121,10 +121,10 @@ pre_mab_simulation <- function(data,
 #' @inheritParams single_mab_simulation
 #' @inheritParams run_mab_trial
 #'
-#' @returns:
+#' @returns: A named list containing:
 #' \itemize{
 #' \item `final_data`: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
-#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period.
+#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson sampling posterior distributions for each period.
 #' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
 #' \item `estimates`: A tibble or data.table containing the
 #' AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional

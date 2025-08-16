@@ -1,7 +1,7 @@
 #' Runs Multi-Arm Bandit Trial
 #' @name run_mab_trial
 #'
-#' @description Performs a full Multi-Arm Bandit (MAB) trial using Thompson Sampling or UCB1.
+#' @description Performs a full Multi-Arm Bandit (MAB) trial using Thompson sampling or UCB1.
 #' The function provides loop around each step of the process for each treatment wave, performing adaptive
 #' treatment assignment, and outcome imputation. Supports flexible customization passed
 #' from [single_mab_simulation()] and [multiple_mab_simulation()] in treatment blocking strategy,
@@ -16,7 +16,7 @@
 #' @returns  A named list containing:
 #' \itemize{
 #' \item `final_data`: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
-#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period.
+#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson sampling posterior distributions for each period.
 #' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
 #' }
 #' @details
@@ -143,7 +143,7 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
 #' @returns  A named list containing:
 #' \itemize{
 #' \item `final_data`: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
-#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period.
+#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson sampling posterior distributions for each period.
 #' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
 #' }
 #' @details
@@ -152,7 +152,7 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
 #' to wide format where each treatment arm is a column, and the rows
 #' represent periods.
 #'
-#' At this step the final UCB1 or Thompson Probabilities are calculated,
+#' At this step the final UCB1 or Thompson sampling probabilities are calculated,
 #' and the whole table is lead by one to have each period be represented
 #' by the calculation that occurred just after completing the period, so
 #' period 11 now means the bandit calculated in period 12, using the results
@@ -319,7 +319,7 @@ end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditio
 #' the results for the current treatment assignment period.
 #'
 #' @seealso
-#' *[run_mab_trial()]
+#' * [run_mab_trial()]
 #' @keywords internal
 
 create_prior <- function(prior_periods, current_period) {
