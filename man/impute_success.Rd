@@ -30,7 +30,7 @@ Passed to \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_clust
 
 \item{prior_data}{tibble/data.frame containing all the data from previous periods. Used to join together at the end for the next iteration of the simulation.}
 
-\item{perfect_assignment}{A logical value; if TRUE, assumes perfect information for treatment assignment
+\item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
 If FALSE, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.

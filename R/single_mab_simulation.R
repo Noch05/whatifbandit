@@ -13,14 +13,10 @@
 #' of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.
 #'
 #' @param time_unit A character string specifying the unit of time for assigning periods when `assignment_method` is "Date".
-#' Acceptable values are "Day", "Week", or "Month". "Month" is a special case that is useful when an experiment
-#' defines the months differently then the genuine dates, i.e. an experiment considers August as starting
-#' the in the second half of July, or when exact calender months are required for the periods, not just
-#' a lengths of time in the month range. As such it requires an additional column to be provided,
-#' with the exact month desired for each observation passed as an integer, character, or factor. Each
-#' observation is treated as occurring on the first of each month.
+#' Acceptable values are "Day", "Week", or "Month". "Month" requires a column with the months of each observation
+#' to be used.
 #'
-#' @param perfect_assignment A logical value; if TRUE, assumes perfect information for treatment assignment
+#' @param perfect_assignment Logical; if TRUE, assumes perfect information for treatment assignment
 #' (i.e., all outcomes are observed regardless of the date).
 #' If FALSE, hides outcomes not yet theoretically observed, based
 #' on the dates treatments would have been assigned for each wave.
@@ -35,25 +31,22 @@
 #'
 #' @param period_length A numeric value of length 1; represents the length of each treatment period.
 #' If assignment method is "Date", this length refers the number of units specified in`time_unit`
-#' (i.e., if "Day", 10 would be 10 days).
-#' If assignment method is "Batch", this refers to the number of people in each batch. This factor
-#' contributes most to the computational cost of calling the function, as large batch sizes make each iteration of
-#' the simulation run slower, while each additional period adds time because of the extra iterations, so be exercise
-#' caution with this argument.
+#' (i.e., if "Day", 10 would be 10 days). If assignment method is "Batch", this refers to the number of people in each batch.
 #'
 #' @param prior_periods A numeric value of length 1, or the character string "All"; number of previous periods to use
 #' in the treatment assignment model. This is used to implement the stationary/non-stationary bandit.
 #' For example, a non-stationary bandit assumes the true probability of success for each treatment changes over time, so to
 #' account for that, not all prior data should be used when making decisions because it could be "out of date".
 #'
-#' @param whole_experiment A logical value; if TRUE, uses all past experimental data for imputing outcomes.
+#' @param whole_experiment Logical; if TRUE, uses all past experimental data for imputing outcomes.
 #' If FALSE, uses only data available up to the current period. In large datasets or with a high number
 #' of periods, setting this to FALSE can be more computationally intensive, though not a significant
 #' contributor to total run time.
 #'
 #' @param conditions A named character vector containing treatment conditions. The elements
 #' of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
-#' `unique(df[[condition_col]])`. The names of each element are used to reference the contents but are not inherently important;
+#' `unique(df[[condition_col]])`. The names of each element are used to refer to the contents but are
+#' not inherently important; choose names
 #' choose names that are meaningful and consistent. If `control_augment` > 0, then the control condition
 #' of the trial in this vector must have the name "Control".
 #'
@@ -70,29 +63,29 @@
 #' Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type `Date`, not a character string.
 #' }
 #'
-#' @param blocking A logical value; whether or not to use treatment blocking. Treatment blocking is used to ensure an even-enough
+#' @param blocking Logical; whether or not to use treatment blocking. Treatment blocking is used to ensure an even-enough
 #' distribution of treatment conditions across blocks. For example, blocking by gender would mean the randomized assignment should
 #' split treatments evenly not just throughout the sample (so for 4 arms, 25-25-25-25), but also within each block, so 25% of men
-#' would receive each treatment and 25% of women the same. This is most useful when the blocks are uneven or have some geographic meaning.
+#' would receive each treatment and 25% of women the same.
 #'
 #' @param block_cols A character vector of variables to block by. This vector should not be named.
 #'
 #' @param assignment_method A character string; one of "Date", "Batch", or "Individual", to define the assignment into treatment waves. When using
 #' "Batch" or "Individual", ensure your dataset is pre-arranged in the proper order observations should be considered so that
 #' groups are assigned correctly. For "Date", observations will be considered in chronological order.
-#' "Individual" assignment can be time-consuming for larger datasets.
+#' "Individual" assignment can be computationally intensive for larger datasets.
 #'
 #' @param control_augment A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.
 #' Default is 0. It is not recommended to use this in conjunction with `random_assign_prop`.
 #'
-#' @param verbose A logical value; whether or not to print intermediate messages. Default is FALSE.
+#' @param verbose Logical; whether or not to print intermediate messages. Default is FALSE.
 #'
 #' @param ndraws A numeric value; When Thompson sampling direct calculations fail, draws from a simulated posterior
 #' will be used to approximate the Thompson sampling probabilities. This is the number of simulations to use, the default
 #' is 5000 to match the default parameter [bandit::best_binomial_bandit_sim()], but might need to be raised or lowered depending on performance and accuracy
 #' concerns.
 #'
-#' @param random_assign_prop a numeric value ranging from 0 to 1; proportion of each wave to be assigned new treatments randomly,
+#' @param random_assign_prop A numeric value ranging from 0 to 1; proportion of each wave to be assigned new treatments randomly,
 #' 1 - `random_assign_prop` is the proportion assigned through the bandit procedure. For example if this is set to 0.1, then
 #' for each wave 10% of the observations will be randomly assigned to a new treatment, while the remaining 90% will be assigned according
 #' to UCB1 or Thompson result. It is not recommended to use this in conjunction with `control_augment`. If batch sizes are small,
@@ -128,10 +121,8 @@
 #' }
 #'
 #' @details
-#' This function simulates a single adaptive Multi-Arm-Bandit trial, using experimental data from
-#' a traditional randomized controlled trial. It is intended to help researchers understand how an adaptive design could have performed
-#' but it is not a substitute for a real experiment, and for that reason it does not generate the synthetic data for the simulation.
-#' The input data should come from a randomized trial to ensure the assumptions made during the simulation are valid.
+#' For all the items laballed as a tibble or data.table, data.tables will be used if the user passed `data` is a
+#' data.table, tibbles used otherwise.
 #'
 #' ## Implementation
 #'

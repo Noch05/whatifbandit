@@ -15,7 +15,7 @@
 #' .
 #' @returns An object of class `multiple.mab`, containing:
 #' \itemize{
-#' \item `final_data_nest:` tibble or data.table containing the nested tibbles/data.tables from each trial. Only provided when `keep_data` is TRUE.
+#' \item `final_data_nest:` A tibble or data.table containing the nested tibbles/data.tables from each trial. Only provided when `keep_data` is TRUE.
 #' \item `bandits`: A tibble or data.table containing the UCB1 valuess or Thompson sampling posterior distributions for each period. Wide format,
 #' each row is a period, and each columns is a treatment.
 #' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period. Wide format,

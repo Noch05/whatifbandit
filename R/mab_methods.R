@@ -114,7 +114,7 @@ summary.mab <- function(object, level = 0.95, ...) {
   check_level(level)
   periods <- base::max(object$bandits$period_number)
   col2 <- switch(object$settings$algorithm,
-    "UCB1" = "UCB1_Statistic",
+    "UCB1" = "UCB1_Value",
     "Thompson" = "Probability_Of_Best_Arm"
   )
   estimates <- object$estimates |>
@@ -219,7 +219,7 @@ plot_arms <- function(x, object, ...) {
 
   if (object == "bandits") {
     if (x$settings$algorithm == "UCB1") {
-      ylab <- "UCB1 values"
+      ylab <- "UCB1 Values"
       title <- "UCB1 Sampling Over Time"
     }
     if (x$settings$algorithm == "Thompson") {

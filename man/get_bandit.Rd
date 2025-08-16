@@ -24,7 +24,8 @@ can be found in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014}
 
 \item{conditions}{A named character vector containing treatment conditions. The elements
 of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
-\code{unique(df[[condition_col]])}. The names of each element are used to reference the contents but are not inherently important;
+\code{unique(df[[condition_col]])}. The names of each element are used to refer to the contents but are
+not inherently important; choose names
 choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
 of the trial in this vector must have the name "Control".}
 

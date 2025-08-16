@@ -21,10 +21,10 @@ assign_treatments(
 
 \item{probs}{Named numeric Vector; probability of assignment for each treatment condition.}
 
-\item{blocking}{A logical value; whether or not to use treatment blocking. Treatment blocking is used to ensure an even-enough
+\item{blocking}{Logical; whether or not to use treatment blocking. Treatment blocking is used to ensure an even-enough
 distribution of treatment conditions across blocks. For example, blocking by gender would mean the randomized assignment should
 split treatments evenly not just throughout the sample (so for 4 arms, 25-25-25-25), but also within each block, so 25\% of men
-would receive each treatment and 25\% of women the same. This is most useful when the blocks are uneven or have some geographic meaning.}
+would receive each treatment and 25\% of women the same.}
 
 \item{algorithm}{A character string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1". Algorithm
 defines the adaptive assignment process. Mathematical details on these algorithms
@@ -35,7 +35,8 @@ can be found in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014}
 
 \item{conditions}{A named character vector containing treatment conditions. The elements
 of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
-\code{unique(df[[condition_col]])}. The names of each element are used to reference the contents but are not inherently important;
+\code{unique(df[[condition_col]])}. The names of each element are used to refer to the contents but are
+not inherently important; choose names
 choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
 of the trial in this vector must have the name "Control".}
 
@@ -43,7 +44,7 @@ of the trial in this vector must have the name "Control".}
 
 \item{success_col}{Column in \code{data}; binary successes from the original experiment.}
 
-\item{random_assign_prop}{a numeric value ranging from 0 to 1; proportion of each wave to be assigned new treatments randomly,
+\item{random_assign_prop}{A numeric value ranging from 0 to 1; proportion of each wave to be assigned new treatments randomly,
 1 - \code{random_assign_prop} is the proportion assigned through the bandit procedure. For example if this is set to 0.1, then
 for each wave 10\% of the observations will be randomly assigned to a new treatment, while the remaining 90\% will be assigned according
 to UCB1 or Thompson result. It is not recommended to use this in conjunction with \code{control_augment}. If batch sizes are small,

@@ -17,17 +17,13 @@ check_cols(
 \item{assignment_method}{A character string; one of "Date", "Batch", or "Individual", to define the assignment into treatment waves. When using
 "Batch" or "Individual", ensure your dataset is pre-arranged in the proper order observations should be considered so that
 groups are assigned correctly. For "Date", observations will be considered in chronological order.
-"Individual" assignment can be time-consuming for larger datasets.}
+"Individual" assignment can be computationally intensive for larger datasets.}
 
 \item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "Date".
-Acceptable values are "Day", "Week", or "Month". "Month" is a special case that is useful when an experiment
-defines the months differently then the genuine dates, i.e. an experiment considers August as starting
-the in the second half of July, or when exact calender months are required for the periods, not just
-a lengths of time in the month range. As such it requires an additional column to be provided,
-with the exact month desired for each observation passed as an integer, character, or factor. Each
-observation is treated as occurring on the first of each month.}
+Acceptable values are "Day", "Week", or "Month". "Month" requires a column with the months of each observation
+to be used.}
 
-\item{perfect_assignment}{A logical value; if TRUE, assumes perfect information for treatment assignment
+\item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
 If FALSE, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.
@@ -51,7 +47,7 @@ Used to simulate imperfect information on the part of researchers conducting an 
 \item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.}
 
-\item{verbose}{A logical value; whether or not to print intermediate messages. Default is FALSE.}
+\item{verbose}{Logical; whether or not to print intermediate messages. Default is FALSE.}
 }
 \value{
 Throws an error if columns which are required have not been declared
