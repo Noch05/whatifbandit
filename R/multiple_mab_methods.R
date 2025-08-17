@@ -75,7 +75,7 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
   upper_level <- 1 - lower_level
 
   quantiles <- object$estimates |>
-    filter(estimator == "AIPW") |>
+    dplyr::filter(estimator == "AIPW") |>
     dplyr::group_by(mab_condition, estimator) |>
     dplyr::summarize(
       lower = stats::quantile(mean, lower_level),
@@ -84,7 +84,7 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
     dplyr::mutate(mab_condition = as.character(mab_condition))
 
   estimate <- object$estimates |>
-    filter(estimator == "AIPW") |>
+    dplyr::filter(estimator == "AIPW") |>
     dplyr::group_by(mab_condition, estimator) |>
     dplyr::summarize(
       estimate_avg = base::mean(mean, na.rm = TRUE),
