@@ -254,7 +254,7 @@ end_mab_trial.data.frame <- function(
         dplyr::slice(base::seq_len(periods))
     },
     rlang::abort(
-      "Invalid Algorithm: valid algorithsm are `thompson`, and `ucb1`"
+      "Invalid Algorithm: valid algorithms are `thompson`, and `ucb1`"
     )
   )
 
@@ -301,6 +301,7 @@ end_mab_trial.data.table <- function(
     control_augment = 0,
     ndraws = ndraws
   )
+  conditions <- as.character(conditions) # Converting to character for reference in Data.table Syntax
 
   bandits$bandit_stat[[(periods + 1)]] <- final_bandit[[1]]
 
