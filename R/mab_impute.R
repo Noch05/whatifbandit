@@ -208,7 +208,7 @@ imputation_precompute.data.table <- function(
 #' @description Executes all preparations necessary to impute outcomes for
 #' each iteration of the simulation loop. Adds an additional column to the current data,
 #' subsets necessary information from the [imputation_precompute()] output, and checks to ensure
-#' compatibility with [randomizr::block_and_cluster_ra()].
+#' compatibility with [randomizr::block_ra()].
 #' @inheritParams get_past_results
 #' @inheritParams run_mab_trial
 #' @inheritParams impute_success
@@ -222,7 +222,7 @@ imputation_precompute.data.table <- function(
 #'
 #' @details
 #' The goal of this function is to set up the imputation procedure and prevent
-#' errors from occurring. [randomizr::block_and_cluster_ra()] does not see the names
+#' errors from occurring. [randomizr::block_ra()] does not see the names
 #' of the probabilities passed per block, so the imputation information must be subsetted
 #' to contain only the treatment blocks which exist in a given period.
 #'
@@ -297,7 +297,7 @@ imputation_preparation <- function(
 #-------------------------------------------------------------------------------
 #' Checking Imputation Info
 #' @description Subsets or adds to tibble/data.frame created by [imputation_precompute()],
-#' to ensure compatibility with [randomizr::block_and_cluster_ra()].
+#' to ensure compatibility with [randomizr::block_ra()].
 #'
 #' @name check_impute
 #' @inheritParams get_past_results
@@ -305,10 +305,10 @@ imputation_preparation <- function(
 #' @param imputation_information `original_summary` element of the `imputation_information`
 #' list created by [imputation_precompute()] for the given period.
 #' @details
-#' [randomizr::block_and_cluster_ra()] does not see the names
+#' [randomizr::block_ra()] does not see the names
 #' of the probabilities passed per block, so the imputation information must be subsetted
 #' to only contain blocks which are present in a period, and sorted to comply with
-#' [randomizr::block_and_cluster_ra()]'s internal ordering.
+#' [randomizr::block_ra()]'s internal ordering.
 #'
 #' When blocks are required but do not exist in the information provided it is added
 #' to the tibble.data.table, with an estimated conditional probability of success as
@@ -445,7 +445,7 @@ check_impute.data.table <- function(
 #' @seealso
 #'* [imputation_preparation()]
 #'* [imputation_precompute()]
-#'* [randomizr::block_and_cluster_ra()]
+#'* [randomizr::block_ra()]
 #' @keywords internal
 impute_success <- function(
   current_data,
