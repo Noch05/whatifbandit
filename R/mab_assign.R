@@ -221,7 +221,6 @@ get_bandit <- function(
   assignment_prob <- bandit[["assignment_prob"]]
 
   if (control_augment > 0) {
-    print(names(conditions))
     ctrl <- names(conditions) == "control"
     if (assignment_prob[ctrl] < control_augment) {
       assignment_prob[ctrl] <- control_augment
