@@ -48,7 +48,9 @@ print.mab <- function(x, ...) {
 print_mab <- function(mab) {
   settings <- mab$settings
 
-  base::cat("Summary for MAB Procedure: \n ----------------------------------------------------- \n")
+  base::cat(
+    "Summary for MAB Procedure: \n ----------------------------------------------------- \n"
+  )
 
   base::cat("Bandit Algorithm:     ", settings$algorithm, "\n")
   base::cat("Control Augmentation: ", settings$control_augment, "\n")
@@ -76,7 +78,11 @@ print_mab <- function(mab) {
 
   base::cat("Total Periods:        ", length(mab$bandits), "periods\n")
   base::cat("Prior Periods:        ", settings$prior_periods, "periods\n")
-  base::cat("Treatments:           ", length(settings$conditions), "treatment arms\n")
+  base::cat(
+    "Treatments:           ",
+    length(settings$conditions),
+    "treatment arms\n"
+  )
 }
 
 #------------------------------------------------------------------------------
@@ -113,7 +119,8 @@ print_mab <- function(mab) {
 summary.mab <- function(object, level = 0.95, ...) {
   check_level(level)
   periods <- base::max(object$bandits$period_number)
-  col2 <- switch(object$settings$algorithm,
+  col2 <- switch(
+    object$settings$algorithm,
     "ucb1" = "UCB1_Value",
     "thompson" = "Probability_Of_Best_Arm"
   )
@@ -124,7 +131,8 @@ summary.mab <- function(object, level = 0.95, ...) {
 
   object$bandits[periods, ] |>
     tidyr::pivot_longer(
-      cols = -period_number, names_to = "Treatment_Arm",
+      cols = -period_number,
+      names_to = "Treatment_Arm",
       values_to = col2
     ) |>
     dplyr::select(-period_number) |>
@@ -187,7 +195,8 @@ summary.mab <- function(object, level = 0.95, ...) {
 
 plot.mab <- function(x, type, level = .95, save = FALSE, path = NULL, ...) {
   rlang::check_installed("ggplot2")
-  plot <- switch(type,
+  plot <- switch(
+    type,
     "arm" = plot_arms(x = x, object = "bandits", ...),
     "assign" = plot_arms(x = x, object = "assignment_probs", ...),
     "estimate" = plot_estimates(x = x, level = level, ...),
@@ -238,11 +247,15 @@ plot_arms <- function(x, object, ...) {
       values_to = "probs"
     ) |>
     ggplot2::ggplot(ggplot2::aes(
-      x = period_number, y = probs,
+      x = period_number,
+      y = probs,
       color = condition
     )) +
     ggplot2::geom_line(...) +
-    ggplot2::scale_y_continuous(breaks = base::seq(0, 1, 0.1), limits = base::range(0, 1)) +
+    ggplot2::scale_y_continuous(
+      breaks = base::seq(0, 1, 0.1),
+      limits = base::range(0, 1)
+    ) +
     ggplot2::scale_x_continuous(
       breaks = base::seq(0, periods, 1),
       limits = range(1, periods)
@@ -272,10 +285,16 @@ plot_estimates <- function(x, level = 0.95, ...) {
     dplyr::filter(estimator == "AIPW") |>
     ggplot2::ggplot(ggplot2::aes(x = mean, y = mab_condition)) +
     ggplot2::geom_errorbarh(
-      ggplot2::aes(xmin = mean - normalq * sqrt(variance), xmax = mean + normalq * sqrt(variance)),
+      ggplot2::aes(
+        xmin = mean - normalq * sqrt(variance),
+        xmax = mean + normalq * sqrt(variance)
+      ),
       ...
     ) +
-    ggplot2::scale_x_continuous(breaks = base::seq(0, 1, 0.05), limits = base::range(0, 1)) +
+    ggplot2::scale_x_continuous(
+      breaks = base::seq(0, 1, 0.05),
+      limits = base::range(0, 1)
+    ) +
     ggplot2::labs(
       x = "Probability of Success (AIPW)",
       y = "Treatment Condition",
@@ -294,7 +313,8 @@ plot_estimates <- function(x, level = 0.95, ...) {
 #' @keywords internal
 check_level <- function(level) {
   if (!is.numeric(level) || (level < 0 || level > 1)) {
-    rlang::abort(c("`level` must be a number between 0 and 1",
+    rlang::abort(c(
+      "`level` must be a number between 0 and 1",
       "x" = paste0("You passed: ", level)
     ))
   }

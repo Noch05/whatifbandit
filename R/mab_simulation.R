@@ -105,7 +105,7 @@ pre_mab_simulation <- function(
     )
   }
   conditions <- create_conditions(
-    control_condition = control_conditions,
+    control_condition = control_condition,
     data = data,
     condition_col = data_cols$condition_col,
     control_augment = control_augment

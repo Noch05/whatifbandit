@@ -482,10 +482,8 @@ impute_success.data.frame <- function(
   if (base::any(current_data$impute_req == 1, na.rm = TRUE)) {
     filtered_data <- current_data[current_data$impute_req == 1, ]
 
-    blocks <- current_data$impute_block[currnet_data$impute_req == 1]
-
     imputations <- randomizr::block_ra(
-      blocks = blocks,
+      blocks = filtered_data$impute_block,
       block_prob_each = imputation_info[, c("failure_rate", "success_rate")],
       num_arms = 2,
       conditions = c(0, 1),

@@ -41,10 +41,15 @@ get_iaipw <- function(data, assignment_probs, periods, conditions, verbose) {
 #' @inheritParams get_iaipw
 #' @noRd
 
-get_iaipw.data.frame <- function(data, assignment_probs, periods, conditions, verbose) {
+get_iaipw.data.frame <- function(
+  data,
+  assignment_probs,
+  periods,
+  conditions,
+  verbose
+) {
   new_cols <- paste0("aipw_", conditions)
   data[new_cols] <- NA_real_
-
 
   prior_data <- data |>
     dplyr::group_by(period_number, mab_condition) |>
@@ -53,30 +58,42 @@ get_iaipw.data.frame <- function(data, assignment_probs, periods, conditions, ve
       trials = dplyr::n(),
       .groups = "drop"
     )
-  names(assignment_probs) <- c("period_number", paste0(names(assignment_probs)[-1], "_assign_prob"))
+  names(assignment_probs) <- c(
+    "period_number",
+    paste0(names(assignment_probs)[-1], "_assign_prob")
+  )
 
   data <- base::expand.grid(
     period_number = base::seq_len(periods),
     mab_condition = conditions
   ) |>
     dplyr::left_join(prior_data, by = c("period_number", "mab_condition")) |>
-    dplyr::mutate(dplyr::across(c(successes, trials), ~ tidyr::replace_na(.x, 0))) |>
+    dplyr::mutate(dplyr::across(
+      c(successes, trials),
+      ~ tidyr::replace_na(.x, 0)
+    )) |>
     dplyr::arrange(mab_condition, period_number) |>
     dplyr::group_by(mab_condition) |>
     dplyr::mutate(
       cumulative_successes = dplyr::lag(base::cumsum(successes), default = 0),
       cumulative_trials = dplyr::lag(base::cumsum(trials), default = 0),
       prior_period_success_rate = dplyr::if_else(
-        cumulative_trials > 0, cumulative_successes / cumulative_trials, 0
+        cumulative_trials > 0,
+        cumulative_successes / cumulative_trials,
+        0
       )
     ) |>
     dplyr::select(period_number, mab_condition, prior_period_success_rate) |>
     tidyr::pivot_wider(
-      names_from = mab_condition, values_from = "prior_period_success_rate",
+      names_from = mab_condition,
+      values_from = "prior_period_success_rate",
       names_prefix = "prior_rate_"
     ) |>
     dplyr::right_join(data, by = "period_number") |>
-    dplyr::select(!!!rlang::syms(names(data)), tidyr::starts_with("prior_rate_")) |>
+    dplyr::select(
+      !!!rlang::syms(names(data)),
+      tidyr::starts_with("prior_rate_")
+    ) |>
     dplyr::left_join(assignment_probs, by = "period_number")
 
   for (i in base::seq_along(conditions)) {
@@ -92,9 +109,11 @@ get_iaipw.data.frame <- function(data, assignment_probs, periods, conditions, ve
     )
   }
 
-
   check <- data |>
-    dplyr::summarize(dplyr::across(dplyr::starts_with("aipw_"), ~ base::sum(base::is.na(.x)))) |>
+    dplyr::summarize(dplyr::across(
+      dplyr::starts_with("aipw_"),
+      ~ base::sum(base::is.na(.x))
+    )) |>
     base::sum()
 
   if (check != 0) {
@@ -108,68 +127,110 @@ get_iaipw.data.frame <- function(data, assignment_probs, periods, conditions, ve
 #' @inheritParams get_iaipw
 #' @noRd
 
-get_iaipw.data.table <- function(data, assignment_probs, periods, conditions, verbose) {
+get_iaipw.data.table <- function(
+  data,
+  assignment_probs,
+  periods,
+  conditions,
+  verbose
+) {
   new_cols <- paste0("aipw_", conditions)
   data[, (new_cols) := NA_real_]
 
-  prior_data <- data[, .(
-    successes = base::sum(mab_success),
-    trials = .N
-  ), by = c("mab_condition", "period_number")]
+  prior_data <- data[,
+    .(
+      successes = base::sum(mab_success),
+      trials = .N
+    ),
+    by = c("mab_condition", "period_number")
+  ]
   data.table::setkey(prior_data, period_number)
 
   full_grid <- data.table::CJ(
     period_number = base::seq_len(periods),
     mab_condition = conditions
   )
-  full_grid <- merge(full_grid, prior_data,
+  full_grid <- merge(
+    full_grid,
+    prior_data,
     by = c("period_number", "mab_condition"),
-    suffixes = c("", ""), all = TRUE
+    suffixes = c("", ""),
+    all = TRUE
   )
   full_grid[is.na(full_grid)] <- 0
 
   data.table::setorder(full_grid, mab_condition, period_number)
-  full_grid[, `:=`(
-    cumulative_successes = data.table::shift(base::cumsum(successes),
-      n = 1L, type = "lag", fill = 0
+  full_grid[,
+    `:=`(
+      cumulative_successes = data.table::shift(
+        base::cumsum(successes),
+        n = 1L,
+        type = "lag",
+        fill = 0
+      ),
+      cumulative_trials = data.table::shift(
+        base::cumsum(trials),
+        n = 1L,
+        type = "lag",
+        fill = 0
+      )
     ),
-    cumulative_trials = data.table::shift(base::cumsum(trials),
-      n = 1L, type = "lag", fill = 0
+    by = c("mab_condition")
+  ]
+  full_grid[,
+    prior_period_success_rate := data.table::fifelse(
+      cumulative_trials > 0,
+      cumulative_successes / cumulative_trials,
+      0
     )
-  ), by = c("mab_condition")]
-  full_grid[, prior_period_success_rate := data.table::fifelse(
-    cumulative_trials > 0, cumulative_successes / cumulative_trials, 0
-  )]
+  ]
 
   full_grid <- data.table::dcast(
-    data = full_grid[, .(period_number, mab_condition, prior_period_success_rate)],
-    formula = period_number ~ mab_condition, value.var = "prior_period_success_rate"
+    data = full_grid[, .(
+      period_number,
+      mab_condition,
+      prior_period_success_rate
+    )],
+    formula = period_number ~ mab_condition,
+    value.var = "prior_period_success_rate"
   )
-  data.table::setnames(full_grid, c("period_number", paste0("prior_rate_", names(full_grid)[-1])))
-  data.table::setnames(assignment_probs, c("period_number", paste0(names(assignment_probs)[-1], "_assign_prob")))
+  data.table::setnames(
+    full_grid,
+    c("period_number", paste0("prior_rate_", names(full_grid)[-1]))
+  )
+  data.table::setnames(
+    assignment_probs,
+    c("period_number", paste0(names(assignment_probs)[-1], "_assign_prob"))
+  )
 
   data <- merge(data, full_grid, all = TRUE, by = "period_number")
-  data <- merge(data, assignment_probs,
+  data <- merge(
+    data,
+    assignment_probs,
     by = "period_number",
-    all = TRUE, suffixes = c("", "_assign_prob")
+    all = TRUE,
+    suffixes = c("", "_assign_prob")
   )
-
 
   for (i in base::seq_along(conditions)) {
     verbose_log(verbose, paste0("Condition: ", conditions[[i]]))
     probability <- paste0(conditions[[i]], "_assign_prob")
     mhat <- paste0("prior_rate_", conditions[[i]])
 
-
-    data[, (paste0("aipw_", conditions[[i]])) := data.table::fifelse(
-      mab_condition == conditions[[i]],
-      (mab_success / get(probability)) + (1 - 1 / get(probability)) * get(mhat),
-      get(mhat),
-    )]
+    data[,
+      (paste0("aipw_", conditions[[i]])) := data.table::fifelse(
+        mab_condition == conditions[[i]],
+        (mab_success / get(probability)) +
+          (1 - 1 / get(probability)) * get(mhat),
+        get(mhat),
+      )
+    ]
   }
 
-  check <- base::sum(base::unlist(data[, lapply(.SD, \(x) base::sum(base::is.na(x))), .SDcols = new_cols]))
-
+  check <- base::sum(base::unlist(data[,
+    lapply(.SD, \(x) base::sum(base::is.na(x))),
+    .SDcols = new_cols
+  ]))
 
   if (check != 0) {
     base::warning(paste0(check, " Individual AIPW Scores are NA"))
@@ -210,7 +271,13 @@ get_iaipw.data.table <- function(data, assignment_probs, periods, conditions, ve
 #' "Confidence Intervals for Policy Evaluation in Adaptive Experiments." \emph{Proceedings of the National Academy of Sciences of the United States of America} 118
 #' (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 #' @keywords internal
-adaptive_aipw <- function(data, assignment_probs, conditions, periods, verbose) {
+adaptive_aipw <- function(
+  data,
+  assignment_probs,
+  conditions,
+  periods,
+  verbose
+) {
   verbose_log(verbose, "Aggregating AIPW Estimates")
 
   base::UseMethod("adaptive_aipw", data)
@@ -221,15 +288,27 @@ adaptive_aipw <- function(data, assignment_probs, conditions, periods, verbose) 
 #' @inheritParams adaptive_aipw
 #' @noRd
 #'
-adaptive_aipw.data.frame <- function(data, assignment_probs, conditions, periods, verbose) {
+adaptive_aipw.data.frame <- function(
+  data,
+  assignment_probs,
+  conditions,
+  periods,
+  verbose
+) {
   rows <- nrow(data)
   estimates <- purrr::map(
-    conditions, ~ {
+    conditions,
+    ~ {
       results <- data |>
         dplyr::group_by(period_number) |>
         dplyr::summarize(
-          avg = base::mean(!!rlang::sym(base::paste0("aipw_", .x)), na.rm = TRUE),
-          assign_prob = base::unique(!!rlang::sym(base::paste0(.x, "_assign_prob"))),
+          avg = base::mean(
+            !!rlang::sym(base::paste0("aipw_", .x)),
+            na.rm = TRUE
+          ),
+          assign_prob = base::unique(
+            !!rlang::sym(base::paste0(.x, "_assign_prob"))
+          ),
           size = dplyr::n()
         ) |>
         dplyr::mutate(
@@ -237,10 +316,16 @@ adaptive_aipw.data.frame <- function(data, assignment_probs, conditions, periods
           size_weights = size / rows
         )
 
-      estimate <- (base::sum(results$avg * results$time_weights * results$size_weights, na.rm = TRUE)) /
+      estimate <- (base::sum(
+        results$avg * results$time_weights * results$size_weights,
+        na.rm = TRUE
+      )) /
         (base::sum(results$time_weights * results$size_weights, na.rm = TRUE))
 
-      variance <- base::sum((results$size_weights * results$time_weights)^2 * (results$avg - estimate)^2) /
+      variance <- base::sum(
+        (results$size_weights * results$time_weights)^2 *
+          (results$avg - estimate)^2
+      ) /
         (base::sum(results$time_weights * results$size_weights)^2)
 
       return(tibble::tibble(
@@ -263,7 +348,6 @@ adaptive_aipw.data.frame <- function(data, assignment_probs, conditions, periods
 
   returns <- dplyr::bind_rows(estimates, sample)
 
-
   return(returns)
 }
 #-------------------------------------------------------------------------------
@@ -272,30 +356,45 @@ adaptive_aipw.data.frame <- function(data, assignment_probs, conditions, periods
 #' @method adaptive_aipw data.table
 #' @inheritParams adaptive_aipw
 #' @noRd
-adaptive_aipw.data.table <- function(data, assignment_probs, conditions,
-                                     periods, verbose) {
+adaptive_aipw.data.table <- function(
+  data,
+  assignment_probs,
+  conditions,
+  periods,
+  verbose
+) {
   rows <- nrow(data)
 
   estimates <- purrr::map(
-    conditions, ~ {
-      results <- data[, .(
-        avg = base::mean(base::get(base::paste0("aipw_", .x)), na.rm = TRUE),
-        assign_prob = base::unique(base::get(base::paste0(.x, "_assign_prob"))),
-        size = .N
-      ),
-      by = period_number
+    conditions,
+    ~ {
+      results <- data[,
+        .(
+          avg = base::mean(base::get(base::paste0("aipw_", .x)), na.rm = TRUE),
+          assign_prob = base::unique(base::get(base::paste0(
+            .x,
+            "_assign_prob"
+          ))),
+          size = .N
+        ),
+        by = period_number
       ]
       results[, `:=`(
         time_weights = assign_prob / periods,
         size_weights = size / rows
       )]
 
-      estimate <- (base::sum(results$avg * results$time_weights * results$size_weights, na.rm = TRUE)) /
+      estimate <- (base::sum(
+        results$avg * results$time_weights * results$size_weights,
+        na.rm = TRUE
+      )) /
         (base::sum(results$time_weights * results$size_weights, na.rm = TRUE))
 
-      variance <- base::sum((results$size_weights * results$time_weights)^2 * (results$avg - estimate)^2) /
+      variance <- base::sum(
+        (results$size_weights * results$time_weights)^2 *
+          (results$avg - estimate)^2
+      ) /
         (base::sum(results$time_weights * results$size_weights)^2)
-
 
       return(data.table::data.table(
         mean = estimate,
@@ -307,19 +406,16 @@ adaptive_aipw.data.table <- function(data, assignment_probs, conditions,
   estimates <- data.table::rbindlist(estimates)
   estimates[, estimator := "AIPW"]
 
-
-
-  sample <- data[, .(
-    mean = base::mean(mab_success, na.rm = TRUE),
-    variance = ((mean(mab_success) * (1 - mean(mab_success))) / .N)
-  ),
-  by = mab_condition
+  sample <- data[,
+    .(
+      mean = base::mean(mab_success, na.rm = TRUE),
+      variance = ((mean(mab_success) * (1 - mean(mab_success))) / .N)
+    ),
+    by = mab_condition
   ]
 
   sample[, estimator := "Sample"]
-  returns <- data.table::rbindlist(list(estimates, sample),
-    use.names = TRUE
-  )
+  returns <- data.table::rbindlist(list(estimates, sample), use.names = TRUE)
 
   return(returns)
 }

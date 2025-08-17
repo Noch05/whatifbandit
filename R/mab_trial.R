@@ -25,12 +25,24 @@
 #'
 #' @keywords internal
 #'
-run_mab_trial <- function(data, time_unit, period_length = NULL,
-                          data_cols, block_cols, blocking,
-                          prior_periods, algorithm,
-                          whole_experiment, perfect_assignment, conditions,
-                          verbose, control_augment,
-                          imputation_information, ndraws, random_assign_prop) {
+run_mab_trial <- function(
+  data,
+  time_unit,
+  period_length = NULL,
+  data_cols,
+  block_cols,
+  blocking,
+  prior_periods,
+  algorithm,
+  whole_experiment,
+  perfect_assignment,
+  conditions,
+  verbose,
+  control_augment,
+  imputation_information,
+  ndraws,
+  random_assign_prop
+) {
   periods <- base::max(data$period_number)
 
   bandits <- base::vector(mode = "list", length = 2)
@@ -38,16 +50,24 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
   bandits$assignment_prob <- base::vector(mode = "list", length = periods)
   num_conditions <- length(conditions)
 
-  bandits$bandit_stat[[1]] <- switch(algorithm,
-    "thompson" = rlang::set_names(rep_len(1 / num_conditions,
-      length.out = num_conditions
-    ), conditions),
-    "ucb1" = tibble::tibble(mab_condition = conditions, ucb = rep_len(0, num_conditions)),
-    rlang::abort("Invalid Algorithm: Valid Algorithms are `thompson` and `ucb1`")
+  bandits$bandit_stat[[1]] <- switch(
+    algorithm,
+    "thompson" = rlang::set_names(
+      rep_len(1 / num_conditions, length.out = num_conditions),
+      conditions
+    ),
+    "ucb1" = tibble::tibble(
+      mab_condition = conditions,
+      ucb = rep_len(0, num_conditions)
+    ),
+    rlang::abort(
+      "Invalid Algorithm: Valid Algorithms are `thompson` and `ucb1`"
+    )
   )
-  bandits$assignment_prob[[1]] <- rlang::set_names(rep_len(1 / num_conditions,
-    length.out = num_conditions
-  ), conditions)
+  bandits$assignment_prob[[1]] <- rlang::set_names(
+    rep_len(1 / num_conditions, length.out = num_conditions),
+    conditions
+  )
 
   verbose_log(verbose, "Starting Bandit Trial")
   for (i in 2:periods) {
@@ -94,8 +114,10 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       random_assign_prop = random_assign_prop
     )
 
-    bandits$assignment_prob[[i]] <- (bandit[["assignment_prob"]] * (1 - random_assign_prop)) +
-      (rep_len(1 / num_conditions, length.out = num_conditions) * random_assign_prop)
+    bandits$assignment_prob[[i]] <- (bandit[["assignment_prob"]] *
+      (1 - random_assign_prop)) +
+      (rep_len(1 / num_conditions, length.out = num_conditions) *
+        random_assign_prop)
 
     prepped_impute <- imputation_preparation(
       current_data = current_data,
@@ -163,7 +185,14 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
 #'* [run_mab_trial()]
 #' @keywords internal
 
-end_mab_trial <- function(data, bandits, algorithm, periods, conditions, ndraws) {
+end_mab_trial <- function(
+  data,
+  bandits,
+  algorithm,
+  periods,
+  conditions,
+  ndraws
+) {
   base::UseMethod("end_mab_trial", data)
 }
 #-------------------------------------------------------------------------------
@@ -172,7 +201,14 @@ end_mab_trial <- function(data, bandits, algorithm, periods, conditions, ndraws)
 #' @inheritParams end_mab_trial
 #' @title [end_mab_trial()] for data.frames
 #' @noRd
-end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditions, ndraws) {
+end_mab_trial.data.frame <- function(
+  data,
+  bandits,
+  algorithm,
+  periods,
+  conditions,
+  ndraws
+) {
   final_summary <- data |>
     dplyr::group_by(mab_condition) |>
     dplyr::summarize(
@@ -192,10 +228,10 @@ end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditio
     ndraws = ndraws
   )
 
-
   bandits$bandit_stat[[(periods + 1)]] <- final_bandit[[1]]
 
-  bandit_stats <- switch(algorithm,
+  bandit_stats <- switch(
+    algorithm,
     "thompson" = {
       dplyr::bind_rows(bandits$bandit_stat, .id = "period_number") |>
         dplyr::mutate(
@@ -207,18 +243,25 @@ end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditio
     "ucb1" = {
       dplyr::bind_rows(bandits$bandit_stat, .id = "period_number") |>
         dplyr::select(ucb, mab_condition, period_number) |>
-        tidyr::pivot_wider(values_from = "ucb", names_from = c("mab_condition")) |>
+        tidyr::pivot_wider(
+          values_from = "ucb",
+          names_from = c("mab_condition")
+        ) |>
         dplyr::mutate(
           period_number = base::as.numeric(period_number),
           dplyr::across(-period_number, ~ dplyr::lead(., n = 1L, default = NA))
         ) |>
         dplyr::slice(base::seq_len(periods))
     },
-    rlang::abort("Invalid Algorithm: valid algorithsm are `thompson`, and `ucb1`")
+    rlang::abort(
+      "Invalid Algorithm: valid algorithsm are `thompson`, and `ucb1`"
+    )
   )
 
-
-  assignment_probs <- dplyr::bind_rows(bandits$assignment_prob, .id = "period_number") |>
+  assignment_probs <- dplyr::bind_rows(
+    bandits$assignment_prob,
+    .id = "period_number"
+  ) |>
     dplyr::mutate(period_number = base::as.numeric(period_number))
 
   return(list(
@@ -233,12 +276,22 @@ end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditio
 #' @inheritParams end_mab_trial
 #' @title [end_mab_trial()] for data.tables
 #' @noRd
-end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditions, ndraws) {
-  final_summary <- data[, .(
-    successes = base::sum(mab_success, na.rm = TRUE),
-    success_rate = base::mean(mab_success, na.rm = TRUE),
-    n = .N
-  ), by = mab_condition]
+end_mab_trial.data.table <- function(
+  data,
+  bandits,
+  algorithm,
+  periods,
+  conditions,
+  ndraws
+) {
+  final_summary <- data[,
+    .(
+      successes = base::sum(mab_success, na.rm = TRUE),
+      success_rate = base::mean(mab_success, na.rm = TRUE),
+      n = .N
+    ),
+    by = mab_condition
+  ]
 
   final_bandit <- get_bandit(
     past_results = final_summary,
@@ -251,52 +304,55 @@ end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditio
 
   bandits$bandit_stat[[(periods + 1)]] <- final_bandit[[1]]
 
-  bandit_stats <- switch(algorithm,
+  bandit_stats <- switch(
+    algorithm,
     "thompson" = {
-      x <- data.table::as.data.table(dplyr::bind_rows(bandits$bandit_stat,
+      x <- data.table::as.data.table(dplyr::bind_rows(
+        bandits$bandit_stat,
         .id = "period_number"
       ))
       x[, period_number := base::as.numeric(period_number)]
 
-      x[, (conditions) := lapply(.SD, function(col) {
-        data.table::shift(col,
-          n = 1L,
-          type = "lead",
-          fill = NA
-        )
-      }),
-      .SDcols = conditions
+      x[,
+        (conditions) := lapply(.SD, function(col) {
+          data.table::shift(col, n = 1L, type = "lead", fill = NA)
+        }),
+        .SDcols = conditions
       ]
       x[base::seq_len(periods), ]
     },
     "ucb1" = {
-      x <- data.table::rbindlist(bandits$bandit_stat,
+      x <- data.table::rbindlist(
+        bandits$bandit_stat,
         use.names = TRUE,
         fill = TRUE,
         idcol = "period_number"
       )
       x <- data.table::dcast(
         data = x[, .(ucb, mab_condition, period_number)],
-        formula = period_number ~ mab_condition, value.var = "ucb"
+        formula = period_number ~ mab_condition,
+        value.var = "ucb"
       )
 
       x[, period_number := base::as.numeric(period_number)]
 
-      x[, (conditions) := base::lapply(.SD, function(col) {
-        data.table::shift(col,
-          n = 1L,
-          type = "lead",
-          fill = NA
-        )
-      }),
-      .SDcols = conditions
+      x[,
+        (conditions) := base::lapply(.SD, function(col) {
+          data.table::shift(col, n = 1L, type = "lead", fill = NA)
+        }),
+        .SDcols = conditions
       ]
       x[base::seq_len(periods), ]
     },
-    rlang::abort("Invalid Algorithm: valid algorithsm are `thompson`, and `ucb1`")
+    rlang::abort(
+      "Invalid Algorithm: valid algorithsm are `thompson`, and `ucb1`"
+    )
   )
 
-  assignment_probs <- data.table::as.data.table(dplyr::bind_rows(bandits$assignment_prob, .id = "period_number"))
+  assignment_probs <- data.table::as.data.table(dplyr::bind_rows(
+    bandits$assignment_prob,
+    .id = "period_number"
+  ))
   assignment_probs[, period_number := base::as.numeric(period_number)]
 
   return(list(
@@ -330,7 +386,11 @@ create_prior <- function(prior_periods, current_period) {
   } else if (prior_periods < current_period) {
     # returns x most recent periods, i.e. if prior is 3, and current is 6, returns 3:5
 
-    prior <- base::seq(from = current_period - prior_periods, to = (current_period - 1), by = 1)
+    prior <- base::seq(
+      from = current_period - prior_periods,
+      to = (current_period - 1),
+      by = 1
+    )
   } else {
     stop("Invalid Prior Cutoff, specify either a whole number or \"All\"")
   }

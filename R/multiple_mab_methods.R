@@ -87,19 +87,25 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
     dplyr::summarize(
       estimate_avg = base::mean(mean, na.rm = TRUE),
       SE_avg = sqrt(base::mean(variance, na.rm = TRUE)),
-      SE_empirical = sqrt(stats::var(mean)), .groups = "drop",
+      SE_empirical = sqrt(stats::var(mean)),
+      .groups = "drop",
     ) |>
     dplyr::mutate(
       lower = estimate_avg + stats::qnorm(lower_level) * SE_avg,
       upper = estimate_avg + stats::qnorm(upper_level) * SE_empirical
     ) |>
-    dplyr::left_join(quantiles, by = c("mab_condition", "estimator"), suffix = c("_normal", "_empirical"))
+    dplyr::left_join(
+      quantiles,
+      by = c("mab_condition", "estimator"),
+      suffix = c("_normal", "_empirical")
+    )
 
   bandits <- object$bandits |>
     dplyr::group_by(trial) |>
     dplyr::filter(period_number == max(period_number)) |>
     tidyr::pivot_longer(
-      cols = c(-trial, -period_number), names_to = "mab_condition",
+      cols = c(-trial, -period_number),
+      names_to = "mab_condition",
       values_to = "bandit"
     ) |>
     dplyr::slice_max(order_by = bandit) |>
@@ -156,14 +162,25 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
 #' @export
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (to change, scales, labels, legend, theme, etc.)
 
-plot.multiple.mab <- function(x, type, cdf = NULL, level = 0.95, save = FALSE, path = NULL, ...) {
+plot.multiple.mab <- function(
+  x,
+  type,
+  cdf = NULL,
+  level = 0.95,
+  save = FALSE,
+  path = NULL,
+  ...
+) {
   rlang::check_installed("ggplot2")
-  plot <- switch(type,
+  plot <- switch(
+    type,
     "summary" = plot_summary(x = x, ...),
     "hist" = plot_hist(x = x, ...),
     "estimate" = plot_mult_estimates(
-      x = x, cdf = cdf,
-      level = level, ...
+      x = x,
+      cdf = cdf,
+      level = level,
+      ...
     ),
     rlang::abort("Invalid Type: Valid types are `hist`, `summary`, estimate`.")
   )
@@ -214,7 +231,8 @@ plot_hist <- function(x, ...) {
     ggplot2::geom_histogram(...) +
     ggplot2::facet_grid(~mab_condition) +
     ggplot2::labs(
-      x = "Estimate", y = "Density",
+      x = "Estimate",
+      y = "Density",
       title = "Estimate Distributions Across Trials"
     ) +
     ggplot2::theme_minimal()
@@ -235,19 +253,34 @@ plot_mult_estimates <- function(x, cdf, level, ...) {
   if (base::is.null(cdf)) {
     rlang::abort("Invalid Estimator: Valid CDF's are, empirical`, and `normal`")
   }
-  cols <- switch(cdf,
+  cols <- switch(
+    cdf,
     "empirical" = c("upper_empirical", "lower_empirical"),
     "normal" = c("upper_normal", "lower_normal"),
     rlang::abort("Invalid `CDF`: valid CDFs are `normal` or `empirical`")
   )
 
   summary(x, level = level) |>
-    dplyr::select(!!!rlang::syms(cols), Treatment_Arm, average_probability_of_success) |>
-    ggplot2::ggplot(ggplot2::aes(x = average_probability_of_success, y = Treatment_Arm)) +
-    ggplot2::geom_errorbarh(ggplot2::aes(xmax = !!rlang::sym(cols[[1]]), xmin = !!rlang::sym(cols[[2]])), ...) +
+    dplyr::select(
+      !!!rlang::syms(cols),
+      Treatment_Arm,
+      average_probability_of_success
+    ) |>
+    ggplot2::ggplot(ggplot2::aes(
+      x = average_probability_of_success,
+      y = Treatment_Arm
+    )) +
+    ggplot2::geom_errorbarh(
+      ggplot2::aes(
+        xmax = !!rlang::sym(cols[[1]]),
+        xmin = !!rlang::sym(cols[[2]])
+      ),
+      ...
+    ) +
     ggplot2::theme_minimal() +
     ggplot2::labs(
-      x = "Probability of Succcess (AIPW)", y = "Treatment Arm",
+      x = "Probability of Succcess (AIPW)",
+      y = "Treatment Arm",
       title = "Uncertainy Around Treatment Arm Estimates"
     )
 }

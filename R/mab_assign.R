@@ -552,6 +552,7 @@ assign_treatments.data.table <- function(
       current_data[
         rand_idx,
         mab_condition := randomizr::complete_ra(
+          N = length(rand_idx),
           prob_each = random_probs,
           conditions = conditions,
           check_inputs = FALSE
@@ -562,6 +563,7 @@ assign_treatments.data.table <- function(
       current_data[
         band_idx,
         mab_condition := randomizr::complete_ra(
+          N = length(band_idx),
           prob_each = probs,
           conditions = conditions,
           check_inputs = FALSE
