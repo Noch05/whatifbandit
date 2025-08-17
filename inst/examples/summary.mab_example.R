@@ -12,11 +12,6 @@ x <- single_mab_simulation(
   perfect_assignment = TRUE,
   blocking = FALSE,
   prior_periods = "All",
-  conditions = c(
-    "no_letter",
-    "open_appt",
-    "specific_appt"
-  ),
   data_cols = c(
     condition_col = "condition",
     id_col = "ic_case_id",

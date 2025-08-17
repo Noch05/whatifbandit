@@ -97,7 +97,6 @@ sim <- single_mab_simulation(
   assignment_method = "Batch",
   period_length = 1000,
   algorithm = "UCB1",
-  conditions = levels(tanf$condition),
   whole_experiment = TRUE, perfect_assignment = TRUE,
   prior_periods = "All",
   blocking = FALSE,
@@ -128,7 +127,6 @@ sim <- single_mab_simulation(
   time_unit = "Month",
   period_length = 1,
   algorithm = "Thompson",
-  conditions = levels(tanf$condition),
   whole_experiment = FALSE, perfect_assignment = TRUE,
   prior_periods = "All",
   blocking = TRUE, block_cols = c("service_center"),
@@ -156,7 +154,8 @@ Control augmentation ensures that the marked control group meets the specified p
 
 The hybrid design sets aside a percentage of the dataset to be assigned uniformly randomly. If we set `random_assign_prop = 0.2`, then the algorithm allocates 20% of each period to be assigned to treatments randomly, while 80% are assigned via the Thompson sampling or UCB1 algorithm.
 
-We do not recommend using both control augmentation and a hybrid design. If there are 3 conditions, like in the TANF experiment, and we set `control_augment = 0.1`, and `random_assign_prop = 0.21`, then the minimum assignment probability for the control group is not 10% but 14.9% instead (0.1 * 0.79 + 0.21/3 = 0.149). Below, we use  `control_augment = 0.2`, and identify the control group by naming one level of the `conditions` character vector `"Control"`; the other names don't matter, they just cannot be `NA` or `NULL`. If we use `random_assign_prob` instead, the conditions vector can remain unnamed. 
+We do not recommend using both control augmentation and a hybrid design. If there are 3 conditions, like in the TANF experiment, and we set `control_augment = 0.1`, and `random_assign_prop = 0.21`, then the minimum assignment probability for the control group is not 10% but 14.9% instead (0.1 * 0.79 + 0.21/3 = 0.149). Below, we use  `control_augment = 0.2`, and identify the control group using the `control_condition` argument. If we use `random_assign_prob` instead, we do not need to specify this.
+
 ```{r, singlesimcontrolaug, eval=FALSE}
 tanf <- arrange(tanf, appt_date)
 conditions <- setNames(levels(tanf$condition), c("Control", "T1", "T2"))
@@ -165,7 +164,6 @@ sim <- single_mab_simulation(
   data = tanf,
   assignment_method = "Individual",
   algorithm = "Thompson",
-  conditions = conditions,
   whole_experiment = FALSE, perfect_assignment = TRUE,
   prior_periods = 500,
   blocking = TRUE, block_cols = c("service_center"),
@@ -174,7 +172,8 @@ sim <- single_mab_simulation(
     success_col = "success",
     condition_col = "condition"
   ),
-  control_augment = 0.2
+  control_augment = 0.2,
+  control_condition = "no_letter"
 )
 ```
 ## Analysis
@@ -271,7 +270,6 @@ time <- system.time(
     time_unit = "Month",
     period_length = 1,
     algorithm = "Thompson",
-    conditions = levels(tanf$condition),
     whole_experiment = FALSE, perfect_assignment = TRUE,
     prior_periods = "All",
     blocking = TRUE, block_cols = c("service_center"),
@@ -307,7 +305,6 @@ parallel_time <- system.time(
     time_unit = "Month",
     period_length = 1,
     algorithm = "Thompson",
-    conditions = levels(tanf$condition),
     whole_experiment = FALSE, perfect_assignment = TRUE,
     prior_periods = "All",
     blocking = TRUE, block_cols = c("service_center"),
@@ -426,7 +423,6 @@ dataframe_time <- system.time(single_mab_simulation(
   assignment_method = "Batch",
   period_length = 3000,
   algorithm = "Thomspon",
-  conditions = levels(tanf$condition),
   whole_experiment = FALSE, perfect_assignment = TRUE,
   prior_periods = "All",
   blocking = FALSE,
@@ -443,7 +439,6 @@ datatable_time <- system.time(single_mab_simulation(
   assignment_method = "Batch",
   period_length = 3000,
   algorithm = "UCB1",
-  conditions = levels(tanf$condition),
   whole_experiment = FALSE, perfect_assignment = TRUE,
   prior_periods = "All",
   blocking = FALSE,

@@ -3,19 +3,25 @@ generate_data <- function(n, k) {
   data <- tibble::tibble(
     type_of_policy = sample(
       c(
-        "Control Group", "Treatment 1",
-        "Treatment 2", "Treatment 3", "Treatment 4"
+        "Control Group",
+        "Treatment 1",
+        "Treatment 2",
+        "Treatment 3",
+        "Treatment 4"
       ),
-      size = n, replace = TRUE
+      size = n,
+      replace = TRUE
     ),
     city = sample(c("New York", "DC", "Los Angeles"), size = n, replace = TRUE),
     male = rbinom(n, 1, 0.5),
     date_of_treatment = sample(
       seq(
         lubridate::ymd("2024-01-01"),
-        lubridate::ymd("2024-06-01"), 1
+        lubridate::ymd("2024-06-01"),
+        1
       ),
-      size = n, replace = TRUE
+      size = n,
+      replace = TRUE
     ),
     treat_month = lubridate::month(date_of_treatment),
     successful_return = dplyr::case_when(
@@ -26,9 +32,12 @@ generate_data <- function(n, k) {
       type_of_policy == "Treatment 4" ~ rbinom(n, 1, 0.42),
     ),
     date_returned = dplyr::if_else(
-      successful_return == 1, date_of_treatment + lubridate::days(
-        sample.int(n / 2, size = n, replace = TRUE)
-      ), NA
+      successful_return == 1,
+      date_of_treatment +
+        lubridate::days(
+          sample.int(n / 2, size = n, replace = TRUE)
+        ),
+      NA
     ),
     treatment_wave_assignment = lubridate::ymd(
       paste0("2024-0", lubridate::month(date_of_treatment), "-01")
@@ -37,14 +46,8 @@ generate_data <- function(n, k) {
     dplyr::arrange(date_of_treatment) |>
     dplyr::mutate(identification_card_num = seq(1, n, 1), )
 
-
-
   static_args <- list(
     data = data,
-    conditions = setNames(
-      sort(unique(data$type_of_policy)),
-      c("Control", "T1", "T2", "T3", "T4")
-    ),
     data_cols = c(
       id_col = "identification_card_num",
       condition_col = "type_of_policy",
@@ -54,6 +57,7 @@ generate_data <- function(n, k) {
       success_date_col = "date_returned",
       month_col = "treat_month"
     ),
+    control_condition = "Control Group",
     block_cols = c("city", "male"),
     verbose = FALSE,
     ndraws = 500
@@ -72,13 +76,23 @@ generate_data <- function(n, k) {
     blocking = c(TRUE, FALSE),
     stringsAsFactors = FALSE
   ) |>
-    dplyr::filter(!(assignment_method == "Batch" & period_length == 1) &
-      !(time_unit == "Month" & period_length > 1) &
-      !(assignment_method == "Individual" & prior_periods != "All") &
-      !(control_augment > 0 & random_assign_prop > 0)) |>
+    dplyr::filter(
+      !(assignment_method == "Batch" & period_length == 1) &
+        !(time_unit == "Month" & period_length > 1) &
+        !(assignment_method == "Individual" & prior_periods != "All") &
+        !(control_augment > 0 & random_assign_prop > 0)
+    ) |>
     dplyr::mutate(
-      time_unit = dplyr::if_else(assignment_method == "Date", time_unit, NA_character_),
-      period_length = dplyr::if_else(assignment_method == "Individual", NA_real_, period_length)
+      time_unit = dplyr::if_else(
+        assignment_method == "Date",
+        time_unit,
+        NA_character_
+      ),
+      period_length = dplyr::if_else(
+        assignment_method == "Individual",
+        NA_real_,
+        period_length
+      )
     ) |>
     dplyr::distinct(.keep_all = TRUE) |>
     dplyr::group_by(algorithm, assignment_method) |>
@@ -93,14 +107,12 @@ generate_data <- function(n, k) {
 # Function to conduct the test
 #
 run_test <- function(full_args, static_args, trial) {
-  FUN <- switch(trial,
+  FUN <- switch(
+    trial,
     "single" = expression(single_mab_simulation),
     "multiple" = expression(multiple_mab_simulation)
   )
-  class <- switch(trial,
-    "single" = "mab",
-    "multiple" = "multiple.mab"
-  )
+  class <- switch(trial, "single" = "mab", "multiple" = "multiple.mab")
 
   results <- purrr::map(seq_len(nrow(full_args)), \(x) {
     args <- c(as.list(full_args[x, ]), static_args)
@@ -111,10 +123,13 @@ run_test <- function(full_args, static_args, trial) {
     return(output)
   })
 
-  purrr::walk(results, ~ {
-    expect_no_failure(summary(.x))
-    expect_no_failure(invisible(.x))
-  })
+  purrr::walk(
+    results,
+    ~ {
+      expect_no_failure(summary(.x))
+      expect_no_failure(invisible(.x))
+    }
+  )
   if (requireNamespace("ggplot2", quietly = TRUE)) {
     if (trial == "single") {
       types <- c("arm", "assign")

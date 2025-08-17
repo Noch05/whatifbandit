@@ -91,6 +91,170 @@
     ! `blocking` must be a logical (TRUE or FALSE)
     x You Passed: 654
 
+---
+
+    i In index: 2.
+    i With name: blocking.
+    Caused by error in `.f()`:
+    ! `blocking` must be a logical (TRUE or FALSE)
+    x You Passed: text
+
+---
+
+    i In index: 2.
+    i With name: blocking.
+    Caused by error in `.f()`:
+    ! `blocking` must be a logical (TRUE or FALSE)
+    x You Passed: NA
+
+---
+
+    Invalid Time Unit
+    x you passed: weeks
+    i valid units are `day`, `month`, `week`
+
+---
+
+    Invalid Time Unit
+    x you passed: 5
+    i valid units are `day`, `month`, `week`
+
+---
+
+    i In index: 4.
+    i With name: perfect_assignment.
+    Caused by error in `.f()`:
+    ! `perfect_assignment` must be a logical (TRUE or FALSE)
+    x You Passed: 45
+
+---
+
+    i In index: 4.
+    i With name: perfect_assignment.
+    Caused by error in `.f()`:
+    ! `perfect_assignment` must be a logical (TRUE or FALSE)
+    x You Passed: text
+
+---
+
+    i In index: 4.
+    i With name: perfect_assignment.
+    Caused by error in `.f()`:
+    ! `perfect_assignment` must be a logical (TRUE or FALSE)
+    x You Passed: NA
+
+---
+
+    i In index: 3.
+    i With name: whole_experiment.
+    Caused by error in `.f()`:
+    ! `whole_experiment` must be a logical (TRUE or FALSE)
+    x You Passed: 546
+
+---
+
+    i In index: 3.
+    i With name: whole_experiment.
+    Caused by error in `.f()`:
+    ! `whole_experiment` must be a logical (TRUE or FALSE)
+    x You Passed: text
+
+---
+
+    i In index: 3.
+    i With name: whole_experiment.
+    Caused by error in `.f()`:
+    ! `whole_experiment` must be a logical (TRUE or FALSE)
+    x You Passed: NA
+
+---
+
+    `prior_periods` must be a positive integer
+    x You passed: -5
+
+---
+
+    `prior_periods` must be a positive integer or one of: 'all'
+    x You passed: text
+
+---
+
+    `prior_periods` must be a positive integer
+    x You passed: NA
+
+---
+
+    `period_length` cannot be larger than data size
+    x You data has 10 rows, and your batch size is 50 rows
+
+---
+
+    `period_length` must be a positive integer.
+    x You passed: -1
+
+---
+
+    `period_length` must be a positive integer.
+    x You passed: text
+
+---
+
+    `period_length` must be a positive integer.
+    x You passed: NA
+
+---
+
+    `ndraws` must be a positive integer
+    x You passed: -234432
+
+---
+
+    `ndraws` must be a positive integer
+    x You passed: NA
+
+---
+
+    `ndraws` must be a positive integer or one of: ''
+    x You passed: text
+
+---
+
+    i In index: 2.
+    i With name: random_assign_prop.
+    Caused by error in `.f()`:
+    ! `random_assign_prop` must be a non-null double between 0 and 1.
+    x You passed: 23
+
+---
+
+    i In index: 2.
+    i With name: random_assign_prop.
+    Caused by error in `.f()`:
+    ! `random_assign_prop` must be a non-null double between 0 and 1.
+    x You passed: -0.4
+
+---
+
+    i In index: 2.
+    i With name: random_assign_prop.
+    Caused by error in `.f()`:
+    ! `random_assign_prop` must be a non-null double between 0 and 1.
+    x You passed: NA
+
+---
+
+    i In index: 2.
+    i With name: random_assign_prop.
+    Caused by error in `.f()`:
+    ! `random_assign_prop` must be a non-null double between 0 and 1.
+    x You passed: text
+
+---
+
+    `control_condition` is not present in the conditions column
+    x Potential Conditions: 1, 2, 3
+    x You Passed: 7
+
 # Throws proper error when columns do not exist or not declared
 
     `block2 is not in the data, but was chosen as a block.

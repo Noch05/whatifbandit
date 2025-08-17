@@ -6,7 +6,6 @@ tanf <- tanf[1:50, ]
 # The seeds passed must be integers, so it is highly recommended to create them
 # before using `sample.int()`
 seeds <- sample.int(10000, 5)
-conditions <- c("no_letter", "open_appt", "specific_appt")
 
 ## Sequential Execution
 x <- multiple_mab_simulation(
@@ -19,7 +18,6 @@ x <- multiple_mab_simulation(
   algorithm = "Thompson",
   prior_periods = "All",
   control_augment = 0,
-  conditions = conditions,
   data_cols = c(
     condition_col = "condition",
     id_col = "ic_case_id",
@@ -44,7 +42,6 @@ if (requireNamespace("future", quietly = TRUE)) {
       algorithm = "Thompson",
       prior_periods = "All",
       control_augment = 0,
-      conditions = conditions,
       data_cols = c(
         condition_col = "condition",
         id_col = "ic_case_id",
