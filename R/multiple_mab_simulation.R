@@ -149,7 +149,7 @@ multiple_mab_simulation <- function(
     data = data,
     assignment_method = assignment_method,
     algorithm = algorithm,
-    conditions = conditions,
+    control_condition = control_condition,
     prior_periods = prior_periods,
     perfect_assignment = perfect_assignment,
     whole_experiment = whole_experiment,
