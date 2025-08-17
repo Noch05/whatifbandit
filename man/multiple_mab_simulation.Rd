@@ -8,7 +8,7 @@ multiple_mab_simulation(
   data,
   assignment_method,
   algorithm,
-  conditions,
+  control_condition,
   prior_periods,
   perfect_assignment,
   whole_experiment,
@@ -40,6 +40,9 @@ groups are assigned correctly. For "date", observations will be considered in ch
 defines the adaptive assignment process. Mathematical details on these algorithms
 can be found in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
 \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}
+
+\item{control_condition}{Value of the control condition. Only necessary when \code{control_augment} is greater than 0. The type of this value should match
+the type in the input data, so if your conditions are stored as factors or strings, pass a string, if integers, use an integer.}
 
 \item{prior_periods}{A numeric value of length 1, or the character string "All"; number of previous periods to use
 in the treatment assignment model. This is used to implement the stationary/non-stationary bandit.
@@ -184,7 +187,6 @@ tanf <- tanf[1:50, ]
 # The seeds passed must be integers, so it is highly recommended to create them
 # before using `sample.int()`
 seeds <- sample.int(10000, 5)
-conditions <- c("no_letter", "open_appt", "specific_appt")
 
 ## Sequential Execution
 x <- multiple_mab_simulation(
@@ -197,7 +199,6 @@ x <- multiple_mab_simulation(
   algorithm = "Thompson",
   prior_periods = "All",
   control_augment = 0,
-  conditions = conditions,
   data_cols = c(
     condition_col = "condition",
     id_col = "ic_case_id",
@@ -222,7 +223,6 @@ if (requireNamespace("future", quietly = TRUE)) {
       algorithm = "Thompson",
       prior_periods = "All",
       control_augment = 0,
-      conditions = conditions,
       data_cols = c(
         condition_col = "condition",
         id_col = "ic_case_id",

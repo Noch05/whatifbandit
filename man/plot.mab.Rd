@@ -67,11 +67,6 @@ x <- single_mab_simulation(
   perfect_assignment = TRUE,
   blocking = FALSE,
   prior_periods = "All",
-  conditions = c(
-    "no_letter",
-    "open_appt",
-    "specific_appt"
-  ),
   data_cols = c(
     condition_col = "condition",
     id_col = "ic_case_id",
@@ -85,7 +80,6 @@ y
 # Adding a new title
 y + ggplot2::labs(title = "Your New Title")
 # type = assign creates a similar plot, but shows probability of assignment instead
-
 
 # Plotting Augmented Inverse Probability Estimates with confidence interval
 # By default it provides 95\% Normal Confidence Intervals but this can be adjusted

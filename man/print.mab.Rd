@@ -33,7 +33,6 @@ x <- single_mab_simulation(
   algorithm = "thompson",
   assignment_method = "batch",
   period_length = 1750,
-  conditions = as.character(levels(tanf$condition)),
   prior_periods = "All",
   blocking = FALSE,
   whole_experiment = TRUE,

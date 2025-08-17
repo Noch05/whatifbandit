@@ -20,7 +20,6 @@
 #'   algorithm = "thompson",
 #'   assignment_method = "Batch",
 #'   period_length = 1750,
-#'   conditions = as.character(levels(tanf$condition)),
 #'   prior_periods = "All",
 #'   blocking = FALSE,
 #'   whole_experiment = TRUE,
@@ -76,23 +75,27 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
   upper_level <- 1 - lower_level
 
   quantiles <- object$estimates |>
+    filter(estimator == "AIPW") |>
     dplyr::group_by(mab_condition, estimator) |>
     dplyr::summarize(
       lower = stats::quantile(mean, lower_level),
       upper = stats::quantile(mean, upper_level)
-    )
+    ) |>
+    dplyr::mutate(mab_condition = as.character(mab_condition))
 
   estimate <- object$estimates |>
+    filter(estimator == "AIPW") |>
     dplyr::group_by(mab_condition, estimator) |>
     dplyr::summarize(
       estimate_avg = base::mean(mean, na.rm = TRUE),
       SE_avg = sqrt(base::mean(variance, na.rm = TRUE)),
-      SE_empirical = sqrt(stats::var(mean)),
+      SE_empirical = stats::sd(mean),
       .groups = "drop",
     ) |>
     dplyr::mutate(
       lower = estimate_avg + stats::qnorm(lower_level) * SE_avg,
-      upper = estimate_avg + stats::qnorm(upper_level) * SE_empirical
+      upper = estimate_avg + stats::qnorm(upper_level) * SE_empirical,
+      mab_condition = as.character(mab_condition)
     ) |>
     dplyr::left_join(
       quantiles,
@@ -118,7 +121,6 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
       times_best = dplyr::if_else(base::is.na(times_best), 0, times_best),
       level = level
     ) |>
-    dplyr::filter(estimator == "AIPW") |>
     dplyr::select(-estimator) |>
     dplyr::rename(
       "average_probability_of_success" = "estimate_avg",

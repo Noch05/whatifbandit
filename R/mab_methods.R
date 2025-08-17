@@ -22,7 +22,6 @@
 #'   algorithm = "thompson",
 #'   assignment_method = "batch",
 #'   period_length = 1750,
-#'   conditions = as.character(levels(tanf$condition)),
 #'   prior_periods = "All",
 #'   blocking = FALSE,
 #'   whole_experiment = TRUE,
@@ -125,7 +124,8 @@ summary.mab <- function(object, level = 0.95, ...) {
     "thompson" = "Probability_Of_Best_Arm"
   )
   estimates <- object$estimates |>
-    dplyr::filter(estimator == "AIPW")
+    dplyr::filter(estimator == "AIPW") |>
+    dplyr::mutate(mab_condition = as.character(mab_condition))
 
   normalq <- base::abs(stats::qnorm((1 - level) / 2))
 
