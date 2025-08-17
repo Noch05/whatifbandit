@@ -59,9 +59,6 @@ If FALSE, uses only data available up to the current period. In large datasets o
 of periods, setting this to FALSE can be more computationally intensive, though not a significant
 contributor to total run time.}
 
-\item{conditions}{A character vector containing names of the treatment conditions. If \code{control_augment} > 0, then the control condition
-of the first element of the vector will be used as the control group.}
-
 \item{blocking}{Logical; whether or not to use treatment blocking. Treatment blocking is used to ensure an even-enough
 distribution of treatment conditions across blocks. For example, blocking by gender would mean the randomized assignment should
 split treatments evenly not just throughout the sample (so for 4 arms, 25-25-25-25), but also within each block, so 25\% of men

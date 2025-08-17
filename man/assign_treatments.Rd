@@ -33,9 +33,6 @@ can be found in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014}
 
 \item{id_col}{Column in \code{data}; contains unique ID as a key.}
 
-\item{conditions}{A character vector containing names of the treatment conditions. If \code{control_augment} > 0, then the control condition
-of the first element of the vector will be used as the control group.}
-
 \item{condition_col}{Column in \code{data}; original treatment condition for each observation.}
 
 \item{success_col}{Column in \code{data}; binary successes from the original experiment.}
@@ -55,8 +52,8 @@ then from under the original experiment, the column 'impute_req' is 1, and else 
 \description{
 Assigns new treatments for an assignment wave based on the assignment probabilities provided from
 \code{\link[=get_bandit]{get_bandit()}}, and the proportion of randomly assigned observations specified in \code{random_assign_prop}.
-Assignments are made randomly with the given probabilities using \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}} or
-\code{\link[randomizr:cluster_ra]{randomizr::cluster_ra()}}.
+Assignments are made randomly with the given probabilities using \code{\link[randomizr:block_ra]{randomizr::block_ra()}} or
+\code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}.
 }
 \details{
 The unique identifier for each row is used as the cluster in the for the
@@ -71,8 +68,8 @@ random assignment. These row selections are also random.
 }
 \seealso{
 \itemize{
-\item \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}}
-\item \code{\link[randomizr:cluster_ra]{randomizr::cluster_ra()}}
+\item \code{\link[randomizr:block_ra]{randomizr::block_ra()}}
+\item \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}
 }
 }
 \keyword{internal}

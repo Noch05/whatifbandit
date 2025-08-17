@@ -10,9 +10,6 @@
 \item{past_results}{Tibble/data.table containing summary of prior periods, with
 successes, number of observations, and success rates, which is created by \code{\link[=get_past_results]{get_past_results()}}.}
 
-\item{conditions}{A character vector containing names of the treatment conditions. If \code{control_augment} > 0, then the control condition
-of the first element of the vector will be used as the control group.}
-
 \item{current_period}{Numeric scalar; current period of the adaptive trial simulation.}
 
 \item{ndraws}{A numeric value; When Thompson sampling direct calculations fail, draws from a simulated posterior

@@ -27,9 +27,6 @@ you have exact dates treatments were assigned.}
 
 \item{assignment_date_col}{Column in \code{data}; contains original dates treatments were assigned to observations. Only necessary when \code{perfect_assignment = FALSE}.
 Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type \code{Date}, not a character string.}
-
-\item{conditions}{A character vector containing names of the treatment conditions. If \code{control_augment} > 0, then the control condition
-of the first element of the vector will be used as the control group.}
 }
 \value{
 A tibble/data.table containing the number of successes, and number of people for each

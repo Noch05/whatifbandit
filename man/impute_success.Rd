@@ -22,7 +22,7 @@ to impute outcomes from.}
 
 \item{imputation_info}{tibble/data.frame containing conditional probability of success by treatment block, for each
 combination that exists in \code{current_data}, calculated from the original experiment.
-Passed to \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}} to impute outcomes.}
+Passed to \code{\link[randomizr:block_ra]{randomizr::block_ra()}} to impute outcomes.}
 
 \item{id_col}{Column in \code{data}; contains unique ID as a key.}
 
@@ -47,7 +47,7 @@ observations whose change in treatment changes their outcome from failure to suc
 }
 \description{
 Imputes outcomes for the current treatment assignment period.
-Uses \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}} to impute the outcomes for observations
+Uses \code{\link[randomizr:block_ra]{randomizr::block_ra()}} to impute the outcomes for observations
 who were assigned new treatments. The probabilities used to guide the imputation
 of the outcomes are pre-computed using the existing data from the original randomized experiment.
 }
@@ -67,7 +67,7 @@ experiment.
 \itemize{
 \item \code{\link[=imputation_preparation]{imputation_preparation()}}
 \item \code{\link[=imputation_precompute]{imputation_precompute()}}
-\item \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}}
+\item \code{\link[randomizr:block_ra]{randomizr::block_ra()}}
 }
 }
 \keyword{internal}

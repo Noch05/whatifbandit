@@ -18,9 +18,6 @@ can be found in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014}
 
 \item{periods}{Numeric value of length 1; total number of periods in Multi-Arm-Bandit trial.}
 
-\item{conditions}{A character vector containing names of the treatment conditions. If \code{control_augment} > 0, then the control condition
-of the first element of the vector will be used as the control group.}
-
 \item{ndraws}{A numeric value; When Thompson sampling direct calculations fail, draws from a simulated posterior
 will be used to approximate the Thompson sampling probabilities. This is the number of simulations to use, the default
 is 5000 to match the default parameter \code{\link[bandit:best_binomial_bandit_sim]{bandit::best_binomial_bandit_sim()}}, but might need to be raised or lowered depending on performance and accuracy

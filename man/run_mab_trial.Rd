@@ -78,9 +78,6 @@ This is useful when simulating batch-based assignment where treatments were assi
 on a given day whether or not all the information from a prior batch was available and
 you have exact dates treatments were assigned.}
 
-\item{conditions}{A character vector containing names of the treatment conditions. If \code{control_augment} > 0, then the control condition
-of the first element of the vector will be used as the control group.}
-
 \item{verbose}{Logical; whether or not to print intermediate messages. Default is FALSE.}
 
 \item{control_augment}{A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.

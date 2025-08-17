@@ -8,7 +8,6 @@ validate_inputs(
   data,
   assignment_method,
   algorithm,
-  conditions,
   prior_periods,
   perfect_assignment,
   whole_experiment,
@@ -36,9 +35,6 @@ groups are assigned correctly. For "date", observations will be considered in ch
 defines the adaptive assignment process. Mathematical details on these algorithms
 can be found in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
 \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}
-
-\item{conditions}{A character vector containing names of the treatment conditions. If \code{control_augment} > 0, then the control condition
-of the first element of the vector will be used as the control group.}
 
 \item{prior_periods}{A numeric value of length 1, or the character string "All"; number of previous periods to use
 in the treatment assignment model. This is used to implement the stationary/non-stationary bandit.

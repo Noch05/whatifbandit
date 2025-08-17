@@ -55,11 +55,11 @@ to impute if perfect_assignment is FALSE. Subsetted from the \code{\link[=imputa
 Executes all preparations necessary to impute outcomes for
 each iteration of the simulation loop. Adds an additional column to the current data,
 subsets necessary information from the \code{\link[=imputation_precompute]{imputation_precompute()}} output, and checks to ensure
-compatibility with \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}}.
+compatibility with \code{\link[randomizr:block_ra]{randomizr::block_ra()}}.
 }
 \details{
 The goal of this function is to set up the imputation procedure and prevent
-errors from occurring. \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}} does not see the names
+errors from occurring. \code{\link[randomizr:block_ra]{randomizr::block_ra()}} does not see the names
 of the probabilities passed per block, so the imputation information must be subsetted
 to contain only the treatment blocks which exist in a given period.
 
