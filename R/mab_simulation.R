@@ -256,14 +256,27 @@ create_conditions <- function(
 ) {
   conditions <- base::sort(base::unique(data[[condition_col$name]]))
   if (control_augment > 0) {
-    if (!control_condition %in% conditions) {
+    if (length(control_condition) != 1) {
+      rlang::abort(c(
+        "`control_condition` must have a length of 1",
+        "x" = sprintf(
+          "You passed a vector of length: %d",
+          length(control_condition)
+        )
+      ))
+    }
+    if (
+      is.null(control_condition) |
+        is.na(control_condition) |
+        !control_condition %in% conditions
+    ) {
       rlang::abort(c(
         "`control_condition` is not present in the conditions column",
         "x" = sprintf(
           "Potential Conditions: %s",
           paste0(conditions, collapse = ", ")
         ),
-        "x" = paste0("You Passed: ", control_condition)
+        "x" = paste0("You Passed: ", base::deparse(control_condition))
       ))
     }
 
