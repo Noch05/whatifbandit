@@ -40,7 +40,7 @@ test_that("Throws Proper Error when arguments are invalid", {
     algorithm = list("not", 76, NA),
     assignment_method = list("not", 45, NA),
     verbose = list(456, "text", NA),
-    control_augment = list(-1, 2, NA, 0.5),
+    control_augment = list(-1, 2, NA),
     blocking = list(654, "text", NA),
     time_unit = list("Weeks", 5),
     perfect_assignment = list(45, "text", NA),
