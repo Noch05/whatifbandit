@@ -305,10 +305,6 @@ posint <- function(x) {
 #' @inheritParams single_mab_simulation
 #' @keywords internal
 check_conditions <- function(conditions, data, data_cols, control_augment) {
-  if (is.null(conditions) || !is.character(conditions)) {
-    rlang::abort("`conditions` must be provided as a character vector.")
-  }
-
   actual_conditions <- unique(data[[data_cols$condition_col$name]])
   if (length(conditions) != length(actual_conditions)) {
     rlang::abort(c(

@@ -239,7 +239,7 @@ create_new_cols.data.frame <- function(data,
     dplyr::mutate(
       period_number = base::match(period_number, base::sort(base::unique(period_number))),
       mab_success = dplyr::if_else(period_number == 1, !!data_cols$success_col$sym, NA),
-      mab_condition = dplyr::if_else(period_number == 1, !!data_cols$condition_col$sym, NA_character_),
+      mab_condition = dplyr::if_else(period_number == 1, !!data_cols$condition_col$sym, NA),
       impute_req = dplyr::if_else(period_number == 1, 0, NA),
       impute_block = NA_character_,
       assignment_type = dplyr::if_else(period_number == 1, "initial", NA_character_)

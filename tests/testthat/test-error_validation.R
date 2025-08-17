@@ -57,7 +57,7 @@ test_that("Throws Proper Error when arguments are invalid", {
     assignment_method = "Batch",
     period_length = 1,
     verbose = TRUE,
-    conditions = unique(as.character(data$condition)),
+    conditions = unique(data$condition),
     control_augment = 0,
     blocking = FALSE,
     perfect_assignment = TRUE,

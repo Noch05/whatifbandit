@@ -367,44 +367,44 @@ assign_treatments.data.frame <- function(current_data, probs, blocking = NULL,
     bandit_blocks <- current_data$block[band_idx]
     random_blocks <- current_data$block[rand_idx]
     if (length(rand_idx) > 0) {
-      current_data$mab_condition[rand_idx] <- base::as.character(randomizr::block_and_cluster_ra(
+      current_data$mab_condition[rand_idx] <- randomizr::block_and_cluster_ra(
         clusters = random_clusters,
         blocks = random_blocks,
         prob_each = random_probs,
         conditions = conditions,
         check_inputs = FALSE
-      ))
+      )
     }
     if (base::length(band_idx) > 0) {
-      current_data$mab_condition[band_idx] <- base::as.character(randomizr::block_and_cluster_ra(
+      current_data$mab_condition[band_idx] <- randomizr::block_and_cluster_ra(
         clusters = bandit_clusters,
         blocks = bandit_blocks,
         prob_each = probs,
         conditions = conditions,
         check_inputs = FALSE
-      ))
+      )
     }
   } else {
     if (base::length(rand_idx) > 0) {
-      current_data$mab_condition[rand_idx] <- base::as.character(randomizr::cluster_ra(
+      current_data$mab_condition[rand_idx] <- randomizr::cluster_ra(
         clusters = random_clusters,
         prob_each = random_probs,
         conditions = conditions,
         check_inputs = FALSE
-      ))
+      )
     }
     if (base::length(band_idx) > 0) {
-      current_data$mab_condition[band_idx] <- base::as.character(randomizr::cluster_ra(
+      current_data$mab_condition[band_idx] <- randomizr::cluster_ra(
         clusters = bandit_clusters,
         prob_each = probs,
         conditions = conditions,
         check_inputs = FALSE
-      ))
+      )
     }
   }
   current_data$impute_req <- base::ifelse(
-    base::as.character(current_data$mab_condition) !=
-      base::as.character(current_data[[condition_col$name]]), 1, 0
+    current_data$mab_condition !=
+      current_data[[condition_col$name]], 1, 0
   )
   return(current_data)
 }

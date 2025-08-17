@@ -181,7 +181,7 @@ imputation_preparation <- function(current_data, block_cols, imputation_informat
         .SDcols = c("mab_condition", block_cols$name)
       ]
     } else {
-      current_data[, impute_block := mab_condition]
+      current_data[, impute_block := base::as.character(mab_condition)]
     }
   } else {
     if (blocking) {
@@ -189,7 +189,7 @@ imputation_preparation <- function(current_data, block_cols, imputation_informat
         paste, c(current_data[, c("mab_condition", block_cols$name)], sep = "_")
       )
     } else {
-      current_data$impute_block <- current_data$mab_condition
+      current_data$impute_block <- base::as.character(current_data$mab_condition)
     }
   }
 
