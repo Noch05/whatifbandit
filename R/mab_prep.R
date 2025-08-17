@@ -29,12 +29,19 @@
 #' representing an observation's new assignment period.
 #' @keywords internal
 #------------------------------------------------------------------------------------------
-create_cutoff <- function(data, data_cols, period_length = NULL,
-                          assignment_method, time_unit) {
-  data <- switch(assignment_method,
+create_cutoff <- function(
+  data,
+  data_cols,
+  period_length = NULL,
+  assignment_method,
+  time_unit
+) {
+  data <- switch(
+    assignment_method,
     "individual" = create_cutoff.individual(data = data),
     "batch" = create_cutoff.batch(data = data, period_length = period_length),
-    "date" = switch(time_unit,
+    "date" = switch(
+      time_unit,
       "day" = create_cutoff.day(
         data = data,
         date_col = data_cols$date_col,
@@ -51,9 +58,13 @@ create_cutoff <- function(data, data_cols, period_length = NULL,
         date_col = data_cols$date_col,
         period_length = period_length
       ),
-      rlang::abort("Invalid Time Unit: Valid Units are `week`, `month`, and `day`")
+      rlang::abort(
+        "Invalid Time Unit: Valid Units are `week`, `month`, and `day`"
+      )
     ),
-    rlang::abort("Invalid Assignment Method: valid methods are `individual`, `batch`, `date`")
+    rlang::abort(
+      "Invalid Assignment Method: valid methods are `individual`, `batch`, `date`"
+    )
   )
   return(invisible(data))
 }
@@ -68,17 +79,25 @@ create_cutoff <- function(data, data_cols, period_length = NULL,
 create_cutoff.day <- function(data, date_col, period_length) {
   start_date <- base::min(data[[date_col$name]])
   if (inherits(data, "data.table")) {
-    data[, period_number := base::floor(
-      lubridate::interval(start_date, base::get(date_col$name)) / lubridate::days(1) / period_length
-    ) + 1]
+    data[,
+      period_number := base::floor(
+        lubridate::interval(start_date, base::get(date_col$name)) /
+          lubridate::days(1) /
+          period_length
+      ) +
+        1
+    ]
 
     return(invisible(data))
   } else {
     data <- data |>
       dplyr::mutate(
         period_number = base::floor(
-          lubridate::interval(start_date, !!date_col$sym) / lubridate::days(1) / period_length
-        ) + 1
+          lubridate::interval(start_date, !!date_col$sym) /
+            lubridate::days(1) /
+            period_length
+        ) +
+          1
       )
     return(data)
   }
@@ -93,9 +112,14 @@ create_cutoff.week <- function(data, date_col, period_length) {
   if (inherits(data, "data.table")) {
     start_date <- base::min(data[, get(date_col$name)])
 
-    data[, period_number := base::floor(
-      lubridate::interval(start_date, base::get(date_col$name)) / lubridate::weeks(1) / period_length
-    ) + 1]
+    data[,
+      period_number := base::floor(
+        lubridate::interval(start_date, base::get(date_col$name)) /
+          lubridate::weeks(1) /
+          period_length
+      ) +
+        1
+    ]
     data.table::setkey(data, period_number)
 
     return(invisible(data))
@@ -105,8 +129,11 @@ create_cutoff.week <- function(data, date_col, period_length) {
     data <- data |>
       dplyr::mutate(
         period_number = base::floor(
-          lubridate::interval(start_date, !!date_col$sym) / lubridate::weeks(1) / period_length
-        ) + 1
+          lubridate::interval(start_date, !!date_col$sym) /
+            lubridate::weeks(1) /
+            period_length
+        ) +
+          1
       )
     return(data)
   }
@@ -123,17 +150,37 @@ create_cutoff.month <- function(data, date_col, month_col, period_length) {
   start_date <- base::min(data[[date_col$name]])
 
   if (inherits(data, "data.table")) {
-    first_month <- data[order(base::get(date_col$name)), base::get(month_col$name)][1]
+    first_month <- data[
+      order(base::get(date_col$name)),
+      base::get(month_col$name)
+    ][1]
 
-    start_month <- lubridate::ymd(base::paste0(lubridate::year(start_date), "-", first_month, "-01"))
+    start_month <- lubridate::ymd(base::paste0(
+      lubridate::year(start_date),
+      "-",
+      first_month,
+      "-01"
+    ))
 
-    data[, month_date := lubridate::ymd(
-      base::paste0(lubridate::year(base::get(date_col$name)), "-", base::get(month_col$name), "-01")
-    )]
+    data[,
+      month_date := lubridate::ymd(
+        base::paste0(
+          lubridate::year(base::get(date_col$name)),
+          "-",
+          base::get(month_col$name),
+          "-01"
+        )
+      )
+    ]
 
-    data[, period_number := base::floor(
-      lubridate::interval(start_month, month_date) / base::months(1) / period_length
-    ) + 1]
+    data[,
+      period_number := base::floor(
+        lubridate::interval(start_month, month_date) /
+          base::months(1) /
+          period_length
+      ) +
+        1
+    ]
 
     data[, month_date := NULL]
 
@@ -149,10 +196,15 @@ create_cutoff.month <- function(data, date_col, month_col, period_length) {
     data <- data |>
       dplyr::mutate(
         month_date = lubridate::ymd(paste0(
-          lubridate::year(!!date_col$sym), "-", !!month_col$sym, "-01"
+          lubridate::year(!!date_col$sym),
+          "-",
+          !!month_col$sym,
+          "-01"
         )),
         period_number = base::floor(
-          lubridate::interval(start_month, month_date) / base::months(1) / period_length
+          lubridate::interval(start_month, month_date) /
+            base::months(1) /
+            period_length
         )
       ) |>
       dplyr::select(-month_date)
@@ -191,7 +243,9 @@ create_cutoff.batch <- function(data, period_length) {
     return(invisible(data))
   } else {
     data <- data |>
-      dplyr::mutate(period_number = base::ceiling(dplyr::row_number() / period_length))
+      dplyr::mutate(
+        period_number = base::ceiling(dplyr::row_number() / period_length)
+      )
     return(data)
   }
 }
@@ -216,11 +270,13 @@ create_cutoff.batch <- function(data, period_length) {
 #' }
 #'
 #' @keywords internal
-create_new_cols <- function(data,
-                            data_cols,
-                            block_cols,
-                            blocking,
-                            perfect_assignment) {
+create_new_cols <- function(
+  data,
+  data_cols,
+  block_cols,
+  blocking,
+  perfect_assignment
+) {
   base::UseMethod("create_new_cols", data)
 }
 # --------------------------------------------------
@@ -230,24 +286,47 @@ create_new_cols <- function(data,
 #' @inheritParams create_new_cols
 #' @noRd
 
-create_new_cols.data.frame <- function(data,
-                                       data_cols,
-                                       block_cols,
-                                       blocking,
-                                       perfect_assignment) {
+create_new_cols.data.frame <- function(
+  data,
+  data_cols,
+  block_cols,
+  blocking,
+  perfect_assignment
+) {
   data <- data |>
     dplyr::mutate(
-      period_number = base::match(period_number, base::sort(base::unique(period_number))),
-      mab_success = dplyr::if_else(period_number == 1, !!data_cols$success_col$sym, NA),
-      mab_condition = dplyr::if_else(period_number == 1, !!data_cols$condition_col$sym, NA),
+      period_number = base::match(
+        period_number,
+        base::sort(base::unique(period_number))
+      ),
+      mab_success = dplyr::if_else(
+        period_number == 1,
+        !!data_cols$success_col$sym,
+        NA
+      ),
+      mab_condition = dplyr::if_else(
+        period_number == 1,
+        !!data_cols$condition_col$sym,
+        NA
+      ),
       impute_req = dplyr::if_else(period_number == 1, 0, NA),
       impute_block = NA_character_,
-      assignment_type = dplyr::if_else(period_number == 1, "initial", NA_character_)
+      assignment_type = dplyr::if_else(
+        period_number == 1,
+        "initial",
+        NA_character_
+      )
     )
 
   if (!perfect_assignment) {
     data <- data |>
-      dplyr::mutate(new_success_date = dplyr::if_else(period_number == 1, !!data_cols$success_date_col$sym, NA))
+      dplyr::mutate(
+        new_success_date = dplyr::if_else(
+          period_number == 1,
+          !!data_cols$success_date_col$sym,
+          NA
+        )
+      )
   }
 
   if (blocking) {
@@ -258,11 +337,16 @@ create_new_cols.data.frame <- function(data,
     data <- data |>
       dplyr::mutate(
         block = do.call(paste, c(data[, block_cols$name], sep = "_")),
-        treatment_block = do.call(paste, c(data[, c(data_cols$condition_col$name, block_cols$name)], sep = "_"))
+        treatment_block = do.call(
+          paste,
+          c(data[, c(data_cols$condition_col$name, block_cols$name)], sep = "_")
+        )
       )
   } else {
     data <- data |>
-      dplyr::mutate(treatment_block = !!data_cols$condition_col$sym)
+      dplyr::mutate(
+        treatment_block = as.character(!!data_cols$condition_col$sym)
+      )
   }
   data <- data |>
     dplyr::arrange(period_number, !!data_cols$id$sym)
@@ -275,13 +359,21 @@ create_new_cols.data.frame <- function(data,
 #' @inheritParams create_new_cols
 #' @noRd
 
-create_new_cols.data.table <- function(data,
-                                       data_cols,
-                                       blocking,
-                                       block_cols,
-                                       perfect_assignment) {
-  data[, period_number := base::match(period_number, base::sort(base::unique(period_number)))][
-    period_number == 1, `:=`(
+create_new_cols.data.table <- function(
+  data,
+  data_cols,
+  blocking,
+  block_cols,
+  perfect_assignment
+) {
+  data[,
+    period_number := base::match(
+      period_number,
+      base::sort(base::unique(period_number))
+    )
+  ][
+    period_number == 1,
+    `:=`(
       mab_success = base::get(data_cols$success_col$name),
       mab_condition = base::get(data_cols$condition_col$name),
       impute_req = 0,
@@ -290,21 +382,27 @@ create_new_cols.data.table <- function(data,
     )
   ]
   if (!perfect_assignment) {
-    data[period_number == 1, new_success_date := base::get(data_cols$success_date_col$name)]
+    data[
+      period_number == 1,
+      new_success_date := base::get(data_cols$success_date_col$name)
+    ]
   }
-
 
   if (blocking) {
     if (base::is.null(block_cols)) {
       rlang::abort("If blocking is TRUE, blocking variables must be specified")
     }
 
-    data[, block := base::do.call(base::paste, c(.SD, sep = "_")), .SDcols = block_cols$name]
-    data[, treatment_block := base::do.call(paste, c(.SD, sep = "_")),
+    data[,
+      block := base::do.call(base::paste, c(.SD, sep = "_")),
+      .SDcols = block_cols$name
+    ]
+    data[,
+      treatment_block := base::do.call(paste, c(.SD, sep = "_")),
       .SDcols = c(data_cols$condition_col$name, block_cols$name)
     ]
   } else {
-    data[, treatment_block := get(data_cols$condition_col$name)]
+    data[, treatment_block := as.character(get(data_cols$condition_col$name))]
   }
   data.table::setkeyv(data, cols = c("period_number", data_cols$id$name))
   data.table::setorderv(data, cols = c("period_number", data_cols$id$name))

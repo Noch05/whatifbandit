@@ -26,8 +26,13 @@
 #' * [get_bandit()]
 #' @keywords internal
 #'
-get_past_results <- function(current_data, prior_data, perfect_assignment, assignment_date_col = NULL,
-                             conditions) {
+get_past_results <- function(
+  current_data,
+  prior_data,
+  perfect_assignment,
+  assignment_date_col = NULL,
+  conditions
+) {
   base::UseMethod("get_past_results", current_data)
 }
 
@@ -38,17 +43,21 @@ get_past_results <- function(current_data, prior_data, perfect_assignment, assig
 #' @inheritParams get_past_results
 #' @noRd
 
-
-get_past_results.data.frame <- function(current_data, prior_data, perfect_assignment, assignment_date_col = NULL,
-                                        conditions) {
+get_past_results.data.frame <- function(
+  current_data,
+  prior_data,
+  perfect_assignment,
+  assignment_date_col = NULL,
+  conditions
+) {
   if (!perfect_assignment) {
     current_date <- base::max(current_data[[assignment_date_col$name]])
 
-
-
     prior_data$known_success <- base::ifelse(
-      current_date >= prior_data[["new_success_date"]] & !base::is.na(prior_data[["new_success_date"]]),
-      1, 0
+      current_date >= prior_data[["new_success_date"]] &
+        !base::is.na(prior_data[["new_success_date"]]),
+      1,
+      0
     )
   } else {
     prior_data$known_success <- prior_data$mab_success
@@ -68,8 +77,10 @@ get_past_results.data.frame <- function(current_data, prior_data, perfect_assign
     conditions_add <- base::setdiff(conditions, prior_data$mab_condition)
 
     replace <- tibble::tibble(
-      mab_condition = conditions_add, successes = 0,
-      success_rate = 0, n = 0
+      mab_condition = conditions_add,
+      successes = 0,
+      success_rate = 0,
+      n = 0
     )
 
     prior_data <- dplyr::bind_rows(prior_data, replace)
@@ -85,39 +96,50 @@ get_past_results.data.frame <- function(current_data, prior_data, perfect_assign
 #' @inheritParams get_past_results
 #' @noRd
 
-
-get_past_results.data.table <- function(current_data,
-                                        perfect_assignment, assignment_date_col = NULL,
-                                        conditions, prior_data) {
+get_past_results.data.table <- function(
+  current_data,
+  perfect_assignment,
+  assignment_date_col = NULL,
+  conditions,
+  prior_data
+) {
   if (!perfect_assignment) {
     current_date <- base::max(current_data[[assignment_date_col$name]])
 
-    prior_data[, known_success := data.table::fifelse(
-      current_date >= new_success_date &
-        !is.na(new_success_date), 1, 0
-    )]
+    prior_data[,
+      known_success := data.table::fifelse(
+        current_date >= new_success_date &
+          !is.na(new_success_date),
+        1,
+        0
+      )
+    ]
   } else if (perfect_assignment) {
     prior_data[, known_success := mab_success]
   } else {
     rlang::abort("Specify Logical for `perfect_assignment`")
   }
 
-  past_results <- prior_data[, .(
-    successes = base::sum(known_success, na.rm = TRUE),
-    success_rate = base::mean(known_success, na.rm = TRUE),
-    n = .N
-  ), by = mab_condition]
-
-
+  past_results <- prior_data[,
+    .(
+      successes = base::sum(known_success, na.rm = TRUE),
+      success_rate = base::mean(known_success, na.rm = TRUE),
+      n = .N
+    ),
+    by = mab_condition
+  ]
 
   if (base::nrow(past_results) != base::length(conditions)) {
     conditions_add <- base::setdiff(conditions, past_results$mab_condition)
     replace <- data.table::data.table(
-      mab_condition = conditions_add, successes = 0,
-      success_rate = 0, n = 0
+      mab_condition = conditions_add,
+      successes = 0,
+      success_rate = 0,
+      n = 0
     )
 
-    past_results <- data.table::rbindlist(list(past_results, replace),
+    past_results <- data.table::rbindlist(
+      list(past_results, replace),
       use.names = TRUE
     )
 
@@ -172,14 +194,27 @@ get_past_results.data.table <- function(current_data,
 #' \url{https://cran.r-project.org/package=bandit}.
 #' @keywords internal
 
-
-get_bandit <- function(past_results, algorithm, conditions, current_period, control_augment = 0, ndraws) {
-  bandit <- switch(algorithm,
+get_bandit <- function(
+  past_results,
+  algorithm,
+  conditions,
+  current_period,
+  control_augment = 0,
+  ndraws
+) {
+  bandit <- switch(
+    algorithm,
     "thompson" = get_bandit.thompson(
-      past_results = past_results, conditions = conditions, current_period =
-        current_period, ndraws = ndraws
+      past_results = past_results,
+      conditions = conditions,
+      current_period = current_period,
+      ndraws = ndraws
     ),
-    "ucb1" = get_bandit.ucb1(past_results = past_results, conditions = conditions, current_period = current_period),
+    "ucb1" = get_bandit.ucb1(
+      past_results = past_results,
+      conditions = conditions,
+      current_period = current_period
+    ),
     rlang::abort("Invalid `algorithm`. Valid Algorithms: 'thomspon', 'ucb1'")
   )
 
@@ -215,7 +250,12 @@ get_bandit <- function(past_results, algorithm, conditions, current_period, cont
 #'
 #' @keywords internal
 
-get_bandit.thompson <- function(past_results, conditions, current_period, ndraws) {
+get_bandit.thompson <- function(
+  past_results,
+  conditions,
+  current_period,
+  ndraws
+) {
   bandit <- tryCatch(
     {
       result <- rlang::set_names(
@@ -224,7 +264,8 @@ get_bandit.thompson <- function(past_results, conditions, current_period, ndraws
           n = past_results$n,
           alpha = 1,
           beta = 1
-        )), conditions
+        )),
+        conditions
       )
       if (bandit_invalid(result)) {
         stop("Invalid Bandit")
@@ -243,7 +284,8 @@ get_bandit.thompson <- function(past_results, conditions, current_period, ndraws
           alpha = 1,
           beta = 1,
           ndraws = ndraws
-        )), conditions
+        )),
+        conditions
       )
 
       result
@@ -251,12 +293,12 @@ get_bandit.thompson <- function(past_results, conditions, current_period, ndraws
   )
 
   if (bandit_invalid(bandit)) {
-    rlang::abort(c("Thompson sampling simulation failed",
+    rlang::abort(c(
+      "Thompson sampling simulation failed",
       "x" = paste0("Most Recent Result:", paste0(bandit, collapse = " ")),
       "i" = "Consider setting `ndraws` higher or reducing `prior_periods`."
     ))
   }
-
 
   return(list(bandit = bandit, assignment_prob = bandit))
 }
@@ -285,30 +327,46 @@ get_bandit.ucb1 <- function(past_results, conditions, current_period) {
   correction <- 1e-10 ## Prevents Division by 0 when n = 0
 
   if (inherits(past_results, "data.table")) {
-    past_results[, ucb := success_rate + base::sqrt(
-      (2 * base::log(current_period - 1)) / (n + correction)
-    )]
+    past_results[,
+      ucb := success_rate +
+        base::sqrt(
+          (2 * base::log(current_period - 1)) / (n + correction)
+        )
+    ]
 
-    best_condition <- base::as.character(past_results[which.max(ucb), mab_condition])
+    best_condition <- base::as.character(past_results[
+      which.max(ucb),
+      mab_condition
+    ])
   } else {
     past_results$ucb <- past_results$success_rate +
-      base::sqrt((2 * base::log(current_period - 1)) / (past_results$n + correction))
+      base::sqrt(
+        (2 * base::log(current_period - 1)) / (past_results$n + correction)
+      )
 
-    best_condition <- past_results$mab_condition[base::which.max(past_results$ucb)]
+    best_condition <- past_results$mab_condition[base::which.max(
+      past_results$ucb
+    )]
   }
 
-  assignment_probs <- rlang::set_names(rep_len(0, length.out = length(conditions)), conditions)
+  assignment_probs <- rlang::set_names(
+    rep_len(0, length.out = length(conditions)),
+    conditions
+  )
 
   assignment_probs[[best_condition]] <- 1
 
-  return(invisible(list(bandit = past_results, assignment_prob = assignment_probs)))
+  return(invisible(list(
+    bandit = past_results,
+    assignment_prob = assignment_probs
+  )))
 }
 #-------------------------------------------------------------------------------
 #' Adaptively Assign Treatments in a Period
 #' @description Assigns new treatments for an assignment wave based on the assignment probabilities provided from
 #' [get_bandit()], and the proportion of randomly assigned observations specified in `random_assign_prop`.
-#' Assignments are made randomly with the given probabilities using [randomizr::block_and_cluster_ra()] or
-#' [randomizr::cluster_ra()].
+#' Assignments are made randomly with the given probabilities using [randomizr::block_ra()] or
+#' [randomizr::complete_ra()].
 #'
 #' @name assign_treatments
 #' @inheritParams single_mab_simulation
@@ -329,36 +387,56 @@ get_bandit.ucb1 <- function(past_results, conditions, current_period) {
 #' rows is rounded to the nearest whole number, and then that many rows are selected to be assigned through
 #' random assignment. These row selections are also random.
 #' @seealso
-#'* [randomizr::block_and_cluster_ra()]
-#'* [randomizr::cluster_ra()]
+#'* [randomizr::block_ra()]
+#'* [randomizr::complete_ra()]
 #' @keywords internal
 
-assign_treatments <- function(current_data, probs, blocking = NULL,
-                              algorithm, id_col, conditions, condition_col,
-                              success_col, random_assign_prop) {
+assign_treatments <- function(
+  current_data,
+  probs,
+  blocking = NULL,
+  algorithm,
+  id_col,
+  conditions,
+  condition_col,
+  success_col,
+  random_assign_prop
+) {
   base::UseMethod("assign_treatments", current_data)
 }
 #' @method assign_treatments data.frame
 #' @title [assign_treatments()] for data.frames
 #' @noRd
-assign_treatments.data.frame <- function(current_data, probs, blocking = NULL,
-                                         algorithm, id_col, conditions, condition_col,
-                                         success_col, random_assign_prop) {
+assign_treatments.data.frame <- function(
+  current_data,
+  probs,
+  blocking = NULL,
+  algorithm,
+  id_col,
+  conditions,
+  condition_col,
+  success_col,
+  random_assign_prop
+) {
   rows <- base::nrow(current_data)
   random_rows <- rows * random_assign_prop
   if (random_assign_prop > 0 && random_rows < 1) {
-    rand_idx <- base::which(base::as.logical(stats::rbinom(rows, 1, random_assign_prop)))
+    rand_idx <- base::which(base::as.logical(stats::rbinom(
+      rows,
+      1,
+      random_assign_prop
+    )))
   } else {
-    rand_idx <- base::sample(x = rows, size = base::round(random_rows, 0), replace = FALSE)
+    rand_idx <- base::sample(
+      x = rows,
+      size = base::round(random_rows, 0),
+      replace = FALSE
+    )
   }
 
   num_conditions <- base::length(conditions)
   random_probs <- base::rep_len(1 / num_conditions, length.out = num_conditions)
   band_idx <- base::setdiff(seq_len(rows), rand_idx)
-
-  ids <- current_data[[id_col$name]]
-  bandit_clusters <- ids[band_idx]
-  random_clusters <- ids[rand_idx]
 
   current_data$assignment_type[band_idx] <- "bandit"
   current_data$assignment_type[rand_idx] <- "random"
@@ -367,8 +445,7 @@ assign_treatments.data.frame <- function(current_data, probs, blocking = NULL,
     bandit_blocks <- current_data$block[band_idx]
     random_blocks <- current_data$block[rand_idx]
     if (length(rand_idx) > 0) {
-      current_data$mab_condition[rand_idx] <- randomizr::block_and_cluster_ra(
-        clusters = random_clusters,
+      current_data$mab_condition[rand_idx] <- randomizr::block_ra(
         blocks = random_blocks,
         prob_each = random_probs,
         conditions = conditions,
@@ -376,8 +453,7 @@ assign_treatments.data.frame <- function(current_data, probs, blocking = NULL,
       )
     }
     if (base::length(band_idx) > 0) {
-      current_data$mab_condition[band_idx] <- randomizr::block_and_cluster_ra(
-        clusters = bandit_clusters,
+      current_data$mab_condition[band_idx] <- randomizr::block_ra(
         blocks = bandit_blocks,
         prob_each = probs,
         conditions = conditions,
@@ -386,25 +462,27 @@ assign_treatments.data.frame <- function(current_data, probs, blocking = NULL,
     }
   } else {
     if (base::length(rand_idx) > 0) {
-      current_data$mab_condition[rand_idx] <- randomizr::cluster_ra(
-        clusters = random_clusters,
+      current_data$mab_condition[rand_idx] <- randomizr::complete_ra(
+        N = length(rand_idx),
         prob_each = random_probs,
         conditions = conditions,
         check_inputs = FALSE
       )
     }
     if (base::length(band_idx) > 0) {
-      current_data$mab_condition[band_idx] <- randomizr::cluster_ra(
-        clusters = bandit_clusters,
+      current_data$mab_condition[band_idx] <- randomizr::complete_ra(
+        N = length(band_idx),
         prob_each = probs,
         conditions = conditions,
         check_inputs = FALSE
       )
     }
   }
+
   current_data$impute_req <- base::ifelse(
-    current_data$mab_condition !=
-      current_data[[condition_col$name]], 1, 0
+    current_data$mab_condition != current_data[[condition_col$name]],
+    1,
+    0
   )
   return(current_data)
 }
@@ -412,13 +490,25 @@ assign_treatments.data.frame <- function(current_data, probs, blocking = NULL,
 #' @method assign_treatments data.table
 #' @title [assign_treatments()] for data.tables
 #' @noRd
-assign_treatments.data.table <- function(current_data, probs, blocking = NULL,
-                                         algorithm, id_col, conditions, condition_col,
-                                         success_col, random_assign_prop) {
+assign_treatments.data.table <- function(
+  current_data,
+  probs,
+  blocking = NULL,
+  algorithm,
+  id_col,
+  conditions,
+  condition_col,
+  success_col,
+  random_assign_prop
+) {
   rows <- base::nrow(current_data)
   random_rows <- base::round(rows * random_assign_prop, 0)
   if (random_assign_prop > 0 && random_rows == 0) {
-    rand_idx <- base::which(base::as.logical(stats::rbinom(rows, 1, random_assign_prop)))
+    rand_idx <- base::which(base::as.logical(stats::rbinom(
+      rows,
+      1,
+      random_assign_prop
+    )))
   } else {
     rand_idx <- base::sample(x = rows, size = random_rows, replace = FALSE)
   }
@@ -426,10 +516,6 @@ assign_treatments.data.table <- function(current_data, probs, blocking = NULL,
   num_conditions <- base::length(conditions)
   random_probs <- base::rep_len(1 / num_conditions, length.out = num_conditions)
   band_idx <- base::setdiff(seq_len(rows), rand_idx)
-
-  ids <- current_data[, base::get(id_col$name)]
-  bandit_clusters <- ids[band_idx]
-  random_clusters <- ids[rand_idx]
 
   current_data[band_idx, assignment_type := "bandit"]
   current_data[rand_idx, assignment_type := "random"]
@@ -439,44 +525,57 @@ assign_treatments.data.table <- function(current_data, probs, blocking = NULL,
     random_blocks <- current_data[rand_idx, block]
 
     if (length(rand_idx) > 0) {
-      current_data[rand_idx, mab_condition := base::as.character(randomizr::block_and_cluster_ra(
-        clusters = random_clusters,
-        blocks = random_blocks,
-        prob_each = random_probs,
-        conditions = conditions,
-        check_inputs = FALSE
-      ))]
+      current_data[
+        rand_idx,
+        mab_condition := randomizr::block_ra(
+          blocks = random_blocks,
+          prob_each = random_probs,
+          conditions = conditions,
+          check_inputs = FALSE
+        )
+      ]
     }
+
     if (base::length(band_idx) > 0) {
-      current_data[band_idx, mab_condition := base::as.character(randomizr::block_and_cluster_ra(
-        clusters = bandit_clusters,
-        blocks = bandit_blocks,
-        prob_each = probs,
-        conditions = conditions,
-        check_inputs = FALSE
-      ))]
+      current_data[
+        band_idx,
+        mab_condition := randomizr::block_ra(
+          blocks = bandit_blocks,
+          prob_each = probs,
+          conditions = conditions,
+          check_inputs = FALSE
+        )
+      ]
     }
   } else {
     if (base::length(rand_idx) > 0) {
-      current_data[rand_idx, mab_condition := base::as.character(randomizr::cluster_ra(
-        clusters = random_clusters,
-        prob_each = random_probs,
-        conditions = conditions,
-        check_inputs = FALSE
-      ))]
+      current_data[
+        rand_idx,
+        mab_condition := randomizr::complete_ra(
+          prob_each = random_probs,
+          conditions = conditions,
+          check_inputs = FALSE
+        )
+      ]
     }
     if (base::length(band_idx) > 0) {
-      current_data[band_idx, mab_condition := base::as.character(randomizr::cluster_ra(
-        clusters = bandit_clusters,
-        prob_each = probs,
-        conditions = conditions,
-        check_inputs = FALSE
-      ))]
+      current_data[
+        band_idx,
+        mab_condition := randomizr::complete_ra(
+          prob_each = probs,
+          conditions = conditions,
+          check_inputs = FALSE
+        )
+      ]
     }
   }
-  current_data[, impute_req := data.table::fifelse(
-    base::as.character(mab_condition) != base::as.character(base::get(condition_col$name)), 1, 0
-  )]
+  current_data[,
+    impute_req := data.table::fifelse(
+      mab_condition != base::get(condition_col$name),
+      1,
+      0
+    )
+  ]
 
   return(invisible(current_data))
 }
