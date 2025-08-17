@@ -305,6 +305,12 @@ posint <- function(x) {
 #' @inheritParams single_mab_simulation
 #' @keywords internal
 check_conditions <- function(conditions, data, data_cols, control_augment) {
+  if (any(is.na(conditions))) { ## Temporary Update This message
+    rlang::abort(c("No element of the conditions vector can be NA",
+      "x" = paste0("You passed: ", paste0(conditions, collapse = ", "))
+    ))
+  }
+
   actual_conditions <- unique(data[[data_cols$condition_col$name]])
   if (length(conditions) != length(actual_conditions)) {
     rlang::abort(c(
