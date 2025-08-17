@@ -25,7 +25,6 @@ single_mab_simulation(
 ## Running UCB1 Sampling with 1 Month based batches and
 ## control augmentation set to 0.25, with perfect_assignment.
 ## When using control_augment > 0, conditions need to have proper names
-names(conditions) <- c("Control", "T1", "T2")
 # no_letter is control, the others are treatments
 
 single_mab_simulation(
