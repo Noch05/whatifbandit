@@ -12,32 +12,35 @@
 #' * [single_mab_simulation()]
 #' * [multiple_mab_simulation()]
 #' @keywords internal
-validate_inputs <- function(data,
-                            assignment_method,
-                            algorithm,
-                            conditions,
-                            prior_periods,
-                            perfect_assignment,
-                            whole_experiment,
-                            blocking,
-                            data_cols,
-                            block_cols,
-                            time_unit,
-                            period_length,
-                            control_augment,
-                            verbose,
-                            ndraws,
-                            random_assign_prop) {
+validate_inputs <- function(
+  data,
+  assignment_method,
+  algorithm,
+  prior_periods,
+  perfect_assignment,
+  whole_experiment,
+  blocking,
+  data_cols,
+  block_cols,
+  time_unit,
+  period_length,
+  control_augment,
+  verbose,
+  ndraws,
+  random_assign_prop
+) {
   # Checking Algorithm
 
   if (!algorithm %in% c("thompson", "ucb1")) {
-    rlang::abort(c("'algorithm' must be 'thompson' or 'ucb1'.",
+    rlang::abort(c(
+      "'algorithm' must be 'thompson' or 'ucb1'.",
       "x" = paste0("You passed: ", algorithm)
     ))
   }
 
   if (!assignment_method %in% c("individual", "batch", "date")) {
-    rlang::abort(c("Invalid `assignment_method`",
+    rlang::abort(c(
+      "Invalid `assignment_method`",
       "x" = paste0("you passed: ", assignment_method),
       "i" = "Valid methods are `individual`, `batch`, `date`"
     ))
@@ -48,9 +51,11 @@ validate_inputs <- function(data,
   # Checking Column Proper Columns are Provided
   check_cols(
     data = data,
-    assignment_method = assignment_method, time_unit = time_unit,
+    assignment_method = assignment_method,
+    time_unit = time_unit,
     perfect_assignment = perfect_assignment,
-    data_cols = data_cols, verbose = verbose
+    data_cols = data_cols,
+    verbose = verbose
   )
   if (blocking) {
     if (is.null(block_cols)) {
@@ -58,7 +63,10 @@ validate_inputs <- function(data,
     } else {
       for (i in base::seq_along(block_cols$name)) {
         if (!block_cols$name[[i]] %in% names(data)) {
-          rlang::abort(sprintf("`%s is not in the data, but was chosen as a block.", block_cols$name[[i]]))
+          rlang::abort(sprintf(
+            "`%s is not in the data, but was chosen as a block.",
+            block_cols$name[[i]]
+          ))
         }
       }
     }
@@ -68,7 +76,6 @@ validate_inputs <- function(data,
       "i" = "Blocking is FALSE, arguments passed to `block_cols` will be ignored."
     ))
   }
-
 
   # Checking Assignment Method Arguments
   check_assign_method(
@@ -85,19 +92,12 @@ validate_inputs <- function(data,
 
   # Checking Data Structure
   check_data(
-    data = data, data_cols = data_cols,
+    data = data,
+    data_cols = data_cols,
     assignment_method = assignment_method,
     period_length = period_length,
     time_unit = time_unit,
     perfect_assignment
-  )
-
-  # Checking Conditions Vector
-  check_conditions(
-    conditions = conditions,
-    data = data,
-    data_cols = data_cols,
-    control_augment = control_augment
   )
 }
 
@@ -116,9 +116,24 @@ validate_inputs <- function(data,
 #' if unnecessary columns have been provided, only when `verbose` is TRUE.
 #' @keywords internal
 #'
-check_cols <- function(assignment_method, time_unit, perfect_assignment, data_cols, data, verbose) {
+check_cols <- function(
+  assignment_method,
+  time_unit,
+  perfect_assignment,
+  data_cols,
+  data,
+  verbose
+) {
   # All possible columns
-  all_cols <- c("id_col", "success_col", "condition_col", "date_col", "month_col", "success_date_col", "assignment_date_col")
+  all_cols <- c(
+    "id_col",
+    "success_col",
+    "condition_col",
+    "date_col",
+    "month_col",
+    "success_date_col",
+    "assignment_date_col"
+  )
 
   # Reason each column might be required
   all_reasons <- list(
@@ -130,16 +145,37 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, data_co
     success_date_col = "perfect_assignment is FALSE",
     assignment_date_col = "perfect_assignment is FALSE"
   )
-  data_types <- c("numeric", "logical", "integer", "character", "factor", "Date", "POSIXt")
-  test_funcs <- c(is.numeric, is.logical, is.character, is.factor, lubridate::is.Date, lubridate::is.POSIXt)
+  data_types <- c(
+    "numeric",
+    "logical",
+    "integer",
+    "character",
+    "factor",
+    "Date",
+    "POSIXt"
+  )
+  test_funcs <- c(
+    is.numeric,
+    is.logical,
+    is.character,
+    is.factor,
+    lubridate::is.Date,
+    lubridate::is.POSIXt
+  )
   required_types <- list(
     id_col = list(classes = data_types, tests = test_funcs),
     success_col = list(classes = data_types[1:3], tests = test_funcs[1:2]),
     condition_col = list(classes = data_types[1:5], tests = test_funcs[1:4]),
     date_col = list(classes = data_types[6:7], tests = test_funcs[5:6]),
-    month_col = list(classes = data_types[c(1, 3, 4, 5)], tests = test_funcs[c(1, 3, 4)]),
+    month_col = list(
+      classes = data_types[c(1, 3, 4, 5)],
+      tests = test_funcs[c(1, 3, 4)]
+    ),
     success_date_col = list(classes = data_types[6:7], tests = test_funcs[5:6]),
-    assignment_date_col = list(classes = data_types[6:7], tests = test_funcs[5:6])
+    assignment_date_col = list(
+      classes = data_types[6:7],
+      tests = test_funcs[5:6]
+    )
   )
 
   # Determine required columns based on settings
@@ -158,31 +194,44 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, data_co
   required_types <- required_types[required_cols]
 
   # Check for missing required columns
-  purrr::pwalk(list(required_cols, req_reasons, required_types), ~ {
-    if (!..1 %in% names(data_cols)) {
-      rlang::abort(c(sprintf("Required column `%s` is not declared in `data_cols`.", ..1),
-        "x" = sprintf("reason: %s", ..2)
-      ))
+  purrr::pwalk(
+    list(required_cols, req_reasons, required_types),
+    ~ {
+      if (!..1 %in% names(data_cols)) {
+        rlang::abort(c(
+          sprintf("Required column `%s` is not declared in `data_cols`.", ..1),
+          "x" = sprintf("reason: %s", ..2)
+        ))
+      }
+      provided_col <- data_cols[[..1]]$name
+      if (!provided_col %in% names(data)) {
+        rlang::abort(c(
+          sprintf("Required column `%s` is not found in provided `data`.", ..1),
+          "x" = sprintf("reason: %s", ..2),
+          "x" = sprintf("Your column: %s", provided_col)
+        ))
+      }
+      data_type <- class(data[[data_cols[[..1]]$name]])
+      if (
+        !any(vapply(
+          ..3$tests,
+          \(x) {
+            `x`(data[[data_cols[[..1]]$name]])
+          },
+          FUN.VALUE = logical(1)
+        ))
+      ) {
+        rlang::abort(c(
+          sprintf("Required column `%s` is the wrong data type.", ..1),
+          "x" = sprintf("Your type: %s", paste(data_type, collapse = ", ")),
+          "i" = sprintf(
+            "Permissible types: %s",
+            paste(..3$classes, collapse = ", ")
+          )
+        ))
+      }
     }
-    provided_col <- data_cols[[..1]]$name
-    if (!provided_col %in% names(data)) {
-      rlang::abort(c(sprintf("Required column `%s` is not found in provided `data`.", ..1),
-        "x" = sprintf("reason: %s", ..2),
-        "x" = sprintf("Your column: %s", provided_col)
-      ))
-    }
-    data_type <- class(data[[data_cols[[..1]]$name]])
-    if (!any(vapply(..3$tests, \(x) {
-      `x`(data[[data_cols[[..1]]$name]])
-    }, FUN.VALUE = logical(1)))) {
-      rlang::abort(c(
-        sprintf("Required column `%s` is the wrong data type.", ..1),
-        "x" = sprintf("Your type: %s", paste(data_type, collapse = ", ")),
-        "i" = sprintf("Permissible types: %s", paste(..3$classes, collapse = ", "))
-      ))
-    }
-  })
-
+  )
 
   # Now handle non-required columns that are present but unnecessary
   if (verbose) {
@@ -195,14 +244,21 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, data_co
     )
     non_req_reasons <- non_req_reasons[non_required_cols]
 
-    purrr::walk2(non_req_reasons, non_req_reasons, ~ {
-      if (.x %in% names(data_cols)) {
-        rlang::warn(c("i" = sprintf(
-          "`%s` is not required because %s. It will be ignored.",
-          .x, .y
-        )))
+    purrr::walk2(
+      non_req_reasons,
+      non_req_reasons,
+      ~ {
+        if (.x %in% names(data_cols)) {
+          rlang::warn(c(
+            "i" = sprintf(
+              "`%s` is not required because %s. It will be ignored.",
+              .x,
+              .y
+            )
+          ))
+        }
       }
-    })
+    )
   }
 }
 
@@ -216,16 +272,19 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, data_co
 #' @keywords internal
 check_logical <- function(...) {
   args <- rlang::dots_list(..., .named = TRUE)
-  purrr::iwalk(args, ~ {
-    if (!is.logical(.x) || length(.x) != 1 || is.na(.x)) {
-      rlang::abort(
-        c(
-          sprintf("`%s` must be a logical (TRUE or FALSE)", .y),
-          "x" = paste0("You Passed: ", .x)
+  purrr::iwalk(
+    args,
+    ~ {
+      if (!is.logical(.x) || length(.x) != 1 || is.na(.x)) {
+        rlang::abort(
+          c(
+            sprintf("`%s` must be a logical (TRUE or FALSE)", .y),
+            "x" = paste0("You Passed: ", .x)
+          )
         )
-      )
+      }
     }
-  })
+  )
 }
 #--------------------------------------------------------------------------------
 #' @title Checking if inputs are proportions
@@ -238,17 +297,22 @@ check_logical <- function(...) {
 check_prop <- function(...) {
   args <- rlang::dots_list(..., .named = TRUE)
 
-  purrr::iwalk(args, ~ {
-    if (is.null(.x) || !is.numeric(.x) || .x < 0 || .x > 1) {
-      rlang::abort(c(
-        sprintf("`%s` must be a non-null double between 0 and 1.", .y),
-        "x" = paste0("You passed: ", .x)
-      ))
+  purrr::iwalk(
+    args,
+    ~ {
+      if (is.null(.x) || !is.numeric(.x) || .x < 0 || .x > 1) {
+        rlang::abort(c(
+          sprintf("`%s` must be a non-null double between 0 and 1.", .y),
+          "x" = paste0("You passed: ", .x)
+        ))
+      }
     }
-  })
+  )
   if (args$control_augment > 0 && args$random_assign_prop > 0) {
-    rlang::warn(c("It is not recommended to use control augmentation with hybrid assignment;
-                control augmentation only affects bandit assignments."))
+    rlang::warn(c(
+      "It is not recommended to use control augmentation with hybrid assignment;
+                control augmentation only affects bandit assignments."
+    ))
   }
 }
 #-------------------------------------------------------------------------------
@@ -278,7 +342,11 @@ check_posint <- function(...) {
     }
     if (is.character(val)) {
       rlang::abort(c(
-        sprintf("`%s` must be a positive integer or one of: '%s'", name, paste(valid_string, collapse = "', '")),
+        sprintf(
+          "`%s` must be a positive integer or one of: '%s'",
+          name,
+          paste(valid_string, collapse = "', '")
+        ),
         "x" = paste0("You passed: ", val)
       ))
     }
@@ -294,32 +362,6 @@ posint <- function(x) {
   return(is.numeric(x) && x > 0 && x %% 1 == 0)
 }
 #--------------------------------------------------------------------------------
-#' @title Checking if conditions vector is proper
-#' @name check_conditions
-#' @returns Throws an error if the conditions vector does not meet the
-#' requirements for the user's specified settings.
-#' @description Helper to [validate_inputs()]. This function accepts the conditions
-#' vector and checks whether it is valid based on the number of conditions in the
-#' vector versus the data set, and if the names have been properly assigned for
-#' control augmentation if used.
-#' @inheritParams single_mab_simulation
-#' @keywords internal
-check_conditions <- function(conditions, data, data_cols, control_augment) {
-  if (any(is.na(conditions))) { ## Temporary Update This message
-    rlang::abort(c("No element of the conditions vector can be NA",
-      "x" = paste0("You passed: ", paste0(conditions, collapse = ", "))
-    ))
-  }
-
-  actual_conditions <- unique(data[[data_cols$condition_col$name]])
-  if (length(conditions) != length(actual_conditions)) {
-    rlang::abort(c(
-      "The number of `conditions` must match the number of unique treatment groups in the data.",
-      "x" = sprintf("You passed a vector of length %d", length(conditions)),
-      "x" = sprintf("Your data has %d unique treatments", length(actual_conditions))
-    ))
-  }
-}
 #-------------------------------------------------------------------------------
 #' @title Checking for valid input data
 #' @name check_data
@@ -329,35 +371,56 @@ check_conditions <- function(conditions, data, data_cols, control_augment) {
 #' whether it has Unique ID's whether the period length is valid.
 #' @inheritParams single_mab_simulation
 #' @keywords internal
-check_data <- function(data, data_cols, assignment_method, period_length, time_unit,
-                       perfect_assignment) {
+check_data <- function(
+  data,
+  data_cols,
+  assignment_method,
+  period_length,
+  time_unit,
+  perfect_assignment
+) {
   unique_ids <- length(unique(data[[data_cols$id$name]]))
   if (unique_ids != nrow(data)) {
-    rlang::abort(paste(data_cols$id$name, "is not a unique identifier; a unique ID for each observation is required."))
+    rlang::abort(paste(
+      data_cols$id$name,
+      "is not a unique identifier; a unique ID for each observation is required."
+    ))
   }
 
   if (assignment_method == "batch" && period_length > nrow(data)) {
-    rlang::abort(c("`period_length` cannot be larger than data size",
-      "x" = sprintf("You data has %d rows, and your batch size is %d rows", nrow(data), period_length)
+    rlang::abort(c(
+      "`period_length` cannot be larger than data size",
+      "x" = sprintf(
+        "You data has %d rows, and your batch size is %d rows",
+        nrow(data),
+        period_length
+      )
     ))
   }
   if (assignment_method == "date") {
-    unit <- switch(time_unit,
+    unit <- switch(
+      time_unit,
       "day" = lubridate::days(1),
       "month" = months(1),
       "week" = lubridate::weeks(1)
     )
 
     data_interval <- lubridate::interval(
-      min(data[[data_cols$date_col$name]]), max(data[[data_cols$date_col$name]])
-    ) / unit
+      min(data[[data_cols$date_col$name]]),
+      max(data[[data_cols$date_col$name]])
+    ) /
+      unit
     data_interval <- round(data_interval, 0)
 
     if (period_length > data_interval) {
-      rlang::abort(c("`period_length` cannot be larger the date range of your data",
+      rlang::abort(c(
+        "`period_length` cannot be larger the date range of your data",
         "x" = sprintf(
           "Your period length is %d %ss but your data only covers %d %ss",
-          period_length, tolower(time_unit), data_interval, tolower(time_unit)
+          period_length,
+          tolower(time_unit),
+          data_interval,
+          tolower(time_unit)
         )
       ))
     }
@@ -373,13 +436,23 @@ check_data <- function(data, data_cols, assignment_method, period_length, time_u
 #' supporting arguments are passed as necessary.
 #' @inheritParams single_mab_simulation
 #' @keywords internal
-check_assign_method <- function(assignment_method, time_unit, verbose, period_length) {
+check_assign_method <- function(
+  assignment_method,
+  time_unit,
+  verbose,
+  period_length
+) {
   if (assignment_method == "date") {
-    if (is.null(time_unit) || length(time_unit) != 1 || isTRUE(is.na(time_unit))) {
-      rlang::abort("`time_unit` must be provided when assignment method is `date`.")
+    if (
+      is.null(time_unit) || length(time_unit) != 1 || isTRUE(is.na(time_unit))
+    ) {
+      rlang::abort(
+        "`time_unit` must be provided when assignment method is `date`."
+      )
     }
     if (!time_unit %in% c("day", "week", "month")) {
-      rlang::abort(c("Invalid Time Unit",
+      rlang::abort(c(
+        "Invalid Time Unit",
         "x" = paste0("you passed: ", time_unit),
         "i" = "valid units are `day`, `month`, `week`"
       ))
@@ -387,16 +460,25 @@ check_assign_method <- function(assignment_method, time_unit, verbose, period_le
   }
   if (assignment_method %in% c("batch", "date")) {
     if (is.null(period_length)) {
-      rlang::abort(c("`period_length`, must be provided when date or batch assignment is used."))
+      rlang::abort(c(
+        "`period_length`, must be provided when date or batch assignment is used."
+      ))
     }
     if (!posint(period_length)) {
-      rlang::abort(c("`period_length` must be a positive integer.",
+      rlang::abort(c(
+        "`period_length` must be a positive integer.",
         "x" = paste0("You passed: ", period_length)
       ))
     }
   }
 
-  if (verbose && !assignment_method %in% c("batch", "date") && !is.null(period_length)) {
-    rlang::warn(c("i" = "`time_unit` is not required when assignment method is not `date`. It will be ignored"))
+  if (
+    verbose &&
+      !assignment_method %in% c("batch", "date") &&
+      !is.null(period_length)
+  ) {
+    rlang::warn(c(
+      "i" = "`time_unit` is not required when assignment method is not `date`. It will be ignored"
+    ))
   }
 }

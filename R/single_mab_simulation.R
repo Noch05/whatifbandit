@@ -43,8 +43,8 @@
 #' of periods, setting this to FALSE can be more computationally intensive, though not a significant
 #' contributor to total run time.
 #'
-#' @param conditions A character vector containing names of the treatment conditions. If `control_augment` > 0, then the control condition
-#' of the first element of the vector will be used as the control group.
+#' @param control_condition Value of the control condition. Only necessary when `control_augment` is greater than 0. The type of this value should match
+#' the type in the input data, so if your conditions are stored as factors or strings, pass a string, if integers, use an integer.
 #'
 #' @param data_cols A named character vector containing the names of columns in `data` as strings:
 #' \itemize{
@@ -186,36 +186,44 @@
 #' Slivkins, Aleksandrs. 2024. "Introduction to Multi-Armed Bandits." \emph{arXiv}. \doi{10.48550/arXiv.1904.07272}.
 #' @example inst/examples/single_mab_simulation_example.R
 #' @export
-single_mab_simulation <- function(data,
-                                  assignment_method,
-                                  algorithm,
-                                  conditions,
-                                  prior_periods,
-                                  perfect_assignment,
-                                  whole_experiment,
-                                  blocking,
-                                  data_cols,
-                                  control_augment = 0,
-                                  random_assign_prop = 0,
-                                  ndraws = 5000,
-                                  time_unit = NULL,
-                                  period_length = NULL,
-                                  block_cols = NULL,
-                                  verbose = FALSE,
-                                  check_args = TRUE) {
+single_mab_simulation <- function(
+  data,
+  assignment_method,
+  algorithm,
+  prior_periods,
+  perfect_assignment,
+  whole_experiment,
+  blocking,
+  data_cols,
+  control_augment = 0,
+  random_assign_prop = 0,
+  ndraws = 5000,
+  control_condition = NULL,
+  time_unit = NULL,
+  period_length = NULL,
+  block_cols = NULL,
+  verbose = FALSE,
+  check_args = TRUE
+) {
   prepped <- pre_mab_simulation(
-    data = data, assignment_method = assignment_method,
-    algorithm = algorithm, conditions = conditions,
-    prior_periods = prior_periods, perfect_assignment = perfect_assignment,
-    whole_experiment = whole_experiment, blocking = blocking,
-    block_cols = block_cols, data_cols = data_cols,
-    control_augment = control_augment, time_unit = time_unit,
-    period_length = period_length, check_args = check_args,
-    verbose = verbose, ndraws = ndraws, random_assign_prop = random_assign_prop
+    data = data,
+    assignment_method = assignment_method,
+    algorithm = algorithm,
+    control_condition = control_condition,
+    prior_periods = prior_periods,
+    perfect_assignment = perfect_assignment,
+    whole_experiment = whole_experiment,
+    blocking = blocking,
+    block_cols = block_cols,
+    data_cols = data_cols,
+    control_augment = control_augment,
+    time_unit = time_unit,
+    period_length = period_length,
+    check_args = check_args,
+    verbose = verbose,
+    ndraws = ndraws,
+    random_assign_prop = random_assign_prop
   )
-  ## Initial Sort for Consistency in calling by numeric indexes
-  conditions <- base::sort(conditions)
-
 
   # Simulating the MAB Trial
   results <- mab_simulation(
@@ -226,7 +234,7 @@ single_mab_simulation <- function(data,
     algorithm = prepped$character_args$algorithm,
     whole_experiment = whole_experiment,
     perfect_assignment = perfect_assignment,
-    conditions = conditions,
+    conditions = prepped$conditions,
     blocking = blocking,
     block_cols = prepped$block_cols,
     data_cols = prepped$data_cols,
@@ -248,7 +256,7 @@ single_mab_simulation <- function(data,
     period_length = period_length,
     prior_periods = prepped$character_args$prior_periods,
     whole_experiment = whole_experiment,
-    conditions = conditions,
+    conditions = prepped$conditions,
     blocking = blocking,
     block_cols = prepped$block_cols$name,
     ndraws = ndraws
