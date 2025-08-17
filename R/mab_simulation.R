@@ -246,7 +246,7 @@ mab_simulation <- function(
 #' than 0, it also labels the control condition. Throws an error of `control_condition` is not
 #' present.
 #' @inheritParams single_mab_simulation
-#' @inheirtParams cols
+#' @inheritParams cols
 #' @keywords internal
 create_conditions <- function(
   control_condition,
@@ -256,6 +256,17 @@ create_conditions <- function(
 ) {
   conditions <- base::sort(base::unique(data[[condition_col$name]]))
   if (control_augment > 0) {
+    if (!control_condition %in% conditions) {
+      rlang::abort(c(
+        "`control_condition` is not present in the conditions column",
+        "x" = sprintf(
+          "Potential Conditions: %s",
+          paste0(conditions, collapse = ", ")
+        ),
+        "x" = paste0("You Passed: ", control_condition)
+      ))
+    }
+
     names(conditions) <- ifelse(
       conditions == control_condition,
       "control",
