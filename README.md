@@ -39,7 +39,7 @@ Whatifbandit provides robust customization options to match as many experimental
 equipped to handle experiments where success is binary. Functionality for other cases may be introduced in future development.
 These major features include:
 
--   2 bandit algorithms: probability matching via Thompson Sampling, and UCB1.
+-   2 bandit algorithms: probability matching via Thompson sampling, and UCB1.
 -   Variable length and flexible assignment periods, such as individual, batch, and date-based.
 -   Simulation of perfect and imperfect information during re-assignment.
 -   Treatment blocking.

@@ -32,40 +32,40 @@
 create_cutoff <- function(data, data_cols, period_length = NULL,
                           assignment_method, time_unit) {
   data <- switch(assignment_method,
-    "Individual" = create_cutoff.Individual(data = data),
-    "Batch" = create_cutoff.Batch(data = data, period_length = period_length),
-    "Date" = switch(time_unit,
-      "Day" = create_cutoff.Day(
+    "individual" = create_cutoff.individual(data = data),
+    "batch" = create_cutoff.batch(data = data, period_length = period_length),
+    "date" = switch(time_unit,
+      "day" = create_cutoff.day(
         data = data,
         date_col = data_cols$date_col,
         period_length = period_length
       ),
-      "Month" = create_cutoff.Month(
+      "month" = create_cutoff.month(
         data = data,
         month_col = data_cols$month_col,
         date_col = data_cols$date_col,
         period_length = period_length
       ),
-      "Week" = create_cutoff.Week(
+      "week" = create_cutoff.week(
         data = data,
         date_col = data_cols$date_col,
         period_length = period_length
       ),
-      rlang::abort("Invalid Time Unit: Valid Units are `Week`, `Month`, and `Day`")
+      rlang::abort("Invalid Time Unit: Valid Units are `week`, `month`, and `day`")
     ),
-    rlang::abort("Invalid Assignment Method: valid methods are `Individual`, `Batch`, `Date`")
+    rlang::abort("Invalid Assignment Method: valid methods are `individual`, `batch`, `date`")
   )
   return(invisible(data))
 }
 #------------------------------------------------------------------------------------------
 
-#' @method create_cutoff Day
+#' @method create_cutoff day
 #' @title [create_cutoff()] Day Based Periods
 #' @inheritParams create_cutoff
 #' @inheritParams cols
 #' @noRd
 #'
-create_cutoff.Day <- function(data, date_col, period_length) {
+create_cutoff.day <- function(data, date_col, period_length) {
   start_date <- base::min(data[[date_col$name]])
   if (inherits(data, "data.table")) {
     data[, period_number := base::floor(
@@ -84,12 +84,12 @@ create_cutoff.Day <- function(data, date_col, period_length) {
   }
 }
 #------------------------------------------------------------------
-#' @method create_cutoff Week
+#' @method create_cutoff week
 #' @title [create_cutoff()] Week Based Periods
 #' @inheritParams create_cutoff
 #' @inheritParams cols
 #' @noRd
-create_cutoff.Week <- function(data, date_col, period_length) {
+create_cutoff.week <- function(data, date_col, period_length) {
   if (inherits(data, "data.table")) {
     start_date <- base::min(data[, get(date_col$name)])
 
@@ -113,13 +113,13 @@ create_cutoff.Week <- function(data, date_col, period_length) {
 }
 #------------------------------------------------------------------
 
-#' #' @method create_cutoff Month
+#' #' @method create_cutoff month
 #' @title [create_cutoff()] Month Based Periods
 #' @inheritParams create_cutoff
 #' @inheritParams cols
 #' @noRd
 #'
-create_cutoff.Month <- function(data, date_col, month_col, period_length) {
+create_cutoff.month <- function(data, date_col, month_col, period_length) {
   start_date <- base::min(data[[date_col$name]])
 
   if (inherits(data, "data.table")) {
@@ -162,12 +162,12 @@ create_cutoff.Month <- function(data, date_col, month_col, period_length) {
 }
 
 
-#' @method create_cutoff Individual
+#' @method create_cutoff individual
 #' @title [create_cutoff()] Individual Periods
 #' @inheritParams create_cutoff
 #' @noRd
 #'
-create_cutoff.Individual <- function(data) {
+create_cutoff.individual <- function(data) {
   if (inherits(data, "data.table")) {
     data[, period_number := .I]
     data.table::setkey(data, period_number)
@@ -179,12 +179,12 @@ create_cutoff.Individual <- function(data) {
   }
 }
 #----------------------------------------------------------------------------------
-#' @method create_cutoff Batch
+#' @method create_cutoff batch
 #' @title [create_cutoff()] Batch Based Periods
 #' @inheritParams create_cutoff
 #' @noRd
 #'
-create_cutoff.Batch <- function(data, period_length) {
+create_cutoff.batch <- function(data, period_length) {
   if (inherits(data, "data.table")) {
     data[, period_number := base::ceiling((.I / period_length))]
     data.table::setkey(data, period_number)
@@ -238,9 +238,9 @@ create_new_cols.data.frame <- function(data,
   data <- data |>
     dplyr::mutate(
       period_number = base::match(period_number, base::sort(base::unique(period_number))),
-      mab_success = dplyr::if_else(period_number == 1, !!data_cols$success_col$sym, NA_real_),
+      mab_success = dplyr::if_else(period_number == 1, !!data_cols$success_col$sym, NA),
       mab_condition = dplyr::if_else(period_number == 1, !!data_cols$condition_col$sym, NA_character_),
-      impute_req = dplyr::if_else(period_number == 1, 0, NA_real_),
+      impute_req = dplyr::if_else(period_number == 1, 0, NA),
       impute_block = NA_character_,
       assignment_type = dplyr::if_else(period_number == 1, "initial", NA_character_)
     )

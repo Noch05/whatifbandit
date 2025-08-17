@@ -17,7 +17,7 @@
 #' # Running Multiple Simulations
 #' x <- multiple_mab_simulation(
 #'   data = tanf,
-#'   algorithm = "Thompson",
+#'   algorithm = "thompson",
 #'   assignment_method = "Batch",
 #'   period_length = 1750,
 #'   conditions = as.character(levels(tanf$condition)),

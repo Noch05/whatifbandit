@@ -14,13 +14,13 @@ check_cols(
 )
 }
 \arguments{
-\item{assignment_method}{A character string; one of "Date", "Batch", or "Individual", to define the assignment into treatment waves. When using
-"Batch" or "Individual", ensure your dataset is pre-arranged in the proper order observations should be considered so that
-groups are assigned correctly. For "Date", observations will be considered in chronological order.
-"Individual" assignment can be computationally intensive for larger datasets.}
+\item{assignment_method}{A character string; one of "date", "batch", or "individual", to define the assignment into treatment waves. When using
+"batch" or "individual", ensure your dataset is pre-arranged in the proper order observations should be considered so that
+groups are assigned correctly. For "date", observations will be considered in chronological order.
+"individual" assignment can be computationally intensive for larger datasets.}
 
 \item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "Date".
-Acceptable values are "Day", "Week", or "Month". "Month" requires a column with the months of each observation
+Acceptable values are "day", "week", or "month". "month" requires a column with the months of each observation
 to be used.}
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment

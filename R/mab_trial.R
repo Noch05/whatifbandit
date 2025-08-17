@@ -16,7 +16,7 @@
 #' @returns  A named list containing:
 #' \itemize{
 #' \item `final_data`: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
-#' \item `bandits`: A tibble or data.table containing the UCB1 valuess or Thompson sampling posterior distributions for each period.
+#' \item `bandits`: A tibble or data.table containing the UCB1 values or Thompson sampling posterior distributions for each period.
 #' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
 #' }
 #' @details
@@ -39,11 +39,11 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
   num_conditions <- length(conditions)
 
   bandits$bandit_stat[[1]] <- switch(algorithm,
-    "Thompson" = rlang::set_names(rep_len(1 / num_conditions,
+    "thompson" = rlang::set_names(rep_len(1 / num_conditions,
       length.out = num_conditions
     ), conditions),
-    "UCB1" = tibble::tibble(mab_condition = conditions, ucb = rep_len(0, num_conditions)),
-    rlang::abort("Invalid Algorithm: Valid Algorithms are `Thompson` and `UCB`")
+    "ucb1" = tibble::tibble(mab_condition = conditions, ucb = rep_len(0, num_conditions)),
+    rlang::abort("Invalid Algorithm: Valid Algorithms are `thompson` and `ucb1`")
   )
   bandits$assignment_prob[[1]] <- rlang::set_names(rep_len(1 / num_conditions,
     length.out = num_conditions
@@ -196,7 +196,7 @@ end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditio
   bandits$bandit_stat[[(periods + 1)]] <- final_bandit[[1]]
 
   bandit_stats <- switch(algorithm,
-    "Thompson" = {
+    "thompson" = {
       dplyr::bind_rows(bandits$bandit_stat, .id = "period_number") |>
         dplyr::mutate(
           period_number = base::as.numeric(period_number),
@@ -204,7 +204,7 @@ end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditio
         ) |>
         dplyr::slice(base::seq_len(periods))
     },
-    "UCB1" = {
+    "ucb1" = {
       dplyr::bind_rows(bandits$bandit_stat, .id = "period_number") |>
         dplyr::select(ucb, mab_condition, period_number) |>
         tidyr::pivot_wider(values_from = "ucb", names_from = c("mab_condition")) |>
@@ -214,7 +214,7 @@ end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditio
         ) |>
         dplyr::slice(base::seq_len(periods))
     },
-    rlang::abort("Invalid Algorithm: valid algorithsm are `Thompson`, and `UCB1`")
+    rlang::abort("Invalid Algorithm: valid algorithsm are `thompson`, and `ucb1`")
   )
 
 
@@ -252,7 +252,7 @@ end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditio
   bandits$bandit_stat[[(periods + 1)]] <- final_bandit[[1]]
 
   bandit_stats <- switch(algorithm,
-    "Thompson" = {
+    "thompson" = {
       x <- data.table::as.data.table(dplyr::bind_rows(bandits$bandit_stat,
         .id = "period_number"
       ))
@@ -269,7 +269,7 @@ end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditio
       ]
       x[base::seq_len(periods), ]
     },
-    "UCB1" = {
+    "ucb1" = {
       x <- data.table::rbindlist(bandits$bandit_stat,
         use.names = TRUE,
         fill = TRUE,
@@ -293,7 +293,7 @@ end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditio
       ]
       x[base::seq_len(periods), ]
     },
-    rlang::abort("Invalid Algorithm: valid algorithsm are `Thompson`, and `UCB1`")
+    rlang::abort("Invalid Algorithm: valid algorithsm are `thompson`, and `ucb1`")
   )
 
   assignment_probs <- data.table::as.data.table(dplyr::bind_rows(bandits$assignment_prob, .id = "period_number"))
@@ -323,7 +323,7 @@ end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditio
 #' @keywords internal
 
 create_prior <- function(prior_periods, current_period) {
-  if (prior_periods == "All" || prior_periods >= current_period) {
+  if (prior_periods == "all" || prior_periods >= current_period) {
     ## Looking at all the past periods
 
     prior <- base::seq_len(current_period - 1)

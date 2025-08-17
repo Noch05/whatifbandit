@@ -2,7 +2,7 @@
  data(tanf)
  conditions <- c("no_letter", "open_appt", "specific_appt")
 
- ## Running Thompson Sampling with 500 person large batches,
+ ## Running Thompson sampling with 500 person large batches,
  ## with no blocks and imperfect assignment
 
  single_mab_simulation(

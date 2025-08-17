@@ -30,8 +30,8 @@ change the output.
 # Running a Trial
 x <- single_mab_simulation(
   data = tanf,
-  algorithm = "Thompson",
-  assignment_method = "Batch",
+  algorithm = "thompson",
+  assignment_method = "batch",
   period_length = 1750,
   conditions = as.character(levels(tanf$condition)),
   prior_periods = "All",

@@ -13,7 +13,7 @@
 #' of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.
 #'
 #' @param time_unit A character string specifying the unit of time for assigning periods when `assignment_method` is "Date".
-#' Acceptable values are "Day", "Week", or "Month". "Month" requires a column with the months of each observation
+#' Acceptable values are "day", "week", or "month". "month" requires a column with the months of each observation
 #' to be used.
 #'
 #' @param perfect_assignment Logical; if TRUE, assumes perfect information for treatment assignment
@@ -24,14 +24,14 @@
 #' on a given day whether or not all the information from a prior batch was available and
 #' you have exact dates treatments were assigned.
 #'
-#' @param algorithm A character string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1". Algorithm
+#' @param algorithm A character string specifying the MAB algorithm to use. Options are "thompson" or "ucb1". Algorithm
 #' defines the adaptive assignment process. Mathematical details on these algorithms
 #' can be found in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
 #' \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.
 #'
 #' @param period_length A numeric value of length 1; represents the length of each treatment period.
-#' If assignment method is "Date", this length refers the number of units specified in`time_unit`
-#' (i.e., if "Day", 10 would be 10 days). If assignment method is "Batch", this refers to the number of people in each batch.
+#' If assignment method is "date", this length refers the number of units specified in`time_unit`
+#' (i.e., if "day", 10 would be 10 days). If assignment method is "batch", this refers to the number of people in each batch.
 #'
 #' @param prior_periods A numeric value of length 1, or the character string "All"; number of previous periods to use
 #' in the treatment assignment model. This is used to implement the stationary/non-stationary bandit.
@@ -43,12 +43,8 @@
 #' of periods, setting this to FALSE can be more computationally intensive, though not a significant
 #' contributor to total run time.
 #'
-#' @param conditions A named character vector containing treatment conditions. The elements
-#' of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
-#' `unique(df[[condition_col]])`. The names of each element are used to refer to the contents but are
-#' not inherently important; choose names
-#' choose names that are meaningful and consistent. If `control_augment` > 0, then the control condition
-#' of the trial in this vector must have the name "Control".
+#' @param conditions A character vector containing names of the treatment conditions. If `control_augment` > 0, then the control condition
+#' of the first element of the vector will be used as the control group.
 #'
 #' @param data_cols A named character vector containing the names of columns in `data` as strings:
 #' \itemize{
@@ -70,10 +66,10 @@
 #'
 #' @param block_cols A character vector of variables to block by. This vector should not be named.
 #'
-#' @param assignment_method A character string; one of "Date", "Batch", or "Individual", to define the assignment into treatment waves. When using
-#' "Batch" or "Individual", ensure your dataset is pre-arranged in the proper order observations should be considered so that
-#' groups are assigned correctly. For "Date", observations will be considered in chronological order.
-#' "Individual" assignment can be computationally intensive for larger datasets.
+#' @param assignment_method A character string; one of "date", "batch", or "individual", to define the assignment into treatment waves. When using
+#' "batch" or "individual", ensure your dataset is pre-arranged in the proper order observations should be considered so that
+#' groups are assigned correctly. For "date", observations will be considered in chronological order.
+#' "individual" assignment can be computationally intensive for larger datasets.
 #'
 #' @param control_augment A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.
 #' Default is 0. It is not recommended to use this in conjunction with `random_assign_prop`.
@@ -224,10 +220,10 @@ single_mab_simulation <- function(data,
   # Simulating the MAB Trial
   results <- mab_simulation(
     data = prepped$data,
-    time_unit = time_unit,
+    time_unit = prepped$character_args$time_unit,
     period_length = period_length,
-    prior_periods = prior_periods,
-    algorithm = algorithm,
+    prior_periods = prepped$character_args$prior_periods,
+    algorithm = prepped$character_args$algorithm,
     whole_experiment = whole_experiment,
     perfect_assignment = perfect_assignment,
     conditions = conditions,
@@ -235,7 +231,7 @@ single_mab_simulation <- function(data,
     block_cols = prepped$block_cols,
     data_cols = prepped$data_cols,
     verbose = verbose,
-    assignment_method = assignment_method,
+    assignment_method = prepped$character_args$assignment_method,
     control_augment = control_augment,
     imputation_information = prepped$imputation_information,
     ndraws = ndraws,
@@ -243,14 +239,14 @@ single_mab_simulation <- function(data,
   )
   results$settings <- list(
     original_data = data,
-    assignment_method = assignment_method,
+    assignment_method = prepped$character_args$assignment_method,
     control_augment = control_augment,
     random_assign_prop = random_assign_prop,
-    time_unit = time_unit,
+    time_unit = prepped$character_args$time_unit,
     perfect_assignment = perfect_assignment,
-    algorithm = algorithm,
+    algorithm = prepped$character_args$algorithm,
     period_length = period_length,
-    prior_periods = prior_periods,
+    prior_periods = prepped$character_args$prior_periods,
     whole_experiment = whole_experiment,
     conditions = conditions,
     blocking = blocking,

@@ -17,17 +17,13 @@ get_bandit(
 \item{past_results}{Tibble/data.table containing summary of prior periods, with
 successes, number of observations, and success rates, which is created by \code{\link[=get_past_results]{get_past_results()}}.}
 
-\item{algorithm}{A character string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1". Algorithm
+\item{algorithm}{A character string specifying the MAB algorithm to use. Options are "thompson" or "ucb1". Algorithm
 defines the adaptive assignment process. Mathematical details on these algorithms
 can be found in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
 \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}
 
-\item{conditions}{A named character vector containing treatment conditions. The elements
-of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
-\code{unique(df[[condition_col]])}. The names of each element are used to refer to the contents but are
-not inherently important; choose names
-choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
-of the trial in this vector must have the name "Control".}
+\item{conditions}{A character vector containing names of the treatment conditions. If \code{control_augment} > 0, then the control condition
+of the first element of the vector will be used as the control group.}
 
 \item{current_period}{Numeric scalar; current period of the adaptive trial simulation.}
 

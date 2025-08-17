@@ -7,20 +7,20 @@
 check_assign_method(assignment_method, time_unit, verbose, period_length)
 }
 \arguments{
-\item{assignment_method}{A character string; one of "Date", "Batch", or "Individual", to define the assignment into treatment waves. When using
-"Batch" or "Individual", ensure your dataset is pre-arranged in the proper order observations should be considered so that
-groups are assigned correctly. For "Date", observations will be considered in chronological order.
-"Individual" assignment can be computationally intensive for larger datasets.}
+\item{assignment_method}{A character string; one of "date", "batch", or "individual", to define the assignment into treatment waves. When using
+"batch" or "individual", ensure your dataset is pre-arranged in the proper order observations should be considered so that
+groups are assigned correctly. For "date", observations will be considered in chronological order.
+"individual" assignment can be computationally intensive for larger datasets.}
 
 \item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "Date".
-Acceptable values are "Day", "Week", or "Month". "Month" requires a column with the months of each observation
+Acceptable values are "day", "week", or "month". "month" requires a column with the months of each observation
 to be used.}
 
 \item{verbose}{Logical; whether or not to print intermediate messages. Default is FALSE.}
 
 \item{period_length}{A numeric value of length 1; represents the length of each treatment period.
-If assignment method is "Date", this length refers the number of units specified in\code{time_unit}
-(i.e., if "Day", 10 would be 10 days). If assignment method is "Batch", this refers to the number of people in each batch.}
+If assignment method is "date", this length refers the number of units specified in\code{time_unit}
+(i.e., if "day", 10 would be 10 days). If assignment method is "batch", this refers to the number of people in each batch.}
 }
 \value{
 Throws an error if the user is missing necessary arguments to

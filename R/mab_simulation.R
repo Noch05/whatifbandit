@@ -63,17 +63,40 @@ pre_mab_simulation <- function(data,
   if (!base::is.null(block_cols)) {
     block_cols <- list(name = block_cols, symbol = rlang::syms(block_cols))
   }
+  character_args <- purrr::map(
+    list(
+      assignment_method = assignment_method,
+      algorithm = algorithm,
+      time_unit = time_unit,
+      prior_periods = prior_periods
+    ), ~ {
+      if (is.character(.x)) {
+        base::tolower(.x)
+      } else {
+        .x
+      }
+    }
+  )
 
   # Input Validation
   if (check_args) {
     validate_inputs(
-      data = data, time_unit = time_unit,
+      data = data,
+      time_unit = character_args$time_unit,
       perfect_assignment = perfect_assignment,
-      algorithm = algorithm, period_length = period_length,
-      whole_experiment = whole_experiment, prior_periods = prior_periods,
-      data_cols = data_cols, block_cols = block_cols, conditions = conditions, blocking = blocking,
-      assignment_method = assignment_method, verbose = verbose,
-      control_augment = control_augment, ndraws = ndraws, random_assign_prop = random_assign_prop
+      algorithm = character_args$algorithm,
+      period_length = period_length,
+      whole_experiment = whole_experiment,
+      prior_periods = character_args$prior_periods,
+      data_cols = data_cols,
+      block_cols = block_cols,
+      conditions = conditions,
+      blocking = blocking,
+      assignment_method = character_args$assignment_method,
+      verbose = verbose,
+      control_augment = control_augment,
+      ndraws = ndraws,
+      random_assign_prop = random_assign_prop
     )
   }
 
@@ -84,8 +107,8 @@ pre_mab_simulation <- function(data,
     data = data,
     data_cols = data_cols,
     period_length = period_length,
-    assignment_method = assignment_method,
-    time_unit = time_unit
+    assignment_method = character_args$assignment_method,
+    time_unit = character_args$ time_unit
   ) |>
     create_new_cols(
       data_cols = data_cols,
@@ -107,7 +130,8 @@ pre_mab_simulation <- function(data,
     data_cols = data_cols,
     block_cols = block_cols,
     data = data,
-    imputation_information = imputation_information
+    imputation_information = imputation_information,
+    character_args = character_args
   ))
 }
 #------------------------------------------------------------------------------

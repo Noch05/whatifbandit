@@ -7,12 +7,8 @@
 check_conditions(conditions, data, data_cols, control_augment)
 }
 \arguments{
-\item{conditions}{A named character vector containing treatment conditions. The elements
-of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
-\code{unique(df[[condition_col]])}. The names of each element are used to refer to the contents but are
-not inherently important; choose names
-choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
-of the trial in this vector must have the name "Control".}
+\item{conditions}{A character vector containing names of the treatment conditions. If \code{control_augment} > 0, then the control condition
+of the first element of the vector will be used as the control group.}
 
 \item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.}

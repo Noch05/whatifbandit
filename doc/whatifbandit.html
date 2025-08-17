@@ -954,7 +954,7 @@ are provided using both the empirical cumulative distribution function
 (eCDF), and the normal CDF using the average standard errors.
 Additionally, the number of times each treatment arm was selected as the
 best is displayed, with the best being the highest Thompson probability
-or UCB1 statistic at the end of the trial.</p>
+or UCB1 values at the end of the trial.</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">summary</span>(multiple_sims) <span class="sc">|&gt;</span> <span class="fu">print</span>(<span class="at">width =</span> <span class="cn">Inf</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 10</span></span>
 <span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="co">#&gt;   Treatment_Arm average_probability_of_success SE_avg SE_empirical lower_normal</span></span>

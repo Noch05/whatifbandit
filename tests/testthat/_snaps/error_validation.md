@@ -4,36 +4,36 @@
 
 # Throws Proper Error when arguments are invalid
 
-    'algorithm' must be 'Thompson' or 'UCB1'.
+    'algorithm' must be 'thompson' or 'ucb1'.
     x You passed: not
 
 ---
 
-    'algorithm' must be 'Thompson' or 'UCB1'.
+    'algorithm' must be 'thompson' or 'ucb1'.
     x You passed: 76
 
 ---
 
-    'algorithm' must be 'Thompson' or 'UCB1'.
+    'algorithm' must be 'thompson' or 'ucb1'.
     x You passed: NA
 
 ---
 
     Invalid `assignment_method`
     x you passed: not
-    i Valid methods are `Individual`, `Batch`, `Date`
+    i Valid methods are `individual`, `batch`, `date`
 
 ---
 
     Invalid `assignment_method`
     x you passed: 45
-    i Valid methods are `Individual`, `Batch`, `Date`
+    i Valid methods are `individual`, `batch`, `date`
 
 ---
 
     Invalid `assignment_method`
     x you passed: NA
-    i Valid methods are `Individual`, `Batch`, `Date`
+    i Valid methods are `individual`, `batch`, `date`
 
 ---
 
@@ -85,7 +85,9 @@
 
 ---
 
-    The `conditions` vector must one element named 'Control' when control augmentation is used.
+    i In argument: `mab_condition = dplyr::if_else(period_number == 1, condition, NA_character_)`.
+    Caused by error in `dplyr::if_else()`:
+    ! Can't combine `true` <double> and `false` <character>.
 
 ---
 
@@ -114,14 +116,14 @@
 ---
 
     Invalid Time Unit
-    x you passed: Weeks
-    i valid units are `Day`, `Month`, `Week`
+    x you passed: weeks
+    i valid units are `day`, `month`, `week`
 
 ---
 
     Invalid Time Unit
     x you passed: 5
-    i valid units are `Day`, `Month`, `Week`
+    i valid units are `day`, `month`, `week`
 
 ---
 
@@ -178,7 +180,7 @@
 
 ---
 
-    `prior_periods` must be a positive integer or one of: 'All'
+    `prior_periods` must be a positive integer or one of: 'all'
     x You passed: text
 
 ---
@@ -312,7 +314,7 @@
     i In index: 4.
     Caused by error in `.f()`:
     ! Required column `date_col` is not found in provided `data`.
-    x reason: assignment_method is 'Date'
+    x reason: assignment_method is 'date'
     x Your column: fake_colname
 
 ---
@@ -320,7 +322,7 @@
     i In index: 5.
     Caused by error in `.f()`:
     ! Required column `month_col` is not found in provided `data`.
-    x reason: time_unit is 'Month'
+    x reason: time_unit is 'month'
     x Your column: fake_colname
 
 ---
@@ -367,14 +369,14 @@
     i In index: 4.
     Caused by error in `.f()`:
     ! Required column `date_col` is not declared in `data_cols`.
-    x reason: assignment_method is 'Date'
+    x reason: assignment_method is 'date'
 
 ---
 
     i In index: 5.
     Caused by error in `.f()`:
     ! Required column `month_col` is not declared in `data_cols`.
-    x reason: time_unit is 'Month'
+    x reason: time_unit is 'month'
 
 # Throws Proper Error When Columns are Wrong Data Type
 

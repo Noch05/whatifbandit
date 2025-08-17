@@ -19,8 +19,8 @@
 #' # Running a Trial
 #' x <- single_mab_simulation(
 #'   data = tanf,
-#'   algorithm = "Thompson",
-#'   assignment_method = "Batch",
+#'   algorithm = "thompson",
+#'   assignment_method = "batch",
 #'   period_length = 1750,
 #'   conditions = as.character(levels(tanf$condition)),
 #'   prior_periods = "All",
@@ -59,13 +59,13 @@ print_mab <- function(mab) {
   base::cat("Blocking Variables:   ", settings$block_cols, "\n")
   base::cat("Assignment Method:    ", settings$assignment_method, "\n")
 
-  if (settings$assignment_method %in% c("Batch", "Date")) {
+  if (settings$assignment_method %in% c("batch", "date")) {
     base::cat("Period Length:        ", settings$period_length)
   }
-  if (settings$assignment_method == "Batch") {
+  if (settings$assignment_method == "batch") {
     base::cat(" People\n")
   }
-  if (settings$assignment_method == "Date") {
+  if (settings$assignment_method == "date") {
     base::cat("", settings$time_unit)
     if (settings$period_length > 1) {
       base::cat("s\n")
@@ -114,8 +114,8 @@ summary.mab <- function(object, level = 0.95, ...) {
   check_level(level)
   periods <- base::max(object$bandits$period_number)
   col2 <- switch(object$settings$algorithm,
-    "UCB1" = "UCB1_Value",
-    "Thompson" = "Probability_Of_Best_Arm"
+    "ucb1" = "UCB1_Value",
+    "thompson" = "Probability_Of_Best_Arm"
   )
   estimates <- object$estimates |>
     dplyr::filter(estimator == "AIPW")
@@ -218,11 +218,11 @@ plot_arms <- function(x, object, ...) {
   periods <- base::max(data$period_number)
 
   if (object == "bandits") {
-    if (x$settings$algorithm == "UCB1") {
+    if (x$settings$algorithm == "ucb1") {
       ylab <- "UCB1 Values"
       title <- "UCB1 Sampling Over Time"
     }
-    if (x$settings$algorithm == "Thompson") {
+    if (x$settings$algorithm == "thompson") {
       ylab <- "Posterior Probability of Being Best Arm"
       title <- "Thompson sampling Over Time"
     }

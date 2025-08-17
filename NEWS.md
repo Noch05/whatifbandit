@@ -13,7 +13,7 @@ error messages, relating to argument specification, and data types passed.
 ## Fixes and Improvements
 * Fixed AIPW calculations mistakes.
 * Fixed improper random seeding in `multiple_mab_simulation()`.
-* Improved numerical calculation errors in Thompson Sampling with large datasets.
+* Improved numerical calculation errors in Thompson sampling with large datasets.
 * Optimization reduced simulation runtime by up to 50%.
 
 

@@ -29,7 +29,7 @@ mab_simulation(
 of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.}
 
 \item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "Date".
-Acceptable values are "Day", "Week", or "Month". "Month" requires a column with the months of each observation
+Acceptable values are "day", "week", or "month". "month" requires a column with the months of each observation
 to be used.}
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
@@ -40,14 +40,14 @@ This is useful when simulating batch-based assignment where treatments were assi
 on a given day whether or not all the information from a prior batch was available and
 you have exact dates treatments were assigned.}
 
-\item{algorithm}{A character string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1". Algorithm
+\item{algorithm}{A character string specifying the MAB algorithm to use. Options are "thompson" or "ucb1". Algorithm
 defines the adaptive assignment process. Mathematical details on these algorithms
 can be found in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
 \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}
 
 \item{period_length}{A numeric value of length 1; represents the length of each treatment period.
-If assignment method is "Date", this length refers the number of units specified in\code{time_unit}
-(i.e., if "Day", 10 would be 10 days). If assignment method is "Batch", this refers to the number of people in each batch.}
+If assignment method is "date", this length refers the number of units specified in\code{time_unit}
+(i.e., if "day", 10 would be 10 days). If assignment method is "batch", this refers to the number of people in each batch.}
 
 \item{prior_periods}{A numeric value of length 1, or the character string "All"; number of previous periods to use
 in the treatment assignment model. This is used to implement the stationary/non-stationary bandit.
@@ -59,12 +59,8 @@ If FALSE, uses only data available up to the current period. In large datasets o
 of periods, setting this to FALSE can be more computationally intensive, though not a significant
 contributor to total run time.}
 
-\item{conditions}{A named character vector containing treatment conditions. The elements
-of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
-\code{unique(df[[condition_col]])}. The names of each element are used to refer to the contents but are
-not inherently important; choose names
-choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
-of the trial in this vector must have the name "Control".}
+\item{conditions}{A character vector containing names of the treatment conditions. If \code{control_augment} > 0, then the control condition
+of the first element of the vector will be used as the control group.}
 
 \item{blocking}{Logical; whether or not to use treatment blocking. Treatment blocking is used to ensure an even-enough
 distribution of treatment conditions across blocks. For example, blocking by gender would mean the randomized assignment should
@@ -88,10 +84,10 @@ Used to simulate imperfect information on the part of researchers conducting an 
 
 \item{verbose}{Logical; whether or not to print intermediate messages. Default is FALSE.}
 
-\item{assignment_method}{A character string; one of "Date", "Batch", or "Individual", to define the assignment into treatment waves. When using
-"Batch" or "Individual", ensure your dataset is pre-arranged in the proper order observations should be considered so that
-groups are assigned correctly. For "Date", observations will be considered in chronological order.
-"Individual" assignment can be computationally intensive for larger datasets.}
+\item{assignment_method}{A character string; one of "date", "batch", or "individual", to define the assignment into treatment waves. When using
+"batch" or "individual", ensure your dataset is pre-arranged in the proper order observations should be considered so that
+groups are assigned correctly. For "date", observations will be considered in chronological order.
+"individual" assignment can be computationally intensive for larger datasets.}
 
 \item{control_augment}{A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.
 Default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.}

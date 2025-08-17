@@ -30,16 +30,16 @@ validate_inputs <- function(data,
                             random_assign_prop) {
   # Checking Algorithm
 
-  if (!algorithm %in% c("Thompson", "UCB1")) {
-    rlang::abort(c("'algorithm' must be 'Thompson' or 'UCB1'.",
+  if (!algorithm %in% c("thompson", "ucb1")) {
+    rlang::abort(c("'algorithm' must be 'thompson' or 'ucb1'.",
       "x" = paste0("You passed: ", algorithm)
     ))
   }
 
-  if (!assignment_method %in% c("Individual", "Batch", "Date")) {
+  if (!assignment_method %in% c("individual", "batch", "date")) {
     rlang::abort(c("Invalid `assignment_method`",
       "x" = paste0("you passed: ", assignment_method),
-      "i" = "Valid methods are `Individual`, `Batch`, `Date`"
+      "i" = "Valid methods are `individual`, `batch`, `date`"
     ))
   }
   # Checking Logical values
@@ -125,8 +125,8 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, data_co
     id_col = "it is always required",
     success_col = "it is always required",
     condition_col = "it is always required",
-    date_col = "assignment_method is 'Date'",
-    month_col = "time_unit is 'Month'",
+    date_col = "assignment_method is 'date'",
+    month_col = "time_unit is 'month'",
     success_date_col = "perfect_assignment is FALSE",
     assignment_date_col = "perfect_assignment is FALSE"
   )
@@ -145,9 +145,9 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, data_co
   # Determine required columns based on settings
   required_cols <- c("id_col", "success_col", "condition_col")
 
-  if (assignment_method == "Date") {
+  if (assignment_method == "date") {
     required_cols <- c(required_cols, "date_col")
-    if (time_unit == "Month") {
+    if (time_unit == "month") {
       required_cols <- c(required_cols, "month_col")
     }
   }
@@ -188,8 +188,8 @@ check_cols <- function(assignment_method, time_unit, perfect_assignment, data_co
   if (verbose) {
     non_required_cols <- setdiff(all_cols, required_cols)
     non_req_reasons <- list(
-      date_col = "assignment_method is not 'Date'",
-      month_col = "time_unit is not 'Month'",
+      date_col = "assignment_method is not 'date'",
+      month_col = "time_unit is not 'month'",
       success_date_col = "perfect_assignment is TRUE",
       assignment_date_col = "perfect_assignment is TRUE"
     )
@@ -266,7 +266,7 @@ check_posint <- function(...) {
 
   valid_strings <- list(
     ndraws = NULL,
-    prior_periods = c("All")
+    prior_periods = c("all")
   )
 
   for (name in names(args)) {
@@ -309,10 +309,6 @@ check_conditions <- function(conditions, data, data_cols, control_augment) {
     rlang::abort("`conditions` must be provided as a character vector.")
   }
 
-  if (control_augment > 0 && !"Control" %in% names(conditions)) {
-    rlang::abort("The `conditions` vector must one element named 'Control' when control augmentation is used.")
-  }
-
   actual_conditions <- unique(data[[data_cols$condition_col$name]])
   if (length(conditions) != length(actual_conditions)) {
     rlang::abort(c(
@@ -338,16 +334,16 @@ check_data <- function(data, data_cols, assignment_method, period_length, time_u
     rlang::abort(paste(data_cols$id$name, "is not a unique identifier; a unique ID for each observation is required."))
   }
 
-  if (assignment_method == "Batch" && period_length > nrow(data)) {
+  if (assignment_method == "batch" && period_length > nrow(data)) {
     rlang::abort(c("`period_length` cannot be larger than data size",
       "x" = sprintf("You data has %d rows, and your batch size is %d rows", nrow(data), period_length)
     ))
   }
-  if (assignment_method == "Date") {
+  if (assignment_method == "date") {
     unit <- switch(time_unit,
-      "Day" = lubridate::days(1),
-      "Month" = months(1),
-      "Week" = lubridate::weeks(1)
+      "day" = lubridate::days(1),
+      "month" = months(1),
+      "week" = lubridate::weeks(1)
     )
 
     data_interval <- lubridate::interval(
@@ -376,20 +372,20 @@ check_data <- function(data, data_cols, assignment_method, period_length, time_u
 #' @inheritParams single_mab_simulation
 #' @keywords internal
 check_assign_method <- function(assignment_method, time_unit, verbose, period_length) {
-  if (assignment_method == "Date") {
+  if (assignment_method == "date") {
     if (is.null(time_unit) || length(time_unit) != 1 || isTRUE(is.na(time_unit))) {
-      rlang::abort("`time_unit` must be provided when assignment method is `Date`.")
+      rlang::abort("`time_unit` must be provided when assignment method is `date`.")
     }
-    if (!time_unit %in% c("Day", "Week", "Month")) {
+    if (!time_unit %in% c("day", "week", "month")) {
       rlang::abort(c("Invalid Time Unit",
         "x" = paste0("you passed: ", time_unit),
-        "i" = "valid units are `Day`, `Month`, `Week`"
+        "i" = "valid units are `day`, `month`, `week`"
       ))
     }
   }
-  if (assignment_method %in% c("Batch", "Date")) {
+  if (assignment_method %in% c("batch", "date")) {
     if (is.null(period_length)) {
-      rlang::abort(c("`period_length`, must be provided when Date or Batch assignment is used."))
+      rlang::abort(c("`period_length`, must be provided when date or batch assignment is used."))
     }
     if (!posint(period_length)) {
       rlang::abort(c("`period_length` must be a positive integer.",
@@ -398,7 +394,7 @@ check_assign_method <- function(assignment_method, time_unit, verbose, period_le
     }
   }
 
-  if (verbose && !assignment_method %in% c("Batch", "Date") && !is.null(period_length)) {
-    rlang::warn(c("i" = "`time_unit` is not required when assignment method is not `Date`. It will be ignored"))
+  if (verbose && !assignment_method %in% c("batch", "date") && !is.null(period_length)) {
+    rlang::warn(c("i" = "`time_unit` is not required when assignment method is not `date`. It will be ignored"))
   }
 }

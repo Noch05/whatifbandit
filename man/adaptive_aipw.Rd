@@ -13,12 +13,8 @@ of a traditional Randomized Controlled Trial (RCT). data.frames will be converte
 \item{assignment_probs}{A tibble/data.table containing the probabilities of being
 assigned each treatment at a given period}
 
-\item{conditions}{A named character vector containing treatment conditions. The elements
-of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
-\code{unique(df[[condition_col]])}. The names of each element are used to refer to the contents but are
-not inherently important; choose names
-choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
-of the trial in this vector must have the name "Control".}
+\item{conditions}{A character vector containing names of the treatment conditions. If \code{control_augment} > 0, then the control condition
+of the first element of the vector will be used as the control group.}
 
 \item{periods}{Numeric value of length 1; number of total periods in the simulation}
 

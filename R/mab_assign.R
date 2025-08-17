@@ -175,23 +175,21 @@ get_past_results.data.table <- function(current_data,
 
 get_bandit <- function(past_results, algorithm, conditions, current_period, control_augment = 0, ndraws) {
   bandit <- switch(algorithm,
-    "Thompson" = get_bandit.Thompson(
+    "thompson" = get_bandit.thompson(
       past_results = past_results, conditions = conditions, current_period =
         current_period, ndraws = ndraws
     ),
-    "UCB1" = get_bandit.UCB1(past_results = past_results, conditions = conditions, current_period = current_period),
-    rlang::abort("Invalid `algorithm`. Valid Algorithms: 'Thomspon', 'UCB1'")
+    "ucb1" = get_bandit.ucb1(past_results = past_results, conditions = conditions, current_period = current_period),
+    rlang::abort("Invalid `algorithm`. Valid Algorithms: 'thomspon', 'ucb1'")
   )
 
   assignment_prob <- bandit[["assignment_prob"]]
 
   if (control_augment > 0) {
-    ctrl <- base::which(base::names(conditions) == "Control")
-
-    if (assignment_prob[ctrl] < control_augment) {
-      assignment_prob[ctrl] <- control_augment
-      assignment_prob[-ctrl] <-
-        (assignment_prob[-ctrl] / sum(assignment_prob[-ctrl])) * (1 - control_augment)
+    if (assignment_prob[1] < control_augment) {
+      assignment_prob[1] <- control_augment
+      assignment_prob[-1] <-
+        (assignment_prob[-1] / sum(assignment_prob[-1])) * (1 - control_augment)
     }
   }
   if (!isTRUE(all.equal(sum(assignment_prob), 1))) {
@@ -202,7 +200,7 @@ get_bandit <- function(past_results, algorithm, conditions, current_period, cont
   return(bandit)
 }
 #-------------------------------------------------------------------
-#' @method get_bandit Thompson
+#' @method get_bandit thompson
 #' @title Thompson sampling Algorithm
 #' @inheritParams get_bandit
 #' @details
@@ -217,7 +215,7 @@ get_bandit <- function(past_results, algorithm, conditions, current_period, cont
 #'
 #' @keywords internal
 
-get_bandit.Thompson <- function(past_results, conditions, current_period, ndraws) {
+get_bandit.thompson <- function(past_results, conditions, current_period, ndraws) {
   bandit <- tryCatch(
     {
       result <- rlang::set_names(
@@ -273,7 +271,7 @@ bandit_invalid <- function(bandit) {
   return(any(is.na(bandit)) || isTRUE(all.equal(base::sum(bandit), 0)))
 }
 #-------------------------------------------------------------------
-#' @method get_bandit UCB1
+#' @method get_bandit ucb1
 #' @title UCB1 Sampling Algorithm
 #' @description Calculates upper confidence bounds for each treatment arm
 #'
@@ -283,7 +281,7 @@ bandit_invalid <- function(bandit) {
 #' is assigned 1, and the rest 0.
 #' @keywords internal
 
-get_bandit.UCB1 <- function(past_results, conditions, current_period) {
+get_bandit.ucb1 <- function(past_results, conditions, current_period) {
   correction <- 1e-10 ## Prevents Division by 0 when n = 0
 
   if (inherits(past_results, "data.table")) {
