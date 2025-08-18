@@ -486,6 +486,7 @@ assign_treatments.data.frame <- function(
     1,
     0
   )
+  print(current_data$mab_condition)
   return(current_data)
 }
 

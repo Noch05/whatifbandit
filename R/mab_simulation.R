@@ -50,9 +50,9 @@ pre_mab_simulation <- function(
   if (base::is.null(data) || !base::is.data.frame(data)) {
     rlang::abort("Input 'data' must be a non-null data.frame.")
   }
-  if (inherits(data, "data.table")) {
+  if (data.table::is.data.table(data)) {
     data <- data.table::copy(data)
-  } else if (!inherits(data, "tbl_df")) {
+  } else if (!tibble::is_tibble(data)) {
     data <- tibble::as_tibble(data)
   }
 

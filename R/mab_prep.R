@@ -78,7 +78,7 @@ create_cutoff <- function(
 #'
 create_cutoff.day <- function(data, date_col, period_length) {
   start_date <- base::min(data[[date_col$name]])
-  if (inherits(data, "data.table")) {
+  if (data.table::is.data.table(data)) {
     data[,
       period_number := base::floor(
         lubridate::interval(start_date, base::get(date_col$name)) /
@@ -109,7 +109,7 @@ create_cutoff.day <- function(data, date_col, period_length) {
 #' @inheritParams cols
 #' @noRd
 create_cutoff.week <- function(data, date_col, period_length) {
-  if (inherits(data, "data.table")) {
+  if (data.table::is.data.table(data)) {
     start_date <- base::min(data[, get(date_col$name)])
 
     data[,
@@ -149,7 +149,7 @@ create_cutoff.week <- function(data, date_col, period_length) {
 create_cutoff.month <- function(data, date_col, month_col, period_length) {
   start_date <- base::min(data[[date_col$name]])
 
-  if (inherits(data, "data.table")) {
+  if (data.table::is.data.table(data)) {
     first_month <- data[
       order(base::get(date_col$name)),
       base::get(month_col$name)
@@ -220,7 +220,7 @@ create_cutoff.month <- function(data, date_col, month_col, period_length) {
 #' @noRd
 #'
 create_cutoff.individual <- function(data) {
-  if (inherits(data, "data.table")) {
+  if (data.table::is.data.table(data)) {
     data[, period_number := .I]
     data.table::setkey(data, period_number)
     return(invisible(data))
@@ -237,7 +237,7 @@ create_cutoff.individual <- function(data) {
 #' @noRd
 #'
 create_cutoff.batch <- function(data, period_length) {
-  if (inherits(data, "data.table")) {
+  if (data.table::is.data.table(data)) {
     data[, period_number := base::ceiling((.I / period_length))]
     data.table::setkey(data, period_number)
     return(invisible(data))

@@ -295,7 +295,7 @@ multiple_mab_simulation <- function(
 condense_results <- function(data, keep_data, mabs, times) {
   items <- c("bandits", "assignment_probs", "estimates")
 
-  if (inherits(data, "data.table")) {
+  if (data.table::is.data.table(data)) {
     results <- lapply(items, \(item) {
       all <- lapply(seq_len(times), function(i) mabs[[i]][[item]])
       result <- data.table::rbindlist(all, idcol = "trial")

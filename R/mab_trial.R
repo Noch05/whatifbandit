@@ -75,7 +75,7 @@ run_mab_trial <- function(
 
     prior <- create_prior(prior_periods = prior_periods, current_period = i)
 
-    if (inherits(data, "data.table")) {
+    if (data.table::is.data.table(data)) {
       current_data <- data[period_number == i, ]
       prior_data <- data[period_number %in% prior, ]
     } else {
