@@ -77,7 +77,11 @@ print_mab <- function(mab) {
     }
   }
 
-  base::cat("Total Periods:        ", length(mab$bandits), "periods\n")
+  base::cat(
+    "Total Periods:        ",
+    max(mab$bandits$period_number),
+    "periods\n"
+  )
   base::cat("Prior Periods:        ", settings$prior_periods, "periods\n")
   base::cat("Number of Treatments: ", length(settings$conditions), "\n")
   if (settings$control_augment > 0) {
