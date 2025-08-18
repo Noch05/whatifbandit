@@ -142,9 +142,8 @@ get_past_results.data.table <- function(
       list(past_results, replace),
       use.names = TRUE
     )
-
-    data.table::setorder(past_results, mab_condition)
   }
+  data.table::setorder(past_results, mab_condition)
   return(invisible(past_results))
 }
 
@@ -267,7 +266,7 @@ get_bandit.thompson <- function(
           alpha = 1,
           beta = 1
         )),
-        conditions
+        past_results$mab_condition
       )
       if (bandit_invalid(result)) {
         stop("Invalid Bandit")
@@ -287,7 +286,7 @@ get_bandit.thompson <- function(
           beta = 1,
           ndraws = ndraws
         )),
-        conditions
+        past_results$mab_condition
       )
 
       result
@@ -439,6 +438,7 @@ assign_treatments.data.frame <- function(
   num_conditions <- base::length(conditions)
   random_probs <- base::rep_len(1 / num_conditions, length.out = num_conditions)
   band_idx <- base::setdiff(seq_len(rows), rand_idx)
+  names(conditions) <- NULL
 
   current_data$assignment_type[band_idx] <- "bandit"
   current_data$assignment_type[rand_idx] <- "random"
@@ -518,7 +518,7 @@ assign_treatments.data.table <- function(
   num_conditions <- base::length(conditions)
   random_probs <- base::rep_len(1 / num_conditions, length.out = num_conditions)
   band_idx <- base::setdiff(seq_len(rows), rand_idx)
-
+  names(conditions) <- NULL
   current_data[band_idx, assignment_type := "bandit"]
   current_data[rand_idx, assignment_type := "random"]
 

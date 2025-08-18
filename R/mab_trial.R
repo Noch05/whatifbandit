@@ -292,6 +292,7 @@ end_mab_trial.data.table <- function(
     ),
     by = mab_condition
   ]
+  data.table::setorder(final_summary, mab_condition)
 
   final_bandit <- get_bandit(
     past_results = final_summary,
