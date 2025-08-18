@@ -353,9 +353,8 @@ get_bandit.ucb1 <- function(past_results, conditions, current_period) {
     rep_len(0, length.out = length(conditions)),
     conditions
   )
-  best_idx <- names(assignment_probs) == best_condition
 
-  assignment_probs[best_idx] <- 1
+  assignment_probs[[best_condition]] <- 1
 
   return(invisible(list(
     bandit = past_results,
@@ -447,46 +446,54 @@ assign_treatments.data.frame <- function(
     bandit_blocks <- current_data$block[band_idx]
     random_blocks <- current_data$block[rand_idx]
     if (length(rand_idx) > 0) {
-      current_data$mab_condition[rand_idx] <- randomizr::block_ra(
+      current_data$mab_condition[
+        rand_idx
+      ] <- base::as.character(randomizr::block_ra(
         blocks = random_blocks,
         prob_each = random_probs,
         conditions = conditions,
-        check_inputs = FALSE
-      )
+        check_inputs = TRUE
+      ))
     }
     if (base::length(band_idx) > 0) {
-      current_data$mab_condition[band_idx] <- randomizr::block_ra(
+      current_data$mab_condition[
+        band_idx
+      ] <- base::as.character(randomizr::block_ra(
         blocks = bandit_blocks,
         prob_each = probs,
         conditions = conditions,
-        check_inputs = FALSE
-      )
+        check_inputs = TRUE
+      ))
     }
   } else {
     if (base::length(rand_idx) > 0) {
-      current_data$mab_condition[rand_idx] <- randomizr::complete_ra(
+      current_data$mab_condition[
+        rand_idx
+      ] <- base::as.character(randomizr::complete_ra(
         N = length(rand_idx),
         prob_each = random_probs,
         conditions = conditions,
-        check_inputs = FALSE
-      )
+        check_inputs = TRUE
+      ))
     }
     if (base::length(band_idx) > 0) {
-      current_data$mab_condition[band_idx] <- randomizr::complete_ra(
+      current_data$mab_condition[
+        band_idx
+      ] <- base::as.character(randomizr::complete_ra(
         N = length(band_idx),
         prob_each = probs,
         conditions = conditions,
-        check_inputs = FALSE
-      )
+        check_inputs = TRUE
+      ))
     }
   }
 
   current_data$impute_req <- base::ifelse(
-    current_data$mab_condition != current_data[[condition_col$name]],
+    base::as.character(current_data$mab_condition) !=
+      base::as.character(current_data[[condition_col$name]]),
     1,
     0
   )
-  print(current_data$mab_condition)
   return(current_data)
 }
 
@@ -530,53 +537,54 @@ assign_treatments.data.table <- function(
     if (length(rand_idx) > 0) {
       current_data[
         rand_idx,
-        mab_condition := randomizr::block_ra(
+        mab_condition := base::as.character(randomizr::block_ra(
           blocks = random_blocks,
           prob_each = random_probs,
           conditions = conditions,
-          check_inputs = FALSE
-        )
+          check_inputs = TRUE
+        ))
       ]
     }
 
     if (base::length(band_idx) > 0) {
       current_data[
         band_idx,
-        mab_condition := randomizr::block_ra(
+        mab_condition := base::as.character(randomizr::block_ra(
           blocks = bandit_blocks,
           prob_each = probs,
           conditions = conditions,
-          check_inputs = FALSE
-        )
+          check_inputs = TRUE
+        ))
       ]
     }
   } else {
     if (base::length(rand_idx) > 0) {
       current_data[
         rand_idx,
-        mab_condition := randomizr::complete_ra(
+        mab_condition := base::as.character(randomizr::complete_ra(
           N = length(rand_idx),
           prob_each = random_probs,
           conditions = conditions,
-          check_inputs = FALSE
-        )
+          check_inputs = TRUE
+        ))
       ]
     }
     if (base::length(band_idx) > 0) {
       current_data[
         band_idx,
-        mab_condition := randomizr::complete_ra(
+        mab_condition := base::as.character(randomizr::complete_ra(
           N = length(band_idx),
           prob_each = probs,
           conditions = conditions,
-          check_inputs = FALSE
-        )
+          check_inputs = TRUE
+        ))
       ]
     }
   }
   current_data[,
     impute_req := data.table::fifelse(
-      mab_condition != base::get(condition_col$name),
+      base::as.character(mab_condition) !=
+        base::as.character(base::get(condition_col$name)),
       1,
       0
     )

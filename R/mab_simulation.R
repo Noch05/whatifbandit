@@ -254,7 +254,7 @@ create_conditions <- function(
   condition_col,
   control_augment
 ) {
-  conditions <- base::sort(base::unique(data[[condition_col$name]]))
+  conditions <- base::unique(data[[condition_col$name]])
   if (control_augment > 0) {
     if (length(control_condition) != 1) {
       rlang::abort(c(
@@ -280,11 +280,11 @@ create_conditions <- function(
       ))
     }
 
-    names(conditions) <- ifelse(
+    names(conditions) <- base::ifelse(
       conditions == control_condition,
       "control",
       "treatment"
     )
   }
-  return(conditions)
+  return(base::sort(base::as.character(conditions)))
 }

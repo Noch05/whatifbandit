@@ -306,7 +306,7 @@ create_new_cols.data.frame <- function(
       ),
       mab_condition = dplyr::if_else(
         period_number == 1,
-        !!data_cols$condition_col$sym,
+        base::as.character(!!data_cols$condition_col$sym),
         NA
       ),
       impute_req = dplyr::if_else(period_number == 1, 0, NA),
@@ -375,7 +375,9 @@ create_new_cols.data.table <- function(
     period_number == 1,
     `:=`(
       mab_success = base::get(data_cols$success_col$name),
-      mab_condition = base::get(data_cols$condition_col$name),
+      mab_condition = base::as.character(base::get(
+        data_cols$condition_col$name
+      )),
       impute_req = 0,
       impute_block = NA_character_,
       assignment_type = "initial"
