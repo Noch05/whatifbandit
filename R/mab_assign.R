@@ -335,10 +335,10 @@ get_bandit.ucb1 <- function(past_results, conditions, current_period) {
         )
     ]
 
-    best_condition <- base::as.character(past_results[
+    best_condition <- past_results[
       which.max(ucb),
       mab_condition
-    ])
+    ]
   } else {
     past_results$ucb <- past_results$success_rate +
       base::sqrt(
@@ -349,13 +349,13 @@ get_bandit.ucb1 <- function(past_results, conditions, current_period) {
       past_results$ucb
     )]
   }
-
   assignment_probs <- rlang::set_names(
     rep_len(0, length.out = length(conditions)),
     conditions
   )
+  best_idx <- names(assignment_probs) == best_condition
 
-  assignment_probs[[best_condition]] <- 1
+  assignment_probs[best_idx] <- 1
 
   return(invisible(list(
     bandit = past_results,
