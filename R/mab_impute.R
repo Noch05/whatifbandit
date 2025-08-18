@@ -243,7 +243,7 @@ imputation_preparation <- function(
   perfect_assignment,
   current_period
 ) {
-  if (inherits(current_data, "data.table")) {
+  if (data.table::is.data.table(current_data)) {
     if (blocking) {
       current_data[,
         impute_block := do.call(paste, c(.SD, sep = "_")),
