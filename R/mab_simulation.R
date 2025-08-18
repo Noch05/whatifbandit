@@ -254,7 +254,9 @@ create_conditions <- function(
   condition_col,
   control_augment
 ) {
-  conditions <- base::unique(data[[condition_col$name]])
+  conditions <- base::sort(base::as.character(base::unique(data[[
+    condition_col$name
+  ]])))
   if (control_augment > 0) {
     if (length(control_condition) != 1) {
       rlang::abort(c(
@@ -268,7 +270,7 @@ create_conditions <- function(
     if (
       is.null(control_condition) |
         is.na(control_condition) |
-        !control_condition %in% conditions
+        !as.character(control_condition) %in% conditions
     ) {
       rlang::abort(c(
         "`control_condition` is not present in the conditions column",
@@ -281,10 +283,10 @@ create_conditions <- function(
     }
 
     names(conditions) <- base::ifelse(
-      conditions == control_condition,
+      conditions == as.character(control_condition),
       "control",
       "treatment"
     )
   }
-  return(base::sort(base::as.character(conditions)))
+  return(conditions)
 }
