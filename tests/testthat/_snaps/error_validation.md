@@ -255,6 +255,17 @@
     x Potential Conditions: 1, 2, 3
     x You Passed: 7
 
+---
+
+    `control_condition` is not present in the conditions column
+    x Potential Conditions: 1, 2, 3
+    x You Passed: NA
+
+---
+
+    `control_condition` must have a length of 1
+    x You passed a vector of length: 2
+
 # Throws proper error when columns do not exist or not declared
 
     `block2 is not in the data, but was chosen as a block.

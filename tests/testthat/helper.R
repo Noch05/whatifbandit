@@ -104,22 +104,57 @@ generate_data <- function(n, k) {
   ))
 }
 
+single_mab_checks <- function(output) {
+  band_col_check <- length(output$settings$conditions) ==
+    (ncol(output$bandits) - 1)
+  prob_col_check <- length(output$settings$conditions) ==
+    (ncol(output$assignment_probs) - 1)
+  est_check <- nrow(output$settings$estimates) ==
+    (2 * length(output$settings$conditions))
+  anyNA_ests <- dplyr::summarize(
+    output$final_data,
+    dplyr::across(
+      dplyr::starts_with("aipw"),
+      ~ sum(is.na(.x))
+    )
+  ) |>
+    sum() ==
+    0
+  return(all(c(band_col_check, prob_col_check, est_check, anyNA_ests)))
+}
+multi_mab_checks <- function(output) {
+  band_col_check <- length(output$settings$conditions) ==
+    (ncol(output$bandits) - 2)
+  prob_col_check <- length(output$settings$conditions) ==
+    (ncol(output$assignment_probs) - 2)
+
+  return(all(c(band_col_check, prob_col_check)))
+}
+
 # Function to conduct the test
-#
 run_test <- function(full_args, static_args, trial) {
   FUN <- switch(
     trial,
     "single" = expression(single_mab_simulation),
     "multiple" = expression(multiple_mab_simulation)
   )
+  class_specific_checks <- switch(
+    trial,
+    "single" = expression(single_mab_checks(output)),
+    "multiple" = expression(multi_mab_checks(output))
+  )
   class <- switch(trial, "single" = "mab", "multiple" = "multiple.mab")
-
   results <- purrr::map(seq_len(nrow(full_args)), \(x) {
     args <- c(as.list(full_args[x, ]), static_args)
     expect_no_failure({
       output <- do.call(eval(FUN), args)
     })
     expect_s3_class(output, class)
+    expect_no_failure({
+      if (!eval(class_specific_checks)) {
+        stop("Post-Run Checks Failed")
+      }
+    })
     return(output)
   })
 
