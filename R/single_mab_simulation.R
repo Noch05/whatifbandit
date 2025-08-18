@@ -247,16 +247,17 @@ single_mab_simulation <- function(
   )
   results$settings <- list(
     original_data = data,
-    assignment_method = prepped$character_args$assignment_method,
-    control_augment = control_augment,
-    random_assign_prop = random_assign_prop,
-    time_unit = prepped$character_args$time_unit,
-    perfect_assignment = perfect_assignment,
     algorithm = prepped$character_args$algorithm,
+    assignment_method = prepped$character_args$assignment_method,
+    time_unit = prepped$character_args$time_unit,
     period_length = period_length,
     prior_periods = prepped$character_args$prior_periods,
-    whole_experiment = whole_experiment,
+    control_augment = control_augment,
+    random_assign_prop = random_assign_prop,
+    control = as.character(control_condition),
     conditions = prepped$conditions,
+    perfect_assignment = perfect_assignment,
+    whole_experiment = whole_experiment,
     blocking = blocking,
     block_cols = prepped$block_cols$name,
     ndraws = ndraws

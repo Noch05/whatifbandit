@@ -57,7 +57,9 @@ print_mab <- function(mab) {
   base::cat("Randomized Assignment:", settings$random_assign_prop, "\n")
   base::cat("Perfect Assignment:   ", settings$perfect_assignment, "\n")
   base::cat("Whole Experiment:     ", settings$whole_experiment, "\n")
-  base::cat("Blocking Variables:   ", settings$block_cols, "\n")
+  if (settings$blocking) {
+    base::cat("Blocking Variables:   ", settings$block_cols, "\n")
+  }
   base::cat("Assignment Method:    ", settings$assignment_method, "\n")
 
   if (settings$assignment_method %in% c("batch", "date")) {
@@ -77,11 +79,10 @@ print_mab <- function(mab) {
 
   base::cat("Total Periods:        ", length(mab$bandits), "periods\n")
   base::cat("Prior Periods:        ", settings$prior_periods, "periods\n")
-  base::cat(
-    "Treatments:           ",
-    length(settings$conditions),
-    "treatment arms\n"
-  )
+  base::cat("Number of Treatments: ", length(settings$conditions), "\n")
+  if (settings$control_augment > 0) {
+    base::cat("Control Group:        ", settings$control, "\n")
+  }
 }
 
 #------------------------------------------------------------------------------
