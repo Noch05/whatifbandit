@@ -8,7 +8,6 @@ multiple_mab_simulation(
   data,
   assignment_method,
   algorithm,
-  control_condition,
   prior_periods,
   perfect_assignment,
   whole_experiment,
@@ -19,6 +18,7 @@ multiple_mab_simulation(
   control_augment = 0,
   random_assign_prop = 0,
   ndraws = 5000,
+  control_condition = NULL,
   time_unit = NULL,
   period_length = NULL,
   block_cols = NULL,
@@ -40,9 +40,6 @@ groups are assigned correctly. For "date", observations will be considered in ch
 defines the adaptive assignment process. Mathematical details on these algorithms
 can be found in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
 \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}
-
-\item{control_condition}{Value of the control condition. Only necessary when \code{control_augment} is greater than 0. The type of this value should match
-the type in the input data, so if your conditions are stored as factors or strings, pass a string, if integers, use an integer.}
 
 \item{prior_periods}{A numeric value of length 1, or the character string "All"; number of previous periods to use
 in the treatment assignment model. This is used to implement the stationary/non-stationary bandit.
@@ -99,6 +96,9 @@ a whole number, and that many rows are selected for random assignment.}
 will be used to approximate the Thompson sampling probabilities. This is the number of simulations to use, the default
 is 5000 to match the default parameter \code{\link[bandit:best_binomial_bandit_sim]{bandit::best_binomial_bandit_sim()}}, but might need to be raised or lowered depending on performance and accuracy
 concerns.}
+
+\item{control_condition}{Value of the control condition. Only necessary when \code{control_augment} is greater than 0. The type of this value should match
+the type in the input data, so if your conditions are stored as factors or strings, pass a string, if integers, use an integer.}
 
 \item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "Date".
 Acceptable values are "day", "week", or "month". "month" requires a column with the months of each observation
