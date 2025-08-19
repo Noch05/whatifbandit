@@ -195,3 +195,68 @@ run_test <- function(full_args, static_args, trial) {
     }
   }
 }
+
+equal_checks <- function(tbl, dt, type) {
+  all_equals <- purrr::map2(
+    tbl,
+    dt,
+    ~ {
+      results <- base::all.equal(.x, .y)
+      return(results[stringr::str_detect(results, "Mean relative difference")])
+    }
+  )
+  all_outcomes <- purrr::map_dbl(
+    all_equals,
+    ~ {
+      length(.x)
+    }
+  )
+  FUN <- switch(
+    type,
+    "single" = expression(`summary.mab`),
+    "multiple" = expression(`summary.multiple.mab`)
+  )
+
+  summary_check <- base::all.equal(eval(FUN)(tbl), eval(FUN)(dt))
+  return(all(all_outcomes == 0) && isTRUE(summary_check))
+}
+
+single_equal_checks <- function(tbl_output, dt_output) {
+  data.table::setorder(dt_output$estimates, estimator, mab_condition)
+  tbl <- tbl_output[-c(1, 5)]
+  dt <- dt_output[-c(1, 5)]
+  return(equal_checks(tbl, dt))
+}
+multi_equal_checks <- function(tbl_output, dt_output) {
+  data.table::setorder(dt_output$estimates, trial, estimator, mab_condition)
+  tbl <- tbl_output[-4]
+  dt <- dt_output[-4]
+  return(equal_checks(tbl, dt))
+}
+
+check_dt_tibble_equal <- function(tbl, dt, full_args, static_args, type, seed) {
+  FUN <- switch(
+    type,
+    "single" = expression(single_mab_simulation),
+    "multiple" = expression(multiple_mab_simulation)
+  )
+  class_specific_checks <- switch(
+    type,
+    "single" = expression(single_equal_checks(tbl_output, dt_output)),
+    "multiple" = expression(multi_equal_checks(tbl_output, dt_output))
+  )
+  purrr::map(seq_len(nrow(full_args)), \(x) {
+    dt_args <- c(as.list(full_args[x, ]), static_args, data = dt)
+    tbl_args <- c(as.list(full_args[x, ]), static_args, data = tbl)
+    set.seed(seed)
+    tbl_output <- do.call(eval(FUN), tbl_args)
+    set.seed(seed)
+    dt_output <- do.call(eval(FUN), dt_args)
+    check <- eval(class_specific_checks)
+    expect_no_failure({
+      if (!check) {
+        stop("Equality Checks Failed")
+      }
+    })
+  })
+}
