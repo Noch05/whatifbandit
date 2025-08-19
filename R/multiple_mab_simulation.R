@@ -12,7 +12,7 @@
 #' @param times A numeric value of length 1, the number of simulations to conduct.
 #' @param seeds An integer vector of `length(times)` containing valid seeds to define random state for each trial.
 #' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets.
-#' .
+#'
 #' @returns An object of class `multiple.mab`, containing:
 #' \itemize{
 #' \item `final_data_nest:` A tibble or data.table containing the nested tibbles/data.tables from each trial. Only provided when `keep_data` is TRUE.
@@ -189,7 +189,7 @@ multiple_mab_simulation <- function(
         ndraws = ndraws,
         random_assign_prop = random_assign_prop
       )
-
+      results$assignment_quantities <- get_assignment_quantities(results)
       if (!keep_data) {
         results$final_data <- NULL
       }
@@ -264,6 +264,40 @@ multiple_mab_simulation <- function(
 
   return(results)
 }
+# ------------------------------------------------------------------
+#' @name get_assignment_quantitites
+#' @title Calculates Number of Observations Assigned to Each Treatment
+#' @description Takes the output from [mab_simulation()], and
+#' calculates the number of observations assigned to each treatment group in the adaptive trial.
+#' @param simulation Output from [mab_simulation()]
+#' @returns Named numeric vector containing number of observations assigned to each treatment group
+#' @keywords internal
+get_assignment_quantities <- function(simulation) {
+  UseMethod("get_assignment_quantities", simulation$final_data)
+}
+#' @method get_assignment_quantities data.frame
+#' @description get_assignment_quantities for data.frames
+#' @inheritParams get_assignment_quantities
+#' @noRd
+get_assignment_quantities.data.frame <- function(simulation) {
+  count_summary <- simulation$final_data |>
+    dplyr::group_by(mab_condition) |>
+    dplyr::count()
+  count_vec <- rlang::set_names(count_summary$n, count_summary$mab_condition)
+  return(count_vec)
+}
+#-------------------------------------------------------------------
+#' @method get_assignment_quantities data.table
+#' @description get_assignment_quantities for data.tables
+#' @inheritParams get_assignment_quantities
+#' @noRd
+get_assignment_quantities.data.table <- function(simulation) {
+  count_summary <- simulation$final_data[, .N, by = mab_condition]
+  count_vec <- rlang::set_names(count_summary$N, count_summary$mab_condition)
+  return(count_vec)
+}
+#-----------------------------------------------------------------
+
 #' @name condense_results
 #' @title Condenses results into a list for [multiple_mab_simulation()]
 #' @description
@@ -294,7 +328,12 @@ multiple_mab_simulation <- function(
 #' @keywords internal
 
 condense_results <- function(data, keep_data, mabs, times) {
-  items <- c("bandits", "assignment_probs", "estimates")
+  items <- c(
+    "bandits",
+    "assignment_probs",
+    "estimates",
+    "assignment_quantities"
+  )
 
   if (data.table::is.data.table(data)) {
     results <- lapply(items, \(item) {
