@@ -4,12 +4,16 @@
 \alias{plot_hist}
 \title{Plots Distribution of AIPW and Sample estimates over trials}
 \usage{
-plot_hist(x, ...)
+plot_hist(x, quantity, params)
 }
 \arguments{
 \item{x}{\code{multiple.mab} class object created by \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}}
 
-\item{...}{arguments to pass to \verb{ggplot2:geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, \code{bins} etc.)}
+\item{quantity}{The quantities to plot when \code{type = "hist"}, accepts either 'estimate' to plot the distributuons of the AIPW estimates, or
+'assignment' to plot the distributions of the number of observations assigned to each treatment across the repeated trials.}
+
+\item{params}{\code{...} from \code{\link[=plot.multiple.mab]{plot.multiple.mab()}} should be a named list containing two elements, \code{geom} and \code{facet} containing arguments for
+\code{ggplot2::geom_histogram()} and \code{ggplot2::facet_grid()} respectively.}
 }
 \value{
 Minimal ggplot object, that can be customized and added to with \code{+} (to change, scales, labels, legend, theme, etc.)

@@ -93,8 +93,8 @@ print_mab <- function(mab) {
 ##' Summary Generic for "mab" class
 #' @description
 #' Summarizes the Results of a Single Multi-Arm Bandit Trial. Provides
-#' confidence intervals around the AIPW estimates, and the final calculations
-#' of the Thompson sampling probabilities or UCB1 valuess for each arm.
+#' confidence intervals around the AIPW estimates, final calculations
+#' of the Thompson sampling probabilities or UCB1 values, and the number of observations assigned for each arm.
 #' @param object `mab`` class object created by [single_mab_simulation()].
 #' @param level Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
 #' Defaults to 0.95
@@ -132,6 +132,10 @@ summary.mab <- function(object, level = 0.95, ...) {
     dplyr::filter(estimator == "AIPW") |>
     dplyr::mutate(mab_condition = as.character(mab_condition))
 
+  quantities <- get_assignment_quantities(object)
+  quantities <- tibble::as_tibble(quantities) |>
+    mutate(mab_condition = names(quantities))
+
   normalq <- base::abs(stats::qnorm((1 - level) / 2))
 
   object$bandits[periods, ] |>
@@ -148,7 +152,11 @@ summary.mab <- function(object, level = 0.95, ...) {
       upper_bound = mean + normalq * sqrt(variance)
     ) |>
     dplyr::select(-variance, -estimator) |>
-    dplyr::rename("estimated_probability_of_success" = "mean") |>
+    dplyr::left_join(quantities, by = c("Treatment_Arm" = "mab_condition")) |>
+    dplyr::rename(
+      "estimated_probability_of_success" = "mean",
+      "num_assigned" = "value"
+    ) |>
     dplyr::mutate(
       level = level,
       periods = periods
@@ -174,7 +182,7 @@ summary.mab <- function(object, level = 0.95, ...) {
 #' @param save Logical; Whether or not to save the plot to disk; FALSE by default.
 #' @param path String; File directory to save file.
 #' @inheritParams summary.mab
-#' @param ... arguments to pass to `ggplot2:geom_*` function (e.g. `color`, `linewidth`, `alpha`, etc.)
+#' @param ... Arguments to pass to `ggplot2::geom_*` function (e.g. `color`, `linewidth`, `alpha`, `bins` etc.).
 #' @details
 #' The plot generic requires \href{https://cran.r-project.org/package=ggplot2}{ggplot2}
 #' which is not required by the package, so it must be installed separately.
@@ -261,10 +269,6 @@ plot_arms <- function(x, object, ...) {
       breaks = base::seq(0, 1, 0.1),
       limits = base::range(0, 1)
     ) +
-    ggplot2::scale_x_continuous(
-      breaks = base::seq(0, periods, 1),
-      limits = range(1, periods)
-    ) +
     ggplot2::labs(
       x = "Assignment Period",
       y = ylab,
@@ -295,10 +299,6 @@ plot_estimates <- function(x, level = 0.95, ...) {
         xmax = mean + normalq * sqrt(variance)
       ),
       ...
-    ) +
-    ggplot2::scale_x_continuous(
-      breaks = base::seq(0, 1, 0.05),
-      limits = base::range(0, 1)
     ) +
     ggplot2::labs(
       x = "Probability of Success (AIPW)",

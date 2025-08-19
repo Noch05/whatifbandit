@@ -74,6 +74,15 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
   lower_level <- (1 - level) / 2
   upper_level <- 1 - lower_level
 
+  quantities <- object$assignment_quantities |>
+    tidyr::pivot_longer(
+      cols = !trial,
+      names_to = "mab_condition",
+      values_to = "value"
+    ) |>
+    dplyr::group_by(mab_condition) |>
+    dplyr::summarize(mean = base::mean(value), sd = stats::sd(value))
+
   quantiles <- object$estimates |>
     dplyr::filter(estimator == "AIPW") |>
     dplyr::group_by(mab_condition, estimator) |>
@@ -125,7 +134,9 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
     dplyr::rename(
       "average_probability_of_success" = "estimate_avg",
       Treatment_Arm = mab_condition
-    )
+    ) |>
+    dplyr::left_join(quantities, by = c("Treatment_Arm" = "mab_condition")) |>
+    dplyr::rename(average_num_assigned = mean, sd_num_assigned = sd)
   return(summary)
 }
 
@@ -138,12 +149,17 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
 #' @param type String; Type of plot requested; valid types are:
 #' \itemize{
 #' \item `summary`: Shows the number of times each arm was selected as the highest chance of being the best.
-#' \item `hist`: Shows histograms for each treatment condition's proportion of success across trials.
+#' \item `hist`: Shows histograms for each treatment condition's proportion of success across trials or number of obersvations assigned.
 #' \item `estimate`: Shows proportion of success estimates using specified normal or empirical confidence intervals.
 #' }
+#' @param quantity The quantities to plot when `type = "hist"`, accepts either 'estimate' to plot the distributuons of the AIPW estimates, or
+#' 'assignment' to plot the distributions of the number of observations assigned to each treatment across the repeated trials.
 #' @param save Logical; Whether or not to save the plot to disk; FALSE by default.
 #' @param path String; File directory to save file.
-#' @param ... arguments to pass to `ggplot2:geom_*` function (e.g. `color`, `linewidth`, `alpha`, `bins` etc.)
+#' @param ... Arguments to pass to `ggplot2::geom_*` function (e.g. `color`, `linewidth`, `alpha`, `bins` etc.). In the case of `type = "hist"`, additional
+#' arguments must be passed in to distinct lists, one named `geom` which are passed to `ggplot2::geom_*` and one named `facet` which are passed to `ggplot2::facet_grid`.
+#' to `ggplot2::geom_*`
+#' should be a named list with 2 components, 'geom' and 'facet', to distinguish between arguments passed to `ggplot2::geom_histogram` and `ggplot2::facet_grid()`.
 #' @param cdf String; specifies the type of CDF to use when analyzing the estimates.
 #' valid CDFs are the 'empirical' CDF, the 'normal' CDF. Used when type = `estimate`. The 'normal' CDF uses the fact
 #' that the AIPW estimates are asymptotically normal, while the empirical CDF estimates the CDF from the sample
@@ -167,6 +183,7 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
 plot.multiple.mab <- function(
   x,
   type,
+  quantity,
   cdf = NULL,
   level = 0.95,
   save = FALSE,
@@ -177,14 +194,15 @@ plot.multiple.mab <- function(
   plot <- switch(
     type,
     "summary" = plot_summary(x = x, ...),
-    "hist" = plot_hist(x = x, ...),
-    "estimate" = plot_mult_estimates(
+    "hist" = plot_hist(
       x = x,
-      cdf = cdf,
-      level = level,
-      ...
+      quantity,
+      params = rlang::dots_list(..., .named = TRUE)
     ),
-    rlang::abort("Invalid Type: Valid types are `hist`, `summary`, estimate`.")
+    "estimate" = plot_mult_estimates(x = x, cdf = cdf, level = level, ...),
+    rlang::abort(
+      "Invalid Type: Valid types are `hist`, `summary`, estimate`."
+    )
   )
 
   if (save) {
@@ -223,21 +241,57 @@ plot_summary <- function(x, ...) {
 #' @description
 #' Plots Distribution of AIPW and Sample estimates over trials for [plot.multiple.mab()]
 #' @inheritParams plot.multiple.mab
+#' @param params `...` from [plot.multiple.mab()] should be a named list containing two elements, `geom` and `facet` containing arguments for
+#' `ggplot2::geom_histogram()` and `ggplot2::facet_grid()` respectively.
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (to change, scales, labels, legend, theme, etc.)
 #' @keywords internal
-plot_hist <- function(x, ...) {
+plot_hist <- function(x, quantity, params) {
   rlang::check_installed("ggplot2")
-
-  x$estimates |>
-    ggplot2::ggplot(ggplot2::aes(x = mean, y = ggplot2::after_stat(density))) +
-    ggplot2::geom_histogram(...) +
-    ggplot2::facet_grid(~mab_condition) +
-    ggplot2::labs(
+  data <- switch(
+    quantity,
+    "estimate" = {
+      x$estimates
+    },
+    "assignment" = {
+      x$assignment_quantities |>
+        tidyr::pivot_longer(
+          cols = !trial,
+          names_to = "mab_condition",
+          values_to = "mean"
+        )
+    },
+    rlang::abort(
+      "Invalid `quantity`, valid values are 'estimate' and 'assignment'"
+    )
+  )
+  plot_labels <- switch(
+    quantity,
+    "estimate" = list(
       x = "Estimate",
-      y = "Density",
       title = "Estimate Distributions Across Trials"
+    ),
+    "assignment" = list(
+      x = "Number of People Assigned",
+      title = "Assignment Distributions Across Trials"
+    )
+  )
+  plot <- ggplot2::ggplot(
+    data,
+    ggplot2::aes(x = mean, y = ggplot2::after_stat(density))
+  ) +
+    rlang::exec(ggplot2::geom_histogram, !!!(params$geom)) +
+    rlang::exec(
+      ggplot2::facet_grid,
+      !!!(c(~mab_condition, params$facet))
+    ) +
+    ggplot2::labs(
+      x = plot_labels$x,
+      y = "Density",
+      title = plot_labels$title
     ) +
     ggplot2::theme_minimal()
+
+  return(plot)
 }
 
 #-------------------------------------------------------------------------------

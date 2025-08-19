@@ -12,7 +12,7 @@ plot_estimates(x, level = 0.95, ...)
 \item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
 Defaults to 0.95}
 
-\item{...}{arguments to pass to \verb{ggplot2:geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, etc.)}
+\item{...}{Arguments to pass to \verb{ggplot2::geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, \code{bins} etc.).}
 }
 \value{
 Minimal ggplot object, that can be customized and added to with \code{+} (to change, scales, labels, legend, theme, etc.)

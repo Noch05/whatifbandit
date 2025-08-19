@@ -19,8 +19,8 @@ Tibble containing summary information from the trial.
 }
 \description{
 Summarizes the Results of a Single Multi-Arm Bandit Trial. Provides
-confidence intervals around the AIPW estimates, and the final calculations
-of the Thompson sampling probabilities or UCB1 valuess for each arm.
+confidence intervals around the AIPW estimates, final calculations
+of the Thompson sampling probabilities or UCB1 values, and the number of observations assigned for each arm.
 }
 \details{
 The confidence intervals applied follow a standard normal distribution

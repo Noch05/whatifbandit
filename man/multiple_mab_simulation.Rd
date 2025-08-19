@@ -115,8 +115,7 @@ If assignment method is "date", this length refers the number of units specified
 \item{check_args}{Logical; Whether or not to robustly check whether arguments are valid. Default is TRUE, and recommended
 not to be changed.}
 
-\item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets.
-.}
+\item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets.}
 }
 \value{
 An object of class \code{multiple.mab}, containing:

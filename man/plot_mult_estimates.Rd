@@ -17,7 +17,10 @@ of AIPW estimates.}
 \item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
 Defaults to 0.95}
 
-\item{...}{arguments to pass to \verb{ggplot2:geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, \code{bins} etc.)}
+\item{...}{Arguments to pass to \verb{ggplot2::geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, \code{bins} etc.). In the case of \code{type = "hist"}, additional
+arguments must be passed in to distinct lists, one named \code{geom} which are passed to \verb{ggplot2::geom_*} and one named \code{facet} which are passed to \code{ggplot2::facet_grid}.
+to \verb{ggplot2::geom_*}
+should be a named list with 2 components, 'geom' and 'facet', to distinguish between arguments passed to \code{ggplot2::geom_histogram} and \code{ggplot2::facet_grid()}.}
 }
 \value{
 Minimal ggplot object, that can be customized and added to with \code{+} (to change, scales, labels, legend, theme, etc.)

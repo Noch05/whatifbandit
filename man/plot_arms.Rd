@@ -12,7 +12,7 @@ plot_arms(x, object, ...)
 \item{object, }{String; Location to gather treatment arm data from, either
 "bandits" or "assignment_probs".}
 
-\item{...}{arguments to pass to \verb{ggplot2:geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, etc.)}
+\item{...}{Arguments to pass to \verb{ggplot2::geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, \code{bins} etc.).}
 }
 \value{
 ggplot object
