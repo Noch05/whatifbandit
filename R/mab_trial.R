@@ -309,10 +309,10 @@ end_mab_trial.data.table <- function(
   bandit_stats <- switch(
     algorithm,
     "thompson" = {
-      x <- data.table::as.data.table(dplyr::bind_rows(
-        bandits$bandit_stat,
-        .id = "period_number"
-      ))
+      x <- base::lapply(seq_len(periods + 1), function(i) {
+        base::as.list(bandits$bandit_stat[[i]])
+      }) |>
+        data.table::rbindlist(idcol = "period_number")
       x[, period_number := base::as.numeric(period_number)]
 
       x[,
@@ -351,10 +351,10 @@ end_mab_trial.data.table <- function(
     )
   )
 
-  assignment_probs <- data.table::as.data.table(dplyr::bind_rows(
-    bandits$assignment_prob,
-    .id = "period_number"
-  ))
+  assignment_probs <- base::lapply(seq_len(periods), function(i) {
+    base::as.list(bandits$assignment_prob[[i]])
+  }) |>
+    data.table::rbindlist(idcol = "period_number")
   assignment_probs[, period_number := base::as.numeric(period_number)]
 
   return(list(
