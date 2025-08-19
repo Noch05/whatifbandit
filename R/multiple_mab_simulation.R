@@ -337,7 +337,13 @@ condense_results <- function(data, keep_data, mabs, times) {
 
   if (data.table::is.data.table(data)) {
     results <- lapply(items, \(item) {
-      all <- lapply(seq_len(times), function(i) mabs[[i]][[item]])
+      all <- lapply(seq_len(times), function(i) {
+        if (item == "assignment_quantities") {
+          as.list(mabs[[i]][[item]])
+        } else {
+          mabs[[i]][[item]]
+        }
+      })
       result <- data.table::rbindlist(all, idcol = "trial")
       result[, trial := as.numeric(trial)]
       return(result)
