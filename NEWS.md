@@ -1,6 +1,12 @@
+# whatifbandit 0.2.1
+
+## Fixes and Improvements
+* Fixed handling of numeric and factor types in `conditions_col` of the `data_cols` argument.
+* Weighting AIPW by group size along with adaptive weights.
+* Fixed inconsistent results across with data.frames, tibbles, and data.tables. Running `single_mab_simulation()` or `multiple_mab_simulation()`, with
+the same seeds on the same system, now results in the same outcome regardless of input data class.
 
 # whatifbandit 0.2.0
-* Initial CRAN Submission
 
 ## New Features
 * `multiple_mab_simulation()` supports parallel processing via [future](https://future.futureverse.org/).
