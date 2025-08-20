@@ -81,7 +81,7 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
       values_to = "value"
     ) |>
     dplyr::group_by(mab_condition) |>
-    dplyr::summarize(mean = base::mean(value), sd = stats::sd(value))
+    dplyr::summarize(mean = base::mean(value), standard_dev = stats::sd(value))
 
   quantiles <- object$estimates |>
     dplyr::filter(estimator == "AIPW") |>
@@ -136,7 +136,7 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
       Treatment_Arm = mab_condition
     ) |>
     dplyr::left_join(quantities, by = c("Treatment_Arm" = "mab_condition")) |>
-    dplyr::rename(average_num_assigned = mean, sd_num_assigned = sd)
+    dplyr::rename(average_num_assigned = mean, sd_num_assigned = standard_dev)
   return(summary)
 }
 
