@@ -2,7 +2,7 @@
 % Please edit documentation in R/input_validation.R
 \name{check_data}
 \alias{check_data}
-\title{Checking for valid input data}
+\title{Checking for Valid Input Data}
 \usage{
 check_data(
   data,

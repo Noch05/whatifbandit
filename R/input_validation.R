@@ -263,12 +263,12 @@ check_cols <- function(
 }
 
 #------------------------------------------------------------------------------
-#' @title Checking if Inputs are proper Logical Values (TRUE and FALSE)
+#' @title Checking if Inputs are Logical Values (TRUE and FALSE)
 #' @name check_logical
-#' @returns Nothing; Throws an error if any input is not TRUE or FALSE
+#' @returns Throws an error if any input is not TRUE or FALSE
 #' @description Helper to [validate_inputs()]. This function accepts the user's
 #' settings for logical values in the Multi-Arm-Bandit trial, and checks whether they are valid.
-#' @param ... Arguments to check
+#' @param ... Arguments to check.
 #' @keywords internal
 check_logical <- function(...) {
   args <- rlang::dots_list(..., .named = TRUE)
@@ -287,7 +287,7 @@ check_logical <- function(...) {
   )
 }
 #--------------------------------------------------------------------------------
-#' @title Checking if inputs are proportions
+#' @title Checking for Proportions
 #' @name check_prop
 #' @returns Throws an error if any input is not a valid proportion between 0 and 1
 #' @description Helper to [validate_inputs()]. This function accepts the user's
@@ -316,7 +316,7 @@ check_prop <- function(...) {
   }
 }
 #-------------------------------------------------------------------------------
-#' @title Checking if inputs are positive integers or a valid string
+#' @title Checking If Inputs Are Positive Integers or a Valid String
 #' @name check_posint
 #' @returns Throws an error if any input is not a positive whole number or
 #' a valid string.
@@ -363,7 +363,7 @@ posint <- function(x) {
 }
 #--------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-#' @title Checking for valid input data
+#' @title Checking for Valid Input Data
 #' @name check_data
 #' @returns Throws an error if the data does not meet the specifications
 #' of the trial based on user settings.
@@ -427,7 +427,7 @@ check_data <- function(
   }
 }
 # ----------------------------------------------------------------------------
-#' @title Checking for valid assignment methods
+#' @title Checking For Valid Assignment Methods
 #' @name check_assign_method
 #' @returns Throws an error if the user is missing necessary arguments to
 #' assign treatments or passes invalid ones.

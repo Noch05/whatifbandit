@@ -2,23 +2,23 @@
 % Please edit documentation in R/multiple_mab_methods.R
 \name{plot_hist}
 \alias{plot_hist}
-\title{Plots Distribution of AIPW and Sample estimates over trials}
+\title{Plots Histograms of \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}} Results}
 \usage{
 plot_hist(x, quantity, params)
 }
 \arguments{
-\item{x}{\code{multiple.mab} class object created by \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}}
+\item{x}{A \code{multiple.mab} class object created by \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}.}
 
 \item{quantity}{The quantities to plot when \code{type = "hist"}, accepts either 'estimate' to plot the distributuons of the AIPW estimates, or
 'assignment' to plot the distributions of the number of observations assigned to each treatment across the repeated trials.}
 
-\item{params}{\code{...} from \code{\link[=plot.multiple.mab]{plot.multiple.mab()}} should be a named list containing two elements, \code{geom} and \code{facet} containing arguments for
+\item{params}{The dynamic dots (\code{...}) from \code{\link[=plot.multiple.mab]{plot.multiple.mab()}} should be a named list containing two elements, \code{geom} and \code{facet} containing arguments for
 \code{ggplot2::geom_histogram()} and \code{ggplot2::facet_grid()} respectively.}
 }
 \value{
-Minimal ggplot object, that can be customized and added to with \code{+} (to change, scales, labels, legend, theme, etc.)
+Minimal ggplot object, that can be customized and added to with \code{+} (to change \code{scales}, \code{labels}, \code{legend}, \code{theme}, etc.).
 }
 \description{
-Plots Distribution of AIPW and Sample estimates over trials for \code{\link[=plot.multiple.mab]{plot.multiple.mab()}}
+Plots distribution of AIPW estimates over trials for \code{\link[=plot.multiple.mab]{plot.multiple.mab()}} or the distribution of the number of observations assigned to each treatment arm.
 }
 \keyword{internal}

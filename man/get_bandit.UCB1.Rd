@@ -7,10 +7,10 @@
 \method{get_bandit}{ucb1}(past_results, conditions, current_period)
 }
 \arguments{
-\item{past_results}{Tibble/data.table containing summary of prior periods, with
+\item{past_results}{A tibble/data.table containing summary of prior periods, with
 successes, number of observations, and success rates, which is created by \code{\link[=get_past_results]{get_past_results()}}.}
 
-\item{current_period}{Numeric scalar; current period of the adaptive trial simulation.}
+\item{current_period}{Numeric value of length 1; current period of the adaptive trial simulation.}
 }
 \value{
 A named list with 2 elements: a tibble/data.table containing UCB1 and success rate for each condition,

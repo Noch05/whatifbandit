@@ -7,8 +7,8 @@
 check_level(level)
 }
 \arguments{
-\item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
-Defaults to 0.95}
+\item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, 0.95, 0.99).
+Defaults to 0.95.}
 }
 \value{
 Throws an error if \code{level} is invalid, else does nothing.

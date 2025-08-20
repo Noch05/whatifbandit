@@ -2,12 +2,12 @@
 % Please edit documentation in R/input_validation.R
 \name{check_posint}
 \alias{check_posint}
-\title{Checking if inputs are positive integers or a valid string}
+\title{Checking If Inputs Are Positive Integers or a Valid String}
 \usage{
 check_posint(...)
 }
 \arguments{
-\item{...}{Arguments to check}
+\item{...}{Arguments to check.}
 }
 \value{
 Throws an error if any input is not a positive whole number or

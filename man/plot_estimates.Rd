@@ -2,22 +2,22 @@
 % Please edit documentation in R/mab_methods.R
 \name{plot_estimates}
 \alias{plot_estimates}
-\title{Plot AIPW/Sample Estimates}
+\title{Plot AIPW Estimates}
 \usage{
 plot_estimates(x, level = 0.95, ...)
 }
 \arguments{
-\item{x}{\code{mab} class object created by \code{\link[=single_mab_simulation]{single_mab_simulation()}}}
+\item{x}{A \code{mab} class object created by \code{\link[=single_mab_simulation]{single_mab_simulation()}}}
 
-\item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
-Defaults to 0.95}
+\item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, 0.95, 0.99).
+Defaults to 0.95.}
 
 \item{...}{Arguments to pass to \verb{ggplot2::geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, \code{bins} etc.).}
 }
 \value{
-Minimal ggplot object, that can be customized and added to with \code{+} (to change, scales, labels, legend, theme, etc.)
+Minimal ggplot object, that can be customized and added to with \code{+} (to change \code{scales}, \code{labels}, \code{legend}, \code{theme}, etc.).
 }
 \description{
-Plot Summary of AIPW estimates and variances for Each Treatment Arm.
+Plot summary of AIPW estimates and variances for each treatment arm.
 }
 \keyword{internal}

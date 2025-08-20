@@ -2,7 +2,7 @@
 % Please edit documentation in R/mab_impute.R
 \name{impute_success}
 \alias{impute_success}
-\title{Imputing New Outcomes under MAB Trial}
+\title{Imputing New Outcomes of Multi-Arm-Bandit Trial}
 \usage{
 impute_success(
   current_data,
@@ -17,10 +17,9 @@ impute_success(
 )
 }
 \arguments{
-\item{current_data}{Updated tibble/data.frame object containing new treatments from \code{\link[=assign_treatments]{assign_treatments()}}
-to impute outcomes from.}
+\item{current_data}{Updated tibble/data.frame object containing new treatments from \code{\link[=assign_treatments]{assign_treatments()}}.}
 
-\item{imputation_info}{tibble/data.frame containing conditional probability of success by treatment block, for each
+\item{imputation_info}{A tibble/data.frame containing conditional probability of success by treatment block, for each
 combination that exists in \code{current_data}, calculated from the original experiment.
 Passed to \code{\link[randomizr:block_ra]{randomizr::block_ra()}} to impute outcomes.}
 
@@ -28,7 +27,8 @@ Passed to \code{\link[randomizr:block_ra]{randomizr::block_ra()}} to impute outc
 
 \item{success_col}{Column in \code{data}; binary successes from the original experiment.}
 
-\item{prior_data}{tibble/data.frame containing all the data from previous periods. Used to join together at the end for the next iteration of the simulation.}
+\item{prior_data}{A tibble/data.frame containing all the data from previous periods.
+Used to join together at the end for the next iteration of the simulation.}
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
@@ -39,7 +39,7 @@ on a given day whether or not all the information from a prior batch was availab
 you have exact dates treatments were assigned.}
 
 \item{dates}{Named date vector containing average success date by treatment block to impute new success dates for
-observations whose change in treatment changes their outcome from failure to success.}
+observations whose change in treatment also changes their outcome from failure to success.}
 
 \item{success_date_col}{Column in \code{data}; contains original dates each success occurred. Only necessary when \code{perfect_assignment = FALSE}. Must be of type \code{Date}, not a character string.}
 
@@ -54,12 +54,12 @@ of the outcomes are pre-computed using the existing data from the original rando
 \details{
 When \code{perfect_assignment} is FALSE, dates of success are imputed according to the average
 by each period and treatment block (treatment arm + any blocking). These imputations are required because
-these observations do not currently have dates of success. If these values are \code{NA}, they will be masked/hidden
-in the next phase and treated as failures by the Multi-Arm-Bandit assignment, because they do not have a record
-of occurring.
+these observations do not currently have dates of success, as no success was observed during the original experiment.
+Therefore if they go through the next iteration of the simulation without being imputed,
+the new successes will still be treated as failues becasue of the date masking mechanism.
 
 Observations that were successful in the original experiment, got assigned a new treatment, and then
-imputed as success again, had their original date kept. This assumes that the treatment has no individual
+imputed as success again, will have their original date kept. This assumes that the treatment has no individual
 treatment effect on the date of success, which may or may not be valid depending on the context of the
 experiment.
 }

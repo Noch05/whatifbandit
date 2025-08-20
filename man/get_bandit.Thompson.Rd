@@ -7,10 +7,10 @@
 \method{get_bandit}{thompson}(past_results, conditions, current_period, ndraws)
 }
 \arguments{
-\item{past_results}{Tibble/data.table containing summary of prior periods, with
+\item{past_results}{A tibble/data.table containing summary of prior periods, with
 successes, number of observations, and success rates, which is created by \code{\link[=get_past_results]{get_past_results()}}.}
 
-\item{current_period}{Numeric scalar; current period of the adaptive trial simulation.}
+\item{current_period}{Numeric value of length 1; current period of the adaptive trial simulation.}
 
 \item{ndraws}{A numeric value; When Thompson sampling direct calculations fail, draws from a simulated posterior
 will be used to approximate the Thompson sampling probabilities. This is the number of simulations to use, the default
@@ -18,9 +18,10 @@ is 5000 to match the default parameter \code{\link[bandit:best_binomial_bandit_s
 concerns.}
 }
 \value{
-A named list of length 2, with both elements, containing a reference to the named numeric vector of Thompson
-sampling probabilities. The second element is adjusted based on what the user has set for \code{control_augment} and
-\code{random_assign_prop} to reflect the probability of assignment to a given treatment at that period.
+A named list of length 2, where element 1 is the named numeric vector of Thompson
+sampling probabilities, and element 2 is a reference to the same vector. The second element is
+adjusted later in the simulation based on what the user has set for \code{control_augment} and \code{random_assign_prop} to reflect the
+probability of assignment to a given treatment at that period.
 }
 \description{
 Thompson sampling Algorithm

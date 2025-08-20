@@ -1,15 +1,16 @@
 #' Calculate Observation Level AIPW For Each Treatment Condition
 #' @name get_iaipw
 #' @description Calculates the augmented inverse probability weighted estimate (AIPW) of treatment
-#' success for each observation and treatment. This method scales the estimated probabilities of success by
-#' the probability of being assigned the treatment, and weighted  by a the conditional expectation of success
-#' from prior periods of an adaptive trial. The condition expectation function is a grouped mean by
+#' success for each observation and treatment (i.e. on the level of a single unit).
+#' This method scales the estimated probabilities of success by
+#' the probability of being assigned the treatment, and weighted by a the conditional expectation of success
+#' from prior periods of an adaptive trial. The conditional expectation function used is a grouped mean by
 #' treatment arm.
 #'
 #' @inheritParams single_mab_simulation
-#' @param periods Numeric value of length 1; number of total periods in the simulation
+#' @param periods Numeric value of length 1; number of total periods in the simulation.
 #' @param assignment_probs A tibble/data.table containing the probabilities of being
-#' assigned each treatment at a given period
+#' assigned each treatment at a given period.
 #'
 #' @returns A tibble/data.frame, containing the data used in the Multi-Arm-Bandit, with
 #' new columns pertaining to the individual AIPW estimate for each person and condition, and
@@ -20,8 +21,8 @@
 #' in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}. The
 #' formulas in equation 5, formed the basis for this function's calculations. Here
 #' the regression adjustment used is the grouped mean of success by treatment, up until
-#' the current period of estimation (so at period 5, the grouped mean was calculated
-#' using data from periods 1 through 4).
+#' the current period of estimation (so at period 5, the grouped mean would be calculated
+#' using the results from periods 1 through 4).
 #'
 #'
 #' @references
@@ -244,9 +245,9 @@ get_iaipw.data.table <- function(
 #' Calculate Adaptive AIPW Estimates
 #' @name adaptive_aipw
 #'
-#' @description Takes the average of the individual AIPW scores created by [get_iaipw()] for each period,
-#' and assigns each estimate an adaptive weight based \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et. al (2021)}
-#' to calculate a final AIPW estimate and variance for each treatment condition.
+#' @description Averages the observation level AIPW scores created by [get_iaipw()] across each period, then assigns
+#' each estimate an adaptive weight based on \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et. al (2021)}, and
+#' another weight based on the size of each period to calculate the final AIPW estimate and variance for each treatment.
 #' Sample means and variances are also provided for comparison.
 #'
 #' @inheritParams get_iaipw

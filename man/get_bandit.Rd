@@ -14,7 +14,7 @@ get_bandit(
 )
 }
 \arguments{
-\item{past_results}{Tibble/data.table containing summary of prior periods, with
+\item{past_results}{A tibble/data.table containing summary of prior periods, with
 successes, number of observations, and success rates, which is created by \code{\link[=get_past_results]{get_past_results()}}.}
 
 \item{algorithm}{A character string specifying the MAB algorithm to use. Options are "thompson" or "ucb1". Algorithm
@@ -22,7 +22,7 @@ defines the adaptive assignment process. Mathematical details on these algorithm
 can be found in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
 \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}
 
-\item{current_period}{Numeric scalar; current period of the adaptive trial simulation.}
+\item{current_period}{Numeric value of length 1; current period of the adaptive trial simulation.}
 
 \item{control_augment}{A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.
 Default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.}
@@ -48,18 +48,23 @@ package and UCB1 valuess are calculated using the well-defined formula that can 
 in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup (2014)}.
 }
 \details{
-The Thompson  \code{assignment_probabilities} is the same as the \code{bandit} except
-when control augmentation is used to alter the probabilities of assignment.
+The Thompson \code{assignment_probabilities} are the same as the \code{bandit} vector except when
+\code{control_augment} or \code{random_assign_prop} are greater than 0, as these arguments will alter the probabilities
+of assignment.
+
 Thompson sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
-package but the direct calculation can result in errors or overflow. If this occurs, a simulation based method is used
-instead to estimate the posterior distribution, and the user receives a warning. The \code{ndraws} argument specifies
-the number of draws to make in this simulation.
+package but the direct calculation can result in errors or overflow. If this occurs, a simulation based method
+from the same package is used instead to estimate the posterior distribution.
+If this occurs a warning will be presented. \code{ndraws} specifies the number of iterations for the
+simulation based method, and the default value is 5000.
 
 The UCB1 algorithm only selects 1 treatment at each period, with no probability matching
-so \code{assignment_probabilities} will always have 1 element equal to 1, and the rest equal to 0.
-Unless control augmentation is used, then the control group will be altered to reach its
-threshold. If originally the vector is \verb{(0, 0, 1)}, and \code{control_augment} = 0.2,
-the new vector is \verb{(0.2, 0, 0.8)} assuming the first element is control.
+so \code{assignment_probabilities} will always have 1 element equal to 1, and the rest equal to 0, unless
+\code{control_augment} or \code{random_assign_prop} are greater than 0, which will alter the probabilities of assignment.
+For example, if the original vector is \verb{(0, 0, 1)}, and \code{control_augment} = 0.2,
+the new vector is \verb{(0.2, 0, 0.8)} assuming the first element is control. If instead the 3rd element
+were the control group the resulting vector would not be changed because it already meets the
+control group threshold.
 }
 \references{
 Kuleshov, Volodymyr, and Doina Precup. 2014. "Algorithms for Multi-Armed Bandit Problems."

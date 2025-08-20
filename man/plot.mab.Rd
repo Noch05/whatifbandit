@@ -7,7 +7,7 @@
 \method{plot}{mab}(x, type, level = 0.95, save = FALSE, path = NULL, ...)
 }
 \arguments{
-\item{x}{\code{mab} class object created by \code{\link[=single_mab_simulation]{single_mab_simulation()}}}
+\item{x}{A \code{mab} class object created by \code{\link[=single_mab_simulation]{single_mab_simulation()}}}
 
 \item{type}{String; Type of plot requested; valid types are:
 \itemize{
@@ -17,17 +17,17 @@
 user specified normal confidence intervals based on their estimated variance.
 }}
 
-\item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
-Defaults to 0.95}
+\item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, 0.95, 0.99).
+Defaults to 0.95.}
 
 \item{save}{Logical; Whether or not to save the plot to disk; FALSE by default.}
 
-\item{path}{String; File directory to save file.}
+\item{path}{String; File directory to save file if necessary.}
 
 \item{...}{Arguments to pass to \verb{ggplot2::geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, \code{bins} etc.).}
 }
 \value{
-Minimal ggplot object, that can be customized and added to with \code{+} (to change, scales, labels, legend, theme, etc.)
+Minimal ggplot object, that can be customized and added to with \code{+} (to change \code{scales}, \code{labels}, \code{legend}, \code{theme}, etc.).
 }
 \description{
 Uses \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} to plot the results of a single
@@ -37,12 +37,9 @@ with \code{+} like any other ggplot plot, but arguments to change
 the underlying geom must be passed to the function initially.
 }
 \details{
-The plot generic requires \href{https://cran.r-project.org/package=ggplot2}{ggplot2}
-which is not required by the package, so it must be installed separately.
-
 This function provides minimalist plots to quickly view the results of any
 Multi-Arm-Bandit trial, and has the ability to be customized through the \code{...}
-in the call and \code{+} afterwords. However, all the data necessary is
+inside the call and \code{+} afterwards. However, all the data necessary is
 provided in the output of \code{\link[=single_mab_simulation]{single_mab_simulation()}} for extreme
 customization or professional plots, it is highly recommended
 to start completely from scratch and not use the generic.

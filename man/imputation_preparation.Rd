@@ -15,7 +15,7 @@ imputation_preparation(
 )
 }
 \arguments{
-\item{current_data}{tibble/data.table with only observations from the current sampling period.}
+\item{current_data}{A tibble/data.table with only observations from the current sampling period.}
 
 \item{block_cols}{A character vector of variables to block by. This vector should not be named.}
 
@@ -45,8 +45,8 @@ you have exact dates treatments were assigned.}
 \value{
 A named list containing:
 \itemize{
-\item \code{current_data}: tibble/data.table containing \code{impute_block} column to guide the outcome imputations
-\item \code{impute_success}: tibble/data.table object containing probabilities of success by \code{treatment_block} used to impute
+\item \code{current_data}: A tibble/data.table containing \code{impute_block} column to guide the outcome imputations
+\item \code{impute_success}: A tibble/data.table object containing probabilities of success by \code{treatment_block} used to impute
 outcomes. Subsetted from the \code{\link[=imputation_precompute]{imputation_precompute()}} output.
 \item \code{impute_dates}: Named date vector by treatment condition, containing the dates of success
 to impute if perfect_assignment is FALSE. Subsetted from the \code{\link[=imputation_precompute]{imputation_precompute()}} output.}
@@ -66,7 +66,7 @@ to contain only the treatment blocks which exist in a given period.
 These checks are not implemented in \code{tryCatch()} block because they have to happen
 in every iteration.
 
-\code{impute_block} is the observations new treatment block, combining any
+\code{impute_block} is the observation's new treatment block, combining any
 blocking variables with their new treatment assigned via the Multi-Arm-Bandit
 procedure.
 }

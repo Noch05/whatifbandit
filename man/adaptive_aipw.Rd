@@ -11,9 +11,9 @@ adaptive_aipw(data, assignment_probs, conditions, periods, verbose)
 of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.}
 
 \item{assignment_probs}{A tibble/data.table containing the probabilities of being
-assigned each treatment at a given period}
+assigned each treatment at a given period.}
 
-\item{periods}{Numeric value of length 1; number of total periods in the simulation}
+\item{periods}{Numeric value of length 1; number of total periods in the simulation.}
 
 \item{verbose}{Logical; whether or not to print intermediate messages. Default is FALSE.}
 }
@@ -22,9 +22,9 @@ A tibble/data.table containing the AIPW estimate of treatment success, AIPW vari
 sample proportion of successful treatments (sample mean), and sample mean variance.
 }
 \description{
-Takes the average of the individual AIPW scores created by \code{\link[=get_iaipw]{get_iaipw()}} for each period,
-and assigns each estimate an adaptive weight based \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et. al (2021)}
-to calculate a final AIPW estimate and variance for each treatment condition.
+Averages the observation level AIPW scores created by \code{\link[=get_iaipw]{get_iaipw()}} across each period, then assigns
+each estimate an adaptive weight based on \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et. al (2021)}, and
+another weight based on the size of each period to calculate the final AIPW estimate and variance for each treatment.
 Sample means and variances are also provided for comparison.
 }
 \details{

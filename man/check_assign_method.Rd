@@ -2,7 +2,7 @@
 % Please edit documentation in R/input_validation.R
 \name{check_assign_method}
 \alias{check_assign_method}
-\title{Checking for valid assignment methods}
+\title{Checking For Valid Assignment Methods}
 \usage{
 check_assign_method(assignment_method, time_unit, verbose, period_length)
 }

@@ -39,9 +39,9 @@ Used to simulate imperfect information on the part of researchers conducting an 
 \value{
 A named list containing:
 \itemize{
-\item \code{original_summary}: tibble(s)/data.table(s) containing the probability of success for each
+\item \code{original_summary}: The tibble(s)/data.table(s) containing the probability of success for each
 treatment block, at each period.
-\item \code{dates_summary}: tibble/data.table containing the average success date for
+\item \code{dates_summary}: A tibble/data.table containing the average success date for
 each treatment block at each treatment period.
 }
 }

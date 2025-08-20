@@ -13,9 +13,9 @@ get_past_results(
 )
 }
 \arguments{
-\item{current_data}{tibble/data.table with only observations from the current sampling period.}
+\item{current_data}{A tibble/data.table with only observations from the current sampling period.}
 
-\item{prior_data}{tibble/data.table with only the observations from the prior index.}
+\item{prior_data}{A tibble/data.table with only the observations from the prior index.}
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
@@ -34,8 +34,8 @@ treatment condition.
 }
 \description{
 Summarizes results of prior periods to use for the current Multi-Arm-Bandit assignment. This function
-calculates the number of success under each treatment, the total number of observations assigned to each treatment,
-to be used for UCB1 or Thompson sampling.
+calculates the number of success under each treatment and the total number of observations assigned to each treatment which are used
+to calculate UCB1 values or Thompson sampling probabilities.
 }
 \details{
 When \code{perfect_assignment} is FALSE, the maximum value from the specified

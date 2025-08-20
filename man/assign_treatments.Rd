@@ -17,7 +17,7 @@ assign_treatments(
 )
 }
 \arguments{
-\item{current_data}{tibble/data.table with only observations from the current sampling period.}
+\item{current_data}{A tibble/data.table with only observations from the current sampling period.}
 
 \item{probs}{Named numeric Vector; probability of assignment for each treatment condition.}
 
@@ -46,8 +46,8 @@ will have a \code{random_assign_prop} probability of being selected for random a
 a whole number, and that many rows are selected for random assignment.}
 }
 \value{
-Updated tibble/data.table with the new treatment conditions for each observation. If this treatment is different
-then from under the original experiment, the column 'impute_req' is 1, and else is 0.
+Updated tibble/data.table with the new treatment conditions for each observation, and whether imputation is required.
+If this treatment is different then from under the original experiment, the 'impute_req' is 1, and else is 0 for the observation.
 }
 \description{
 Assigns new treatments for an assignment wave based on the assignment probabilities provided from
@@ -56,15 +56,11 @@ Assignments are made randomly with the given probabilities using \code{\link[ran
 \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}.
 }
 \details{
-The unique identifier for each row is used as the cluster in the for the
-randomizr package functions to ensure that each observation is only
-treated once, and is returned in the same order as provided.
-
 The number of rows which are randomly assigned in each period is \code{random_assign_prop} multiplied by
 the number of rows in the period. If this number is less than 1, then Bernoulli draws are made for each row
 with probability \code{random_assign_prob} to determine if that row will be assigned randomly. Else, the number of random
 rows is rounded to the nearest whole number, and then that many rows are selected to be assigned through
-random assignment. These row selections are also random.
+complete random assignment. The row selections are also random.
 }
 \seealso{
 \itemize{

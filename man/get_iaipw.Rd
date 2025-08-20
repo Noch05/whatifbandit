@@ -11,9 +11,9 @@ get_iaipw(data, assignment_probs, periods, conditions, verbose)
 of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.}
 
 \item{assignment_probs}{A tibble/data.table containing the probabilities of being
-assigned each treatment at a given period}
+assigned each treatment at a given period.}
 
-\item{periods}{Numeric value of length 1; number of total periods in the simulation}
+\item{periods}{Numeric value of length 1; number of total periods in the simulation.}
 
 \item{verbose}{Logical; whether or not to print intermediate messages. Default is FALSE.}
 }
@@ -24,9 +24,10 @@ probability of assignment for each treatment at each period.
 }
 \description{
 Calculates the augmented inverse probability weighted estimate (AIPW) of treatment
-success for each observation and treatment. This method scales the estimated probabilities of success by
-the probability of being assigned the treatment, and weighted  by a the conditional expectation of success
-from prior periods of an adaptive trial. The condition expectation function is a grouped mean by
+success for each observation and treatment (i.e. on the level of a single unit).
+This method scales the estimated probabilities of success by
+the probability of being assigned the treatment, and weighted by a the conditional expectation of success
+from prior periods of an adaptive trial. The conditional expectation function used is a grouped mean by
 treatment arm.
 }
 \details{
@@ -34,8 +35,8 @@ The specification for the individual AIPW estimates can be found
 in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}. The
 formulas in equation 5, formed the basis for this function's calculations. Here
 the regression adjustment used is the grouped mean of success by treatment, up until
-the current period of estimation (so at period 5, the grouped mean was calculated
-using data from periods 1 through 4).
+the current period of estimation (so at period 5, the grouped mean would be calculated
+using the results from periods 1 through 4).
 }
 \references{
 Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.

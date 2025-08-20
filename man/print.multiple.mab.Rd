@@ -7,17 +7,17 @@
 \method{print}{multiple.mab}(x, ...)
 }
 \arguments{
-\item{x}{\code{multiple.mab} class object}
+\item{x}{A \code{multiple.mab} class object created by \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}.}
 
-\item{...}{further arguments passed to or from other methods}
+\item{...}{Further arguments passed to or from other methods.}
 }
 \value{
 Text summary of settings used for the Multi-Arm Bandit trials.
 }
 \description{
 Custom Print Display for \code{multiple.mab} objects returned by \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}.
-Prevents the large list output from being printed to the R console, and provides
-useful information about the settings for the trials
+Prevents the large list output from being printed directly, and provides
+useful information about the settings for the trials.
 }
 \details{
 The items used to create the text summary can be found in the settings

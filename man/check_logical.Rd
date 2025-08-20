@@ -2,15 +2,15 @@
 % Please edit documentation in R/input_validation.R
 \name{check_logical}
 \alias{check_logical}
-\title{Checking if Inputs are proper Logical Values (TRUE and FALSE)}
+\title{Checking if Inputs are Logical Values (TRUE and FALSE)}
 \usage{
 check_logical(...)
 }
 \arguments{
-\item{...}{Arguments to check}
+\item{...}{Arguments to check.}
 }
 \value{
-Nothing; Throws an error if any input is not TRUE or FALSE
+Throws an error if any input is not TRUE or FALSE
 }
 \description{
 Helper to \code{\link[=validate_inputs]{validate_inputs()}}. This function accepts the user's

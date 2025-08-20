@@ -7,9 +7,9 @@
 #' @inheritParams single_mab_simulation
 #' @returns A named list containing:
 #' \itemize{
-#' \item `original_summary`: tibble(s)/data.table(s) containing the probability of success for each
+#' \item `original_summary`: The tibble(s)/data.table(s) containing the probability of success for each
 #' treatment block, at each period.
-#' \item `dates_summary`: tibble/data.table containing the average success date for
+#' \item `dates_summary`: A tibble/data.table containing the average success date for
 #' each treatment block at each treatment period.
 #' }
 #' @details
@@ -34,7 +34,7 @@ imputation_precompute <- function(
 #-------------------------------------------------------------------------------
 
 #' @method imputation_precompute data.frame
-#' @title imputation precompute for data.frames
+#' @title [imputation_precompute()] for data.frames
 #' @inheritParams imputation_precompute
 #' @noRd
 
@@ -44,8 +44,6 @@ imputation_precompute.data.frame <- function(
   perfect_assignment,
   data_cols
 ) {
-  # Choosing Whether to use all the data from the experiment or only up to the current treatment period
-
   if (whole_experiment) {
     original_summary <- data |>
       dplyr::group_by(treatment_block) |>
@@ -96,7 +94,10 @@ imputation_precompute.data.frame <- function(
     dates_summary <- NULL
   }
 
-  imputation_information <- list(original_summary, dates_summary)
+  imputation_information <- list(
+    success = original_summary,
+    dates = dates_summary
+  )
 
   return(imputation_information)
 }
@@ -104,7 +105,7 @@ imputation_precompute.data.frame <- function(
 #-------------------------------------------------------------------------------
 #' @method imputation_precompute data.table
 #' @title
-#' imputation precompute for data.tables
+#' [imputation_precompute()] for data.tables
 #' @inheritParams imputation_precompute
 #' @noRd
 
@@ -214,8 +215,8 @@ imputation_precompute.data.table <- function(
 #' @inheritParams impute_success
 #' @returns A named list containing:
 #' \itemize{
-#' \item `current_data`: tibble/data.table containing `impute_block` column to guide the outcome imputations
-#' \item `impute_success`: tibble/data.table object containing probabilities of success by `treatment_block` used to impute
+#' \item `current_data`: A tibble/data.table containing `impute_block` column to guide the outcome imputations
+#' \item `impute_success`: A tibble/data.table object containing probabilities of success by `treatment_block` used to impute
 #' outcomes. Subsetted from the [imputation_precompute()] output.
 #' \item `impute_dates`: Named date vector by treatment condition, containing the dates of success
 #' to impute if perfect_assignment is FALSE. Subsetted from the [imputation_precompute()] output.}
@@ -229,9 +230,10 @@ imputation_precompute.data.table <- function(
 #' These checks are not implemented in `tryCatch()` block because they have to happen
 #' in every iteration.
 #'
-#' `impute_block` is the observations new treatment block, combining any
+#' `impute_block` is the observation's new treatment block, combining any
 #' blocking variables with their new treatment assigned via the Multi-Arm-Bandit
 #' procedure.
+#'
 #' @keywords internal
 
 imputation_preparation <- function(
@@ -266,17 +268,17 @@ imputation_preparation <- function(
   }
 
   if (whole_experiment) {
-    impute_success <- imputation_information[[1]]
+    impute_success <- imputation_information[["success"]]
   } else {
-    impute_success <- imputation_information[[1]][[current_period]]
+    impute_success <- imputation_information[["success"]][[current_period]]
   }
   if (!perfect_assignment) {
     dates <- rlang::set_names(
-      base::as.Date(base::as.numeric(imputation_information[[2]][
+      base::as.Date(base::as.numeric(imputation_information[["dates"]][
         current_period,
         -1
       ])),
-      base::names(imputation_information[[2]][current_period, -1])
+      base::names(imputation_information[["dates"]][current_period, -1])
     )
   } else {
     dates <- NULL
@@ -296,13 +298,13 @@ imputation_preparation <- function(
 }
 #-------------------------------------------------------------------------------
 #' Checking Imputation Info
-#' @description Subsets or adds to tibble/data.frame created by [imputation_precompute()],
-#' to ensure compatibility with [randomizr::block_ra()].
+#' @description Subsets or adds to the tibble/data.frame created by [imputation_precompute()],
+#' and sorts it to ensure compatibility with [randomizr::block_ra()].
 #'
 #' @name check_impute
 #' @inheritParams get_past_results
 #' @inheritParams impute_success
-#' @param imputation_information `original_summary` element of the `imputation_information`
+#' @param imputation_information The `success` element of the `imputation_information`
 #' list created by [imputation_precompute()] for the given period.
 #' @details
 #' [randomizr::block_ra()] does not see the names
@@ -311,7 +313,7 @@ imputation_preparation <- function(
 #' [randomizr::block_ra()]'s internal ordering.
 #'
 #' When blocks are required but do not exist in the information provided it is added
-#' to the tibble.data.table, with an estimated conditional probability of success as
+#' to the tibble/data.table, with an estimated conditional probability of success as
 #' the average across other blocks.
 #'
 #' When blocks are present but not required, they are removed from the
@@ -411,21 +413,21 @@ check_impute.data.table <- function(
 }
 #------------------------------------------------------------------------------------
 
-#' Imputing New Outcomes under MAB Trial
+#' Imputing New Outcomes of Multi-Arm-Bandit Trial
 #' @name impute_success
 #' @description Imputes outcomes for the current treatment assignment period.
 #' Uses [randomizr::block_ra()] to impute the outcomes for observations
 #' who were assigned new treatments. The probabilities used to guide the imputation
 #' of the outcomes are pre-computed using the existing data from the original randomized experiment.
-#' @param current_data Updated tibble/data.frame object containing new treatments from [assign_treatments()]
-#' to impute outcomes from.
+#' @param current_data Updated tibble/data.frame object containing new treatments from [assign_treatments()].
 #' @inheritParams run_mab_trial
-#' @param prior_data tibble/data.frame containing all the data from previous periods. Used to join together at the end for the next iteration of the simulation.
-#' @param imputation_info tibble/data.frame containing conditional probability of success by treatment block, for each
+#' @param prior_data A tibble/data.frame containing all the data from previous periods.
+#' Used to join together at the end for the next iteration of the simulation.
+#' @param imputation_info A tibble/data.frame containing conditional probability of success by treatment block, for each
 #' combination that exists in `current_data`, calculated from the original experiment.
 #' Passed to [randomizr::block_ra()] to impute outcomes.
 #' @param dates Named date vector containing average success date by treatment block to impute new success dates for
-#' observations whose change in treatment changes their outcome from failure to success.
+#' observations whose change in treatment also changes their outcome from failure to success.
 #' @param current_period Numeric value of length 1; current treatment wave of the simulation.
 #' @inheritParams get_past_results
 #' @inheritParams single_mab_simulation
@@ -433,12 +435,12 @@ check_impute.data.table <- function(
 #' @details
 #' When `perfect_assignment` is FALSE, dates of success are imputed according to the average
 #' by each period and treatment block (treatment arm + any blocking). These imputations are required because
-#' these observations do not currently have dates of success. If these values are `NA`, they will be masked/hidden
-#' in the next phase and treated as failures by the Multi-Arm-Bandit assignment, because they do not have a record
-#' of occurring.
+#' these observations do not currently have dates of success, as no success was observed during the original experiment.
+#' Therefore if they go through the next iteration of the simulation without being imputed,
+#' the new successes will still be treated as failues becasue of the date masking mechanism.
 #'
 #' Observations that were successful in the original experiment, got assigned a new treatment, and then
-#' imputed as success again, had their original date kept. This assumes that the treatment has no individual
+#' imputed as success again, will have their original date kept. This assumes that the treatment has no individual
 #' treatment effect on the date of success, which may or may not be valid depending on the context of the
 #' experiment.
 #'
@@ -477,8 +479,6 @@ impute_success.data.frame <- function(
   success_date_col,
   current_period
 ) {
-  ## Imputing success randomly based on previously calculated Probabilities
-
   if (base::any(current_data$impute_req == 1, na.rm = TRUE)) {
     filtered_data <- current_data[current_data$impute_req == 1, ]
 
@@ -490,7 +490,6 @@ impute_success.data.frame <- function(
       check_inputs = FALSE
     )
 
-    # Joining Data Together and Returning
     filtered_data$mab_success <- imputations
 
     imputed <- dplyr::rows_update(current_data, filtered_data, by = id_col$name)
@@ -535,8 +534,6 @@ impute_success.data.table <- function(
   success_date_col,
   current_period
 ) {
-  ## Imputing success randomly based on previously calculated Probabilities
-
   if (current_data[impute_req == 1, .N] > 0) {
     blocks <- current_data[impute_req == 1, impute_block]
 
@@ -548,7 +545,6 @@ impute_success.data.table <- function(
       check_inputs = FALSE
     )
 
-    # Joining Data Together and Returning
     current_data[impute_req == 1, mab_success := imputations]
     current_data[impute_req == 0, mab_success := base::get(success_col$name)]
   } else {

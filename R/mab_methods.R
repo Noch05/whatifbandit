@@ -1,10 +1,10 @@
 #' Print Generic For `mab`
 #' @description
 #' Custom Print Display for objects of `mab` class returned by [single_mab_simulation()].
-#' Prevents the large list from being printed directly to the R console, and provides
+#' Prevents the large list from being printed directly, and provides
 #' useful information about the settings of each trial.
-#' @param x `mab` class object created by [single_mab_simulation()]
-#' @param ... further arguments passed to or from other methods
+#' @param x A `mab` class object created by [single_mab_simulation()].
+#' @param ... Further arguments passed to or from other methods.
 #' @method print mab
 #' @name print.mab
 #' @returns Text summary of settings used for the Multi-Arm Bandit trial.
@@ -41,9 +41,9 @@ print.mab <- function(x, ...) {
 #' Print Helper for `mab` and `multiple.mab`
 #' @description Common items for the print generics for `mab` and `multiple.mab` classes
 #' @name print_mab
-#' @param mab `mab` or `multiple.mab` object to derive settings from
+#' @param mab A `mab` or `multiple.mab` object.
 #' @returns Text summary of settings used for the Multi-Arm Bandit trial.
-#' @noRd
+#' @keywords internal
 print_mab <- function(mab) {
   settings <- mab$settings
 
@@ -90,21 +90,21 @@ print_mab <- function(mab) {
 }
 
 #------------------------------------------------------------------------------
-##' Summary Generic for "mab" class
+##' Summary Generic For "mab" Class
 #' @description
 #' Summarizes the Results of a Single Multi-Arm Bandit Trial. Provides
 #' confidence intervals around the AIPW estimates, final calculations
 #' of the Thompson sampling probabilities or UCB1 values, and the number of observations assigned for each arm.
-#' @param object `mab`` class object created by [single_mab_simulation()].
-#' @param level Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
-#' Defaults to 0.95
-#' @param ... additional arguments.
+#' @param object A `mab` class object created by [single_mab_simulation()].
+#' @param level Numeric value of length 1; indicates confidence interval Width (i.e 0.90, 0.95, 0.99).
+#' Defaults to 0.95.
+#' @param ... Additional arguments.
 #' @method summary mab
 #' @export
 #' @details
 #' The confidence intervals applied follow a standard normal distribution
 #' because it is assumed the AIPW estimators are asymptotically normal as shown
-#' in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}
+#' in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}.
 #'
 #' `...` is provided to be compatible with `summary()`, the function
 #' does not have any additional arguments.
@@ -113,7 +113,19 @@ print_mab <- function(mab) {
 #' created by [single_mab_simulation()] but
 #' this provides a simple shortcut, which is useful when testing many
 #' different simulations.
-#' @returns Tibble containing summary information from the trial.
+#
+#' @returns A tibble containing summary information from the trial with the columns:
+#' \itemize{
+#' \item `Treatment_Arm`: Contains the treatment condition.
+#' \item `Probability_Of_Best_Arm`/`UCB1_Value`: Final Thompson sampling probabilities or UCB1 values for each treatment.
+#' \item `estimated_probability_of_success`: The AIPW estimates for the probability of success for each treatment.
+#' \item `SE`: The standard error for the AIPW estimates.
+#' \item `lower_bound`: The lower bound on the normal confidence interval for the `estimated_probability_of_success`. Default is 95%.
+#' \item `upper_bound`: The upper bound on the normal confidence interval for the `estimated_probability_of_success`. Default is 95%.
+#' \item `num_assigned`: The number of observations assigned to each treatment under the simulated trial.
+#' \item `level`: The confidence level for the confidence interval, default is 95%.
+#' \item `periods`: The total number of periods of the simulation.
+#' }
 #' @references
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
 #' "Confidence Intervals for Policy Evaluation in Adaptive Experiments." \emph{Proceedings of the National Academy of Sciences of the United States of America} 118
@@ -171,7 +183,7 @@ summary.mab <- function(object, level = 0.95, ...) {
 #' the underlying geom must be passed to the function initially.
 #'
 #' @method plot mab
-#' @param x `mab` class object created by [single_mab_simulation()]
+#' @param x A `mab` class object created by [single_mab_simulation()]
 #' @param type String; Type of plot requested; valid types are:
 #' \itemize{
 #' \item `arm`: Shows Thompson sampling probabilities or UCB1 values over the trial period.
@@ -180,16 +192,13 @@ summary.mab <- function(object, level = 0.95, ...) {
 #' user specified normal confidence intervals based on their estimated variance.
 #' }
 #' @param save Logical; Whether or not to save the plot to disk; FALSE by default.
-#' @param path String; File directory to save file.
+#' @param path String; File directory to save file if necessary.
 #' @inheritParams summary.mab
 #' @param ... Arguments to pass to `ggplot2::geom_*` function (e.g. `color`, `linewidth`, `alpha`, `bins` etc.).
 #' @details
-#' The plot generic requires \href{https://cran.r-project.org/package=ggplot2}{ggplot2}
-#' which is not required by the package, so it must be installed separately.
-#'
 #' This function provides minimalist plots to quickly view the results of any
 #' Multi-Arm-Bandit trial, and has the ability to be customized through the `...`
-#' in the call and `+` afterwords. However, all the data necessary is
+#' inside the call and `+` afterwards. However, all the data necessary is
 #' provided in the output of [single_mab_simulation()] for extreme
 #' customization or professional plots, it is highly recommended
 #' to start completely from scratch and not use the generic.
@@ -204,7 +213,7 @@ summary.mab <- function(object, level = 0.95, ...) {
 #' (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 #' @export
 #' @example inst/examples/plot.mab_example.R
-#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change, scales, labels, legend, theme, etc.)
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change `scales`, `labels`, `legend`, `theme`, etc.).
 
 plot.mab <- function(x, type, level = .95, save = FALSE, path = NULL, ...) {
   rlang::check_installed("ggplot2")
@@ -225,13 +234,13 @@ plot.mab <- function(x, type, level = .95, save = FALSE, path = NULL, ...) {
 #' @name plot_arms
 #' @title Plot Treatment Arms Over Time
 #' @description
-#' Helper to [plot.mab()]. Plots Treatment Arms over Time.
+#' Helper to [plot.mab()]; plots treatment arms over time.
 #' @returns ggplot object
-#' @param x, mab object passed from [plot.mab()]
+#' @param x A `mab` object passed from [plot.mab()]
 #' @inheritParams plot.mab
-#' @param object, String; Location to gather treatment arm data from, either
+#' @param object String; Location to gather treatment arm data from, either
 #' "bandits" or "assignment_probs".
-#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change, scales, labels, legend, theme, etc.)
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change `scales`, `labels`, `legend`, `theme`, etc.).
 #' @keywords internal
 
 plot_arms <- function(x, object, ...) {
@@ -279,11 +288,11 @@ plot_arms <- function(x, object, ...) {
 }
 
 #' @name plot_estimates
-#' @title Plot AIPW/Sample Estimates
+#' @title Plot AIPW Estimates
 #' @inheritParams plot.mab
 #' @description
-#' Plot Summary of AIPW estimates and variances for Each Treatment Arm.
-#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change, scales, labels, legend, theme, etc.)
+#' Plot summary of AIPW estimates and variances for each treatment arm.
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change `scales`, `labels`, `legend`, `theme`, etc.).
 #' @keywords internal
 plot_estimates <- function(x, level = 0.95, ...) {
   rlang::check_installed("ggplot2")

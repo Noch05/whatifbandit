@@ -1,14 +1,14 @@
 #' Gather Past Results for Given Assignment Period
 #' @name get_past_results
 #' @description Summarizes results of prior periods to use for the current Multi-Arm-Bandit assignment. This function
-#' calculates the number of success under each treatment, the total number of observations assigned to each treatment,
-#'  to be used for UCB1 or Thompson sampling.
+#' calculates the number of success under each treatment and the total number of observations assigned to each treatment which are used
+#' to calculate UCB1 values or Thompson sampling probabilities.
 #'
 #' @inheritParams single_mab_simulation
 #' @inheritParams create_prior
 #' @inheritParams cols
-#' @param current_data tibble/data.table with only observations from the current sampling period.
-#' @param prior_data tibble/data.table with only the observations from the prior index.
+#' @param current_data A tibble/data.table with only observations from the current sampling period.
+#' @param prior_data A tibble/data.table with only the observations from the prior index.
 #' @returns A tibble/data.table containing the number of successes, and number of people for each
 #' treatment condition.
 #'
@@ -158,9 +158,9 @@ get_past_results.data.table <- function(
 #' @name get_bandit
 #'
 #' @inheritParams single_mab_simulation
-#' @param past_results Tibble/data.table containing summary of prior periods, with
+#' @param past_results A tibble/data.table containing summary of prior periods, with
 #' successes, number of observations, and success rates, which is created by [get_past_results()].
-#' @param current_period Numeric scalar; current period of the adaptive trial simulation.
+#' @param current_period Numeric value of length 1; current period of the adaptive trial simulation.
 #'
 #' @returns A list of length 2 containing:
 #' \itemize{
@@ -170,18 +170,24 @@ get_past_results.data.table <- function(
 #' containing the probability of being assigned that treatment.}
 #'
 #' @details
-#' The Thompson  `assignment_probabilities` is the same as the `bandit` except
-#' when control augmentation is used to alter the probabilities of assignment.
+#'
+#' The Thompson `assignment_probabilities` are the same as the `bandit` vector except when
+#' `control_augment` or `random_assign_prop` are greater than 0, as these arguments will alter the probabilities
+#' of assignment.
+#'
 #' Thompson sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
-#' package but the direct calculation can result in errors or overflow. If this occurs, a simulation based method is used
-#' instead to estimate the posterior distribution, and the user receives a warning. The `ndraws` argument specifies
-#' the number of draws to make in this simulation.
+#' package but the direct calculation can result in errors or overflow. If this occurs, a simulation based method
+#' from the same package is used instead to estimate the posterior distribution.
+#' If this occurs a warning will be presented. `ndraws` specifies the number of iterations for the
+#' simulation based method, and the default value is 5000.
 #'
 #' The UCB1 algorithm only selects 1 treatment at each period, with no probability matching
-#' so `assignment_probabilities` will always have 1 element equal to 1, and the rest equal to 0.
-#' Unless control augmentation is used, then the control group will be altered to reach its
-#' threshold. If originally the vector is `(0, 0, 1)`, and `control_augment` = 0.2,
-#' the new vector is `(0.2, 0, 0.8)` assuming the first element is control.
+#' so `assignment_probabilities` will always have 1 element equal to 1, and the rest equal to 0, unless
+#' `control_augment` or `random_assign_prop` are greater than 0, which will alter the probabilities of assignment.
+#' For example, if the original vector is `(0, 0, 1)`, and `control_augment` = 0.2,
+#' the new vector is `(0.2, 0, 0.8)` assuming the first element is control. If instead the 3rd element
+#' were the control group the resulting vector would not be changed because it already meets the
+#' control group threshold.
 #'
 #'
 #' @references
@@ -191,6 +197,7 @@ get_past_results.data.table <- function(
 #' Loecher, Thomas Lotze and Markus. 2022.
 #' "Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis."
 #' \url{https://cran.r-project.org/package=bandit}.
+#'
 #' @keywords internal
 
 get_bandit <- function(
@@ -245,10 +252,10 @@ get_bandit <- function(
 #' instead to estimate the posterior distribution, and the user receives a warning.
 #'
 #'
-#' @returns A named list of length 2, with both elements, containing a reference to the named numeric vector of Thompson
-#' sampling probabilities. The second element is adjusted based on what the user has set for `control_augment` and
-#' `random_assign_prop` to reflect the probability of assignment to a given treatment at that period.
-#'
+#' @returns A named list of length 2, where element 1 is the named numeric vector of Thompson
+#' sampling probabilities, and element 2 is a reference to the same vector. The second element is
+#' adjusted later in the simulation based on what the user has set for `control_augment` and `random_assign_prop` to reflect the
+#' probability of assignment to a given treatment at that period.
 #' @keywords internal
 
 get_bandit.thompson <- function(
@@ -327,7 +334,7 @@ bandit_invalid <- function(bandit) {
 get_bandit.ucb1 <- function(past_results, conditions, current_period) {
   correction <- 1e-10 ## Prevents Division by 0 when n = 0
 
-  if (inherits(past_results, "data.table")) {
+  if (data.table::is.data.table(past_results)) {
     past_results[,
       ucb := success_rate +
         base::sqrt(
@@ -373,19 +380,15 @@ get_bandit.ucb1 <- function(past_results, conditions, current_period) {
 #' @inheritParams cols
 #' @param probs Named numeric Vector; probability of assignment for each treatment condition.
 #' @inheritParams get_past_results
-#' @returns Updated tibble/data.table with the new treatment conditions for each observation. If this treatment is different
-#' then from under the original experiment, the column 'impute_req' is 1, and else is 0.
+#' @returns Updated tibble/data.table with the new treatment conditions for each observation, and whether imputation is required.
+#' If this treatment is different then from under the original experiment, the 'impute_req' is 1, and else is 0 for the observation.
 #'
 #' @details
-#' The unique identifier for each row is used as the cluster in the for the
-#' randomizr package functions to ensure that each observation is only
-#' treated once, and is returned in the same order as provided.
-#'
 #' The number of rows which are randomly assigned in each period is `random_assign_prop` multiplied by
 #' the number of rows in the period. If this number is less than 1, then Bernoulli draws are made for each row
 #' with probability `random_assign_prob` to determine if that row will be assigned randomly. Else, the number of random
 #' rows is rounded to the nearest whole number, and then that many rows are selected to be assigned through
-#' random assignment. These row selections are also random.
+#' complete random assignment. The row selections are also random.
 #' @seealso
 #'* [randomizr::block_ra()]
 #'* [randomizr::complete_ra()]

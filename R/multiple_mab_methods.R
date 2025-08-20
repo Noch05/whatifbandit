@@ -1,10 +1,10 @@
 #' Print Generic For `multiple.mab`
 #' @description Custom Print Display for `multiple.mab` objects returned by [multiple_mab_simulation()].
-#' Prevents the large list output from being printed to the R console, and provides
-#' useful information about the settings for the trials
+#' Prevents the large list output from being printed directly, and provides
+#' useful information about the settings for the trials.
 #' @method print multiple.mab
-#' @param x `multiple.mab` class object
-#' @param ... further arguments passed to or from other methods
+#' @param x A `multiple.mab` class object created by [multiple_mab_simulation()].
+#' @param ... Further arguments passed to or from other methods.
 #' @returns Text summary of settings used for the Multi-Arm Bandit trials.
 #' @details
 #' The items used to create the text summary can be found in the settings
@@ -40,33 +40,51 @@ print.multiple.mab <- function(x, ...) {
   base::cat("----------------------------------------------------- \n")
 }
 #------------------------------------------------------------------------------
-#' Summary Generic for "multiple.mab" class
+#' Summary Generic For "multiple.mab" Class
 #' @description
-#' Summarizes results of of multiple Multi-Arm Bandit Trials. Provides empirically estimated
-#' and normally approximated confidence intervals on AIPW estimates for probability of success, and
-#' the number of times each arm was the chosen as the best treatment across all simulations.
-#' @param object `multiple.mab` object created by [multiple_mab_simulation]
-#' @param level Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
-#' Defaults to 0.95
-#' @param ... additional arguments.
+#' Summarizes results of multiple Multi-Arm Bandit Trials. Provides empirically estimated
+#' and normally approximated confidence intervals on AIPW estimates for probability of success,
+#' the number of times each arm was the chosen as the best treatment across all simulations, and the average for how many
+#' units were assigned to each treatment across all the simulations.
+#' @param object A `multiple.mab` object created by [multiple_mab_simulation].
+#' @param level Numeric value of length 1; indicates confidence interval Width (i.e 0.90, 0.95, 0.99).
+#' Defaults to 0.95.
+#' @param ... Additional arguments.
 #' @method summary multiple.mab
 #' @details
-#' This summary provides the number of times each treatment arm was
-#' selected as the best, chosen by the highest UCB1 or Thompson sampling probabilities
-#' from the end of each trial.
+#' The empirically estimated variances and confidence intervals, use the variance
+#' measured directly in the AIPW estimates for each treatment over all the simulations.
+#' The normal confidence intervals are estimated using an average of the measured variances
+#' across the simulations.
 #'
-#' Additionally it provides the average of the AIPW and sample estimates
-#' across all trials, while also providing 2 distinct variances and intervals.
-#' One interval is based on the average of the variances, and uses a normal distribution,
-#' while an empirical distribution is estimated using the sample of estimates
-#' created by the repeated trials. These empirical
-#' variances represent the variation in each simulation due to the random state
+#' The best arm at the end of each trial is chosen by the highest UCB1 value or Thompson sampling
+#' probability. These values indicate which treatment would be chosen next, or have the highest probability
+#' of being chosen next, therefore representing the current best treatment.
+#'
+#' Additionally, an average and standard deviation for the number of units assigned to each
+#' treatment across all the simulations is provided.
 #'
 #' `...` is provided to be compatible with `summary()`, the function
 #' does not have any additional arguments.
 #'
 #' @example inst/examples/summary.multiple.mab_example.R
-#' @returns Tibble containing summary information for repeated trials.
+#' @returns A tibble containing summary information from the repeated trials with the columns:
+#' \itemize{
+#' \item `Treatment_Arm`: Contains the treatment condition.
+#' \item `average_probability_of_success`: The average of the AIPW estimates for the probability of success for each treatment across the trials.
+#' \item `SE_avg`: The standard error for the AIPW estimates, calculated as the square root of the average of the variances.
+#' \item `SE_empirical`: The standard error estimated empirically as the standard deviation of the all the calculated AIPW estimates for probability of success.
+#' \item `lower_normal`: The lower bound on the normal confidence interval for the `estimated_probability_of_success`. Default is 95%.
+#' \item `upper_normal`: The upper bound on the normal confidence interval for the `estimated_probability_of_success`. Default is 95%.
+#' \item `lower_empirical`: The lower bound on the empirical confidence interval for the `estimated_probability_of_success`. Calculated using the observed distribution
+#' of AIPW estimated probabilities of success. Default is 95%.
+#' \item `upper_empirical`: The upper bound on the empirical confidence interval for the `estimated_probability_of_success`. Calculated using the observed distribution
+#' of AIPW estimated probabilities of success. Default is 95%.
+#' \item `times_best`: The number of times each treatment arm was selected as the best for an individual simulation.
+#' \item `average_num_assigned`: The average number of observations assigned to each treatment under the simulated trials.
+#' \item `sd_num_assigned`: The standard deviation for the number of observations assigned to each treatment under the simulated trials.
+#' \item `level`: The confidence level for the confidence interval, default is 95%.
+#' }
 #' @export
 
 summary.multiple.mab <- function(object, level = 0.95, ...) {
@@ -140,35 +158,31 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
   return(summary)
 }
 
-#' Plot Generic for `multiple.mab` objects
+#' Plot Generic For `multiple.mab` Objects
 #' @description Uses [ggplot2::ggplot()] to plot the results of multiple
-#' Multi-Arm Bandit Trials
+#' Multi-Arm-Bandit trials.
 #'
 #' @method plot multiple.mab
-#' @param x `multiple.mab` class object created by [multiple_mab_simulation()]
+#' @param x A `multiple.mab` class object created by [multiple_mab_simulation()].
 #' @param type String; Type of plot requested; valid types are:
 #' \itemize{
 #' \item `summary`: Shows the number of times each arm was selected as the highest chance of being the best.
 #' \item `hist`: Shows histograms for each treatment condition's proportion of success across trials or number of obersvations assigned.
-#' \item `estimate`: Shows proportion of success estimates using specified normal or empirical confidence intervals.
+#' \item `estimate`: Shows proportion of success AIPW estimates using specified normal or empirical confidence intervals.
 #' }
 #' @param quantity The quantities to plot when `type = "hist"`, accepts either 'estimate' to plot the distributuons of the AIPW estimates, or
 #' 'assignment' to plot the distributions of the number of observations assigned to each treatment across the repeated trials.
 #' @param save Logical; Whether or not to save the plot to disk; FALSE by default.
 #' @param path String; File directory to save file.
 #' @param ... Arguments to pass to `ggplot2::geom_*` function (e.g. `color`, `linewidth`, `alpha`, `bins` etc.). In the case of `type = "hist"`, additional
-#' arguments must be passed in to distinct lists, one named `geom` which are passed to `ggplot2::geom_*` and one named `facet` which are passed to `ggplot2::facet_grid`.
-#' to `ggplot2::geom_*`
-#' should be a named list with 2 components, 'geom' and 'facet', to distinguish between arguments passed to `ggplot2::geom_histogram` and `ggplot2::facet_grid()`.
+#' arguments must be passed in to distinct lists, one named `geom` which are passed to `ggplot2::geom_*`
+#' and one named `facet` which are passed to `ggplot2::facet_grid`.
 #' @param cdf String; specifies the type of CDF to use when analyzing the estimates.
 #' valid CDFs are the 'empirical' CDF, the 'normal' CDF. Used when type = `estimate`. The 'normal' CDF uses the fact
-#' that the AIPW estimates are asymptotically normal, while the empirical CDF estimates the CDF from the sample
+#' that the AIPW estimates are asymptotically normal, while the empirical CDF (eCDF) estimates the CDF from the sample
 #' of AIPW estimates.
 #' @inheritParams summary.multiple.mab
 #' @details
-#' The plot generic requires \href{https://cran.r-project.org/package=ggplot2}{ggplot2}
-#' which is not required by the package, so it must be installed separately.
-#'
 #' This function provides minimalist plots to quickly view the results of the procedure
 #' and has the ability to be customized through the `...`
 #' in the call and `+` afterwords. However, all the data necessary is
@@ -178,7 +192,7 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
 #'
 #' @example inst/examples/plot.multiple.mab_example.R
 #' @export
-#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change, scales, labels, legend, theme, etc.)
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change `scales`, `labels`, `legend`, `theme`, etc.).
 
 plot.multiple.mab <- function(
   x,
@@ -213,11 +227,11 @@ plot.multiple.mab <- function(
 }
 #-------------------------------------------------------------------------------
 #' @name plot_summary
-#' @title Plot treatment Arms over multiple trials
+#' @title Plot Treatment Arms Over Multiple Trials
 #' @description
-#' Plots Summary Results for [plot.multiple.mab()]
+#' Plots summary results for [plot.multiple.mab()], shows then number of times each arm was selected as the best in a bar chart.
 #' @inheritParams plot.multiple.mab
-#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change, scales, labels, legend, theme, etc.)
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change `scales`, `labels`, `legend`, `theme`, etc.).
 #' @keywords internal
 
 plot_summary <- function(x, ...) {
@@ -237,13 +251,13 @@ plot_summary <- function(x, ...) {
 #------------------------------------------------------------------------------
 #
 #' @name plot_hist
-#' @title Plots Distribution of AIPW and Sample estimates over trials
+#' @title Plots Histograms of [multiple_mab_simulation()] Results
 #' @description
-#' Plots Distribution of AIPW and Sample estimates over trials for [plot.multiple.mab()]
+#' Plots distribution of AIPW estimates over trials for [plot.multiple.mab()] or the distribution of the number of observations assigned to each treatment arm.
 #' @inheritParams plot.multiple.mab
-#' @param params `...` from [plot.multiple.mab()] should be a named list containing two elements, `geom` and `facet` containing arguments for
+#' @param params The dynamic dots (`...`) from [plot.multiple.mab()] should be a named list containing two elements, `geom` and `facet` containing arguments for
 #' `ggplot2::geom_histogram()` and `ggplot2::facet_grid()` respectively.
-#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change, scales, labels, legend, theme, etc.)
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change `scales`, `labels`, `legend`, `theme`, etc.).
 #' @keywords internal
 plot_hist <- function(x, quantity, params) {
   rlang::check_installed("ggplot2")
@@ -296,11 +310,11 @@ plot_hist <- function(x, quantity, params) {
 
 #-------------------------------------------------------------------------------
 #' @name plot_mult_estimates
-#' @title Plots AIPW/Sample Estimates for each Arm
+#' @title Plots AIPW Confidence Intervals
 #' @description
-#' Plots AIPW/Sample Estimates for each arm using variance from the repeated trials for [plot.multiple.mab()]
+#' Plots the uncertainty AIPW estimates for each arm using the specified variance from the repeated trials for [plot.multiple.mab()].
 #' @inheritParams plot.multiple.mab
-#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change, scales, labels, legend, theme, etc.)
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change `scales`, `labels`, `legend`, `theme`, etc.).
 #' @keywords internal
 
 plot_mult_estimates <- function(x, cdf, level, ...) {
