@@ -328,9 +328,10 @@ Using `{future}` comes with some new complexities. Generally, Windows users shou
 
 ## Analyzing Repeated Simulations
 
-`multiple_mab_simulation()` returns the same elements as `single_mab_simulation()` except for `final_data`. When
+`multiple_mab_simulation()` returns the mostly the same elements as `single_mab_simulation()` except for `final_data`. When
 `keep_data = TRUE` the `final_data` element is a nested data frame of all the `final_data` from each trial, and when
-`keep_data = FALSE`, the function returns only objects `bandits`, `assignment_probs`, `estimates`, and `settings`.
+`keep_data = FALSE`, the function returns only objects `bandits`, `assignment_probs`, `estimates`, `assignment_quantities` and `settings`. `assignment_quantities` is a new object, which is the same structure as `bandits` and `assignment_probs` but contains the number of units assigned
+to each treatment for each trial.
 
 The object is also a custom `multiple.mab` class containing similar generic methods as the `mab` class, including `print()` and `summary()`.
 
@@ -339,7 +340,7 @@ class(multiple_sims)
 print(multiple_sims)
 ```
 
-For `multiple.mab` objects, `summary()` returns the average for AIPW estimates and 2 estimates of their standard error. One estimate is the average of the standard errors across each trial, with the variances averaged first $\left(\sqrt{\frac{1}{\text{n}}\sum_1^n\mathbb{V}[\text{Estimate}_i]}\right)$. The other estimate, is the sample variance of all of the AIPW estimates across the trials (`SE_empirical`). 95% confidence intervals are provided using both the empirical cumulative distribution function (eCDF), and the normal CDF using the average standard errors. Additionally, the number of times each treatment arm was selected as the best is displayed, with the best being the highest Thompson probability or UCB1 statistic at the end of the trial. 
+For `multiple.mab` objects, `summary()` returns the average for AIPW estimates and 2 estimates of their standard error. One estimate is the average of the standard errors across each trial, with the variances averaged first $\left(\sqrt{\frac{1}{\text{n}}\sum_1^n\mathbb{V}[\text{Estimate}_i]}\right)$. The other estimate, is the sample variance of all of the AIPW estimates across the trials (`SE_empirical`). 95% confidence intervals are provided using both the empirical cumulative distribution function (eCDF), and the normal CDF using the average standard errors. Additionally, the number of times each treatment arm was selected as the best is displayed, along with the mean and standard deviation of the number of units assigned to each treatment across the trials. The best arm for a given simulation is selected as the treatment arm with the highest Thompson probability or UCB1 statistic at the end of the trial.
 
 ```{r}
 summary(multiple_sims) |> print(width = Inf)
@@ -362,18 +363,19 @@ summary(multiple_sims, level = 0.75) |> print(width = Inf)
 plot(multiple_sims, type = "summary")
 ```
 
-`type = "hist"` creates histograms showcasing the distribution for the AIPW for each treatment arm, over the repeated trials.
+`type = "hist"` creates histograms showcasing the distribution for the AIPW for each treatment arm, over the repeated trials or the distribution of the number of units assigned to each treatment arm. For this function because it also takes advtanage of `facet_grid()`, additional arguments need to be specified in a list labelled `geom` for items to go to `geom_histogram()` and `facet` for items to go to `facet_grid()`.
 
 ```{r}
 #| fig.width: 5
-plot(multiple_sims, type = "hist", bins = 50)
+plot(multiple_sims, type = "hist", quantity = "estimate", geom = list(bins = 50))
+plot(multiple_sims, type = "hist", quantity = "assignment", facet = list(switch = "x"))
 ```
 
 `type = "estimate"` is the same as for `mab`, but now the spread can be shown using either empirical or normal CDF.
 
 ```{r}
 #| fig.width: 5
-plot(multiple_sims,type = "estimate",
+plot(multiple_sims, type = "estimate",
   cdf = "empirical", level = 0.99, height = 0.4
 ) +
   scale_x_continuous(breaks = seq(0, 1, .1), limits = range(0, 1))
