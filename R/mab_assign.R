@@ -223,8 +223,8 @@ get_bandit <- function(
     ctrl <- names(conditions) == "control"
     if (assignment_prob[ctrl] < control_augment) {
       assignment_prob[ctrl] <- control_augment
-      assignment_prob[-ctrl] <-
-        (assignment_prob[-ctrl] / sum(assignment_prob[-ctrl])) *
+      assignment_prob[!ctrl] <- (assignment_prob[!ctrl] /
+        sum(assignment_prob[!ctrl])) *
         (1 - control_augment)
     }
   }
