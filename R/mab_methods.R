@@ -134,7 +134,7 @@ summary.mab <- function(object, level = 0.95, ...) {
 
   quantities <- get_assignment_quantities(object)
   quantities <- tibble::as_tibble(quantities) |>
-    mutate(mab_condition = names(quantities))
+    dplyr::mutate(mab_condition = names(quantities))
 
   normalq <- base::abs(stats::qnorm((1 - level) / 2))
 

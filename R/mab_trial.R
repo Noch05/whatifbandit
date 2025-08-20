@@ -312,7 +312,7 @@ end_mab_trial.data.table <- function(
       x <- base::lapply(seq_len(periods + 1), function(i) {
         base::as.list(bandits$bandit_stat[[i]])
       }) |>
-        data.table::rbindlist(idcol = "period_number")
+        data.table::rbindlist(idcol = "period_number", use.names = TRUE)
       x[, period_number := base::as.numeric(period_number)]
 
       x[,
@@ -354,7 +354,7 @@ end_mab_trial.data.table <- function(
   assignment_probs <- base::lapply(seq_len(periods), function(i) {
     base::as.list(bandits$assignment_prob[[i]])
   }) |>
-    data.table::rbindlist(idcol = "period_number")
+    data.table::rbindlist(idcol = "period_number", use.names = TRUE)
   assignment_probs[, period_number := base::as.numeric(period_number)]
 
   return(list(

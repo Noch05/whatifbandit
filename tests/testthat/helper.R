@@ -132,76 +132,74 @@ multi_mab_checks <- function(output) {
 
   return(all(c(band_col_check, prob_col_check, assignment_quant_check)))
 }
-control_augment_checks <- function() {
-  # Function to conduct the test
-  run_test <- function(full_args, static_args, trial) {
-    FUN <- switch(
-      trial,
-      "single" = expression(single_mab_simulation),
-      "multiple" = expression(multiple_mab_simulation)
-    )
-    class_specific_checks <- switch(
-      trial,
-      "single" = expression(single_mab_checks(output)),
-      "multiple" = expression(multi_mab_checks(output))
-    )
-    class <- switch(trial, "single" = "mab", "multiple" = "multiple.mab")
-    results <- purrr::map(seq_len(nrow(full_args)), \(x) {
-      args <- c(as.list(full_args[x, ]), static_args)
-      expect_no_failure({
-        output <- do.call(eval(FUN), args)
-      })
-      expect_s3_class(output, class)
-      expect_no_failure({
-        if (!eval(class_specific_checks)) {
-          stop("Post-Run Checks Failed")
-        }
-      })
-      return(output)
+# Function to conduct the test
+run_test <- function(full_args, static_args, trial) {
+  FUN <- switch(
+    trial,
+    "single" = expression(single_mab_simulation),
+    "multiple" = expression(multiple_mab_simulation)
+  )
+  class_specific_checks <- switch(
+    trial,
+    "single" = expression(single_mab_checks(output)),
+    "multiple" = expression(multi_mab_checks(output))
+  )
+  class <- switch(trial, "single" = "mab", "multiple" = "multiple.mab")
+  results <- purrr::map(seq_len(nrow(full_args)), \(x) {
+    args <- c(as.list(full_args[x, ]), static_args)
+    expect_no_failure({
+      output <- do.call(eval(FUN), args)
     })
-
-    purrr::walk(
-      results,
-      ~ {
-        expect_no_failure(summary(.x))
-        expect_no_failure(invisible(.x))
+    expect_s3_class(output, class)
+    expect_no_failure({
+      if (!eval(class_specific_checks)) {
+        stop("Post-Run Checks Failed")
       }
-    )
-    if (requireNamespace("ggplot2", quietly = TRUE)) {
-      if (trial == "single") {
-        types <- c("arm", "assign")
-        purrr::walk(results, \(x) {
-          purrr::walk(types, \(type) {
-            expect_no_failure(plot(x, type = type))
-          })
+    })
+    return(output)
+  })
+
+  purrr::walk(
+    results,
+    ~ {
+      expect_no_failure(summary(.x))
+      expect_no_failure(invisible(.x))
+    }
+  )
+  if (requireNamespace("ggplot2", quietly = TRUE)) {
+    if (trial == "single") {
+      types <- c("arm", "assign")
+      purrr::walk(results, \(x) {
+        purrr::walk(types, \(type) {
+          expect_no_failure(plot(x, type = type))
         })
+      })
 
-        levels <- runif(3)
-        purrr::walk(results, \(x) {
-          purrr::walk(levels, \(level) {
-            expect_no_failure(plot(x, type = "estimate", level = level))
-          })
+      levels <- runif(3)
+      purrr::walk(results, \(x) {
+        purrr::walk(levels, \(level) {
+          expect_no_failure(plot(x, type = "estimate", level = level))
         })
-      }
-      if (trial == "multiple") {
-        types <- c("hist", "estimate")
-        cdfs <- c("normal", "empirical")
-        quantities <- c("estimate", "assignment")
+      })
+    }
+    if (trial == "multiple") {
+      types <- c("hist", "estimate")
+      cdfs <- c("normal", "empirical")
+      quantities <- c("estimate", "assignment")
 
-        purrr::walk(results, ~ expect_no_failure(plot(.x, type = "summary")))
-        purrr::walk(
-          results,
-          ~ purrr::walk(quantities, \(y) {
-            expect_no_failure(plot(.x, type = "hist", quantity = y))
-          })
-        )
-        purrr::walk(
-          results,
-          ~ purrr::walk(cdfs, \(y) {
-            expect_no_failure(plot(.x, type = "estimate", cdf = y))
-          })
-        )
-      }
+      purrr::walk(results, ~ expect_no_failure(plot(.x, type = "summary")))
+      purrr::walk(
+        results,
+        ~ purrr::walk(quantities, \(y) {
+          expect_no_failure(plot(.x, type = "hist", quantity = y))
+        })
+      )
+      purrr::walk(
+        results,
+        ~ purrr::walk(cdfs, \(y) {
+          expect_no_failure(plot(.x, type = "estimate", cdf = y))
+        })
+      )
     }
   }
 }
@@ -214,29 +212,35 @@ equal_checks <- function(tbl, dt, type) {
       return(base::isTRUE(base::all.equal(.x, .y, check.attributes = FALSE)))
     }
   )
-  FUN <- switch(
-    type,
-    "single" = expression(`summary.mab`),
-    "multiple" = expression(`summary.multiple.mab`)
-  )
-  summary_check <- base::isTRUE(base::all.equal(eval(FUN)(tbl), eval(FUN)(dt)))
-  return(all(c(all_equals, summary_check)))
+  return(all(all_equals))
 }
 
 single_equal_checks <- function(tbl_output, dt_output) {
   data.table::setorder(dt_output$estimates, estimator, mab_condition)
   tbl <- tbl_output[-1]
   dt <- dt_output[-1]
-  return(equal_checks(tbl, dt, "single"))
+  check1 <- equal_checks(tbl, dt)
+  summary_check <- base::isTRUE(base::all.equal(
+    summary(tbl_output),
+    summary(dt_output)
+  ))
+  return(all(check1, summary_check))
 }
 multi_equal_checks <- function(tbl_output, dt_output) {
   data.table::setorder(dt_output$estimates, trial, estimator, mab_condition)
-  return(equal_checks(tbl_output, dt_output, "multiple"))
+  check1 <- equal_checks(tbl_output, dt_output)
+  summary_check <- base::isTRUE(base::all.equal(
+    summary(tbl_output),
+    summary(dt_output)
+  ))
+  return(all(check1, summary_check))
 }
-control_augment_checks(output, args)
-{
-  assign_vec <- output$assignment_probs[[as.character(args$control_condition)]]
-  return(all(assign_vec >= args$control_augment))
+control_augment_checks <- function(output) {
+  col <- paste0(output$settings$control, "_assign_prob")
+  assign_probs <- output$assignment_probs |>
+    dplyr::filter(period_number != 1)
+  vec <- output$assign_probs[[col]]
+  return(all(vec > output$settings$control_augment))
 }
 
 
@@ -263,9 +267,9 @@ check_dt_tibble_equal <- function(full_args, static_args, type, seed) {
     expect_no_failure({
       if (!check_equal) stop("Equality Checks Failed")
     })
-    control_augment_checks <- purrr::map(
+    control_augment_checks <- purrr::map_lgl(
       list(tbl_output, dt_output),
-      ~ control_augment_checks(.x, tbl_args)
+      ~ control_augment_checks(.x)
     )
     expect_no_failure({
       if (!all(control_augment_checks)) stop("Control Augment Checks Fail")

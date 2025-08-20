@@ -293,6 +293,7 @@ get_assignment_quantities.data.frame <- function(simulation) {
 #' @noRd
 get_assignment_quantities.data.table <- function(simulation) {
   count_summary <- simulation$final_data[, .N, by = mab_condition]
+  data.table::setorder(count_summary, mab_condition)
   count_vec <- rlang::set_names(count_summary$N, count_summary$mab_condition)
   return(count_vec)
 }
@@ -344,7 +345,7 @@ condense_results <- function(data, keep_data, mabs, times) {
           mabs[[i]][[item]]
         }
       })
-      result <- data.table::rbindlist(all, idcol = "trial")
+      result <- data.table::rbindlist(all, idcol = "trial", use.names = TRUE)
       result[, trial := as.numeric(trial)]
       return(result)
     })

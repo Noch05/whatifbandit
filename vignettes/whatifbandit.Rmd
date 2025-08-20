@@ -219,7 +219,7 @@ sim_summary |>
 
 ## Plotting
 
-Plot methods display the results. These methods use `{ggplot2}` to create visualizations. The `mab` class supports 3 plot types, `"arm"`, `"assign"` and `"estimate"`, each providing different information about the results. These plots can be built with `+` like any `{ggplot2}` object, and arguments to the main `geom*` can be specified through the `...` argument. The geoms used are `geom_line()`, and `geom_errorbarh()`
+Plot methods display the results. These methods use `{ggplot2}` to create visualizations. The `mab` class supports 3 plot types, `"arm"`, `"assign"` and `"estimate"`, each providing different information about the results. These plots can be built with `+` like any `{ggplot2}` object, and arguments to the main `geom*` can be specified through the `...` argument. The geoms used are `geom_line()`, and `geom_errorbarh()`.
 
 `type = "arm"` provides a view of each arm over time, its relative probability of being the best, or the UCB1 value.
 
@@ -252,7 +252,7 @@ All of the data used to create these plots and summary statistics is present in 
 
 `multiple_mab_simulation()` has 3 new arguments but is otherwise the same as `single_mab_simulation()`. These arguments are:
 
-* `times`: The number of times to run the simulation
+* `times`: The number of times to run the simulation.
 * `seeds`: A numeric vector of random seeds, where `length(seeds) = times`. Required to make results reproducible, and we encourage setting them before hand using `sample.int()`.
 * `keep_data`: A logical value, whether or not to keep the `final_data` object from each simulation. Default is FALSE,
 to reduce memory load of execution.
@@ -287,7 +287,7 @@ time <- system.time(
 )
 ```
 
-Here we've kept `keep_data = TRUE` to showcase the memory impact of saving the data from each iteration. The full object size with all the data is `r as.numeric(object.size(multiple_sims, units = "MiB"))` megabytes (MiB). However, when we remove the data from the object, the size becomes just `r multi_sims$final_data_nest <- NULL; as.numeric(object.size(multiple_sims, units = "MiB"))` megabytes(MiB).
+Here we've kept `keep_data = TRUE` to showcase the memory impact of saving the data from each iteration. The full object size with all the data is `r as.numeric(object.size(multiple_sims) |> format(units = "MiB") |> substr(1,1))` megabytes (MiB). However, when we remove the data from the object, the size becomes just `r multiple_sims$final_data_nest <- NULL; as.numeric(object.size(multiple_sims) |> format(units = "MiB") |> substr(1,1))` megabytes (MiB).
 
 Executing those 100 simulations took `r as.numeric(time["elapsed"])` seconds. To speed up this process `multiple_mab_simulation()` supports parallel processing via the [furrr](https://furrr.futureverse.org/) and [future](https://furrr.futureverse.org/) packages. To run the function in parallel, call `future::plan()` before running it and specify the number of cores you want to use.
 ```{r}
