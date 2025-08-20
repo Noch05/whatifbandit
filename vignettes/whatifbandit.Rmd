@@ -282,10 +282,12 @@ time <- system.time(
       success_date_col = "date_of_recert",
       assignment_date_col = "letter_sent_date"
     ),
-    keep_data = FALSE, times = 100, seeds = seeds
+    keep_data = TRUE, times = 100, seeds = seeds
   )
 )
 ```
+
+Here we've kept `keep_data = TRUE` to showcase the memory impact of saving the data from each iteration. The full object size with all the data is `r as.numeric(object.size(multiple_sims, units = "MiB"))` megabytes (MiB). However, when we remove the data from the object, the size becomes just `r multi_sims$final_data_nest <- NULL; as.numeric(object.size(multiple_sims, units = "MiB"))` megabytes(MiB).
 
 Executing those 100 simulations took `r as.numeric(time["elapsed"])` seconds. To speed up this process `multiple_mab_simulation()` supports parallel processing via the [furrr](https://furrr.futureverse.org/) and [future](https://furrr.futureverse.org/) packages. To run the function in parallel, call `future::plan()` before running it and specify the number of cores you want to use.
 ```{r}
