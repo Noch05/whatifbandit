@@ -156,7 +156,7 @@ test_that("Throws proper error when columns do not exist or not declared", {
       )
       block_col <- eval(data_cols$block_cols[[1]])
 
-      if (.x > (nrow(col_args) / 2)) {
+      if (.x > (nrow(col_args) / 2) && .x <= nrow(col_args)) {
         if (.x == (1 + (nrow(col_args) / 2))) {
           block_col <- NULL
         } else {
