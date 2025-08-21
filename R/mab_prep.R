@@ -66,7 +66,7 @@ create_cutoff.date <- function(
   start_date <- base::min(data[[date_col$name]])
 
   if (data.table::is.data.table(data)) {
-    if (time_unit == "month" && !is.null(data[[month_col$name]])) {
+    if (time_unit == "month" && !is.null(month_col$name)) {
       first_month <- data[
         order(base::get(date_col$name)),
         base::get(month_col$name)
@@ -97,7 +97,8 @@ create_cutoff.date <- function(
         ) +
           1
       ]
-
+      data.table::setkey(data, period_number)
+      data.table::setorderv(data, cols = c(date_col$name, "period_number"))
       data[, month_date := NULL]
     } else {
       data[,
@@ -108,9 +109,11 @@ create_cutoff.date <- function(
         ) +
           1
       ]
+      data.table::setkey(data, period_number)
+      data.table::setorderv(data, cols = c(date_col$name))
     }
   } else {
-    if (time_unit == "month" && !is.null(data[[month_col$name]])) {
+    if (time_unit == "month" && !is.null(month_col$name)) {
       first_month <- data |>
         dplyr::slice_min(order_by = !!date_col$sym, n = 1, with_ties = FALSE) |>
         dplyr::pull(!!month_col$sym)
@@ -132,7 +135,8 @@ create_cutoff.date <- function(
               period_length
           )
         ) |>
-        dplyr::select(-month_date)
+        dplyr::select(-month_date) |>
+        dplyr::arrange(!!date_col$sym, period_number)
     } else {
       data <- data |>
         dplyr::mutate(
@@ -142,7 +146,8 @@ create_cutoff.date <- function(
               period_length
           ) +
             1
-        )
+        ) |>
+        dplyr::arrange(!!date_col$sym)
     }
   }
   return(data)
@@ -159,10 +164,12 @@ create_cutoff.individual <- function(data) {
   if (data.table::is.data.table(data)) {
     data[, period_number := .I]
     data.table::setkey(data, period_number)
+    data.table::setorder(data, period_number)
     return(invisible(data))
   } else {
     data <- data |>
-      dplyr::mutate(period_number = dplyr::row_number())
+      dplyr::mutate(period_number = dplyr::row_number()) |>
+      dplyr::arrange(period_number)
     return(data)
   }
 }
@@ -176,12 +183,14 @@ create_cutoff.batch <- function(data, period_length) {
   if (data.table::is.data.table(data)) {
     data[, period_number := base::ceiling((.I / period_length))]
     data.table::setkey(data, period_number)
+    data.table::setorder(data, period_number)
     return(invisible(data))
   } else {
     data <- data |>
       dplyr::mutate(
         period_number = base::ceiling(dplyr::row_number() / period_length)
-      )
+      ) |>
+      dplyr::arrange(period_number)
     return(data)
   }
 }
@@ -284,9 +293,6 @@ create_new_cols.data.frame <- function(
         treatment_block = as.character(!!data_cols$condition_col$sym)
       )
   }
-  data <- data |>
-    dplyr::arrange(period_number, !!data_cols$id$sym)
-
   return(data)
 }
 #---------------------------------------------------------------------------------
@@ -342,8 +348,5 @@ create_new_cols.data.table <- function(
   } else {
     data[, treatment_block := as.character(get(data_cols$condition_col$name))]
   }
-  data.table::setkeyv(data, cols = c("period_number", data_cols$id$name))
-  data.table::setorderv(data, cols = c("period_number", data_cols$id$name))
-
   return(invisible(data))
 }
