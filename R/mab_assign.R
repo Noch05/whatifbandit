@@ -357,7 +357,7 @@ get_bandit.ucb1 <- function(past_results, conditions, current_period) {
     )]
   }
   assignment_probs <- rlang::set_names(
-    rep_len(0, length.out = length(conditions)),
+    rep(0, length(conditions)),
     conditions
   )
 
@@ -405,6 +405,8 @@ assign_treatments <- function(
   success_col,
   random_assign_prop
 ) {
+  is_dt <- data.table::is.data.table(current_data)
+
   base::UseMethod("assign_treatments", current_data)
 }
 #' @method assign_treatments data.frame
@@ -438,7 +440,7 @@ assign_treatments.data.frame <- function(
   }
 
   num_conditions <- base::length(conditions)
-  random_probs <- base::rep_len(1 / num_conditions, length.out = num_conditions)
+  random_probs <- base::rep(1 / num_conditions, num_conditions)
   band_idx <- base::setdiff(seq_len(rows), rand_idx)
   names(conditions) <- NULL
 
@@ -515,19 +517,23 @@ assign_treatments.data.table <- function(
   random_assign_prop
 ) {
   rows <- base::nrow(current_data)
-  random_rows <- base::round(rows * random_assign_prop, 0)
-  if (random_assign_prop > 0 && random_rows == 0) {
+  random_rows <- rows * random_assign_prop
+  if (random_assign_prop > 0 && random_rows < 1) {
     rand_idx <- base::which(base::as.logical(stats::rbinom(
       rows,
       1,
       random_assign_prop
     )))
   } else {
-    rand_idx <- base::sample(x = rows, size = random_rows, replace = FALSE)
+    rand_idx <- base::sample(
+      x = rows,
+      size = base::round(random_rows, 0),
+      replace = FALSE
+    )
   }
 
   num_conditions <- base::length(conditions)
-  random_probs <- base::rep_len(1 / num_conditions, length.out = num_conditions)
+  random_probs <- base::rep(1 / num_conditions, num_conditions)
   band_idx <- base::setdiff(seq_len(rows), rand_idx)
   names(conditions) <- NULL
   current_data[band_idx, assignment_type := "bandit"]

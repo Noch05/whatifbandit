@@ -144,7 +144,7 @@ summary.mab <- function(object, level = 0.95, ...) {
     dplyr::filter(estimator == "AIPW") |>
     dplyr::mutate(mab_condition = as.character(mab_condition))
 
-  quantities <- get_assignment_quantities(object)
+  quantities <- get_assignment_quantities(object, object$settings$conditions)
   quantities <- tibble::as_tibble(quantities) |>
     dplyr::mutate(mab_condition = names(quantities))
 

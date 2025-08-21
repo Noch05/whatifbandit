@@ -53,19 +53,19 @@ run_mab_trial <- function(
   bandits$bandit_stat[[1]] <- switch(
     algorithm,
     "thompson" = rlang::set_names(
-      rep_len(1 / num_conditions, length.out = num_conditions),
+      rep(1 / num_conditions, num_conditions),
       conditions
     ),
     "ucb1" = tibble::tibble(
       mab_condition = conditions,
-      ucb = rep_len(0, num_conditions)
+      ucb = rep(0, num_conditions)
     ),
     rlang::abort(
       "Invalid Algorithm: Valid Algorithms are `thompson` and `ucb1`"
     )
   )
   bandits$assignment_prob[[1]] <- rlang::set_names(
-    rep_len(1 / num_conditions, length.out = num_conditions),
+    rep(1 / num_conditions, num_conditions),
     conditions
   )
 
@@ -116,7 +116,7 @@ run_mab_trial <- function(
 
     bandits$assignment_prob[[i]] <- (bandit[["assignment_prob"]] *
       (1 - random_assign_prop)) +
-      (rep_len(1 / num_conditions, length.out = num_conditions) *
+      (rep(1 / num_conditions, num_conditions) *
         random_assign_prop)
 
     prepped_impute <- imputation_preparation(
