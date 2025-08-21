@@ -14,8 +14,10 @@ groups are assigned correctly. For "date", observations will be considered in ch
 
 \item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "date".
 Acceptable values are "day", "week", or "month". "month" does not require an additional column with the months of each observation,
-but it can accept a separate \code{month_col}. This should be used when the contents of that column are not simply what would be returned
-by \code{lubridate::months(data$date_col)} or \code{format(data$date_col, "\%m")}, otherwise passing just a column of dates will suffice.}
+but it can accept a separate \code{month_col}. If \code{month_col} is specified, the periods follow the calendar months strictly, and when it is not
+specified months are simply used as the time interval. For example if a dataset has dates starting on July 26th, under month based assignment and
+a specified \code{month_col} the dates July 26th and August 3st would be in different periods, but if the \code{month_col} was not specified, they would be
+in the same period because the dates are less than one month apart.}
 
 \item{verbose}{Logical; whether or not to print intermediate messages. Default is FALSE.}
 

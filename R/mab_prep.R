@@ -12,9 +12,7 @@
 #' is up to the researcher to test the possible options.
 #'
 #' Month based assignment can be specified either using the months inside the `month_col` or `date_col`,
-#' if `month_col` is passed into the function it will be used. `month_col` should only be provided separately
-#' when the months inside the column are different than what `format(data[[date_col]], "%m")`, `format(data[[data_col]], "%B")`
-#' or `lubridate::month(data[[data_col]])` would return.
+#' if `month_col` is passed into the function it will be used.
 #'
 #' @returns Updated tibble/data.table with the new `period_number` column. `period_number` is an integer
 #' representing an observation's new assignment period.

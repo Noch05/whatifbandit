@@ -30,8 +30,10 @@ of a traditional Randomized Controlled Trial (RCT). Any data.frames will be conv
 
 \item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "date".
 Acceptable values are "day", "week", or "month". "month" does not require an additional column with the months of each observation,
-but it can accept a separate \code{month_col}. This should be used when the contents of that column are not simply what would be returned
-by \code{lubridate::months(data$date_col)} or \code{format(data$date_col, "\%m")}, otherwise passing just a column of dates will suffice.}
+but it can accept a separate \code{month_col}. If \code{month_col} is specified, the periods follow the calendar months strictly, and when it is not
+specified months are simply used as the time interval. For example if a dataset has dates starting on July 26th, under month based assignment and
+a specified \code{month_col} the dates July 26th and August 3st would be in different periods, but if the \code{month_col} was not specified, they would be
+in the same period because the dates are less than one month apart.}
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
@@ -73,9 +75,9 @@ would receive each treatment and 25\% of women the same.}
 \item \code{success_col}: Column in \code{data}; binary successes from the original experiment.
 \item \code{condition_col}: Column in \code{data}; original treatment condition for each observation.
 \item \code{date_col}: Column in \code{data}; contains original date of event/trial. Only necessary when assigning by "Date". Must be of type \code{Date}, not a character string.
-\item \code{month_col}: Column in \code{data}; contains month of treatment. Only necessary when \code{time_unit = "Month"}, and the months described are different
-then what would be returned by \code{lubridate::months(data$date_col)} or \code{format(data$date_col, "\%m")}. This can be a numeric, string, or factor variable
-containing the names or numbers of the months.
+\item \code{month_col}: Column in \code{data}; contains month of treatment. Only necessary when \code{time_unit = "Month"}, and when periods should be determined directly by
+the calendar months instead of month based time periods. This column can be a string/factor variable with the month names or numeric with the month number. It can easily
+be created from your \code{date_col} via \code{lubridate::month(data[[date_col]])} or \code{format(data[[date_col]], "\%m")}.
 \item \code{success_date_col}: Column in \code{data}; contains original dates each success occurred. Only necessary when \code{perfect_assignment = FALSE}. Must be of type \code{Date}, not a character string.
 \item \code{assignment_date_col}: Column in \code{data}; contains original dates treatments were assigned to observations. Only necessary when \code{perfect_assignment = FALSE}.
 Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type \code{Date}, not a character string.
