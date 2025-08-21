@@ -398,35 +398,14 @@ assign_treatments <- function(
   current_data,
   probs,
   blocking = NULL,
-  algorithm,
-  id_col,
   conditions,
   condition_col,
-  success_col,
-  random_assign_prop
-) {
-  is_dt <- data.table::is.data.table(current_data)
-
-  base::UseMethod("assign_treatments", current_data)
-}
-#' @method assign_treatments data.frame
-#' @title [assign_treatments()] for data.frames
-#' @noRd
-assign_treatments.data.frame <- function(
-  current_data,
-  probs,
-  blocking = NULL,
-  algorithm,
-  id_col,
-  conditions,
-  condition_col,
-  success_col,
   random_assign_prop
 ) {
   rows <- base::nrow(current_data)
   random_rows <- rows * random_assign_prop
-  if (random_assign_prop > 0 && random_rows < 1) {
-    rand_idx <- base::which(base::as.logical(stats::rbinom(
+  rand_idx <- if (random_assign_prop > 0 && random_rows < 1) {
+    base::which(base::as.logical(stats::rbinom(
       rows,
       1,
       random_assign_prop
@@ -442,8 +421,47 @@ assign_treatments.data.frame <- function(
   num_conditions <- base::length(conditions)
   random_probs <- base::rep(1 / num_conditions, num_conditions)
   band_idx <- base::setdiff(seq_len(rows), rand_idx)
-  names(conditions) <- NULL
 
+  current_data <- if (data.table::is.data.table(current_data)) {
+    assign_treatments.data.table(
+      current_data = current_data,
+      probs = probs,
+      blocking = blocking,
+      conditions = conditions,
+      condition_col = condition_col,
+      rand_idx = rand_idx,
+      band_idx = band_idx,
+      random_probs = random_probs
+    )
+  } else {
+    assign_treatments.data.frame(
+      current_data = current_data,
+      probs = probs,
+      blocking = blocking,
+      conditions = conditions,
+      condition_col = condition_col,
+      rand_idx = rand_idx,
+      band_idx = band_idx,
+      random_probs = random_probs
+    )
+  }
+  return(current_data)
+}
+#-----------------------------------------------------
+
+#' @method assign_treatments data.frame
+#' @title [assign_treatments()] for data.frames
+#' @noRd
+assign_treatments.data.frame <- function(
+  current_data,
+  probs,
+  blocking = NULL,
+  conditions,
+  condition_col,
+  rand_idx,
+  band_idx,
+  random_probs
+) {
   current_data$assignment_type[band_idx] <- "bandit"
   current_data$assignment_type[rand_idx] <- "random"
 
@@ -509,33 +527,12 @@ assign_treatments.data.table <- function(
   current_data,
   probs,
   blocking = NULL,
-  algorithm,
-  id_col,
   conditions,
   condition_col,
-  success_col,
-  random_assign_prop
+  rand_idx,
+  band_idx,
+  random_probs
 ) {
-  rows <- base::nrow(current_data)
-  random_rows <- rows * random_assign_prop
-  if (random_assign_prop > 0 && random_rows < 1) {
-    rand_idx <- base::which(base::as.logical(stats::rbinom(
-      rows,
-      1,
-      random_assign_prop
-    )))
-  } else {
-    rand_idx <- base::sample(
-      x = rows,
-      size = base::round(random_rows, 0),
-      replace = FALSE
-    )
-  }
-
-  num_conditions <- base::length(conditions)
-  random_probs <- base::rep(1 / num_conditions, num_conditions)
-  band_idx <- base::setdiff(seq_len(rows), rand_idx)
-  names(conditions) <- NULL
   current_data[band_idx, assignment_type := "bandit"]
   current_data[rand_idx, assignment_type := "random"]
 
@@ -598,6 +595,5 @@ assign_treatments.data.table <- function(
       0
     )
   ]
-
   return(invisible(current_data))
 }

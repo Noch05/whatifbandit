@@ -106,11 +106,8 @@ run_mab_trial <- function(
       current_data = current_data,
       probs = bandit[["assignment_prob"]],
       blocking = blocking,
-      algorithm = algorithm,
-      id_col = data_cols$id_col,
       conditions = conditions,
       condition_col = data_cols$condition_col,
-      success_col = data_cols$success_col,
       random_assign_prop = random_assign_prop
     )
 
