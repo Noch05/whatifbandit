@@ -347,7 +347,20 @@ adaptive_aipw.data.frame <- function(
     ) |>
     dplyr::mutate(estimator = "Sample")
 
-  returns <- dplyr::bind_rows(estimates, sample)
+  for (condition in conditions) {
+    if (!condition %in% sample$mab_condition) {
+      addition <- tibble::tibble(
+        mean = 0,
+        variance = 0,
+        mab_condition = condition,
+        estimator = "Sample"
+      )
+      sample <- dplyr::bind_rows(sample, addition)
+    }
+  }
+
+  returns <- dplyr::bind_rows(estimates, sample) |>
+    dplyr::arrange(estimator, mab_condition)
 
   return(returns)
 }
@@ -414,9 +427,22 @@ adaptive_aipw.data.table <- function(
     ),
     by = mab_condition
   ]
-
   sample[, estimator := "Sample"]
+
+  for (condition in conditions) {
+    if (!condition %in% sample$mab_condition) {
+      addition <- data.table::data.table(
+        mean = 0,
+        variance = 0,
+        mab_condition = condition,
+        estimator = "Sample"
+      )
+      sample <- data.table::rbindlist(list(sample, addition), use.names = TRUE)
+    }
+  }
+
   returns <- data.table::rbindlist(list(estimates, sample), use.names = TRUE)
+  data.table::setorder(returns, estimator, mab_condition)
 
   return(returns)
 }

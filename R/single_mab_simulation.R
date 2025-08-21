@@ -278,8 +278,9 @@ single_mab_simulation <- function(
 #' @param success_col Column in `data`; binary successes from the original experiment.
 #' @param condition_col Column in `data`; original treatment condition for each observation.
 #' @param date_col Column in `data`; contains original date of event/trial. Only necessary when assigning by "Date". Must be of type `Date`, not a character string.
-#' @param month_col Column in `data`; contains month of treatment. Only necessary when `time_unit = "Month"`. This can be a string or factor variable
-#' containing the names or numbers of months.
+#' @param month_col Column in `data`; contains month of treatment. Only necessary when `time_unit = "Month"`, and the months described are different
+#' then what would be returned by `lubridate::months(data$date_col)` or `format(data$date_col, "%m")`. This can be a numeric, string, or factor variable
+#' containing the names or numbers of the months.
 #' @param success_date_col Column in `data`; contains original dates each success occurred. Only necessary when `perfect_assignment = FALSE`. Must be of type `Date`, not a character string.
 #' @param assignment_date_col Column in `data`; contains original dates treatments were assigned to observations. Only necessary when `perfect_assignment = FALSE`.
 #' Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type `Date`, not a character string.

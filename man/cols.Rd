@@ -12,8 +12,9 @@
 
 \item{date_col}{Column in \code{data}; contains original date of event/trial. Only necessary when assigning by "Date". Must be of type \code{Date}, not a character string.}
 
-\item{month_col}{Column in \code{data}; contains month of treatment. Only necessary when \code{time_unit = "Month"}. This can be a string or factor variable
-containing the names or numbers of months.}
+\item{month_col}{Column in \code{data}; contains month of treatment. Only necessary when \code{time_unit = "Month"}, and the months described are different
+then what would be returned by \code{lubridate::months(data$date_col)} or \code{format(data$date_col, "\%m")}. This can be a numeric, string, or factor variable
+containing the names or numbers of the months.}
 
 \item{success_date_col}{Column in \code{data}; contains original dates each success occurred. Only necessary when \code{perfect_assignment = FALSE}. Must be of type \code{Date}, not a character string.}
 

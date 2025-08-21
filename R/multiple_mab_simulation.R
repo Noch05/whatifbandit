@@ -189,7 +189,10 @@ multiple_mab_simulation <- function(
         ndraws = ndraws,
         random_assign_prop = random_assign_prop
       )
-      results$assignment_quantities <- get_assignment_quantities(results)
+      results$assignment_quantities <- get_assignment_quantities(
+        results,
+        prepped$conditions
+      )
       if (!keep_data) {
         results$final_data <- NULL
       }
@@ -270,20 +273,30 @@ multiple_mab_simulation <- function(
 #' @description Takes the output from [mab_simulation()], and
 #' calculates the number of observations assigned to each treatment group in the adaptive trial.
 #' @param simulation Output from [mab_simulation()]
+#' @param conditions Character vector containing the names of all the treatment conditions in the trial.
 #' @returns Named numeric vector containing number of observations assigned to each treatment group
 #' @keywords internal
-get_assignment_quantities <- function(simulation) {
+get_assignment_quantities <- function(simulation, conditions) {
   UseMethod("get_assignment_quantities", simulation$final_data)
 }
 #' @method get_assignment_quantities data.frame
 #' @description get_assignment_quantities for data.frames
 #' @inheritParams get_assignment_quantities
 #' @noRd
-get_assignment_quantities.data.frame <- function(simulation) {
+get_assignment_quantities.data.frame <- function(simulation, conditions) {
   count_summary <- simulation$final_data |>
     dplyr::group_by(mab_condition) |>
     dplyr::count()
+
   count_vec <- rlang::set_names(count_summary$n, count_summary$mab_condition)
+
+  if (length(count_vec) < length(conditions)) {
+    missing_conds <- base::setdiff(
+      conditions,
+      base::names(count_vec)
+    )
+    count_vec[missing_conds] <- 0
+  }
   return(count_vec)
 }
 #-------------------------------------------------------------------
@@ -291,10 +304,17 @@ get_assignment_quantities.data.frame <- function(simulation) {
 #' @description get_assignment_quantities for data.tables
 #' @inheritParams get_assignment_quantities
 #' @noRd
-get_assignment_quantities.data.table <- function(simulation) {
+get_assignment_quantities.data.table <- function(simulation, conditions) {
   count_summary <- simulation$final_data[, .N, by = mab_condition]
   data.table::setorder(count_summary, mab_condition)
   count_vec <- rlang::set_names(count_summary$N, count_summary$mab_condition)
+  if (length(count_vec) < length(conditions)) {
+    missing_conds <- base::setdiff(
+      conditions,
+      base::names(count_vec)
+    )
+    count_vec[missing_conds] <- 0
+  }
   return(count_vec)
 }
 #-----------------------------------------------------------------

@@ -321,7 +321,7 @@ plot_mult_estimates <- function(x, cdf, level, ...) {
   rlang::check_installed("ggplot2")
   check_level(level)
   if (base::is.null(cdf)) {
-    rlang::abort("Invalid Estimator: Valid CDF's are, empirical`, and `normal`")
+    rlang::abort("Invalid CDF: Valid CDF's are, empirical`, and `normal`")
   }
   cols <- switch(
     cdf,

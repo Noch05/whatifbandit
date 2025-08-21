@@ -5,10 +5,12 @@
 \alias{get_assignment_quantities}
 \title{Calculates Number of Observations Assigned to Each Treatment}
 \usage{
-get_assignment_quantities(simulation)
+get_assignment_quantities(simulation, conditions)
 }
 \arguments{
 \item{simulation}{Output from \code{\link[=mab_simulation]{mab_simulation()}}}
+
+\item{conditions}{Character vector containing the names of all the treatment conditions in the trial.}
 }
 \value{
 Named numeric vector containing number of observations assigned to each treatment group
