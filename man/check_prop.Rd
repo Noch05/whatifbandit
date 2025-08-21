@@ -2,15 +2,15 @@
 % Please edit documentation in R/input_validation.R
 \name{check_prop}
 \alias{check_prop}
-\title{Checking if inputs are proportions}
+\title{Checking for Proportions}
 \usage{
 check_prop(...)
 }
 \arguments{
-\item{...}{Arguments to check}
+\item{...}{Arguments to check.}
 }
 \value{
-Nothing; Throws an error if any input is not a valid proportion between 0 and 1
+Throws an error if any input is not a valid proportion between 0 and 1
 }
 \description{
 Helper to \code{\link[=validate_inputs]{validate_inputs()}}. This function accepts the user's

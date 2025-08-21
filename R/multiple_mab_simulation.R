@@ -11,12 +11,12 @@
 #' @param verbose Logical; Toggles progress bar from [furrr::future_map()] and other intermediate messages.
 #' @param times A numeric value of length 1, the number of simulations to conduct.
 #' @param seeds An integer vector of `length(times)` containing valid seeds to define random state for each trial.
-#' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets.
-#' .
+#' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended FALSE.
+#'
 #' @returns An object of class `multiple.mab`, containing:
 #' \itemize{
-#' \item `final_data_nest:` tibble or data.table containing the nested tibbles/data.tables from each trial. Only provided when `keep_data` is TRUE.
-#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period. Wide format,
+#' \item `final_data_nest:` A tibble or data.table containing the nested tibbles/data.tables from each trial. Only provided when `keep_data` is TRUE.
+#' \item `bandits`: A tibble or data.table containing the UCB1 valuess or Thompson sampling posterior distributions for each period. Wide format,
 #' each row is a period, and each columns is a treatment.
 #' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period. Wide format,
 #' each row is a period, and each columns is a treatment.
@@ -28,8 +28,8 @@
 #' }
 #' @example inst/examples/multiple_mab_simulation_example.R
 #' @details
-#' Note that when called if data.table has not been attached already it will be when `future.map()` runs,
-#' which will print a message to console. This does not mean that if you pass a tibble or data.frame, that data.table will
+#' Note that when called if data.table has not been attached already it will be when `future.map()` runs and a message
+#' may print. This does not mean that if you pass a tibble or data.frame, that data.table will
 #' used.
 #'
 #' ## Implementation
@@ -91,26 +91,28 @@
 #' @seealso [single_mab_simulation()], \href{https://furrr.futureverse.org}{furrr}, \href{https://future.futureverse.org}{future}
 #' @export
 
-multiple_mab_simulation <- function(data,
-                                    assignment_method,
-                                    algorithm,
-                                    conditions,
-                                    prior_periods,
-                                    perfect_assignment,
-                                    whole_experiment,
-                                    blocking,
-                                    data_cols,
-                                    times,
-                                    seeds,
-                                    control_augment = 0,
-                                    random_assign_prop = 0,
-                                    ndraws = 5000,
-                                    time_unit = NULL,
-                                    period_length = NULL,
-                                    block_cols = NULL,
-                                    verbose = FALSE,
-                                    check_args = TRUE,
-                                    keep_data = FALSE) {
+multiple_mab_simulation <- function(
+  data,
+  assignment_method,
+  algorithm,
+  prior_periods,
+  perfect_assignment,
+  whole_experiment,
+  blocking,
+  data_cols,
+  times,
+  seeds,
+  control_augment = 0,
+  random_assign_prop = 0,
+  ndraws = 5000,
+  control_condition = NULL,
+  time_unit = NULL,
+  period_length = NULL,
+  block_cols = NULL,
+  verbose = FALSE,
+  check_args = TRUE,
+  keep_data = FALSE
+) {
   if ((utils::object.size(data) / (1024^2) > 500)) {
     rlang::warn(c(
       "i" = "`furrr::future_map()` has a serialization limit of 500 MB. If your data
@@ -120,62 +122,77 @@ multiple_mab_simulation <- function(data,
   }
 
   if (!is.numeric(times) || times < 1 || floor(times) != times) {
-    rlang::abort(c("Argument 'times' must be an integer value greater than or equal to 1"),
+    rlang::abort(
+      c("Argument 'times' must be an integer value greater than or equal to 1"),
       "x" = paste0("You Passed: ", times)
     )
   }
   if (!is.integer(seeds) || length(seeds) != times) {
-    rlang::abort(c("Argument 'seeds' must be an integer vector of length equal to `times`. Please provide a valid vector.",
-      "x" = sprintf("You passed a %s vector of length %d, while times is %d.", base::typeof(seeds), base::length(seeds), times),
+    rlang::abort(c(
+      "Argument 'seeds' must be an integer vector of length equal to `times`. Please provide a valid vector.",
+      "x" = sprintf(
+        "You passed a %s vector of length %d, while times is %d.",
+        base::typeof(seeds),
+        base::length(seeds),
+        times
+      ),
       "i" = "Reccomended to use `sample.int()` to create proper vector"
     ))
   }
   if (!is.logical(keep_data) || is.na(keep_data)) {
-    rlang::abort("Argument 'keep_data' must logical. Please enter `TRUE` or `FALSE`")
+    rlang::abort(
+      "Argument 'keep_data' must logical. Please enter `TRUE` or `FALSE`"
+    )
   }
 
-
   prepped <- pre_mab_simulation(
-    data = data, assignment_method = assignment_method,
-    algorithm = algorithm, conditions = conditions,
-    prior_periods = prior_periods, perfect_assignment = perfect_assignment,
-    whole_experiment = whole_experiment, blocking = blocking,
-    block_cols = block_cols, data_cols = data_cols,
-    control_augment = control_augment, time_unit = time_unit,
+    data = data,
+    assignment_method = assignment_method,
+    algorithm = algorithm,
+    control_condition = control_condition,
+    prior_periods = prior_periods,
+    perfect_assignment = perfect_assignment,
+    whole_experiment = whole_experiment,
+    blocking = blocking,
+    block_cols = block_cols,
+    data_cols = data_cols,
+    control_augment = control_augment,
+    time_unit = time_unit,
     period_length = period_length,
-    verbose = verbose, ndraws = ndraws, random_assign_prop = random_assign_prop,
+    verbose = verbose,
+    ndraws = ndraws,
+    random_assign_prop = random_assign_prop,
     check_args = check_args
   )
   verbose_log(verbose, "Starting Simulations")
-
-  ## Initial Sort for Consistency in calling by numeric indexes
-  conditions <- base::sort(conditions)
 
   mabs <- furrr::future_map(
     seeds,
     function(x) {
       set.seed(x)
-
       results <- mab_simulation(
         data = prepped$data,
-        time_unit = time_unit,
+        time_unit = prepped$character_args$time_unit,
         period_length = period_length,
-        prior_periods = prior_periods,
-        algorithm = algorithm,
+        prior_periods = prepped$character_args$prior_periods,
+        algorithm = prepped$character_args$algorithm,
         whole_experiment = whole_experiment,
         perfect_assignment = perfect_assignment,
-        conditions = conditions,
+        conditions = prepped$conditions,
         blocking = blocking,
         block_cols = prepped$block_cols,
         data_cols = prepped$data_cols,
         verbose = FALSE,
-        assignment_method = assignment_method,
+        assignment_method = prepped$character_args$assignment_method,
         control_augment = control_augment,
         imputation_information = prepped$imputation_information,
         ndraws = ndraws,
         random_assign_prop = random_assign_prop
       )
-
+      results$assignment_quantities <- get_assignment_quantities(
+        results,
+        prepped$conditions
+      )
       if (!keep_data) {
         results$final_data <- NULL
       }
@@ -188,13 +205,13 @@ multiple_mab_simulation <- function(data,
         block_cols = prepped$block_cols,
         data_cols = prepped$data_cols,
         imputation_information = prepped$imputation_information,
-        time_unit = time_unit,
+        time_unit = prepped$character_args$time_unit,
         period_length = period_length,
-        prior_periods = prior_periods,
-        algorithm = algorithm,
+        prior_periods = prepped$character_args$prior_periods,
+        algorithm = prepped$character_args$algorithm,
         whole_experiment = whole_experiment,
-        perfect_assignment = perfect_assignment,
-        conditions = conditions,
+        perfect_assignment = prepped$character_args$perfect_assignment,
+        conditions = prepped$conditions,
         blocking = blocking,
         assignment_method = assignment_method,
         control_augment = control_augment,
@@ -203,9 +220,17 @@ multiple_mab_simulation <- function(data,
         random_assign_prop = random_assign_prop
       ),
       packages = c(
-        "whatifbandit", "dplyr", "rlang",
-        "tidyr", "bandit", "tibble", "lubridate",
-        "purrr", "furrr", "randomizr", "data.table"
+        "whatifbandit",
+        "dplyr",
+        "rlang",
+        "tidyr",
+        "bandit",
+        "tibble",
+        "lubridate",
+        "purrr",
+        "furrr",
+        "randomizr",
+        "data.table"
       ),
       seed = TRUE
     ),
@@ -213,22 +238,25 @@ multiple_mab_simulation <- function(data,
   )
   verbose_log(verbose, "Collating Results")
   results <- condense_results(
-    data = data, keep_data = keep_data, mabs = mabs,
+    data = data,
+    keep_data = keep_data,
+    mabs = mabs,
     times = times
   )
 
   results$settings <- base::list(
     original_data = data,
-    assignment_method = assignment_method,
+    algorithm = prepped$character_args$algorithm,
+    assignment_method = prepped$character_args$assignment_method,
+    time_unit = prepped$character_args$time_unit,
+    period_length = period_length,
+    prior_periods = prepped$character_args$prior_periods,
     control_augment = control_augment,
     random_assign_prop = random_assign_prop,
-    time_unit = time_unit,
+    control = as.character(control_condition),
+    conditions = prepped$conditions,
     perfect_assignment = perfect_assignment,
-    algorithm = algorithm,
-    period_length = period_length,
-    prior_periods = prior_periods,
     whole_experiment = whole_experiment,
-    conditions = conditions,
     blocking = blocking,
     block_cols = prepped$block_cols$name,
     ndraws = ndraws,
@@ -239,6 +267,58 @@ multiple_mab_simulation <- function(data,
 
   return(results)
 }
+# ------------------------------------------------------------------
+#' @name get_assignment_quantitites
+#' @title Calculates Number of Observations Assigned to Each Treatment
+#' @description Takes the output from [mab_simulation()], and
+#' calculates the number of observations assigned to each treatment group in the adaptive trial.
+#' @param simulation Output from [mab_simulation()]
+#' @param conditions Character vector containing the names of all the treatment conditions in the trial.
+#' @returns Named numeric vector containing number of observations assigned to each treatment group
+#' @keywords internal
+get_assignment_quantities <- function(simulation, conditions) {
+  UseMethod("get_assignment_quantities", simulation$final_data)
+}
+#' @method get_assignment_quantities data.frame
+#' @description get_assignment_quantities for data.frames
+#' @inheritParams get_assignment_quantities
+#' @noRd
+get_assignment_quantities.data.frame <- function(simulation, conditions) {
+  count_summary <- simulation$final_data |>
+    dplyr::group_by(mab_condition) |>
+    dplyr::count()
+
+  count_vec <- rlang::set_names(count_summary$n, count_summary$mab_condition)
+
+  if (length(count_vec) < length(conditions)) {
+    missing_conds <- base::setdiff(
+      conditions,
+      base::names(count_vec)
+    )
+    count_vec[missing_conds] <- 0
+  }
+  return(count_vec)
+}
+#-------------------------------------------------------------------
+#' @method get_assignment_quantities data.table
+#' @description get_assignment_quantities for data.tables
+#' @inheritParams get_assignment_quantities
+#' @noRd
+get_assignment_quantities.data.table <- function(simulation, conditions) {
+  count_summary <- simulation$final_data[, .N, by = mab_condition]
+  data.table::setorder(count_summary, mab_condition)
+  count_vec <- rlang::set_names(count_summary$N, count_summary$mab_condition)
+  if (length(count_vec) < length(conditions)) {
+    missing_conds <- base::setdiff(
+      conditions,
+      base::names(count_vec)
+    )
+    count_vec[missing_conds] <- 0
+  }
+  return(count_vec)
+}
+#-----------------------------------------------------------------
+
 #' @name condense_results
 #' @title Condenses results into a list for [multiple_mab_simulation()]
 #' @description
@@ -249,7 +329,7 @@ multiple_mab_simulation <- function(data,
 #' @returns `multiple.mab` class object, which is a named list containing:
 #' \itemize{
 #' \item `final_data_nest:` tibble or data.table containing the nested tibbles/data.tables from each trial. Only provided when `keep_data` is TRUE.
-#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period. Wide format,
+#' \item `bandits`: A tibble or data.table containing the UCB1 valuess or Thompson sampling posterior distributions for each period. Wide format,
 #' each row is a period, and each columns is a treatment.
 #' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period. Wide format,
 #' each row is a period, and each columns is a treatment.
@@ -269,12 +349,23 @@ multiple_mab_simulation <- function(data,
 #' @keywords internal
 
 condense_results <- function(data, keep_data, mabs, times) {
-  items <- c("bandits", "assignment_probs", "estimates")
+  items <- c(
+    "bandits",
+    "assignment_probs",
+    "estimates",
+    "assignment_quantities"
+  )
 
-  if (inherits(data, "data.table")) {
+  if (data.table::is.data.table(data)) {
     results <- lapply(items, \(item) {
-      all <- lapply(seq_len(times), function(i) mabs[[i]][[item]])
-      result <- data.table::rbindlist(all, idcol = "trial")
+      all <- lapply(seq_len(times), function(i) {
+        if (item == "assignment_quantities") {
+          as.list(mabs[[i]][[item]])
+        } else {
+          mabs[[i]][[item]]
+        }
+      })
+      result <- data.table::rbindlist(all, idcol = "trial", use.names = TRUE)
       result[, trial := as.numeric(trial)]
       return(result)
     })

@@ -8,10 +8,9 @@ condense_results(data, keep_data, mabs, times)
 }
 \arguments{
 \item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
-of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.}
+of a traditional Randomized Controlled Trial (RCT). Any data.frames will be converted to tibbles internally.}
 
-\item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets.
-.}
+\item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended FALSE.}
 
 \item{mabs}{output from \code{\link[furrr:future_map]{furrr::future_map()}} in \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}}
 
@@ -21,7 +20,7 @@ of a traditional Randomized Controlled Trial (RCT). data.frames will be converte
 \code{multiple.mab} class object, which is a named list containing:
 \itemize{
 \item \verb{final_data_nest:} tibble or data.table containing the nested tibbles/data.tables from each trial. Only provided when \code{keep_data} is TRUE.
-\item \code{bandits}: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period. Wide format,
+\item \code{bandits}: A tibble or data.table containing the UCB1 valuess or Thompson sampling posterior distributions for each period. Wide format,
 each row is a period, and each columns is a treatment.
 \item \code{assignment_probs}: A tibble or data.table containing the probability of being assigned each treatment arm at a given period. Wide format,
 each row is a period, and each columns is a treatment.

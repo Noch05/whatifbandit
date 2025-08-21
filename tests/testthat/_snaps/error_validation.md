@@ -4,36 +4,36 @@
 
 # Throws Proper Error when arguments are invalid
 
-    'algorithm' must be 'Thompson' or 'UCB1'.
+    'algorithm' must be 'thompson' or 'ucb1'.
     x You passed: not
 
 ---
 
-    'algorithm' must be 'Thompson' or 'UCB1'.
+    'algorithm' must be 'thompson' or 'ucb1'.
     x You passed: 76
 
 ---
 
-    'algorithm' must be 'Thompson' or 'UCB1'.
+    'algorithm' must be 'thompson' or 'ucb1'.
     x You passed: NA
 
 ---
 
     Invalid `assignment_method`
     x you passed: not
-    i Valid methods are `Individual`, `Batch`, `Date`
+    i Valid methods are `individual`, `batch`, `date`
 
 ---
 
     Invalid `assignment_method`
     x you passed: 45
-    i Valid methods are `Individual`, `Batch`, `Date`
+    i Valid methods are `individual`, `batch`, `date`
 
 ---
 
     Invalid `assignment_method`
     x you passed: NA
-    i Valid methods are `Individual`, `Batch`, `Date`
+    i Valid methods are `individual`, `batch`, `date`
 
 ---
 
@@ -85,10 +85,6 @@
 
 ---
 
-    The `conditions` vector must one element named 'Control' when control augmentation is used.
-
----
-
     i In index: 2.
     i With name: blocking.
     Caused by error in `.f()`:
@@ -114,14 +110,14 @@
 ---
 
     Invalid Time Unit
-    x you passed: Weeks
-    i valid units are `Day`, `Month`, `Week`
+    x you passed: weeks
+    i valid units are `day`, `month`, `week`
 
 ---
 
     Invalid Time Unit
     x you passed: 5
-    i valid units are `Day`, `Month`, `Week`
+    i valid units are `day`, `month`, `week`
 
 ---
 
@@ -178,7 +174,7 @@
 
 ---
 
-    `prior_periods` must be a positive integer or one of: 'All'
+    `prior_periods` must be a positive integer or one of: 'all'
     x You passed: text
 
 ---
@@ -205,16 +201,6 @@
 
     `period_length` must be a positive integer.
     x You passed: NA
-
----
-
-    The number of `conditions` must match the number of unique treatment groups in the data.
-    x You passed a vector of length 4
-    x Your data has 3 unique treatments
-
----
-
-    `conditions` must be provided as a character vector.
 
 ---
 
@@ -263,6 +249,23 @@
     ! `random_assign_prop` must be a non-null double between 0 and 1.
     x You passed: text
 
+---
+
+    `control_condition` is not present in the conditions column
+    x Potential Conditions: 1, 2, 3
+    x You Passed: 7
+
+---
+
+    `control_condition` is not present in the conditions column
+    x Potential Conditions: 1, 2, 3
+    x You Passed: NA
+
+---
+
+    `control_condition` must have a length of 1
+    x You passed a vector of length: 2
+
 # Throws proper error when columns do not exist or not declared
 
     `block2 is not in the data, but was chosen as a block.
@@ -293,7 +296,7 @@
 
 ---
 
-    i In index: 6.
+    i In index: 5.
     Caused by error in `.f()`:
     ! Required column `success_date_col` is not found in provided `data`.
     x reason: perfect_assignment is FALSE
@@ -301,7 +304,7 @@
 
 ---
 
-    i In index: 7.
+    i In index: 6.
     Caused by error in `.f()`:
     ! Required column `assignment_date_col` is not found in provided `data`.
     x reason: perfect_assignment is FALSE
@@ -312,15 +315,7 @@
     i In index: 4.
     Caused by error in `.f()`:
     ! Required column `date_col` is not found in provided `data`.
-    x reason: assignment_method is 'Date'
-    x Your column: fake_colname
-
----
-
-    i In index: 5.
-    Caused by error in `.f()`:
-    ! Required column `month_col` is not found in provided `data`.
-    x reason: time_unit is 'Month'
+    x reason: assignment_method is 'date'
     x Your column: fake_colname
 
 ---
@@ -350,14 +345,14 @@
 
 ---
 
-    i In index: 6.
+    i In index: 5.
     Caused by error in `.f()`:
     ! Required column `success_date_col` is not declared in `data_cols`.
     x reason: perfect_assignment is FALSE
 
 ---
 
-    i In index: 7.
+    i In index: 6.
     Caused by error in `.f()`:
     ! Required column `assignment_date_col` is not declared in `data_cols`.
     x reason: perfect_assignment is FALSE
@@ -367,14 +362,15 @@
     i In index: 4.
     Caused by error in `.f()`:
     ! Required column `date_col` is not declared in `data_cols`.
-    x reason: assignment_method is 'Date'
+    x reason: assignment_method is 'date'
 
 ---
 
     i In index: 5.
     Caused by error in `.f()`:
-    ! Required column `month_col` is not declared in `data_cols`.
-    x reason: time_unit is 'Month'
+    ! Required column `month_col` is not found in provided `data`.
+    x reason: time_unit is 'month' and you provided a `month_col`
+    x Your column: 5
 
 # Throws Proper Error When Columns are Wrong Data Type
 

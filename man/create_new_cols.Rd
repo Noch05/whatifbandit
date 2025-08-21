@@ -8,7 +8,7 @@ create_new_cols(data, data_cols, block_cols, blocking, perfect_assignment)
 }
 \arguments{
 \item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
-of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.}
+of a traditional Randomized Controlled Trial (RCT). Any data.frames will be converted to tibbles internally.}
 
 \item{data_cols}{A named character vector containing the names of columns in \code{data} as strings:
 \itemize{
@@ -16,8 +16,9 @@ of a traditional Randomized Controlled Trial (RCT). data.frames will be converte
 \item \code{success_col}: Column in \code{data}; binary successes from the original experiment.
 \item \code{condition_col}: Column in \code{data}; original treatment condition for each observation.
 \item \code{date_col}: Column in \code{data}; contains original date of event/trial. Only necessary when assigning by "Date". Must be of type \code{Date}, not a character string.
-\item \code{month_col}: Column in \code{data}; contains month of treatment. Only necessary when \code{time_unit = "Month"}. This can be a string or factor variable
-containing the names or numbers of months.
+\item \code{month_col}: Column in \code{data}; contains month of treatment. Only necessary when \code{time_unit = "Month"}, and when periods should be determined directly by
+the calendar months instead of month based time periods. This column can be a string/factor variable with the month names or numeric with the month number. It can easily
+be created from your \code{date_col} via \code{lubridate::month(data[[date_col]])} or \code{format(data[[date_col]], "\%m")}.
 \item \code{success_date_col}: Column in \code{data}; contains original dates each success occurred. Only necessary when \code{perfect_assignment = FALSE}. Must be of type \code{Date}, not a character string.
 \item \code{assignment_date_col}: Column in \code{data}; contains original dates treatments were assigned to observations. Only necessary when \code{perfect_assignment = FALSE}.
 Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type \code{Date}, not a character string.
@@ -25,12 +26,12 @@ Used to simulate imperfect information on the part of researchers conducting an 
 
 \item{block_cols}{A character vector of variables to block by. This vector should not be named.}
 
-\item{blocking}{A logical value; whether or not to use treatment blocking. Treatment blocking is used to ensure an even-enough
+\item{blocking}{Logical; whether or not to use treatment blocking. Treatment blocking is used to ensure an even-enough
 distribution of treatment conditions across blocks. For example, blocking by gender would mean the randomized assignment should
 split treatments evenly not just throughout the sample (so for 4 arms, 25-25-25-25), but also within each block, so 25\% of men
-would receive each treatment and 25\% of women the same. This is most useful when the blocks are uneven or have some geographic meaning.}
+would receive each treatment and 25\% of women the same.}
 
-\item{perfect_assignment}{A logical value; if TRUE, assumes perfect information for treatment assignment
+\item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
 If FALSE, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.

@@ -1,2 +1,3 @@
 *.html
 *.R
+whatifbandit_files/*

@@ -97,7 +97,6 @@ sim <- single_mab_simulation(
   assignment_method = "Batch",
   period_length = 1000,
   algorithm = "UCB1",
-  conditions = levels(tanf$condition),
   whole_experiment = TRUE, perfect_assignment = TRUE,
   prior_periods = "All",
   blocking = FALSE,
@@ -128,7 +127,6 @@ sim <- single_mab_simulation(
   time_unit = "Month",
   period_length = 1,
   algorithm = "Thompson",
-  conditions = levels(tanf$condition),
   whole_experiment = FALSE, perfect_assignment = TRUE,
   prior_periods = "All",
   blocking = TRUE, block_cols = c("service_center"),
@@ -156,7 +154,8 @@ Control augmentation ensures that the marked control group meets the specified p
 
 The hybrid design sets aside a percentage of the dataset to be assigned uniformly randomly. If we set `random_assign_prop = 0.2`, then the algorithm allocates 20% of each period to be assigned to treatments randomly, while 80% are assigned via the Thompson sampling or UCB1 algorithm.
 
-We do not recommend using both control augmentation and a hybrid design. If there are 3 conditions, like in the TANF experiment, and we set `control_augment = 0.1`, and `random_assign_prop = 0.21`, then the minimum assignment probability for the control group is not 10% but 14.9% instead (0.1 * 0.79 + 0.21/3 = 0.149). Below, we use  `control_augment = 0.2`, and identify the control group by naming one level of the `conditions` character vector `"Control"`; the other names don't matter, they just cannot be `NA` or `NULL`. If we use `random_assign_prob` instead, the conditions vector can remain unnamed. 
+We do not recommend using both control augmentation and a hybrid design. If there are 3 conditions, like in the TANF experiment, and we set `control_augment = 0.1`, and `random_assign_prop = 0.21`, then the minimum assignment probability for the control group is not 10% but 14.9% instead (0.1 * 0.79 + 0.21/3 = 0.149). Below, we use  `control_augment = 0.2`, and identify the control group using the `control_condition` argument. If we use `random_assign_prob` instead, we do not need to specify this.
+
 ```{r, singlesimcontrolaug, eval=FALSE}
 tanf <- arrange(tanf, appt_date)
 conditions <- setNames(levels(tanf$condition), c("Control", "T1", "T2"))
@@ -165,7 +164,6 @@ sim <- single_mab_simulation(
   data = tanf,
   assignment_method = "Individual",
   algorithm = "Thompson",
-  conditions = conditions,
   whole_experiment = FALSE, perfect_assignment = TRUE,
   prior_periods = 500,
   blocking = TRUE, block_cols = c("service_center"),
@@ -174,7 +172,8 @@ sim <- single_mab_simulation(
     success_col = "success",
     condition_col = "condition"
   ),
-  control_augment = 0.2
+  control_augment = 0.2,
+  control_condition = "no_letter"
 )
 ```
 ## Analysis
@@ -182,7 +181,7 @@ sim <- single_mab_simulation(
 `single_mab_simulation()` returns a list with 4 components:
 
 * `final_data` is the transformed input containing the treatment assignments and outcomes from the simulation, along with other new columns such as the probability of being assigned each treatment at each period, and the regression adjustment $\hat{m}(W)$ for the AIPW estimates.
-* `bandits` contains either the Thompson sampling or UCB1 statistics from each period in the trial. The chart should be interpreted as the bandit calculation after that period occurred.
+* `bandits` contains either the Thompson sampling probabilities or UCB1 values from each period in the trial. The chart should be interpreted as the bandit calculation after that period occurred.
 * `assignment_probs` contains the probability of assignment from each period in the trial. The chart should be interpreted as the probability for that specific period.
 * `estimates` contains the AIPW and sample estimates with variances for each treatment arm.
 * `settings` contains the configuration for the simulation.
@@ -194,7 +193,7 @@ class(sim)
 sim
 ```
 The summary method presents the final Thompson/UCB1 calculation from after the trial concluded, the AIPW estimate
-for the probability of success, its standard error and a 95% two-tailed confidence interval based on a normal distribution.
+for the probability of success, its standard error, a 95% two-tailed confidence interval based on a normal distribution, and the number of observations assigned to each treatment group over the course of the trial.
 
 ```{r}
 sim_summary <- summary(sim)
@@ -220,7 +219,7 @@ sim_summary |>
 
 ## Plotting
 
-Plot methods display the results. These methods use `{ggplot2}` to create visualizations. The `mab` class supports 3 plot types, `"arm"`, `"assign"` and `"estimate"`, each providing different information about the results. These plots can be built with `+` like any `{ggplot2}` object, and arguments to the main `geom*` can be specified through the `...` argument. The geoms used are `geom_line()`, and `geom_errorbarh()`
+Plot methods display the results. These methods use `{ggplot2}` to create visualizations. The `mab` class supports 3 plot types, `"arm"`, `"assign"` and `"estimate"`, each providing different information about the results. These plots can be built with `+` like any `{ggplot2}` object, and arguments to the main `geom*` can be specified through the `...` argument. The geoms used are `geom_line()`, and `geom_errorbarh()`.
 
 `type = "arm"` provides a view of each arm over time, its relative probability of being the best, or the UCB1 value.
 
@@ -253,7 +252,7 @@ All of the data used to create these plots and summary statistics is present in 
 
 `multiple_mab_simulation()` has 3 new arguments but is otherwise the same as `single_mab_simulation()`. These arguments are:
 
-* `times`: The number of times to run the simulation
+* `times`: The number of times to run the simulation.
 * `seeds`: A numeric vector of random seeds, where `length(seeds) = times`. Required to make results reproducible, and we encourage setting them before hand using `sample.int()`.
 * `keep_data`: A logical value, whether or not to keep the `final_data` object from each simulation. Default is FALSE,
 to reduce memory load of execution.
@@ -271,7 +270,6 @@ time <- system.time(
     time_unit = "Month",
     period_length = 1,
     algorithm = "Thompson",
-    conditions = levels(tanf$condition),
     whole_experiment = FALSE, perfect_assignment = TRUE,
     prior_periods = "All",
     blocking = TRUE, block_cols = c("service_center"),
@@ -284,10 +282,26 @@ time <- system.time(
       success_date_col = "date_of_recert",
       assignment_date_col = "letter_sent_date"
     ),
-    keep_data = FALSE, times = 100, seeds = seeds
+    keep_data = TRUE, times = 100, seeds = seeds
   )
 )
 ```
+
+```{r}
+#| echo: FALSE
+get_size <- function(x, unit) {
+  string_format <- object.size(x) |> format(units = unit)
+  num <- regmatches(string_format, regexpr("[0-9]+", string_format)) |> as.numeric()
+  return(num)
+}
+full_size <- get_size(multiple_sims, unit = "MiB")
+full_size_kib <- get_size(multiple_sims, unit = "KiB")
+multiple_sims$final_data_nest <- NULL
+reduced_size <- get_size(multiple_sims, unit = "KiB")
+
+```
+
+Here we've kept `keep_data = TRUE` to showcase the memory impact of saving the data from each iteration. The full object size with all the data is `r full_size` megabytes (MiB). However, when we remove the data from the object, the size becomes just `r reduced_size` kilobytes (KiB), making it `r round(full_size_kib / reduced_size, 0)` times smaller than the original size.
 
 Executing those 100 simulations took `r as.numeric(time["elapsed"])` seconds. To speed up this process `multiple_mab_simulation()` supports parallel processing via the [furrr](https://furrr.futureverse.org/) and [future](https://furrr.futureverse.org/) packages. To run the function in parallel, call `future::plan()` before running it and specify the number of cores you want to use.
 ```{r}
@@ -307,7 +321,6 @@ parallel_time <- system.time(
     time_unit = "Month",
     period_length = 1,
     algorithm = "Thompson",
-    conditions = levels(tanf$condition),
     whole_experiment = FALSE, perfect_assignment = TRUE,
     prior_periods = "All",
     blocking = TRUE, block_cols = c("service_center"),
@@ -331,9 +344,10 @@ Using `{future}` comes with some new complexities. Generally, Windows users shou
 
 ## Analyzing Repeated Simulations
 
-`multiple_mab_simulation()` returns the same elements as `single_mab_simulation()` except for `final_data`. When
+`multiple_mab_simulation()` returns the mostly the same elements as `single_mab_simulation()` except for `final_data`. When
 `keep_data = TRUE` the `final_data` element is a nested data frame of all the `final_data` from each trial, and when
-`keep_data = FALSE`, the function returns only objects `bandits`, `assignment_probs`, `estimates`, and `settings`.
+`keep_data = FALSE`, the function returns only objects `bandits`, `assignment_probs`, `estimates`, `assignment_quantities` and `settings`. `assignment_quantities` is a new object, which is the same structure as `bandits` and `assignment_probs` but contains the number of units assigned
+to each treatment for each trial.
 
 The object is also a custom `multiple.mab` class containing similar generic methods as the `mab` class, including `print()` and `summary()`.
 
@@ -342,7 +356,7 @@ class(multiple_sims)
 print(multiple_sims)
 ```
 
-For `multiple.mab` objects, `summary()` returns the average for AIPW estimates and 2 estimates of their standard error. One estimate is the average of the standard errors across each trial, with the variances averaged first $\left(\sqrt{\frac{1}{\text{n}}\sum_1^n\mathbb{V}[\text{Estimate}_i]}\right)$. The other estimate, is the sample variance of all of the AIPW estimates across the trials (`SE_empirical`). 95% confidence intervals are provided using both the empirical cumulative distribution function (eCDF), and the normal CDF using the average standard errors. Additionally, the number of times each treatment arm was selected as the best is displayed, with the best being the highest Thompson probability or UCB1 statistic at the end of the trial. 
+For `multiple.mab` objects, `summary()` returns the average for AIPW estimates and 2 estimates of their standard error. One estimate is the average of the standard errors across each trial, with the variances averaged first $\left(\sqrt{\frac{1}{\text{n}}\sum_1^n\mathbb{V}[\text{Estimate}_i]}\right)$. The other estimate, is the sample variance of all of the AIPW estimates across the trials (`SE_empirical`). 95% confidence intervals are provided using both the empirical cumulative distribution function (eCDF), and the normal CDF using the average standard errors. Additionally, the number of times each treatment arm was selected as the best is displayed, along with the mean and standard deviation of the number of units assigned to each treatment across the trials. The best arm for a given simulation is selected as the treatment arm with the highest Thompson sampling probability or UCB1 value at the end of the trial.
 
 ```{r}
 summary(multiple_sims) |> print(width = Inf)
@@ -365,18 +379,19 @@ summary(multiple_sims, level = 0.75) |> print(width = Inf)
 plot(multiple_sims, type = "summary")
 ```
 
-`type = "hist"` creates histograms showcasing the distribution for the AIPW for each treatment arm, over the repeated trials.
+`type = "hist"` creates histograms showcasing the distribution for the AIPW for each treatment arm, over the repeated trials or the distribution of the number of units assigned to each treatment arm. For this function because it also takes advtanage of `facet_grid()`, additional arguments need to be specified in a list labelled `geom` for items to go to `geom_histogram()` and `facet` for items to go to `facet_grid()`.
 
 ```{r}
 #| fig.width: 5
-plot(multiple_sims, type = "hist", bins = 50)
+plot(multiple_sims, type = "hist", quantity = "estimate", geom = list(bins = 50))
+plot(multiple_sims, type = "hist", quantity = "assignment", facet = list(switch = "x"))
 ```
 
 `type = "estimate"` is the same as for `mab`, but now the spread can be shown using either empirical or normal CDF.
 
 ```{r}
 #| fig.width: 5
-plot(multiple_sims,type = "estimate",
+plot(multiple_sims, type = "estimate",
   cdf = "empirical", level = 0.99, height = 0.4
 ) +
   scale_x_continuous(breaks = seq(0, 1, .1), limits = range(0, 1))
@@ -426,7 +441,6 @@ dataframe_time <- system.time(single_mab_simulation(
   assignment_method = "Batch",
   period_length = 3000,
   algorithm = "Thomspon",
-  conditions = levels(tanf$condition),
   whole_experiment = FALSE, perfect_assignment = TRUE,
   prior_periods = "All",
   blocking = FALSE,
@@ -443,7 +457,6 @@ datatable_time <- system.time(single_mab_simulation(
   assignment_method = "Batch",
   period_length = 3000,
   algorithm = "UCB1",
-  conditions = levels(tanf$condition),
   whole_experiment = FALSE, perfect_assignment = TRUE,
   prior_periods = "All",
   blocking = FALSE,

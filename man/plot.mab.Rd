@@ -7,27 +7,27 @@
 \method{plot}{mab}(x, type, level = 0.95, save = FALSE, path = NULL, ...)
 }
 \arguments{
-\item{x}{\code{mab} class object created by \code{\link[=single_mab_simulation]{single_mab_simulation()}}}
+\item{x}{A \code{mab} class object created by \code{\link[=single_mab_simulation]{single_mab_simulation()}}}
 
 \item{type}{String; Type of plot requested; valid types are:
 \itemize{
-\item \code{arm}: Shows Thompson Probability or UCB1 Statistic over the trial period.
+\item \code{arm}: Shows Thompson sampling probabilities or UCB1 values over the trial period.
 \item \code{assign}: Shows Assignment Probability/Proportion over trial period.
 \item \code{estimate}: Shows AIPW estimates for success probability with
 user specified normal confidence intervals based on their estimated variance.
 }}
 
-\item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
-Defaults to 0.95}
+\item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, 0.95, 0.99).
+Defaults to 0.95.}
 
 \item{save}{Logical; Whether or not to save the plot to disk; FALSE by default.}
 
-\item{path}{String; File directory to save file.}
+\item{path}{String; File directory to save file if necessary.}
 
-\item{...}{arguments to pass to \verb{ggplot2:geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, etc.)}
+\item{...}{Arguments to pass to \verb{ggplot2::geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, \code{bins} etc.).}
 }
 \value{
-Minimal ggplot object, that can be customized and added to with \code{+} (To change, scales, labels, legend, theme, etc.)
+Minimal ggplot object, that can be customized and added to with \code{+} (to change \code{scales}, \code{labels}, \code{legend}, \code{theme}, etc.).
 }
 \description{
 Uses \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} to plot the results of a single
@@ -37,12 +37,9 @@ with \code{+} like any other ggplot plot, but arguments to change
 the underlying geom must be passed to the function initially.
 }
 \details{
-The plot generic requires \href{https://cran.r-project.org/package=ggplot2}{ggplot2}
-which is not required by the package, so it must be installed separately.
-
 This function provides minimalist plots to quickly view the results of any
 Multi-Arm-Bandit trial, and has the ability to be customized through the \code{...}
-in the call and \code{+} afterwords. However, all the data necessary is
+inside the call and \code{+} afterwards. However, all the data necessary is
 provided in the output of \code{\link[=single_mab_simulation]{single_mab_simulation()}} for extreme
 customization or professional plots, it is highly recommended
 to start completely from scratch and not use the generic.
@@ -55,47 +52,38 @@ in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (20
 # Objects returned by `single_mab_simulation()` have a `mab` class.
 # This class has a plot generic that has several minimal plots to examine
 # the trial quickly
-#
-# These functions require ggplot2
-if (requireNamespace("ggplot2", quietly = TRUE)) {
-  # Loading Data and running a quick simulation
-  data(tanf)
-  x <- single_mab_simulation(
-    data = tanf,
-    algorithm = "Thompson",
-    assignment_method = "Batch",
-    period_length = 600,
-    whole_experiment = TRUE,
-    perfect_assignment = TRUE,
-    blocking = FALSE,
-    prior_periods = "All",
-    conditions = c(
-      "no_letter",
-      "open_appt",
-      "specific_appt"
-    ),
-    data_cols = c(
-      condition_col = "condition",
-      id_col = "ic_case_id",
-      success_col = "success"
-    )
+
+# Loading Data and running a quick simulation
+data(tanf)
+x <- single_mab_simulation(
+  data = tanf,
+  algorithm = "Thompson",
+  assignment_method = "Batch",
+  period_length = 600,
+  whole_experiment = TRUE,
+  perfect_assignment = TRUE,
+  blocking = FALSE,
+  prior_periods = "All",
+  data_cols = c(
+    condition_col = "condition",
+    id_col = "ic_case_id",
+    success_col = "success"
   )
+)
 
-  # View best treatment arms over the simulation
-  y <- plot(x, type = "arm")
-  y
-  # Adding a new title
-  y + ggplot2::labs(title = "Your New Title")
-  # type = assign creates a similar plot, but shows probability of assignment instead
+# View best treatment arms over the simulation
+y <- plot(x, type = "arm")
+y
+# Adding a new title
+y + ggplot2::labs(title = "Your New Title")
+# type = assign creates a similar plot, but shows probability of assignment instead
 
+# Plotting Augmented Inverse Probability Estimates with confidence interval
+# By default it provides 95\% Normal Confidence Intervals but this can be adjusted
+plot(x, type = "estimate")
 
-  # Plotting Augmented Inverse Probability Estimates with confidence interval
-  # By default it provides 95\% Normal Confidence Intervals but this can be adjusted
-  plot(x, type = "estimate")
-
-  # Adjusting height of internal geom* argument. (`geom_errorbarh()`)
-  plot(x, type = "estimate", height = 0.4)
-}
+# Adjusting height of internal geom* argument. (`geom_errorbarh()`)
+plot(x, type = "estimate", height = 0.4)
 }
 \references{
 Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.

@@ -3,7 +3,8 @@
 ^\.github$
 ^\whatifbandit.pdf$
 ^LICENSE.md$
-
 ^doc$
 ^Meta$
 ^cran-comments\.md$
+^NEWS_files/
+^vignettes/whatifbandit_files/

@@ -2,36 +2,31 @@
 % Please edit documentation in R/input_validation.R
 \name{check_assign_method}
 \alias{check_assign_method}
-\title{Checking for valid assignment methods}
+\title{Checking For Valid Assignment Methods}
 \usage{
 check_assign_method(assignment_method, time_unit, verbose, period_length)
 }
 \arguments{
-\item{assignment_method}{A character string; one of "Date", "Batch", or "Individual", to define the assignment into treatment waves. When using
-"Batch" or "Individual", ensure your dataset is pre-arranged in the proper order observations should be considered so that
-groups are assigned correctly. For "Date", observations will be considered in chronological order.
-"Individual" assignment can be time-consuming for larger datasets.}
+\item{assignment_method}{A character string; one of "date", "batch", or "individual", to define the assignment into treatment waves. When using
+"batch" or "individual", ensure your dataset is pre-arranged in the proper order observations should be considered so that
+groups are assigned correctly. For "date", observations will be considered in chronological order.
+"individual" assignment can be computationally intensive for larger datasets.}
 
-\item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "Date".
-Acceptable values are "Day", "Week", or "Month". "Month" is a special case that is useful when an experiment
-defines the months differently then the genuine dates, i.e. an experiment considers August as starting
-the in the second half of July, or when exact calender months are required for the periods, not just
-a lengths of time in the month range. As such it requires an additional column to be provided,
-with the exact month desired for each observation passed as an integer, character, or factor. Each
-observation is treated as occurring on the first of each month.}
+\item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "date".
+Acceptable values are "day", "week", or "month". "month" does not require an additional column with the months of each observation,
+but it can accept a separate \code{month_col}. If \code{month_col} is specified, the periods follow the calendar months strictly, and when it is not
+specified months are simply used as the time interval. For example if a dataset has dates starting on July 26th, under month based assignment and
+a specified \code{month_col} the dates July 26th and August 3st would be in different periods, but if the \code{month_col} was not specified, they would be
+in the same period because the dates are less than one month apart.}
 
-\item{verbose}{A logical value; whether or not to print intermediate messages. Default is FALSE.}
+\item{verbose}{Logical; whether or not to print intermediate messages. Default is FALSE.}
 
 \item{period_length}{A numeric value of length 1; represents the length of each treatment period.
-If assignment method is "Date", this length refers the number of units specified in\code{time_unit}
-(i.e., if "Day", 10 would be 10 days).
-If assignment method is "Batch", this refers to the number of people in each batch. This factor
-contributes most to the computational cost of calling the function, as large batch sizes make each iteration of
-the simulation run slower, while each additional period adds time because of the extra iterations, so be exercise
-caution with this argument.}
+If assignment method is "date", this length refers the number of units specified in \code{time_unit}
+(i.e., if "day", 10 would be 10 days). If assignment method is "batch", this refers to the number of people in each batch.}
 }
 \value{
-Nothing; Throws an error if the user is missing necessary arguments to
+Throws an error if the user is missing necessary arguments to
 assign treatments or passes invalid ones.
 }
 \description{

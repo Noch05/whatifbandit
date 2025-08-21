@@ -14,20 +14,19 @@ check_cols(
 )
 }
 \arguments{
-\item{assignment_method}{A character string; one of "Date", "Batch", or "Individual", to define the assignment into treatment waves. When using
-"Batch" or "Individual", ensure your dataset is pre-arranged in the proper order observations should be considered so that
-groups are assigned correctly. For "Date", observations will be considered in chronological order.
-"Individual" assignment can be time-consuming for larger datasets.}
+\item{assignment_method}{A character string; one of "date", "batch", or "individual", to define the assignment into treatment waves. When using
+"batch" or "individual", ensure your dataset is pre-arranged in the proper order observations should be considered so that
+groups are assigned correctly. For "date", observations will be considered in chronological order.
+"individual" assignment can be computationally intensive for larger datasets.}
 
-\item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "Date".
-Acceptable values are "Day", "Week", or "Month". "Month" is a special case that is useful when an experiment
-defines the months differently then the genuine dates, i.e. an experiment considers August as starting
-the in the second half of July, or when exact calender months are required for the periods, not just
-a lengths of time in the month range. As such it requires an additional column to be provided,
-with the exact month desired for each observation passed as an integer, character, or factor. Each
-observation is treated as occurring on the first of each month.}
+\item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "date".
+Acceptable values are "day", "week", or "month". "month" does not require an additional column with the months of each observation,
+but it can accept a separate \code{month_col}. If \code{month_col} is specified, the periods follow the calendar months strictly, and when it is not
+specified months are simply used as the time interval. For example if a dataset has dates starting on July 26th, under month based assignment and
+a specified \code{month_col} the dates July 26th and August 3st would be in different periods, but if the \code{month_col} was not specified, they would be
+in the same period because the dates are less than one month apart.}
 
-\item{perfect_assignment}{A logical value; if TRUE, assumes perfect information for treatment assignment
+\item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
 If FALSE, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.
@@ -41,22 +40,23 @@ you have exact dates treatments were assigned.}
 \item \code{success_col}: Column in \code{data}; binary successes from the original experiment.
 \item \code{condition_col}: Column in \code{data}; original treatment condition for each observation.
 \item \code{date_col}: Column in \code{data}; contains original date of event/trial. Only necessary when assigning by "Date". Must be of type \code{Date}, not a character string.
-\item \code{month_col}: Column in \code{data}; contains month of treatment. Only necessary when \code{time_unit = "Month"}. This can be a string or factor variable
-containing the names or numbers of months.
+\item \code{month_col}: Column in \code{data}; contains month of treatment. Only necessary when \code{time_unit = "Month"}, and when periods should be determined directly by
+the calendar months instead of month based time periods. This column can be a string/factor variable with the month names or numeric with the month number. It can easily
+be created from your \code{date_col} via \code{lubridate::month(data[[date_col]])} or \code{format(data[[date_col]], "\%m")}.
 \item \code{success_date_col}: Column in \code{data}; contains original dates each success occurred. Only necessary when \code{perfect_assignment = FALSE}. Must be of type \code{Date}, not a character string.
 \item \code{assignment_date_col}: Column in \code{data}; contains original dates treatments were assigned to observations. Only necessary when \code{perfect_assignment = FALSE}.
 Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type \code{Date}, not a character string.
 }}
 
 \item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
-of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.}
+of a traditional Randomized Controlled Trial (RCT). Any data.frames will be converted to tibbles internally.}
 
-\item{verbose}{A logical value; whether or not to print intermediate messages. Default is FALSE.}
+\item{verbose}{Logical; whether or not to print intermediate messages. Default is FALSE.}
 }
 \value{
 Throws an error if columns which are required have not been declared
-or are not present in the data. Additionally throws warning messages,
-if unnecessary columns have been provided.
+or are not present in the data, or are the wrong primitive data type. Additionally throws warning messages,
+if unnecessary columns have been provided, only when \code{verbose} is TRUE.
 }
 \description{
 Helper to \code{\link[=validate_inputs]{validate_inputs()}}. This function accepts the user's

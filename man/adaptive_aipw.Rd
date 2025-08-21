@@ -8,31 +8,24 @@ adaptive_aipw(data, assignment_probs, conditions, periods, verbose)
 }
 \arguments{
 \item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
-of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.}
+of a traditional Randomized Controlled Trial (RCT). Any data.frames will be converted to tibbles internally.}
 
-\item{assignment_probs}{tibble/data.table containing the probabilities of being
-assigned each treatment at a given period}
+\item{assignment_probs}{A tibble/data.table containing the probabilities of being
+assigned each treatment at a given period.}
 
-\item{conditions}{A named character vector containing treatment conditions. The elements
-of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
-\code{unique(df[[condition_col]])}. The names of each element are used to reference the contents but are not inherently important;
-choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
-of the trial in this vector must have the name "Control".}
+\item{periods}{Numeric value of length 1; number of total periods in the simulation.}
 
-\item{periods}{Numeric value of length 1; number of total periods in the simulation}
-
-\item{verbose}{A logical value; whether or not to print intermediate messages. Default is FALSE.}
+\item{verbose}{Logical; whether or not to print intermediate messages. Default is FALSE.}
 }
 \value{
-tibble/data.table containing the AIPW estimate of treatment success, AIPW variance,
+A tibble/data.table containing the AIPW estimate of treatment success, AIPW variance,
 sample proportion of successful treatments (sample mean), and sample mean variance.
 }
 \description{
-Takes the average of the individual AIPW scores created by \code{\link[=get_iaipw]{get_iaipw()}} for each period,
-and assigns each estimate an adaptive weight based on a constant allocation rate of variance across periods defined by
-\href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et. al (2021)} to calculate a final
-AIPW estimate and variance for each treatment condition. Sample means and variances are also provided
-for comparison.
+Averages the observation level AIPW scores created by \code{\link[=get_iaipw]{get_iaipw()}} across each period, then assigns
+each estimate an adaptive weight based on \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et. al (2021)}, and
+another weight based on the size of each period to calculate the final AIPW estimate and variance for each treatment.
+Sample means and variances are also provided for comparison.
 }
 \details{
 The formulas for the calculations in this function can be found in
@@ -41,11 +34,11 @@ equation 5 (estimate), equation 11 (variance), equation 15 (allocation rate).
 
 The formulas specified assume that each period is 1 observation but in the cases
 for this simulation where periods contain multiple observations the individual estimates
-from each period are averaged before being used in the final calculations.
+from each period are averaged and weighted by size before being used in the final calculations.
 
-The AIPW estimator makes corrections for the non-random method of assigning treatment,
-and is both unbiased and asymptotically normal, so can be used fo statistical
-inference, while the sample mean which is still provided for comparison, cannot be.
+The AIPW estimator is unbiased, consistent, and asymptotically normal under the conditions of the simulated trial
+of the so can be used for valid inference with a normal distribution. The sample means and variances
+are provided for comparison but these are biased and inconsistent under the conditions of the simulated trial
 }
 \references{
 Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.

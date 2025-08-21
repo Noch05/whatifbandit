@@ -19,10 +19,12 @@ Numeric vector containing the prior treatment periods to be used when aggregatin
 the results for the current treatment assignment period.
 }
 \description{
-Used during \code{\link[=run_mab_trial]{run_mab_trial()}} to create a vector of prior periods dynamically. Used to create
-the proper vector when \code{prior_periods} is not "All".
+Used during \code{\link[=run_mab_trial]{run_mab_trial()}} to create a vector of prior periods dynamically based on the specified
+number of prior periods.
 }
 \seealso{
-*\code{\link[=run_mab_trial]{run_mab_trial()}}
+\itemize{
+\item \code{\link[=run_mab_trial]{run_mab_trial()}}
+}
 }
 \keyword{internal}

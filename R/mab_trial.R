@@ -1,7 +1,7 @@
 #' Runs Multi-Arm Bandit Trial
 #' @name run_mab_trial
 #'
-#' @description Performs a full Multi-Arm Bandit (MAB) trial using Thompson Sampling or UCB1.
+#' @description Performs a full Multi-Arm Bandit (MAB) trial using Thompson sampling or UCB1.
 #' The function provides loop around each step of the process for each treatment wave, performing adaptive
 #' treatment assignment, and outcome imputation. Supports flexible customization passed
 #' from [single_mab_simulation()] and [multiple_mab_simulation()] in treatment blocking strategy,
@@ -16,7 +16,7 @@
 #' @returns  A named list containing:
 #' \itemize{
 #' \item `final_data`: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
-#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period.
+#' \item `bandits`: A tibble or data.table containing the UCB1 values or Thompson sampling posterior distributions for each period.
 #' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
 #' }
 #' @details
@@ -25,12 +25,24 @@
 #'
 #' @keywords internal
 #'
-run_mab_trial <- function(data, time_unit, period_length = NULL,
-                          data_cols, block_cols, blocking,
-                          prior_periods, algorithm,
-                          whole_experiment, perfect_assignment, conditions,
-                          verbose, control_augment,
-                          imputation_information, ndraws, random_assign_prop) {
+run_mab_trial <- function(
+  data,
+  time_unit,
+  period_length = NULL,
+  data_cols,
+  block_cols,
+  blocking,
+  prior_periods,
+  algorithm,
+  whole_experiment,
+  perfect_assignment,
+  conditions,
+  verbose,
+  control_augment,
+  imputation_information,
+  ndraws,
+  random_assign_prop
+) {
   periods <- base::max(data$period_number)
 
   bandits <- base::vector(mode = "list", length = 2)
@@ -38,16 +50,24 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
   bandits$assignment_prob <- base::vector(mode = "list", length = periods)
   num_conditions <- length(conditions)
 
-  bandits$bandit_stat[[1]] <- switch(algorithm,
-    "Thompson" = rlang::set_names(rep_len(1 / num_conditions,
-      length.out = num_conditions
-    ), conditions),
-    "UCB1" = tibble::tibble(mab_condition = conditions, ucb = rep_len(0, num_conditions)),
-    rlang::abort("Invalid Algorithm: Valid Algorithms are `Thompson` and `UCB`")
+  bandits$bandit_stat[[1]] <- switch(
+    algorithm,
+    "thompson" = rlang::set_names(
+      rep(1 / num_conditions, num_conditions),
+      conditions
+    ),
+    "ucb1" = tibble::tibble(
+      mab_condition = conditions,
+      ucb = rep(0, num_conditions)
+    ),
+    rlang::abort(
+      "Invalid Algorithm: Valid Algorithms are `thompson` and `ucb1`"
+    )
   )
-  bandits$assignment_prob[[1]] <- rlang::set_names(rep_len(1 / num_conditions,
-    length.out = num_conditions
-  ), conditions)
+  bandits$assignment_prob[[1]] <- rlang::set_names(
+    rep(1 / num_conditions, num_conditions),
+    conditions
+  )
 
   verbose_log(verbose, "Starting Bandit Trial")
   for (i in 2:periods) {
@@ -55,7 +75,7 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
 
     prior <- create_prior(prior_periods = prior_periods, current_period = i)
 
-    if (inherits(data, "data.table")) {
+    if (data.table::is.data.table(data)) {
       current_data <- data[period_number == i, ]
       prior_data <- data[period_number %in% prior, ]
     } else {
@@ -86,16 +106,15 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
       current_data = current_data,
       probs = bandit[["assignment_prob"]],
       blocking = blocking,
-      algorithm = algorithm,
-      id_col = data_cols$id_col,
       conditions = conditions,
       condition_col = data_cols$condition_col,
-      success_col = data_cols$success_col,
       random_assign_prop = random_assign_prop
     )
 
-    bandits$assignment_prob[[i]] <- (bandit[["assignment_prob"]] * (1 - random_assign_prop)) +
-      (rep_len(1 / num_conditions, length.out = num_conditions) * random_assign_prop)
+    bandits$assignment_prob[[i]] <- (bandit[["assignment_prob"]] *
+      (1 - random_assign_prop)) +
+      (rep(1 / num_conditions, num_conditions) *
+        random_assign_prop)
 
     prepped_impute <- imputation_preparation(
       current_data = current_data,
@@ -143,7 +162,7 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
 #' @returns  A named list containing:
 #' \itemize{
 #' \item `final_data`: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
-#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period.
+#' \item `bandits`: A tibble or data.table containing the UCB1 valuess or Thompson sampling posterior distributions for each period.
 #' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
 #' }
 #' @details
@@ -152,18 +171,30 @@ run_mab_trial <- function(data, time_unit, period_length = NULL,
 #' to wide format where each treatment arm is a column, and the rows
 #' represent periods.
 #'
-#' At this step the final UCB1 or Thompson Probabilities are calculated,
-#' and the whole table is lead by one to have each period be represented
-#' by the calculation that occurred just after completing the period, so
-#' period 11 now means the bandit calculated in period 12, using the results
-#' from period 11. The assignment probabilities are not changed in this way, so for each period
+#' At this step the final UCB1 or Thompson sampling probabilities are calculated.
+#' The entire table is shifted backward by one period so that each row reflects the calculation
+#' that occurs after completing a period. For example prior to this change, row 11, would indicate the calculations
+#' from period 11 before assignment, but now that occured after period 11's imputations.
+#'
+#' This has the impact of removing the original first row, where all the assignment
+#' probabilities are equal, and modifying the last row to represent the final calculation after the conclusion
+#' of the simulation.
+#'
+#' The assignment probabilities are not changed in this way, so for each period
 #' they still reflect the assignment probabilities used in that period.
 #'
 #' @seealso
-#'* [run_mab_trial()]
+#' * [run_mab_trial()]
 #' @keywords internal
 
-end_mab_trial <- function(data, bandits, algorithm, periods, conditions, ndraws) {
+end_mab_trial <- function(
+  data,
+  bandits,
+  algorithm,
+  periods,
+  conditions,
+  ndraws
+) {
   base::UseMethod("end_mab_trial", data)
 }
 #-------------------------------------------------------------------------------
@@ -172,7 +203,14 @@ end_mab_trial <- function(data, bandits, algorithm, periods, conditions, ndraws)
 #' @inheritParams end_mab_trial
 #' @title [end_mab_trial()] for data.frames
 #' @noRd
-end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditions, ndraws) {
+end_mab_trial.data.frame <- function(
+  data,
+  bandits,
+  algorithm,
+  periods,
+  conditions,
+  ndraws
+) {
   final_summary <- data |>
     dplyr::group_by(mab_condition) |>
     dplyr::summarize(
@@ -192,11 +230,11 @@ end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditio
     ndraws = ndraws
   )
 
-
   bandits$bandit_stat[[(periods + 1)]] <- final_bandit[[1]]
 
-  bandit_stats <- switch(algorithm,
-    "Thompson" = {
+  bandit_stats <- switch(
+    algorithm,
+    "thompson" = {
       dplyr::bind_rows(bandits$bandit_stat, .id = "period_number") |>
         dplyr::mutate(
           period_number = base::as.numeric(period_number),
@@ -204,21 +242,28 @@ end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditio
         ) |>
         dplyr::slice(base::seq_len(periods))
     },
-    "UCB1" = {
+    "ucb1" = {
       dplyr::bind_rows(bandits$bandit_stat, .id = "period_number") |>
         dplyr::select(ucb, mab_condition, period_number) |>
-        tidyr::pivot_wider(values_from = "ucb", names_from = c("mab_condition")) |>
+        tidyr::pivot_wider(
+          values_from = "ucb",
+          names_from = c("mab_condition")
+        ) |>
         dplyr::mutate(
           period_number = base::as.numeric(period_number),
           dplyr::across(-period_number, ~ dplyr::lead(., n = 1L, default = NA))
         ) |>
         dplyr::slice(base::seq_len(periods))
     },
-    rlang::abort("Invalid Algorithm: valid algorithsm are `Thompson`, and `UCB1`")
+    rlang::abort(
+      "Invalid Algorithm: valid algorithms are `thompson`, and `ucb1`"
+    )
   )
 
-
-  assignment_probs <- dplyr::bind_rows(bandits$assignment_prob, .id = "period_number") |>
+  assignment_probs <- dplyr::bind_rows(
+    bandits$assignment_prob,
+    .id = "period_number"
+  ) |>
     dplyr::mutate(period_number = base::as.numeric(period_number))
 
   return(list(
@@ -233,12 +278,23 @@ end_mab_trial.data.frame <- function(data, bandits, algorithm, periods, conditio
 #' @inheritParams end_mab_trial
 #' @title [end_mab_trial()] for data.tables
 #' @noRd
-end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditions, ndraws) {
-  final_summary <- data[, .(
-    successes = base::sum(mab_success, na.rm = TRUE),
-    success_rate = base::mean(mab_success, na.rm = TRUE),
-    n = .N
-  ), by = mab_condition]
+end_mab_trial.data.table <- function(
+  data,
+  bandits,
+  algorithm,
+  periods,
+  conditions,
+  ndraws
+) {
+  final_summary <- data[,
+    .(
+      successes = base::sum(mab_success, na.rm = TRUE),
+      success_rate = base::mean(mab_success, na.rm = TRUE),
+      n = .N
+    ),
+    by = mab_condition
+  ]
+  data.table::setorder(final_summary, mab_condition)
 
   final_bandit <- get_bandit(
     past_results = final_summary,
@@ -248,55 +304,59 @@ end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditio
     control_augment = 0,
     ndraws = ndraws
   )
+  conditions <- as.character(conditions) # Converting to character for reference in Data.table Syntax
 
   bandits$bandit_stat[[(periods + 1)]] <- final_bandit[[1]]
 
-  bandit_stats <- switch(algorithm,
-    "Thompson" = {
-      x <- data.table::as.data.table(dplyr::bind_rows(bandits$bandit_stat,
-        .id = "period_number"
-      ))
+  bandit_stats <- switch(
+    algorithm,
+    "thompson" = {
+      x <- base::lapply(seq_len(periods + 1), function(i) {
+        base::as.list(bandits$bandit_stat[[i]])
+      }) |>
+        data.table::rbindlist(idcol = "period_number", use.names = TRUE)
       x[, period_number := base::as.numeric(period_number)]
 
-      x[, (conditions) := lapply(.SD, function(col) {
-        data.table::shift(col,
-          n = 1L,
-          type = "lead",
-          fill = NA
-        )
-      }),
-      .SDcols = conditions
+      x[,
+        (conditions) := lapply(.SD, function(col) {
+          data.table::shift(col, n = 1L, type = "lead", fill = NA)
+        }),
+        .SDcols = conditions
       ]
       x[base::seq_len(periods), ]
     },
-    "UCB1" = {
-      x <- data.table::rbindlist(bandits$bandit_stat,
+    "ucb1" = {
+      x <- data.table::rbindlist(
+        bandits$bandit_stat,
         use.names = TRUE,
         fill = TRUE,
         idcol = "period_number"
       )
       x <- data.table::dcast(
         data = x[, .(ucb, mab_condition, period_number)],
-        formula = period_number ~ mab_condition, value.var = "ucb"
+        formula = period_number ~ mab_condition,
+        value.var = "ucb"
       )
 
       x[, period_number := base::as.numeric(period_number)]
 
-      x[, (conditions) := base::lapply(.SD, function(col) {
-        data.table::shift(col,
-          n = 1L,
-          type = "lead",
-          fill = NA
-        )
-      }),
-      .SDcols = conditions
+      x[,
+        (conditions) := base::lapply(.SD, function(col) {
+          data.table::shift(col, n = 1L, type = "lead", fill = NA)
+        }),
+        .SDcols = conditions
       ]
       x[base::seq_len(periods), ]
     },
-    rlang::abort("Invalid Algorithm: valid algorithsm are `Thompson`, and `UCB1`")
+    rlang::abort(
+      "Invalid Algorithm: valid algorithsm are `thompson`, and `ucb1`"
+    )
   )
 
-  assignment_probs <- data.table::as.data.table(dplyr::bind_rows(bandits$assignment_prob, .id = "period_number"))
+  assignment_probs <- base::lapply(seq_len(periods), function(i) {
+    base::as.list(bandits$assignment_prob[[i]])
+  }) |>
+    data.table::rbindlist(idcol = "period_number", use.names = TRUE)
   assignment_probs[, period_number := base::as.numeric(period_number)]
 
   return(list(
@@ -308,29 +368,30 @@ end_mab_trial.data.table <- function(data, bandits, algorithm, periods, conditio
 #------------------------------------------------------------------------------
 #' Create Prior Periods
 #' @name create_prior
-#' @description Used during [run_mab_trial()] to create a vector of prior periods dynamically. Used to create
-#' the proper vector when `prior_periods` is not "All".
-#'
+#' @description Used during [run_mab_trial()] to create a vector of prior periods dynamically based on the specified
+#' number of prior periods.
 #' @inheritParams single_mab_simulation
 #' @param current_period The current period of the simulation. Defined by loop structure inside [run_mab_trial()].
-#'
-#'
 #' @returns Numeric vector containing the prior treatment periods to be used when aggregating
 #' the results for the current treatment assignment period.
 #'
 #' @seealso
-#' *[run_mab_trial()]
+#' * [run_mab_trial()]
 #' @keywords internal
 
 create_prior <- function(prior_periods, current_period) {
-  if (prior_periods == "All" || prior_periods >= current_period) {
+  if (prior_periods == "all" || prior_periods >= current_period) {
     ## Looking at all the past periods
 
     prior <- base::seq_len(current_period - 1)
   } else if (prior_periods < current_period) {
     # returns x most recent periods, i.e. if prior is 3, and current is 6, returns 3:5
 
-    prior <- base::seq(from = current_period - prior_periods, to = (current_period - 1), by = 1)
+    prior <- base::seq(
+      from = current_period - prior_periods,
+      to = (current_period - 1),
+      by = 1
+    )
   } else {
     stop("Invalid Prior Cutoff, specify either a whole number or \"All\"")
   }

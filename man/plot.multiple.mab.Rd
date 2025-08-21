@@ -2,45 +2,56 @@
 % Please edit documentation in R/multiple_mab_methods.R
 \name{plot.multiple.mab}
 \alias{plot.multiple.mab}
-\title{Plot Generic for \code{multiple.mab} objects}
+\title{Plot Generic For \code{multiple.mab} Objects}
 \usage{
-\method{plot}{multiple.mab}(x, type, cdf = NULL, level = 0.95, save = FALSE, path = NULL, ...)
+\method{plot}{multiple.mab}(
+  x,
+  type,
+  quantity,
+  cdf = NULL,
+  level = 0.95,
+  save = FALSE,
+  path = NULL,
+  ...
+)
 }
 \arguments{
-\item{x}{\code{multiple.mab} class object created by \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}}
+\item{x}{A \code{multiple.mab} class object created by \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}.}
 
 \item{type}{String; Type of plot requested; valid types are:
 \itemize{
 \item \code{summary}: Shows the number of times each arm was selected as the highest chance of being the best.
-\item \code{hist}: Shows histograms for each treatment condition's proportion of success across trials.
-\item \code{estimate}: Shows proportion of success estimates using specified normal or empirical confidence intervals.
+\item \code{hist}: Shows histograms for each treatment condition's proportion of success across trials or number of obersvations assigned.
+\item \code{estimate}: Shows proportion of success AIPW estimates using specified normal or empirical confidence intervals.
 }}
+
+\item{quantity}{The quantities to plot when \code{type = "hist"}, accepts either 'estimate' to plot the distributuons of the AIPW estimates, or
+'assignment' to plot the distributions of the number of observations assigned to each treatment across the repeated trials.}
 
 \item{cdf}{String; specifies the type of CDF to use when analyzing the estimates.
 valid CDFs are the 'empirical' CDF, the 'normal' CDF. Used when type = \code{estimate}. The 'normal' CDF uses the fact
-that the AIPW estimates are asymptotically normal, while the empirical CDF estimates the CDF from the sample
+that the AIPW estimates are asymptotically normal, while the empirical CDF (eCDF) estimates the CDF from the sample
 of AIPW estimates.}
 
-\item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
-Defaults to 0.95}
+\item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, 0.95, 0.99).
+Defaults to 0.95.}
 
 \item{save}{Logical; Whether or not to save the plot to disk; FALSE by default.}
 
 \item{path}{String; File directory to save file.}
 
-\item{...}{arguments to pass to \verb{ggplot2:geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, \code{bins} etc.)}
+\item{...}{Arguments to pass to \verb{ggplot2::geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, \code{bins} etc.). In the case of \code{type = "hist"}, additional
+arguments must be passed in to distinct lists, one named \code{geom} which are passed to \verb{ggplot2::geom_*}
+and one named \code{facet} which are passed to \code{ggplot2::facet_grid}.}
 }
 \value{
-Minimal ggplot object, that can be customized and added to with \code{+} (To change, scales, labels, legend, theme, etc.)
+Minimal ggplot object, that can be customized and added to with \code{+} (to change \code{scales}, \code{labels}, \code{legend}, \code{theme}, etc.).
 }
 \description{
 Uses \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} to plot the results of multiple
-Multi-Arm Bandit Trials
+Multi-Arm-Bandit trials.
 }
 \details{
-The plot generic requires \href{https://cran.r-project.org/package=ggplot2}{ggplot2}
-which is not required by the package, so it must be installed separately.
-
 This function provides minimalist plots to quickly view the results of the procedure
 and has the ability to be customized through the \code{...}
 in the call and \code{+} afterwords. However, all the data necessary is
@@ -53,47 +64,47 @@ to start completely from scratch and not use the generic.
 # This class has a plot generic has several minimal plots to examine the trials
 # quickly
 #
-# # These functions require ggplot2
-if (requireNamespace("ggplot2", quietly = TRUE)) {
-  data(tanf)
-  tanf <- tanf[1:20, ]
-  # Simulating a few trials
+#
+data(tanf)
+tanf <- tanf[1:20, ]
+# Simulating a few trials
 
-  seeds <- sample.int(100, 5)
-  conditions <- as.character(unique(tanf$condition))
-  x <- multiple_mab_simulation(
-    data = tanf,
-    assignment_method = "Batch",
-    period_length = 10,
-    whole_experiment = TRUE,
-    blocking = FALSE,
-    perfect_assignment = TRUE,
-    algorithm = "Thompson",
-    prior_periods = "All",
-    control_augment = 0,
-    conditions = conditions,
-    data_cols = c(
-      condition_col = "condition",
-      id_col = "ic_case_id",
-      success_col = "success"
-    ),
-    verbose = FALSE, times = 5, seeds = seeds, keep_data = FALSE
-  )
+seeds <- sample.int(100, 5)
+conditions <- as.character(unique(tanf$condition))
+x <- multiple_mab_simulation(
+  data = tanf,
+  assignment_method = "Batch",
+  period_length = 10,
+  whole_experiment = TRUE,
+  blocking = FALSE,
+  perfect_assignment = TRUE,
+  algorithm = "Thompson",
+  prior_periods = "All",
+  control_augment = 0,
+  data_cols = c(
+    condition_col = "condition",
+    id_col = "ic_case_id",
+    success_col = "success"
+  ),
+  verbose = FALSE,
+  times = 5,
+  seeds = seeds,
+  keep_data = FALSE
+)
 
-  # View number of times each treatment was the best.
-  plot(x, type = "summary")
+# View number of times each treatment was the best.
+plot(x, type = "summary")
 
-  # View a histogram of the AIPW estimates for each treatment.
-  plot(x, type = "hist")
+# View a histogram of the AIPW estimates for each treatment.
+plot(x, type = "hist", quantity = "estimate")
 
-  # Plotting AIPW confidence intervals using the empirical cdf, from the simulated
-  # trials.
-  plot(x, type = "estimate", cdf = "empirical")
+# Plotting AIPW confidence intervals using the empirical cdf, from the simulated
+# trials.
+plot(x, type = "estimate", cdf = "empirical")
 
-  # Changing the title, like any ggplot2 object.
-  plot(x, type = "summary") + ggplot2::labs(title = "Your New Title")
+# Changing the title, like any ggplot2 object.
+plot(x, type = "summary") + ggplot2::labs(title = "Your New Title")
 
-  # Changing the bin width of the histogram.
-  plot(x, type = "hist", binwidth = 0.05)
-}
+# Changing the bin width of the histograms.
+plot(x, type = "hist", quantity = "assignment", geom = list(binwidth = 0.05))
 }

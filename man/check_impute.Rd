@@ -7,25 +7,25 @@
 check_impute(imputation_information, current_data, current_period)
 }
 \arguments{
-\item{imputation_information}{\code{original_summary} element of the \code{imputation_information}
+\item{imputation_information}{The \code{success} element of the \code{imputation_information}
 list created by \code{\link[=imputation_precompute]{imputation_precompute()}} for the given period.}
 
-\item{current_data}{tibble/data.table with only observations from the current sampling period.}
+\item{current_data}{A tibble/data.table with only observations from the current sampling period.}
 
 \item{current_period}{Numeric value of length 1; current treatment wave of the simulation.}
 }
 \description{
-Subsets or adds to tibble/data.frame created by \code{\link[=imputation_precompute]{imputation_precompute()}},
-to ensure compatibility with \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}}.
+Subsets or adds to the tibble/data.frame created by \code{\link[=imputation_precompute]{imputation_precompute()}},
+and sorts it to ensure compatibility with \code{\link[randomizr:block_ra]{randomizr::block_ra()}}.
 }
 \details{
-\code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}} does not see the names
+\code{\link[randomizr:block_ra]{randomizr::block_ra()}} does not see the names
 of the probabilities passed per block, so the imputation information must be subsetted
 to only contain blocks which are present in a period, and sorted to comply with
-\code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}}'s internal ordering.
+\code{\link[randomizr:block_ra]{randomizr::block_ra()}}'s internal ordering.
 
 When blocks are required but do not exist in the information provided it is added
-to the tibble.data.table, with an estimated conditional probability of success as
+to the tibble/data.table, with an estimated conditional probability of success as
 the average across other blocks.
 
 When blocks are present but not required, they are removed from the

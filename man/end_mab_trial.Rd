@@ -11,21 +11,15 @@ end_mab_trial(data, bandits, algorithm, periods, conditions, ndraws)
 
 \item{bandits}{Finalized bandits list from \code{\link[=run_mab_trial]{run_mab_trial()}}.}
 
-\item{algorithm}{A character string specifying the MAB algorithm to use. Options are "Thompson" or "UCB1". Algorithm
+\item{algorithm}{A character string specifying the MAB algorithm to use. Options are "thompson" or "ucb1". Algorithm
 defines the adaptive assignment process. Mathematical details on these algorithms
 can be found in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
 \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}
 
 \item{periods}{Numeric value of length 1; total number of periods in Multi-Arm-Bandit trial.}
 
-\item{conditions}{A named character vector containing treatment conditions. The elements
-of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
-\code{unique(df[[condition_col]])}. The names of each element are used to reference the contents but are not inherently important;
-choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
-of the trial in this vector must have the name "Control".}
-
-\item{ndraws}{A numeric value; When Thompson Sampling direct calculations fail, draws from a simulated posterior
-will be used to approximate the Thompson Sampling probabilities. This is the number of simulations to use, the default
+\item{ndraws}{A numeric value; When Thompson sampling direct calculations fail, draws from a simulated posterior
+will be used to approximate the Thompson sampling probabilities. This is the number of simulations to use, the default
 is 5000 to match the default parameter \code{\link[bandit:best_binomial_bandit_sim]{bandit::best_binomial_bandit_sim()}}, but might need to be raised or lowered depending on performance and accuracy
 concerns.}
 }
@@ -33,7 +27,7 @@ concerns.}
 A named list containing:
 \itemize{
 \item \code{final_data}: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
-\item \code{bandits}: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period.
+\item \code{bandits}: A tibble or data.table containing the UCB1 valuess or Thompson sampling posterior distributions for each period.
 \item \code{assignment_probs}: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
 }
 }
@@ -47,11 +41,16 @@ into tibbles or data.tables, and then pivots the table
 to wide format where each treatment arm is a column, and the rows
 represent periods.
 
-At this step the final UCB1 or Thompson Probabilities are calculated,
-and the whole table is lead by one to have each period be represented
-by the calculation that occurred just after completing the period, so
-period 11 now means the bandit calculated in period 12, using the results
-from period 11. The assignment probabilities are not changed in this way, so for each period
+At this step the final UCB1 or Thompson sampling probabilities are calculated.
+The entire table is shifted backward by one period so that each row reflects the calculation
+that occurs after completing a period. For example prior to this change, row 11, would indicate the calculations
+from period 11 before assignment, but now that occured after period 11's imputations.
+
+This has the impact of removing the original first row, where all the assignment
+probabilities are equal, and modifying the last row to represent the final calculation after the conclusion
+of the simulation.
+
+The assignment probabilities are not changed in this way, so for each period
 they still reflect the assignment probabilities used in that period.
 }
 \seealso{

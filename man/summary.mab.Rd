@@ -2,30 +2,41 @@
 % Please edit documentation in R/mab_methods.R
 \name{summary.mab}
 \alias{summary.mab}
-\title{Summary Generic for "mab" class}
+\title{Summary Generic For "mab" Class}
 \usage{
 \method{summary}{mab}(object, level = 0.95, ...)
 }
 \arguments{
-\item{object}{`mab`` class object created by \code{\link[=single_mab_simulation]{single_mab_simulation()}}.}
+\item{object}{A \code{mab} class object created by \code{\link[=single_mab_simulation]{single_mab_simulation()}}.}
 
-\item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
-Defaults to 0.95}
+\item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, 0.95, 0.99).
+Defaults to 0.95.}
 
-\item{...}{additional arguments.}
+\item{...}{Additional arguments.}
 }
 \value{
-Tibble containing summary information from the trial.
+A tibble containing summary information from the trial with the columns:
+\itemize{
+\item \code{Treatment_Arm}: Contains the treatment condition.
+\item \code{Probability_Of_Best_Arm}/\code{UCB1_Value}: Final Thompson sampling probabilities or UCB1 values for each treatment.
+\item \code{estimated_probability_of_success}: The AIPW estimates for the probability of success for each treatment.
+\item \code{SE}: The standard error for the AIPW estimates.
+\item \code{lower_bound}: The lower bound on the normal confidence interval for the \code{estimated_probability_of_success}. Default is 95\%.
+\item \code{upper_bound}: The upper bound on the normal confidence interval for the \code{estimated_probability_of_success}. Default is 95\%.
+\item \code{num_assigned}: The number of observations assigned to each treatment under the simulated trial.
+\item \code{level}: The confidence level for the confidence interval, default is 95\%.
+\item \code{periods}: The total number of periods of the simulation.
+}
 }
 \description{
 Summarizes the Results of a Single Multi-Arm Bandit Trial. Provides
-confidence intervals around the AIPW estimates, and the final calculations
-of the Thompson Probabilities or UCB1 statistics for each arm.
+confidence intervals around the AIPW estimates, final calculations
+of the Thompson sampling probabilities or UCB1 values, and the number of observations assigned for each arm.
 }
 \details{
 The confidence intervals applied follow a standard normal distribution
 because it is assumed the AIPW estimators are asymptotically normal as shown
-in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}
+in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}.
 
 \code{...} is provided to be compatible with \code{summary()}, the function
 does not have any additional arguments.
@@ -50,11 +61,6 @@ x <- single_mab_simulation(
   perfect_assignment = TRUE,
   blocking = FALSE,
   prior_periods = "All",
-  conditions = c(
-    "no_letter",
-    "open_appt",
-    "specific_appt"
-  ),
   data_cols = c(
     condition_col = "condition",
     id_col = "ic_case_id",
@@ -62,15 +68,12 @@ x <- single_mab_simulation(
   )
 )
 
-# Producing a Summary Table
-# Defaults to 95\% Normal Confidence Intervals
-summary(x)
+# Creating summary table
+## Defaults to 95\% confidence interval
+summary(x) |> print(width = Inf)
 
-# Changing to 70\% Confidence Level
-summary(x, level = 0.7)
-
-# Invalid levels throw an error
-try(summary(x, level = 5))
+## 70\% confidence level
+summary(x, level = 0.7) |> print(width = Inf)
 }
 \references{
 Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.

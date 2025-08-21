@@ -4,7 +4,6 @@ data(tanf)
 tanf <- tanf[1:100, ]
 # Simulating a few trials
 seeds <- sample.int(10000, 5)
-conditions <- c("no_letter", "open_appt", "specific_appt")
 x <- multiple_mab_simulation(
   data = tanf,
   assignment_method = "Batch",
@@ -15,21 +14,20 @@ x <- multiple_mab_simulation(
   algorithm = "Thompson",
   prior_periods = "All",
   control_augment = 0,
-  conditions = conditions,
   data_cols = c(
     condition_col = "condition",
     id_col = "ic_case_id",
     success_col = "success"
   ),
-  verbose = FALSE, times = 5, seeds = seeds, keep_data = FALSE
+  verbose = FALSE,
+  times = 5,
+  seeds = seeds,
+  keep_data = FALSE
 )
 
 # Creating summary table
-# Defaults to 95% confidence interval
+## Defaults to 95% confidence interval
 summary(x) |> print(width = Inf)
 
-# Changing to 70% confidence level
+## 70% confidence level
 summary(x, level = 0.7) |> print(width = Inf)
-
-# Invalid levels throw an error
-try(summary(x, level = 5))

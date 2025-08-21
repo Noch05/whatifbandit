@@ -7,19 +7,19 @@
 plot_arms(x, object, ...)
 }
 \arguments{
-\item{x, }{mab object passed from \code{\link[=plot.mab]{plot.mab()}}}
+\item{x}{A \code{mab} object passed from \code{\link[=plot.mab]{plot.mab()}}}
 
-\item{object, }{String; Location to gather treatment arm data from, either
+\item{object}{String; Location to gather treatment arm data from, either
 "bandits" or "assignment_probs".}
 
-\item{...}{arguments to pass to \verb{ggplot2:geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, etc.)}
+\item{...}{Arguments to pass to \verb{ggplot2::geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, \code{bins} etc.).}
 }
 \value{
 ggplot object
 
-Minimal ggplot object, that can be customized and added to with \code{+} (To change, scales, labels, legend, theme, etc.)
+Minimal ggplot object, that can be customized and added to with \code{+} (to change \code{scales}, \code{labels}, \code{legend}, \code{theme}, etc.).
 }
 \description{
-Helper to \code{\link[=plot.mab]{plot.mab()}}. Plots Treatment Arms over Time.
+Helper to \code{\link[=plot.mab]{plot.mab()}}; plots treatment arms over time.
 }
 \keyword{internal}

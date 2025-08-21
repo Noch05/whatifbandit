@@ -15,12 +15,12 @@ test_that("Throws Proper Error when ID's are not unique", {
     perfect_assignment = TRUE,
     algorithm = "Thompson",
     prior_periods = "All",
-    conditions = conditions,
     data_cols = c(
       condition_col = "condition",
       id_col = "id",
       success_col = "success"
-    ), verbose = TRUE
+    ),
+    verbose = TRUE
   ))
 })
 
@@ -40,16 +40,16 @@ test_that("Throws Proper Error when arguments are invalid", {
     algorithm = list("not", 76, NA),
     assignment_method = list("not", 45, NA),
     verbose = list(456, "text", NA),
-    control_augment = list(-1, 2, NA, 0.5),
+    control_augment = list(-1, 2, NA),
     blocking = list(654, "text", NA),
     time_unit = list("Weeks", 5),
     perfect_assignment = list(45, "text", NA),
     whole_experiment = list(546, "text", NA),
     prior_periods = list(-5, "text", NA),
     period_length = list(50, -1, "text", NA),
-    conditions = list(c("1", "2", "3", "4"), rep(NA, 3)),
     ndraws = list(-234432, NA, "text"),
-    random_assign_prop = list(23, -0.4, NA, "text")
+    random_assign_prop = list(23, -0.4, NA, "text"),
+    control_condition = list(7, NA, c(1, 2))
   )
   args <- list(
     data = data,
@@ -57,7 +57,6 @@ test_that("Throws Proper Error when arguments are invalid", {
     assignment_method = "Batch",
     period_length = 1,
     verbose = TRUE,
-    conditions = unique(as.character(data$condition)),
     control_augment = 0,
     blocking = FALSE,
     perfect_assignment = TRUE,
@@ -71,29 +70,35 @@ test_that("Throws Proper Error when arguments are invalid", {
   )
 
   purrr::walk2(invalid_args_exs, names(invalid_args_exs), \(x, y) {
-    purrr::walk(x, ~ {
-      if (y == "time_unit") {
-        args$assignment_method <- "Date"
-        args$data_cols <- c(
-          condition_col = "condition",
-          id_col = "id",
-          success_col = "success",
-          date_col = "date"
-        )
-      }
-      if (y == "perfect_assignment") {
-        args$data_cols <- c(
-          condition_col = "condition",
-          id_col = "id",
-          success_col = "success",
-          success_date_col = "success_date",
-          assignment_date_col = "assignment_date"
-        )
-      }
+    purrr::walk(
+      x,
+      ~ {
+        if (y == "time_unit") {
+          args$assignment_method <- "Date"
+          args$data_cols <- c(
+            condition_col = "condition",
+            id_col = "id",
+            success_col = "success",
+            date_col = "date"
+          )
+        }
+        if (y == "perfect_assignment") {
+          args$data_cols <- c(
+            condition_col = "condition",
+            id_col = "id",
+            success_col = "success",
+            success_date_col = "success_date",
+            assignment_date_col = "assignment_date"
+          )
+        }
+        if (y == "control_condition") {
+          args$control_augment = 0.2
+        }
 
-      args[[y]] <- .x
-      expect_snapshot_error(do.call(single_mab_simulation, args))
-    })
+        args[[y]] <- .x
+        expect_snapshot_error(do.call(single_mab_simulation, args))
+      }
+    )
   })
 })
 #-------------------------------------------------------------------------------
@@ -107,23 +112,32 @@ test_that("Throws proper error when columns do not exist or not declared", {
     success_date = rep(lubridate::ymd("2025-01-01"), 10),
     assignment_date = rep(lubridate::ymd("2025-01-01"), 10),
     apt_date = rep(lubridate::ymd("2024-01-01"), 10),
-    month = sample(c("June", "July"), replace = TRUE, size = 10),
     block = rbinom(10, 1, 0.3)
   )
 
   col_args <- expand.grid(
     block_cols = c(block_cols = c("block"), block_cols = c("block", "block2")),
-    condition_col = c(condition_col = "condition", condition_col = "fake_colname"),
+    condition_col = c(
+      condition_col = "condition",
+      condition_col = "fake_colname"
+    ),
     id_col = c(id_col = "id", id_col = "fake_colname"),
     success_col = c(success_col = "success", success_col = "fake_colname"),
-    success_date_col = c(success_date_col = "success_date", success_date_col = "fake_colname"),
-    assignment_date_col = c(assignment_date_col = "assignment_date", assignment_date_col = "fake_colname"),
+    success_date_col = c(
+      success_date_col = "success_date",
+      success_date_col = "fake_colname"
+    ),
+    assignment_date_col = c(
+      assignment_date_col = "assignment_date",
+      assignment_date_col = "fake_colname"
+    ),
     date_col = c(date_col = "apt_date", date_col = "fake_colname"),
-    month_col = c(month_col = "month", month_col = "fake_colname"),
     stringsAsFactors = FALSE
   ) |>
     dplyr::rowwise() |>
-    dplyr::mutate(fake_count = sum(dplyr::c_across(dplyr::everything()) == "fake_colname")) |>
+    dplyr::mutate(
+      fake_count = sum(dplyr::c_across(dplyr::everything()) == "fake_colname")
+    ) |>
     dplyr::filter(fake_count <= 1 & block_cols != "block2") |>
     dplyr::ungroup() |>
     dplyr::select(-fake_count) |>
@@ -133,35 +147,58 @@ test_that("Throws proper error when columns do not exist or not declared", {
 
   conditions <- as.character(unique(data$condition))
 
-  purrr::walk(seq_len(nrow(col_args)), ~ {
-    data_cols <- setNames(
-      col_args[.x, ],
-      names(col_args)
-    )
-    block_col <- eval(data_cols$block_cols[[1]])
+  purrr::walk(
+    seq_len(nrow(col_args) + 1),
+    ~ {
+      data_cols <- setNames(
+        col_args[.x, ],
+        names(col_args)
+      )
+      block_col <- eval(data_cols$block_cols[[1]])
 
-    if (.x > (nrow(col_args) / 2)) {
-      if (.x == (1 + (nrow(col_args) / 2))) {
-        block_col <- NULL
+      if (.x > (nrow(col_args) / 2) && .x <= nrow(col_args)) {
+        if (.x == (1 + (nrow(col_args) / 2))) {
+          block_col <- NULL
+        } else {
+          data_cols <- data_cols[-(.x - (nrow(col_args) / 2))]
+        }
+      }
+      if (.x <= nrow(col_args)) {
+        expect_snapshot_error(single_mab_simulation(
+          data = data,
+          assignment_method = "Date",
+          time_unit = "Month",
+          whole_experiment = TRUE,
+          period_length = 1,
+          blocking = TRUE,
+          block_cols = block_col,
+          perfect_assignment = FALSE,
+          algorithm = "Thompson",
+          prior_periods = "All",
+          data_cols = data_cols[names(data_cols) != "block_cols"]
+        ))
       } else {
-        data_cols <- data_cols[-(.x - (nrow(col_args) / 2))]
+        expect_snapshot_error(single_mab_simulation(
+          data = data,
+          assignment_method = "Date",
+          time_unit = "Month",
+          whole_experiment = TRUE,
+          period_length = 1,
+          blocking = FALSE,
+          perfect_assignment = TRUE,
+          algorithm = "Thompson",
+          prior_periods = "All",
+          data_cols = c(
+            id_col = "id",
+            success_col = "success",
+            condition_col = "condition",
+            month_col = "5",
+            date_col = "apt_date"
+          )
+        ))
       }
     }
-    expect_snapshot_error(single_mab_simulation(
-      data = data,
-      assignment_method = "Date",
-      time_unit = "Month",
-      whole_experiment = TRUE,
-      period_length = 1,
-      blocking = TRUE,
-      block_cols = block_col,
-      perfect_assignment = FALSE,
-      algorithm = "Thompson",
-      prior_periods = "All",
-      conditions = conditions,
-      data_cols = data_cols[names(data_cols) != "block_cols"]
-    ))
-  })
+  )
 })
 
 #-------------------------------------------------------------------------------
@@ -179,38 +216,46 @@ test_that("Throws Proper Error When Columns are Wrong Data Type", {
   changes <- list(
     id = rlang::expr(new_data$id <- as.complex(new_data$id)),
     success = rlang::expr(new_data$success <- as.character(new_data$success)),
-    success_date = rlang::expr(new_data$success_date <- as.character(new_data$success_date)),
+    success_date = rlang::expr(
+      new_data$success_date <- as.character(new_data$success_date)
+    ),
     date = rlang::expr(new_data$date <- as.character(new_data$date)),
-    assignment_date = rlang::expr(new_data$assignment_date <- as.character(new_data$assignment_date)),
-    condition = rlang::expr(new_data$condition <- as.POSIXct(new_data$condition)),
+    assignment_date = rlang::expr(
+      new_data$assignment_date <- as.character(new_data$assignment_date)
+    ),
+    condition = rlang::expr(
+      new_data$condition <- as.POSIXct(new_data$condition)
+    ),
     month = rlang::expr(new_data$month <- as.complex(new_data$month))
   )
 
-  purrr::map(changes, ~ {
-    new_data <- data
-    eval(.x)
-    expect_snapshot_error(single_mab_simulation(
-      data = new_data,
-      assignment_method = "Date",
-      time_unit = "Month",
-      whole_experiment = TRUE,
-      period_length = 1,
-      blocking = FALSE,
-      perfect_assignment = FALSE,
-      algorithm = "Thompson",
-      prior_periods = "All",
-      conditions = as.character(sort(unique(data$condition))),
-      data_cols = c(
-        id_col = "id",
-        date_col = "date",
-        success_col = "success",
-        success_date_col = "success_date",
-        assignment_date_col = "assignment_date",
-        condition_col = "condition",
-        month_col = "month"
-      )
-    ))
-  })
+  purrr::map(
+    changes,
+    ~ {
+      new_data <- data
+      eval(.x)
+      expect_snapshot_error(single_mab_simulation(
+        data = new_data,
+        assignment_method = "Date",
+        time_unit = "Month",
+        whole_experiment = TRUE,
+        period_length = 1,
+        blocking = FALSE,
+        perfect_assignment = FALSE,
+        algorithm = "Thompson",
+        prior_periods = "All",
+        data_cols = c(
+          id_col = "id",
+          date_col = "date",
+          success_col = "success",
+          success_date_col = "success_date",
+          assignment_date_col = "assignment_date",
+          condition_col = "condition",
+          month_col = "month"
+        )
+      ))
+    }
+  )
 })
 #-------------------------------------------------------------------------------
 test_that("Multiple Simulation Specific Error Checks work", {
@@ -238,7 +283,6 @@ test_that("Multiple Simulation Specific Error Checks work", {
     assignment_method = "Batch",
     period_length = 1,
     verbose = TRUE,
-    conditions = unique(as.character(data$condition)),
     control_augment = 0,
     blocking = FALSE,
     perfect_assignment = TRUE,
@@ -254,10 +298,13 @@ test_that("Multiple Simulation Specific Error Checks work", {
     keep_data = FALSE
   )
 
-  purrr::walk2(args_change, names(args_change), \(x, y){
-    purrr::walk(x, ~ {
-      args[[y]] <- .x
-      expect_snapshot_error(do.call(multiple_mab_simulation, args))
-    })
+  purrr::walk2(args_change, names(args_change), \(x, y) {
+    purrr::walk(
+      x,
+      ~ {
+        args[[y]] <- .x
+        expect_snapshot_error(do.call(multiple_mab_simulation, args))
+      }
+    )
   })
 })

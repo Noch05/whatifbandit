@@ -2,19 +2,21 @@
 % Please edit documentation in R/multiple_mab_methods.R
 \name{plot_summary}
 \alias{plot_summary}
-\title{Plot treatment Arms over multiple trials}
+\title{Plot Treatment Arms Over Multiple Trials}
 \usage{
 plot_summary(x, ...)
 }
 \arguments{
-\item{x}{\code{multiple.mab} class object created by \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}}
+\item{x}{A \code{multiple.mab} class object created by \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}.}
 
-\item{...}{arguments to pass to \verb{ggplot2:geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, \code{bins} etc.)}
+\item{...}{Arguments to pass to \verb{ggplot2::geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, \code{bins} etc.). In the case of \code{type = "hist"}, additional
+arguments must be passed in to distinct lists, one named \code{geom} which are passed to \verb{ggplot2::geom_*}
+and one named \code{facet} which are passed to \code{ggplot2::facet_grid}.}
 }
 \value{
-Minimal ggplot object, that can be customized and added to with \code{+} (To change, scales, labels, legend, theme, etc.)
+Minimal ggplot object, that can be customized and added to with \code{+} (to change \code{scales}, \code{labels}, \code{legend}, \code{theme}, etc.).
 }
 \description{
-Plots Summary Results for \code{\link[=plot.multiple.mab]{plot.multiple.mab()}}
+Plots summary results for \code{\link[=plot.multiple.mab]{plot.multiple.mab()}}, shows then number of times each arm was selected as the best in a bar chart.
 }
 \keyword{internal}

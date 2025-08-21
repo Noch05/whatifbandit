@@ -2,37 +2,55 @@
 % Please edit documentation in R/multiple_mab_methods.R
 \name{summary.multiple.mab}
 \alias{summary.multiple.mab}
-\title{Summary Generic for "multiple.mab" class}
+\title{Summary Generic For "multiple.mab" Class}
 \usage{
 \method{summary}{multiple.mab}(object, level = 0.95, ...)
 }
 \arguments{
-\item{object}{\code{multiple.mab} object created by \link{multiple_mab_simulation}}
+\item{object}{A \code{multiple.mab} object created by \link{multiple_mab_simulation}.}
 
-\item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, .95, 0.99).
-Defaults to 0.95}
+\item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, 0.95, 0.99).
+Defaults to 0.95.}
 
-\item{...}{additional arguments.}
+\item{...}{Additional arguments.}
 }
 \value{
-Tibble containing summary information for repeated trials.
+A tibble containing summary information from the repeated trials with the columns:
+\itemize{
+\item \code{Treatment_Arm}: Contains the treatment condition.
+\item \code{average_probability_of_success}: The average of the AIPW estimates for the probability of success for each treatment across the trials.
+\item \code{SE_avg}: The standard error for the AIPW estimates, calculated as the square root of the average of the variances.
+\item \code{SE_empirical}: The standard error estimated empirically as the standard deviation of the all the calculated AIPW estimates for probability of success.
+\item \code{lower_normal}: The lower bound on the normal confidence interval for the \code{estimated_probability_of_success}. Default is 95\%.
+\item \code{upper_normal}: The upper bound on the normal confidence interval for the \code{estimated_probability_of_success}. Default is 95\%.
+\item \code{lower_empirical}: The lower bound on the empirical confidence interval for the \code{estimated_probability_of_success}. Calculated using the observed distribution
+of AIPW estimated probabilities of success. Default is 95\%.
+\item \code{upper_empirical}: The upper bound on the empirical confidence interval for the \code{estimated_probability_of_success}. Calculated using the observed distribution
+of AIPW estimated probabilities of success. Default is 95\%.
+\item \code{times_best}: The number of times each treatment arm was selected as the best for an individual simulation.
+\item \code{average_num_assigned}: The average number of observations assigned to each treatment under the simulated trials.
+\item \code{sd_num_assigned}: The standard deviation for the number of observations assigned to each treatment under the simulated trials.
+\item \code{level}: The confidence level for the confidence interval, default is 95\%.
+}
 }
 \description{
-Summarizes results of of multiple Multi-Arm Bandit Trials. Provides empirically estimated
-and normally approximated confidence intervals on AIPW estimates for probability of success, and
-the number of times each arm was the chosen as the best treatment across all simulations.
+Summarizes results of multiple Multi-Arm Bandit Trials. Provides empirically estimated
+and normally approximated confidence intervals on AIPW estimates for probability of success,
+the number of times each arm was the chosen as the best treatment across all simulations, and the average for how many
+units were assigned to each treatment across all the simulations.
 }
 \details{
-This summary provides the number of times each treatment arm was
-selected as the best, chosen by the highest UCB1 or Thompson Probability
-from the end of each trial.
+The empirically estimated variances and confidence intervals, use the variance
+measured directly in the AIPW estimates for each treatment over all the simulations.
+The normal confidence intervals are estimated using an average of the measured variances
+across the simulations.
 
-Additionally it provides the average of the AIPW and sample estimates
-across all trials, while also providing 2 distinct variances and intervals.
-One interval is based on the average of the variances, and uses a normal distribution,
-while an empirical distribution is estimated using the sample of estimates
-created by the repeated trials. These empirical
-variances represent the variation in each simulation due to the random state
+The best arm at the end of each trial is chosen by the highest UCB1 value or Thompson sampling
+probability. These values indicate which treatment would be chosen next, or have the highest probability
+of being chosen next, therefore representing the current best treatment.
+
+Additionally, an average and standard deviation for the number of units assigned to each
+treatment across all the simulations is provided.
 
 \code{...} is provided to be compatible with \code{summary()}, the function
 does not have any additional arguments.
@@ -44,7 +62,6 @@ data(tanf)
 tanf <- tanf[1:100, ]
 # Simulating a few trials
 seeds <- sample.int(10000, 5)
-conditions <- c("no_letter", "open_appt", "specific_appt")
 x <- multiple_mab_simulation(
   data = tanf,
   assignment_method = "Batch",
@@ -55,22 +72,21 @@ x <- multiple_mab_simulation(
   algorithm = "Thompson",
   prior_periods = "All",
   control_augment = 0,
-  conditions = conditions,
   data_cols = c(
     condition_col = "condition",
     id_col = "ic_case_id",
     success_col = "success"
   ),
-  verbose = FALSE, times = 5, seeds = seeds, keep_data = FALSE
+  verbose = FALSE,
+  times = 5,
+  seeds = seeds,
+  keep_data = FALSE
 )
 
 # Creating summary table
-# Defaults to 95\% confidence interval
+## Defaults to 95\% confidence interval
 summary(x) |> print(width = Inf)
 
-# Changing to 70\% confidence level
+## 70\% confidence level
 summary(x, level = 0.7) |> print(width = Inf)
-
-# Invalid levels throw an error
-try(summary(x, level = 5))
 }

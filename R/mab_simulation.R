@@ -24,58 +24,92 @@
 
 #'
 #' @seealso
-#' *[single_mab_simulation()]
-#' *[multiple_mab_simulation()]
+#' * [single_mab_simulation()]
+#' * [multiple_mab_simulation()]
 #' @keywords internal
 
-
-pre_mab_simulation <- function(data,
-                               assignment_method,
-                               algorithm,
-                               conditions,
-                               prior_periods,
-                               perfect_assignment,
-                               whole_experiment,
-                               blocking,
-                               data_cols,
-                               control_augment,
-                               time_unit,
-                               period_length,
-                               block_cols,
-                               verbose,
-                               ndraws,
-                               random_assign_prop,
-                               check_args) {
+pre_mab_simulation <- function(
+  data,
+  assignment_method,
+  algorithm,
+  control_condition,
+  prior_periods,
+  perfect_assignment,
+  whole_experiment,
+  blocking,
+  data_cols,
+  control_augment,
+  time_unit,
+  period_length,
+  block_cols,
+  verbose,
+  ndraws,
+  random_assign_prop,
+  check_args
+) {
   if (base::is.null(data) || !base::is.data.frame(data)) {
     rlang::abort("Input 'data' must be a non-null data.frame.")
   }
-  if (inherits(data, "data.table")) {
+  if (data.table::is.data.table(data)) {
     data <- data.table::copy(data)
-  } else if (!inherits(data, "tbl_df")) {
+  } else if (!tibble::is_tibble(data)) {
     data <- tibble::as_tibble(data)
   }
 
-  data_cols <- purrr::map(data_cols, ~ list(
-    name = .x, symbol = rlang::sym(.x)
-  )) |>
+  data_cols <- purrr::map(
+    data_cols,
+    ~ list(
+      name = .x,
+      sym = rlang::sym(.x)
+    )
+  ) |>
     stats::setNames(names(data_cols))
 
   if (!base::is.null(block_cols)) {
     block_cols <- list(name = block_cols, symbol = rlang::syms(block_cols))
   }
+  character_args <- purrr::map(
+    list(
+      assignment_method = assignment_method,
+      algorithm = algorithm,
+      time_unit = time_unit,
+      prior_periods = prior_periods
+    ),
+    ~ {
+      if (is.character(.x)) {
+        base::tolower(.x)
+      } else {
+        .x
+      }
+    }
+  )
 
   # Input Validation
   if (check_args) {
     validate_inputs(
-      data = data, time_unit = time_unit,
+      data = data,
+      time_unit = character_args$time_unit,
       perfect_assignment = perfect_assignment,
-      algorithm = algorithm, period_length = period_length,
-      whole_experiment = whole_experiment, prior_periods = prior_periods,
-      data_cols = data_cols, block_cols = block_cols, conditions = conditions, blocking = blocking,
-      assignment_method = assignment_method, verbose = verbose,
-      control_augment = control_augment, ndraws = ndraws, random_assign_prop = random_assign_prop
+      algorithm = character_args$algorithm,
+      period_length = period_length,
+      whole_experiment = whole_experiment,
+      prior_periods = character_args$prior_periods,
+      data_cols = data_cols,
+      block_cols = block_cols,
+      blocking = blocking,
+      assignment_method = character_args$assignment_method,
+      verbose = verbose,
+      control_augment = control_augment,
+      ndraws = ndraws,
+      random_assign_prop = random_assign_prop
     )
   }
+  conditions <- create_conditions(
+    control_condition = control_condition,
+    data = data,
+    condition_col = data_cols$condition_col,
+    control_augment = control_augment
+  )
 
   # Preparing Data to be simulated
   verbose_log(verbose, "Preparing Data")
@@ -84,8 +118,8 @@ pre_mab_simulation <- function(data,
     data = data,
     data_cols = data_cols,
     period_length = period_length,
-    assignment_method = assignment_method,
-    time_unit = time_unit
+    assignment_method = character_args$assignment_method,
+    time_unit = character_args$time_unit
   ) |>
     create_new_cols(
       data_cols = data_cols,
@@ -107,7 +141,9 @@ pre_mab_simulation <- function(data,
     data_cols = data_cols,
     block_cols = block_cols,
     data = data,
-    imputation_information = imputation_information
+    imputation_information = imputation_information,
+    character_args = character_args,
+    conditions = conditions
   ))
 }
 #------------------------------------------------------------------------------
@@ -121,10 +157,10 @@ pre_mab_simulation <- function(data,
 #' @inheritParams single_mab_simulation
 #' @inheritParams run_mab_trial
 #'
-#' @returns:
+#' @returns: A named list containing:
 #' \itemize{
 #' \item `final_data`: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
-#' \item `bandits`: A tibble or data.table containing the UCB1 statistics or Thompson Sampling posterior distributions for each period.
+#' \item `bandits`: A tibble or data.table containing the UCB1 valuess or Thompson sampling posterior distributions for each period.
 #' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
 #' \item `estimates`: A tibble or data.table containing the
 #' AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
@@ -137,23 +173,25 @@ pre_mab_simulation <- function(data,
 #' @keywords internal
 #'
 
-
-mab_simulation <- function(data,
-                           time_unit,
-                           perfect_assignment,
-                           algorithm,
-                           period_length,
-                           prior_periods,
-                           whole_experiment,
-                           conditions,
-                           blocking,
-                           block_cols,
-                           data_cols,
-                           verbose,
-                           assignment_method, control_augment,
-                           imputation_information,
-                           ndraws,
-                           random_assign_prop) {
+mab_simulation <- function(
+  data,
+  time_unit,
+  perfect_assignment,
+  algorithm,
+  period_length,
+  prior_periods,
+  whole_experiment,
+  conditions,
+  blocking,
+  block_cols,
+  data_cols,
+  verbose,
+  assignment_method,
+  control_augment,
+  imputation_information,
+  ndraws,
+  random_assign_prop
+) {
   sim_results <- run_mab_trial(
     data = data,
     time_unit = time_unit,
@@ -197,4 +235,58 @@ mab_simulation <- function(data,
     settings = NULL
   )
   return(results)
+}
+#---------------------------------------------------------------------------------
+#' @title Creating proper conditions vector
+#' @name create_conditions
+#' @returns Character vector of unique treatment conditions. Throws error if an invalid specification
+#' is used.
+#' @description This function creates a character vector of treatment conditions
+#' using the conditions column in the provided data, and if `control_augment` is greater
+#' than 0, it also labels the control condition. Throws an error of `control_condition` is not
+#' present.
+#' @inheritParams single_mab_simulation
+#' @inheritParams cols
+#' @keywords internal
+create_conditions <- function(
+  control_condition,
+  data,
+  condition_col,
+  control_augment
+) {
+  conditions <- base::sort(base::as.character(base::unique(data[[
+    condition_col$name
+  ]])))
+  if (control_augment > 0) {
+    if (length(control_condition) != 1) {
+      rlang::abort(c(
+        "`control_condition` must have a length of 1",
+        "x" = sprintf(
+          "You passed a vector of length: %d",
+          length(control_condition)
+        )
+      ))
+    }
+    if (
+      is.null(control_condition) |
+        is.na(control_condition) |
+        !as.character(control_condition) %in% conditions
+    ) {
+      rlang::abort(c(
+        "`control_condition` is not present in the conditions column",
+        "x" = sprintf(
+          "Potential Conditions: %s",
+          paste0(conditions, collapse = ", ")
+        ),
+        "x" = paste0("You Passed: ", base::deparse(control_condition))
+      ))
+    }
+
+    names(conditions) <- base::ifelse(
+      conditions == as.character(control_condition),
+      "control",
+      "treatment"
+    )
+  }
+  return(conditions)
 }

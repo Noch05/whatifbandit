@@ -2,26 +2,20 @@
 % Please edit documentation in R/mab_inference.R
 \name{get_iaipw}
 \alias{get_iaipw}
-\title{Calculate Individual AIPW For Each Treatment Condition}
+\title{Calculate Observation Level AIPW For Each Treatment Condition}
 \usage{
 get_iaipw(data, assignment_probs, periods, conditions, verbose)
 }
 \arguments{
 \item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
-of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.}
+of a traditional Randomized Controlled Trial (RCT). Any data.frames will be converted to tibbles internally.}
 
-\item{assignment_probs}{tibble/data.table containing the probabilities of being
-assigned each treatment at a given period}
+\item{assignment_probs}{A tibble/data.table containing the probabilities of being
+assigned each treatment at a given period.}
 
-\item{periods}{Numeric value of length 1; number of total periods in the simulation}
+\item{periods}{Numeric value of length 1; number of total periods in the simulation.}
 
-\item{conditions}{A named character vector containing treatment conditions. The elements
-of this vector should be the names of each treatment as seen in your data, so to create it you can simply call
-\code{unique(df[[condition_col]])}. The names of each element are used to reference the contents but are not inherently important;
-choose names that are meaningful and consistent. If \code{control_augment} > 0, then the control condition
-of the trial in this vector must have the name "Control".}
-
-\item{verbose}{A logical value; whether or not to print intermediate messages. Default is FALSE.}
+\item{verbose}{Logical; whether or not to print intermediate messages. Default is FALSE.}
 }
 \value{
 A tibble/data.frame, containing the data used in the Multi-Arm-Bandit, with
@@ -29,23 +23,20 @@ new columns pertaining to the individual AIPW estimate for each person and condi
 probability of assignment for each treatment at each period.
 }
 \description{
-Calculates the individual Augmented Inverse Probability Weighted Estimate (AIPW) of treatment
-success for each treatment condition provided. This method scales the estimated probabilities of success by
-the probability of being assigned the treatment, and weighted  by a the conditional expectation of success
-from prior periods of an adaptive trial. The condition expectation function is a grouped mean by
+Calculates the augmented inverse probability weighted estimate (AIPW) of treatment
+success for each observation and treatment (i.e. on the level of a single unit).
+This method scales the estimated probabilities of success by
+the probability of being assigned the treatment, and weighted by a the conditional expectation of success
+from prior periods of an adaptive trial. The conditional expectation function used is a grouped mean by
 treatment arm.
 }
 \details{
-The specification for the Individual AIPW estimates can be found
+The specification for the individual AIPW estimates can be found
 in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}. The
 formulas in equation 5, formed the basis for this function's calculations. Here
 the regression adjustment used is the grouped mean of success by treatment, up until
-the current period of estimation (so at period 5, the grouped mean was calculated
-using data from periods 1 through 4).
-
-The AIPW estimator makes corrections for the non-random method of assigning treatment,
-and is both unbiased and asymptotically normal, so can be used fo statistical
-inference, while the sample mean in this case cannot.
+the current period of estimation (so at period 5, the grouped mean would be calculated
+using the results from periods 1 through 4).
 }
 \references{
 Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
