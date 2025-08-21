@@ -11,7 +11,7 @@
 #' @param verbose Logical; Toggles progress bar from [furrr::future_map()] and other intermediate messages.
 #' @param times A numeric value of length 1, the number of simulations to conduct.
 #' @param seeds An integer vector of `length(times)` containing valid seeds to define random state for each trial.
-#' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets.
+#' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended FALSE.
 #'
 #' @returns An object of class `multiple.mab`, containing:
 #' \itemize{
@@ -28,8 +28,8 @@
 #' }
 #' @example inst/examples/multiple_mab_simulation_example.R
 #' @details
-#' Note that when called if data.table has not been attached already it will be when `future.map()` runs,
-#' which will print a message to console. This does not mean that if you pass a tibble or data.frame, that data.table will
+#' Note that when called if data.table has not been attached already it will be when `future.map()` runs and a message
+#' may print. This does not mean that if you pass a tibble or data.frame, that data.table will
 #' used.
 #'
 #' ## Implementation

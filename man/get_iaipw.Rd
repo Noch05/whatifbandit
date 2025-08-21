@@ -8,7 +8,7 @@ get_iaipw(data, assignment_probs, periods, conditions, verbose)
 }
 \arguments{
 \item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
-of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.}
+of a traditional Randomized Controlled Trial (RCT). Any data.frames will be converted to tibbles internally.}
 
 \item{assignment_probs}{A tibble/data.table containing the probabilities of being
 assigned each treatment at a given period.}

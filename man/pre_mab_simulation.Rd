@@ -26,7 +26,7 @@ pre_mab_simulation(
 }
 \arguments{
 \item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
-of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.}
+of a traditional Randomized Controlled Trial (RCT). Any data.frames will be converted to tibbles internally.}
 
 \item{assignment_method}{A character string; one of "date", "batch", or "individual", to define the assignment into treatment waves. When using
 "batch" or "individual", ensure your dataset is pre-arranged in the proper order observations should be considered so that
@@ -38,8 +38,8 @@ defines the adaptive assignment process. Mathematical details on these algorithm
 can be found in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
 \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}
 
-\item{control_condition}{Value of the control condition. Only necessary when \code{control_augment} is greater than 0. The type of this value should match
-the type in the input data, so if your conditions are stored as factors or strings, pass a string, if integers, use an integer.}
+\item{control_condition}{Value of the control condition. Only necessary when \code{control_augment} is greater than 0. Internally this value
+is coerced to a string, so it should be passed as a string, or a type that can easily be converted to a string.}
 
 \item{prior_periods}{A numeric value of length 1, or the character string "All"; number of previous periods to use
 in the treatment assignment model. This is used to implement the stationary/non-stationary bandit.
@@ -70,8 +70,9 @@ would receive each treatment and 25\% of women the same.}
 \item \code{success_col}: Column in \code{data}; binary successes from the original experiment.
 \item \code{condition_col}: Column in \code{data}; original treatment condition for each observation.
 \item \code{date_col}: Column in \code{data}; contains original date of event/trial. Only necessary when assigning by "Date". Must be of type \code{Date}, not a character string.
-\item \code{month_col}: Column in \code{data}; contains month of treatment. Only necessary when \code{time_unit = "Month"}. This can be a string or factor variable
-containing the names or numbers of months.
+\item \code{month_col}: Column in \code{data}; contains month of treatment. Only necessary when \code{time_unit = "Month"}, and the months described are different
+then what would be returned by \code{lubridate::months(data$date_col)} or \code{format(data$date_col, "\%m")}. This can be a numeric, string, or factor variable
+containing the names or numbers of the months.
 \item \code{success_date_col}: Column in \code{data}; contains original dates each success occurred. Only necessary when \code{perfect_assignment = FALSE}. Must be of type \code{Date}, not a character string.
 \item \code{assignment_date_col}: Column in \code{data}; contains original dates treatments were assigned to observations. Only necessary when \code{perfect_assignment = FALSE}.
 Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type \code{Date}, not a character string.
@@ -80,12 +81,13 @@ Used to simulate imperfect information on the part of researchers conducting an 
 \item{control_augment}{A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.
 Default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.}
 
-\item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "Date".
-Acceptable values are "day", "week", or "month". "month" requires a column with the months of each observation
-to be used.}
+\item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "date".
+Acceptable values are "day", "week", or "month". "month" does not require an additional column with the months of each observation,
+but it can accept a separate \code{month_col}. This should be used when the contents of that column are not simply what would be returned
+by \code{lubridate::months(data$date_col)} or \code{format(data$date_col, "\%m")}, otherwise passing just a column of dates will suffice.}
 
 \item{period_length}{A numeric value of length 1; represents the length of each treatment period.
-If assignment method is "date", this length refers the number of units specified in\code{time_unit}
+If assignment method is "date", this length refers the number of units specified in \code{time_unit}
 (i.e., if "day", 10 would be 10 days). If assignment method is "batch", this refers to the number of people in each batch.}
 
 \item{block_cols}{A character vector of variables to block by. This vector should not be named.}

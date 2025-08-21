@@ -60,7 +60,7 @@ pre_mab_simulation <- function(
     data_cols,
     ~ list(
       name = .x,
-      symbol = rlang::sym(.x)
+      sym = rlang::sym(.x)
     )
   ) |>
     stats::setNames(names(data_cols))
@@ -240,7 +240,7 @@ mab_simulation <- function(
 #' @title Creating proper conditions vector
 #' @name create_conditions
 #' @returns Character vector of unique treatment conditions. Throws error if an invalid specification
-#' is used
+#' is used.
 #' @description This function creates a character vector of treatment conditions
 #' using the conditions column in the provided data, and if `control_augment` is greater
 #' than 0, it also labels the control condition. Throws an error of `control_condition` is not

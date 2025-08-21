@@ -15,7 +15,7 @@ check_data(
 }
 \arguments{
 \item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
-of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.}
+of a traditional Randomized Controlled Trial (RCT). Any data.frames will be converted to tibbles internally.}
 
 \item{data_cols}{A named character vector containing the names of columns in \code{data} as strings:
 \itemize{
@@ -23,8 +23,9 @@ of a traditional Randomized Controlled Trial (RCT). data.frames will be converte
 \item \code{success_col}: Column in \code{data}; binary successes from the original experiment.
 \item \code{condition_col}: Column in \code{data}; original treatment condition for each observation.
 \item \code{date_col}: Column in \code{data}; contains original date of event/trial. Only necessary when assigning by "Date". Must be of type \code{Date}, not a character string.
-\item \code{month_col}: Column in \code{data}; contains month of treatment. Only necessary when \code{time_unit = "Month"}. This can be a string or factor variable
-containing the names or numbers of months.
+\item \code{month_col}: Column in \code{data}; contains month of treatment. Only necessary when \code{time_unit = "Month"}, and the months described are different
+then what would be returned by \code{lubridate::months(data$date_col)} or \code{format(data$date_col, "\%m")}. This can be a numeric, string, or factor variable
+containing the names or numbers of the months.
 \item \code{success_date_col}: Column in \code{data}; contains original dates each success occurred. Only necessary when \code{perfect_assignment = FALSE}. Must be of type \code{Date}, not a character string.
 \item \code{assignment_date_col}: Column in \code{data}; contains original dates treatments were assigned to observations. Only necessary when \code{perfect_assignment = FALSE}.
 Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type \code{Date}, not a character string.
@@ -36,12 +37,13 @@ groups are assigned correctly. For "date", observations will be considered in ch
 "individual" assignment can be computationally intensive for larger datasets.}
 
 \item{period_length}{A numeric value of length 1; represents the length of each treatment period.
-If assignment method is "date", this length refers the number of units specified in\code{time_unit}
+If assignment method is "date", this length refers the number of units specified in \code{time_unit}
 (i.e., if "day", 10 would be 10 days). If assignment method is "batch", this refers to the number of people in each batch.}
 
-\item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "Date".
-Acceptable values are "day", "week", or "month". "month" requires a column with the months of each observation
-to be used.}
+\item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "date".
+Acceptable values are "day", "week", or "month". "month" does not require an additional column with the months of each observation,
+but it can accept a separate \code{month_col}. This should be used when the contents of that column are not simply what would be returned
+by \code{lubridate::months(data$date_col)} or \code{format(data$date_col, "\%m")}, otherwise passing just a column of dates will suffice.}
 
 \item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).

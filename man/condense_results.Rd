@@ -8,9 +8,9 @@ condense_results(data, keep_data, mabs, times)
 }
 \arguments{
 \item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
-of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.}
+of a traditional Randomized Controlled Trial (RCT). Any data.frames will be converted to tibbles internally.}
 
-\item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended FALSE for large datasets.}
+\item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended FALSE.}
 
 \item{mabs}{output from \code{\link[furrr:future_map]{furrr::future_map()}} in \code{\link[=multiple_mab_simulation]{multiple_mab_simulation()}}}
 

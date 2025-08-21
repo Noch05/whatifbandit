@@ -10,11 +10,12 @@
 #' estimation. See the details and vignettes to learn more.
 #'
 #' @param data A data.frame, data.table, or tibble containing input data from the trial. This should be the results
-#' of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.
+#' of a traditional Randomized Controlled Trial (RCT). Any data.frames will be converted to tibbles internally.
 #'
-#' @param time_unit A character string specifying the unit of time for assigning periods when `assignment_method` is "Date".
-#' Acceptable values are "day", "week", or "month". "month" requires a column with the months of each observation
-#' to be used.
+#' @param time_unit A character string specifying the unit of time for assigning periods when `assignment_method` is "date".
+#' Acceptable values are "day", "week", or "month". "month" does not require an additional column with the months of each observation,
+#' but it can accept a separate `month_col`. This should be used when the contents of that column are not simply what would be returned
+#' by `lubridate::months(data$date_col)` or `format(data$date_col, "%m")`, otherwise passing just a column of dates will suffice.
 #'
 #' @param perfect_assignment Logical; if TRUE, assumes perfect information for treatment assignment
 #' (i.e., all outcomes are observed regardless of the date).
@@ -30,7 +31,7 @@
 #' \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.
 #'
 #' @param period_length A numeric value of length 1; represents the length of each treatment period.
-#' If assignment method is "date", this length refers the number of units specified in`time_unit`
+#' If assignment method is "date", this length refers the number of units specified in `time_unit`
 #' (i.e., if "day", 10 would be 10 days). If assignment method is "batch", this refers to the number of people in each batch.
 #'
 #' @param prior_periods A numeric value of length 1, or the character string "All"; number of previous periods to use
@@ -43,8 +44,8 @@
 #' of periods, setting this to FALSE can be more computationally intensive, though not a significant
 #' contributor to total run time.
 #'
-#' @param control_condition Value of the control condition. Only necessary when `control_augment` is greater than 0. The type of this value should match
-#' the type in the input data, so if your conditions are stored as factors or strings, pass a string, if integers, use an integer.
+#' @param control_condition Value of the control condition. Only necessary when `control_augment` is greater than 0. Internally this value
+#' is coerced to a string, so it should be passed as a string, or a type that can easily be converted to a string.
 #'
 #' @param data_cols A named character vector containing the names of columns in `data` as strings:
 #' \itemize{
@@ -52,8 +53,9 @@
 #' \item `success_col`: Column in `data`; binary successes from the original experiment.
 #' \item `condition_col`: Column in `data`; original treatment condition for each observation.
 #' \item `date_col`: Column in `data`; contains original date of event/trial. Only necessary when assigning by "Date". Must be of type `Date`, not a character string.
-#' \item `month_col`: Column in `data`; contains month of treatment. Only necessary when `time_unit = "Month"`. This can be a string or factor variable
-#' containing the names or numbers of months.
+#' \item `month_col`: Column in `data`; contains month of treatment. Only necessary when `time_unit = "Month"`, and the months described are different
+#' then what would be returned by `lubridate::months(data$date_col)` or `format(data$date_col, "%m")`. This can be a numeric, string, or factor variable
+#' containing the names or numbers of the months.
 #' \item `success_date_col`: Column in `data`; contains original dates each success occurred. Only necessary when `perfect_assignment = FALSE`. Must be of type `Date`, not a character string.
 #' \item `assignment_date_col`: Column in `data`; contains original dates treatments were assigned to observations. Only necessary when `perfect_assignment = FALSE`.
 #' Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type `Date`, not a character string.
@@ -124,7 +126,7 @@
 #'
 #' At each period, either the Thompson sampling probabilities or UCB1 valuess are calculated based on
 #' the outcomes from the number of `prior_periods` specified. New treatments are then assigned randomly using the Thompson
-#' Probabilities via the \href{https://cran.r-project.org/package=randomizr}{randomizr}
+#' sampling probabilities via the \href{https://cran.r-project.org/package=randomizr}{randomizr}
 #' package, or as the treatment with the highest UCB1 values, while implementing the specific
 #' treatment blocking and control augmentation specified. More details on bandit algorithms can in
 #' \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and

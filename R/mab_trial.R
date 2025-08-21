@@ -174,15 +174,20 @@ run_mab_trial <- function(
 #' to wide format where each treatment arm is a column, and the rows
 #' represent periods.
 #'
-#' At this step the final UCB1 or Thompson sampling probabilities are calculated,
-#' and the whole table is lead by one to have each period be represented
-#' by the calculation that occurred just after completing the period, so
-#' period 11 now means the bandit calculated in period 12, using the results
-#' from period 11. The assignment probabilities are not changed in this way, so for each period
+#' At this step the final UCB1 or Thompson sampling probabilities are calculated.
+#' The entire table is shifted backward by one period so that each row reflects the calculation
+#' that occurs after completing a period. For example prior to this change, row 11, would indicate the calculations
+#' from period 11 before assignment, but now that occured after period 11's imputations.
+#'
+#' This has the impact of removing the original first row, where all the assignment
+#' probabilities are equal, and modifying the last row to represent the final calculation after the conclusion
+#' of the simulation.
+#'
+#' The assignment probabilities are not changed in this way, so for each period
 #' they still reflect the assignment probabilities used in that period.
 #'
 #' @seealso
-#'* [run_mab_trial()]
+#' * [run_mab_trial()]
 #' @keywords internal
 
 end_mab_trial <- function(
@@ -366,13 +371,10 @@ end_mab_trial.data.table <- function(
 #------------------------------------------------------------------------------
 #' Create Prior Periods
 #' @name create_prior
-#' @description Used during [run_mab_trial()] to create a vector of prior periods dynamically. Used to create
-#' the proper vector when `prior_periods` is not "All".
-#'
+#' @description Used during [run_mab_trial()] to create a vector of prior periods dynamically based on the specified
+#' number of prior periods.
 #' @inheritParams single_mab_simulation
 #' @param current_period The current period of the simulation. Defined by loop structure inside [run_mab_trial()].
-#'
-#'
 #' @returns Numeric vector containing the prior treatment periods to be used when aggregating
 #' the results for the current treatment assignment period.
 #'

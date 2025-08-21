@@ -7,11 +7,11 @@
 create_conditions(control_condition, data, condition_col, control_augment)
 }
 \arguments{
-\item{control_condition}{Value of the control condition. Only necessary when \code{control_augment} is greater than 0. The type of this value should match
-the type in the input data, so if your conditions are stored as factors or strings, pass a string, if integers, use an integer.}
+\item{control_condition}{Value of the control condition. Only necessary when \code{control_augment} is greater than 0. Internally this value
+is coerced to a string, so it should be passed as a string, or a type that can easily be converted to a string.}
 
 \item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
-of a traditional Randomized Controlled Trial (RCT). data.frames will be converted to tibbles internally.}
+of a traditional Randomized Controlled Trial (RCT). Any data.frames will be converted to tibbles internally.}
 
 \item{condition_col}{Column in \code{data}; original treatment condition for each observation.}
 
@@ -20,7 +20,7 @@ Default is 0. It is not recommended to use this in conjunction with \code{random
 }
 \value{
 Character vector of unique treatment conditions. Throws error if an invalid specification
-is used
+is used.
 }
 \description{
 This function creates a character vector of treatment conditions
