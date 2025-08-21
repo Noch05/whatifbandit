@@ -141,7 +141,7 @@ check_cols <- function(
     success_col = "it is always required",
     condition_col = "it is always required",
     date_col = "assignment_method is 'date'",
-    month_col = "time_unit is 'month'",
+    month_col = "time_unit is 'month' and you provided a `month_col`",
     success_date_col = "perfect_assignment is FALSE",
     assignment_date_col = "perfect_assignment is FALSE"
   )

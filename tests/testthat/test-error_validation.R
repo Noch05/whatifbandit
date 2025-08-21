@@ -148,7 +148,7 @@ test_that("Throws proper error when columns do not exist or not declared", {
   conditions <- as.character(unique(data$condition))
 
   purrr::walk(
-    seq_len(nrow(col_args)),
+    seq_len(nrow(col_args) + 1),
     ~ {
       data_cols <- setNames(
         col_args[.x, ],
@@ -163,19 +163,40 @@ test_that("Throws proper error when columns do not exist or not declared", {
           data_cols <- data_cols[-(.x - (nrow(col_args) / 2))]
         }
       }
-      expect_snapshot_error(single_mab_simulation(
-        data = data,
-        assignment_method = "Date",
-        time_unit = "Month",
-        whole_experiment = TRUE,
-        period_length = 1,
-        blocking = TRUE,
-        block_cols = block_col,
-        perfect_assignment = FALSE,
-        algorithm = "Thompson",
-        prior_periods = "All",
-        data_cols = data_cols[names(data_cols) != "block_cols"]
-      ))
+      if (.x <= nrow(col_args)) {
+        expect_snapshot_error(single_mab_simulation(
+          data = data,
+          assignment_method = "Date",
+          time_unit = "Month",
+          whole_experiment = TRUE,
+          period_length = 1,
+          blocking = TRUE,
+          block_cols = block_col,
+          perfect_assignment = FALSE,
+          algorithm = "Thompson",
+          prior_periods = "All",
+          data_cols = data_cols[names(data_cols) != "block_cols"]
+        ))
+      } else {
+        expect_snapshot_error(single_mab_simulation(
+          data = data,
+          assignment_method = "Date",
+          time_unit = "Month",
+          whole_experiment = TRUE,
+          period_length = 1,
+          blocking = FALSE,
+          perfect_assignment = TRUE,
+          algorithm = "Thompson",
+          prior_periods = "All",
+          data_cols = c(
+            id_col = "id",
+            success_col = "success",
+            condition_col = "condition",
+            month_col = "5",
+            date_col = "apt_date"
+          )
+        ))
+      }
     }
   )
 })

@@ -1,6 +1,6 @@
 test_that("Single Sim Equality Check", {
   set.seed(123401)
-  required_inputs <- generate_data(100, 3)
+  required_inputs <- generate_data(100, 5)
   full_args <- required_inputs$full_args
   static_args <- required_inputs$static_args
 
@@ -14,7 +14,7 @@ test_that("Single Sim Equality Check", {
 
 test_that("Multi Sim Equality check", {
   set.seed(971834)
-  required_inputs <- generate_data(100, 3)
+  required_inputs <- generate_data(100, 5)
   full_args <- required_inputs$full_args
   static_args <- required_inputs$static_args
   static_args$times <- 2

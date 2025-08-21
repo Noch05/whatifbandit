@@ -97,9 +97,10 @@ create_cutoff.date <- function(
         ) +
           1
       ]
+      data[, month_date := NULL]
+
       data.table::setkey(data, period_number)
       data.table::setorderv(data, cols = c(date_col$name, "period_number"))
-      data[, month_date := NULL]
     } else {
       data[,
         period_number := base::floor(
@@ -110,7 +111,7 @@ create_cutoff.date <- function(
           1
       ]
       data.table::setkey(data, period_number)
-      data.table::setorderv(data, cols = c(date_col$name))
+      data.table::setorderv(data, cols = c(date_col$name, "period_number"))
     }
   } else {
     if (time_unit == "month" && !is.null(month_col$name)) {
@@ -147,7 +148,7 @@ create_cutoff.date <- function(
           ) +
             1
         ) |>
-        dplyr::arrange(!!date_col$sym)
+        dplyr::arrange(!!date_col$sym, period_number)
     }
   }
   return(data)

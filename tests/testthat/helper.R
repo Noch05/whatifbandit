@@ -23,6 +23,7 @@ generate_data <- function(n, k) {
       size = n,
       replace = TRUE
     ),
+    month_col = lubridate::month(date_of_treatment),
     successful_return = dplyr::case_when(
       type_of_policy == "Control Group" ~ rbinom(n, 1, 0.3),
       type_of_policy == "Treatment 1" ~ rbinom(n, 1, 0.25),
@@ -53,7 +54,7 @@ generate_data <- function(n, k) {
       success_col = "successful_return",
       date_col = "date_of_treatment",
       assignment_date_col = "treatment_wave_assignment",
-      success_date_col = "date_returned"
+      success_date_col = "date_returned",
     ),
     control_condition = "Control Group",
     block_cols = c("city", "male"),
@@ -145,8 +146,12 @@ run_test <- function(full_args, static_args, trial) {
   class <- switch(trial, "single" = "mab", "multiple" = "multiple.mab")
   results <- purrr::map(seq_len(nrow(full_args)), \(x) {
     args <- c(as.list(full_args[x, ]), static_args)
+    if (rbinom(1, 1, 0.5)) {
+      args$data_cols$month_col <- "month_col"
+    }
     expect_no_failure({
       output <- do.call(eval(FUN), args)
+      print(output)
     })
     expect_s3_class(output, class)
     expect_no_failure({
