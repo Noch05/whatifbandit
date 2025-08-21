@@ -54,7 +54,7 @@ create_cutoff.date <- function(
   data,
   time_unit,
   date_col,
-  month_col = NULL,
+  month_col,
   period_length
 ) {
   time_length <- switch(
@@ -66,7 +66,7 @@ create_cutoff.date <- function(
   start_date <- base::min(data[[date_col$name]])
 
   if (data.table::is.data.table(data)) {
-    if (time_unit == "month" && !is.null(month_col$name)) {
+    if (time_unit == "month" && !is.null(month_col)) {
       first_month <- data[
         order(base::get(date_col$name)),
         base::get(month_col$name)
@@ -114,7 +114,7 @@ create_cutoff.date <- function(
       data.table::setorderv(data, cols = c(date_col$name, "period_number"))
     }
   } else {
-    if (time_unit == "month" && !is.null(month_col$name)) {
+    if (time_unit == "month" && !is.null(month_col)) {
       first_month <- data |>
         dplyr::slice_min(order_by = !!date_col$sym, n = 1, with_ties = FALSE) |>
         dplyr::pull(!!month_col$sym)

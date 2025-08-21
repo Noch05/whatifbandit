@@ -41,7 +41,7 @@ generate_data <- function(n, k) {
     treatment_wave_assignment = lubridate::ymd(
       paste0("2024-0", lubridate::month(date_of_treatment), "-01")
     ),
-    month_col = lubridate::month(date_of_treatment)
+    months = lubridate::month(date_of_treatment)
   ) |>
     dplyr::arrange(date_of_treatment) |>
     dplyr::mutate(identification_card_num = seq(1, n, 1), )
@@ -54,7 +54,8 @@ generate_data <- function(n, k) {
       success_col = "successful_return",
       date_col = "date_of_treatment",
       assignment_date_col = "treatment_wave_assignment",
-      success_date_col = "date_returned"
+      success_date_col = "date_returned",
+      month_col = "months"
     ),
     control_condition = "Control Group",
     block_cols = c("city", "male"),
@@ -77,9 +78,8 @@ generate_data <- function(n, k) {
   ) |>
     dplyr::filter(
       !(assignment_method == "Batch" & period_length == 1) &
-        !(time_unit == "Month" & period_length > 1) &
-        !(assignment_method == "Individual" & prior_periods != "All") &
-        !(control_augment > 0 & random_assign_prop > 0)
+        !(control_augment > 0 & random_assign_prop > 0) &
+        !(time_unit == "Month" & period_length > 1)
     ) |>
     dplyr::mutate(
       time_unit = dplyr::if_else(
@@ -106,10 +106,13 @@ generate_data <- function(n, k) {
 single_mab_checks <- function(output) {
   band_col_check <- length(output$settings$conditions) ==
     (ncol(output$bandits) - 1)
+
   prob_col_check <- length(output$settings$conditions) ==
     (ncol(output$assignment_probs) - 1)
+
   est_check <- nrow(output$settings$estimates) ==
     (2 * length(output$settings$conditions))
+
   anyNA_ests <- dplyr::summarize(
     output$final_data,
     dplyr::across(
@@ -146,13 +149,6 @@ run_test <- function(full_args, static_args, trial) {
   class <- switch(trial, "single" = "mab", "multiple" = "multiple.mab")
   results <- purrr::map(seq_len(nrow(full_args)), \(x) {
     args <- c(as.list(full_args[x, ]), static_args)
-    if (
-      args$time_unit == "Month" &&
-        args$assignment_method == "Date" &&
-        sample(c(TRUE, FALSE), 1, prob = c(0.5, 0.5))
-    ) {
-      args$data_cols$month_col <- "month_col"
-    }
     expect_no_failure({
       output <- do.call(eval(FUN), args)
       testthat::capture_output_lines(expect_no_failure(print(output)))
