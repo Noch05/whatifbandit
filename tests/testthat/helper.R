@@ -103,6 +103,28 @@ generate_data <- function(n, k) {
   ))
 }
 
+control_augment_checks <- function(output) {
+  col <- paste0(output$settings$control, "_assign_prob")
+  assign_probs <- output$assignment_probs |>
+    dplyr::filter(period_number != 1)
+  vec <- output$assign_probs[[col]]
+  return(all(vec > output$settings$control_augment))
+}
+random_assign_checks <- function(output) {
+  true_prop <- mean(
+    output$final_data$assignment_type[
+      output$final_data$assignment_type != "initial"
+    ] ==
+      "random"
+  )
+  check <- dplyr::near(
+    true_prop,
+    output$settings$random_assign_prop,
+    tol = 0.15
+  )
+  return(check)
+}
+
 single_mab_checks <- function(output) {
   band_col_check <- length(output$settings$conditions) ==
     (ncol(output$bandits) - 1)
@@ -122,7 +144,25 @@ single_mab_checks <- function(output) {
   ) |>
     sum() ==
     0
-  return(all(c(band_col_check, prob_col_check, est_check, anyNA_ests)))
+  control_augment <- if (output$settings$control_augment > 0) {
+    control_augment_checks(output)
+  } else {
+    TRUE
+  }
+  random_assign <- if (output$settings$random_assign_prop > 0) {
+    random_assign_checks(output)
+  } else {
+    TRUE
+  }
+
+  return(all(c(
+    band_col_check,
+    prob_col_check,
+    est_check,
+    anyNA_ests,
+    control_augment,
+    random_assign
+  )))
 }
 multi_mab_checks <- function(output) {
   band_col_check <- length(output$settings$conditions) ==
@@ -131,7 +171,6 @@ multi_mab_checks <- function(output) {
     (ncol(output$assignment_probs) - 2)
   assignment_quant_check <- length(output$settings$conditions) ==
     (ncol(output$assignment_quantities) - 1)
-
   return(all(c(band_col_check, prob_col_check, assignment_quant_check)))
 }
 # Function to conduct the test
@@ -153,6 +192,10 @@ run_test <- function(full_args, static_args, trial) {
       output <- do.call(eval(FUN), args)
       testthat::capture_output_lines(expect_no_failure(print(output)))
     })
+    if (isTRUE(args$time_unit == "Month")) {
+      args$data_cols <- args$data_cols[!names(args$data_cols) == "month_col"]
+      expect_no_failure(do.call(eval(FUN), args))
+    }
     expect_s3_class(output, class)
     expect_no_failure({
       if (!eval(class_specific_checks)) {
@@ -238,13 +281,6 @@ multi_equal_checks <- function(tbl_output, dt_output) {
   ))
   return(all(check1, summary_check))
 }
-control_augment_checks <- function(output) {
-  col <- paste0(output$settings$control, "_assign_prob")
-  assign_probs <- output$assignment_probs |>
-    dplyr::filter(period_number != 1)
-  vec <- output$assign_probs[[col]]
-  return(all(vec > output$settings$control_augment))
-}
 
 
 check_dt_tibble_equal <- function(full_args, static_args, type, seed) {
@@ -268,14 +304,10 @@ check_dt_tibble_equal <- function(full_args, static_args, type, seed) {
     dt_output <- do.call(eval(FUN), dt_args)
     check_equal <- eval(class_equal_checks)
     expect_no_failure({
-      if (!check_equal) stop("Equality Checks Failed")
-    })
-    control_augment_checks <- purrr::map_lgl(
-      list(tbl_output, dt_output),
-      ~ control_augment_checks(.x)
-    )
-    expect_no_failure({
-      if (!all(control_augment_checks)) stop("Control Augment Checks Fail")
+      if (!check_equal) {
+        print(tbl_args)
+        stop("Equality Checks Failed")
+      }
     })
   })
 }

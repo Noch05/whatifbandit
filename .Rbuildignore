@@ -7,3 +7,4 @@
 ^Meta$
 ^cran-comments\.md$
 ^NEWS_files/
+^vignettes/whatifbandit_files/

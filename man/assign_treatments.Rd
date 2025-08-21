@@ -8,11 +8,8 @@ assign_treatments(
   current_data,
   probs,
   blocking = NULL,
-  algorithm,
-  id_col,
   conditions,
   condition_col,
-  success_col,
   random_assign_prop
 )
 }
@@ -26,16 +23,7 @@ distribution of treatment conditions across blocks. For example, blocking by gen
 split treatments evenly not just throughout the sample (so for 4 arms, 25-25-25-25), but also within each block, so 25\% of men
 would receive each treatment and 25\% of women the same.}
 
-\item{algorithm}{A character string specifying the MAB algorithm to use. Options are "thompson" or "ucb1". Algorithm
-defines the adaptive assignment process. Mathematical details on these algorithms
-can be found in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
-\href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}
-
-\item{id_col}{Column in \code{data}; contains unique ID as a key.}
-
 \item{condition_col}{Column in \code{data}; original treatment condition for each observation.}
-
-\item{success_col}{Column in \code{data}; binary successes from the original experiment.}
 
 \item{random_assign_prop}{A numeric value ranging from 0 to 1; proportion of each wave to be assigned new treatments randomly,
 1 - \code{random_assign_prop} is the proportion assigned through the bandit procedure. For example if this is set to 0.1, then
