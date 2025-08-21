@@ -112,7 +112,6 @@ test_that("Throws proper error when columns do not exist or not declared", {
     success_date = rep(lubridate::ymd("2025-01-01"), 10),
     assignment_date = rep(lubridate::ymd("2025-01-01"), 10),
     apt_date = rep(lubridate::ymd("2024-01-01"), 10),
-    month = sample(c("June", "July"), replace = TRUE, size = 10),
     block = rbinom(10, 1, 0.3)
   )
 
@@ -133,7 +132,6 @@ test_that("Throws proper error when columns do not exist or not declared", {
       assignment_date_col = "fake_colname"
     ),
     date_col = c(date_col = "apt_date", date_col = "fake_colname"),
-    month_col = c(month_col = "month", month_col = "fake_colname"),
     stringsAsFactors = FALSE
   ) |>
     dplyr::rowwise() |>

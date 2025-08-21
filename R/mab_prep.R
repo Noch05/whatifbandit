@@ -3,7 +3,7 @@
 #' @description Used to assign each observation a new treatment assignment period, based
 #' on user-supplied specifications, and user supplied data from
 #' `date_col` and `month_col` in `data_cols`, and the `period_length`. Creates a new
-#' column indicating with period each observation belongs to, used for future subsetting.
+#' column indicating with period each observation belongs to.
 #'
 #' @inheritParams single_mab_simulation
 #' @inheritParams cols
@@ -11,19 +11,10 @@
 #' The assignment periods do not strictly have to line up with the original experiment, it
 #' is up to the researcher to test the possible options.
 #'
-#' Month based assignment is a special case to be used when an experimenter wants
-#' their periods to line up exactly with the calendar months, not just the length of a month.
-#' This is useful for experiments that only track months, or define the calendar months differently
-#' than the dates. For example if an experiment defines August as starting on July 17th, or
-#' one where the passing of specific months is meaningful outside of time passed.
-#' In this specification, an additional column must be provided that specifies the desired month
-#' for each observation and each one is treated as if it occurred on the first of each month.
-#' If only months are available, a synthetic date column will have to be provided,
-#' simply make a date vector using the appropriate months with the proper year.
-#'
-#' If months is simply the length of time wished for the period it would
-#' be better to use day or week based, and set the `period_length` to an appropriate
-#' 30-31 days, or 4 weeks.
+#' Month based assignment can be specified either using the months inside the `month_col` or `date_col`,
+#' if `month_col` is passed into the function it will be used. `month_col` should only be provided separately
+#' when the months inside the column are different than what `format(data[[date_col]], "%m")`, `format(data[[data_col]], "%B")`
+#' or `lubridate::month(data[[data_col]])` would return.
 #'
 #' @returns Updated tibble/data.table with the new `period_number` column. `period_number` is an integer
 #' representing an observation's new assignment period.
@@ -40,27 +31,12 @@ create_cutoff <- function(
     assignment_method,
     "individual" = create_cutoff.individual(data = data),
     "batch" = create_cutoff.batch(data = data, period_length = period_length),
-    "date" = switch(
-      time_unit,
-      "day" = create_cutoff.day(
-        data = data,
-        date_col = data_cols$date_col,
-        period_length = period_length
-      ),
-      "month" = create_cutoff.month(
-        data = data,
-        month_col = data_cols$month_col,
-        date_col = data_cols$date_col,
-        period_length = period_length
-      ),
-      "week" = create_cutoff.week(
-        data = data,
-        date_col = data_cols$date_col,
-        period_length = period_length
-      ),
-      rlang::abort(
-        "Invalid Time Unit: Valid Units are `week`, `month`, and `day`"
-      )
+    "date" = create_cutoff.date(
+      data = data,
+      period_length = period_length,
+      date_col = data_cols$date_col,
+      month_col = data_cols$month_col,
+      time_unit = time_unit
     ),
     rlang::abort(
       "Invalid Assignment Method: valid methods are `individual`, `batch`, `date`"
@@ -69,150 +45,110 @@ create_cutoff <- function(
   return(invisible(data))
 }
 #------------------------------------------------------------------------------------------
-
-#' @method create_cutoff day
-#' @title [create_cutoff()] Day Based Periods
+#' @method create_cutoff date
+#' @title [create_cutoff()] Date Based Periods
 #' @inheritParams create_cutoff
 #' @inheritParams cols
 #' @noRd
-#'
-create_cutoff.day <- function(data, date_col, period_length) {
-  start_date <- base::min(data[[date_col$name]])
-  if (data.table::is.data.table(data)) {
-    data[,
-      period_number := base::floor(
-        lubridate::interval(start_date, base::get(date_col$name)) /
-          lubridate::days(1) /
-          period_length
-      ) +
-        1
-    ]
-
-    return(invisible(data))
-  } else {
-    data <- data |>
-      dplyr::mutate(
-        period_number = base::floor(
-          lubridate::interval(start_date, !!date_col$sym) /
-            lubridate::days(1) /
-            period_length
-        ) +
-          1
-      )
-    return(data)
-  }
-}
-#------------------------------------------------------------------
-#' @method create_cutoff week
-#' @title [create_cutoff()] Week Based Periods
-#' @inheritParams create_cutoff
-#' @inheritParams cols
-#' @noRd
-create_cutoff.week <- function(data, date_col, period_length) {
-  if (data.table::is.data.table(data)) {
-    start_date <- base::min(data[, get(date_col$name)])
-
-    data[,
-      period_number := base::floor(
-        lubridate::interval(start_date, base::get(date_col$name)) /
-          lubridate::weeks(1) /
-          period_length
-      ) +
-        1
-    ]
-    data.table::setkey(data, period_number)
-
-    return(invisible(data))
-  } else {
-    start_date <- base::min(dplyr::pull(data, !!date_col$sym), na.rm = TRUE)
-
-    data <- data |>
-      dplyr::mutate(
-        period_number = base::floor(
-          lubridate::interval(start_date, !!date_col$sym) /
-            lubridate::weeks(1) /
-            period_length
-        ) +
-          1
-      )
-    return(data)
-  }
-}
-#------------------------------------------------------------------
-
-#' #' @method create_cutoff month
-#' @title [create_cutoff()] Month Based Periods
-#' @inheritParams create_cutoff
-#' @inheritParams cols
-#' @noRd
-#'
-create_cutoff.month <- function(data, date_col, month_col, period_length) {
+create_cutoff.date <- function(
+  data,
+  time_unit,
+  date_col,
+  month_col = NULL,
+  period_length
+) {
+  time_length <- switch(
+    time_unit,
+    "day" = lubridate::days(1),
+    "week" = lubridate::weeks(1),
+    "month" = base::months(1)
+  )
   start_date <- base::min(data[[date_col$name]])
 
   if (data.table::is.data.table(data)) {
-    first_month <- data[
-      order(base::get(date_col$name)),
-      base::get(month_col$name)
-    ][1]
+    if (time_unit == "month" && !is.null(data[[month_col$name]])) {
+      first_month <- data[
+        order(base::get(date_col$name)),
+        base::get(month_col$name)
+      ][1]
 
-    start_month <- lubridate::ymd(base::paste0(
-      lubridate::year(start_date),
-      "-",
-      first_month,
-      "-01"
-    ))
+      start_month <- lubridate::ymd(base::paste0(
+        lubridate::year(start_date),
+        "-",
+        first_month,
+        "-01"
+      ))
 
-    data[,
-      month_date := lubridate::ymd(
-        base::paste0(
-          lubridate::year(base::get(date_col$name)),
-          "-",
-          base::get(month_col$name),
-          "-01"
+      data[,
+        month_date := lubridate::ymd(
+          base::paste0(
+            lubridate::year(base::get(date_col$name)),
+            "-",
+            base::get(month_col$name),
+            "-01"
+          )
         )
-      )
-    ]
-
-    data[,
-      period_number := base::floor(
-        lubridate::interval(start_month, month_date) /
-          base::months(1) /
-          period_length
-      ) +
-        1
-    ]
-
-    data[, month_date := NULL]
-
-    return(invisible(data))
-  } else {
-    first_month <- data |>
-      dplyr::slice_min(order_by = !!date_col$sym, n = 1, with_ties = FALSE) |>
-      dplyr::pull(!!month_col$sym)
-
-    start_month <- lubridate::ymd(
-      paste0(lubridate::year(start_date), "-", first_month, "-01")
-    )
-    data <- data |>
-      dplyr::mutate(
-        month_date = lubridate::ymd(paste0(
-          lubridate::year(!!date_col$sym),
-          "-",
-          !!month_col$sym,
-          "-01"
-        )),
-        period_number = base::floor(
+      ]
+      data[,
+        period_number := base::floor(
           lubridate::interval(start_month, month_date) /
             base::months(1) /
             period_length
-        )
-      ) |>
-      dplyr::select(-month_date)
+        ) +
+          1
+      ]
 
-    return(data)
+      data[, month_date := NULL]
+    } else {
+      data[,
+        period_number := base::floor(
+          lubridate::interval(start_date, base::get(date_col$name)) /
+            time_length /
+            period_length
+        ) +
+          1
+      ]
+    }
+  } else {
+    if (time_unit == "month" && !is.null(data[[month_col$name]])) {
+      first_month <- data |>
+        dplyr::slice_min(order_by = !!date_col$sym, n = 1, with_ties = FALSE) |>
+        dplyr::pull(!!month_col$sym)
+
+      start_month <- lubridate::ymd(
+        paste0(lubridate::year(start_date), "-", first_month, "-01")
+      )
+      data <- data |>
+        dplyr::mutate(
+          month_date = lubridate::ymd(paste0(
+            lubridate::year(!!date_col$sym),
+            "-",
+            !!month_col$sym,
+            "-01"
+          )),
+          period_number = base::floor(
+            lubridate::interval(start_month, month_date) /
+              base::months(1) /
+              period_length
+          )
+        ) |>
+        dplyr::select(-month_date)
+    } else {
+      data <- data |>
+        dplyr::mutate(
+          period_number = base::floor(
+            lubridate::interval(start_date, !!date_col$sym) /
+              time_length /
+              period_length
+          ) +
+            1
+        )
+    }
   }
+  return(data)
 }
 
+#--------------------------------------------------------------------------
 
 #' @method create_cutoff individual
 #' @title [create_cutoff()] Individual Periods

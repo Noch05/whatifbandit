@@ -183,7 +183,9 @@ check_cols <- function(
 
   if (assignment_method == "date") {
     required_cols <- c(required_cols, "date_col")
-    if (time_unit == "month") {
+    if (
+      time_unit == "month" && !base::is.null(data[[data_cols$month_col$name]])
+    ) {
       required_cols <- c(required_cols, "month_col")
     }
   }
