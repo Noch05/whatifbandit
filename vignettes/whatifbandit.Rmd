@@ -30,7 +30,13 @@ of each treatment. Usually this means that better performing treatments will be 
 -   Simple random assignment produces sample sizes too small to detect the subset of treatment effects the researcher most cares about.
 -   An experiment occurs over multiple time periods.
 
-This vignette introduces the key functions of the `{whatifbandit}` package and how they to use them effectively. All that's required is data from a previous randomized experiment containing information about which treatment each observation was originally assigned to, and the original outcome. For a more detailed view of the exact adaptive procedures and implementation, please refer to the function documentation, and if you encounter any bugs please report them on the package's [GitHub](https://github.com/Noch05/whatifbandit/issues) repository.
+This vignette introduces the key functions of the `{whatifbandit}` package and how 
+to use them effectively. All that's required is data from a previous randomized 
+experiment containing information about which treatment each observation was 
+originally assigned to, and the original outcome. For a more detailed view of 
+the exact adaptive procedures and implementation, please refer to the function 
+documentation, and if you encounter any bugs please report them on the package's 
+[GitHub](https://github.com/Noch05/whatifbandit/issues) repository.
 
 # Core Functionality
 
@@ -38,9 +44,25 @@ This vignette introduces the key functions of the `{whatifbandit}` package and h
 
 ## Multi-Arm-Bandits: Adaptive Assignment
 
-Adaptive experiments are a form of multi-arm bandit (MAB) problem, where each treatment arm has an unknown probability of success, and a balance must be achieved between exploration and exploitation. In an applied setting, we want a design that explores the space of possible treatment options to find the best treatment, then exploit that best treatment. If we do too much exploitation, we have the chance to miss the true best treatment, but if we do too much exploration, then we miss out on the rewards from best treatment. Additionally, these unknown probabilities can change overtime in what is called a non-stationary bandit problem. Solutions to these bandit problems, in the form of decision algorithms, provide the basis for how `{whatifbandit}` simulates an adaptive trial.
+Adaptive experiments are a form of multi-arm bandit (MAB) problem, where each 
+treatment arm has an unknown probability of success, and a balance must be achieved 
+between exploration and exploitation. In an applied setting, we want a design 
+that explores the space of possible treatment options to find the best treatment, 
+then exploit that best treatment. If we do too much exploitation, we have the 
+chance to miss the true best treatment, but if we do too much exploration, then 
+we miss out on rewards from the best treatment. Additionally, these unknown 
+probabilities can change overtime in what is called a non-stationary bandit 
+problem. Solutions to these bandit problems, in the form of decision algorithms, 
+provide the basis for how `{whatifbandit}` simulates an adaptive trial.
 
-`{whatifbandit}` supports 2 decision algorithms, Thompson sampling and upper confidence bound assignment ("UCB1"). Thompson sampling calculates the posterior probability of each treatment being the best treatment arm, and then those probabilities are used to assign the treatment arms in the next wave. In the Bernoulli case implemented in {whatifbandit}`, the posterior probabilities can be calculated from a beta distribution. On the other hand, UCB1 instead calculates an upper confidence bound on the expected reward of each arm, and selects the maximum value [@kuleshov2014; @slivkins2024; @offer-westort2021]. 
+`{whatifbandit}` supports 2 assignment algorithms, Thompson sampling and upper 
+confidence bound assignment ("UCB1"). Thompson sampling calculates the posterior 
+probability of each treatment being the best treatment arm, and then uses those 
+probabilities to assign the treatment arms in the next wave. In the Bernoulli 
+case implemented in `{whatifbandit}`, the posterior probabilities can be calculated 
+from a beta distribution. On the other hand, UCB1 instead calculates an upper 
+confidence bound on the expected reward of each arm, and selects the maximum 
+value [@kuleshov2014; @slivkins2024; @offer-westort2021]. 
 
 Below $\hat{\theta^k_t}$ is the estimated probability of a reward from arm $k$ after wave $t-1$ of the adaptive procedure, and is distributed according to the posterior beta distribution resulting from the number of observed successes and failures arm $k$ has received by wave $t$. Then the probability that treatment $w$ is assigned from the pool of $k$ arms, at time $t$ is the probability that arm $w$ is better than all the other arms. For UCB1, $W_t$ the selected treatment at time $t$, is the treatment arm $k$ which maximizes the sum of the estimated expected reward and the uncertainty bound at time $t$, where $n_{kt}$ is the number of times arm $k$ has been selected up to time $t$.
 
@@ -56,14 +78,34 @@ $$
 
 ## Adaptive Inference
 
-Statistical inference under adaptive designs requires careful consideration. The sample mean is biased, $\left(\bar{x} = \frac{1}{n}\sum_i^n x_i \right)$, because observations are no longer independently identically distributed (i.i.d.). Instead we utilize an augmented inverse probability weighted estimator (AIPW), with a constant allocation of the variance across periods formulated by @hadad2021a, whose formulas we use in the package. These estimators are unbiased and asymptotically normal under adaptive trials, so a normal distribution can be used for parametric inference. Additionally, `{whatifbandit}` also allows for multiple simulations to easily estimate the variance of the procedure, and build an empirical distribution of the unbiased AIPW estimates, instead of just relying on the normal approximation. 
+Statistical inference under adaptive designs requires careful consideration. The 
+sample mean is biased for the true reward probability, because observations are 
+no longer independently identically distributed (i.i.d.). Thus, we utilize an 
+augmented inverse probability weighted estimator (AIPW), with a constant 
+allocation of the variance across periods formulated by @hadad2021a, whose 
+formulas we implement in the package. These estimators are unbiased and 
+asymptotically normal under adaptive trials, so a normal distribution can be 
+used for parametric inference. Additionally, `{whatifbandit}` also allows for 
+multiple simulations to easily estimate the variance of the procedure, and build 
+an empirical distribution of the unbiased AIPW estimates, instead of just relying 
+on the normal approximation. 
 
 The estimator is calculated by weighting the outcome against the probability of being assigned the treatment, and a conditional expectation/regression estimate based on the previous periods of assignment, then aggregating based on an adaptive weight. In the package the conditional expectation is estimated via a grouped mean, and the adaptive weight uses the constant allocation rate described in @hadad2021a. The allocation rate is a function which describes the proportion of the remaining variance that is allocated for next observation. This allocation rate determines how the adaptive weights are used which are necessary to ensure the variance of the estimator converges properly. Additional details about adaptive weights, and allocation functions can be found in @hadad2021a, along with the other specifications they tested. The formulas below are adapted from the @hadad2021a, and showcase the AIPW calculations.
 
-The first formula is the individual AIPW estimate for treatment $w$ and at period $t$, where $\mathbb{I}$ is an indicator function, $e_t(w)$ is the probability of person $t$ being assigned treatment $w$, and $\hat{m}_t(w)$ is conditional expectation/regression estimate based on the previous periods of assignment. The regression estimate at period $t$, is the average of the outcomes under treatment $w$, from periods $t-1$, where $n_{t-1}(w)$ is the number of times treatment $w$ was assigned by period $t-1$.
+The first equation below gives the individual AIPW estimate for treatment $w$ and 
+at period $t$, where $\mathbb{I}$ is an indicator function, $e_t(w)$ is the 
+probability of unit in period $t$ being assigned treatment $w$, and $\hat{m}_t(w)$ 
+is conditional expectation/regression estimate based on the previous periods of 
+assignment. The regression estimate at period $t$, is the average of the outcomes 
+under treatment $w$, from periods $t-1$, where $n_{t-1}(w)$ is the number of times 
+treatment $w$ was assigned by period $t-1$.
 
-The second formula, is the final AIPW estimate for treatment $w$, and is the weighted sum of each individual estimate $\widehat{\Gamma}^{AIPW}_t$ and the adaptive weights $h_t(w)$ for treatment $w$ at time $t$, all divided by the sum of the weights. These adaptive weights are calculated in formula 3, by dividing current probability of being assigned treatment, $e_t(w)$, by the total number of periods, $T$, and taking the square root.
-
+The second equation below gives the final AIPW estimate for treatment $w$, and 
+is the weighted sum of each individual estimate $\widehat{\Gamma}^{AIPW}_t$ and 
+the adaptive weights $h_t(w)$ for treatment $w$ at time $t$, all divided by the 
+sum of the weights. These adaptive weights are calculated in the third equation 
+below by dividing current probability of being assigned treatment, $e_t(w)$, by the total 
+number of periods, $T$, and taking the square root.
 
 $$
 \widehat{\Gamma}^{AIPW}_t = \frac{\mathbb{I}\{W_t = w\}}{e_t(w)} Y_t + \left(1 - \frac{\mathbb{I}\{W_t = w\}}{e_t(w)} \right)\hat{m}_t(w) \tag {Individual} \\
@@ -89,7 +131,10 @@ glimpse(tanf)
 
 # A Single MAB Simulation
 
-`single_mab_simulation()` runs an adaptive-design simulation, where each of its arguments tunes the settings of the simulation. A simulation requres a data frame containing a unique ID for every row, that row's original treatment, and its original outcome. These column names are passed to the function as strings. 
+`single_mab_simulation()` runs an adaptive-design simulation, where each of its 
+arguments tunes the settings of the simulation. A simulation requres a data frame 
+containing a unique ID for every row, that row's original treatment, and its 
+original outcome. These column names are passed to the function as strings. 
 
 ```{r, singlesimnoeval, eval=FALSE}
 sim <- single_mab_simulation(
