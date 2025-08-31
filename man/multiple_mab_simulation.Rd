@@ -125,10 +125,12 @@ not to be changed.}
 An object of class \code{multiple.mab}, containing:
 \itemize{
 \item \verb{final_data_nest:} A tibble or data.table containing the nested tibbles/data.tables from each trial. Only provided when \code{keep_data} is TRUE.
-\item \code{bandits}: A tibble or data.table containing the UCB1 valuess or Thompson sampling posterior distributions for each period. Wide format,
-each row is a period, and each columns is a treatment.
+\item \code{bandits}: A tibble or data.table containing the UCB1 values or Thompson sampling posterior distributions for each period. Wide format,
+each row is a period, and each columns is a treatment. Each row in this table represents the calculation from the given period
+after its values were imputed, so row 2 represents the calculations made in period 3, but represent the impact of period 2's new assignments.
 \item \code{assignment_probs}: A tibble or data.table containing the probability of being assigned each treatment arm at a given period. Wide format,
-each row is a period, and each columns is a treatment.
+each row is a period, and each columns is a treatment. Each row represents the probability of being assigned each treatment at each period, these have not
+been shifted like the bandits table.
 \item \code{estimates}: A tibble or data.table containing the
 AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
 sample means and variances, for each treatment arm. Long format, treatment arm, and estimate type are columns along with the mean

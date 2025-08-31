@@ -113,7 +113,7 @@ a whole number, and that many rows are selected for random assignment.}
 : A named list containing:
 \itemize{
 \item \code{final_data}: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
-\item \code{bandits}: A tibble or data.table containing the UCB1 valuess or Thompson sampling posterior distributions for each period.
+\item \code{bandits}: A tibble or data.table containing the UCB1 values or Thompson sampling posterior distributions for each period.
 \item \code{assignment_probs}: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
 \item \code{estimates}: A tibble or data.table containing the
 AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional

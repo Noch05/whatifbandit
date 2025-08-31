@@ -162,7 +162,7 @@ run_mab_trial <- function(
 #' @returns  A named list containing:
 #' \itemize{
 #' \item `final_data`: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
-#' \item `bandits`: A tibble or data.table containing the UCB1 valuess or Thompson sampling posterior distributions for each period.
+#' \item `bandits`: A tibble or data.table containing the UCB1 values or Thompson sampling posterior distributions for each period.
 #' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
 #' }
 #' @details

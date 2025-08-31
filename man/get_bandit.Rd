@@ -36,7 +36,7 @@ concerns.}
 A list of length 2 containing:
 \itemize{
 \item \code{bandit}: Bandit object, either a named numeric vector of Thompson sampling probabilities or a
-tibble/data.table of UCB1 valuess.
+tibble/data.table of UCB1 values.
 \item \verb{assignment_probabilities:} Named numeric vector with a value for each condition
 containing the probability of being assigned that treatment.}
 }
@@ -44,7 +44,7 @@ containing the probability of being assigned that treatment.}
 Calculates the best treatment for a given period using either a UCB1 or Thompson sampling algorithm.
 Thompson sampling is done using \code{\link[bandit:best_binomial_bandit]{bandit::best_binomial_bandit()}} from
 the \href{https://cran.r-project.org/package=bandit}{bandit}
-package and UCB1 valuess are calculated using the well-defined formula that can be found
+package and UCB1 values are calculated using the well-defined formula that can be found
 in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup (2014)}.
 }
 \details{
