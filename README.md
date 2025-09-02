@@ -151,7 +151,7 @@ future::plan("sequential")
 ## More Information
 For more complete information about the package details, please refer to the vignette tutorial and the full documentation.
 
-If you have any specific questions about the package, feel free to send me an at <noahochital@icloud.com>, and if you encounter
+If you have any specific questions about the package, feel free to send me an email at <noahochital@icloud.com>, and if you encounter
 any bugs, please create an issue on [GitHub](https://github.com/Noch05/whatifbandit/issues) with a reproducible example.
 
 
