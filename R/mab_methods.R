@@ -187,7 +187,7 @@ summary.mab <- function(object, level = 0.95, ...) {
 #' @param type String; Type of plot requested; valid types are:
 #' \itemize{
 #' \item `arm`: Shows Thompson sampling probabilities or UCB1 values over the trial period.
-#' \item `assign`: Shows Assignment Probability/Proportion over trial period.
+#' \item `assign`: Shows cumulative assignment proportions over the trial period.
 #' \item `estimate`: Shows AIPW estimates for success probability with
 #' user specified normal confidence intervals based on their estimated variance.
 #' }
@@ -219,8 +219,8 @@ plot.mab <- function(x, type, level = .95, save = FALSE, path = NULL, ...) {
   rlang::check_installed("ggplot2")
   plot <- switch(
     type,
-    "arm" = plot_arms(x = x, object = "bandits", ...),
-    "assign" = plot_arms(x = x, object = "assignment_probs", ...),
+    "arm" = plot_arms(x = x, ...),
+    "assign" = plot_assign(x = x, ...),
     "estimate" = plot_estimates(x = x, level = level, ...),
     rlang::abort("Invalid Type: Specify `arm`, `assign`, or `estimate`")
   )
@@ -243,25 +243,20 @@ plot.mab <- function(x, type, level = .95, save = FALSE, path = NULL, ...) {
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (to change `scales`, `labels`, `legend`, `theme`, etc.).
 #' @keywords internal
 
-plot_arms <- function(x, object, ...) {
+plot_arms <- function(x, ...) {
   rlang::check_installed("ggplot2")
-  data <- x[[object]]
+  data <- x$bandits
   periods <- base::max(data$period_number)
 
-  if (object == "bandits") {
-    if (x$settings$algorithm == "ucb1") {
-      ylab <- "UCB1 Values"
-      title <- "UCB1 Sampling Over Time"
-    }
-    if (x$settings$algorithm == "thompson") {
-      ylab <- "Posterior Probability of Being Best Arm"
-      title <- "Thompson sampling Over Time"
-    }
+  if (x$settings$algorithm == "ucb1") {
+    ylab <- "UCB1 Values"
+    title <- "UCB1 Sampling Over Time"
   }
-  if (object == "assignment_probs") {
-    ylab <- "Probability of Assignment"
-    title <- "Assignment Probabilities Over Time"
+  if (x$settings$algorithm == "thompson") {
+    ylab <- "Posterior Probability of Being Best Arm"
+    title <- "Thompson sampling Over Time"
   }
+
   data |>
     tidyr::pivot_longer(
       cols = -period_number,
@@ -283,6 +278,43 @@ plot_arms <- function(x, object, ...) {
       y = ylab,
       title = title,
       color = "Treatment Arm"
+    ) +
+    ggplot2::theme_minimal()
+}
+
+#' @name plot_assign
+#' @title Plot Cumulative Assignment Probability Over Time
+#' @returns ggplot object
+#' @param x A `mab` object passed from [plot.mab()]
+#' @inheritParams plot.mab
+#' @returns Minimal ggplot object, that can be customized and added to with `+` (to change `scales`, `labels`, `legend`, `theme`, etc.).
+#' @keywords internal
+plot_assign <- function(x, ...) {
+  data <- x$final_data
+  cumulative_data <- data |>
+    dplyr::select(mab_condition, period_number) |>
+    dplyr::arrange(period_number) |>
+    dplyr::group_by(mab_condition, period_number) |>
+    dplyr::count() |>
+    dplyr::ungroup() |>
+    dplyr::mutate(n = n / nrow(data)) |>
+    dplyr::group_by(mab_condition) |>
+    dplyr::mutate(cum_n = cumsum(n))
+
+  ggplot2::ggplot(
+    cumulative_data,
+    ggplot2::aes(x = period_number, y = cum_n, color = mab_condition)
+  ) +
+    ggplot2::geom_line(...) +
+    ggplot2::labs(
+      x = "Assignment Period",
+      y = "Proportion of Data",
+      title = "Cumulative Assignments Across Trial",
+      color = "Treatment Arm"
+    ) +
+    ggplot2::scale_y_continuous(
+      breaks = base::seq(0, 1, 0.1),
+      limits = base::range(0, 1)
     ) +
     ggplot2::theme_minimal()
 }

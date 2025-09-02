@@ -12,7 +12,7 @@
 \item{type}{String; Type of plot requested; valid types are:
 \itemize{
 \item \code{arm}: Shows Thompson sampling probabilities or UCB1 values over the trial period.
-\item \code{assign}: Shows Assignment Probability/Proportion over trial period.
+\item \code{assign}: Shows cumulative assignment proportions over the trial period.
 \item \code{estimate}: Shows AIPW estimates for success probability with
 user specified normal confidence intervals based on their estimated variance.
 }}
