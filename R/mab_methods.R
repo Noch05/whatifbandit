@@ -254,7 +254,7 @@ plot_arms <- function(x, ...) {
   }
   if (x$settings$algorithm == "thompson") {
     ylab <- "Posterior Probability of Being Best Arm"
-    title <- "Thompson Sampling Over Time"
+    title <- "Thompson sampling Over Time"
   }
 
   data |>

@@ -18,7 +18,6 @@ library(dplyr)
 library(future)
 library(ggplot2)
 library(whatifbandit)
-set.seed(34934501)
 ```
 
 `{whatifbandit}` allows researchers to re-simulate their randomized experiments under adaptive experimental designs. Replicating experiments can be costly and time-consuming, so this simulation tool allows researchers to explore what their results could have looked like under an adaptive experimental design. These re-analyses can inform the planning for future studies, allowing a researcher to justify an adaptive design for a future project by understanding how such designs help meet research and implementation goals.
@@ -274,7 +273,7 @@ Plot methods display the results. These methods use `{ggplot2}` to create visual
 plot(sim, type = "arm")
 ```
 
-`type = "assign"` showcases the cumulative proportion of the data assigned to each arm over the trial period.
+`type = "assign"` showcases the assignment probability for that arm overtime.
 
 ```{r}
 #| fig.width: 5
