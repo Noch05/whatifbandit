@@ -135,6 +135,8 @@ been shifted like the bandits table.
 AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
 sample means and variances, for each treatment arm. Long format, treatment arm, and estimate type are columns along with the mean
 and variance.
+\item \code{assignment_quantities}: A tibble or data.table containing the number of units assigned to each treatment for each simulation in
+the set of repeated simulations.
 \item \code{settings}: A named list of the configuration settings used in the trial.
 }
 }

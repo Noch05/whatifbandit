@@ -26,6 +26,8 @@
 #' AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
 #' sample means and variances, for each treatment arm. Long format, treatment arm, and estimate type are columns along with the mean
 #' and variance.
+#' \item `assignment_quantities`: A tibble or data.table containing the number of units assigned to each treatment for each simulation in
+#' the set of repeated simulations.
 #' \item `settings`: A named list of the configuration settings used in the trial.
 #' }
 #' @example inst/examples/multiple_mab_simulation_example.R
