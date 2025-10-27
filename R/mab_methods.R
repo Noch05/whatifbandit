@@ -238,8 +238,6 @@ plot.mab <- function(x, type, level = .95, save = FALSE, path = NULL, ...) {
 #' @returns ggplot object
 #' @param x A `mab` object passed from [plot.mab()]
 #' @inheritParams plot.mab
-#' @param object String; Location to gather treatment arm data from, either
-#' "bandits" or "assignment_probs".
 #' @returns Minimal ggplot object, that can be customized and added to with `+` (to change `scales`, `labels`, `legend`, `theme`, etc.).
 #' @keywords internal
 

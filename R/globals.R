@@ -58,7 +58,8 @@ utils::globalVariables(c(
   "estimated_probability_of_success",
   "Treatment_Arm",
   "value",
-  "standard_dev"
+  "standard_dev",
+  "cum_n"
 ))
 
 NULL
