@@ -1,4 +1,5 @@
 test_that("BaseR/Dplyr datatype test", {
+  skip_on_cran()
   set.seed(43243)
   required_inputs <- generate_data(100, 3)
   full_args <- required_inputs$full_args
@@ -11,6 +12,7 @@ test_that("BaseR/Dplyr datatype test", {
 })
 
 test_that("Data.table datatype test", {
+  skip_on_cran()
   set.seed(43243)
   required_inputs <- generate_data(100, 3)
   full_args <- required_inputs$full_args

@@ -1,4 +1,5 @@
 test_that("Single Sim Equality Check", {
+  skip_on_cran()
   set.seed(123401)
   required_inputs <- generate_data(100, 3)
   full_args <- required_inputs$full_args
@@ -13,6 +14,7 @@ test_that("Single Sim Equality Check", {
 })
 
 test_that("Multi Sim Equality check", {
+  skip_on_cran()
   set.seed(971834)
   required_inputs <- generate_data(100, 3)
   full_args <- required_inputs$full_args
