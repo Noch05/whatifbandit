@@ -274,7 +274,7 @@ Plot methods display the results. These methods use `{ggplot2}` to create visual
 plot(sim, type = "arm")
 ```
 
-`type = "assign"` showcases the assignment probability for that arm overtime.
+`type = "assign"` showcases the cumulative proportion of the data, assigned to each arm over time
 
 ```{r}
 #| fig.width: 5
