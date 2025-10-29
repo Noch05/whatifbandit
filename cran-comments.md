@@ -5,7 +5,7 @@
 * This is a new release.
 
 ## Resubmission
-This is a resubmission. In I have:
+This is a resubmission. I have:
 
 * Removed the unecessary LICENSE file
 * Made the GitHub Repo public so hyperlinks work approprietly
