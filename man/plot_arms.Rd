@@ -10,9 +10,6 @@ plot_arms(x, ...)
 \item{x}{A \code{mab} object passed from \code{\link[=plot.mab]{plot.mab()}}}
 
 \item{...}{Arguments to pass to \verb{ggplot2::geom_*} function (e.g. \code{color}, \code{linewidth}, \code{alpha}, \code{bins} etc.).}
-
-\item{object}{String; Location to gather treatment arm data from, either
-"bandits" or "assignment_probs".}
 }
 \value{
 ggplot object
