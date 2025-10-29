@@ -19,7 +19,7 @@ Description: Simulates the results of completed randomized controlled
     strategies for assigning treatment arms. The methods used in
     simulation were inspired by Offer-Westort et al.  (2021)
     <doi:10.1111/ajps.12597>.
-License: GPL (>= 3) + file LICENSE
+License: GPL (>= 3)
 URL: https://github.com/Noch05/whatifbandit
 BugReports: https://github.com/Noch05/whatifbandit/issues
 Depends: 
