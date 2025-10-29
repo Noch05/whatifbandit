@@ -63,24 +63,17 @@ remotes::install_github("Noch05/whatifbandit")
 ```
 sim <- single_mab_simulation(
   data = tanf,
-  assignment_method = "Date",
-  time_unit = "Month",
-  period_length = 1,
-  algorithm = "Thompson",
-  conditions = levels(tanf$condition),
-  whole_experiment = FALSE,
+  assignment_method = "Batch",
+  period_length = 1000,
+  algorithm = "UCB1",
+  whole_experiment = TRUE, 
   perfect_assignment = TRUE,
   prior_periods = "All",
-  blocking = TRUE, 
-  block_cols = c("service_center"),
+  blocking = FALSE,
   data_cols = c(
     id_col = "ic_case_id",
-    date_col = "appt_date",
     success_col = "success",
-    condition_col = "condition",
-    month_col = "recert_month",
-    success_date_col = "date_of_recert",
-    assignment_date_col = "letter_sent_date"
+    condition_col = "condition"
   )
 )
 ```
@@ -96,7 +89,6 @@ multiple_sims <- multiple_mab_simulation(
     time_unit = "Month",
     period_length = 1,
     algorithm = "Thompson",
-    conditions = levels(tanf$condition),
     whole_experiment = FALSE, 
     perfect_assignment = TRUE,
     prior_periods = "All",
@@ -111,7 +103,7 @@ multiple_sims <- multiple_mab_simulation(
       success_date_col = "date_of_recert",
       assignment_date_col = "letter_sent_date"
     ),
-    keep_data = FALSE, times = 100, seeds = seeds
+    keep_data = TRUE, times = 100, seeds = seeds
   )
 ```
 ## Running in Multiple Trials in Parallel
@@ -129,7 +121,6 @@ multiple_sims <- multiple_mab_simulation(
     time_unit = "Month",
     period_length = 1,
     algorithm = "Thompson",
-    conditions = levels(tanf$condition),
     whole_experiment = FALSE, 
     perfect_assignment = TRUE,
     prior_periods = "All",
@@ -144,7 +135,7 @@ multiple_sims <- multiple_mab_simulation(
       success_date_col = "date_of_recert",
       assignment_date_col = "letter_sent_date"
     ),
-    keep_data = FALSE, times = 100, seeds = seeds
+    keep_data = TRUE, times = 100, seeds = seeds
   )
 future::plan("sequential")
 ```
