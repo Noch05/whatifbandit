@@ -1,7 +1,7 @@
 # whatifbandit
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/Noch05/whatifbandit/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Noch05/whatifbandit/actions/workflows/R-CMD-check.yaml)
-[![codecov](https://codecov.io/gh/Noch05/whatifbandit/branch/main/graph/badge.svg?token=B51SYMH66I)](https://codecov.io/gh/Noch05/whatifbandit)
+[![codecov](https://codecov.io/gh/Noch05/whatifbandit/branch/main/graph/badge.svg?token=B51SYMH66I)](https://app.codecov.io/gh/Noch05/whatifbandit)
 <!-- badges: end -->
 
 
