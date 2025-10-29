@@ -46,12 +46,10 @@ documentation, and if you encounter any bugs please report them on the package's
 
 Adaptive experiments are a form of multi-arm bandit (MAB) problem, where each 
 treatment arm has an unknown probability of success, and a balance must be achieved 
-between exploration and exploitation. In an applied setting, we want a design 
-that explores the space of possible treatment options to find the best treatment, 
-then exploit that best treatment. If we do too much exploitation, we have the 
-chance to miss the true best treatment, but if we do too much exploration, then 
-we miss out on rewards from the best treatment. Additionally, these unknown 
-probabilities can change overtime in what is called a non-stationary bandit 
+between exploration and exploitation. In an applied setting, we want a design can
+adequately explore the space of possible treatments, and find the best treatment to exploit.
+If the decision algorithm is quick to exploit a single treatment, then there is a high chance that
+the true best treatment is missed, but if the decision algorithm explores too much, then we miss out on the rewards from exploiting the current treatment we believe is the best. Additionally, these unknown probabilities can change overtime in what is called a non-stationary bandit 
 problem. Solutions to these bandit problems, in the form of decision algorithms, 
 provide the basis for how `{whatifbandit}` simulates an adaptive trial.
 
@@ -64,13 +62,14 @@ from a beta distribution. On the other hand, UCB1 instead calculates an upper
 confidence bound on the expected reward of each arm, and selects the maximum 
 value [@kuleshov2014; @slivkins2024; @offer-westort2021]. 
 
-In a multi-arm experiment with $T$ time periods, let the set of potential treatment arms be denoted by $\mathcal{K}$. At each time period $t \in \{1, 2, ..., T\}$, a treatment arm $W_t \in \mathcal{K} $ needs to be selected for all the treatments. 
+In a multi-arm experiment with $T$ time periods, let the set of potential treatment arms be denoted $\mathcal{K}$. At each time period $t \in \{1, 2, ..., T\}$, a treatment arm $W_t \in \mathcal{K}$ needs to be selected.
 
-In Thompson sampling, this involves finding the arm $w \in \mathcal{K}$ with the highest probability of being the best treatment arm. When outcomes are binary, the probability of a reward from any arm $k \in \mathcal{K}$ after wave $t-1$ of the adaptive procedure, denoted $\theta^k_t$, follows a beta distribution according to the number of observed success and failures the treatment has received up to that point. These cumulative successes and failures are for each arm are denoted, $\text{success}_{kt}$ and $\text{failures}_{kt}$ respectively. Now instead of choosing the arm $w$ which has the highest probability of being the best as the one $W_t$, Thompson sampling uses these probabilities to assign new treatments, so the probability that each arm $w$ is the best becomes the probability that it will be assigned from the set of $\mathcal{K}$ arms at time $t$.
+In Thompson sampling, this involves finding the arm $k \in \mathcal{K}$ with the highest probability of being the best treatment arm. When outcomes are binary, the probability of a reward from any arm $k \in \mathcal{K}$ after wave $t-1$ of the adaptive procedure, denoted $\theta^k_t$, follows a beta distribution according to the number of observed success and failures the treatment has received up to that point. These cumulative successes and failures are for each arm are denoted, $\text{success}_{kt}$ and $\text{failures}_{kt}$ respectively. Now instead of choosing the arm $k$ which has the highest probability of being the best as the one and only $W_t$, Thompson sampling uses these probabilities to assign new treatments, so the probability that each arm $k$ is the best becomes the probability that it will be assigned from the set of $\mathcal{K}$ arms at time $t$. For a given treatment arm $w \in \mathcal{K}$, this probability is represented below:
 
 $$
 P(W_t = w) = P\left(\theta_t^w > \theta_t^k,  \ \forall k \in \mathcal{K} \setminus \{w\} \mid \ \theta^k_t \sim \text{Beta}(1+\text{success}_{kt}, 1 + \text{failures}_{kt}) \ \forall k \in \mathcal{K}\right)
 $$
+
 For UCB1 only 1 treatment arm is selected at any time $t$. $W_t$, the selected treatment at time $t$, is the treatment arm $k \in \mathcal{K}$ which maximizes the sum of the estimated expected reward and the uncertainty bound at time $t$, where $n_{kt}$ is the number of times arm $k$ has been selected up to time $t$.
 
 $$
