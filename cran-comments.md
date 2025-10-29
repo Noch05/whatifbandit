@@ -3,3 +3,9 @@
 0 errors | 0 warnings | 1 note
 
 * This is a new release.
+
+## Resubmission
+This is a resubmission. In I have:
+
+* Removed the unecessary LICENSE file
+* Made the GitHub Repo public so hyperlinks work approprietly
