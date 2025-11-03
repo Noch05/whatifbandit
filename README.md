@@ -52,11 +52,12 @@ and a full suite of generic functions to accelerate post-simulation analysis.
 
 ## Installation
 ```
-# Install From CRAN
+# Install from CRAN
 install.packages("whatifbandit")
 
-# Install most recent version from GitHub
-remotes::install_github("Noch05/whatifbandit")
+# Install the latest stable version from GitHub
+remotes::install_github("Noch05/whatifbandit@v0.3.0")
+
 ```
 ## Usage 
 ### Running 1 Trial
