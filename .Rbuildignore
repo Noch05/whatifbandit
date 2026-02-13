@@ -9,3 +9,4 @@
 ^NEWS_files/
 ^vignettes/whatifbandit_files/
 ^CRAN-SUBMISSION$
+^.gitattributes$
