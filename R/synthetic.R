@@ -10,7 +10,7 @@
 #' @param dates_of_assignment Optional `Date` vector containing dates of assignment for each observation.
 #'  If its length is less than `n` provided dates will be recylced.
 #' @param time_model Optional user-specified function that models the time from treatment until success for successful observations.
-#'   The function must return a `period` object. It should accept treatment assignments and outcomes as its first two arguments,
+#'   The function must return a `period` object. It should accept `n`, treatment assignments and outcomes as its first 3 arguments,
 #'   respectively. Additional arguments may be supplied via `...`.
 #' @param ... Additional arguments to `time_model`.
 #' @returns `tibble` or `data.table` with `n` rows, containing the following columns:
@@ -19,8 +19,10 @@
 #' \item `treatments`: Assigned treatment for each observation.
 #' \item `success`: Whether or not treatment was successful for each observation.
 #' \item `success_dates`: Dates of success for each observation calculated as `assignment_dates + time_model(treatments, success, ...)`.
+#' \item `id`: Row number.
 #' }
 #' @export
+#' @example inst/examples/generate_rct.bernoulli_example.R
 
 generate_rct.bernoulli <- function(
   n,
@@ -32,33 +34,48 @@ generate_rct.bernoulli <- function(
   time_model = NULL,
   ...
 ) {
-  assign_func <- if (simple) randomizr::simple_ra else randomizr::complete_ra
-
-  treatments <- assign_func(N = n, num_arms = t, conditions = names(p))
-  success <- rbinom(n, 1, prob = p[assignments])
-
-  result_func <- if (!dt) tibble::tibble else data.table::data.table
-
-  assignment_dates <- if (is.null(dates_of_assignment)) {
-    NULL
-  } else if (length(dates_of_assignment) < n) {
-    sort(rep_len(dates_of_assignment, n))
+  assign_func <- if (simple) {
+    randomizr::simple_ra
   } else {
-    dates_of_assignment
+    randomizr::complete_ra
   }
 
-  success_dates <- if (is.null(time_model)) {
-    NULL
-  } else {
-    assignment_dates + time_model(treatments, success, ...)
+  if (is.null(names(p))) {
+    names(p) <- paste0("T", seq_along(p))
   }
 
-  return(
-    result_func(
-      assignment_dates,
-      treatments,
-      success,
-      success_dates
-    )
+  treatments <- assign_func(
+    N = n,
+    num_arms = length(p),
+    conditions = names(p)
   )
+
+  success <- rbinom(n, 1, prob = p[treatments])
+
+  assignment_dates <- NULL
+  if (!is.null(dates_of_assignment)) {
+    assignment_dates <- if (length(dates_of_assignment) < n) {
+      sort(rep_len(dates_of_assignment, n))
+    } else {
+      dates_of_assignment
+    }
+  }
+
+  success_dates <- NULL
+  if (!is.null(time_model) && !is.null(assignment_dates)) {
+    success_dates <- assignment_dates +
+      time_model(n, treatments, success, ...)
+  }
+
+  result_func <- if (dt) data.table::data.table else tibble::tibble
+
+  result <- result_func(
+    assignment_date = assignment_dates,
+    treatment = treatments,
+    success = success,
+    success_date = success_dates,
+    id = 1:n
+  )
+
+  return(result)
 }
