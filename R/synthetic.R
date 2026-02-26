@@ -38,7 +38,7 @@ generate_rct.bernoulli <- function(
     rlang::abort(
       c(
         "all `p` must be probabilities between 0 and 1",
-        "x" = paste0("You passed:", paste0(p, collapse = ","))
+        "x" = base::paste0("You passed:", base::paste0(p, collapse = ","))
       )
     )
   }
@@ -50,13 +50,13 @@ generate_rct.bernoulli <- function(
   }
 
   if (is.null(names(p))) {
-    names(p) <- paste0("T", seq_along(p))
+    base::names(p) <- base::paste0("T", base::seq_along(p))
   }
 
   treatments <- assign_func(
     N = n,
-    prob_each = rep(1 / length(p), length(p)),
-    conditions = names(p)
+    prob_each = base::rep(1 / base::length(p), base::length(p)),
+    conditions = base::names(p)
   )
 
   success <- stats::rbinom(n, 1, prob = p[treatments])

@@ -316,25 +316,25 @@ check_dt_tibble_equal <- function(full_args, static_args, type, seed) {
 # Potential Time Models
 time_model_extended <- function(n, t, s) {
   time <- data.table::fcase(
-    t == "T1" , rexp(n, rate = 5)                   ,
-    t == "T2" , rgamma(n, shape = 2, rate = 2)      ,
-    t == "T3" , rweibull(n, shape = 3, scale = 4)   ,
-    t == "T4" , rlnorm(n, meanlog = 1, sdlog = 0.5) ,
-    t == "T5" , runif(n, min = 0, max = 5)          ,
-    t == "T6" , rchisq(n, df = 4)
+    t == "T1" , stats::rexp(n, rate = 5)                   ,
+    t == "T2" , stats::rgamma(n, shape = 2, rate = 2)      ,
+    t == "T3" , stats::rweibull(n, shape = 3, scale = 4)   ,
+    t == "T4" , stats::rlnorm(n, meanlog = 1, sdlog = 0.5) ,
+    t == "T5" , stats::runif(n, min = 0, max = 5)          ,
+    t == "T6" , stats::rchisq(n, df = 4)
   )
 
-  time <- ifelse(s == 1, round(time) * days(3), NA)
+  time <- dplyr::if_else(s == 1, round(time) * lubridate::days(3), NA)
   return(time)
 }
 time_model_alt <- function(n, t, s) {
-  arm_index <- as.numeric(sub("T", "", t))
+  arm_index <- base::as.numeric(sub("T", "", t))
   mu <- arm_index * 0.5 + 1
 
   time <- rnorm(n, mean = mu, sd = 1)
-  time <- abs(time)
+  time <- base::abs(time)
 
-  time <- ifelse(s == 1, ceiling(time) * days(7), NA)
+  time <- dplyr::if_else(s == 1, base::ceiling(time) * lubridate::days(7), NA)
   return(time)
 }
 
@@ -344,13 +344,13 @@ generate_random_params <- function() {
   n_arms <- sample(2:6, 1)
 
   list(
-    n = sample(c(1000, 5000, 10000, 20000), 1),
-    p = runif(n_arms, min = 0.3, max = 0.7),
-    months_out = sample(c(6, 12, 24, 36), 1),
-    perfect_assignment = sample(c(TRUE, FALSE), 1),
-    dt = sample(c(TRUE, FALSE), 1),
-    simple = sample(c(TRUE, FALSE), 1),
-    alg = sample(c("Thompson", "UCB1"), 1),
+    n = base::sample(c(1000, 5000, 10000, 20000), 1),
+    p = stats::runif(n_arms, min = 0.3, max = 0.7),
+    months_out = base::sample(c(6, 12, 24, 36), 1),
+    perfect_assignment = base::sample(c(TRUE, FALSE), 1),
+    dt = base::sample(c(TRUE, FALSE), 1),
+    simple = base::sample(c(TRUE, FALSE), 1),
+    alg = base::sample(c("Thompson", "UCB1"), 1),
     time_model_fn = sample(
       list(time_model_extended, time_model_alt),
       1
@@ -366,7 +366,7 @@ run_simulation <- function(params) {
     p = params$p,
     simple = params$simple,
     dt = params$dt,
-    dates_of_assignment = ymd("2023-01-01") +
+    dates_of_assignment = lubridate::ymd("2023-01-01") +
       0:(params$months_out - 1) * months(1),
     time_model = params$time_model_fn
   ) |>

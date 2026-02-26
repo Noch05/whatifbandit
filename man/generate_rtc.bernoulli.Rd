@@ -7,7 +7,6 @@
 \usage{
 generate_rct.bernoulli(
   n,
-  t,
   p,
   simple = TRUE,
   dt = FALSE,
@@ -19,9 +18,8 @@ generate_rct.bernoulli(
 \arguments{
 \item{n}{Number of observations to generate.}
 
-\item{t}{Number of treatments.}
-
-\item{p}{Numeric vector of length \code{t} containing true probabilities of success for each treatment. \code{names(p)} provide the names of the treatment groups.}
+\item{p}{Numeric vector containing true probabilities of success for each treatment.
+\code{names(p)} provide the names of the treatment groups and \code{length(p)} is the number of treatment arms.}
 
 \item{dt}{Logical; whether to return a \code{data.table} or a \code{tibble}. Default is \code{FALSE}}
 
@@ -53,11 +51,11 @@ based on specified input parameters.
 \examples{
 # 2-Arm Design; Complete Randomization
 
-generate_rct.bernoulli(n = 1000, t = 2, p = c(0.3, 0.7), simple = FALSE)
+generate_rct.bernoulli(n = 1000, p = c(0.3, 0.7), simple = FALSE)
 
 # Linear relationships in treatment
 
-generate_rct.bernoulli(n = 1000, t = 10, p = (1:10) * 0.1 - 0.05)
+generate_rct.bernoulli(n = 1000, p = (1:10) * 0.1 - 0.05)
 
 # Modelling Success Dates
 
@@ -77,7 +75,6 @@ time_model <- function(n, t, s) {
 set.seed(100)
 result <- generate_rct.bernoulli(
   n = 10000,
-  t = 10,
   p = c(0.3, 0.6, 0.45),
   dates_of_assignment = lubridate::ymd("2023-04-15") +
     0:24 * months(1),
