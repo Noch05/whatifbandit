@@ -3,8 +3,8 @@
 #' @description Generates compatible `tibble` or `data.table` for use in `single_mab_simulation()`
 #' based on specified input parameters.
 #' @param n Number of observations to generate.
-#' @param t Number of treatments.
-#' @param p Numeric vector of length `t` containing true probabilities of success for each treatment. `names(p)` provide the names of the treatment groups.
+#' @param p Numeric vector containing true probabilities of success for each treatment.
+#' `names(p)` provide the names of the treatment groups and `length(p)` is the number of treatment arms.
 #' @param dt Logical; whether to return a `data.table` or a `tibble`. Default is `FALSE`
 #' @param simple; Logical; Whether to use simple random assignment or complete random assignment. Default is `TRUE`
 #' @param dates_of_assignment Optional `Date` vector containing dates of assignment for each observation.
@@ -26,7 +26,6 @@
 
 generate_rct.bernoulli <- function(
   n,
-  t,
   p,
   simple = TRUE,
   dt = FALSE,
@@ -34,11 +33,11 @@ generate_rct.bernoulli <- function(
   time_model = NULL,
   ...
 ) {
-  check_posint(n, t)
-  if (!all(p < 1 & p > 0)) {
+  check_posint(n)
+  if (any(p > 1 | p < 0)) {
     rlang::abort(
-      list(
-        "`p` must be a probability between 0 and 1",
+      c(
+        "all `p` must be probabilities between 0 and 1",
         "x" = paste0("You passed:", paste0(p, collapse = ","))
       )
     )
@@ -56,16 +55,16 @@ generate_rct.bernoulli <- function(
 
   treatments <- assign_func(
     N = n,
-    num_arms = length(p),
+    prob_each = rep(1 / length(p), length(p)),
     conditions = names(p)
   )
 
-  success <- rbinom(n, 1, prob = p[treatments])
+  success <- stats::rbinom(n, 1, prob = p[treatments])
 
   assignment_dates <- NULL
   if (!is.null(dates_of_assignment)) {
     assignment_dates <- if (length(dates_of_assignment) < n) {
-      sort(rep_len(dates_of_assignment, n))
+      base::sort(base::rep_len(dates_of_assignment, n))
     } else {
       dates_of_assignment
     }

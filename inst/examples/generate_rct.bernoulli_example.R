@@ -1,10 +1,10 @@
 # 2-Arm Design; Complete Randomization
 
-generate_rct.bernoulli(n = 1000, t = 2, p = c(0.3, 0.7), simple = FALSE)
+generate_rct.bernoulli(n = 1000, p = c(0.3, 0.7), simple = FALSE)
 
 # Linear relationships in treatment
 
-generate_rct.bernoulli(n = 1000, t = 10, p = (1:10) * 0.1 - 0.05)
+generate_rct.bernoulli(n = 1000, p = (1:10) * 0.1 - 0.05)
 
 # Modelling Success Dates
 
@@ -24,7 +24,6 @@ time_model <- function(n, t, s) {
 set.seed(100)
 result <- generate_rct.bernoulli(
   n = 10000,
-  t = 10,
   p = c(0.3, 0.6, 0.45),
   dates_of_assignment = lubridate::ymd("2023-04-15") +
     0:24 * months(1),

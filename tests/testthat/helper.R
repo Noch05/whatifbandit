@@ -103,6 +103,7 @@ generate_data <- function(n, k) {
   ))
 }
 
+# Checking Functions
 control_augment_checks <- function(output) {
   col <- paste0(output$settings$control, "_assign_prob")
   assign_probs <- output$assignment_probs |>
@@ -310,4 +311,81 @@ check_dt_tibble_equal <- function(full_args, static_args, type, seed) {
       }
     })
   })
+}
+
+# Potential Time Models
+time_model_extended <- function(n, t, s) {
+  time <- data.table::fcase(
+    t == "T1" , rexp(n, rate = 5)                   ,
+    t == "T2" , rgamma(n, shape = 2, rate = 2)      ,
+    t == "T3" , rweibull(n, shape = 3, scale = 4)   ,
+    t == "T4" , rlnorm(n, meanlog = 1, sdlog = 0.5) ,
+    t == "T5" , runif(n, min = 0, max = 5)          ,
+    t == "T6" , rchisq(n, df = 4)
+  )
+
+  time <- ifelse(s == 1, round(time) * days(3), NA)
+  return(time)
+}
+time_model_alt <- function(n, t, s) {
+  arm_index <- as.numeric(sub("T", "", t))
+  mu <- arm_index * 0.5 + 1
+
+  time <- rnorm(n, mean = mu, sd = 1)
+  time <- abs(time)
+
+  time <- ifelse(s == 1, ceiling(time) * days(7), NA)
+  return(time)
+}
+
+# Generating Random Parameters
+
+generate_random_params <- function() {
+  n_arms <- sample(2:6, 1)
+
+  list(
+    n = sample(c(1000, 5000, 10000, 20000), 1),
+    p = runif(n_arms, min = 0.3, max = 0.7),
+    months_out = sample(c(6, 12, 24, 36), 1),
+    perfect_assignment = sample(c(TRUE, FALSE), 1),
+    dt = sample(c(TRUE, FALSE), 1),
+    simple = sample(c(TRUE, FALSE), 1),
+    alg = sample(c("Thompson", "UCB1"), 1),
+    time_model_fn = sample(
+      list(time_model_extended, time_model_alt),
+      1
+    )[[1]]
+  )
+}
+
+# Running Generate Data then mab
+
+run_simulation <- function(params) {
+  generate_rct.bernoulli(
+    n = params$n,
+    p = params$p,
+    simple = params$simple,
+    dt = params$dt,
+    dates_of_assignment = ymd("2023-01-01") +
+      0:(params$months_out - 1) * months(1),
+    time_model = params$time_model_fn
+  ) |>
+    single_mab_simulation(
+      assignment_method = "date",
+      time_unit = "month",
+      period_length = 3,
+      algorithm = params$alg,
+      prior_periods = "All",
+      perfect_assignment = params$perfect_assignment,
+      whole_experiment = FALSE,
+      blocking = FALSE,
+      data_cols = c(
+        id_col = "id",
+        success_col = "success",
+        condition_col = "treatment",
+        date_col = "assignment_date",
+        assignment_date_col = "assignment_date",
+        success_date_col = "success_date"
+      )
+    )
 }
