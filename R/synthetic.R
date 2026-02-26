@@ -34,6 +34,16 @@ generate_rct.bernoulli <- function(
   time_model = NULL,
   ...
 ) {
+  check_posint(n, t)
+  if (!all(p < 1 & p > 0)) {
+    rlang::abort(
+      list(
+        "`p` must be a probability between 0 and 1",
+        "x" = paste0("You passed:", paste0(p, collapse = ","))
+      )
+    )
+  }
+
   assign_func <- if (simple) {
     randomizr::simple_ra
   } else {
