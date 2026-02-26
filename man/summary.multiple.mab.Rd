@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiple_mab_methods.R
 \name{summary.multiple.mab}
 \alias{summary.multiple.mab}
-\title{Summary Generic For "multiple.mab" Class}
+\title{Summary Generic For \code{multiple.mab} Class}
 \usage{
 \method{summary}{multiple.mab}(object, level = 0.95, ...)
 }

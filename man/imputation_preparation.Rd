@@ -15,16 +15,16 @@ imputation_preparation(
 )
 }
 \arguments{
-\item{current_data}{A tibble/data.table with only observations from the current sampling period.}
+\item{current_data}{A \code{tibble} or \code{data.table} with only observations from the current sampling period.}
 
 \item{block_cols}{A character vector of variables to block by. This vector should not be named.}
 
 \item{imputation_information}{Object created by \code{\link[=imputation_precompute]{imputation_precompute()}} containing the conditional means and success dates
 for each treatment block to impute from.}
 
-\item{whole_experiment}{Logical; if TRUE, uses all past experimental data for imputing outcomes.
-If FALSE, uses only data available up to the current period. In large datasets or with a high number
-of periods, setting this to FALSE can be more computationally intensive, though not a significant
+\item{whole_experiment}{Logical; if \code{TRUE}, uses all past experimental data for imputing outcomes.
+If \code{FALSE}, uses only data available up to the current period. In large datasets or with a high number
+of periods, setting this to \code{FALSE} can be more computationally intensive, though not a significant
 contributor to total run time.}
 
 \item{blocking}{Logical; whether or not to use treatment blocking. Treatment blocking is used to ensure an even-enough
@@ -32,9 +32,9 @@ distribution of treatment conditions across blocks. For example, blocking by gen
 split treatments evenly not just throughout the sample (so for 4 arms, 25-25-25-25), but also within each block, so 25\% of men
 would receive each treatment and 25\% of women the same.}
 
-\item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
+\item{perfect_assignment}{Logical; if \code{TRUE}, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
-If FALSE, hides outcomes not yet theoretically observed, based
+If \code{FALSE}, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.
 This is useful when simulating batch-based assignment where treatments were assigned
 on a given day whether or not all the information from a prior batch was available and
@@ -45,8 +45,8 @@ you have exact dates treatments were assigned.}
 \value{
 A named list containing:
 \itemize{
-\item \code{current_data}: A tibble/data.table containing \code{impute_block} column to guide the outcome imputations
-\item \code{impute_success}: A tibble/data.table object containing probabilities of success by \code{treatment_block} used to impute
+\item \code{current_data}: A \code{tibble} or \code{data.table} containing \code{impute_block} column to guide the outcome imputations
+\item \code{impute_success}: A \code{tibble} or \code{data.table} object containing probabilities of success by \code{treatment_block} used to impute
 outcomes. Subsetted from the \code{\link[=imputation_precompute]{imputation_precompute()}} output.
 \item \code{impute_dates}: Named date vector by treatment condition, containing the dates of success
 to impute if perfect_assignment is FALSE. Subsetted from the \code{\link[=imputation_precompute]{imputation_precompute()}} output.}

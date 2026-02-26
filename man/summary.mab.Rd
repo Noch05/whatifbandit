@@ -2,7 +2,7 @@
 % Please edit documentation in R/mab_methods.R
 \name{summary.mab}
 \alias{summary.mab}
-\title{Summary Generic For "mab" Class}
+\title{Summary Generic For \code{mab} Class}
 \usage{
 \method{summary}{mab}(object, level = 0.95, ...)
 }

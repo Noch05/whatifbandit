@@ -13,8 +13,8 @@ the \code{verbose} argument passed from higher functions.}
 \item{message}{The message to be printed to screen, as a string.}
 }
 \value{
-Text output of \code{message} to the console when \code{log} is TRUE. If
-\code{log} is FALSE, returns nothing.
+Text output of \code{message} to the console when \code{log = TRUE}. If
+\code{log = FALSE}, returns nothing.
 }
 \description{
 Shorthand Function for checking \code{verbose} and then printing if TRUE

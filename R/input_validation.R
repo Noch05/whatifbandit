@@ -3,7 +3,7 @@
 #' @description This function checks to ensure that all required arguments
 #' have been properly passed to the function before continuing with the simulation. When
 #' errors are thrown, user-friendly messages are provided to indicate which argument
-#' was misspecified. Additionally, when `verbose` = TRUE, additional warning
+#' was misspecified. Additionally, when `verbose = TRUE`, additional warning
 #' messages may be shown if unnecessary arguments are passed.
 #' @inheritParams single_mab_simulation
 #' @inheritParams cols
@@ -113,7 +113,7 @@ validate_inputs <- function(
 #' @inheritParams cols
 #' @returns Throws an error if columns which are required have not been declared
 #' or are not present in the data, or are the wrong primitive data type. Additionally throws warning messages,
-#' if unnecessary columns have been provided, only when `verbose` is TRUE.
+#' if unnecessary columns have been provided, only when `verbose = TRUE`.
 #' @keywords internal
 #'
 check_cols <- function(
@@ -368,7 +368,7 @@ posint <- function(x) {
 #' @returns Throws an error if the data does not meet the specifications
 #' of the trial based on user settings.
 #' @description Helper to [validate_inputs()]. This function accepts the data and checks
-#' whether it has Unique ID's whether the period length is valid.
+#' whether it has unique ID's whether the period length is valid.
 #' @inheritParams single_mab_simulation
 #' @keywords internal
 check_data <- function(

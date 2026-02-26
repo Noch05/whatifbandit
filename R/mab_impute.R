@@ -7,20 +7,20 @@
 #' @inheritParams single_mab_simulation
 #' @returns A named list containing:
 #' \itemize{
-#' \item `original_summary`: The tibble(s)/data.table(s) containing the probability of success for each
+#' \item `original_summary`: The `tibble`(s) or `data.table`(s) containing the probability of success for each
 #' treatment block, at each period.
-#' \item `dates_summary`: A tibble/data.table containing the average success date for
+#' \item `dates_summary`: A `tibble` or `data.table` containing the average success date for
 #' each treatment block at each treatment period.
 #' }
 #' @details
 #' [imputation_precompute()] is an optimization, meant to reduce the cost of calculating these variables
-#' within the simulation loop. When `whole_experiment` is TRUE, `original_summary` is a single tibble/data.table,
-#' and used through the simulation. When `whole_experiment` is FALSE, `original_summary` is a list of tibbles/data.tables,
-#' each containing the cumulative probabilities of all periods up to the index i.
+#' within the simulation loop. When `whole_experiment = TRUE`, `original_summary` is a single `tibble` or `data.table`,
+#' and used through the simulation. When `whole_experiment = FALSE`, `original_summary` is a list of `tibble`s or `data.table`s,
+#' each containing the cumulative probabilities of all periods up to the index `i`.
 #'
-#' If `perfect_assignment` is FALSE, `dates_summary` is not calculated, and is NULL.
+#' If `perfect_assignment = FALSE`, `dates_summary` is not calculated, and is `NULL`.
 #'
-#' No covariates are used in the calculation, these are all simply grouped averages.
+#' No covariates are used in the calculation, these are all simply grouped means.
 #' @keywords internal
 
 imputation_precompute <- function(
@@ -103,9 +103,9 @@ imputation_precompute.data.frame <- function(
 }
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-#' @method imputation_precompute data.table
+#' @method imputation_precompute `data.table`
 #' @title
-#' [imputation_precompute()] for data.tables
+#' [imputation_precompute()] for `data.table`s
 #' @inheritParams imputation_precompute
 #' @noRd
 
@@ -215,8 +215,8 @@ imputation_precompute.data.table <- function(
 #' @inheritParams impute_success
 #' @returns A named list containing:
 #' \itemize{
-#' \item `current_data`: A tibble/data.table containing `impute_block` column to guide the outcome imputations
-#' \item `impute_success`: A tibble/data.table object containing probabilities of success by `treatment_block` used to impute
+#' \item `current_data`: A `tibble` or `data.table` containing `impute_block` column to guide the outcome imputations
+#' \item `impute_success`: A `tibble` or `data.table` object containing probabilities of success by `treatment_block` used to impute
 #' outcomes. Subsetted from the [imputation_precompute()] output.
 #' \item `impute_dates`: Named date vector by treatment condition, containing the dates of success
 #' to impute if perfect_assignment is FALSE. Subsetted from the [imputation_precompute()] output.}
@@ -298,7 +298,7 @@ imputation_preparation <- function(
 }
 #-------------------------------------------------------------------------------
 #' Checking Imputation Info
-#' @description Subsets or adds to the tibble/data.frame created by [imputation_precompute()],
+#' @description Subsets or adds to the `tibble`/`data.table` created by [imputation_precompute()],
 #' and sorts it to ensure compatibility with [randomizr::block_ra()].
 #'
 #' @name check_impute
@@ -368,8 +368,8 @@ check_impute.data.frame <- function(
   return(imputation_information)
 }
 #-------------------------------------------------------------------------------
-#' @method check_impute data.table
-#' @title [check_impute()] for data.tables
+#' @method check_impute `data.table`
+#' @title [check_impute()] for `data.tables`
 #' @inheritParams check_impute
 #' @noRd
 check_impute.data.table <- function(
@@ -419,11 +419,11 @@ check_impute.data.table <- function(
 #' Uses [randomizr::block_ra()] to impute the outcomes for observations
 #' who were assigned new treatments. The probabilities used to guide the imputation
 #' of the outcomes are pre-computed using the existing data from the original randomized experiment.
-#' @param current_data Updated tibble/data.frame object containing new treatments from [assign_treatments()].
+#' @param current_data Updated `tibble`or `data.table` object containing new treatments from [assign_treatments()].
 #' @inheritParams run_mab_trial
-#' @param prior_data A tibble/data.frame containing all the data from previous periods.
+#' @param prior_data A `tibble` or `data.table` containing all the data from previous periods.
 #' Used to join together at the end for the next iteration of the simulation.
-#' @param imputation_info A tibble/data.frame containing conditional probability of success by treatment block, for each
+#' @param imputation_info A `tibble` or `data.table` containing conditional probability of success by treatment block, for each
 #' combination that exists in `current_data`, calculated from the original experiment.
 #' Passed to [randomizr::block_ra()] to impute outcomes.
 #' @param dates Named date vector containing average success date by treatment block to impute new success dates for
@@ -433,7 +433,7 @@ check_impute.data.table <- function(
 #' @inheritParams single_mab_simulation
 #' @inheritParams cols
 #' @details
-#' When `perfect_assignment` is FALSE, dates of success are imputed according to the average
+#' When `perfect_assignment = FALSE`, dates of success are imputed according to the average
 #' by each period and treatment block (treatment arm + any blocking). These imputations are required because
 #' these observations do not currently have dates of success, as no success was observed during the original experiment.
 #' Therefore if they go through the next iteration of the simulation without being imputed,
@@ -464,8 +464,8 @@ impute_success <- function(
 }
 #-------------------------------------------------------------------------------
 #' @inheritParams impute_success
-#' @method impute_success data.frame
-#' @title [impute_success()] for data.frames
+#' @method impute_success `data.frame`
+#' @title [impute_success()] for `data.frames`
 #' @noRd
 
 impute_success.data.frame <- function(
@@ -520,8 +520,8 @@ impute_success.data.frame <- function(
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #' @inheritParams impute_success
-#' @method impute_success data.table
-#' @title [impute_success()] for data.tables
+#' @method impute_success `data.table`
+#' @title [impute_success()] for `data.table`s
 #' @noRd
 impute_success.data.table <- function(
   current_data,
@@ -566,11 +566,11 @@ impute_success.data.table <- function(
     prior_data[
       period_number == current_period,
       new_success_date := data.table::fcase(
-        impute_req == 0 | (get(success_col$name) == 0 & mab_success == 1),
-        get(success_date_col$name),
-        mab_success == 1 & get(success_col$name) == 0,
-        dates[impute_block],
-        mab_success == 0 | TRUE,
+        impute_req == 0 | (get(success_col$name) == 0 & mab_success == 1) ,
+        get(success_date_col$name)                                        ,
+        mab_success == 1 & get(success_col$name) == 0                     ,
+        dates[impute_block]                                               ,
+        mab_success == 0 | TRUE                                           ,
         base::as.Date(NA)
       )
     ]

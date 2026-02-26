@@ -7,18 +7,18 @@
 get_iaipw(data, assignment_probs, periods, conditions, verbose)
 }
 \arguments{
-\item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
-of a traditional Randomized Controlled Trial (RCT). Any data.frames will be converted to tibbles internally.}
+\item{data}{A \code{data.frame}, \code{data.table}, or \code{tibble} containing input data from the trial. This should be the results
+of a traditional Randomized Controlled Trial (RCT). Any \code{data.frame}s will be converted to tibbles internally.}
 
-\item{assignment_probs}{A tibble/data.table containing the probabilities of being
+\item{assignment_probs}{A \code{tibble}/\code{data.table} containing the probabilities of being
 assigned each treatment at a given period.}
 
 \item{periods}{Numeric value of length 1; number of total periods in the simulation.}
 
-\item{verbose}{Logical; whether or not to print intermediate messages. Default is FALSE.}
+\item{verbose}{Logical; whether or not to print intermediate messages. Default is \code{FALSE}.}
 }
 \value{
-A tibble/data.frame, containing the data used in the Multi-Arm-Bandit, with
+A \code{tibble}/\code{data.frame}, containing the data used in the Multi-Arm-Bandit, with
 new columns pertaining to the individual AIPW estimate for each person and condition, and
 probability of assignment for each treatment at each period.
 }

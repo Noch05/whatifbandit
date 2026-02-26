@@ -14,7 +14,7 @@
 #' Month based assignment can be specified either using the months inside the `month_col` or `date_col`,
 #' if `month_col` is passed into the function it will be used.
 #'
-#' @returns Updated tibble/data.table with the new `period_number` column. `period_number` is an integer
+#' @returns Updated `tibble`/`data.table` with the new `period_number` column. `period_number` is an integer
 #' representing an observation's new assignment period.
 #' @keywords internal
 #------------------------------------------------------------------------------------------
@@ -203,7 +203,7 @@ create_cutoff.batch <- function(data, period_length) {
 #' @inheritParams single_mab_simulation
 #'
 #'
-#' @returns Updated tibble/data.table with 6 new columns:
+#' @returns Updated `tibble`/`data.table` with 6 new columns:
 #' \itemize{
 #' \item `mab_success`: New variable to hold new success from Multi-arm bandit procedure, NA until assigned.
 #' \item `mab_condition`: New variable to hold new treatment condition from Multi-arm bandit procedure, NA until assigned.
@@ -225,8 +225,8 @@ create_new_cols <- function(
 }
 # --------------------------------------------------
 
-#' @title [create_new_cols()] for data.frames and tibbles
-#' @method create_new_cols data.frame
+#' @title [create_new_cols()] for `data.frame`s and `tibble`s
+#' @method create_new_cols `data.frame`
 #' @inheritParams create_new_cols
 #' @noRd
 
@@ -295,8 +295,8 @@ create_new_cols.data.frame <- function(
   return(data)
 }
 #---------------------------------------------------------------------------------
-#' @title [create_new_cols()] for Data.tables
-#' @method create_new_cols data.table
+#' @title [create_new_cols()] for `data.table`s
+#' @method create_new_cols `data.table`
 #' @inheritParams create_new_cols
 #' @noRd
 

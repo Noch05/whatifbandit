@@ -11,29 +11,29 @@
 #' @param verbose Logical; Toggles progress bar from [furrr::future_map()] and other intermediate messages.
 #' @param times A numeric value of length 1, the number of simulations to conduct.
 #' @param seeds An integer vector of `length(times)` containing valid seeds to define random state for each trial.
-#' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended FALSE.
+#' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended `FALSE`.
 #'
 #' @returns An object of class `multiple.mab`, containing:
 #' \itemize{
-#' \item `final_data_nest:` A tibble or data.table containing the nested tibbles/data.tables from each trial. Only provided when `keep_data` is TRUE.
-#' \item `bandits`: A tibble or data.table containing the UCB1 values or Thompson sampling posterior distributions for each period. Wide format,
+#' \item `final_data_nest:` A `tibble` or `data.table` containing the nested `tibble`s/`data.table`s from each trial. Only provided when `keep_data = TRUE`.
+#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson sampling posterior distributions for each period. Wide format,
 #' each row is a period, and each columns is a treatment. Each row in this table represents the calculation from the given period
 #' after its values were imputed, so row 2 represents the calculations made in period 3, but represent the impact of period 2's new assignments.
-#' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period. Wide format,
+#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period. Wide format,
 #' each row is a period, and each columns is a treatment. Each row represents the probability of being assigned each treatment at each period, these have not
 #' been shifted like the bandits table.
-#' \item `estimates`: A tibble or data.table containing the
+#' \item `estimates`: A `tibble` or `data.table` containing the
 #' AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
 #' sample means and variances, for each treatment arm. Long format, treatment arm, and estimate type are columns along with the mean
 #' and variance.
-#' \item `assignment_quantities`: A tibble or data.table containing the number of units assigned to each treatment for each simulation in
+#' \item `assignment_quantities`: A `tibble` or `data.table` containing the number of units assigned to each treatment for each simulation in
 #' the set of repeated simulations.
 #' \item `settings`: A named list of the configuration settings used in the trial.
 #' }
 #' @example inst/examples/multiple_mab_simulation_example.R
 #' @details
-#' Note that when called if data.table has not been attached already it will be when `future.map()` runs and a message
-#' may print. This does not mean that if you pass a tibble or data.frame, that data.table will
+#' Note that when called if `data.table` has not been attached already it will be when `future.map()` runs and a message
+#' may print. This does not mean that if you pass a `tibble` or data.frame, that `data.table` will
 #' used.
 #'
 #' ## Implementation
@@ -50,7 +50,7 @@
 #' An important note is that `seeds` can only take integer values, so they must be declared or coerced as valid integers,
 #' passing doubles (even ones that are mathematical integers) will result in an error. It is recommended to use `sample.int()`,
 #' with a known seed beforehand to generate the values. Additionally, it is highly recommended to
-#' set `keep_data` to FALSE as the memory used by the function will exponentially increase. This can cause
+#' set `keep_data = FALSE` as the memory used by the function will exponentially increase. This can cause
 #' significant performance issues, especially if your system must swap to disk because memory is full.
 #'
 #' ## Parallel Processing
@@ -304,8 +304,8 @@ get_assignment_quantities.data.frame <- function(simulation, conditions) {
   return(count_vec)
 }
 #-------------------------------------------------------------------
-#' @method get_assignment_quantities data.table
-#' @description get_assignment_quantities for data.tables
+#' @method get_assignment_quantities `data.table`
+#' @description get_assignment_quantities for `data.table`s
 #' @inheritParams get_assignment_quantities
 #' @noRd
 get_assignment_quantities.data.table <- function(simulation, conditions) {
@@ -332,12 +332,12 @@ get_assignment_quantities.data.table <- function(simulation, conditions) {
 #' @param mabs output from [furrr::future_map()] in [multiple_mab_simulation()]
 #' @returns `multiple.mab` class object, which is a named list containing:
 #' \itemize{
-#' \item `final_data_nest:` tibble or data.table containing the nested tibbles/data.tables from each trial. Only provided when `keep_data` is TRUE.
-#' \item `bandits`: A tibble or data.table containing the UCB1 values or Thompson sampling posterior distributions for each period. Wide format,
+#' \item `final_data_nest:` `tibble` or `data.table` containing the nested `tibble`s/`data.table`s from each trial. Only provided when `keep_data = TRUE`.
+#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson sampling posterior distributions for each period. Wide format,
 #' each row is a period, and each columns is a treatment.
-#' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period. Wide format,
+#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period. Wide format,
 #' each row is a period, and each columns is a treatment.
-#' \item `estimates`: A tibble or data.table containing the
+#' \item `estimates`: A `tibble` or `data.table` containing the
 #' AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
 #' sample means and variances, for each treatment arm. Long format, treatment arm, and estimate type are columns along with the mean
 #' and variance.
@@ -346,9 +346,9 @@ get_assignment_quantities.data.table <- function(simulation, conditions) {
 #' @details
 #' This function iterates over every element in the output from [furrr::future_map()]
 #' and extracts the required element to place to condense into the final list, outputted to the user
-#' in [multiple_mab_simulation]. It condenses the long list into tibbles or data.tables, keeping each element
+#' in [multiple_mab_simulation]. It condenses the long list into `tibble`s or `data.table`s, keeping each element
 #' together. For example it extracts all the `bandits` objects from the output lists, across all trials, and
-#' binds them into a single tibble/data.table.
+#' binds them into a single `tibble`/`data.table`.
 #'
 #' @keywords internal
 

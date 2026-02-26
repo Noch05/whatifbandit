@@ -13,7 +13,7 @@ successes, number of observations, and success rates, which is created by \code{
 \item{current_period}{Numeric value of length 1; current period of the adaptive trial simulation.}
 }
 \value{
-A named list with 2 elements: a tibble/data.table containing UCB1 and success rate for each condition,
+A named list with 2 elements: a \code{tibble} or \code{data.table} containing UCB1 and success rate for each condition,
 and a named numeric vector of assignment probabilities, where the highest UCB1 out of the treatments
 is assigned 1, and the rest 0.
 }

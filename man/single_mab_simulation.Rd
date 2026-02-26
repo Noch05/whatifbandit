@@ -25,35 +25,35 @@ single_mab_simulation(
 )
 }
 \arguments{
-\item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
-of a traditional Randomized Controlled Trial (RCT). Any data.frames will be converted to tibbles internally.}
+\item{data}{A \code{data.frame}, \code{data.table}, or \code{tibble} containing input data from the trial. This should be the results
+of a traditional Randomized Controlled Trial (RCT). Any \code{data.frame}s will be converted to tibbles internally.}
 
-\item{assignment_method}{A character string; one of "date", "batch", or "individual", to define the assignment into treatment waves. When using
-"batch" or "individual", ensure your dataset is pre-arranged in the proper order observations should be considered so that
+\item{assignment_method}{A character string; one of \code{"date"}, \code{"batch"}, or \code{"individual"}, to define the assignment into treatment waves. When using
+\code{"batch"} or \code{"individual"}, ensure your dataset is pre-arranged in the proper order observations should be considered so that
 groups are assigned correctly. For "date", observations will be considered in chronological order.
-"individual" assignment can be computationally intensive for larger datasets.}
+\code{"individual"} assignment can be computationally intensive for larger datasets.}
 
-\item{algorithm}{A character string specifying the MAB algorithm to use. Options are "thompson" or "ucb1". Algorithm
+\item{algorithm}{A character string specifying the MAB algorithm to use. Options are \code{"Thompson"} or \code{"UCB1"}, ignoring case. Algorithm
 defines the adaptive assignment process. Mathematical details on these algorithms
 can be found in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
 \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}
 
-\item{prior_periods}{A numeric value of length 1, or the character string "All"; number of previous periods to use
+\item{prior_periods}{A numeric value of length 1, or the string \code{"All"}; number of previous periods to use
 in the treatment assignment model. This is used to implement the stationary/non-stationary bandit.
 For example, a non-stationary bandit assumes the true probability of success for each treatment changes over time, so to
 account for that, not all prior data should be used when making decisions because it could be "out of date".}
 
-\item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
+\item{perfect_assignment}{Logical; if \code{TRUE}, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
-If FALSE, hides outcomes not yet theoretically observed, based
+If \code{FALSE}, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.
 This is useful when simulating batch-based assignment where treatments were assigned
 on a given day whether or not all the information from a prior batch was available and
 you have exact dates treatments were assigned.}
 
-\item{whole_experiment}{Logical; if TRUE, uses all past experimental data for imputing outcomes.
-If FALSE, uses only data available up to the current period. In large datasets or with a high number
-of periods, setting this to FALSE can be more computationally intensive, though not a significant
+\item{whole_experiment}{Logical; if \code{TRUE}, uses all past experimental data for imputing outcomes.
+If \code{FALSE}, uses only data available up to the current period. In large datasets or with a high number
+of periods, setting this to \code{FALSE} can be more computationally intensive, though not a significant
 contributor to total run time.}
 
 \item{blocking}{Logical; whether or not to use treatment blocking. Treatment blocking is used to ensure an even-enough
@@ -94,20 +94,20 @@ concerns.}
 \item{control_condition}{Value of the control condition. Only necessary when \code{control_augment} is greater than 0. Internally this value
 is coerced to a string, so it should be passed as a string, or a type that can easily be converted to a string.}
 
-\item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "date".
-Acceptable values are "day", "week", or "month". "month" does not require an additional column with the months of each observation,
+\item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method ="date"}.
+Acceptable values are \verb{"day", "week",} or \code{"month"}. \code{"month"} does not require an additional column with the months of each observation,
 but it can accept a separate \code{month_col}. If \code{month_col} is specified, the periods follow the calendar months strictly, and when it is not
 specified months are simply used as the time interval. For example if a dataset has dates starting on July 26th, under month based assignment and
 a specified \code{month_col} the dates July 26th and August 3st would be in different periods, but if the \code{month_col} was not specified, they would be
 in the same period because the dates are less than one month apart.}
 
 \item{period_length}{A numeric value of length 1; represents the length of each treatment period.
-If assignment method is "date", this length refers the number of units specified in \code{time_unit}
-(i.e., if "day", 10 would be 10 days). If assignment method is "batch", this refers to the number of people in each batch.}
+If \code{assignment_method} is "date", this length refers the number of units specified in \code{time_unit}
+(i.e., if \verb{"day"``, 10 would be 10 days). If }assignment_method\code{=}"batch"`, this refers to the number of people in each batch.}
 
 \item{block_cols}{A character vector of variables to block by. This vector should not be named.}
 
-\item{verbose}{Logical; whether or not to print intermediate messages. Default is FALSE.}
+\item{verbose}{Logical; whether or not to print intermediate messages. Default is \code{FALSE}.}
 
 \item{check_args}{Logical; Whether or not to robustly check whether arguments are valid. Default is TRUE, and recommended
 not to be changed.}
@@ -115,7 +115,7 @@ not to be changed.}
 \value{
 An object of class \code{mab}, containing:
 \itemize{
-\item \code{final_data}: The processed tibble or data.table, containing new columns pertaining to the results of the trial. Specifically Contains:
+\item \code{final_data}: The processed \code{tibble} or \code{data.table}, containing new columns pertaining to the results of the trial. Specifically Contains:
 \itemize{
 \item \code{period_number}: Assigned period for simulation.
 \item \verb{mab_*}: New treatment conditions and outcomes under the simulation.
@@ -126,13 +126,13 @@ of that block with an observations original treatment, and new treatment.
 \item \verb{prior_rate_*}: Columns containing success rate for each treatment arm, from all periods before the observations period of the simulation.
 \item \verb{*_assign_prob}: Columns containing probability of being assigned each treatment at the given period.
 }
-\item \code{bandits}: A tibble or data.table containing the UCB1 values or Thompson sampling posterior distributions for each period. Wide format,
+\item \code{bandits}: A \code{tibble} or \code{data.table} containing the UCB1 values or Thompson sampling posterior distributions for each period. Wide format,
 each row is a period, and each columns is a treatment. Each row in this table represents the calculation from the given period
 after its values were imputed, so row 2 represents the calculations made in period 3, but represent the impact of period 2's new assignments.
-\item \code{assignment_probs}: A tibble or data.table containing the probability of being assigned each treatment arm at a given period. Wide format,
+\item \code{assignment_probs}: A \code{tibble} or \code{data.table} containing the probability of being assigned each treatment arm at a given period. Wide format,
 each row is a period, and each columns is a treatment. Each row represents the probability of being assigned each treatment at each period, these have not
 been shifted like the bandits table.
-\item \code{estimates}: A tibble or data.table containing the
+\item \code{estimates}: A \code{tibble} or \code{data.table} containing the
 AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
 sample means and variances, for each treatment arm. Long format, treatment arm, and estimate type are columns along with the mean
 and variance.
@@ -148,8 +148,8 @@ MAB pipeline: preparing inputs, assigning treatments and imputing successes, and
 estimation. See the details and vignettes to learn more.
 }
 \details{
-For all the items laballed as a tibble or data.table, data.tables will be used if the user passed \code{data} is a
-data.table, tibbles used otherwise.
+For all the items laballed as a \code{tibble} or \code{data.table}, \code{data.table}s will be used if the user passed \code{data} is a
+\code{data.table}, \code{tibble}s used otherwise.
 \subsection{Implementation}{
 
 At each period, either the Thompson sampling probabilities or UCB1 values are calculated based on
@@ -170,7 +170,7 @@ specified treatment blocking. The probabilities of success used to impute,
 are estimated via the grouped means of successes from the original data either from the whole trial, or
 up to that period, defined by \code{whole_experiment}.
 
-If \code{perfect_assignment} is FALSE, new dates of success will be imputed using averages
+If \code{perfect_assignment = FALSE}, new dates of success will be imputed using averages
 of those dates in the period, grouped by treatment block. Observations for which
 their treatment changed, but their outcome was success in the original and simulation, do not have their date changed.
 When the next period starts, the success dates are checked against the maximum/latest \code{assignment_date} for the period, and
@@ -186,12 +186,12 @@ conditions which is why they are used. For a complete view of their properties, 
 
 This procedure has the potential to be computationally expensive and time-consuming. Performance
 depends on the relative size of each period, number of periods, and overall size of the dataset. This function has
-separate support for data.frames and data.tables. If a data.frame is passed, the function uses a combination of dplyr, tidyr
-and base R to shape data, and run the simulation. However, if a data.table is passed the function exclusively uses the data.table
+separate support for \code{data.frame}s and \code{data.table}s. If a \code{data.frame} is passed, the function uses a combination of \code{dplyr}, \code{tidyr}
+and base \code{R} to shape data, and run the simulation. However, if a \code{data.table} is passed the function exclusively uses the \code{data.table}
 code for all the same operations.
 
-In general, smaller batches run faster under base R, while larger ones could benefit from the performance
-and memory efficiencies provided by data.table. However, we've observed larger datasets can cause numerical
+In general, smaller batches run faster under base \code{R}, while larger ones could benefit from the performance
+and memory efficiencies provided by \code{data.table}. However, we've observed larger datasets can cause numerical
 instability with some calculations in the Thompson sampling procedure. Internal safeguards exist to prevent this, but
 the best way to preempt any issues is to set \code{prior_periods} to a low number.
 

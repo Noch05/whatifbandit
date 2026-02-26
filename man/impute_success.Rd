@@ -17,9 +17,9 @@ impute_success(
 )
 }
 \arguments{
-\item{current_data}{Updated tibble/data.frame object containing new treatments from \code{\link[=assign_treatments]{assign_treatments()}}.}
+\item{current_data}{Updated \code{tibble}or \code{data.table} object containing new treatments from \code{\link[=assign_treatments]{assign_treatments()}}.}
 
-\item{imputation_info}{A tibble/data.frame containing conditional probability of success by treatment block, for each
+\item{imputation_info}{A \code{tibble} or \code{data.table} containing conditional probability of success by treatment block, for each
 combination that exists in \code{current_data}, calculated from the original experiment.
 Passed to \code{\link[randomizr:block_ra]{randomizr::block_ra()}} to impute outcomes.}
 
@@ -27,12 +27,12 @@ Passed to \code{\link[randomizr:block_ra]{randomizr::block_ra()}} to impute outc
 
 \item{success_col}{Column in \code{data}; binary successes from the original experiment.}
 
-\item{prior_data}{A tibble/data.frame containing all the data from previous periods.
+\item{prior_data}{A \code{tibble} or \code{data.table} containing all the data from previous periods.
 Used to join together at the end for the next iteration of the simulation.}
 
-\item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
+\item{perfect_assignment}{Logical; if \code{TRUE}, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
-If FALSE, hides outcomes not yet theoretically observed, based
+If \code{FALSE}, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.
 This is useful when simulating batch-based assignment where treatments were assigned
 on a given day whether or not all the information from a prior batch was available and
@@ -52,7 +52,7 @@ who were assigned new treatments. The probabilities used to guide the imputation
 of the outcomes are pre-computed using the existing data from the original randomized experiment.
 }
 \details{
-When \code{perfect_assignment} is FALSE, dates of success are imputed according to the average
+When \code{perfect_assignment = FALSE}, dates of success are imputed according to the average
 by each period and treatment block (treatment arm + any blocking). These imputations are required because
 these observations do not currently have dates of success, as no success was observed during the original experiment.
 Therefore if they go through the next iteration of the simulation without being imputed,

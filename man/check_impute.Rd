@@ -10,12 +10,12 @@ check_impute(imputation_information, current_data, current_period)
 \item{imputation_information}{The \code{success} element of the \code{imputation_information}
 list created by \code{\link[=imputation_precompute]{imputation_precompute()}} for the given period.}
 
-\item{current_data}{A tibble/data.table with only observations from the current sampling period.}
+\item{current_data}{A \code{tibble} or \code{data.table} with only observations from the current sampling period.}
 
 \item{current_period}{Numeric value of length 1; current treatment wave of the simulation.}
 }
 \description{
-Subsets or adds to the tibble/data.frame created by \code{\link[=imputation_precompute]{imputation_precompute()}},
+Subsets or adds to the \code{tibble}/\code{data.table} created by \code{\link[=imputation_precompute]{imputation_precompute()}},
 and sorts it to ensure compatibility with \code{\link[randomizr:block_ra]{randomizr::block_ra()}}.
 }
 \details{

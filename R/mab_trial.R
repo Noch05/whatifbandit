@@ -15,9 +15,9 @@
 #'
 #' @returns  A named list containing:
 #' \itemize{
-#' \item `final_data`: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
-#' \item `bandits`: A tibble or data.table containing the UCB1 values or Thompson sampling posterior distributions for each period.
-#' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
+#' \item `final_data`: The processed `tibble` or `data.table`, containing new columns pertaining to the results of the trial.
+#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson sampling posterior distributions for each period.
+#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period.
 #' }
 #' @details
 #' The first period is used to start the trial, so the MAB loop
@@ -161,13 +161,13 @@ run_mab_trial <- function(
 #' @inheritParams single_mab_simulation
 #' @returns  A named list containing:
 #' \itemize{
-#' \item `final_data`: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
-#' \item `bandits`: A tibble or data.table containing the UCB1 values or Thompson sampling posterior distributions for each period.
-#' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
+#' \item `final_data`: The processed `tibble` or `data.table`, containing new columns pertaining to the results of the trial.
+#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson sampling posterior distributions for each period.
+#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period.
 #' }
 #' @details
 #' Takes the bandit lists provided, and condenses them using [dplyr::bind_rows()]
-#' into tibbles or data.tables, and then pivots the table
+#' into `tibble`s or `data.table`s, and then pivots the table
 #' to wide format where each treatment arm is a column, and the rows
 #' represent periods.
 #'
@@ -199,9 +199,9 @@ end_mab_trial <- function(
 }
 #-------------------------------------------------------------------------------
 #
-#' @method end_mab_trial data.frame
+#' @method end_mab_trial `data.frame`
 #' @inheritParams end_mab_trial
-#' @title [end_mab_trial()] for data.frames
+#' @title [end_mab_trial()] for `data.frame`s
 #' @noRd
 end_mab_trial.data.frame <- function(
   data,
@@ -274,9 +274,9 @@ end_mab_trial.data.frame <- function(
 }
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-#' @method end_mab_trial data.table
+#' @method end_mab_trial `data.table`
 #' @inheritParams end_mab_trial
-#' @title [end_mab_trial()] for data.tables
+#' @title [end_mab_trial()] for `data.table`s
 #' @noRd
 end_mab_trial.data.table <- function(
   data,

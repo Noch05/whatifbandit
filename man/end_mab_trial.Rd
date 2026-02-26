@@ -11,7 +11,7 @@ end_mab_trial(data, bandits, algorithm, periods, conditions, ndraws)
 
 \item{bandits}{Finalized bandits list from \code{\link[=run_mab_trial]{run_mab_trial()}}.}
 
-\item{algorithm}{A character string specifying the MAB algorithm to use. Options are "thompson" or "ucb1". Algorithm
+\item{algorithm}{A character string specifying the MAB algorithm to use. Options are \code{"Thompson"} or \code{"UCB1"}, ignoring case. Algorithm
 defines the adaptive assignment process. Mathematical details on these algorithms
 can be found in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
 \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}
@@ -26,9 +26,9 @@ concerns.}
 \value{
 A named list containing:
 \itemize{
-\item \code{final_data}: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
-\item \code{bandits}: A tibble or data.table containing the UCB1 values or Thompson sampling posterior distributions for each period.
-\item \code{assignment_probs}: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
+\item \code{final_data}: The processed \code{tibble} or \code{data.table}, containing new columns pertaining to the results of the trial.
+\item \code{bandits}: A \code{tibble} or \code{data.table} containing the UCB1 values or Thompson sampling posterior distributions for each period.
+\item \code{assignment_probs}: A \code{tibble} or \code{data.table} containing the probability of being assigned each treatment arm at a given period.
 }
 }
 \description{
@@ -37,7 +37,7 @@ manageable structure.
 }
 \details{
 Takes the bandit lists provided, and condenses them using \code{\link[dplyr:bind_rows]{dplyr::bind_rows()}}
-into tibbles or data.tables, and then pivots the table
+into \code{tibble}s or \code{data.table}s, and then pivots the table
 to wide format where each treatment arm is a column, and the rows
 represent periods.
 

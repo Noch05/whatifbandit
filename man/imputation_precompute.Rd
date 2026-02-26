@@ -7,17 +7,17 @@
 imputation_precompute(data, whole_experiment, perfect_assignment, data_cols)
 }
 \arguments{
-\item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
-of a traditional Randomized Controlled Trial (RCT). Any data.frames will be converted to tibbles internally.}
+\item{data}{A \code{data.frame}, \code{data.table}, or \code{tibble} containing input data from the trial. This should be the results
+of a traditional Randomized Controlled Trial (RCT). Any \code{data.frame}s will be converted to tibbles internally.}
 
-\item{whole_experiment}{Logical; if TRUE, uses all past experimental data for imputing outcomes.
-If FALSE, uses only data available up to the current period. In large datasets or with a high number
-of periods, setting this to FALSE can be more computationally intensive, though not a significant
+\item{whole_experiment}{Logical; if \code{TRUE}, uses all past experimental data for imputing outcomes.
+If \code{FALSE}, uses only data available up to the current period. In large datasets or with a high number
+of periods, setting this to \code{FALSE} can be more computationally intensive, though not a significant
 contributor to total run time.}
 
-\item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
+\item{perfect_assignment}{Logical; if \code{TRUE}, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
-If FALSE, hides outcomes not yet theoretically observed, based
+If \code{FALSE}, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.
 This is useful when simulating batch-based assignment where treatments were assigned
 on a given day whether or not all the information from a prior batch was available and
@@ -40,9 +40,9 @@ Used to simulate imperfect information on the part of researchers conducting an 
 \value{
 A named list containing:
 \itemize{
-\item \code{original_summary}: The tibble(s)/data.table(s) containing the probability of success for each
+\item \code{original_summary}: The \code{tibble}(s) or \code{data.table}(s) containing the probability of success for each
 treatment block, at each period.
-\item \code{dates_summary}: A tibble/data.table containing the average success date for
+\item \code{dates_summary}: A \code{tibble} or \code{data.table} containing the average success date for
 each treatment block at each treatment period.
 }
 }
@@ -54,12 +54,12 @@ success is calculated for each treatment block at every period.
 }
 \details{
 \code{\link[=imputation_precompute]{imputation_precompute()}} is an optimization, meant to reduce the cost of calculating these variables
-within the simulation loop. When \code{whole_experiment} is TRUE, \code{original_summary} is a single tibble/data.table,
-and used through the simulation. When \code{whole_experiment} is FALSE, \code{original_summary} is a list of tibbles/data.tables,
-each containing the cumulative probabilities of all periods up to the index i.
+within the simulation loop. When \code{whole_experiment = TRUE}, \code{original_summary} is a single \code{tibble} or \code{data.table},
+and used through the simulation. When \code{whole_experiment = FALSE}, \code{original_summary} is a list of \code{tibble}s or \code{data.table}s,
+each containing the cumulative probabilities of all periods up to the index \code{i}.
 
-If \code{perfect_assignment} is FALSE, \code{dates_summary} is not calculated, and is NULL.
+If \code{perfect_assignment = FALSE}, \code{dates_summary} is not calculated, and is \code{NULL}.
 
-No covariates are used in the calculation, these are all simply grouped averages.
+No covariates are used in the calculation, these are all simply grouped means.
 }
 \keyword{internal}

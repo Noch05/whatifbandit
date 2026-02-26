@@ -36,7 +36,7 @@ of AIPW estimates.}
 \item{level}{Numeric value of length 1; indicates confidence interval Width (i.e 0.90, 0.95, 0.99).
 Defaults to 0.95.}
 
-\item{save}{Logical; Whether or not to save the plot to disk; FALSE by default.}
+\item{save}{Logical; Whether or not to save the plot to disk; \code{FALSE} by default.}
 
 \item{path}{String; File directory to save file.}
 
