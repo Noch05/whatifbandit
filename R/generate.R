@@ -308,8 +308,8 @@ generate_rct.bernoulli <- function(
     id = 1:n,
     treatment = treatments,
     success = success,
-    blocks = blocks,
-    clusters = clusters,
+    block = blocks,
+    cluster = clusters,
     assignment_date = assignment_dates,
     success_date = success_dates
   )

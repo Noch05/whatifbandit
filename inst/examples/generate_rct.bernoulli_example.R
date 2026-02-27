@@ -47,7 +47,7 @@ result <- generate_rct.bernoulli(
     T1 = c(B1 = 0.5, B2 = 0.3, B3 = 0.2),
     T2 = c(B1 = 0.7, B2 = 0.6, B3 = 0.9)
   ),
-  blocks = c(B1 = 0.35, B2 = 0.65),
+  blocks = c(B1 = 0.3, B2 = 0.4, B3 = 0.3),
   dates_of_assignment = lubridate::ymd("2023-04-15") +
     0:24 * months(1),
   time_model = time_model
