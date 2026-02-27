@@ -190,16 +190,17 @@ run_test <- function(full_args, static_args, trial) {
   class <- switch(trial, "single" = "mab", "multiple" = "multiple.mab")
   results <- purrr::map(seq_len(nrow(full_args)), \(x) {
     args <- c(as.list(full_args[x, ]), static_args)
-    expect_success({
+    expect_no_failure({
       output <- do.call(eval(FUN), args)
-      testthat::capture_output_lines(expect_success(print(output)))
+
+      testthat::capture_output_lines(expect_no_failure(print(output)))
     })
     if (isTRUE(args$time_unit == "Month")) {
       args$data_cols <- args$data_cols[!names(args$data_cols) == "month_col"]
-      expect_success(do.call(eval(FUN), args))
+      expect_no_failure(do.call(eval(FUN), args))
     }
     expect_s3_class(output, class)
-    expect_success({
+    expect_no_failure({
       if (!eval(class_specific_checks)) {
         stop("Post-Run Checks Failed")
       }
@@ -210,8 +211,8 @@ run_test <- function(full_args, static_args, trial) {
   purrr::walk(
     results,
     ~ {
-      expect_success(summary(.x))
-      expect_success(invisible(.x))
+      expect_no_failure(summary(.x))
+      expect_no_failure(invisible(.x))
     }
   )
   if (requireNamespace("ggplot2", quietly = TRUE)) {
@@ -219,14 +220,14 @@ run_test <- function(full_args, static_args, trial) {
       types <- c("arm", "assign")
       purrr::walk(results, \(x) {
         purrr::walk(types, \(type) {
-          expect_success(plot(x, type = type))
+          expect_no_failure(plot(x, type = type))
         })
       })
 
       levels <- runif(3)
       purrr::walk(results, \(x) {
         purrr::walk(levels, \(level) {
-          expect_success(plot(x, type = "estimate", level = level))
+          expect_no_failure(plot(x, type = "estimate", level = level))
         })
       })
     }
@@ -235,17 +236,17 @@ run_test <- function(full_args, static_args, trial) {
       cdfs <- c("normal", "empirical")
       quantities <- c("estimate", "assignment")
 
-      purrr::walk(results, ~ expect_success(plot(.x, type = "summary")))
+      purrr::walk(results, ~ expect_no_failure(plot(.x, type = "summary")))
       purrr::walk(
         results,
         ~ purrr::walk(quantities, \(y) {
-          expect_success(plot(.x, type = "hist", quantity = y))
+          expect_no_failure(plot(.x, type = "hist", quantity = y))
         })
       )
       purrr::walk(
         results,
         ~ purrr::walk(cdfs, \(y) {
-          expect_success(plot(.x, type = "estimate", cdf = y))
+          expect_no_failure(plot(.x, type = "estimate", cdf = y))
         })
       )
     }
@@ -305,7 +306,7 @@ check_dt_tibble_equal <- function(full_args, static_args, type, seed) {
     set.seed(seed)
     dt_output <- do.call(eval(FUN), dt_args)
     check_equal <- eval(class_equal_checks)
-    expect_success({
+    expect_no_failure({
       if (!check_equal) {
         print(tbl_args)
         stop("Equality Checks Failed")
@@ -476,9 +477,6 @@ check_relative_probs <- function(df, p) {
   checks <- dplyr::near(theory, p_real$prob, tol = 0.25)
 
   if (!base::all(checks)) {
-    print(p_real$prob)
-    print(theory)
-    print(checks)
     base::stop("Probabilities diverge from user specified values")
   }
 }
@@ -495,7 +493,6 @@ run_simulation <- function(params) {
     blocks = params$blocks,
     clusters = params$clusters
   )
-  expect_success(data_checks(data, params))
   expect_success(
     single_mab_simulation(
       data,

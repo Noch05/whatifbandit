@@ -5,3 +5,5 @@ test_that("Generate data test with single mab", {
     run_simulation(params)
   })
 })
+params <- generate_random_params(1000)
+run_simulation(params)
