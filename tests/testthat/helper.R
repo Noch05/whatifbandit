@@ -493,6 +493,7 @@ run_simulation <- function(params) {
     blocks = params$blocks,
     clusters = params$clusters
   )
+  expect_success(data_checks(data, params))
   expect_success(
     single_mab_simulation(
       data,
