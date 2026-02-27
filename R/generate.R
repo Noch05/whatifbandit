@@ -144,23 +144,6 @@ extract_success_prob <- function(
 }
 
 
-#' Expand assignment dates to length n
-#'
-#' If fewer dates than units are provided they are recycled and sorted so that
-#' each unit receives an assignment date in ascending order. If enough dates
-#' are already provided they are returned as-is.
-#'
-#' @param dates_of_assignment A vector of dates (or date-times) to assign to
-#'   units. Can be shorter than `n`, in which case it is recycled.
-#' @param n A positive integer. Number of units.
-#'
-#' @return A vector of dates of length `n`.
-#'
-#' @keywords internal
-expand_assignment_dates <- function(dates_of_assignment, n) {
- 
-
-
 #' Generate a Bernoulli RCT dataset
 #' @name generate_rct.bernoulli
 #' @description Simulates a randomized controlled trial with Bernoulli outcomes. Supports
@@ -264,8 +247,9 @@ generate_rct.bernoulli <- function(
 
   success <- stats::rbinom(n, 1, prob = success_prob)
 
-  assignment_dates <- if(base::is.null(dates_of_assignment)) {
-    NULL} else if (base::length(dates_of_assignment) < n) {
+  assignment_dates <- if (base::is.null(dates_of_assignment)) {
+    NULL
+  } else if (base::length(dates_of_assignment) < n) {
     base::sort(base::rep_len(dates_of_assignment, n))
   } else {
     dates_of_assignment
