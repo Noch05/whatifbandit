@@ -1,4 +1,5 @@
 # Helper Function to Generate Data Sets
+
 generate_data <- function(n, k) {
   data <- tibble::tibble(
     type_of_policy = sample(
@@ -189,16 +190,16 @@ run_test <- function(full_args, static_args, trial) {
   class <- switch(trial, "single" = "mab", "multiple" = "multiple.mab")
   results <- purrr::map(seq_len(nrow(full_args)), \(x) {
     args <- c(as.list(full_args[x, ]), static_args)
-    expect_no_failure({
+    expect_success({
       output <- do.call(eval(FUN), args)
-      testthat::capture_output_lines(expect_no_failure(print(output)))
+      testthat::capture_output_lines(expect_success(print(output)))
     })
     if (isTRUE(args$time_unit == "Month")) {
       args$data_cols <- args$data_cols[!names(args$data_cols) == "month_col"]
-      expect_no_failure(do.call(eval(FUN), args))
+      expect_success(do.call(eval(FUN), args))
     }
     expect_s3_class(output, class)
-    expect_no_failure({
+    expect_success({
       if (!eval(class_specific_checks)) {
         stop("Post-Run Checks Failed")
       }
@@ -209,8 +210,8 @@ run_test <- function(full_args, static_args, trial) {
   purrr::walk(
     results,
     ~ {
-      expect_no_failure(summary(.x))
-      expect_no_failure(invisible(.x))
+      expect_success(summary(.x))
+      expect_success(invisible(.x))
     }
   )
   if (requireNamespace("ggplot2", quietly = TRUE)) {
@@ -218,14 +219,14 @@ run_test <- function(full_args, static_args, trial) {
       types <- c("arm", "assign")
       purrr::walk(results, \(x) {
         purrr::walk(types, \(type) {
-          expect_no_failure(plot(x, type = type))
+          expect_success(plot(x, type = type))
         })
       })
 
       levels <- runif(3)
       purrr::walk(results, \(x) {
         purrr::walk(levels, \(level) {
-          expect_no_failure(plot(x, type = "estimate", level = level))
+          expect_success(plot(x, type = "estimate", level = level))
         })
       })
     }
@@ -234,17 +235,17 @@ run_test <- function(full_args, static_args, trial) {
       cdfs <- c("normal", "empirical")
       quantities <- c("estimate", "assignment")
 
-      purrr::walk(results, ~ expect_no_failure(plot(.x, type = "summary")))
+      purrr::walk(results, ~ expect_success(plot(.x, type = "summary")))
       purrr::walk(
         results,
         ~ purrr::walk(quantities, \(y) {
-          expect_no_failure(plot(.x, type = "hist", quantity = y))
+          expect_success(plot(.x, type = "hist", quantity = y))
         })
       )
       purrr::walk(
         results,
         ~ purrr::walk(cdfs, \(y) {
-          expect_no_failure(plot(.x, type = "estimate", cdf = y))
+          expect_success(plot(.x, type = "estimate", cdf = y))
         })
       )
     }
@@ -304,7 +305,7 @@ check_dt_tibble_equal <- function(full_args, static_args, type, seed) {
     set.seed(seed)
     dt_output <- do.call(eval(FUN), dt_args)
     check_equal <- eval(class_equal_checks)
-    expect_no_failure({
+    expect_success({
       if (!check_equal) {
         print(tbl_args)
         stop("Equality Checks Failed")
@@ -314,78 +315,207 @@ check_dt_tibble_equal <- function(full_args, static_args, type, seed) {
 }
 
 # Potential Time Models
-time_model_extended <- function(n, t, s) {
+time_model_extended <- function(
+  n,
+  treatments,
+  success,
+  blocks = NULL,
+  clusters = NULL
+) {
   time <- data.table::fcase(
-    t == "T1" , stats::rexp(n, rate = 5)                   ,
-    t == "T2" , stats::rgamma(n, shape = 2, rate = 2)      ,
-    t == "T3" , stats::rweibull(n, shape = 3, scale = 4)   ,
-    t == "T4" , stats::rlnorm(n, meanlog = 1, sdlog = 0.5) ,
-    t == "T5" , stats::runif(n, min = 0, max = 5)          ,
-    t == "T6" , stats::rchisq(n, df = 4)
+    treatments == "T1" , stats::rexp(n, rate = 5)                   ,
+    treatments == "T2" , stats::rgamma(n, shape = 2, rate = 2)      ,
+    treatments == "T3" , stats::rweibull(n, shape = 3, scale = 4)   ,
+    treatments == "T4" , stats::rlnorm(n, meanlog = 1, sdlog = 0.5) ,
+    treatments == "T5" , stats::runif(n, min = 0, max = 5)          ,
+    treatments == "T6" , stats::rchisq(n, df = 4)
   )
 
-  time <- dplyr::if_else(s == 1, round(time) * lubridate::days(3), NA)
+  time <- dplyr::if_else(success == 1, round(time) * lubridate::days(3), NA)
   return(time)
 }
-time_model_alt <- function(n, t, s) {
-  arm_index <- base::as.numeric(sub("T", "", t))
+time_model_alt <- function(
+  n,
+  treatments,
+  success,
+  blocks = NULL,
+  clusters = NULL
+) {
+  arm_index <- base::as.numeric(substr(as.character(treatments), 2, 2))
   mu <- arm_index * 0.5 + 1
 
   time <- rnorm(n, mean = mu, sd = 1)
   time <- base::abs(time)
 
-  time <- dplyr::if_else(s == 1, base::ceiling(time) * lubridate::days(7), NA)
+  time <- dplyr::if_else(
+    success == 1,
+    base::ceiling(time) * lubridate::days(7),
+    NA
+  )
   return(time)
 }
 
 # Generating Random Parameters
 
-generate_random_params <- function() {
-  n_arms <- sample(2:6, 1)
+r_sum1 <- function(n) {
+  x <- stats::runif(n, min = 0.4, max = 0.7)
+  x / base::sum(x)
+}
 
-  list(
-    n = base::sample(c(1000, 5000, 10000, 20000), 1),
-    p = stats::runif(n_arms, min = 0.3, max = 0.7),
-    months_out = base::sample(c(6, 12, 24, 36), 1),
-    perfect_assignment = base::sample(c(TRUE, FALSE), 1),
+generate_random_params <- function(n) {
+  n_arms <- base::sample(3:7, 1)
+  n_blocks <- base::sample(c(0, 4), 1)
+  n_clusters <- base::sample(c(0, 12), 1)
+
+  has_blocks <- n_blocks > 0
+  has_clusters <- n_clusters > 0
+
+  blocks <- if (has_blocks) {
+    stats::setNames(
+      r_sum1(n_blocks),
+      base::paste0("B", base::seq_len(n_blocks))
+    )
+  } else {
+    NULL
+  }
+
+  clusters <- if (has_blocks && has_clusters) {
+    cluster_list <- base::split(
+      base::paste0("C", 1:n_clusters),
+      base::cut(1:n_clusters, breaks = n_blocks, labels = FALSE)
+    )
+
+    stats::setNames(
+      base::lapply(cluster_list, \(c) {
+        stats::setNames(r_sum1(length(c)), c)
+      }),
+      base::paste0("B", base::seq_len(n_blocks))
+    )
+  } else if (has_clusters) {
+    stats::setNames(
+      r_sum1(n_clusters),
+      base::paste0("C", base::seq_len(n_clusters))
+    )
+  } else {
+    NULL
+  }
+
+  probs <- if (has_blocks && has_clusters) {
+    stats::setNames(
+      base::lapply(base::seq_len(n_arms), \(arm) {
+        stats::setNames(
+          base::lapply(base::names(clusters), \(b) {
+            stats::setNames(
+              stats::runif(base::length(clusters[[b]]), 0.4, 0.6),
+              base::names(clusters[[b]])
+            )
+          }),
+          base::names(clusters)
+        )
+      }),
+      base::paste0("T", base::seq_len(n_arms))
+    )
+  } else if (has_blocks || has_clusters) {
+    m <- max(n_blocks, n_clusters)
+    letter <- c("B", "C")[which.max(c(n_blocks, n_clusters))]
+    stats::setNames(
+      base::lapply(base::seq_len(n_arms), \(arm) {
+        stats::setNames(
+          stats::runif(m, 0.4, 0.6),
+          base::paste0(letter, base::seq_len(m))
+        )
+      }),
+      base::paste0("T", base::seq_len(n_arms))
+    )
+  } else {
+    stats::setNames(
+      stats::runif(n_arms, 0.4, 0.6),
+      base::paste0("T", base::seq_len(n_arms))
+    )
+  }
+
+  return(base::list(
+    n = n,
     dt = base::sample(c(TRUE, FALSE), 1),
-    simple = base::sample(c(TRUE, FALSE), 1),
     alg = base::sample(c("Thompson", "UCB1"), 1),
-    time_model_fn = sample(
-      list(time_model_extended, time_model_alt),
+    time_model_fn = base::sample(
+      base::list(time_model_extended, time_model_alt),
       1
-    )[[1]]
-  )
+    )[[1]],
+    perfect_assignment = base::sample(c(TRUE, FALSE), 1),
+    blocks = blocks,
+    clusters = clusters,
+    probs = probs
+  ))
 }
 
 # Running Generate Data then mab
+data_checks <- function(data, param) {
+  df <- data |>
+    dplyr::select(dplyr::any_of(c("treatment", "success", "block", "cluster")))
+  check_relative_probs(df, param$probs)
+  check_na(df)
+}
+check_na <- function(df) {
+  x <- base::sum(base::is.na(df))
+  if (x != 0) {
+    stop("NA Present")
+  }
+}
+
+check_relative_probs <- function(df, p) {
+  p_real <- df |>
+    dplyr::group_by(dplyr::across(-success)) |>
+    dplyr::summarize(prob = base::mean(success), .groups = "drop")
+  theory <- extract_success_prob(
+    p = p,
+    treatments = p_real$treatment,
+    blocks = p_real$block,
+    cluster = p_real$cluster
+  )
+  checks <- dplyr::near(theory, p_real$prob, tol = 0.25)
+
+  if (!base::all(checks)) {
+    print(p_real$prob)
+    print(theory)
+    print(checks)
+    base::stop("Probabilities diverge from user specified values")
+  }
+}
+
 
 run_simulation <- function(params) {
-  generate_rct.bernoulli(
+  data <- generate_rct.bernoulli(
     n = params$n,
-    p = params$p,
-    simple = params$simple,
+    p = params$probs,
     dt = params$dt,
     dates_of_assignment = lubridate::ymd("2023-01-01") +
-      0:(params$months_out - 1) * months(1),
-    time_model = params$time_model_fn
-  ) |>
+      0:(6 - 1) * months(1),
+    time_model = params$time_model_fn,
+    blocks = params$blocks,
+    clusters = params$clusters
+  )
+  expect_success(data_checks(data, params))
+  expect_success(
     single_mab_simulation(
+      data,
       assignment_method = "date",
-      time_unit = "month",
-      period_length = 3,
       algorithm = params$alg,
-      prior_periods = "All",
+      prior_periods = 2,
       perfect_assignment = params$perfect_assignment,
       whole_experiment = FALSE,
-      blocking = FALSE,
+      blocking = (base::length(params$blocks) > 0),
+      block_cols = c("block"),
       data_cols = c(
-        id_col = "id",
         success_col = "success",
-        condition_col = "treatment",
-        date_col = "assignment_date",
         assignment_date_col = "assignment_date",
-        success_date_col = "success_date"
-      )
+        success_date_col = "success_date",
+        id_col = "id",
+        condition_col = "treatment",
+        date_col = "assignment_date"
+      ),
+      period_length = 1,
+      time_unit = "month"
     )
+  )
 }

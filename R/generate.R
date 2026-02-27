@@ -3,12 +3,14 @@
 #' @description Checks that all provided probabilities are valid between 0 and 1, and that probabilities
 #' have been provided for all blocks and clusters
 #'
-#' @inheritParams generate_rct.bernoulli
+#' @inheritParams extract_success_prob
+#' @inheritParams generate_bernoulli.rct
+#' @inheritParams assign_treatments.rct
 #'
 #' @returns Nothing. Throws an error if validation fails.
 #'
 #' @keywords internal
-check_probs <- function(p, blocks = NULL, clusters = NULL) {
+check_probs <- function(p, treatments, blocks = NULL, clusters = NULL) {
   flat_p <- base::unlist(p)
   if (base::any(flat_p > 1 | flat_p < 0)) {
     rlang::abort(c(
@@ -17,13 +19,16 @@ check_probs <- function(p, blocks = NULL, clusters = NULL) {
     ))
   }
 
-  req_prob <- if (base::is.list(clusters)) {
-    base::length(p) *
-      base::sum(base::vapply(clusters, base::length, numeric(1)))
-  } else if (!base::is.null(blocks) || !base::is.null(clusters)) {
-    base::length(p) * base::length(blocks %||% clusters)
+  n_clusters <- base::nlevels(clusters)
+  n_blocks <- base::nlevels(blocks)
+  n_treat <- base::nlevels(treatments)
+
+  req_prob <- if (n_clusters > 0) {
+    n_treat * n_clusters
+  } else if (n_blocks > 0) {
+    n_treat * n_blocks
   } else {
-    base::length(p)
+    n_treat
   }
 
   passed_prob <- base::length(flat_p)
@@ -47,7 +52,7 @@ check_probs <- function(p, blocks = NULL, clusters = NULL) {
 #' @param group A named numeric vector or named list (see [generate_rct.bernoulli()]) of assignment probabilities.
 #' When blocks and cluster are together, clusters must be fully nested in blocks.
 #'   `names(group)` are used as the condition labels (block or cluster names).
-#' @param blocks A factor with levels of `names(blocks)` holding block assignment for each observation.
+#' @inheritParams assign_treatments.rct
 #'
 #' @returns A factor of length `n` with levels corresponding to `names(group)` or `NULL` if `group = NULL`.
 #'
@@ -74,7 +79,7 @@ generate_group_membership <- function(n, group, blocks = NULL) {
           conditions = base::names(probs)
         )
       }
-      return(as.factor(clusters))
+      return(clusters)
     }
     if (base::is.null(base::names(group))) {
       rlang::abort("`names()` for blocks and/or clusters cannot be `NULL`")
@@ -96,12 +101,12 @@ generate_group_membership <- function(n, group, blocks = NULL) {
 
 
 #' Assign Treatments
-#' @name assign_treatments
+#' @name assign_treatments.rct
 #' @description Selects the appropriate [randomizr] randomization function based on whether
 #' blocks and/or clusters are present, and returns a vector of treatment
 #' assignments.
 #'
-#' @param n A positive integer. Number of units.
+#' @inheritParams generate_rct.bernoulli
 #' @param assignment_probs A numeric vector of equal treatment assignment
 #'   probabilities (length = number of treatments, sums to 1).
 #' @param blocks A factor or character vector of block memberships, or `NULL`.
@@ -156,16 +161,10 @@ assign_treatments.rct <- function(
 #' all supported `p` structures: plain vector, block-indexed list, cluster-indexed list, and
 #' block-then-cluster nested list.
 #'
-#' @param p A numeric vector, named list of vectors, or nested named list of
-#'   vectors. See [generate_rct.bernoulli()] for full details.
+#' @inheritParams generate_rct.bernoulli
 #' @param treatments A character or factor vector of treatment assignments of
 #'   length `n`.
-#' @param blocks A character or factor vector of block memberships of length
-#'   `n`, or `NULL`.
-#' @param clusters A character or factor vector of cluster memberships of
-#'   length `n`, or `NULL`.
-#' @param n_treatments Integer. Number of treatment arms, used to auto-name
-#'   unnamed probability vectors.
+#' @inheritParams assign_treatments.rct
 #'
 #' @returns A numeric vector of length `n` containing the per-unit success
 #'   probability.
@@ -175,31 +174,38 @@ extract_success_prob <- function(
   p,
   treatments,
   blocks = NULL,
-  clusters = NULL,
-  n_treatments
+  clusters = NULL
 ) {
+  idxs <- stats::setNames(
+    base::lapply(list(treatments, blocks, clusters), \(x) {
+      char <- base::as.character(x)
+      if (base::length(char) > 0) {
+        char
+      } else {
+        NULL
+      }
+    }),
+    c("treatments", "blocks", "clusters")
+  )
   if (!base::is.null(blocks) && !base::is.null(clusters)) {
+    items <- list(idxs[["treatments"]], idxs[["blocks"]], idxs[["clusters"]])
     purrr::pmap_vec(
-      base::list(treatments, blocks, clusters),
+      items,
       \(t, b, c) p[[t]][[b]][c],
       .ptype = numeric()
     )
-  } else if (!base::is.null(blocks)) {
-    purrr::map2_vec(
-      treatments,
-      blocks,
+  } else if (!base::is.null(blocks) || !base::is.null(clusters)) {
+    items <- base::list(
+      idxs[["treatments"]],
+      idxs[["blocks"]] %||% idxs[["clusters"]]
+    )
+    purrr::pmap_vec(
+      items,
       \(t, b) p[[t]][b],
       .ptype = numeric()
     )
-  } else if (!base::is.null(clusters)) {
-    purrr::map2_vec(
-      treatments,
-      clusters,
-      \(t, c) p[[t]][c],
-      .ptype = numeric()
-    )
   } else {
-    p[treatments]
+    p[idxs[["treatments"]]]
   }
 }
 
@@ -274,8 +280,12 @@ generate_rct.bernoulli <- function(
   ...
 ) {
   check_posint(n)
-  check_probs(p, blocks = blocks, clusters = clusters)
   check_logical(dt)
+  base::names(p) <- if (base::is.null(names(p))) {
+    base::paste0("T", 1:base::length(p))
+  } else {
+    base::names(p)
+  }
 
   blocks <- generate_group_membership(n, blocks)
   clusters <- generate_group_membership(n, clusters, blocks = blocks)
@@ -291,12 +301,13 @@ generate_rct.bernoulli <- function(
     clusters = clusters
   )
 
+  check_probs(p, treatments = treatments, blocks = blocks, clusters = clusters)
+
   success_prob <- extract_success_prob(
     p = p,
-    treatments = as.character(treatments),
-    blocks = as.character(blocks),
-    clusters = as.character(clusters),
-    n_treatments = as.character(base::length(p))
+    treatments = treatments,
+    blocks = blocks,
+    clusters = clusters
   )
 
   success <- stats::rbinom(n, 1, prob = success_prob)
