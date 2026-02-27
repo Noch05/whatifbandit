@@ -1,22 +1,41 @@
-# 2-Arm Design; Complete Randomization
+# 4-Arm Design;
 
-generate_rct.bernoulli(n = 1000, p = c(0.3, 0.7), simple = FALSE)
+generate_rct.bernoulli(n = 1000, p = c(0.3, 0.7, 0.5, 0.4))
 
-# Linear relationships in treatment
+# Blocked and Clustered with random probabilities
 
-generate_rct.bernoulli(n = 1000, p = (1:10) * 0.1 - 0.05)
+generate_rct.bernoulli(
+  n = 1000,
+  p = list(
+    Control = list(
+      B1 = c(C1 = runif(3), C2 = runif(3)),
+      B2 = c(C3 = runif(3), C4 = runif(3))
+    ),
+    T1 = list(
+      B1 = c(C1 = runif(3), C2 = runif(3)),
+      B2 = c(C3 = runif(3), C4 = runif(3))
+    ),
+    T2 = list(
+      B1 = c(C1 = runif(3), C2 = runif(3)),
+      B2 = c(C2 = runif(3), C3 = runif(3))
+    )
+  ),
+  blocks = c(B1 = 0.3, B2 = 0.7),
+  clusters = list(B1 = c(C1 = 0.3, C2 = 0.7), B2 = c(C3 = 0.2, C4 = 0.8))
+)
 
 # Modelling Success Dates
 
-time_model <- function(n, t, s) {
-  # Specific times for each treatment
+time_model <- function(n, treatments, success, blocks, clusters = NULL) {
+  # Specific model for each treatment and block
   time <- data.table::fcase(
-    t == "T1" , rexp(n, rate = 5)                 ,
-    t == "T2" , rgamma(n, shape = 2, rate = 2)    ,
-    t == "T3" , rweibull(n, shape = 3, scale = 4)
+    treatments == "T1" & blocks == "B1" , rexp(n, rate = 5)                 ,
+    treatments == "T1" & blocks == "B2" , rexp(n, rate = 10)                ,
+    treatments == "T2" & blocks == "B1" , rgamma(n, shape = 2, rate = 2)    ,
+    treatments == "T2" & blocks == "B2" , rweibull(n, shape = 3, scale = 4)
   )
 
-  time <- ifelse(s == 1, round(time) * lubridate::days(3), NA)
+  time <- ifelse(success == 1, round(time) * lubridate::days(1), NA)
   return(time)
 }
 # Using with `single_mab_simulation()`
@@ -24,7 +43,11 @@ time_model <- function(n, t, s) {
 set.seed(100)
 result <- generate_rct.bernoulli(
   n = 10000,
-  p = c(0.3, 0.6, 0.45),
+  p = list(
+    T1 = c(B1 = 0.5, B2 = 0.3, B3 = 0.2),
+    T2 = c(B1 = 0.7, B2 = 0.6, B3 = 0.9)
+  ),
+  blocks = c(B1 = 0.35, B2 = 0.65),
   dates_of_assignment = lubridate::ymd("2023-04-15") +
     0:24 * months(1),
   time_model = time_model

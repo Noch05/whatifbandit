@@ -26,18 +26,54 @@ check_probs <- function(p) {
 #' block or cluster according to those probabilities.
 #'
 #' @param n A positive integer. Number of units to assign.
-#' @param group A named numeric vector of assignment probabilities that sum to 1.
+#' @param group A named numeric vector or named list (see [generate_rct.bernoulli()]) of assignment probabilities.
+#' When blocks and cluster are together, clusters must be fully nested in blocks.
 #'   `names(group)` are used as the condition labels (block or cluster names).
+#' @param blocks A factor with levels of `names(blocks)` holding block assignment for each observation.
 #'
-#' @returns A factor of length `n` with levels corresponding to `names(group)`.
+#' @returns A factor of length `n` with levels corresponding to `names(group)` or `NULL` if `group = NULL`.
 #'
 #' @keywords internal
-generate_group_membership <- function(n, group) {
-  randomizr::complete_ra(
-    N = n,
-    prob_each = group,
-    conditions = base::names(group)
-  )
+generate_group_membership <- function(n, group, blocks = NULL) {
+  if (base::is.null(group)) {
+    return(NULL)
+  } else {
+    if (base::is.list(group)) {
+      if (base::is.null(blocks)) {
+        rlang::abort("Nested clusters require `blocks` to be specified.")
+      }
+      if (!base::setequal(base::names(group), base::levels(blocks))) {
+        rlang::abort("`names(clusters)` must match block labels.")
+      }
+      clusters <- base::vector("character", n) |>
+        factor(levels = base::unlist(base::lapply(group, names)))
+      for (b in base::names(group)) {
+        probs <- group[[b]]
+        idx <- blocks == b
+        clusters[idx] <- randomizr::complete_ra(
+          N = base::sum(idx),
+          prob_each = probs,
+          conditions = base::names(probs)
+        )
+      }
+      return(as.factor(clusters))
+    }
+    if (base::is.null(base::names(group))) {
+      rlang::abort("`names()` for blocks and/or clusters cannot be `NULL`")
+    }
+    if (!dplyr::near(base::sum(group), 1)) {
+      rlang::abort(
+        "Assignment probabilities for blocks and/or clusters must sum to 1"
+      )
+    }
+    return(
+      randomizr::complete_ra(
+        N = n,
+        prob_each = group,
+        conditions = base::names(group)
+      )
+    )
+  }
 }
 
 
@@ -56,7 +92,7 @@ generate_group_membership <- function(n, group) {
 #' @returns A factor of length `n` with levels corresponding to treatment arms.
 #'
 #' @keywords internal
-assign_treatments <- function(
+assign_treatments.rct <- function(
   n,
   assignment_probs,
   blocks = NULL,
@@ -64,7 +100,7 @@ assign_treatments <- function(
 ) {
   undo_randomizr_defaults <- function(treatments, assignment_probs) {
     if (base::is.null(base::names(assignment_probs))) {
-      treatments |> as.numeric() |> as.factor()
+      treatments |> as.numeric() |> factor(labels = 1:length(assignment_probs))
     } else {
       treatments
     }
@@ -73,17 +109,20 @@ assign_treatments <- function(
     randomizr::block_and_cluster_ra(
       blocks = blocks,
       clusters = clusters,
-      prob_each = assignment_probs
+      prob_each = assignment_probs,
+      conditions = names(assignment_probs)
     )
   } else if (!base::is.null(blocks)) {
     randomizr::block_ra(
       blocks = blocks,
-      prob_each = assignment_probs
+      prob_each = assignment_probs,
+      conditions = names(assignment_probs)
     )
   } else if (!base::is.null(clusters)) {
     randomizr::cluster_ra(
       clusters = clusters,
-      prob_each = assignment_probs
+      prob_each = assignment_probs,
+      conditions = names(assignment_probs)
     )
   } else {
     randomizr::complete_ra(n, prob_each = assignment_probs)
@@ -110,7 +149,7 @@ assign_treatments <- function(
 #' @param n_treatments Integer. Number of treatment arms, used to auto-name
 #'   unnamed probability vectors.
 #'
-#' @return A numeric vector of length `n` containing the per-unit success
+#' @returns A numeric vector of length `n` containing the per-unit success
 #'   probability.
 #'
 #' @keywords internal
@@ -124,19 +163,22 @@ extract_success_prob <- function(
   if (!base::is.null(blocks) && !base::is.null(clusters)) {
     purrr::pmap_vec(
       base::list(treatments, blocks, clusters),
-      \(t, b, c) p[[t]][[b]][c]
+      \(t, b, c) p[[t]][[b]][c],
+      .ptype = numeric()
     )
   } else if (!base::is.null(blocks)) {
     purrr::map2_vec(
       treatments,
       blocks,
-      \(t, b) p[[t]][b]
+      \(t, b) p[[t]][b],
+      .ptype = numeric()
     )
   } else if (!base::is.null(clusters)) {
     purrr::map2_vec(
       treatments,
       clusters,
-      \(t, c) p[[t]][c]
+      \(t, c) p[[t]][c],
+      .ptype = numeric()
     )
   } else {
     p[treatments]
@@ -170,27 +212,29 @@ extract_success_prob <- function(
 #'        Accessed as `p[[treatment]][[block]][cluster]`.}
 #'   }
 #'   All probability values must be between 0 and 1.
-#' @param dt Logical. If `TRUE` returns a [data.table::data.table()]; otherwise
-#'   returns a [tibble::tibble()]. Default `FALSE`.
-#' @param blocks A named numeric vector of block membership probabilities
-#'   (must sum to 1), where `names(blocks)` are the block labels. Units are
-#'   assigned to blocks via [randomizr::complete_ra()]. Pass `NULL` (default)
-#'   for no blocking.
-#' @param clusters A named numeric vector of cluster membership probabilities
-#'   (must sum to 1), where `names(clusters)` are the cluster labels. Units
-#'   are assigned to clusters via [randomizr::complete_ra()]. Pass `NULL`
-#'   (default) for no clustering.
-#' @param dates_of_assignment An optional vector of dates representing when
-#'   units are assigned. If shorter than `n` it is recycled and sorted. If
-#'   `NULL` (default) no assignment dates are recorded.
-#' @param time_model An optional function with signature
-#'   `function(n, treatments, success, blocks, clusters, ...)` that returns a
-#'   vector of time offsets (e.g. [lubridate::Period] objects) to add to
-#'   `dates_of_assignment` to produce `success_date`. Only used when
-#'   `dates_of_assignment` is also supplied. Default `NULL`.
+#' @param dt Logical. If `TRUE` returns a [data.table::data.table()]; otherwise returns a [tibble::tibble()]. Default `FALSE`.
+#' @param blocks A named numeric vector of block membership probabilities (must sum to 1), where `names(blocks)`
+#' are the block labels. Units are assigned to blocks via [randomizr::complete_ra()]. Pass `NULL` (default) for no blocking.
+#' @param clusters Cluster membership probabilities. Can be:
+#' \describe{
+#' \item{Numeric vector}{A named vector where `names(clusters)` are the cluster labels e. g. `C(C1 = 0.4, C2 = 0.6)`.
+#' Used when there is not blocking.}
+#' \item{Named list of vectors}{A named list where `names(clusters)` are block labels, and each element is a named vector
+#' of per-block cluster proportions, e.g.
+#' `list(B1 = c(C1 = 0.4, C=0.6)), B2 = c(C3 = 0.2, C4 = 0.8)`
+#' Clusters are accessed as `clusters[[block]][cluster]`. Insided each block, cluster proportions must sum to 1, and clusters across blocks
+#' should be different.}
+#' }
+#' where `names(clusters)` are the cluster labels.
+#' Units are assigned to clusters via [randomizr::complete_ra()]. Pass `NULL` (default) for no clustering.
+#' @param dates_of_assignment An optional vector of dates representing when units are assigned.
+#' If shorter than `n` it is recycled and sorted. If NULL` (default) no assignment dates are recorded.
+#' @param time_model An optional function with signature `function(n, treatments, success, blocks = NULL, clusters = NULL, ...)`
+#' that returns a vector of [lubridate::period] objects to add to `dates_of_assignment` to produce `success_date`.
+#' Only used when`dates_of_assignment` is also supplied. Default `NULL`.
 #' @param ... Additional arguments forwarded to `time_model`.
 #'
-#' @return A [tibble::tibble()] or [data.table::data.table()] with columns:
+#' @returns A [tibble::tibble()] or [data.table::data.table()] with columns:
 #'   \describe{
 #'     \item{`id`}{Integer unit identifier.}
 #'     \item{`treatment`}{Treatment arm assigned to each unit.}
@@ -200,6 +244,7 @@ extract_success_prob <- function(
 #'   }
 #'
 #' @export
+#' @example inst/examples/generate_rct.bernoulli_example.R
 generate_rct.bernoulli <- function(
   n,
   p,
@@ -213,28 +258,18 @@ generate_rct.bernoulli <- function(
   check_posint(n)
   check_probs(p)
 
-  bl_cl <- purrr::map(base::list(clusters, blocks), \(arg) {
-    if (!base::is.null(arg) && base::is.null(base::names(arg))) {
-      rlang::abort("`names()` for blocks and/or clusters cannot be `NULL`")
-    }
-    if (!dplyr::near(base::sum(arg), 1)) {
-      rlang::abort(
-        "Assignment probabilities for blocks and/or clusters must sum to 1"
-      )
-    }
-    generate_group_membership(n, arg)
-  })
+  blocks <- generate_group_membership(n, blocks)
+  clusters <- generate_group_membership(n, clusters, blocks = blocks)
 
   assignment_probs <- stats::setNames(
     base::rep(1 / base::length(p), base::length(p)),
     names(p)
   )
-
-  treatments <- assign_treatments(
+  treatments <- assign_treatments.rct(
     n = n,
     assignment_probs = assignment_probs,
     blocks = blocks,
-    clusers = clusters
+    clusters = clusters
   )
 
   success_prob <- extract_success_prob(
@@ -259,9 +294,9 @@ generate_rct.bernoulli <- function(
   if (!base::is.null(time_model) && !base::is.null(assignment_dates)) {
     success_dates <- assignment_dates +
       time_model(
-        n,
-        treatments,
-        success,
+        n = n,
+        treatments = treatments,
+        success = success,
         blocks = blocks,
         clusters = clusters,
         ...
@@ -273,6 +308,8 @@ generate_rct.bernoulli <- function(
     id = 1:n,
     treatment = treatments,
     success = success,
+    blocks = blocks,
+    clusters = clusters,
     assignment_date = assignment_dates,
     success_date = success_dates
   )
