@@ -1,23 +1,23 @@
 # 4-Arm Design;
 
-generate_rct.bernoulli(n = 1000, p = c(0.3, 0.7, 0.5, 0.4))
+generate_rct.bernoulli(n = 100, p = c(0.3, 0.7, 0.5, 0.4))
 
 # Blocked and Clustered with random probabilities
 
 generate_rct.bernoulli(
-  n = 1000,
+  n = 100,
   p = list(
     Control = list(
-      B1 = c(C1 = runif(3), C2 = runif(3)),
-      B2 = c(C3 = runif(3), C4 = runif(3))
+      B1 = c(C1 = 0.6, C2 = 0.3),
+      B2 = c(C3 = 0.2, C4 = 0.5)
     ),
     T1 = list(
-      B1 = c(C1 = runif(3), C2 = runif(3)),
-      B2 = c(C3 = runif(3), C4 = runif(3))
+      B1 = c(C1 = 0.8, C2 = 0.9),
+      B2 = c(C3 = 0.2, C4 = 0.4)
     ),
     T2 = list(
-      B1 = c(C1 = runif(3), C2 = runif(3)),
-      B2 = c(C2 = runif(3), C3 = runif(3))
+      B1 = c(C1 = 0.3, C2 = 0.3),
+      B2 = c(C3 = 0.5, C3 = 0.5)
     )
   ),
   blocks = c(B1 = 0.3, B2 = 0.7),

@@ -1,19 +1,37 @@
 #' Validate Bernoulli Success Probabilities
 #' @name check_probs
-#' @description Checks that all provided probabilities are valid between 0 and 1.
+#' @description Checks that all provided probabilities are valid between 0 and 1, and that probabilities
+#' have been provided for all blocks and clusters
 #'
-#' @param p A numeric vector, named list of vectors, or nested named list of vectors
-#'   containing success probabilities. See [generate_rct.bernoulli()] for full details.
+#' @inheritParams generate_rct.bernoulli
 #'
 #' @returns Nothing. Throws an error if validation fails.
 #'
 #' @keywords internal
-check_probs <- function(p) {
+check_probs <- function(p, blocks = NULL, clusters = NULL) {
   flat_p <- base::unlist(p)
   if (base::any(flat_p > 1 | flat_p < 0)) {
     rlang::abort(c(
       "all `p` must be probabilities between 0 and 1",
       "x" = base::paste0("You passed: ", base::paste0(flat_p, collapse = ", "))
+    ))
+  }
+
+  req_prob <- if (base::is.list(clusters)) {
+    base::length(p) *
+      base::sum(base::vapply(clusters, base::length, numeric(1)))
+  } else if (!base::is.null(blocks) || !base::is.null(clusters)) {
+    base::length(p) * base::length(blocks %||% clusters)
+  } else {
+    base::length(p)
+  }
+
+  passed_prob <- base::length(flat_p)
+  if (passed_prob != req_prob) {
+    rlang::abort(c(
+      "Not enough probabilities provided",
+      "i" = base::sprintf("Required number: %d ", req_prob),
+      "x" = base::sprintf("You passed: %d", passed_prob)
     ))
   }
 }
@@ -256,7 +274,8 @@ generate_rct.bernoulli <- function(
   ...
 ) {
   check_posint(n)
-  check_probs(p)
+  check_probs(p, blocks = blocks, clusters = clusters)
+  check_logical(dt)
 
   blocks <- generate_group_membership(n, blocks)
   clusters <- generate_group_membership(n, clusters, blocks = blocks)
@@ -274,10 +293,10 @@ generate_rct.bernoulli <- function(
 
   success_prob <- extract_success_prob(
     p = p,
-    treatments = treatments,
-    blocks = blocks,
-    clusters = clusters,
-    n_treatments = base::length(p)
+    treatments = as.character(treatments),
+    blocks = as.character(blocks),
+    clusters = as.character(clusters),
+    n_treatments = as.character(base::length(p))
   )
 
   success <- stats::rbinom(n, 1, prob = success_prob)
