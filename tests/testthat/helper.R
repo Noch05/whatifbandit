@@ -493,27 +493,27 @@ run_simulation <- function(params) {
     blocks = params$blocks,
     clusters = params$clusters
   )
-  expect_success(data_checks(data, params))
-  expect_success(
-    single_mab_simulation(
-      data,
-      assignment_method = "date",
-      algorithm = params$alg,
-      prior_periods = 2,
-      perfect_assignment = params$perfect_assignment,
-      whole_experiment = FALSE,
-      blocking = (base::length(params$blocks) > 0),
-      block_cols = c("block"),
-      data_cols = c(
-        success_col = "success",
-        assignment_date_col = "assignment_date",
-        success_date_col = "success_date",
-        id_col = "id",
-        condition_col = "treatment",
-        date_col = "assignment_date"
-      ),
-      period_length = 1,
-      time_unit = "month"
-    )
-  )
+  expect_no_error(data_checks(data, params))
+
+  blocking <- (base::length(params$blocks) > 0)
+  expect_no_error(single_mab_simulation(
+    data,
+    assignment_method = "date",
+    algorithm = params$alg,
+    prior_periods = 2,
+    perfect_assignment = params$perfect_assignment,
+    whole_experiment = FALSE,
+    blocking = blocking,
+    block_cols = if (blocking) c("block") else NULL,
+    data_cols = c(
+      success_col = "success",
+      assignment_date_col = "assignment_date",
+      success_date_col = "success_date",
+      id_col = "id",
+      condition_col = "treatment",
+      date_col = "assignment_date"
+    ),
+    period_length = 1,
+    time_unit = "month"
+  ))
 }
