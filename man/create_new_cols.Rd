@@ -7,8 +7,8 @@
 create_new_cols(data, data_cols, block_cols, blocking, perfect_assignment)
 }
 \arguments{
-\item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
-of a traditional Randomized Controlled Trial (RCT). Any data.frames will be converted to tibbles internally.}
+\item{data}{A \code{data.frame}, \code{data.table}, or \code{tibble} containing input data from the trial. This should be the results
+of a traditional Randomized Controlled Trial (RCT). Any \code{data.frame}s will be converted to tibbles internally.}
 
 \item{data_cols}{A named character vector containing the names of columns in \code{data} as strings:
 \itemize{
@@ -31,16 +31,16 @@ distribution of treatment conditions across blocks. For example, blocking by gen
 split treatments evenly not just throughout the sample (so for 4 arms, 25-25-25-25), but also within each block, so 25\% of men
 would receive each treatment and 25\% of women the same.}
 
-\item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
+\item{perfect_assignment}{Logical; if \code{TRUE}, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
-If FALSE, hides outcomes not yet theoretically observed, based
+If \code{FALSE}, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.
 This is useful when simulating batch-based assignment where treatments were assigned
 on a given day whether or not all the information from a prior batch was available and
 you have exact dates treatments were assigned.}
 }
 \value{
-Updated tibble/data.table with 6 new columns:
+Updated \code{tibble}/\code{data.table} with 6 new columns:
 \itemize{
 \item \code{mab_success}: New variable to hold new success from Multi-arm bandit procedure, NA until assigned.
 \item \code{mab_condition}: New variable to hold new treatment condition from Multi-arm bandit procedure, NA until assigned.

@@ -13,13 +13,13 @@ get_past_results(
 )
 }
 \arguments{
-\item{current_data}{A tibble/data.table with only observations from the current sampling period.}
+\item{current_data}{A \code{tibble} or \code{data.table} with only observations from the current sampling period.}
 
-\item{prior_data}{A tibble/data.table with only the observations from the prior index.}
+\item{prior_data}{A \code{tibble} or \code{data.table} with only the observations from the prior index.}
 
-\item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
+\item{perfect_assignment}{Logical; if \code{TRUE}, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
-If FALSE, hides outcomes not yet theoretically observed, based
+If \code{FALSE}, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.
 This is useful when simulating batch-based assignment where treatments were assigned
 on a given day whether or not all the information from a prior batch was available and
@@ -29,7 +29,7 @@ you have exact dates treatments were assigned.}
 Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type \code{Date}, not a character string.}
 }
 \value{
-A tibble/data.table containing the number of successes, and number of people for each
+A \code{tibble} or \code{data.table} containing the number of successes, and number of people for each
 treatment condition.
 }
 \description{
@@ -38,7 +38,7 @@ calculates the number of success under each treatment and the total number of ob
 to calculate UCB1 values or Thompson sampling probabilities.
 }
 \details{
-When \code{perfect_assignment} is FALSE, the maximum value from the specified
+When \code{perfect_assignment = FALSE}, the maximum value from the specified
 \code{assignment_date_col} in the current data is taken as the last possible date
 the researchers conducting the experiment could have learned about a treatment outcome.
 All successes that occur past this date are masked and treated as failures for the purposes

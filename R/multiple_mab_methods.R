@@ -40,7 +40,7 @@ print.multiple.mab <- function(x, ...) {
   base::cat("----------------------------------------------------- \n")
 }
 #------------------------------------------------------------------------------
-#' Summary Generic For "multiple.mab" Class
+#' Summary Generic For `multiple.mab` Class
 #' @description
 #' Summarizes results of multiple Multi-Arm Bandit Trials. Provides empirically estimated
 #' and normally approximated confidence intervals on AIPW estimates for probability of success,
@@ -172,7 +172,7 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
 #' }
 #' @param quantity The quantities to plot when `type = "hist"`, accepts either 'estimate' to plot the distributuons of the AIPW estimates, or
 #' 'assignment' to plot the distributions of the number of observations assigned to each treatment across the repeated trials.
-#' @param save Logical; Whether or not to save the plot to disk; FALSE by default.
+#' @param save Logical; Whether or not to save the plot to disk; `FALSE` by default.
 #' @param path String; File directory to save file.
 #' @param ... Arguments to pass to `ggplot2::geom_*` function (e.g. `color`, `linewidth`, `alpha`, `bins` etc.). In the case of `type = "hist"`, additional
 #' arguments must be passed in to distinct lists, one named `geom` which are passed to `ggplot2::geom_*`

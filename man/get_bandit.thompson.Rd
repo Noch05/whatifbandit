@@ -19,7 +19,7 @@ concerns.}
 }
 \value{
 A named list of length 2, where element 1 is the named numeric vector of Thompson
-sampling probabilities, and element 2 is a reference to the same vector. The second element is
+Sampling probabilities, and element 2 is a reference to the same vector. The second element is
 adjusted later in the simulation based on what the user has set for \code{control_augment} and \code{random_assign_prop} to reflect the
 probability of assignment to a given treatment at that period.
 }
@@ -27,7 +27,7 @@ probability of assignment to a given treatment at that period.
 Thompson sampling Algorithm
 }
 \details{
-Thompson sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
+Thompson Sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
 package but the direct calculation can fail. If this occurs, a simulation based method is used
 instead to estimate the posterior distribution, and the user receives a warning.
 }

@@ -9,10 +9,10 @@
 #'
 #' @inheritParams single_mab_simulation
 #' @param periods Numeric value of length 1; number of total periods in the simulation.
-#' @param assignment_probs A tibble/data.table containing the probabilities of being
+#' @param assignment_probs A `tibble`/`data.table` containing the probabilities of being
 #' assigned each treatment at a given period.
 #'
-#' @returns A tibble/data.frame, containing the data used in the Multi-Arm-Bandit, with
+#' @returns A `tibble`/`data.frame`, containing the data used in the Multi-Arm-Bandit, with
 #' new columns pertaining to the individual AIPW estimate for each person and condition, and
 #' probability of assignment for each treatment at each period.
 #'
@@ -36,9 +36,9 @@ get_iaipw <- function(data, assignment_probs, periods, conditions, verbose) {
   base::UseMethod("get_iaipw", data)
 }
 #-------------------------------------------------------------------------------
-#' @method get_iaipw data.frame
+#' @method get_iaipw `data.frame`
 #' @title
-#' [get_iaipw()] for data.frames
+#' [get_iaipw()] for `data.frame`s
 #' @inheritParams get_iaipw
 #' @noRd
 
@@ -123,8 +123,8 @@ get_iaipw.data.frame <- function(
   return(data)
 }
 # ------------------------------------------------------------------------------
-#' @method get_iaipw data.table
-#' @title [get_iaipw()] for data.tables
+#' @method get_iaipw `data.table`
+#' @title [get_iaipw()] for `data.table`s
 #' @inheritParams get_iaipw
 #' @noRd
 
@@ -252,7 +252,7 @@ get_iaipw.data.table <- function(
 #'
 #' @inheritParams get_iaipw
 #' @inheritParams single_mab_simulation
-#' @returns A tibble/data.table containing the AIPW estimate of treatment success, AIPW variance,
+#' @returns A `tibble`/`data.table` containing the AIPW estimate of treatment success, AIPW variance,
 #' sample proportion of successful treatments (sample mean), and sample mean variance.
 #' @details
 #' The formulas for the calculations in this function can be found in
@@ -284,8 +284,8 @@ adaptive_aipw <- function(
   base::UseMethod("adaptive_aipw", data)
 }
 #-------------------------------------------------------------------------------
-#' @title Adaptive AIPW Estimates for data.frames
-#' @method adaptive_aipw data.frame
+#' @title Adaptive AIPW Estimates for `data.frame`s
+#' @method adaptive_aipw `data.frame`
 #' @inheritParams adaptive_aipw
 #' @noRd
 #'
@@ -366,8 +366,8 @@ adaptive_aipw.data.frame <- function(
 }
 #-------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
-#' @title Adaptive AIPW Estimates for data.tables
-#' @method adaptive_aipw data.table
+#' @title Adaptive AIPW Estimates for `data.table`s
+#' @method adaptive_aipw `data.table`
 #' @inheritParams adaptive_aipw
 #' @noRd
 adaptive_aipw.data.table <- function(

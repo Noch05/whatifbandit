@@ -1,4 +1,5 @@
 # Helper Function to Generate Data Sets
+
 generate_data <- function(n, k) {
   data <- tibble::tibble(
     type_of_policy = sample(
@@ -103,6 +104,7 @@ generate_data <- function(n, k) {
   ))
 }
 
+# Checking Functions
 control_augment_checks <- function(output) {
   col <- paste0(output$settings$control, "_assign_prob")
   assign_probs <- output$assignment_probs |>
@@ -190,6 +192,7 @@ run_test <- function(full_args, static_args, trial) {
     args <- c(as.list(full_args[x, ]), static_args)
     expect_no_failure({
       output <- do.call(eval(FUN), args)
+
       testthat::capture_output_lines(expect_no_failure(print(output)))
     })
     if (isTRUE(args$time_unit == "Month")) {
@@ -310,4 +313,207 @@ check_dt_tibble_equal <- function(full_args, static_args, type, seed) {
       }
     })
   })
+}
+
+# Potential Time Models
+time_model_extended <- function(
+  n,
+  treatments,
+  success,
+  blocks = NULL,
+  clusters = NULL
+) {
+  time <- data.table::fcase(
+    treatments == "T1" , stats::rexp(n, rate = 5)                   ,
+    treatments == "T2" , stats::rgamma(n, shape = 2, rate = 2)      ,
+    treatments == "T3" , stats::rweibull(n, shape = 3, scale = 4)   ,
+    treatments == "T4" , stats::rlnorm(n, meanlog = 1, sdlog = 0.5) ,
+    treatments == "T5" , stats::runif(n, min = 0, max = 5)          ,
+    treatments == "T6" , stats::rchisq(n, df = 4)
+  )
+
+  time <- dplyr::if_else(success == 1, round(time) * lubridate::days(3), NA)
+  return(time)
+}
+time_model_alt <- function(
+  n,
+  treatments,
+  success,
+  blocks = NULL,
+  clusters = NULL
+) {
+  arm_index <- base::as.numeric(substr(as.character(treatments), 2, 2))
+  mu <- arm_index * 0.5 + 1
+
+  time <- rnorm(n, mean = mu, sd = 1)
+  time <- base::abs(time)
+
+  time <- dplyr::if_else(
+    success == 1,
+    base::ceiling(time) * lubridate::days(7),
+    NA
+  )
+  return(time)
+}
+
+# Generating Random Parameters
+
+r_sum1 <- function(n) {
+  x <- stats::runif(n, min = 0.4, max = 0.7)
+  x / base::sum(x)
+}
+
+generate_random_params <- function(n) {
+  n_arms <- base::sample(3:7, 1)
+  n_blocks <- base::sample(c(0, 4), 1)
+  n_clusters <- base::sample(c(0, 12), 1)
+
+  has_blocks <- n_blocks > 0
+  has_clusters <- n_clusters > 0
+
+  blocks <- if (has_blocks) {
+    stats::setNames(
+      r_sum1(n_blocks),
+      base::paste0("B", base::seq_len(n_blocks))
+    )
+  } else {
+    NULL
+  }
+
+  clusters <- if (has_blocks && has_clusters) {
+    cluster_list <- base::split(
+      base::paste0("C", 1:n_clusters),
+      base::cut(1:n_clusters, breaks = n_blocks, labels = FALSE)
+    )
+
+    stats::setNames(
+      base::lapply(cluster_list, \(c) {
+        stats::setNames(r_sum1(length(c)), c)
+      }),
+      base::paste0("B", base::seq_len(n_blocks))
+    )
+  } else if (has_clusters) {
+    stats::setNames(
+      r_sum1(n_clusters),
+      base::paste0("C", base::seq_len(n_clusters))
+    )
+  } else {
+    NULL
+  }
+
+  probs <- if (has_blocks && has_clusters) {
+    stats::setNames(
+      base::lapply(base::seq_len(n_arms), \(arm) {
+        stats::setNames(
+          base::lapply(base::names(clusters), \(b) {
+            stats::setNames(
+              stats::runif(base::length(clusters[[b]]), 0.4, 0.6),
+              base::names(clusters[[b]])
+            )
+          }),
+          base::names(clusters)
+        )
+      }),
+      base::paste0("T", base::seq_len(n_arms))
+    )
+  } else if (has_blocks || has_clusters) {
+    m <- max(n_blocks, n_clusters)
+    letter <- c("B", "C")[which.max(c(n_blocks, n_clusters))]
+    stats::setNames(
+      base::lapply(base::seq_len(n_arms), \(arm) {
+        stats::setNames(
+          stats::runif(m, 0.4, 0.6),
+          base::paste0(letter, base::seq_len(m))
+        )
+      }),
+      base::paste0("T", base::seq_len(n_arms))
+    )
+  } else {
+    stats::setNames(
+      stats::runif(n_arms, 0.4, 0.6),
+      base::paste0("T", base::seq_len(n_arms))
+    )
+  }
+
+  return(base::list(
+    n = n,
+    dt = base::sample(c(TRUE, FALSE), 1),
+    alg = base::sample(c("Thompson", "UCB1"), 1),
+    time_model_fn = base::sample(
+      base::list(time_model_extended, time_model_alt),
+      1
+    )[[1]],
+    perfect_assignment = base::sample(c(TRUE, FALSE), 1),
+    blocks = blocks,
+    clusters = clusters,
+    probs = probs
+  ))
+}
+
+# Running Generate Data then mab
+data_checks <- function(data, param) {
+  df <- data |>
+    dplyr::select(dplyr::any_of(c("treatment", "success", "block", "cluster")))
+  check_relative_probs(df, param$probs)
+  check_na(df)
+}
+check_na <- function(df) {
+  x <- base::sum(base::is.na(df))
+  if (x != 0) {
+    stop("NA Present")
+  }
+}
+
+check_relative_probs <- function(df, p) {
+  p_real <- df |>
+    dplyr::group_by(dplyr::across(-success)) |>
+    dplyr::summarize(prob = base::mean(success), .groups = "drop")
+  theory <- extract_success_prob(
+    p = p,
+    treatments = p_real$treatment,
+    blocks = p_real$block,
+    cluster = p_real$cluster
+  )
+  checks <- dplyr::near(theory, p_real$prob, tol = 0.25)
+
+  if (!base::all(checks)) {
+    base::stop("Probabilities diverge from user specified values")
+  }
+}
+
+
+run_simulation <- function(params) {
+  data <- generate_rct.bernoulli(
+    n = params$n,
+    p = params$probs,
+    dt = params$dt,
+    dates_of_assignment = lubridate::ymd("2023-01-01") +
+      0:(6 - 1) * months(1),
+    time_model = params$time_model_fn,
+    blocks = params$blocks,
+    clusters = params$clusters
+  )
+  expect_no_error(data_checks(data, params))
+
+  blocking <- (base::length(params$blocks) > 0)
+  expect_no_error(single_mab_simulation(
+    data,
+    assignment_method = "date",
+    algorithm = params$alg,
+    prior_periods = 2,
+    perfect_assignment = params$perfect_assignment,
+    whole_experiment = FALSE,
+    blocking = blocking,
+    block_cols = if (blocking) c("block") else NULL,
+    data_cols = c(
+      success_col = "success",
+      assignment_date_col = "assignment_date",
+      success_date_col = "success_date",
+      id_col = "id",
+      condition_col = "treatment",
+      date_col = "assignment_date"
+    ),
+    period_length = 1,
+    time_unit = "month"
+  ))
 }

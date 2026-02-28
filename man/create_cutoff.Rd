@@ -13,8 +13,8 @@ create_cutoff(
 )
 }
 \arguments{
-\item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
-of a traditional Randomized Controlled Trial (RCT). Any data.frames will be converted to tibbles internally.}
+\item{data}{A \code{data.frame}, \code{data.table}, or \code{tibble} containing input data from the trial. This should be the results
+of a traditional Randomized Controlled Trial (RCT). Any \code{data.frame}s will be converted to tibbles internally.}
 
 \item{data_cols}{A named character vector containing the names of columns in \code{data} as strings:
 \itemize{
@@ -31,23 +31,23 @@ Used to simulate imperfect information on the part of researchers conducting an 
 }}
 
 \item{period_length}{A numeric value of length 1; represents the length of each treatment period.
-If assignment method is "date", this length refers the number of units specified in \code{time_unit}
-(i.e., if "day", 10 would be 10 days). If assignment method is "batch", this refers to the number of people in each batch.}
+If \code{assignment_method} is "date", this length refers the number of units specified in \code{time_unit}
+(i.e., if \verb{"day"``, 10 would be 10 days). If }assignment_method\code{=}"batch"`, this refers to the number of people in each batch.}
 
-\item{assignment_method}{A character string; one of "date", "batch", or "individual", to define the assignment into treatment waves. When using
-"batch" or "individual", ensure your dataset is pre-arranged in the proper order observations should be considered so that
+\item{assignment_method}{A character string; one of \code{"date"}, \code{"batch"}, or \code{"individual"}, to define the assignment into treatment waves. When using
+\code{"batch"} or \code{"individual"}, ensure your dataset is pre-arranged in the proper order observations should be considered so that
 groups are assigned correctly. For "date", observations will be considered in chronological order.
-"individual" assignment can be computationally intensive for larger datasets.}
+\code{"individual"} assignment can be computationally intensive for larger datasets.}
 
-\item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "date".
-Acceptable values are "day", "week", or "month". "month" does not require an additional column with the months of each observation,
+\item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method ="date"}.
+Acceptable values are \verb{"day", "week",} or \code{"month"}. \code{"month"} does not require an additional column with the months of each observation,
 but it can accept a separate \code{month_col}. If \code{month_col} is specified, the periods follow the calendar months strictly, and when it is not
 specified months are simply used as the time interval. For example if a dataset has dates starting on July 26th, under month based assignment and
 a specified \code{month_col} the dates July 26th and August 3st would be in different periods, but if the \code{month_col} was not specified, they would be
 in the same period because the dates are less than one month apart.}
 }
 \value{
-Updated tibble/data.table with the new \code{period_number} column. \code{period_number} is an integer
+Updated \code{tibble}/\code{data.table} with the new \code{period_number} column. \code{period_number} is an integer
 representing an observation's new assignment period.
 }
 \description{

@@ -10,8 +10,8 @@ create_conditions(control_condition, data, condition_col, control_augment)
 \item{control_condition}{Value of the control condition. Only necessary when \code{control_augment} is greater than 0. Internally this value
 is coerced to a string, so it should be passed as a string, or a type that can easily be converted to a string.}
 
-\item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
-of a traditional Randomized Controlled Trial (RCT). Any data.frames will be converted to tibbles internally.}
+\item{data}{A \code{data.frame}, \code{data.table}, or \code{tibble} containing input data from the trial. This should be the results
+of a traditional Randomized Controlled Trial (RCT). Any \code{data.frame}s will be converted to tibbles internally.}
 
 \item{condition_col}{Column in \code{data}; original treatment condition for each observation.}
 

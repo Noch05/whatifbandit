@@ -1,4 +1,5 @@
 # whatifbandit (development version)
+* New function `generate_rct.bernoulli` simulates an RCT with user defined probabilities, along with other parameters, such that it is compatible with `single_mab_simulation()` and `multiple_mab_simulation()`
 
 # whatifbandit 0.3.0
 

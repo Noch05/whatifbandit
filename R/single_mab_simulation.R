@@ -9,41 +9,41 @@
 #' MAB pipeline: preparing inputs, assigning treatments and imputing successes, and adaptively weighted
 #' estimation. See the details and vignettes to learn more.
 #'
-#' @param data A data.frame, data.table, or tibble containing input data from the trial. This should be the results
-#' of a traditional Randomized Controlled Trial (RCT). Any data.frames will be converted to tibbles internally.
+#' @param data A `data.frame`, `data.table`, or `tibble` containing input data from the trial. This should be the results
+#' of a traditional Randomized Controlled Trial (RCT). Any `data.frame`s will be converted to tibbles internally.
 #'
-#' @param time_unit A character string specifying the unit of time for assigning periods when `assignment_method` is "date".
-#' Acceptable values are "day", "week", or "month". "month" does not require an additional column with the months of each observation,
+#' @param time_unit A character string specifying the unit of time for assigning periods when `assignment_method ="date"`.
+#' Acceptable values are `"day", "week",` or `"month"`. `"month"` does not require an additional column with the months of each observation,
 #' but it can accept a separate `month_col`. If `month_col` is specified, the periods follow the calendar months strictly, and when it is not
 #' specified months are simply used as the time interval. For example if a dataset has dates starting on July 26th, under month based assignment and
 #' a specified `month_col` the dates July 26th and August 3st would be in different periods, but if the `month_col` was not specified, they would be
 #' in the same period because the dates are less than one month apart.
 #'
-#' @param perfect_assignment Logical; if TRUE, assumes perfect information for treatment assignment
+#' @param perfect_assignment Logical; if `TRUE`, assumes perfect information for treatment assignment
 #' (i.e., all outcomes are observed regardless of the date).
-#' If FALSE, hides outcomes not yet theoretically observed, based
+#' If `FALSE`, hides outcomes not yet theoretically observed, based
 #' on the dates treatments would have been assigned for each wave.
 #' This is useful when simulating batch-based assignment where treatments were assigned
 #' on a given day whether or not all the information from a prior batch was available and
 #' you have exact dates treatments were assigned.
 #'
-#' @param algorithm A character string specifying the MAB algorithm to use. Options are "thompson" or "ucb1". Algorithm
+#' @param algorithm A character string specifying the MAB algorithm to use. Options are `"Thompson"` or `"UCB1"`, ignoring case. Algorithm
 #' defines the adaptive assignment process. Mathematical details on these algorithms
 #' can be found in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
 #' \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.
 #'
 #' @param period_length A numeric value of length 1; represents the length of each treatment period.
-#' If assignment method is "date", this length refers the number of units specified in `time_unit`
-#' (i.e., if "day", 10 would be 10 days). If assignment method is "batch", this refers to the number of people in each batch.
+#' If `assignment_method` is "date", this length refers the number of units specified in `time_unit`
+#' (i.e., if `"day"``, 10 would be 10 days). If `assignment_method` = `"batch"`, this refers to the number of people in each batch.
 #'
-#' @param prior_periods A numeric value of length 1, or the character string "All"; number of previous periods to use
+#' @param prior_periods A numeric value of length 1, or the string `"All"`; number of previous periods to use
 #' in the treatment assignment model. This is used to implement the stationary/non-stationary bandit.
 #' For example, a non-stationary bandit assumes the true probability of success for each treatment changes over time, so to
 #' account for that, not all prior data should be used when making decisions because it could be "out of date".
 #'
-#' @param whole_experiment Logical; if TRUE, uses all past experimental data for imputing outcomes.
-#' If FALSE, uses only data available up to the current period. In large datasets or with a high number
-#' of periods, setting this to FALSE can be more computationally intensive, though not a significant
+#' @param whole_experiment Logical; if `TRUE`, uses all past experimental data for imputing outcomes.
+#' If `FALSE`, uses only data available up to the current period. In large datasets or with a high number
+#' of periods, setting this to `FALSE` can be more computationally intensive, though not a significant
 #' contributor to total run time.
 #'
 #' @param control_condition Value of the control condition. Only necessary when `control_augment` is greater than 0. Internally this value
@@ -70,15 +70,15 @@
 #'
 #' @param block_cols A character vector of variables to block by. This vector should not be named.
 #'
-#' @param assignment_method A character string; one of "date", "batch", or "individual", to define the assignment into treatment waves. When using
-#' "batch" or "individual", ensure your dataset is pre-arranged in the proper order observations should be considered so that
+#' @param assignment_method A character string; one of `"date"`, `"batch"`, or `"individual"`, to define the assignment into treatment waves. When using
+#' `"batch"` or `"individual"`, ensure your dataset is pre-arranged in the proper order observations should be considered so that
 #' groups are assigned correctly. For "date", observations will be considered in chronological order.
-#' "individual" assignment can be computationally intensive for larger datasets.
+#' `"individual"` assignment can be computationally intensive for larger datasets.
 #'
 #' @param control_augment A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.
 #' Default is 0. It is not recommended to use this in conjunction with `random_assign_prop`.
 #'
-#' @param verbose Logical; whether or not to print intermediate messages. Default is FALSE.
+#' @param verbose Logical; whether or not to print intermediate messages. Default is `FALSE`.
 #'
 #' @param ndraws A numeric value; When Thompson sampling direct calculations fail, draws from a simulated posterior
 #' will be used to approximate the Thompson sampling probabilities. This is the number of simulations to use, the default
@@ -98,7 +98,7 @@
 #'
 #' @returns An object of class `mab`, containing:
 #' \itemize{
-#' \item `final_data`: The processed tibble or data.table, containing new columns pertaining to the results of the trial. Specifically Contains:
+#' \item `final_data`: The processed `tibble` or `data.table`, containing new columns pertaining to the results of the trial. Specifically Contains:
 #' \itemize{
 #' \item `period_number`: Assigned period for simulation.
 #' \item `mab_*`: New treatment conditions and outcomes under the simulation.
@@ -109,13 +109,13 @@
 #' \item `prior_rate_*`: Columns containing success rate for each treatment arm, from all periods before the observations period of the simulation.
 #' \item `*_assign_prob`: Columns containing probability of being assigned each treatment at the given period.
 #' }
-#' \item `bandits`: A tibble or data.table containing the UCB1 values or Thompson sampling posterior distributions for each period. Wide format,
+#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson sampling posterior distributions for each period. Wide format,
 #' each row is a period, and each columns is a treatment. Each row in this table represents the calculation from the given period
 #' after its values were imputed, so row 2 represents the calculations made in period 3, but represent the impact of period 2's new assignments.
-#' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period. Wide format,
+#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period. Wide format,
 #' each row is a period, and each columns is a treatment. Each row represents the probability of being assigned each treatment at each period, these have not
 #' been shifted like the bandits table.
-#' \item `estimates`: A tibble or data.table containing the
+#' \item `estimates`: A `tibble` or `data.table` containing the
 #' AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
 #' sample means and variances, for each treatment arm. Long format, treatment arm, and estimate type are columns along with the mean
 #' and variance.
@@ -123,8 +123,8 @@
 #' }
 #'
 #' @details
-#' For all the items laballed as a tibble or data.table, data.tables will be used if the user passed `data` is a
-#' data.table, tibbles used otherwise.
+#' For all the items laballed as a `tibble` or `data.table`, `data.table`s will be used if the user passed `data` is a
+#' `data.table`, `tibble`s used otherwise.
 #'
 #' ## Implementation
 #'
@@ -146,7 +146,7 @@
 #' are estimated via the grouped means of successes from the original data either from the whole trial, or
 #' up to that period, defined by `whole_experiment`.
 #'
-#' If `perfect_assignment` is FALSE, new dates of success will be imputed using averages
+#' If `perfect_assignment = FALSE`, new dates of success will be imputed using averages
 #' of those dates in the period, grouped by treatment block. Observations for which
 #' their treatment changed, but their outcome was success in the original and simulation, do not have their date changed.
 #' When the next period starts, the success dates are checked against the maximum/latest `assignment_date` for the period, and
@@ -161,12 +161,12 @@
 #'
 #' This procedure has the potential to be computationally expensive and time-consuming. Performance
 #' depends on the relative size of each period, number of periods, and overall size of the dataset. This function has
-#' separate support for data.frames and data.tables. If a data.frame is passed, the function uses a combination of dplyr, tidyr
-#' and base R to shape data, and run the simulation. However, if a data.table is passed the function exclusively uses the data.table
+#' separate support for `data.frame`s and `data.table`s. If a `data.frame` is passed, the function uses a combination of `dplyr`, `tidyr`
+#' and base `R` to shape data, and run the simulation. However, if a `data.table` is passed the function exclusively uses the `data.table`
 #' code for all the same operations.
 #'
-#' In general, smaller batches run faster under base R, while larger ones could benefit from the performance
-#' and memory efficiencies provided by data.table. However, we've observed larger datasets can cause numerical
+#' In general, smaller batches run faster under base `R`, while larger ones could benefit from the performance
+#' and memory efficiencies provided by `data.table`. However, we've observed larger datasets can cause numerical
 #' instability with some calculations in the Thompson sampling procedure. Internal safeguards exist to prevent this, but
 #' the best way to preempt any issues is to set `prior_periods` to a low number.
 #'
@@ -297,8 +297,8 @@ NULL
 #' @param message The message to be printed to screen, as a string.
 #' @param log Logical; Whether or not to print the message, this will always be
 #' the `verbose` argument passed from higher functions.
-#' @returns Text output of `message` to the console when `log` is TRUE. If
-#' `log` is FALSE, returns nothing.
+#' @returns Text output of `message` to the console when `log = TRUE`. If
+#' `log = FALSE`, returns nothing.
 #' @keywords internal
 
 verbose_log <- function(log, message) {

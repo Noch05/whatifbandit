@@ -90,7 +90,7 @@ print_mab <- function(mab) {
 }
 
 #------------------------------------------------------------------------------
-##' Summary Generic For "mab" Class
+##' Summary Generic For `mab` Class
 #' @description
 #' Summarizes the Results of a Single Multi-Arm Bandit Trial. Provides
 #' confidence intervals around the AIPW estimates, final calculations

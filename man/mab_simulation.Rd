@@ -25,41 +25,41 @@ mab_simulation(
 )
 }
 \arguments{
-\item{data}{A data.frame, data.table, or tibble containing input data from the trial. This should be the results
-of a traditional Randomized Controlled Trial (RCT). Any data.frames will be converted to tibbles internally.}
+\item{data}{A \code{data.frame}, \code{data.table}, or \code{tibble} containing input data from the trial. This should be the results
+of a traditional Randomized Controlled Trial (RCT). Any \code{data.frame}s will be converted to tibbles internally.}
 
-\item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method} is "date".
-Acceptable values are "day", "week", or "month". "month" does not require an additional column with the months of each observation,
+\item{time_unit}{A character string specifying the unit of time for assigning periods when \code{assignment_method ="date"}.
+Acceptable values are \verb{"day", "week",} or \code{"month"}. \code{"month"} does not require an additional column with the months of each observation,
 but it can accept a separate \code{month_col}. If \code{month_col} is specified, the periods follow the calendar months strictly, and when it is not
 specified months are simply used as the time interval. For example if a dataset has dates starting on July 26th, under month based assignment and
 a specified \code{month_col} the dates July 26th and August 3st would be in different periods, but if the \code{month_col} was not specified, they would be
 in the same period because the dates are less than one month apart.}
 
-\item{perfect_assignment}{Logical; if TRUE, assumes perfect information for treatment assignment
+\item{perfect_assignment}{Logical; if \code{TRUE}, assumes perfect information for treatment assignment
 (i.e., all outcomes are observed regardless of the date).
-If FALSE, hides outcomes not yet theoretically observed, based
+If \code{FALSE}, hides outcomes not yet theoretically observed, based
 on the dates treatments would have been assigned for each wave.
 This is useful when simulating batch-based assignment where treatments were assigned
 on a given day whether or not all the information from a prior batch was available and
 you have exact dates treatments were assigned.}
 
-\item{algorithm}{A character string specifying the MAB algorithm to use. Options are "thompson" or "ucb1". Algorithm
+\item{algorithm}{A character string specifying the MAB algorithm to use. Options are \code{"Thompson"} or \code{"UCB1"}, ignoring case. Algorithm
 defines the adaptive assignment process. Mathematical details on these algorithms
 can be found in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
 \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}
 
 \item{period_length}{A numeric value of length 1; represents the length of each treatment period.
-If assignment method is "date", this length refers the number of units specified in \code{time_unit}
-(i.e., if "day", 10 would be 10 days). If assignment method is "batch", this refers to the number of people in each batch.}
+If \code{assignment_method} is "date", this length refers the number of units specified in \code{time_unit}
+(i.e., if \verb{"day"``, 10 would be 10 days). If }assignment_method\code{=}"batch"`, this refers to the number of people in each batch.}
 
-\item{prior_periods}{A numeric value of length 1, or the character string "All"; number of previous periods to use
+\item{prior_periods}{A numeric value of length 1, or the string \code{"All"}; number of previous periods to use
 in the treatment assignment model. This is used to implement the stationary/non-stationary bandit.
 For example, a non-stationary bandit assumes the true probability of success for each treatment changes over time, so to
 account for that, not all prior data should be used when making decisions because it could be "out of date".}
 
-\item{whole_experiment}{Logical; if TRUE, uses all past experimental data for imputing outcomes.
-If FALSE, uses only data available up to the current period. In large datasets or with a high number
-of periods, setting this to FALSE can be more computationally intensive, though not a significant
+\item{whole_experiment}{Logical; if \code{TRUE}, uses all past experimental data for imputing outcomes.
+If \code{FALSE}, uses only data available up to the current period. In large datasets or with a high number
+of periods, setting this to \code{FALSE} can be more computationally intensive, though not a significant
 contributor to total run time.}
 
 \item{blocking}{Logical; whether or not to use treatment blocking. Treatment blocking is used to ensure an even-enough
@@ -83,12 +83,12 @@ be created from your \code{date_col} via \code{lubridate::month(data[[date_col]]
 Used to simulate imperfect information on the part of researchers conducting an adaptive trial. Must be of type \code{Date}, not a character string.
 }}
 
-\item{verbose}{Logical; whether or not to print intermediate messages. Default is FALSE.}
+\item{verbose}{Logical; whether or not to print intermediate messages. Default is \code{FALSE}.}
 
-\item{assignment_method}{A character string; one of "date", "batch", or "individual", to define the assignment into treatment waves. When using
-"batch" or "individual", ensure your dataset is pre-arranged in the proper order observations should be considered so that
+\item{assignment_method}{A character string; one of \code{"date"}, \code{"batch"}, or \code{"individual"}, to define the assignment into treatment waves. When using
+\code{"batch"} or \code{"individual"}, ensure your dataset is pre-arranged in the proper order observations should be considered so that
 groups are assigned correctly. For "date", observations will be considered in chronological order.
-"individual" assignment can be computationally intensive for larger datasets.}
+\code{"individual"} assignment can be computationally intensive for larger datasets.}
 
 \item{control_augment}{A numeric value ranging from 0 to 1; proportion of each wave guaranteed to receive the "Control" treatment.
 Default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.}
@@ -112,10 +112,10 @@ a whole number, and that many rows are selected for random assignment.}
 \value{
 : A named list containing:
 \itemize{
-\item \code{final_data}: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
-\item \code{bandits}: A tibble or data.table containing the UCB1 values or Thompson sampling posterior distributions for each period.
-\item \code{assignment_probs}: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
-\item \code{estimates}: A tibble or data.table containing the
+\item \code{final_data}: The processed \code{tibble} or \code{data.table}, containing new columns pertaining to the results of the trial.
+\item \code{bandits}: A \code{tibble} or \code{data.table} containing the UCB1 values or Thompson sampling posterior distributions for each period.
+\item \code{assignment_probs}: A \code{tibble} or \code{data.table} containing the probability of being assigned each treatment arm at a given period.
+\item \code{estimates}: A \code{tibble} or \code{data.table} containing the
 AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
 sample means and variances, for each treatment arm.
 \item \code{settings}: A named list of the configuration settings used in the trial.

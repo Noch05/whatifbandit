@@ -11,15 +11,15 @@
 #' \itemize{
 #' \item `data_cols`: List of necessary columns in `data` as strings and symbols.
 #' \item `block_cols`: List of columns to block by in `data` as strings and symbols.
-#' \item `data`: Prepared tibble/data.table containing all the necessary columns to
+#' \item `data`: Prepared `tibble` or `data.table` containing all the necessary columns to
 #' conduct the adaptive trial simulation.
 #' columns required for [mab_simulation()].
 #' \item `imputation_information`: List containing necessary information
 #' for outcome and date imputation for [mab_simulation()].
 #' }
 #' @details
-#' If a data.frame is passed as input data it is internally converted into
-#' a tibble. If a data.table is passed it is copied to avoid modifying the
+#' If a `data.frame` is passed as input data it is internally converted into
+#' a `tibble`. If a `data.table` is passed it is copied to avoid modifying the
 #' original dataset in the users environment.
 
 #'
@@ -159,10 +159,10 @@ pre_mab_simulation <- function(
 #'
 #' @returns: A named list containing:
 #' \itemize{
-#' \item `final_data`: The processed tibble or data.table, containing new columns pertaining to the results of the trial.
-#' \item `bandits`: A tibble or data.table containing the UCB1 values or Thompson sampling posterior distributions for each period.
-#' \item `assignment_probs`: A tibble or data.table containing the probability of being assigned each treatment arm at a given period.
-#' \item `estimates`: A tibble or data.table containing the
+#' \item `final_data`: The processed `tibble` or `data.table`, containing new columns pertaining to the results of the trial.
+#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson sampling posterior distributions for each period.
+#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period.
+#' \item `estimates`: A `tibble` or `data.table` containing the
 #' AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
 #' sample means and variances, for each treatment arm.
 #' \item `settings`: A named list of the configuration settings used in the trial.

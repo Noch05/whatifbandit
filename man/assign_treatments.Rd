@@ -14,9 +14,9 @@ assign_treatments(
 )
 }
 \arguments{
-\item{current_data}{A tibble/data.table with only observations from the current sampling period.}
+\item{current_data}{A \code{tibble} or \code{data.table} with only observations from the current sampling period.}
 
-\item{probs}{Named numeric Vector; probability of assignment for each treatment condition.}
+\item{probs}{Named numeric vector; probability of assignment for each treatment condition.}
 
 \item{blocking}{Logical; whether or not to use treatment blocking. Treatment blocking is used to ensure an even-enough
 distribution of treatment conditions across blocks. For example, blocking by gender would mean the randomized assignment should
@@ -34,8 +34,8 @@ will have a \code{random_assign_prop} probability of being selected for random a
 a whole number, and that many rows are selected for random assignment.}
 }
 \value{
-Updated tibble/data.table with the new treatment conditions for each observation, and whether imputation is required.
-If this treatment is different then from under the original experiment, the 'impute_req' is 1, and else is 0 for the observation.
+Updated \code{tibble} or \code{data.table} with the new treatment conditions for each observation, and whether imputation is required.
+If this treatment is different then from under the original experiment, then 'impute_req = 1`, and else is 0 for the observation.
 }
 \description{
 Assigns new treatments for an assignment wave based on the assignment probabilities provided from

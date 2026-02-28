@@ -7,13 +7,13 @@
 #' @inheritParams single_mab_simulation
 #' @inheritParams create_prior
 #' @inheritParams cols
-#' @param current_data A tibble/data.table with only observations from the current sampling period.
-#' @param prior_data A tibble/data.table with only the observations from the prior index.
-#' @returns A tibble/data.table containing the number of successes, and number of people for each
+#' @param current_data A `tibble` or `data.table` with only observations from the current sampling period.
+#' @param prior_data A `tibble` or `data.table` with only the observations from the prior index.
+#' @returns A `tibble` or `data.table` containing the number of successes, and number of people for each
 #' treatment condition.
 #'
 #' @details
-#' When `perfect_assignment` is FALSE, the maximum value from the specified
+#' When `perfect_assignment = FALSE`, the maximum value from the specified
 #' `assignment_date_col` in the current data is taken as the last possible date
 #' the researchers conducting the experiment could have learned about a treatment outcome.
 #' All successes that occur past this date are masked and treated as failures for the purposes
@@ -149,7 +149,7 @@ get_past_results.data.table <- function(
 
 #-------------------------------------------------------------------------------
 #' Calculate Multi-Arm Bandit Decision Based on Algorithm
-#' @description Calculates the best treatment for a given period using either a UCB1 or Thompson sampling algorithm.
+#' @description Calculates the best treatment for a given period using either a UCB1 or Thompson Sampling algorithm.
 #' Thompson sampling is done using [bandit::best_binomial_bandit()] from
 #' the \href{https://cran.r-project.org/package=bandit}{bandit}
 #' package and UCB1 values are calculated using the well-defined formula that can be found
@@ -247,13 +247,13 @@ get_bandit <- function(
 #' @title Thompson sampling Algorithm
 #' @inheritParams get_bandit
 #' @details
-#' Thompson sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
+#' Thompson Sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
 #' package but the direct calculation can fail. If this occurs, a simulation based method is used
 #' instead to estimate the posterior distribution, and the user receives a warning.
 #'
 #'
 #' @returns A named list of length 2, where element 1 is the named numeric vector of Thompson
-#' sampling probabilities, and element 2 is a reference to the same vector. The second element is
+#' Sampling probabilities, and element 2 is a reference to the same vector. The second element is
 #' adjusted later in the simulation based on what the user has set for `control_augment` and `random_assign_prop` to reflect the
 #' probability of assignment to a given treatment at that period.
 #' @keywords internal
@@ -311,10 +311,10 @@ get_bandit.thompson <- function(
   return(list(bandit = bandit, assignment_prob = bandit))
 }
 #' @name bandit_invalid
-#' @title Checks Validity of Thompson sampling probabilities
-#' @description Checks if the Thompson sampling probabilities either sum arbitrarily close
+#' @title Checks Validity of Thompson Sampling probabilities
+#' @description Checks if the Thompson Sampling probabilities either sum arbitrarily close
 #' to 0 or if any of them are NA, indicating the direct calculation failed or did not converge.
-#' @param bandit a numeric vector of Thompson sampling probabilities.
+#' @param bandit a numeric vector of Thompson Sampling probabilities.
 #' @returns Logical; TRUE if the vector is invalid, FALSE if valid
 #' @keywords internal
 bandit_invalid <- function(bandit) {
@@ -326,7 +326,7 @@ bandit_invalid <- function(bandit) {
 #' @description Calculates upper confidence bounds for each treatment arm
 #'
 #' @inheritParams get_bandit
-#' @returns A named list with 2 elements: a tibble/data.table containing UCB1 and success rate for each condition,
+#' @returns A named list with 2 elements: a `tibble` or `data.table` containing UCB1 and success rate for each condition,
 #' and a named numeric vector of assignment probabilities, where the highest UCB1 out of the treatments
 #' is assigned 1, and the rest 0.
 #' @keywords internal
@@ -378,10 +378,10 @@ get_bandit.ucb1 <- function(past_results, conditions, current_period) {
 #' @name assign_treatments
 #' @inheritParams single_mab_simulation
 #' @inheritParams cols
-#' @param probs Named numeric Vector; probability of assignment for each treatment condition.
+#' @param probs Named numeric vector; probability of assignment for each treatment condition.
 #' @inheritParams get_past_results
-#' @returns Updated tibble/data.table with the new treatment conditions for each observation, and whether imputation is required.
-#' If this treatment is different then from under the original experiment, the 'impute_req' is 1, and else is 0 for the observation.
+#' @returns Updated `tibble` or `data.table` with the new treatment conditions for each observation, and whether imputation is required.
+#' If this treatment is different then from under the original experiment, then 'impute_req = 1`, and else is 0 for the observation.
 #'
 #' @details
 #' The number of rows which are randomly assigned in each period is `random_assign_prop` multiplied by
