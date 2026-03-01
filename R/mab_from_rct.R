@@ -300,32 +300,35 @@ mab_from_rct.bernoulli <- function(
     impute_cluster = impute_cluster
   )
 
-  results <- mab_simulation(
+  results <- simulate_mab_rct.bernoulli(
     data = prepped$data,
-    time_unit = prepped$character_args$time_unit,
+    time_unit = prepped$char_args$time_unit,
     period_length = period_length,
-    prior_periods = prepped$character_args$prior_periods,
-    algorithm = prepped$character_args$algorithm,
+    prior_periods = prior_periods,
+    algorithm = prepped$char_args$algorithm,
     whole_experiment = whole_experiment,
-    perfect_assignment = perfect_assignment,
+    delayed_feedback = delayed_feedback,
     conditions = prepped$conditions,
     blocking = blocking,
-    block_cols = prepped$block_cols,
+    clustering = clustering,
     data_cols = prepped$data_cols,
     verbose = verbose,
-    assignment_method = prepped$character_args$assignment_method,
+    period_method = prepped$char_args$period_method,
     control_augment = control_augment,
     imputation_information = prepped$imputation_information,
     ndraws = ndraws,
-    random_assign_prop = random_assign_prop
+    random_assign_prop = random_assign_prop,
+    starts = prepped$period_starts,
+    ends = prepped$period_ends,
   )
+
   results$settings <- list(
     original_data = data,
-    algorithm = prepped$character_args$algorithm,
-    assignment_method = prepped$character_args$assignment_method,
-    time_unit = prepped$character_args$time_unit,
+    algorithm = prepped$char_args$algorithm,
+    period_method = prepped$char_args$period_method,
+    time_unit = prepped$char_args$time_unit,
     period_length = period_length,
-    prior_periods = prepped$character_args$prior_periods,
+    prior_periods = prior_periods,
     control_augment = control_augment,
     random_assign_prop = random_assign_prop,
     control = as.character(control_condition),
@@ -333,10 +336,17 @@ mab_from_rct.bernoulli <- function(
     perfect_assignment = perfect_assignment,
     whole_experiment = whole_experiment,
     blocking = blocking,
-    block_cols = prepped$block_cols$name,
-    ndraws = ndraws
+    block_cols = prepped$data_cols$block_cols$name,
+    cluster_col = prepped$data_cols$cluster_col$name,
+    ndraws = ndraws,
+    impute_cluster = impute_cluster,
+    delayed_feedback = delayed_feedback,
+    keep_data = keep_data,
+    r = r,
+    seeds = seeds
   )
-  class(results) <- c("mab", class(results))
+
+  class(results) <- c("fixed", "mab", class(results))
 
   return(results)
 }

@@ -104,7 +104,7 @@ imputation_precompute.data.frame <- function(
 }
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-#' @method imputation_precompute `data.table`
+#' @method imputation_precompute data.table
 #' @title
 #' [imputation_precompute()] for `data.table`s
 #' @inheritParams imputation_precompute
@@ -369,7 +369,7 @@ check_impute.data.frame <- function(
   return(imputation_information)
 }
 #-------------------------------------------------------------------------------
-#' @method check_impute `data.table`
+#' @method check_impute data.table
 #' @title [check_impute()] for `data.tables`
 #' @inheritParams check_impute
 #' @noRd
@@ -465,7 +465,7 @@ impute_success <- function(
 }
 #-------------------------------------------------------------------------------
 #' @inheritParams impute_success
-#' @method impute_success `data.frame`
+#' @method impute_success data.frame
 #' @title [impute_success()] for `data.frames`
 #' @noRd
 
@@ -521,7 +521,7 @@ impute_success.data.frame <- function(
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #' @inheritParams impute_success
-#' @method impute_success `data.table`
+#' @method impute_success data.table
 #' @title [impute_success()] for `data.table`s
 #' @noRd
 impute_success.data.table <- function(

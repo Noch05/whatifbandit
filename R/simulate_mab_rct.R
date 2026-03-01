@@ -1,3 +1,98 @@
+#------------------------------------------------------------------------------
+#' @title Simulates Multi-Arm Bandit Trial From Prepared Inputs
+#' @name simulate_mab_rct.bernoulli
+#'
+#' @description Internal helper to [single_mab_simulation()]
+#' and [multiple_mab_simulation()]. Centralizes necessary functions to conduct a
+#' single Multi-Arm-Bandit Trial with adaptive inference. It assumes all inputs have
+#' been preprocessed by [pre_mab_simulation()].
+#' @inheritParams single_mab_simulation
+#' @inheritParams run_mab_trial
+#'
+#' @returns: A named list containing:
+#' \itemize{
+#' \item `final_data`: The processed `tibble` or `data.table`, containing new columns pertaining to the results of the trial.
+#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson sampling posterior distributions for each period.
+#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period.
+#' \item `estimates`: A `tibble` or `data.table` containing the
+#' AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
+#' sample means and variances, for each treatment arm.
+#' \item `settings`: A named list of the configuration settings used in the trial.
+#' }
+#' @seealso
+#'* [single_mab_simulation()]
+#'* [multiple_mab_simulation()]
+#' @keywords internal
+#'
+
+simulate_mab_rct.bernoulli <- function(
+  data,
+  time_unit,
+  perfect_assignment,
+  algorithm,
+  period_length,
+  prior_periods,
+  whole_experiment,
+  conditions,
+  blocking,
+  block_cols,
+  data_cols,
+  verbose,
+  assignment_method,
+  control_augment,
+  imputation_information,
+  ndraws,
+  random_assign_prop,
+  starts,
+  ends
+) {
+  sim_results <- run_mab_trial(
+    data = data,
+    time_unit = time_unit,
+    period_length = period_length,
+    prior_periods = prior_periods,
+    algorithm = algorithm,
+    whole_experiment = whole_experiment,
+    perfect_assignment = perfect_assignment,
+    conditions = conditions,
+    blocking = blocking,
+    block_cols = block_cols,
+    data_cols = data_cols,
+    verbose = verbose,
+    control_augment = control_augment,
+    imputation_information = imputation_information,
+    ndraws = ndraws,
+    random_assign_prop,
+    starts = starts,
+    ends = ends
+  )
+  periods <- base::max(sim_results$final_data$period_number)
+
+  sim_results$final_data <- get_iaipw(
+    data = sim_results$final_data,
+    assignment_probs = sim_results$assignment_probs,
+    conditions = conditions,
+    periods = periods,
+    verbose = verbose
+  )
+  estimates <- adaptive_aipw(
+    data = sim_results$final_data,
+    assignment_probs = sim_results$assignment_probss,
+    periods = periods,
+    conditions = conditions,
+    verbose = verbose
+  )
+
+  results <- list(
+    final_data = sim_results$final_data,
+    bandits = sim_results$bandits,
+    assignment_probs = sim_results$assignment_probs,
+    estimates = estimates,
+    settings = NULL
+  )
+  return(results)
+}
+
 #' Runs Multi-Arm Bandit Trial
 #' @name run_mab_trial
 #'
@@ -10,7 +105,6 @@
 #' @inheritParams single_mab_simulation
 #' @param imputation_information Object created by [imputation_precompute()] containing the conditional means and success dates
 #' for each treatment block to impute from.
-#' @inheritParams cols
 #'
 #'
 #' @returns  A named list containing:

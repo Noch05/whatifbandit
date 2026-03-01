@@ -17,6 +17,8 @@
 #' columns required for [mab_simulation()].
 #' \item `imputation_information`: List containing necessary information
 #' for outcome and date imputation for [mab_simulation()].
+#' \item `period_starts`: Numeric vector where element `i` is the starting row number of period `i`
+#' \item `period_starts`: Numeric vector where element `i` is the ending row number of period `i`
 #' }
 #' @details
 #'  If a `data.table` is passed it is copied to avoid modifying the
@@ -127,12 +129,18 @@ prep_rct_data <- function(
     delayed_feedback = delayed_feedback
   )
 
+  period_sizes <- get_period_sizes(data, char_args$period_method, period_length)
+  end_idxs <- base::cumsum(period_sizes)
+  start_idxs <- c(1, end_idxs[-base::length(period_sizes)] + 1)
+
   return(list(
     data_cols = data_cols,
     data = data,
     imputation_information = imputation_information,
     char_args = char_args,
-    conditions = conditions
+    conditions = conditions,
+    period_starts = start_idxs,
+    period_ends = end_idxs
   ))
 }
 #---------------------------------------------------------------------------------
@@ -400,7 +408,7 @@ create_cutoff.batch <- function(data, period_length) {
 #' \item `impute_req`: Binary indicator for imputation requirement, NA until assigned.
 #' \item `new_success_date`: New variable to hold the new success date under Multi-arm bandit procedure, NA until assigned.
 #' \item `block`: New variable indicating the variables to block by for assignment.
-#' \item `treatment_block`: New variable combining block with original treatment condition.
+#' \item `treatment_group`: New variable combining block with original treatment condition.
 #' }
 #'
 #' @keywords internal
@@ -417,7 +425,7 @@ create_new_cols <- function(
 # --------------------------------------------------
 
 #' @title [create_new_cols()] for `data.frame`s and `tibble`s
-#' @method create_new_cols `data.frame`
+#' @method create_new_cols data.frame
 #' @inheritParams create_new_cols
 #' @noRd
 
@@ -492,7 +500,7 @@ create_new_cols.data.frame <- function(
 }
 #---------------------------------------------------------------------------------
 #' @title [create_new_cols()] for `data.table`s
-#' @method create_new_cols `data.table`
+#' @method create_new_cols data.table
 #' @inheritParams create_new_cols
 #' @noRd
 
@@ -547,4 +555,57 @@ create_new_cols.data.table <- function(
     .SDcols = treatment_block_cols
   ]
   return(invisible(data))
+}
+
+#' @title Compute exact period sizes
+#' @name get_period_sizes
+#'
+#' @inheritParams mab_from_rct.bernoulli
+#'
+#' @returns Numeric vector of `length(max(period_nummber))` with each element representing the number of units in each period.
+#'
+#' @keywords internal
+get_period_sizes <- function(
+  data,
+  period_method,
+  period_length
+) {
+  if (period_method == "individual") {
+    return(base::rep(1, base::nrow(data)))
+  }
+  if (period_method == "batch") {
+    n_periods <- base::ceiling(base::nrow(data) / period_length)
+    sizes <- c(
+      base::rep(base::floor(base::nrow(data) / n_periods), n_periods - 1),
+      base::nrow(data) %% n_periods
+    )
+    sizes[n_periods] <- if (sizes[n_periods] == 0) {
+      sizes[n_periods - 1]
+    } else {
+      sizes[n_periods]
+    }
+    return(sizes)
+  }
+  base::UseMethod("get_period_sizes", data)
+}
+
+#' @title [get_period_sizes()] for `data.frames`s
+#' @method  get_period_sizes data.frame
+#' @inheritParams get_period_sizes
+#' @noRd
+get_period_sizes.data.frame <- function(data, period_method, period_length) {
+  data |>
+    dplyr::group_by(period_number) |>
+    dplyr::summarize(count = dplyr::n()) |>
+    dplyr::arrange(period_number) |>
+    dplyr::pull(count)
+}
+
+#' @title [get_period_sizes()] for `data.tables`s
+#' @method  get_period_sizes data.table
+#' @inheritParams get_period_sizes
+#' @noRd
+get_period_sizes.data.table <- function(data, period_method, period_length) {
+  counts <- data[, .(count = .N), group_by = period_nummber]
+  counts$count
 }
