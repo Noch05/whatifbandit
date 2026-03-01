@@ -330,7 +330,9 @@ check_posint <- function(...) {
 
   valid_strings <- list(
     ndraws = NULL,
-    prior_periods = c("all")
+    prior_periods = c("all"),
+    n = NULL,
+    t = NULL
   )
 
   for (name in names(args)) {
