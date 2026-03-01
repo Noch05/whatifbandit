@@ -4,18 +4,19 @@
 #' procedure. Calculates the probabilities of success for each treatment block (treatment arm + any blocking specified),
 #' using the grouped means of the original experimental data. When `delayed_feedback = FALSE`, the average date of
 #' success is calculated for each treatment block at every period.
-#' @inheritParams single_mab_simulation
+#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams prep_rct_data
 #' @returns A named list containing:
 #' \itemize{
-#' \item `original_summary`: The `tibble`(s) or `data.table`(s) containing the probability of success for each
+#' \item `original_summary`: The `data.frame`(s) or `data.table`(s) containing the probability of success for each
 #' treatment block, at each period.
-#' \item `dates_summary`: A `tibble` or `data.table` containing the average success date for
+#' \item `dates_summary`: A `data.frame` or `data.table` containing the average success date for
 #' each treatment block at each treatment period.
 #' }
 #' @details
 #' [imputation_precompute()] is an optimization, meant to reduce the cost of calculating these variables
-#' within the simulation loop. When `whole_experiment = TRUE`, `original_summary` is a single `tibble` or `data.table`,
-#' and used through the simulation. When `whole_experiment = FALSE`, `original_summary` is a list of `tibble`s or `data.table`s,
+#' within the simulation loop. When `whole_experiment = TRUE`, `original_summary` is a single `data.frame` or `data.table`,
+#' and used through the simulation. When `whole_experiment = FALSE`, `original_summary` is a list of `data.frame`s or `data.table`s,
 #' each containing the cumulative probabilities of all periods up to the index `i`.
 #'
 #' If `perfect_assignment = FALSE`, `dates_summary` is not calculated, and is `NULL`.

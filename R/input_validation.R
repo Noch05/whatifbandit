@@ -59,7 +59,7 @@ validate_inputs <- function(
   )
 
   # Checking Column Proper Columns are Provided
-  impute_clustercheck_cols(
+  check_cols(
     data = data,
     period_method = period_method,
     time_unit = time_unit,
