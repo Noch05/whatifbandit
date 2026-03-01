@@ -275,7 +275,7 @@ mab_from_rct.bernoulli <- function(
 
   prepped <- pre_mab_simulation(
     data = data,
-    assignment_method = assignment_method,
+    period_method = period_method,
     algorithm = algorithm,
     control_condition = control_condition,
     prior_periods = prior_periods,
@@ -290,7 +290,10 @@ mab_from_rct.bernoulli <- function(
     check_args = check_args,
     verbose = verbose,
     ndraws = ndraws,
-    random_assign_prop = random_assign_prop
+    random_assign_prop = random_assign_prop,
+    r = r,
+    seeds = seeds,
+    keep_data = keep_data
   )
 
   results <- mab_simulation(

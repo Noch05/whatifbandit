@@ -1,9 +1,9 @@
-#' @name pre_mab_simulation
-#' @inheritParams single_mab_simulation
-#' @title Pre-Simulation Setup for an adaptive Multi-Arm-Bandit Trial
+#' @name prep_rct_data
+#' @inheritParams mab_from_rct.bernoulli()
+#' @title Pre-Simulation Setup to Simulate a Multi Arm Bandit Trial From an RCT
 
 #' @description Common function for all the actions that need to take place before
-#' running the Multi-Arm-Bandit simulation. Intakes the data and column names to
+#' running the Multi-Arm-Bandit re-simulation. Intakes the data and column names to
 #' check for valid arguments, format and create new columns as needed, and pre-compute
 #' key values to avoid doing so within the simulation loop.
 #'
@@ -23,85 +23,71 @@
 #' original dataset in the users environment.
 
 #'
-#' @seealso
-#' * [single_mab_simulation()]
-#' * [multiple_mab_simulation()]
 #' @keywords internal
 
-pre_mab_simulation <- function(
+prep_rct_data <- function(
   data,
-  assignment_method,
+  period_method,
   algorithm,
   control_condition,
   prior_periods,
   perfect_assignment,
   whole_experiment,
-  blocking,
   data_cols,
   control_augment,
   time_unit,
   period_length,
-  block_cols,
   verbose,
   ndraws,
   random_assign_prop,
-  check_args
+  check_args,
+  r,
+  seeds,
+  keep_data
 ) {
   if (base::is.null(data) || !base::is.data.frame(data)) {
     rlang::abort("Input 'data' must be a non-null data.frame.")
   }
   if (data.table::is.data.table(data)) {
     data <- data.table::copy(data)
-  } else if (!tibble::is_tibble(data)) {
-    data <- tibble::as_tibble(data)
   }
+  data_cols <- base::lapply(data_cols, \(col) {
+    rlang_func <- if (base::length(col) > 1) rlang::syms else rlang::sym
+    base::list(name = col, sym = rlang_func(x))
+  }) |>
+    stats::setNames(base::names(data_cols))
 
-  data_cols <- purrr::map(
-    data_cols,
-    ~ list(
-      name = .x,
-      sym = rlang::sym(.x)
-    )
-  ) |>
-    stats::setNames(names(data_cols))
-
-  if (!base::is.null(block_cols)) {
-    block_cols <- list(name = block_cols, symbol = rlang::syms(block_cols))
-  }
-  character_args <- purrr::map(
-    list(
+  char_args <- base::lapply(
+    base::list(
       assignment_method = assignment_method,
       algorithm = algorithm,
       time_unit = time_unit,
-      prior_periods = prior_periods
     ),
-    ~ {
-      if (is.character(.x)) {
-        base::tolower(.x)
-      } else {
-        .x
-      }
+    \(arg) {
+      if (base::is.chararcter(arg)) base::tolower(arg) else arg
     }
   )
-
   # Input Validation
   if (check_args) {
     validate_inputs(
       data = data,
-      time_unit = character_args$time_unit,
+      time_unit = char_args$time_unit,
       perfect_assignment = perfect_assignment,
-      algorithm = character_args$algorithm,
+      algorithm = char_args$algorithm,
       period_length = period_length,
       whole_experiment = whole_experiment,
-      prior_periods = character_args$prior_periods,
+      prior_periods = prior_periods,
       data_cols = data_cols,
       block_cols = block_cols,
       blocking = blocking,
-      assignment_method = character_args$assignment_method,
+      period_method = char_args$period_method,
       verbose = verbose,
       control_augment = control_augment,
       ndraws = ndraws,
-      random_assign_prop = random_assign_prop
+      random_assign_prop = random_assign_prop,
+      r = r,
+      keep_data = keep_data,
+      seeds = seeds
     )
   }
   conditions <- create_conditions(
