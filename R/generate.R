@@ -10,7 +10,7 @@
 #' @returns Nothing. Throws an error if validation fails.
 #'
 #' @keywords internal
-check_probs <- function(p, treatments, blocks = NULL, clusters = NULL) {
+check_p <- function(p, blocks = NULL, clusters = NULL) {
   flat_p <- base::unlist(p)
   if (base::any(flat_p > 1 | flat_p < 0)) {
     rlang::abort(c(
@@ -18,10 +18,13 @@ check_probs <- function(p, treatments, blocks = NULL, clusters = NULL) {
       "x" = base::paste0("You passed: ", base::paste0(flat_p, collapse = ", "))
     ))
   }
+  if (base::is.null(blocks) && base::is.null(clusters)) {
+    return(0)
+  }
 
   n_clusters <- base::nlevels(clusters)
   n_blocks <- base::nlevels(blocks)
-  n_treat <- base::nlevels(treatments)
+  n_treat <- base::length(p)
 
   req_prob <- if (n_clusters > 0) {
     n_treat * n_clusters
@@ -209,6 +212,20 @@ extract_success_prob <- function(
   }
 }
 
+#' Add names to an Unnamed Vector
+#' @name add_names
+#' @description Adds `names` attribute to an unnamed vector based on the provided prefix.
+#' @param x Input vector to be named
+#' @param prefix String to be prepended to index of an element to create names. e.g. if "T",
+#' `names(x) <- c("T1", "T2",..., "Tn")`
+#' @returns Original vector with new names, or the original vector if it was already named.
+
+add_names <- function(x, prefix) {
+  if (base::is.null(base::names(x))) {
+    base::names(x) <- base::paste0(prefix, base::seq_along(x))
+  }
+  x
+}
 
 #' Generate a Bernoulli RCT dataset
 #' @name generate_rct.bernoulli
@@ -216,8 +233,10 @@ extract_success_prob <- function(
 #' complete, block, cluster, and block-and-cluster randomized assignment, optional
 #' assignment dates, and a user-supplied time-to-event model for successful observations.
 #'
+#'
 #' @param n A positive integer. Total number of units to simulate.
-#' @param p The true probabilities of success for each treatment arm. Can be:
+#' @param p The true probabilities of success for each treatment arm, where `length(p)` is the number of
+#' treatment arms. Can be:
 #'   \describe{
 #'     \item{Numeric vector}{A named vector where `names(p)` are the treatment
 #'       labels, e.g. `c(T1 = 0.2, T2 = 0.4)`. Used when there are no blocks
@@ -280,11 +299,7 @@ generate_rct.bernoulli <- function(
 ) {
   check_posint(n)
   check_logical(dt)
-  base::names(p) <- if (base::is.null(names(p))) {
-    base::paste0("T", 1:base::length(p))
-  } else {
-    base::names(p)
-  }
+  p <- add_names(p, "T")
 
   blocks <- generate_group_membership(n, blocks)
   clusters <- generate_group_membership(n, clusters, blocks = blocks)
@@ -300,7 +315,7 @@ generate_rct.bernoulli <- function(
     clusters = clusters
   )
 
-  check_probs(p, treatments = treatments, blocks = blocks, clusters = clusters)
+  check_p(p, blocks = blocks, clusters = clusters)
 
   success_prob <- extract_success_prob(
     p = p,

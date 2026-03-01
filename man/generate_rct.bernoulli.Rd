@@ -18,7 +18,8 @@ generate_rct.bernoulli(
 \arguments{
 \item{n}{A positive integer. Total number of units to simulate.}
 
-\item{p}{The true probabilities of success for each treatment arm. Can be:
+\item{p}{The true probabilities of success for each treatment arm, where \code{length(p)} is the number of
+treatment arms. Can be:
 \describe{
 \item{Numeric vector}{A named vector where \code{names(p)} are the treatment
 labels, e.g. \code{c(T1 = 0.2, T2 = 0.4)}. Used when there are no blocks

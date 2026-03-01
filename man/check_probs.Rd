@@ -2,12 +2,14 @@
 % Please edit documentation in R/generate.R
 \name{check_probs}
 \alias{check_probs}
+\alias{check_p}
 \title{Validate Bernoulli Success Probabilities}
 \usage{
-check_probs(p, treatments, blocks = NULL, clusters = NULL)
+check_p(p, blocks = NULL, clusters = NULL)
 }
 \arguments{
-\item{p}{The true probabilities of success for each treatment arm. Can be:
+\item{p}{The true probabilities of success for each treatment arm, where \code{length(p)} is the number of
+treatment arms. Can be:
 \describe{
 \item{Numeric vector}{A named vector where \code{names(p)} are the treatment
 labels, e.g. \code{c(T1 = 0.2, T2 = 0.4)}. Used when there are no blocks
@@ -25,9 +27,6 @@ per-cluster success probabilities. e.g.
 Accessed as \code{p[[treatment]][[block]][cluster]}.}
 }
 All probability values must be between 0 and 1.}
-
-\item{treatments}{A character or factor vector of treatment assignments of
-length \code{n}.}
 
 \item{blocks}{A named numeric vector of block membership probabilities (must sum to 1), where \code{names(blocks)}
 are the block labels. Units are assigned to blocks via \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}. Pass \code{NULL} (default) for no blocking.}
