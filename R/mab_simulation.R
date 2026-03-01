@@ -43,7 +43,10 @@ prep_rct_data <- function(
   check_args,
   r,
   seeds,
-  keep_data
+  keep_data,
+  impute_cluster,
+  blocking,
+  clustering
 ) {
   if (base::is.null(data) || !base::is.data.frame(data)) {
     rlang::abort("Input 'data' must be a non-null data.frame.")
@@ -87,7 +90,8 @@ prep_rct_data <- function(
       keep_data = keep_data,
       seeds = seeds,
       blocking = blocking,
-      clustering = clustering
+      clustering = clustering,
+      impute_cluster = impute_cluster
     )
   }
   conditions <- create_conditions(
@@ -111,7 +115,8 @@ prep_rct_data <- function(
       data_cols = data_cols,
       delayed_feedback = delayed_feedback,
       blocking = blocking,
-      clustering = clustering
+      clustering = clustering,
+      impute_cluster = impute_cluster
     )
   # Pre-computing Important values to be accessed for the simulation
   verbose_log(verbose, "Precomputing")
@@ -131,6 +136,61 @@ prep_rct_data <- function(
     conditions = conditions
   ))
 }
+#---------------------------------------------------------------------------------
+#' @title Creating proper conditions vector
+#' @name create_conditions
+#' @returns Character vector of unique treatment conditions. Throws error if an invalid specification
+#' is used.
+#' @description This function creates a character vector of treatment conditions
+#' using the conditions column in the provided data, and if `control_augment` is greater
+#' than 0, it also labels the control condition. Throws an error of `control_condition` is not
+#' present.
+#' @inheritParams single_mab_simulation
+#' @inheritParams cols
+#' @keywords internal
+create_conditions <- function(
+  control_condition,
+  data,
+  condition_col,
+  control_augment
+) {
+  conditions <- base::sort(base::as.character(base::unique(data[[
+    condition_col$name
+  ]])))
+  if (control_augment > 0) {
+    if (length(control_condition) != 1) {
+      rlang::abort(c(
+        "`control_condition` must have a length of 1",
+        "x" = sprintf(
+          "You passed a vector of length: %d",
+          length(control_condition)
+        )
+      ))
+    }
+    if (
+      is.null(control_condition) |
+        is.na(control_condition) |
+        !as.character(control_condition) %in% conditions
+    ) {
+      rlang::abort(c(
+        "`control_condition` is not present in the conditions column",
+        "x" = sprintf(
+          "Potential Conditions: %s",
+          paste0(conditions, collapse = ", ")
+        ),
+        "x" = paste0("You Passed: ", base::deparse(control_condition))
+      ))
+    }
+
+    names(conditions) <- base::ifelse(
+      conditions == as.character(control_condition),
+      "control",
+      "treatment"
+    )
+  }
+  return(conditions)
+}
+
 #------------------------------------------------------------------------------
 #' @title Simulates Multi-Arm Bandit Trial From Prepared Inputs
 #' @name mab_simulation
@@ -220,58 +280,4 @@ mab_simulation <- function(
     settings = NULL
   )
   return(results)
-}
-#---------------------------------------------------------------------------------
-#' @title Creating proper conditions vector
-#' @name create_conditions
-#' @returns Character vector of unique treatment conditions. Throws error if an invalid specification
-#' is used.
-#' @description This function creates a character vector of treatment conditions
-#' using the conditions column in the provided data, and if `control_augment` is greater
-#' than 0, it also labels the control condition. Throws an error of `control_condition` is not
-#' present.
-#' @inheritParams single_mab_simulation
-#' @inheritParams cols
-#' @keywords internal
-create_conditions <- function(
-  control_condition,
-  data,
-  condition_col,
-  control_augment
-) {
-  conditions <- base::sort(base::as.character(base::unique(data[[
-    condition_col$name
-  ]])))
-  if (control_augment > 0) {
-    if (length(control_condition) != 1) {
-      rlang::abort(c(
-        "`control_condition` must have a length of 1",
-        "x" = sprintf(
-          "You passed a vector of length: %d",
-          length(control_condition)
-        )
-      ))
-    }
-    if (
-      is.null(control_condition) |
-        is.na(control_condition) |
-        !as.character(control_condition) %in% conditions
-    ) {
-      rlang::abort(c(
-        "`control_condition` is not present in the conditions column",
-        "x" = sprintf(
-          "Potential Conditions: %s",
-          paste0(conditions, collapse = ", ")
-        ),
-        "x" = paste0("You Passed: ", base::deparse(control_condition))
-      ))
-    }
-
-    names(conditions) <- base::ifelse(
-      conditions == as.character(control_condition),
-      "control",
-      "treatment"
-    )
-  }
-  return(conditions)
 }

@@ -2,7 +2,7 @@
 #' @name imputation_precompute
 #' @description Pre-computes key values required for the outcome imputation step of the Multi-Arm-Bandit
 #' procedure. Calculates the probabilities of success for each treatment block (treatment arm + any blocking specified),
-#' using the grouped means of the original experimental data. When `perfect_assignment` is FALSE, the average date of
+#' using the grouped means of the original experimental data. When `delayed_feedback = FALSE`, the average date of
 #' success is calculated for each treatment block at every period.
 #' @inheritParams single_mab_simulation
 #' @returns A named list containing:
@@ -41,12 +41,12 @@ imputation_precompute <- function(
 imputation_precompute.data.frame <- function(
   data,
   whole_experiment,
-  perfect_assignment,
+  delayed_feedback,
   data_cols
 ) {
   if (whole_experiment) {
     original_summary <- data |>
-      dplyr::group_by(treatment_block) |>
+      dplyr::group_by(treatment_group) |>
       dplyr::summarize(
         success_rate = base::mean(!!data_cols$success_col$sym, na.rm = TRUE),
         .groups = "drop"
@@ -54,14 +54,14 @@ imputation_precompute.data.frame <- function(
       dplyr::mutate(failure_rate = 1 - success_rate)
   } else if (!whole_experiment) {
     original_summary <- data |>
-      dplyr::group_by(period_number, treatment_block) |>
+      dplyr::group_by(period_number, treatment_group) |>
       dplyr::summarize(
         count = dplyr::n(),
         n_success = base::sum(!!data_cols$success_col$sym),
         .groups = "drop",
       ) |>
-      dplyr::arrange(period_number, treatment_block) |>
-      dplyr::group_by(treatment_block) |>
+      dplyr::arrange(period_number, treatment_group) |>
+      dplyr::group_by(treatment_group) |>
       dplyr::mutate(
         cumulative_count = dplyr::lag(base::cumsum(count), default = 0),
         cumulative_success = dplyr::lag(base::cumsum(n_success), default = 0),
@@ -72,22 +72,22 @@ imputation_precompute.data.frame <- function(
         )
       ) |>
       dplyr::ungroup() |>
-      dplyr::select(period_number, treatment_block, success_rate) |>
+      dplyr::select(period_number, treatment_group, success_rate) |>
       dplyr::mutate(failure_rate = 1 - success_rate) |>
       dplyr::group_split(period_number)
   } else {
     rlang::abort("Specify Logical for `whole_experiment`")
   }
 
-  if (!perfect_assignment) {
+  if (!delayed_feedback) {
     dates_summary <- data |>
-      dplyr::group_by(treatment_block, period_number) |>
+      dplyr::group_by(treatment_group, period_number) |>
       dplyr::summarize(
         mean_date = base::mean(!!data_cols$success_date_col$sym, na.rm = TRUE),
         .groups = "drop"
       ) |>
       tidyr::pivot_wider(
-        names_from = "treatment_block",
+        names_from = "treatment_group",
         values_from = "mean_date"
       )
   } else {
@@ -112,7 +112,7 @@ imputation_precompute.data.frame <- function(
 imputation_precompute.data.table <- function(
   data,
   whole_experiment,
-  perfect_assignment,
+  delayed_feedback,
   data_cols
 ) {
   if (whole_experiment) {
@@ -123,11 +123,11 @@ imputation_precompute.data.table <- function(
           na.rm = TRUE
         )
       ),
-      by = treatment_block
+      by = treatment_group
     ]
     original_summary[, failure_rate := 1 - success_rate]
 
-    data.table::setorder(original_summary, treatment_block)
+    data.table::setorder(original_summary, treatment_group)
   } else if (!whole_experiment) {
     original_summary <- data[,
       .(
@@ -136,10 +136,10 @@ imputation_precompute.data.table <- function(
           base::get(data_cols$success_col$name)
         )
       ),
-      by = .(period_number, treatment_block)
+      by = .(period_number, treatment_group)
     ]
 
-    data.table::setorder(original_summary, period_number, treatment_block)
+    data.table::setorder(original_summary, period_number, treatment_group)
 
     original_summary[,
       `:=`(
@@ -154,7 +154,7 @@ imputation_precompute.data.table <- function(
           fill = 0
         )
       ),
-      by = treatment_block
+      by = treatment_group
     ]
 
     original_summary[,
@@ -167,7 +167,7 @@ imputation_precompute.data.table <- function(
 
     original_summary <- original_summary[, .(
       period_number,
-      treatment_block,
+      treatment_group,
       success_rate
     )]
 
@@ -181,14 +181,14 @@ imputation_precompute.data.table <- function(
     rlang::abort("Specify Logical for `whole_experiment`")
   }
 
-  if (!perfect_assignment) {
+  if (!delayed_feedback) {
     dates_summary <- data.table::dcast(
       data[, .(
         period_number,
-        treatment_block,
+        treatment_group,
         base::get(data_cols$success_date_col$name)
       )],
-      formula = period_number ~ treatment_block,
+      formula = period_number ~ treatment_group,
       fun.aggregate = \(x) base::mean(x, na.rm = TRUE),
       value.var = "V3"
     )
@@ -216,10 +216,10 @@ imputation_precompute.data.table <- function(
 #' @returns A named list containing:
 #' \itemize{
 #' \item `current_data`: A `tibble` or `data.table` containing `impute_block` column to guide the outcome imputations
-#' \item `impute_success`: A `tibble` or `data.table` object containing probabilities of success by `treatment_block` used to impute
+#' \item `impute_success`: A `tibble` or `data.table` object containing probabilities of success by `treatment_group` used to impute
 #' outcomes. Subsetted from the [imputation_precompute()] output.
 #' \item `impute_dates`: Named date vector by treatment condition, containing the dates of success
-#' to impute if perfect_assignment is FALSE. Subsetted from the [imputation_precompute()] output.}
+#' to impute if delayed_feedback is FALSE. Subsetted from the [imputation_precompute()] output.}
 #'
 #' @details
 #' The goal of this function is to set up the imputation procedure and prevent
@@ -242,7 +242,7 @@ imputation_preparation <- function(
   imputation_information,
   whole_experiment,
   blocking,
-  perfect_assignment,
+  delayed_feedback,
   current_period
 ) {
   if (data.table::is.data.table(current_data)) {
@@ -272,7 +272,7 @@ imputation_preparation <- function(
   } else {
     impute_success <- imputation_information[["success"]][[current_period]]
   }
-  if (!perfect_assignment) {
+  if (!delayed_feedback) {
     dates <- rlang::set_names(
       base::as.Date(base::as.numeric(imputation_information[["dates"]][
         current_period,
@@ -339,7 +339,7 @@ check_impute.data.frame <- function(
   current_blocks <- stats::na.omit(current_data$impute_block[
     current_data$impute_req == 1
   ])
-  imputation_blocks <- stats::na.omit(imputation_information$treatment_block)
+  imputation_blocks <- stats::na.omit(imputation_information$treatment_group)
 
   missing_blocks <- base::setdiff(current_blocks, imputation_blocks)
 
@@ -347,7 +347,7 @@ check_impute.data.frame <- function(
 
   if (base::length(missing_blocks) > 0) {
     addition <- tibble::tibble(
-      treatment_block = missing_blocks,
+      treatment_group = missing_blocks,
       success_rate = mean_rate,
       failure_rate = 1 - mean_rate
     )
@@ -357,13 +357,13 @@ check_impute.data.frame <- function(
 
   if (base::length(blocks_to_remove) > 0) {
     imputation_information <- imputation_information[
-      !imputation_information$treatment_block %in% blocks_to_remove,
+      !imputation_information$treatment_group %in% blocks_to_remove,
     ]
   }
 
   imputation_information <- imputation_information[
-    !duplicated(imputation_information$treatment_block),
-  ][order(imputation_information$treatment_block), ]
+    !duplicated(imputation_information$treatment_group),
+  ][order(imputation_information$treatment_group), ]
 
   return(imputation_information)
 }
@@ -381,7 +381,7 @@ check_impute.data.table <- function(
 
   current_blocks <- stats::na.omit(current_data[impute_req == 1, impute_block])
 
-  imputation_blocks <- stats::na.omit(imputation_information$treatment_block)
+  imputation_blocks <- stats::na.omit(imputation_information$treatment_group)
 
   missing_blocks <- base::setdiff(current_blocks, imputation_blocks)
 
@@ -389,7 +389,7 @@ check_impute.data.table <- function(
 
   if (base::length(missing_blocks) > 0) {
     addition <- data.table::data.table(
-      treatment_block = missing_blocks,
+      treatment_group = missing_blocks,
       success_rate = mean_rate,
       failure_rate = 1 - mean_rate
     )
@@ -402,12 +402,12 @@ check_impute.data.table <- function(
 
   if (base::length(blocks_to_remove) > 0) {
     imputation_information <- imputation_information[
-      !treatment_block %in% blocks_to_remove,
+      !treatment_group %in% blocks_to_remove,
     ]
   }
 
-  imputation_information <- imputation_information[!duplicated(treatment_block)]
-  data.table::setorder(imputation_information, treatment_block)
+  imputation_information <- imputation_information[!duplicated(treatment_group)]
+  data.table::setorder(imputation_information, treatment_group)
 
   return(invisible(imputation_information))
 }
@@ -433,7 +433,7 @@ check_impute.data.table <- function(
 #' @inheritParams single_mab_simulation
 #' @inheritParams cols
 #' @details
-#' When `perfect_assignment = FALSE`, dates of success are imputed according to the average
+#' When `delayed_feedback = FALSE`, dates of success are imputed according to the average
 #' by each period and treatment block (treatment arm + any blocking). These imputations are required because
 #' these observations do not currently have dates of success, as no success was observed during the original experiment.
 #' Therefore if they go through the next iteration of the simulation without being imputed,
@@ -455,7 +455,7 @@ impute_success <- function(
   id_col,
   success_col,
   prior_data = NULL,
-  perfect_assignment,
+  delayed_feedback,
   dates = NULL,
   success_date_col,
   current_period = NULL
@@ -474,7 +474,7 @@ impute_success.data.frame <- function(
   id_col,
   success_col,
   prior_data,
-  perfect_assignment,
+  delayed_feedback,
   dates = NULL,
   success_date_col,
   current_period
@@ -504,7 +504,7 @@ impute_success.data.frame <- function(
     imputed$mab_success <- imputed[[success_col$name]]
   }
 
-  if (!perfect_assignment) {
+  if (!delayed_feedback) {
     imputed$new_success_date <- dplyr::case_when(
       imputed$impute_req == 0 |
         (imputed[[success_col$name]] == 0 & imputed$mab_success == 1) ~
@@ -529,7 +529,7 @@ impute_success.data.table <- function(
   id_col,
   success_col,
   prior_data,
-  perfect_assignment,
+  delayed_feedback,
   dates = NULL,
   success_date_col,
   current_period
@@ -562,7 +562,7 @@ impute_success.data.table <- function(
     )
   ]
 
-  if (!perfect_assignment) {
+  if (!delayed_feedback) {
     prior_data[
       period_number == current_period,
       new_success_date := data.table::fcase(

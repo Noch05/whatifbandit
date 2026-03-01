@@ -255,6 +255,7 @@ mab_from_rct.bernoulli <- function(
   control_augment = 0,
   random_assign_prop = 0,
   ndraws = 5000,
+  impute_cluster = FALSE,
   delayed_feedback = FALSE,
   whole_experiment = FALSE,
   control_condition = NULL,
@@ -295,7 +296,8 @@ mab_from_rct.bernoulli <- function(
     random_assign_prop = random_assign_prop,
     r = r,
     seeds = seeds,
-    keep_data = keep_data
+    keep_data = keep_data,
+    impute_cluster = impute_cluster
   )
 
   results <- mab_simulation(
