@@ -8,11 +8,12 @@
 #' MAB pipeline: preparing inputs, assigning treatments and imputing successes, and adaptively weighted
 #' estimation. See the details and vignettes to learn more.
 #'
-#' @param formula A `formula` object specifying outcome variable, treatment indicator, treatment blocking and treatment clustering. (Additional covariates to be added in later updates). Clustering and blocking variables
-#' should being included in specific `block()` or `cluster()` blocks in the formula, e.g. `outcome ~ treatment + block(x1 + x2 + x3) + cluster(x4)`. Given a set of probabilities for assigning treatments,
+#' @param formula A `formula` object specifying outcome variable, treatment indicator, treatment blocking and treatment clustering. The treatment variable should always be the first variable following `~`
+#' (Additional covariates to be added in later updates). Clustering and blocking variables
+#' should being included in specific `block()` or `cluster()` blocks in the formula, e.g. `outcome ~ treatment + block(x1, x2, x3) + cluster(x4)`. Given a set of probabilities for assigning treatments,
 #' treatment blocking applies these within each block indpendently instead of the whole sample, while for clustering assignment occurs at the cluster level instead of the individual level, so all observations
 #' in a cluster have the same treatment. When blocks and clusters are specified together each cluster must be fully nested in a single block. See below for details. To speciy without clustering or blocking
-#' simply do not provide them in the formula.
+#' simply do not provide them in the formula. Clusters can only ever be given by 1 variable, while blocks can be a combination of variables.
 #'
 #' @param data A `data.frame`, `data.table`, or any object which inherits from `data.frame`, containing input data from the trial. This should be the results
 #' of a traditional Randomized Controlled Trial (RCT).
@@ -197,8 +198,6 @@
 #'
 #' For more information about how to use the function, please view the vignette.
 #'
-#'
-#'
 #' @references
 #'
 #' Agrawal, Shipra, and Navin Goyal. 2012.
@@ -265,6 +264,15 @@ mab_from_rct.bernoulli <- function(
   check_args = TRUE,
   keep_data = FALSE
 ) {
+  data_cols <- c(
+    formula_parse(formula),
+    id_col = id_col,
+    date_col = date_col,
+    month_col = month_col,
+    assignment_date_col = assignment_date_col,
+    success_date_col = success_date_col
+  )
+
   prepped <- pre_mab_simulation(
     data = data,
     assignment_method = assignment_method,
@@ -285,7 +293,6 @@ mab_from_rct.bernoulli <- function(
     random_assign_prop = random_assign_prop
   )
 
-  # Simulating the MAB Trial
   results <- mab_simulation(
     data = prepped$data,
     time_unit = prepped$character_args$time_unit,
@@ -327,6 +334,66 @@ mab_from_rct.bernoulli <- function(
   return(results)
 }
 #------------------------------------------------------------------------------
+#' Formula Parser
+#' @description
+#' Parsers the input formula for [mab_from_rct.bernoulli()]
+#' @name formula_parse
+#' @inheritParams mab_from_rct.bernoulli
+#' @returns
+#' @keywords internal
+
+formula_parse <- function(formula) {
+  formula <- as.character(formula)
+
+  outcome <- formula[2]
+
+  obc <- base::strsplit(formula[3], "\\+") |>
+    base::lapply(base::trimws) |>
+    base::unlist()
+
+  conditions_col <- obc[1]
+  other_vars <- base::lapply(
+    base::list(
+      obc[base::grepl("block\\((.*?)\\)", obc)],
+      obc[base::grepl("cluster\\((.*?)\\)", obc)]
+    ),
+    gather_args
+  )
+
+  return(
+    base::list(
+      conditions_col = conditions_col,
+      success_col = outcome,
+      block_cols = block(other_vars[[1]]$args),
+      cluster_col = cluster(other_vars[[2]]$args)
+    )
+  )
+}
+
+gather_args <- function(x) {
+  if (base::length(x) == 0) {
+    return(base::list(NULL))
+  }
+  call <- rlang::parse_expr(x) |>
+    base::as.list()
+
+  args <- base::vapply(
+    call[-1],
+    rlang::as_label,
+    base::character(1)
+  )
+  return(list(call = call[[1]], args = args))
+}
+
+block <- function(...) {
+  base::c(...)
+}
+cluster <- function(x) {
+  x
+}
+
+
+#'
 #' Verbose Printer
 #' @description Shorthand Function for checking `verbose` and then printing if TRUE
 #' @name verbose_log
@@ -341,4 +408,135 @@ verbose_log <- function(log, message) {
   if (log) {
     base::cat(message, "\n")
   }
+}
+#' @name get_assignment_quantitites
+#' @title Calculates Number of Observations Assigned to Each Treatment
+#' @description Takes the output from [mab_simulation()], and
+#' calculates the number of observations assigned to each treatment group in the adaptive trial.
+#' @param simulation Output from [mab_simulation()]
+#' @param conditions Character vector containing the names of all the treatment conditions in the trial.
+#' @returns Named numeric vector containing number of observations assigned to each treatment group
+#' @keywords internal
+get_assignment_quantities <- function(simulation, conditions) {
+  UseMethod("get_assignment_quantities", simulation$final_data)
+}
+#' @method get_assignment_quantities data.frame
+#' @description get_assignment_quantities for data.frames
+#' @inheritParams get_assignment_quantities
+#' @noRd
+get_assignment_quantities.data.frame <- function(simulation, conditions) {
+  count_summary <- simulation$final_data |>
+    dplyr::group_by(mab_condition) |>
+    dplyr::count()
+
+  count_vec <- rlang::set_names(count_summary$n, count_summary$mab_condition)
+
+  if (length(count_vec) < length(conditions)) {
+    missing_conds <- base::setdiff(
+      conditions,
+      base::names(count_vec)
+    )
+    count_vec[missing_conds] <- 0
+  }
+  return(count_vec)
+}
+#-------------------------------------------------------------------
+#' @method get_assignment_quantities `data.table`
+#' @description get_assignment_quantities for `data.table`s
+#' @inheritParams get_assignment_quantities
+#' @noRd
+get_assignment_quantities.data.table <- function(simulation, conditions) {
+  count_summary <- simulation$final_data[, .N, by = mab_condition]
+  data.table::setorder(count_summary, mab_condition)
+  count_vec <- rlang::set_names(count_summary$N, count_summary$mab_condition)
+  if (length(count_vec) < length(conditions)) {
+    missing_conds <- base::setdiff(
+      conditions,
+      base::names(count_vec)
+    )
+    count_vec[missing_conds] <- 0
+  }
+  return(count_vec)
+}
+#-----------------------------------------------------------------
+
+#' @name condense_results
+#' @title Condenses results into a list for [multiple_mab_simulation()]
+#' @description
+#' Takes the output from [furrr::future_map()] in [multiple_mab_simulation()]
+#' and condenses it to return to the user.
+#' @inheritParams multiple_mab_simulation
+#' @param mabs output from [furrr::future_map()] in [multiple_mab_simulation()]
+#' @returns `multiple.mab` class object, which is a named list containing:
+#' \itemize{
+#' \item `final_data_nest:` `tibble` or `data.table` containing the nested `tibble`s/`data.table`s from each trial. Only provided when `keep_data = TRUE`.
+#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson sampling posterior distributions for each period. Wide format,
+#' each row is a period, and each columns is a treatment.
+#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period. Wide format,
+#' each row is a period, and each columns is a treatment.
+#' \item `estimates`: A `tibble` or `data.table` containing the
+#' AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
+#' sample means and variances, for each treatment arm. Long format, treatment arm, and estimate type are columns along with the mean
+#' and variance.
+#' \item `settings`: A named list of the configuration settings used in the trial.
+#' }
+#' @details
+#' This function iterates over every element in the output from [furrr::future_map()]
+#' and extracts the required element to place to condense into the final list, outputted to the user
+#' in [multiple_mab_simulation]. It condenses the long list into `tibble`s or `data.table`s, keeping each element
+#' together. For example it extracts all the `bandits` objects from the output lists, across all trials, and
+#' binds them into a single `tibble`/`data.table`.
+#'
+#' @keywords internal
+
+condense_results <- function(data, keep_data, mabs, times) {
+  items <- c(
+    "bandits",
+    "assignment_probs",
+    "estimates",
+    "assignment_quantities"
+  )
+
+  if (data.table::is.data.table(data)) {
+    results <- lapply(items, \(item) {
+      all <- lapply(seq_len(times), function(i) {
+        if (item == "assignment_quantities") {
+          as.list(mabs[[i]][[item]])
+        } else {
+          mabs[[i]][[item]]
+        }
+      })
+      result <- data.table::rbindlist(all, idcol = "trial", use.names = TRUE)
+      result[, trial := as.numeric(trial)]
+      return(result)
+    })
+    names(results) <- items
+    if (keep_data) {
+      results$final_data_nest <- data.table::data.table(
+        trial = base::seq_len(times),
+        data = purrr::map(mabs, ~ .x$final_data)
+      )
+    } else {
+      results$final_data_nest <- NULL
+    }
+  } else {
+    results <- purrr::map(items, function(item) {
+      result <- purrr::map(seq_len(times), function(i) mabs[[i]][[item]]) |>
+        dplyr::bind_rows(.id = "trial") |>
+        dplyr::mutate(trial = as.numeric(trial))
+      return(result)
+    })
+    names(results) <- items
+
+    if (keep_data) {
+      results$final_data_nest <- tibble::tibble(
+        trial = base::seq_len(times),
+        data = purrr::map(mabs, ~ .x$final_data)
+      )
+    } else {
+      results$final_data_nest <- NULL
+    }
+  }
+
+  return(results)
 }
