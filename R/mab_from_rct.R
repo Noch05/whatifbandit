@@ -255,7 +255,7 @@ mab_from_rct.bernoulli <- function(
   control_augment = 0,
   random_assign_prop = 0,
   ndraws = 5000,
-  perfect_assignment = TRUE,
+  delayed_feedback = FALSE,
   whole_experiment = FALSE,
   control_condition = NULL,
   time_unit = NULL,
@@ -272,17 +272,19 @@ mab_from_rct.bernoulli <- function(
     assignment_date_col = assignment_date_col,
     success_date_col = success_date_col
   )
+  blocking <- !base::is.null(data_cols$block_cols)
+  clustering <- !base::is.null(data$cluster_col)
 
-  prepped <- pre_mab_simulation(
+  prepped <- prep_rct_data(
     data = data,
     period_method = period_method,
     algorithm = algorithm,
     control_condition = control_condition,
     prior_periods = prior_periods,
-    perfect_assignment = perfect_assignment,
+    delayed_feedback = delayed_feedback,
     whole_experiment = whole_experiment,
     blocking = blocking,
-    block_cols = block_cols,
+    clustering = clustering,
     data_cols = data_cols,
     control_augment = control_augment,
     time_unit = time_unit,
@@ -365,7 +367,7 @@ formula_parse <- function(formula) {
 
   return(
     base::list(
-      conditions_col = conditions_col,
+      condition_col = conditions_col,
       success_col = outcome,
       block_cols = block(other_vars[[1]]$args),
       cluster_col = cluster(other_vars[[2]]$args)

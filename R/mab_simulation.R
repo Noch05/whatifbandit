@@ -6,20 +6,20 @@
 #' running the Multi-Arm-Bandit re-simulation. Intakes the data and column names to
 #' check for valid arguments, format and create new columns as needed, and pre-compute
 #' key values to avoid doing so within the simulation loop.
+#' @param blocking Logical; Whether or not treatment blocking is occuring
+#' @param clustering Logical; Whether or not treatment clustering is occuring
 #'
 #' @returns Named list containing:
 #' \itemize{
 #' \item `data_cols`: List of necessary columns in `data` as strings and symbols.
-#' \item `block_cols`: List of columns to block by in `data` as strings and symbols.
-#' \item `data`: Prepared `tibble` or `data.table` containing all the necessary columns to
+#' \item `data`: Prepared `data.frame` or `data.table` containing all the necessary columns to
 #' conduct the adaptive trial simulation.
 #' columns required for [mab_simulation()].
 #' \item `imputation_information`: List containing necessary information
 #' for outcome and date imputation for [mab_simulation()].
 #' }
 #' @details
-#' If a `data.frame` is passed as input data it is internally converted into
-#' a `tibble`. If a `data.table` is passed it is copied to avoid modifying the
+#'  If a `data.table` is passed it is copied to avoid modifying the
 #' original dataset in the users environment.
 
 #'
@@ -31,7 +31,7 @@ prep_rct_data <- function(
   algorithm,
   control_condition,
   prior_periods,
-  perfect_assignment,
+  delayed_feedback,
   whole_experiment,
   data_cols,
   control_augment,
@@ -72,14 +72,12 @@ prep_rct_data <- function(
     validate_inputs(
       data = data,
       time_unit = char_args$time_unit,
-      perfect_assignment = perfect_assignment,
+      delayed_feedback = delayed_feedback,
       algorithm = char_args$algorithm,
       period_length = period_length,
       whole_experiment = whole_experiment,
       prior_periods = prior_periods,
       data_cols = data_cols,
-      block_cols = block_cols,
-      blocking = blocking,
       period_method = char_args$period_method,
       verbose = verbose,
       control_augment = control_augment,
@@ -87,7 +85,9 @@ prep_rct_data <- function(
       random_assign_prop = random_assign_prop,
       r = r,
       keep_data = keep_data,
-      seeds = seeds
+      seeds = seeds,
+      blocking = blocking,
+      clustering = clustering
     )
   }
   conditions <- create_conditions(
@@ -104,14 +104,14 @@ prep_rct_data <- function(
     data = data,
     data_cols = data_cols,
     period_length = period_length,
-    assignment_method = character_args$assignment_method,
-    time_unit = character_args$time_unit
+    period_method = char_args$period_method,
+    time_unit = char_args$time_unit
   ) |>
     create_new_cols(
       data_cols = data_cols,
-      perfect_assignment = perfect_assignment,
+      delayed_feedback = delayed_feedback,
       blocking = blocking,
-      block_cols = block_cols
+      clustering = clustering
     )
   # Pre-computing Important values to be accessed for the simulation
   verbose_log(verbose, "Precomputing")
@@ -120,15 +120,14 @@ prep_rct_data <- function(
     data = data,
     whole_experiment = whole_experiment,
     data_cols = data_cols,
-    perfect_assignment = perfect_assignment
+    delayed_feedback = delayed_feedback
   )
 
   return(list(
     data_cols = data_cols,
-    block_cols = block_cols,
     data = data,
     imputation_information = imputation_information,
-    character_args = character_args,
+    char_args = char_args,
     conditions = conditions
   ))
 }
