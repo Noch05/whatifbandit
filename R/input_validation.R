@@ -5,7 +5,8 @@
 #' errors are thrown, user-friendly messages are provided to indicate which argument
 #' was misspecified. Additionally, when `verbose = TRUE`, additional warning
 #' messages may be shown if unnecessary arguments are passed.
-#' @inheritParams single_mab_simulation
+#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams prep_rct_data
 #' @returns Throws an error if an argument is missing or misspecified.
 #' @seealso
 #' * [single_mab_simulation()]
@@ -29,7 +30,8 @@ validate_inputs <- function(
   keep_data,
   seeds,
   blocking,
-  clustering
+  clustering,
+  impute_cluster
 ) {
   # Checking Algorithm
 
@@ -52,11 +54,12 @@ validate_inputs <- function(
     verbose,
     whole_experiment,
     delayed_feedback,
-    keep_data
+    keep_data,
+    impute_cluster
   )
 
   # Checking Column Proper Columns are Provided
-  check_cols(
+  impute_clustercheck_cols(
     data = data,
     period_method = period_method,
     time_unit = time_unit,
