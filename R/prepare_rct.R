@@ -17,8 +17,8 @@
 #' columns required for [mab_simulation()].
 #' \item `imputation_information`: List containing necessary information
 #' for outcome and date imputation for [mab_simulation()].
-#' \item `period_starts`: Numeric vector where element `i` is the starting row number of period `i`
-#' \item `period_starts`: Numeric vector where element `i` is the ending row number of period `i`
+#' \item `period_starts`: Numeric vector where element `i` is the starting row number of period `i`.
+#' \item `period_starts`: Numeric vector where element `i` is the ending row number of period `i`.
 #' }
 #' @details
 #'  If a `data.table` is passed it is copied to avoid modifying the

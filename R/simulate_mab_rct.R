@@ -77,12 +77,16 @@ simulate_mab_rct.bernoulli <- function(
     periods = periods,
     verbose = verbose
   )
-  estimates <- adaptive_aipw(
+  estimates <- estimate_aipw(
     data = sim_results$final_data,
     assignment_probs = sim_results$assignment_probss,
     periods = periods,
     conditions = conditions,
     verbose = verbose
+  )
+  estimates <- estimate_ipw(
+    data = sim_results$final_data,
+    cluster_col = data_cols$cluster_col
   )
 
   results <- list(

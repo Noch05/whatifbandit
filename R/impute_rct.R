@@ -494,6 +494,7 @@ impute_success.data.frame <- function(
   starts,
   ends
 ) {
+  i <- current_period
   impute_idx <- base::which(current_data$impute_req == 1)
 
   if (length(impute_idx) > 0) {
@@ -505,8 +506,8 @@ impute_success.data.frame <- function(
       check_inputs = FALSE
     )
     current_data$mab_success[impute_idx] <- imputations
-    current_data$mab_success[-impute_idx] <- current_data[[success_col$name]][
-      -impute_idx
+    current_data$mab_success[!impute_idx] <- current_data[[success_col$name]][
+      !impute_idx
     ]
   } else {
     current_data$mab_success <- current_data[[success_col$name]]
@@ -557,7 +558,7 @@ impute_success.data.table <- function(
       check_inputs = FALSE
     )
     current_data[impute_idx, mab_success := imputations]
-    current_data[-impute_idx, mab_success := base::get(success_col$name)]
+    current_data[!impute_idx, mab_success := base::get(success_col$name)]
   } else {
     current_data[, mab_success := base::get(success_col$name)]
   }
@@ -565,11 +566,11 @@ impute_success.data.table <- function(
   prior_data[
     starts[i]:ends[i],
     `:=`(
-      mab_condition = current_data[, mab_condition],
-      impute_req = current_data[, impute_req],
-      impute_group = current_data[, impute_group],
-      mab_success = current_data[, mab_success],
-      assignment_type = current_data[, assignment_type]
+      mab_condition = current_data$mab_condition,
+      impute_req = current_data$impute_req,
+      impute_group = current_data$impute_group,
+      mab_success = current_data$mab_success,
+      assignment_type = current_data$assignment_type
     )
   ]
 
