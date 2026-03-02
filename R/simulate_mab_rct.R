@@ -67,7 +67,8 @@ simulate_mab_rct.bernoulli <- function(
     starts = starts,
     ends = ends,
     periods = periods,
-    impute_cluster = impute_cluster
+    impute_cluster = impute_cluster,
+    rct = TRUE
   )
 
   sim_results$final_data <- get_iaipw(
@@ -152,7 +153,8 @@ run_mab_trial <- function(
   starts,
   ends,
   periods,
-  impute_cluster
+  impute_cluster,
+  rct
 ) {
   bandits <- base::vector(mode = "list", length = 2)
   bandits$bandit_stat <- base::vector(mode = "list", length = (periods + 1))

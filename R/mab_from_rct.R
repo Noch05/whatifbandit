@@ -93,6 +93,7 @@
 #' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended `FALSE`. When `r = 1` the final data is always kept and reported.
 #' @param check_args Logical; Whether or not to robustly check whether arguments are valid. Default is TRUE, and recommended
 #' not to be changed.
+#' @param ... Additional named arguments passed to [furrr::furrr_options()]
 #'
 #' @returns An object of class `mab`, containing:
 #' \itemize{
@@ -263,7 +264,8 @@ mab_from_rct.bernoulli <- function(
   seeds = NULL,
   verbose = FALSE,
   check_args = TRUE,
-  keep_data = FALSE
+  keep_data = FALSE,
+  ...
 ) {
   data_cols <- c(
     formula_parse(formula),
@@ -299,56 +301,165 @@ mab_from_rct.bernoulli <- function(
     keep_data = keep_data,
     impute_cluster = impute_cluster
   )
+  if (r == 1) {
+    results <- simulate_mab_rct.bernoulli(
+      data = prepped$data,
+      time_unit = prepped$char_args$time_unit,
+      period_length = period_length,
+      prior_periods = prior_periods,
+      algorithm = prepped$char_args$algorithm,
+      whole_experiment = whole_experiment,
+      delayed_feedback = delayed_feedback,
+      conditions = prepped$conditions,
+      blocking = blocking,
+      clustering = clustering,
+      impute_cluster = impute_cluster,
+      data_cols = prepped$data_cols,
+      verbose = verbose,
+      period_method = prepped$char_args$period_method,
+      control_augment = control_augment,
+      imputation_information = prepped$imputation_information,
+      ndraws = ndraws,
+      random_assign_prop = random_assign_prop,
+      starts = prepped$period_starts,
+      ends = prepped$period_ends,
+    )
 
-  results <- simulate_mab_rct.bernoulli(
-    data = prepped$data,
-    time_unit = prepped$char_args$time_unit,
-    period_length = period_length,
-    prior_periods = prior_periods,
-    algorithm = prepped$char_args$algorithm,
-    whole_experiment = whole_experiment,
-    delayed_feedback = delayed_feedback,
-    conditions = prepped$conditions,
-    blocking = blocking,
-    clustering = clustering,
-    impute_cluster = impute_cluster,
-    data_cols = prepped$data_cols,
-    verbose = verbose,
-    period_method = prepped$char_args$period_method,
-    control_augment = control_augment,
-    imputation_information = prepped$imputation_information,
-    ndraws = ndraws,
-    random_assign_prop = random_assign_prop,
-    starts = prepped$period_starts,
-    ends = prepped$period_ends,
-  )
+    results$settings <- list(
+      original_data = data,
+      algorithm = prepped$char_args$algorithm,
+      period_method = prepped$char_args$period_method,
+      time_unit = prepped$char_args$time_unit,
+      period_length = period_length,
+      prior_periods = prior_periods,
+      control_augment = control_augment,
+      random_assign_prop = random_assign_prop,
+      control = as.character(control_condition),
+      conditions = prepped$conditions,
+      delayed_feedback = delayed_feedback,
+      whole_experiment = whole_experiment,
+      blocking = blocking,
+      block_cols = prepped$data_cols$block_cols$name,
+      cluster_col = prepped$data_cols$cluster_col$name,
+      ndraws = ndraws,
+      impute_cluster = impute_cluster,
+      delayed_feedback = delayed_feedback,
+      keep_data = keep_data,
+      r = r
+    )
 
-  results$settings <- list(
-    original_data = data,
-    algorithm = prepped$char_args$algorithm,
-    period_method = prepped$char_args$period_method,
-    time_unit = prepped$char_args$time_unit,
-    period_length = period_length,
-    prior_periods = prior_periods,
-    control_augment = control_augment,
-    random_assign_prop = random_assign_prop,
-    control = as.character(control_condition),
-    conditions = prepped$conditions,
-    perfect_assignment = perfect_assignment,
-    whole_experiment = whole_experiment,
-    blocking = blocking,
-    block_cols = prepped$data_cols$block_cols$name,
-    cluster_col = prepped$data_cols$cluster_col$name,
-    ndraws = ndraws,
-    impute_cluster = impute_cluster,
-    delayed_feedback = delayed_feedback,
-    keep_data = keep_data,
-    r = r,
-    seeds = seeds
-  )
+    class(results) <- c("mab", class(results))
+  } else {
+    verbose_log(verbose, "Starting Simulations")
+    mabs <- furrr::future_map(
+      seeds,
+      function(x) {
+        set.seed(x)
+        results <- simulate_mab_rct.bernoulli(
+          data = prepped$data,
+          time_unit = prepped$char_args$time_unit,
+          period_length = period_length,
+          prior_periods = prior_periods,
+          algorithm = prepped$char_args$algorithm,
+          whole_experiment = whole_experiment,
+          delayed_feedback = delayed_feedback,
+          conditions = prepped$conditions,
+          blocking = blocking,
+          clustering = clustering,
+          impute_cluster = impute_cluster,
+          data_cols = prepped$data_cols,
+          verbose = FALSE,
+          period_method = prepped$char_args$period_method,
+          control_augment = control_augment,
+          imputation_information = prepped$imputation_information,
+          ndraws = ndraws,
+          random_assign_prop = random_assign_prop,
+          starts = prepped$period_starts,
+          ends = prepped$period_ends,
+        )
+        results$assignment_quantities <- get_assignment_quantities(
+          results,
+          prepped$conditions
+        )
+        if (!keep_data) {
+          results$final_data <- NULL
+        }
+        return(results)
+      },
+      .options = furrr::furrr_options(
+        globals = list(
+          mab_simulation = mab_simulation,
+          data = prepped$data,
+          block_cols = prepped$block_cols,
+          data_cols = prepped$data_cols,
+          imputation_information = prepped$imputation_information,
+          time_unit = prepped$character_args$time_unit,
+          period_length = period_length,
+          prior_periods = prepped$character_args$prior_periods,
+          algorithm = prepped$character_args$algorithm,
+          whole_experiment = whole_experiment,
+          perfect_assignment = prepped$character_args$perfect_assignment,
+          conditions = prepped$conditions,
+          blocking = blocking,
+          assignment_method = assignment_method,
+          control_augment = control_augment,
+          keep_data = keep_data,
+          ndraws = ndraws,
+          random_assign_prop = random_assign_prop
+        ),
+        packages = c(
+          "whatifbandit",
+          "dplyr",
+          "rlang",
+          "tidyr",
+          "bandit",
+          "tibble",
+          "lubridate",
+          "purrr",
+          "furrr",
+          "randomizr",
+          "data.table",
+          "estimatr"
+        ),
+        seed = TRUE,
+        ...
+      ),
+      .progress = verbose
+    )
+    verbose_log(verbose, "Collating Results")
+    results <- condense_results(
+      data = data,
+      keep_data = keep_data,
+      mabs = mabs,
+      r = r
+    )
 
-  class(results) <- c("fixed", "mab", class(results))
-
+    results$settings <- list(
+      original_data = data,
+      algorithm = prepped$char_args$algorithm,
+      period_method = prepped$char_args$period_method,
+      time_unit = prepped$char_args$time_unit,
+      period_length = period_length,
+      prior_periods = prior_periods,
+      control_augment = control_augment,
+      random_assign_prop = random_assign_prop,
+      control = as.character(control_condition),
+      conditions = prepped$conditions,
+      delayed_feedback = delayed_feedback,
+      whole_experiment = whole_experiment,
+      blocking = blocking,
+      block_cols = prepped$data_cols$block_cols$name,
+      cluster_col = prepped$data_cols$cluster_col$name,
+      ndraws = ndraws,
+      impute_cluster = impute_cluster,
+      delayed_feedback = delayed_feedback,
+      keep_data = keep_data,
+      r = r,
+      seeds = seeds
+    )
+    base::class(results) <- c("multiple.mab", class(results))
+  }
+  class(results) <- c("fixed", class(results))
   return(results)
 }
 #------------------------------------------------------------------------------
@@ -483,7 +594,7 @@ get_assignment_quantities.data.table <- function(simulation, conditions) {
 #' @description
 #' Takes the output from [furrr::future_map()] in [multiple_mab_simulation()]
 #' and condenses it to return to the user.
-#' @inheritParams multiple_mab_simulation
+#' @inheritParams mab_from_rct.bernoulli
 #' @param mabs output from [furrr::future_map()] in [multiple_mab_simulation()]
 #' @returns `multiple.mab` class object, which is a named list containing:
 #' \itemize{
@@ -507,7 +618,7 @@ get_assignment_quantities.data.table <- function(simulation, conditions) {
 #'
 #' @keywords internal
 
-condense_results <- function(data, keep_data, mabs, times) {
+condense_results <- function(data, keep_data, mabs, r) {
   items <- c(
     "bandits",
     "assignment_probs",
@@ -517,7 +628,7 @@ condense_results <- function(data, keep_data, mabs, times) {
 
   if (data.table::is.data.table(data)) {
     results <- lapply(items, \(item) {
-      all <- lapply(seq_len(times), function(i) {
+      all <- lapply(seq_len(r), function(i) {
         if (item == "assignment_quantities") {
           as.list(mabs[[i]][[item]])
         } else {
@@ -531,7 +642,7 @@ condense_results <- function(data, keep_data, mabs, times) {
     names(results) <- items
     if (keep_data) {
       results$final_data_nest <- data.table::data.table(
-        trial = base::seq_len(times),
+        trial = base::seq_len(r),
         data = purrr::map(mabs, ~ .x$final_data)
       )
     } else {
@@ -539,7 +650,7 @@ condense_results <- function(data, keep_data, mabs, times) {
     }
   } else {
     results <- purrr::map(items, function(item) {
-      result <- purrr::map(seq_len(times), function(i) mabs[[i]][[item]]) |>
+      result <- purrr::map(seq_len(r), function(i) mabs[[i]][[item]]) |>
         dplyr::bind_rows(.id = "trial") |>
         dplyr::mutate(trial = as.numeric(trial))
       return(result)
@@ -548,7 +659,7 @@ condense_results <- function(data, keep_data, mabs, times) {
 
     if (keep_data) {
       results$final_data_nest <- tibble::tibble(
-        trial = base::seq_len(times),
+        trial = base::seq_len(r),
         data = purrr::map(mabs, ~ .x$final_data)
       )
     } else {
