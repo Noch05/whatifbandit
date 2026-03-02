@@ -46,6 +46,27 @@ simulate_mab_rct.bernoulli <- function(
   impute_cluster
 ) {
   periods <- base::length(starts)
+  bandits <- base::vector(mode = "list", length = 2)
+  bandits$bandit_stat <- base::vector(mode = "list", length = (periods + 1))
+  bandits$assignment_prob <- base::vector(mode = "list", length = periods)
+  num_conditions <- length(conditions)
+
+  bandits$bandit_stat[[1]] <- switch(
+    algorithm,
+    "thompson" = rlang::set_names(
+      rep(1 / num_conditions, num_conditions),
+      conditions
+    ),
+    "ucb1" = tibble::tibble(
+      mab_condition = conditions,
+      ucb = rep(0, num_conditions)
+    )
+  )
+  bandits$assignment_prob[[1]] <- rlang::set_names(
+    rep(1 / num_conditions, num_conditions),
+    conditions
+  )
+  verbose_log(verbose, "Starting Bandit Trial")
 
   sim_results <- run_mab_trial(
     data = data,
@@ -68,7 +89,8 @@ simulate_mab_rct.bernoulli <- function(
     ends = ends,
     periods = periods,
     impute_cluster = impute_cluster,
-    rct = TRUE
+    rct = TRUE,
+    bandits = bandits
   )
 
   sim_results$final_data <- get_iaipw(
@@ -156,29 +178,9 @@ run_mab_trial <- function(
   ends,
   periods,
   impute_cluster,
-  rct
+  rct,
+  bandits
 ) {
-  bandits <- base::vector(mode = "list", length = 2)
-  bandits$bandit_stat <- base::vector(mode = "list", length = (periods + 1))
-  bandits$assignment_prob <- base::vector(mode = "list", length = periods)
-  num_conditions <- length(conditions)
-
-  bandits$bandit_stat[[1]] <- switch(
-    algorithm,
-    "thompson" = rlang::set_names(
-      rep(1 / num_conditions, num_conditions),
-      conditions
-    ),
-    "ucb1" = tibble::tibble(
-      mab_condition = conditions,
-      ucb = rep(0, num_conditions)
-    )
-  )
-  bandits$assignment_prob[[1]] <- rlang::set_names(
-    rep(1 / num_conditions, num_conditions),
-    conditions
-  )
-  verbose_log(verbose, "Starting Bandit Trial")
   for (i in 2:periods) {
     verbose_log(verbose, paste0("Period: ", i))
 
