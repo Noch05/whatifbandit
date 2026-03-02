@@ -83,7 +83,9 @@ simulate_mab_rct.bernoulli <- function(
     assignment_probs = sim_results$assignment_probss,
     periods = periods,
     conditions = conditions,
-    verbose = verbose
+    verbose = verbose,
+    clustering = clustering,
+    cluster_col = data_cols$cluster_col
   ) |>
     estimate_ipw(
       data = sim_results$final_data,

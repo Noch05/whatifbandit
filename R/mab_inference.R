@@ -281,6 +281,7 @@ estimate_aipw <- function(
   assignment_probs,
   conditions,
   cluster_col = data_cols$cluster_col,
+  clustering,
   periods,
   verbose
 ) {
@@ -298,9 +299,27 @@ estimate_aipw.data.frame <- function(
   data,
   assignment_probs,
   conditions,
+  clustering,
+  cluster_col,
   periods,
   verbose
 ) {
+  data <- if (clustering) {
+    data |>
+      dplyr::group_by(period_number, !!cluster_col$sym) |>
+      dplyr::summarize(
+        mab_condition = mab_condition,
+        dplyr::across(
+          dplyr::all_of(paste0("aipw_", conditions)),
+          mean,
+          .names = {
+            .col
+          }
+        )
+      )
+  } else {
+    data
+  }
   rows <- nrow(data)
   aipw_estimates <- base::lapply(conditions, \(condition) {
     weights <- data[[base::sprintf("%s_assign_prob", condition)]] /
@@ -354,9 +373,20 @@ estimate_aipw.data.table <- function(
   data,
   assignment_probs,
   conditions,
+  clustering,
+  cluster_col,
   periods,
   verbose
 ) {
+  data <- if (clustering) {
+    data[,
+      .(base::lapply(.SD, mean), mab_condition = mab_condition),
+      by = c("period_number", cluster_col$name),
+      .SDcols = base::paste0("aipw_", conditions)
+    ]
+  } else {
+    data
+  }
   rows <- nrow(data)
   aipw_estimates <- base::lapply(conditions, \(condition) {
     weights <- data[[paste0(condition, "_assign_prob")]] / rows

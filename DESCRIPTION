@@ -28,6 +28,7 @@ Imports:
     bandit,
     data.table,
     dplyr,
+    estimatr,
     furrr,
     ggplot2,
     lubridate,
