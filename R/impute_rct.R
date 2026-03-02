@@ -80,7 +80,7 @@ imputation_precompute.data.frame <- function(
     rlang::abort("Specify Logical for `whole_experiment`")
   }
 
-  if (!delayed_feedback) {
+  if (delayed_feedback) {
     dates_summary <- data |>
       dplyr::group_by(treatment_group, period_number) |>
       dplyr::summarize(
@@ -182,7 +182,7 @@ imputation_precompute.data.table <- function(
     rlang::abort("Specify Logical for `whole_experiment`")
   }
 
-  if (!delayed_feedback) {
+  if (delayed_feedback) {
     dates_summary <- data.table::dcast(
       data[, .(
         period_number,
@@ -216,7 +216,7 @@ imputation_precompute.data.table <- function(
 #' @inheritParams impute_success
 #' @returns A named list containing:
 #' \itemize{
-#' \item `current_data`: A `tibble` or `data.table` containing `impute_block` column to guide the outcome imputations
+#' \item `current_data`: A `tibble` or `data.table` containing `impute_group` column to guide the outcome imputations
 #' \item `impute_success`: A `tibble` or `data.table` object containing probabilities of success by `treatment_group` used to impute
 #' outcomes. Subsetted from the [imputation_precompute()] output.
 #' \item `impute_dates`: Named date vector by treatment condition, containing the dates of success
@@ -231,7 +231,7 @@ imputation_precompute.data.table <- function(
 #' These checks are not implemented in `tryCatch()` block because they have to happen
 #' in every iteration.
 #'
-#' `impute_block` is the observation's new treatment block, combining any
+#' `impute_group` is the observation's new treatment block, combining any
 #' blocking variables with their new treatment assigned via the Multi-Arm-Bandit
 #' procedure.
 #'
@@ -239,31 +239,43 @@ imputation_precompute.data.table <- function(
 
 imputation_preparation <- function(
   current_data,
-  block_cols,
+  data_cols,
   imputation_information,
   whole_experiment,
   blocking,
+  clustering,
+  impute_cluster,
   delayed_feedback,
   current_period
 ) {
   if (data.table::is.data.table(current_data)) {
-    if (blocking) {
-      current_data[,
-        impute_block := do.call(paste, c(.SD, sep = "_")),
-        .SDcols = c("mab_condition", block_cols$name)
-      ]
+    impute_group_cols <- c(
+      "mab_condition",
+      if (blocking) "block",
+      if (impute_cluster) data_cols$cluster_col$name
+    )
+    if (length(impute_group_cols) == 1) {
+      current_data[, impute_group := base::as.character(mab_condition)]
     } else {
-      current_data[, impute_block := base::as.character(mab_condition)]
+      current_data[,
+        impute_group := base::do.call(base::paste, c(.SD, sep = "_")),
+        .SDcols = impute_group_cols
+      ]
     }
   } else {
-    if (blocking) {
-      current_data$impute_block <- do.call(
-        paste,
-        c(current_data[, c("mab_condition", block_cols$name)], sep = "_")
+    impute_group_cols <- c(
+      "mab_condition",
+      if (blocking) "block",
+      if (impute_cluster) data_cols$cluster_col$name
+    )
+    if (length(impute_group_cols) == 1) {
+      current_data$impute_group <- base::as.character(
+        current_data$mab_condition
       )
     } else {
-      current_data$impute_block <- base::as.character(
-        current_data$mab_condition
+      current_data$impute_group <- base::do.call(
+        base::paste,
+        c(current_data[, impute_group_cols], sep = "_")
       )
     }
   }
@@ -337,7 +349,7 @@ check_impute.data.frame <- function(
 ) {
   mean_rate <- base::mean(imputation_information$success_rate)
 
-  current_blocks <- stats::na.omit(current_data$impute_block[
+  current_blocks <- stats::na.omit(current_data$impute_group[
     current_data$impute_req == 1
   ])
   imputation_blocks <- stats::na.omit(imputation_information$treatment_group)
@@ -380,7 +392,7 @@ check_impute.data.table <- function(
 ) {
   mean_rate <- base::mean(imputation_information$success_rate)
 
-  current_blocks <- stats::na.omit(current_data[impute_req == 1, impute_block])
+  current_blocks <- stats::na.omit(current_data[impute_req == 1, impute_group])
 
   imputation_blocks <- stats::na.omit(imputation_information$treatment_group)
 
@@ -478,45 +490,41 @@ impute_success.data.frame <- function(
   delayed_feedback,
   dates = NULL,
   success_date_col,
-  current_period
+  current_period,
+  starts,
+  ends
 ) {
-  if (base::any(current_data$impute_req == 1, na.rm = TRUE)) {
-    filtered_data <- current_data[current_data$impute_req == 1, ]
+  impute_idx <- base::which(current_data$impute_req == 1)
 
+  if (length(impute_idx) > 0) {
     imputations <- randomizr::block_ra(
-      blocks = filtered_data$impute_block,
+      blocks = current_data$impute_group[impute_idx],
       block_prob_each = imputation_info[, c("failure_rate", "success_rate")],
       num_arms = 2,
       conditions = c(0, 1),
       check_inputs = FALSE
     )
-
-    filtered_data$mab_success <- imputations
-
-    imputed <- dplyr::rows_update(current_data, filtered_data, by = id_col$name)
-
-    imputed$mab_success <- base::ifelse(
-      base::is.na(imputed$mab_success) & imputed$impute_req == 0,
-      imputed[[success_col$name]],
-      imputed$mab_success
-    )
+    current_data$mab_success[impute_idx] <- imputations
+    current_data$mab_success[-impute_idx] <- current_data[[success_col$name]][
+      -impute_idx
+    ]
   } else {
-    imputed <- current_data
-    imputed$mab_success <- imputed[[success_col$name]]
+    current_data$mab_success <- current_data[[success_col$name]]
   }
 
-  if (!delayed_feedback) {
-    imputed$new_success_date <- dplyr::case_when(
-      imputed$impute_req == 0 |
-        (imputed[[success_col$name]] == 0 & imputed$mab_success == 1) ~
-        imputed[[success_date_col$name]],
-      imputed$mab_success == 1 & imputed[[success_col$name]] == 0 ~
-        dates[imputed$impute_block],
-      imputed$mab_success == 0 | TRUE ~ base::as.Date(NA)
+  if (delayed_feedback) {
+    current_data$new_success_date <- dplyr::case_when(
+      current_data$impute_req == 0 ~ current_data[[success_date_col$name]],
+      current_data$mab_success == 1 &
+        current_data[[success_col$name]] == 0 ~ dates[
+        current_data$impute_group
+      ],
+      .default = base::as.Date(NA)
     )
   }
-  data <- dplyr::rows_update(prior_data, imputed, by = id_col$name)
-  return(data)
+
+  prior_data[starts[i]:ends[i]] <- current_data
+  return(prior_data)
 }
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
@@ -533,49 +541,48 @@ impute_success.data.table <- function(
   delayed_feedback,
   dates = NULL,
   success_date_col,
-  current_period
+  current_period,
+  starts,
+  ends
 ) {
-  if (current_data[impute_req == 1, .N] > 0) {
-    blocks <- current_data[impute_req == 1, impute_block]
+  i <- current_period
+  impute_idx <- current_data[, base::which(impute_req == 1)]
 
+  if (length(impute_idx) > 0) {
     imputations <- randomizr::block_ra(
-      blocks = blocks,
+      blocks = current_data[impute_idx, impute_group],
       block_prob_each = imputation_info[, .(failure_rate, success_rate)],
       num_arms = 2,
       conditions = c(0, 1),
       check_inputs = FALSE
     )
-
-    current_data[impute_req == 1, mab_success := imputations]
-    current_data[impute_req == 0, mab_success := base::get(success_col$name)]
+    current_data[impute_idx, mab_success := imputations]
+    current_data[-impute_idx, mab_success := base::get(success_col$name)]
   } else {
     current_data[, mab_success := base::get(success_col$name)]
   }
 
   prior_data[
-    period_number == current_period,
+    starts[i]:ends[i],
     `:=`(
       mab_condition = current_data[, mab_condition],
       impute_req = current_data[, impute_req],
-      impute_block = current_data[, impute_block],
+      impute_group = current_data[, impute_group],
       mab_success = current_data[, mab_success],
       assignment_type = current_data[, assignment_type]
     )
   ]
 
-  if (!delayed_feedback) {
+  if (delayed_feedback) {
     prior_data[
-      period_number == current_period,
+      starts[i]:ends[i],
       new_success_date := data.table::fcase(
-        impute_req == 0 | (get(success_col$name) == 0 & mab_success == 1) ,
-        get(success_date_col$name)                                        ,
-        mab_success == 1 & get(success_col$name) == 0                     ,
-        dates[impute_block]                                               ,
-        mab_success == 0 | TRUE                                           ,
-        base::as.Date(NA)
+        impute_req == 0                               , base::get(success_date_col$name) ,
+        mab_success == 1 & get(success_col$name) == 0 , dates[impute_group]              ,
+        default = base::as.Date(NA)
       )
     ]
   }
 
-  return(invisible(prior_data))
+  invisible(prior_data)
 }

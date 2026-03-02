@@ -4,16 +4,14 @@
 #' calculates the number of success under each treatment and the total number of observations assigned to each treatment which are used
 #' to calculate UCB1 values or Thompson sampling probabilities.
 #'
-#' @inheritParams single_mab_simulation
-#' @inheritParams create_prior
-#' @inheritParams cols
-#' @param current_data A `tibble` or `data.table` with only observations from the current sampling period.
-#' @param prior_data A `tibble` or `data.table` with only the observations from the prior index.
+#' @inheritParams simulate_mab.rct
+#' @param current_data A `data.frame` or `data.table` with only observations from the current sampling period.
+#' @param prior_data A `data.frame` or `data.table` with only the observations from the prior index.
 #' @returns A `tibble` or `data.table` containing the number of successes, and number of people for each
 #' treatment condition.
 #'
 #' @details
-#' When `perfect_assignment = FALSE`, the maximum value from the specified
+#' When `delayed_feedback = FALSE`, the maximum value from the specified
 #' `assignment_date_col` in the current data is taken as the last possible date
 #' the researchers conducting the experiment could have learned about a treatment outcome.
 #' All successes that occur past this date are masked and treated as failures for the purposes
@@ -29,7 +27,7 @@
 get_past_results <- function(
   current_data,
   prior_data,
-  perfect_assignment,
+  delayed_feedback,
   assignment_date_col = NULL,
   conditions
 ) {
@@ -46,11 +44,11 @@ get_past_results <- function(
 get_past_results.data.frame <- function(
   current_data,
   prior_data,
-  perfect_assignment,
+  delayed_feedback,
   assignment_date_col = NULL,
   conditions
 ) {
-  if (!perfect_assignment) {
+  if (delayed_feedback) {
     current_date <- base::max(current_data[[assignment_date_col$name]])
 
     prior_data$known_success <- base::ifelse(
@@ -98,12 +96,12 @@ get_past_results.data.frame <- function(
 
 get_past_results.data.table <- function(
   current_data,
-  perfect_assignment,
+  delayed_feedback,
   assignment_date_col = NULL,
   conditions,
   prior_data
 ) {
-  if (!perfect_assignment) {
+  if (delayed_feedback) {
     current_date <- base::max(current_data[[assignment_date_col$name]])
 
     prior_data[,
@@ -114,10 +112,8 @@ get_past_results.data.table <- function(
         0
       )
     ]
-  } else if (perfect_assignment) {
-    prior_data[, known_success := mab_success]
   } else {
-    rlang::abort("Specify Logical for `perfect_assignment`")
+    prior_data[, known_success := mab_success]
   }
 
   past_results <- prior_data[,
@@ -372,8 +368,9 @@ get_bandit.ucb1 <- function(past_results, conditions, current_period) {
 #' Adaptively Assign Treatments in a Period
 #' @description Assigns new treatments for an assignment wave based on the assignment probabilities provided from
 #' [get_bandit()], and the proportion of randomly assigned observations specified in `random_assign_prop`.
-#' Assignments are made randomly with the given probabilities using [randomizr::block_ra()] or
-#' [randomizr::complete_ra()].
+#' Assignments are made randomly with the given probabilities using [randomizr::block_ra()],
+#' [randomizr::complete_ra()], [randomizr::cluster_ra()], or [randomizr::cluster_block_ra()]
+#' depending on whether blocking and/or clustering are used.
 #'
 #' @name assign_treatments
 #' @inheritParams single_mab_simulation
@@ -392,43 +389,70 @@ get_bandit.ucb1 <- function(past_results, conditions, current_period) {
 #' @seealso
 #'* [randomizr::block_ra()]
 #'* [randomizr::complete_ra()]
+#'* [randomizr::cluster_ra()]
+#'* [randomizr::cluster_block_ra()]
 #' @keywords internal
-
 assign_treatments <- function(
   current_data,
   probs,
   blocking = NULL,
+  clustering = NULL,
   conditions,
   condition_col,
+  cluster_col,
   random_assign_prop
 ) {
   rows <- base::nrow(current_data)
   random_rows <- rows * random_assign_prop
-  rand_idx <- if (random_assign_prop > 0 && random_rows < 1) {
-    base::which(base::as.logical(stats::rbinom(
-      rows,
-      1,
-      random_assign_prop
-    )))
+
+  rand_idx <- if (clustering && random_assign_prop > 0) {
+    if (random_rows < 1) {
+      clusters <- base::unique(current_data[[cluster_col$name]])
+      rand_clusters <- clusters[base::as.logical(stats::rbinom(
+        base::length(clusters),
+        1,
+        random_assign_prop
+      ))]
+      which(current_data[[cluster_col$name]] %in% rand_clusters)
+    } else {
+      clusters <- base::unique(current_data[[cluster_col$name]])
+      cluster_sizes <- base::table(current_data[[cluster_col$name]])
+      target_rows <- base::round(rows * random_assign_prop, 0)
+      shuffled <- base::sample(base::names(cluster_sizes))
+      cumulative <- base::cumsum(cluster_sizes[shuffled])
+      n_clusters <- base::which(cumulative >= target_rows)[1]
+      base::which(
+        current_data[[cluster_col$name]] %in%
+          shuffled[base::seq_len(n_clusters)]
+      )
+    }
   } else {
-    rand_idx <- base::sample(
-      x = rows,
-      size = base::round(random_rows, 0),
-      replace = FALSE
-    )
+    if (random_rows < 1) {
+      base::which(base::as.logical(stats::rbinom(rows, 1, random_assign_prop)))
+    } else {
+      base::sample(
+        x = rows,
+        size = base::round(random_rows, 0),
+        replace = FALSE
+      )
+    }
   }
 
-  num_conditions <- base::length(conditions)
-  random_probs <- base::rep(1 / num_conditions, num_conditions)
   band_idx <- base::setdiff(seq_len(rows), rand_idx)
+  random_probs <- base::rep(
+    1 / base::length(conditions),
+    base::length(conditions)
+  )
 
-  current_data <- if (data.table::is.data.table(current_data)) {
+  if (data.table::is.data.table(current_data)) {
     assign_treatments.data.table(
       current_data = current_data,
       probs = probs,
       blocking = blocking,
+      clustering = clustering,
       conditions = conditions,
       condition_col = condition_col,
+      cluster_col = cluster_col,
       rand_idx = rand_idx,
       band_idx = band_idx,
       random_probs = random_probs
@@ -438,16 +462,85 @@ assign_treatments <- function(
       current_data = current_data,
       probs = probs,
       blocking = blocking,
+      clustering = clustering,
       conditions = conditions,
       condition_col = condition_col,
+      cluster_col = cluster_col,
       rand_idx = rand_idx,
       band_idx = band_idx,
       random_probs = random_probs
     )
   }
-  return(current_data)
 }
-#-----------------------------------------------------
+
+#' Build randomizr function and arguments
+#' @description Selects the appropriate `randomizr` function and constructs its argument list
+#' based on whether blocking and/or clustering are requested.
+#' @param idx Integer vector of row indices to assign.
+#' @param dt Logical. Whether `current_data` is a data.table.
+#' @return A list with `fn` (the randomizr function) and `args` (its arguments).
+#' @noRd
+build_ra_args <- function(
+  idx,
+  current_data,
+  probs,
+  conditions,
+  blocking,
+  clustering,
+  cluster_col,
+  dt
+) {
+  get_col <- function(col) {
+    if (dt) {
+      current_data[idx, get(col)]
+    } else {
+      current_data[[col]][idx]
+    }
+  }
+
+  if (blocking && clustering) {
+    list(
+      fn = randomizr::cluster_block_ra,
+      args = list(
+        blocks = get_col("block"),
+        clusters = get_col(cluster_col$name),
+        prob_each = probs,
+        conditions = conditions,
+        check_inputs = TRUE
+      )
+    )
+  } else if (blocking) {
+    list(
+      fn = randomizr::block_ra,
+      args = list(
+        blocks = get_col("block"),
+        prob_each = probs,
+        conditions = conditions,
+        check_inputs = TRUE
+      )
+    )
+  } else if (clustering) {
+    list(
+      fn = randomizr::cluster_ra,
+      args = list(
+        clusters = get_col(cluster_col$name),
+        prob_each = probs,
+        conditions = conditions,
+        check_inputs = TRUE
+      )
+    )
+  } else {
+    list(
+      fn = randomizr::complete_ra,
+      args = list(
+        N = length(idx),
+        prob_each = probs,
+        conditions = conditions,
+        check_inputs = TRUE
+      )
+    )
+  }
+}
 
 #' @method assign_treatments data.frame
 #' @title [assign_treatments()] for data.frames
@@ -455,9 +548,11 @@ assign_treatments <- function(
 assign_treatments.data.frame <- function(
   current_data,
   probs,
-  blocking = NULL,
+  blocking,
+  clustering,
   conditions,
   condition_col,
+  cluster_col,
   rand_idx,
   band_idx,
   random_probs
@@ -465,59 +560,32 @@ assign_treatments.data.frame <- function(
   current_data$assignment_type[band_idx] <- "bandit"
   current_data$assignment_type[rand_idx] <- "random"
 
-  if (blocking) {
-    bandit_blocks <- current_data$block[band_idx]
-    random_blocks <- current_data$block[rand_idx]
-    if (length(rand_idx) > 0) {
-      current_data$mab_condition[
-        rand_idx
-      ] <- base::as.character(randomizr::block_ra(
-        blocks = random_blocks,
-        prob_each = random_probs,
-        conditions = conditions,
-        check_inputs = TRUE
-      ))
+  for (idx in list(band_idx, rand_idx)) {
+    if (base::length(idx) == 0) {
+      next
     }
-    if (base::length(band_idx) > 0) {
-      current_data$mab_condition[
-        band_idx
-      ] <- base::as.character(randomizr::block_ra(
-        blocks = bandit_blocks,
-        prob_each = probs,
-        conditions = conditions,
-        check_inputs = TRUE
-      ))
-    }
-  } else {
-    if (base::length(rand_idx) > 0) {
-      current_data$mab_condition[
-        rand_idx
-      ] <- base::as.character(randomizr::complete_ra(
-        N = length(rand_idx),
-        prob_each = random_probs,
-        conditions = conditions,
-        check_inputs = TRUE
-      ))
-    }
-    if (base::length(band_idx) > 0) {
-      current_data$mab_condition[
-        band_idx
-      ] <- base::as.character(randomizr::complete_ra(
-        N = length(band_idx),
-        prob_each = probs,
-        conditions = conditions,
-        check_inputs = TRUE
-      ))
-    }
+    p <- if (base::identical(idx, rand_idx)) random_probs else probs
+    ra <- build_ra_args(
+      idx,
+      current_data,
+      p,
+      conditions,
+      blocking,
+      clustering,
+      cluster_col,
+      FALSE
+    )
+    current_data$mab_condition[idx] <- base::as.character(do.call(
+      ra$fn,
+      ra$args
+    ))
   }
 
-  current_data$impute_req <- base::ifelse(
+  current_data$impute_req <- base::as.integer(
     base::as.character(current_data$mab_condition) !=
-      base::as.character(current_data[[condition_col$name]]),
-    1,
-    0
+      base::as.character(current_data[[condition_col$name]])
   )
-  return(current_data)
+  current_data
 }
 
 #' @method assign_treatments data.table
@@ -526,9 +594,11 @@ assign_treatments.data.frame <- function(
 assign_treatments.data.table <- function(
   current_data,
   probs,
-  blocking = NULL,
+  blocking,
+  clustering,
   conditions,
   condition_col,
+  cluster_col,
   rand_idx,
   band_idx,
   random_probs
@@ -536,64 +606,34 @@ assign_treatments.data.table <- function(
   current_data[band_idx, assignment_type := "bandit"]
   current_data[rand_idx, assignment_type := "random"]
 
-  if (blocking) {
-    bandit_blocks <- current_data[band_idx, block]
-    random_blocks <- current_data[rand_idx, block]
-
-    if (length(rand_idx) > 0) {
-      current_data[
-        rand_idx,
-        mab_condition := base::as.character(randomizr::block_ra(
-          blocks = random_blocks,
-          prob_each = random_probs,
-          conditions = conditions,
-          check_inputs = TRUE
-        ))
-      ]
+  for (idx in list(band_idx, rand_idx)) {
+    if (base::length(idx) == 0) {
+      next
     }
-
-    if (base::length(band_idx) > 0) {
-      current_data[
-        band_idx,
-        mab_condition := base::as.character(randomizr::block_ra(
-          blocks = bandit_blocks,
-          prob_each = probs,
-          conditions = conditions,
-          check_inputs = TRUE
-        ))
-      ]
-    }
-  } else {
-    if (base::length(rand_idx) > 0) {
-      current_data[
-        rand_idx,
-        mab_condition := base::as.character(randomizr::complete_ra(
-          N = length(rand_idx),
-          prob_each = random_probs,
-          conditions = conditions,
-          check_inputs = TRUE
-        ))
-      ]
-    }
-    if (base::length(band_idx) > 0) {
-      current_data[
-        band_idx,
-        mab_condition := base::as.character(randomizr::complete_ra(
-          N = length(band_idx),
-          prob_each = probs,
-          conditions = conditions,
-          check_inputs = TRUE
-        ))
-      ]
-    }
+    p <- if (base::identical(idx, rand_idx)) random_probs else probs
+    ra <- build_ra_args(
+      idx,
+      current_data,
+      p,
+      conditions,
+      blocking,
+      clustering,
+      cluster_col,
+      TRUE
+    )
+    current_data[
+      idx,
+      mab_condition := base::as.character(do.call(ra$fn, ra$args))
+    ]
   }
+
   current_data[,
     impute_req := data.table::fifelse(
       base::as.character(mab_condition) !=
-        base::as.character(base::get(condition_col$name)),
-      1,
-      0
+        base::as.character(get(condition_col$name)),
+      1L,
+      0L
     )
   ]
-  return(invisible(current_data))
+  invisible(current_data)
 }

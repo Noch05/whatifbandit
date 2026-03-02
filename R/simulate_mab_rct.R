@@ -6,8 +6,9 @@
 #' and [multiple_mab_simulation()]. Centralizes necessary functions to conduct a
 #' single Multi-Arm-Bandit Trial with adaptive inference. It assumes all inputs have
 #' been preprocessed by [pre_mab_simulation()].
-#' @inheritParams single_mab_simulation
+#' @inheritParams mab_from_rct.bernoulli
 #' @inheritParams run_mab_trial
+#' @inheritParams prepare_rct
 #'
 #' @returns: A named list containing:
 #' \itemize{
@@ -19,33 +20,33 @@
 #' sample means and variances, for each treatment arm.
 #' \item `settings`: A named list of the configuration settings used in the trial.
 #' }
-#' @seealso
-#'* [single_mab_simulation()]
-#'* [multiple_mab_simulation()]
 #' @keywords internal
 #'
 
 simulate_mab_rct.bernoulli <- function(
   data,
   time_unit,
-  perfect_assignment,
+  delayed_feedback,
   algorithm,
   period_length,
   prior_periods,
   whole_experiment,
   conditions,
   blocking,
-  block_cols,
+  clustering,
   data_cols,
   verbose,
-  assignment_method,
+  period_method,
   control_augment,
   imputation_information,
   ndraws,
   random_assign_prop,
   starts,
-  ends
+  ends,
+  impute_cluster
 ) {
+  periods <- base::length(starts)
+
   sim_results <- run_mab_trial(
     data = data,
     time_unit = time_unit,
@@ -53,10 +54,10 @@ simulate_mab_rct.bernoulli <- function(
     prior_periods = prior_periods,
     algorithm = algorithm,
     whole_experiment = whole_experiment,
-    perfect_assignment = perfect_assignment,
+    delayed_feedback = delayed_feedback,
     conditions = conditions,
     blocking = blocking,
-    block_cols = block_cols,
+    clustering = clustering,
     data_cols = data_cols,
     verbose = verbose,
     control_augment = control_augment,
@@ -64,9 +65,10 @@ simulate_mab_rct.bernoulli <- function(
     ndraws = ndraws,
     random_assign_prop,
     starts = starts,
-    ends = ends
+    ends = ends,
+    periods = periods,
+    impute_cluster = impute_cluster
   )
-  periods <- base::max(sim_results$final_data$period_number)
 
   sim_results$final_data <- get_iaipw(
     data = sim_results$final_data,
@@ -102,7 +104,11 @@ simulate_mab_rct.bernoulli <- function(
 #' from [single_mab_simulation()] and [multiple_mab_simulation()] in treatment blocking strategy,
 #' stationary/non-stationary bandits, control augmentation, and hybrid assignment.
 #'
-#' @inheritParams single_mab_simulation
+#' @inheritParams simulate_mab_rct.bernoulli
+#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams prepare_rct
+#' @param starts  Numeric vector where element `i` is the starting row number of period `i`.
+#' @param ends  Numeric vector where element `i` is the ending row number of period `i`.
 #' @param imputation_information Object created by [imputation_precompute()] containing the conditional means and success dates
 #' for each treatment block to impute from.
 #'
@@ -124,21 +130,23 @@ run_mab_trial <- function(
   time_unit,
   period_length = NULL,
   data_cols,
-  block_cols,
+  clustering,
   blocking,
   prior_periods,
   algorithm,
   whole_experiment,
-  perfect_assignment,
+  delayed_feedback,
   conditions,
   verbose,
   control_augment,
   imputation_information,
   ndraws,
-  random_assign_prop
+  random_assign_prop,
+  starts,
+  ends,
+  periods,
+  impute_cluster
 ) {
-  periods <- base::max(data$period_number)
-
   bandits <- base::vector(mode = "list", length = 2)
   bandits$bandit_stat <- base::vector(mode = "list", length = (periods + 1))
   bandits$assignment_prob <- base::vector(mode = "list", length = periods)
@@ -153,34 +161,25 @@ run_mab_trial <- function(
     "ucb1" = tibble::tibble(
       mab_condition = conditions,
       ucb = rep(0, num_conditions)
-    ),
-    rlang::abort(
-      "Invalid Algorithm: Valid Algorithms are `thompson` and `ucb1`"
     )
   )
   bandits$assignment_prob[[1]] <- rlang::set_names(
     rep(1 / num_conditions, num_conditions),
     conditions
   )
-
   verbose_log(verbose, "Starting Bandit Trial")
   for (i in 2:periods) {
     verbose_log(verbose, paste0("Period: ", i))
 
     prior <- create_prior(prior_periods = prior_periods, current_period = i)
 
-    if (data.table::is.data.table(data)) {
-      current_data <- data[period_number == i, ]
-      prior_data <- data[period_number %in% prior, ]
-    } else {
-      current_data <- data[data$period_number == i, ]
-      prior_data <- data[data$period_number %in% prior, ]
-    }
+    current_data <- data[starts[i]:ends[i], ]
+    prior_data <- data[starts[prior]:ends[i - 1], ]
 
     past_results <- get_past_results(
       current_data = current_data,
       prior_data = prior_data,
-      perfect_assignment = perfect_assignment,
+      delayed_feedback = delayed_feedback,
       assignment_date_col = data_cols$assignment_date_col,
       conditions = conditions
     )
@@ -200,6 +199,8 @@ run_mab_trial <- function(
       current_data = current_data,
       probs = bandit[["assignment_prob"]],
       blocking = blocking,
+      clustering = clustering,
+      cluster_col,
       conditions = conditions,
       condition_col = data_cols$condition_col,
       random_assign_prop = random_assign_prop
@@ -214,9 +215,11 @@ run_mab_trial <- function(
       current_data = current_data,
       whole_experiment = whole_experiment,
       imputation_information = imputation_information,
-      block_cols = block_cols,
+      data_cols = data_cols,
+      clustering = clustering,
+      impute_cluster = impute_cluster,
       blocking = blocking,
-      perfect_assignment,
+      delayed_feedback,
       current_period = i
     )
 
@@ -227,9 +230,11 @@ run_mab_trial <- function(
       id_col = data_cols$id_col,
       success_col = data_cols$success_col,
       prior_data = data,
-      perfect_assignment = perfect_assignment,
+      delayed_feedback = delayed_feedback,
       success_date_col = data_cols$success_date_col,
-      current_period = i
+      current_period = i,
+      starts = starts,
+      ends <- ends
     )
   }
   results <- end_mab_trial(
@@ -464,30 +469,19 @@ end_mab_trial.data.table <- function(
 #' @name create_prior
 #' @description Used during [run_mab_trial()] to create a vector of prior periods dynamically based on the specified
 #' number of prior periods.
-#' @inheritParams single_mab_simulation
+#' @inheritParams mab_from_rct.bernoulli()
 #' @param current_period The current period of the simulation. Defined by loop structure inside [run_mab_trial()].
-#' @returns Numeric vector containing the prior treatment periods to be used when aggregating
+#' @returns Numeric value referring to the period index to look back from.
 #' the results for the current treatment assignment period.
 #'
 #' @seealso
 #' * [run_mab_trial()]
 #' @keywords internal
 
-create_prior <- function(prior_periods, current_period) {
-  if (prior_periods == "all" || prior_periods >= current_period) {
-    ## Looking at all the past periods
-
-    prior <- base::seq_len(current_period - 1)
-  } else if (prior_periods < current_period) {
-    # returns x most recent periods, i.e. if prior is 3, and current is 6, returns 3:5
-
-    prior <- base::seq(
-      from = current_period - prior_periods,
-      to = (current_period - 1),
-      by = 1
-    )
+create_prior <- function(prior_periods = NULL, current_period) {
+  if (!base::is.null(prior_periods)) {
+    1
   } else {
-    stop("Invalid Prior Cutoff, specify either a whole number or \"All\"")
+    current_period - prior_periods
   }
-  return(prior)
 }

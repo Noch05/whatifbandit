@@ -18,7 +18,7 @@
 #' @param data A `data.frame`, `data.table`, or any object which inherits from `data.frame`, containing input data from the trial. This should be the results
 #' of a traditional Randomized Controlled Trial (RCT).
 #'
-#' @param time_unit A character string specifying the unit of time for assigning periods when `assignment_method ="date"`.
+#' @param time_unit A character string specifying the unit of time for assigning periods when `period_method ="date"`.
 #' Acceptable values are `"day", "week",` or `"month"`. `"month"` does not require an additional column with the months of each observation,
 #' but it can accept a separate `month_col`. If `month_col` is specified, the periods follow the calendar months strictly, and when it is not
 #' specified months are simply used as the time interval. For example if a dataset has dates starting on July 26th, under month based assignment and
@@ -37,8 +37,8 @@
 #' `"individual"` assignment can be computationally intensive for larger datasets.
 #'
 #' @param period_length A positive integer; represents the length of each treatment period.
-#' If `assignment_method` is "date", this length refers the number of units specified in `time_unit`.
-#' (i.e., if `"day"``, 10 would be 10 days). If `assignment_method` = `"batch"`, this refers to the number of people in each batch.
+#' If `period_method` is "date", this length refers the number of units specified in `time_unit`.
+#' (i.e., if `"day"``, 10 would be 10 days). If `period_method` = `"batch"`, this refers to the number of people in each batch.
 #'
 #' @param prior_periods A positive integer; number of previous periods to use
 #' in the treatment assignment model. Default is `NULL`, where all prior periods are considered. See below for details.
@@ -311,6 +311,7 @@ mab_from_rct.bernoulli <- function(
     conditions = prepped$conditions,
     blocking = blocking,
     clustering = clustering,
+    impute_cluster = impute_cluster,
     data_cols = prepped$data_cols,
     verbose = verbose,
     period_method = prepped$char_args$period_method,
