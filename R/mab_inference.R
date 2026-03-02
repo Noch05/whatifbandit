@@ -316,33 +316,28 @@ estimate_aipw.data.frame <- function(
       na.rm = TRUE
     )) /
       (sum_w^2)
-    return(tibble::tibble(mean = mean, var = var, mab_condition = condition))
+    return(tibble::tibble(
+      mean = mean,
+      var = var,
+      mab_condition = condition,
+      estimator = "AIPW"
+    ))
   }) |>
-    dplyr::bind_rows() |>
-    dplyr::mutate(estimator = "AIPW")
+    dplyr::bind_rows()
 
   sample <- data |>
     dplyr::group_by(mab_condition) |>
-    dplyr::summarize(mean = base::mean(mab_success), n = dplyr::n()) |>
+    dplyr::summarize(
+      mean = base::mean(mab_success),
+      n = dplyr::n(),
+      estimator = "Sample"
+    ) |>
     dplyr::ungroup() |>
     dplyr::mutate(
       var = (mean * (1 - mean)) / n,
-      estimator = "Sample"
     ) |>
-    dplyr::select(-n)
-
-  missing_conditions <- setdiff(conditions, sample$mab_condition)
-  if (length(missing_conditions) > 0) {
-    sample <- dplyr::bind_rows(
-      sample,
-      tibble::tibble(
-        mean = 0,
-        variance = Inf,
-        mab_condition = missing_conditions,
-        estimator = "Sample"
-      )
-    )
-  }
+    dplyr::select(-n) |>
+    fill_missing_conditions(conditions)
 
   returns <- dplyr::bind_rows(estimates, sample) |>
     dplyr::arrange(estimator, mab_condition)
@@ -376,38 +371,141 @@ estimate_aipw.data.table <- function(
       na.rm = TRUE
     )) /
       (sum_w^2)
-    data.table::data.table(mean = mean, var = var, mab_condition = condition)
-    estimates[, estimator := "AIPW"]
+    data.table::data.table(
+      mean = mean,
+      var = var,
+      mab_condition = condition,
+      estimator = "AIPW"
+    )
   }) |>
     data.table::rbindlist()
 
   sample <- data[,
     .(
       mean = base::mean(mab_success, na.rm = TRUE),
-      variance = ((mean(mab_success) * (1 - mean(mab_success))) / .N)
+      variance = ((mean(mab_success) * (1 - mean(mab_success))) / .N),
+      estimator = "Sample"
     ),
     by = mab_condition
   ]
-  sample[, estimator := "Sample"]
 
-  missing_conditions <- base::setdiff(conditions, sample$mab_condition)
-  if (length(missing_conditions) > 0) {
-    sample <- data.table::rbindlist(
-      list(
-        sample,
-        data.table::data.table(
-          mean = 0,
-          variance = Inf,
-          mab_condition = missing_conditions,
-          estimator = "Sample"
-        )
-      ),
-      use.names = TRUE
-    )
-  }
+  sample <- fill_missing_conditions(sample, conditions)
 
   returns <- data.table::rbindlist(list(estimates, sample), use.names = TRUE)
   data.table::setorder(returns, estimator, mab_condition)
 
   return(returns)
+}
+
+#' IPW Estimates for Probability of Success
+#'
+#' @description
+#'
+#'
+estimate_ipw <- function(
+  estimates,
+  data,
+  cluster_col,
+  blocking,
+  clustering,
+  conditions
+) {
+  est_lm <- if (blocking && clustering) {
+    estimatr::lm_robust(
+      mab_success ~ mab_condition - 1,
+      fixed_effects = ~block,
+      data = data,
+      clusters = data[[cluster_col$name]],
+      weights = ipw_weights,
+      se_type = "CR2"
+    )
+  } else if (blocking) {
+    estimatr::lm_robust(
+      mab_success ~ mab_condition - 1,
+      fixed_effects = ~block,
+      data = data,
+      se_type = "HC2",
+      weights = ipw_weights
+    )
+  } else if (clustering) {
+    estimatr::lm_robust(
+      mab_success ~ mab_condition - 1,
+      data = data,
+      clusters = data[[cluster_col$name]],
+      weights = ipw_weights,
+      se_type = "CR2"
+    )
+  } else {
+    estimatr::lm_robust(
+      mab_success ~ mab_condition - 1,
+      data = data,
+      se_type = "HC2",
+      weights = ipw_weights
+    )
+  }
+
+  coefs <- est_lm$coefficients
+  var <- (est_lm$std.error)^2
+  f <- est_lm$proj_statistic |> as.numeric()[1]
+  df <- est_lm$df
+
+  for (item in list(coefs, var, df)) {
+    base::names(item) <- base::gsub("^mab_condition", "", base::names(item))
+  }
+
+  if (data.table::is.data.table(data)) {
+    ipw <- data.table::data.table(
+      mean = c(coefs, f),
+      var = c(var, NA),
+      df = c(df, NA),
+      mab_condition = c(base::names(coefs), "Joint"),
+      estimator = "IPW"
+    )
+    ipw <- fill_missing_conditions(ipw, conditions)
+    estimates <- data.table::rbindlist(list(estimates, ipw), fill = TRUE)
+  } else {
+    estimates <- tibble::tibble(
+      mean = c(coefs, f),
+      var = c(var, NA),
+      df = c(df, NA),
+      mab_condition = c(base::names(coefs), "Joint"),
+      estimator = "IPW"
+    ) |>
+      fill_missing_conditions(conditions) |>
+      dplyr::bind_rows(estimates)
+  }
+  return(estimates)
+}
+
+
+#' Fill Missing Conditions
+fill_missing_conditions <- function(estimates, conditions) {
+  missing_conditions <- base::setdiff(conditions, estimates$mab_condition)
+  if (length(missing_conditions) > 0) {
+    if (data.table::is.data.table(estimates)) {
+      estimates <- data.table::rbindlist(
+        list(
+          estimates,
+          data.table::data.table(
+            mean = 0,
+            var = Inf,
+            mab_condition = missing_conditions,
+            estimator = estimates$estimator[1]
+          )
+        ),
+        fill = TRUE
+      )
+    } else {
+      estimates <- dplyr::bind_rows(
+        estimates,
+        tibble::tibble(
+          mean = 0,
+          var = Inf,
+          mab_condition = missing_conditions,
+          estimator = estimates$estimator[1]
+        )
+      )
+    }
+  }
+  return(estimates)
 }
