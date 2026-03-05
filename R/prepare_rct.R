@@ -15,6 +15,7 @@
 #' \item `data`: Prepared `data.frame` or `data.table` containing all the necessary columns to
 #' conduct the adaptive trial simulation, subset from the originally provided data to reduce memory usage.
 #' columns required for [mab_simulation()].
+#' \item `char_args` List of processed string arguments for compatibility.
 #' \item `imputation_information`: List containing necessary information
 #' for outcome and date imputation for [mab_simulation()].
 #' \item `period_starts`: Numeric vector where element `i` is the starting row number of period `i`.
@@ -106,13 +107,13 @@ prep_rct_data <- function(
   # Preparing Data to be simulated
   verbose_log(verbose, "Preparing Data")
   vars_keep <- c(
-    base::vapply(
+    base::lapply(
       data_cols,
       \(col) {
         col$name
-      },
-      character(1)
-    ),
+      }
+    ) |>
+      base::unlist(),
     "period_number"
   )
 
@@ -139,7 +140,7 @@ prep_rct_data <- function(
     delayed_feedback = delayed_feedback
   )
 
-  period_sizes <- get_period_sizes(data, char_args$period_method, period_length)
+  period_sizes <- get_period_sizes(data)
   end_idxs <- base::cumsum(period_sizes)
   start_idxs <- c(1, end_idxs[-base::length(period_sizes)] + 1)
 
@@ -564,9 +565,7 @@ create_new_cols.data.table <- function(
 #'
 #' @keywords internal
 get_period_sizes <- function(
-  data,
-  period_method,
-  period_length
+  data
 ) {
   base::UseMethod("get_period_sizes", data)
 }
@@ -575,7 +574,7 @@ get_period_sizes <- function(
 #' @method  get_period_sizes data.frame
 #' @inheritParams get_period_sizes
 #' @noRd
-get_period_sizes.data.frame <- function(data, period_method, period_length) {
+get_period_sizes.data.frame <- function(data) {
   data |>
     dplyr::group_by(period_number) |>
     dplyr::summarize(count = dplyr::n()) |>
@@ -587,7 +586,7 @@ get_period_sizes.data.frame <- function(data, period_method, period_length) {
 #' @method  get_period_sizes data.table
 #' @inheritParams get_period_sizes
 #' @noRd
-get_period_sizes.data.table <- function(data, period_method, period_length) {
+get_period_sizes.data.table <- function(data) {
   counts <- data[, .(count = .N), group_by = period_nummber][order(
     period_number
   )]
