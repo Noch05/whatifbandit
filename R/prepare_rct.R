@@ -175,9 +175,9 @@ create_conditions <- function(
       ))
     }
     if (
-      is.null(control_condition) |
-        is.na(control_condition) |
-        !as.character(control_condition) %in% conditions
+      base::is.null(control_condition) ||
+        base::is.na(control_condition) ||
+        !base::as.character(control_condition) %in% conditions
     ) {
       rlang::abort(c(
         "`control_condition` is not present in the conditions column",

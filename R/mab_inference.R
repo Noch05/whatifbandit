@@ -476,7 +476,11 @@ estimate_ipw <- function(
 
   coefs <- est_lm$coefficients
   var <- (est_lm$std.error)^2
-  f <- est_lm$proj_statistic |> as.numeric()[1]
+  f <- if (base::is.null(est_lm$fstatistic)) {
+    est_lm$proj_statistic[1] |> as.numeric()
+  } else {
+    est_lm$ftatistic[1] |> as.numeric()
+  }
   df <- est_lm$df
 
   for (item in list(coefs, var, df)) {
@@ -509,6 +513,8 @@ estimate_ipw <- function(
 
 
 #' Fill Missing Conditions
+#'
+#'
 fill_missing_conditions <- function(estimates, conditions) {
   missing_conditions <- base::setdiff(conditions, estimates$mab_condition)
   if (length(missing_conditions) > 0) {
