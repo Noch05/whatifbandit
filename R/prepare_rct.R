@@ -1,6 +1,5 @@
 #' @name prep_rct_data
-#' @inheritParams mab_from_rct.bernoulli()
-#' @title Pre-Simulation Setup to Simulate a Multi Arm Bandit Trial From an RCT
+#' @title Pre-Simulation Setup to Simulate a MAB Trial From an RCT
 
 #' @description Common function for all the actions that need to take place before
 #' running the Multi-Arm-Bandit re-simulation. Intakes the data and column names to
@@ -8,12 +7,13 @@
 #' key values to avoid doing so within the simulation loop.
 #' @param blocking Logical; Whether or not treatment blocking is occuring
 #' @param clustering Logical; Whether or not treatment clustering is occuring
+#' @inheritParams mab_from_rct.bernoulli
 #'
 #' @returns Named list containing:
 #' \itemize{
-#' \item `data_cols`: List of necessary columns in `data` as strings and symbols.
+#' \item `data_cols`: List of necessary columns in `data` as strings and as symbols.
 #' \item `data`: Prepared `data.frame` or `data.table` containing all the necessary columns to
-#' conduct the adaptive trial simulation.
+#' conduct the adaptive trial simulation, subset from the originally provided data to reduce memory usage.
 #' columns required for [mab_simulation()].
 #' \item `imputation_information`: List containing necessary information
 #' for outcome and date imputation for [mab_simulation()].
@@ -29,24 +29,24 @@
 
 prep_rct_data <- function(
   data,
-  period_method,
   algorithm,
-  control_condition,
-  prior_periods,
-  delayed_feedback,
-  whole_experiment,
-  data_cols,
+  random_assign_prop,
   control_augment,
+  control_condition,
+  period_method,
   time_unit,
   period_length,
+  prior_periods,
+  discount_rate,
+  data_cols,
+  delayed_feedback,
+  whole_experiment,
   verbose,
   ndraws,
-  random_assign_prop,
   check_args,
   r,
   seeds,
   keep_data,
-  impute_cluster,
   blocking,
   clustering
 ) {
@@ -76,24 +76,24 @@ prep_rct_data <- function(
   if (check_args) {
     validate_inputs(
       data = data,
-      time_unit = char_args$time_unit,
-      delayed_feedback = delayed_feedback,
       algorithm = char_args$algorithm,
-      period_length = period_length,
-      whole_experiment = whole_experiment,
-      prior_periods = prior_periods,
-      data_cols = data_cols,
-      period_method = char_args$period_method,
-      verbose = verbose,
-      control_augment = control_augment,
-      ndraws = ndraws,
       random_assign_prop = random_assign_prop,
+      control_augment = control_augment,
+      period_method = char_args$period_method,
+      time_unit = char_args$time_unit,
+      period_length = period_length,
+      prior_periods = prior_periods,
+      discount_rate = discount_rate,
+      data_cols = data_cols,
+      delayed_feedback = delayed_feedback,
+      whole_experiment = whole_experiment,
+      verbose = verbose,
+      ndraws = ndraws,
       r = r,
-      keep_data = keep_data,
       seeds = seeds,
+      keep_data = keep_data,
       blocking = blocking,
-      clustering = clustering,
-      impute_cluster = impute_cluster
+      clustering = clustering
     )
   }
   conditions <- create_conditions(
@@ -105,6 +105,16 @@ prep_rct_data <- function(
 
   # Preparing Data to be simulated
   verbose_log(verbose, "Preparing Data")
+  vars_keep <- c(
+    base::vapply(
+      data_cols,
+      \(col) {
+        col$name
+      },
+      character(1)
+    ),
+    "period_number"
+  )
 
   data <- create_cutoff(
     data = data,
@@ -117,7 +127,7 @@ prep_rct_data <- function(
       data_cols = data_cols,
       delayed_feedback = delayed_feedback,
       blocking = blocking,
-      impute_cluster = impute_cluster
+      vars_keep = vars_keep
     )
   # Pre-computing Important values to be accessed for the simulation
   verbose_log(verbose, "Precomputing")
@@ -152,8 +162,8 @@ prep_rct_data <- function(
 #' using the conditions column in the provided data, and if `control_augment` is greater
 #' than 0, it also labels the control condition. Throws an error of `control_condition` is not
 #' present.
-#' @inheritParams single_mab_simulation
-#' @inheritParams cols
+#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams prep_rct_data
 #' @keywords internal
 create_conditions <- function(
   control_condition,
@@ -165,12 +175,12 @@ create_conditions <- function(
     condition_col$name
   ]])))
   if (control_augment > 0) {
-    if (length(control_condition) != 1) {
+    if (base::length(control_condition) != 1) {
       rlang::abort(c(
         "`control_condition` must have a length of 1",
-        "x" = sprintf(
+        "x" = base::sprintf(
           "You passed a vector of length: %d",
-          length(control_condition)
+          base::length(control_condition)
         )
       ))
     }
@@ -181,16 +191,16 @@ create_conditions <- function(
     ) {
       rlang::abort(c(
         "`control_condition` is not present in the conditions column",
-        "x" = sprintf(
+        "x" = base::sprintf(
           "Potential Conditions: %s",
-          paste0(conditions, collapse = ", ")
+          base::paste0(conditions, collapse = ", ")
         ),
-        "x" = paste0("You Passed: ", base::deparse(control_condition))
+        "x" = base::paste0("You Passed: ", base::deparse(control_condition))
       ))
     }
 
     names(conditions) <- base::ifelse(
-      conditions == as.character(control_condition),
+      conditions == base::as.character(control_condition),
       "control",
       "treatment"
     )
@@ -205,6 +215,7 @@ create_conditions <- function(
 #' column indicating with period each observation belongs to.
 #'
 #' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams prep_rct_data
 #' @details
 #' The assignment periods do not strictly have to line up with the original experiment, it
 #' is up to the researcher to test the possible options.
@@ -399,9 +410,9 @@ create_cutoff.batch <- function(data, period_length) {
 #'
 #' @inheritParams mab_from_rct.bernoulli
 #' @inheritParams prep_rct_data
+#' @param vars_keep Character vector of variables to keep
 #'
-#'
-#' @returns Updated `data.frame`/`data.table` with 6 new columns:
+#' @returns A `data.frame`/`data.table` subset to the user provided columns and 6 new columns:
 #' \itemize{
 #' \item `mab_success`: New variable to hold new success from Multi-arm bandit procedure, NA until assigned.
 #' \item `mab_condition`: New variable to hold new treatment condition from Multi-arm bandit procedure, NA until assigned.
@@ -415,10 +426,9 @@ create_cutoff.batch <- function(data, period_length) {
 create_new_cols <- function(
   data,
   data_cols,
-  block_cols,
   blocking,
   delayed_feedback,
-  impute_cluster
+  vars_keep
 ) {
   base::UseMethod("create_new_cols", data)
 }
@@ -432,12 +442,12 @@ create_new_cols <- function(
 create_new_cols.data.frame <- function(
   data,
   data_cols,
-  block_cols,
   blocking,
   delayed_feedback,
-  impute_cluster
+  vars_keep
 ) {
   data <- data |>
+    dplyr::select(all_of(vars_keep)) |>
     dplyr::mutate(
       period_number = base::match(
         period_number,
@@ -454,7 +464,7 @@ create_new_cols.data.frame <- function(
         NA
       ),
       impute_req = dplyr::if_else(period_number == 1, 0, NA),
-      impute_group = NA_character_,
+      impute_block = NA_character_,
       assignment_type = dplyr::if_else(
         period_number == 1,
         "initial",
@@ -476,26 +486,22 @@ create_new_cols.data.frame <- function(
   if (blocking) {
     data <- data |>
       dplyr::mutate(
-        block = do.call(paste, c(data[, data_cols$block_cols$name], sep = "_"))
+        block = base::do.call(
+          base::paste,
+          c(data[, data_cols$block_cols$name], sep = "_")
+        ),
+        treatment_block = base::do.call(
+          base::paste,
+          c(data[, c(data_cols$condition_col$name, data_cols$block_cols$name)])
+        )
       )
-    treatment_group_cols <- c(
-      data_cols$condition_col$name,
-      "block",
-      if (impute_cluster) data_cols$cluster_col$name
-    )
   } else {
-    treatment_group_cols <- c(
-      data_cols$condition_col$name,
-      if (impute_cluster) data_cols$cluster_col$name
-    )
-  }
-  data <- data |>
-    dplyr::mutate(
-      treatment_group = do.call(
-        paste,
-        c(data[, treatment_group_cols], sep = "_")
+    data <- data |>
+      dplyr::mutate(
+        treatment_block = base::as.character(!!data_cols$condition_col$sym)
       )
-    )
+  }
+
   return(data)
 }
 #---------------------------------------------------------------------------------
@@ -508,9 +514,9 @@ create_new_cols.data.table <- function(
   data,
   data_cols,
   blocking,
-  block_cols,
   delayed_feedback
 ) {
+  data <- data[, .SD, .SDcols = vars_keep]
   data[,
     period_number := base::match(
       period_number,
@@ -528,7 +534,7 @@ create_new_cols.data.table <- function(
       assignment_type = "initial"
     )
   ]
-  if (!delayed_feedback) {
+  if (delayed_feedback) {
     data[
       period_number == 1,
       new_success_date := base::get(data_cols$success_date_col$name)
@@ -539,21 +545,13 @@ create_new_cols.data.table <- function(
       block := base::do.call(base::paste, c(.SD, sep = "_")),
       .SDcols = block_cols$name
     ]
-    treatment_block_cols <- c(
-      data_cols$condition_col$name,
-      "block",
-      if (impute_cluster) data_cols$cluster_col$name
-    )
+    data[,
+      treatment_block := base::do.call(paste, c(.SD, sep = "_")),
+      .SDcols = c(data_cols$condition_col$name, block_cols$name)
+    ]
   } else {
-    treatment_block_cols <- c(
-      data_cols$condition_col$name,
-      if (impute_cluster) data_cols$cluster_col$name
-    )
+    data[, treatment_block := as.character(get(data_cols$condition_col$name))]
   }
-  data[,
-    treatment_block := base::do.call(paste, c(.SD, sep = "_")),
-    .SDcols = treatment_block_cols
-  ]
   return(invisible(data))
 }
 
@@ -570,22 +568,6 @@ get_period_sizes <- function(
   period_method,
   period_length
 ) {
-  if (period_method == "individual") {
-    return(base::rep(1, base::nrow(data)))
-  }
-  if (period_method == "batch") {
-    n_periods <- base::ceiling(base::nrow(data) / period_length)
-    sizes <- c(
-      base::rep(base::floor(base::nrow(data) / n_periods), n_periods - 1),
-      base::nrow(data) %% n_periods
-    )
-    sizes[n_periods] <- if (sizes[n_periods] == 0) {
-      sizes[n_periods - 1]
-    } else {
-      sizes[n_periods]
-    }
-    return(sizes)
-  }
   base::UseMethod("get_period_sizes", data)
 }
 
@@ -606,6 +588,8 @@ get_period_sizes.data.frame <- function(data, period_method, period_length) {
 #' @inheritParams get_period_sizes
 #' @noRd
 get_period_sizes.data.table <- function(data, period_method, period_length) {
-  counts <- data[, .(count = .N), group_by = period_nummber]
+  counts <- data[, .(count = .N), group_by = period_nummber][order(
+    period_number
+  )]
   counts$count
 }

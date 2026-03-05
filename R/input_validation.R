@@ -1,4 +1,4 @@
-#' @title Validates Inputs For [single_mab_simulation()] and [multiple_mab_simulation()]
+#' @title Validates Inputs For [mab_from_rct.bernoulli()]
 #' @name validate_inputs
 #' @description This function checks to ensure that all required arguments
 #' have been properly passed to the function before continuing with the simulation. When
@@ -8,33 +8,28 @@
 #' @inheritParams mab_from_rct.bernoulli
 #' @inheritParams prep_rct_data
 #' @returns Throws an error if an argument is missing or misspecified.
-#' @seealso
-#' * [single_mab_simulation()]
-#' * [multiple_mab_simulation()]
 #' @keywords internal
 validate_inputs <- function(
   data,
-  period_method,
   algorithm,
+  control_augment,
+  random_assign_prop,
+  period_method,
+  time_unit,
+  period_length,
   prior_periods,
+  discount_rate,
   delayed_feedback,
   whole_experiment,
   data_cols,
-  time_unit,
-  period_length,
-  control_augment,
   verbose,
   ndraws,
-  random_assign_prop,
   r,
-  keep_data,
   seeds,
+  keep_data,
   blocking,
-  clustering,
-  impute_cluster
+  clustering
 ) {
-  # Checking Algorithm
-
   if (!algorithm %in% c("thompson", "ucb1")) {
     rlang::abort(c(
       "'algorithm' must be 'thompson' or 'ucb1'.",
@@ -54,8 +49,7 @@ validate_inputs <- function(
     verbose,
     whole_experiment,
     delayed_feedback,
-    keep_data,
-    impute_cluster
+    keep_data
   )
 
   # Checking Column Proper Columns are Provided
@@ -78,7 +72,7 @@ validate_inputs <- function(
 
   # Checking Numeric Arguments
 
-  check_prop(control_augment, random_assign_prop)
+  check_prop(control_augment, random_assign_prop, discount_rate)
   check_posint(r, ndraws, prior_periods)
 
   if (r > 1) {
@@ -114,8 +108,8 @@ validate_inputs <- function(
 #' @description Helper to [validate_inputs()]. This function accepts the user's
 #' settings for the Multi-Arm-Bandit trial, and checks whether columns in the data have been properly
 #' specified based on these settings.
-#' @inheritParams single_mab_simulation
-#' @inheritParams cols
+#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams prep_rct_data
 #' @returns Throws an error if columns which are required have not been declared
 #' or are not present in the data, or are the wrong primitive data type. Additionally throws warning messages,
 #' if unnecessary columns have been provided, only when `verbose = TRUE`.
@@ -145,7 +139,6 @@ check_cols <- function(
 
   # Reason each column might be required
   all_reasons <- list(
-    id_col = "it is always required",
     success_col = "it is always required",
     condition_col = "it is always required",
     date_col = "period_method is 'date'",
@@ -191,7 +184,7 @@ check_cols <- function(
   )
 
   # Determine required columns based on settings
-  required_cols <- c("id_col", "success_col", "condition_col")
+  required_cols <- c("success_col", "condition_col")
 
   if (period_method == "date") {
     required_cols <- c(required_cols, "date_col")
@@ -199,7 +192,7 @@ check_cols <- function(
       required_cols <- c(required_cols, "month_col")
     }
   }
-  if (!delayed_feedback) {
+  if (delayed_feedback) {
     required_cols <- c(required_cols, "success_date_col", "assignment_date_col")
   }
   if (!base::is.null(data_cols$cluster_col)) {
@@ -249,7 +242,7 @@ check_cols <- function(
   )
 
   if (blocking) {
-    purrr::walk(data_cols$block_cols, \(col) {
+    purrr::walk(data_cols$block_cols$name, \(col) {
       if (!col %in% base::names(data)) {
         rlang::abort(sprintf(
           "`%s is not in the data, but was chosen as a block.",
@@ -372,7 +365,8 @@ posint <- function(x) {
 #' of the trial based on user settings.
 #' @description Helper to [validate_inputs()]. This function accepts the data and checks
 #' whether it has unique ID's whether the period length is valid.
-#' @inheritParams single_mab_simulation
+#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams prep_rct_data
 #' @keywords internal
 check_data <- function(
   data,
@@ -382,14 +376,6 @@ check_data <- function(
   time_unit,
   delayed_feedback
 ) {
-  unique_ids <- length(unique(data[[data_cols$id$name]]))
-  if (unique_ids != nrow(data)) {
-    rlang::abort(paste(
-      data_cols$id$name,
-      "is not a unique identifier; a unique ID for each observation is required."
-    ))
-  }
-
   if (period_method == "batch" && period_length > nrow(data)) {
     rlang::abort(c(
       "`period_length` cannot be larger than data size",
@@ -437,7 +423,8 @@ check_data <- function(
 #' @description Helper to [validate_inputs()]. This function accepts arguments relating
 #' to how treatment waves are assigned, and checks if they are valid, and if all
 #' supporting arguments are passed as necessary.
-#' @inheritParams single_mab_simulation
+#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams prep_rct_data
 #' @keywords internal
 check_period_method <- function(
   period_method,
