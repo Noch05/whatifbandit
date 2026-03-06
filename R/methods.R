@@ -1,9 +1,9 @@
 #' Print Generic For `mab`
 #' @description
-#' Custom Print Display for objects of `mab` class returned by [single_mab_simulation()].
+#' Custom Print Display for objects of `mab` class returned by [mab_from_rct.bernoulli()].
 #' Prevents the large list from being printed directly, and provides
 #' useful information about the settings of each trial.
-#' @param x A `mab` class object created by [single_mab_simulation()].
+#' @param x A `mab` class object created by [mab_from_rct.bernoulli()].
 #' @param ... Further arguments passed to or from other methods.
 #' @method print mab
 #' @name print.mab

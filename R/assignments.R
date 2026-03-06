@@ -21,7 +21,6 @@
 #'
 #' @seealso
 #' * [run_mab_trial()]
-#' * [single_mab_simulation()]
 #' * [get_bandit()]
 #' @keywords internal
 #'
@@ -391,7 +390,7 @@ get_bandit.ucb1 <- function(
 #' @description Assigns new treatments for an assignment wave based on the assignment probabilities provided from
 #' [get_bandit()], and the proportion of randomly assigned observations specified in `random_assign_prop`.
 #' Assignments are made randomly with the given probabilities using [randomizr::block_ra()],
-#' [randomizr::complete_ra()], [randomizr::cluster_ra()], or [randomizr::cluster_block_ra()]
+#' [randomizr::complete_ra()], [randomizr::cluster_ra()], or [randomizr::block_and_cluster_ra()]
 #' depending on whether blocking and/or clustering are used.
 #'
 #' @name assign_treatments
@@ -419,7 +418,7 @@ get_bandit.ucb1 <- function(
 #'* [randomizr::block_ra()]
 #'* [randomizr::complete_ra()]
 #'* [randomizr::cluster_ra()]
-#'* [randomizr::cluster_block_ra()]
+#'* [randomizr::block_and_cluster_ra()]
 #' @keywords internal
 assign_treatments <- function(
   current_data,

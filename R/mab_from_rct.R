@@ -85,7 +85,7 @@
 #' the re-simulation method. Replications can be conducted in parallel, by setting an appropriate [future::plan()]. See details below.
 #'
 #' @param seeds An integer vector of `length(r)` containing valid seeds to define random state for each re-simulation.
-#' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended `FALSE`. When `r = 1` the final data is always kept and reported.
+#' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended `FALSE`. When` r = 1` the final data is always kept and reported.
 #' @param check_args Logical; Whether or not to robustly check whether arguments are valid. Default is TRUE, and recommended
 #' not to be changed.
 #' @param ... Additional named arguments passed to [furrr::furrr_options()]
@@ -182,7 +182,7 @@
 #' instability with some calculations in the Thompson sampling procedure. Internal safeguards exist to prevent this, but
 #' the best way to preempt any issues is to set `prior_periods` to a low number.
 #'
-#' ## `r > 1`
+#' ## ` r > 1`
 #' Multiple simulations allows researchers to gauge the variance
 #' of the simulation procedure itself, by repeating it several times under different random states, using the same fixed data
 #'
@@ -579,7 +579,7 @@ get_assignment_quantities.data.table <- function(simulation, conditions) {
 #' @name condense_results
 #' @title Condenses results of repeated simulations.
 #' @inheritParams mab_from_rct.bernoulli
-#' @param dt Logical; Whether to output `data.table`s or `tibble`s. When `r * number_of_periods > 100000`, `dt = TRUE`, even if the user passed data is not a
+#' @param dt Logical; Whether to output `data.table`s or `tibble`s. When` r * number_of_periods > 100000`, `dt = TRUE`, even if the user passed data is not a
 #' `data.table`.
 #' @param mabs List of outputs from repeated [simulate_mab_rct.bernoulli()] calls.
 #' @returns A named list containing

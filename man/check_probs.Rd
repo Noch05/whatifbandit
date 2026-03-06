@@ -37,10 +37,9 @@ are the block labels. Units are assigned to blocks via \code{\link[randomizr:com
 Used when there is not blocking.}
 \item{Named list of vectors}{A named list where \code{names(clusters)} are block labels, and each element is a named vector
 of per-block cluster proportions, e.g.
-\verb{list(B1 = c(C1 = 0.4, C=0.6)), B2 = c(C3 = 0.2, C4 = 0.8)}
+\verb{list(B1 = c(C1 = 0.4, C=0.6)), B2 = c(C3 = 0.2, C4 = 0.8))}
 Clusters are accessed as \code{clusters[[block]][cluster]}. Insided each block, cluster proportions must sum to 1, and the same cluster cannot appear in multiple blocks.}
 }
-where \code{names(clusters)} are the cluster labels.
 Units are assigned to clusters via \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}. Pass \code{NULL} (default) for no clustering.}
 }
 \value{

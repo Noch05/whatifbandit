@@ -7,7 +7,6 @@
 #' from prior periods of an adaptive trial. The conditional expectation function used is a grouped mean by
 #' treatment arm.
 #'
-#' @inheritParams single_mab_simulation
 #' @param periods Numeric value of length 1; number of total periods in the simulation.
 #' @param assignment_probs A `tibble`/`data.table` containing the probabilities of being
 #' assigned each treatment at a given period.
@@ -255,7 +254,6 @@ get_iaipw.data.table <- function(
 #' Sample means and variances are also provided for comparison.
 #'
 #' @inheritParams get_iaipw
-#' @inheritParams single_mab_simulation
 #' @returns A `tibble`/`data.table` containing the AIPW estimate of treatment success, AIPW variance,
 #' sample proportion of successful treatments (sample mean), and sample mean variance.
 #' @details
@@ -429,7 +427,7 @@ estimate_aipw.data.table <- function(
 
 #' IPW Estimates for Probability of Success
 #'
-#' @description
+#' @description Placeholder
 #'
 #'
 estimate_ipw <- function(
