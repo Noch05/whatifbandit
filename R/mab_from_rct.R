@@ -208,6 +208,9 @@
 #' \emph{Proceedings of the 25th Annual Conference on Learning Theory}, June 16, 39.1-39.26.
 #' \url{https://proceedings.mlr.press/v23/agrawal12.html}.
 #'
+#' Asyuraa, F. C., S. Abdullah, and T. E. Sutanto. 2021. "Empirical Evaluation on Discounted Thompson Sampling for Multi-Armed Bandit Problem with Piecewise-Stationary Bernoulli Arms."
+#'  Journal of Physics: Conference Series 1722 (1): 012096. \doi{10.1088/1742-6596/1722/1/012096}
+#'
 #' Auer, Peter, Nicolò Cesa-Bianchi, and Paul Fischer. 2002.
 #' "Finite-Time Analysis of the Multiarmed Bandit Problem." \emph{Machine Learning}
 #' 47 (2): 235–56. \doi{10.1023/A:1013689704352}.
@@ -217,6 +220,9 @@
 #'
 #' Bengtsson, Henrik. 2025. "Future.Batchtools: A Future API for Parallel and Distributed Processing Using ‘Batchtools.’"
 #' \url{https://cran.r-project.org/package=future.batchtools}.
+#'
+#' Garivier, Aurélien, and Eric Moulines. 2008. "On Upper-Confidence Bound Policies for Non-Stationary Bandit Problems."
+#'  arXiv:0805.3415. Preprint, arXiv, May 22. \doi{10.48550/arXiv.0805.3415}
 #'
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
 #' "Confidence Intervals for Policy Evaluation in Adaptive Experiments." \emph{Proceedings of the National Academy of Sciences of the United States of America} 118
