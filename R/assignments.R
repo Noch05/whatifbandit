@@ -56,11 +56,9 @@ get_past_results.data.frame <- function(
   if (delayed_feedback) {
     current_date <- base::max(current_data[[assignment_date_col$name]])
 
-    prior_data$known_success <- base::ifelse(
+    prior_data$known_success <- base::as.integer(
       current_date >= prior_data[["new_success_date"]] &
-        !base::is.na(prior_data[["new_success_date"]]),
-      1,
-      0
+        !base::is.na(prior_data[["new_success_date"]])
     )
   } else {
     prior_data$known_success <- prior_data$mab_success
@@ -116,11 +114,9 @@ get_past_results.data.table <- function(
     current_date <- base::max(current_data[[assignment_date_col$name]])
 
     prior_data[,
-      known_success := data.table::fifelse(
+      known_success := base::as.integer(
         current_date >= new_success_date &
-          !is.na(new_success_date),
-        1,
-        0
+          !is.na(new_success_date)
       )
     ]
   } else {
@@ -663,11 +659,9 @@ assign_treatments.data.table <- function(
   }
 
   current_data[,
-    impute_req := data.table::fifelse(
+    impute_req := base::as.integer(
       base::as.character(mab_condition) !=
-        base::as.character(get(condition_col$name)),
-      1L,
-      0L
+        base::as.character(get(condition_col$name))
     )
   ]
   invisible(current_data)
