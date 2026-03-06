@@ -507,13 +507,14 @@ assign_treatments <- function(
   }
 }
 
-#' Build randomizr function and arguments
-#' @description Selects the appropriate `randomizr` function and constructs its argument list
+#' Build `{randomizr}`` function and arguments
+#' @name build_ra_args
+#' @description Selects the appropriate `{randomizr}` function and constructs its argument list
 #' based on whether blocking and/or clustering are requested.
 #' @param idx Integer vector of row indices to assign.
 #' @param dt Logical. Whether `current_data` is a data.table.
-#' @return A list with `fn` (the randomizr function) and `args` (its arguments).
-#' @noRd
+#' @returns A list with `fn` (the randomizr function) and `args` (its arguments).
+#' @keywords internal
 build_ra_args <- function(
   idx,
   current_data,
@@ -526,7 +527,7 @@ build_ra_args <- function(
 ) {
   get_col <- function(col) {
     if (dt) {
-      current_data[idx, get(col)]
+      current_data[idx, base::get(col)]
     } else {
       current_data[[col]][idx]
     }
@@ -534,7 +535,7 @@ build_ra_args <- function(
 
   if (blocking && clustering) {
     list(
-      fn = randomizr::cluster_block_ra,
+      fn = randomizr::block_and_cluster_ra,
       args = list(
         blocks = get_col("block"),
         clusters = get_col(cluster_col$name),
@@ -598,16 +599,16 @@ assign_treatments.data.frame <- function(
     if (base::length(idx) == 0) {
       next
     }
-    p <- if (base::identical(idx, rand_idx)) random_probs else probs
+    prob <- if (base::identical(idx, rand_idx)) random_probs else probs
     ra <- build_ra_args(
-      idx,
-      current_data,
-      p,
-      conditions,
-      blocking,
-      clustering,
-      cluster_col,
-      FALSE
+      idx = idx,
+      current_data = current_data,
+      p = prob,
+      conditions = conditions,
+      blocking = blocking,
+      clustering = clustering,
+      cluster_col = cluster_col,
+      dt = FALSE
     )
     current_data$mab_condition[idx] <- base::as.character(do.call(
       ra$fn,
@@ -644,16 +645,16 @@ assign_treatments.data.table <- function(
     if (base::length(idx) == 0) {
       next
     }
-    p <- if (base::identical(idx, rand_idx)) random_probs else probs
+    prob <- if (base::identical(idx, rand_idx)) random_probs else probs
     ra <- build_ra_args(
-      idx,
-      current_data,
-      p,
-      conditions,
-      blocking,
-      clustering,
-      cluster_col,
-      TRUE
+      idx = idx,
+      current_data = current_data,
+      p = prob,
+      conditions = conditions,
+      blocking = blocking,
+      clustering = clustering,
+      cluster_col = cluster_col,
+      dt = TRUE
     )
     current_data[
       idx,
