@@ -2,7 +2,7 @@
 #' @name get_past_results
 #' @description Summarizes results of prior periods to use for the current Multi-Arm-Bandit assignment. This function
 #' calculates the number of success under each treatment and the total number of observations assigned to each treatment which are used
-#' to calculate UCB1 values or Thompson sampling probabilities.
+#' to calculate UCB1 values or Thompson sampling probabilities. These values are weighted by the discount_rate provided.
 #'
 #' @inheritParams simulate_mab.rct
 #' @param current_data A `data.frame` or `data.table` with only observations from the current sampling period.
@@ -11,12 +11,13 @@
 #' treatment condition.
 #'
 #' @details
-#' When `delayed_feedback = FALSE`, the maximum value from the specified
+#' When `delayed_feedback = TRUE`, the maximum value from the specified
 #' `assignment_date_col` in the current data is taken as the last possible date
 #' the researchers conducting the experiment could have learned about a treatment outcome.
 #' All successes that occur past this date are masked and treated as failures for the purposes
 #' of assigning this treatments periods, as it simulates the researchers not having
 #' received that information yet.
+#'
 #'
 #' @seealso
 #' * [run_mab_trial()]
@@ -29,7 +30,9 @@ get_past_results <- function(
   prior_data,
   delayed_feedback,
   assignment_date_col = NULL,
-  conditions
+  discount_rate,
+  conditions,
+  current_period
 ) {
   base::UseMethod("get_past_results", current_data)
 }
@@ -46,7 +49,9 @@ get_past_results.data.frame <- function(
   prior_data,
   delayed_feedback,
   assignment_date_col = NULL,
-  conditions
+  discount_rate,
+  conditions,
+  current_period
 ) {
   if (delayed_feedback) {
     current_date <- base::max(current_data[[assignment_date_col$name]])
@@ -62,14 +67,18 @@ get_past_results.data.frame <- function(
   }
 
   prior_data <- prior_data |>
-    dplyr::group_by(mab_condition) |>
+    dplyr::mutate(
+      discount_period = current_period - period_number,
+      col_of_1 = 1,
+      weight = discount_rate^discount_period
+    )
+  dplyr::group_by(mab_condition) |>
     dplyr::summarize(
-      successes = base::sum(known_success, na.rm = TRUE),
-      success_rate = base::mean(known_success, na.rm = TRUE),
-      n = dplyr::n(),
+      successes = base::sum(known_success * weight, na.rm = TRUE),
+      n = base::sum(weight * col_of_1, na.rm = TRUE),
       .groups = "drop"
     ) |>
-    dplyr::ungroup()
+    dplyr::mutate(success_rate = successes / n)
 
   if (base::nrow(prior_data) != base::length(conditions)) {
     conditions_add <- base::setdiff(conditions, prior_data$mab_condition)
@@ -96,10 +105,12 @@ get_past_results.data.frame <- function(
 
 get_past_results.data.table <- function(
   current_data,
+  prior_data,
   delayed_feedback,
   assignment_date_col = NULL,
+  discount_rate,
   conditions,
-  prior_data
+  current_period
 ) {
   if (delayed_feedback) {
     current_date <- base::max(current_data[[assignment_date_col$name]])
@@ -116,14 +127,20 @@ get_past_results.data.table <- function(
     prior_data[, known_success := mab_success]
   }
 
+  prior_data[, `:=`(
+    col_of_1 = 1,
+    discount_period = current_period - period_number
+  )][,
+    weight := discount_rate^discount_period
+  ]
+
   past_results <- prior_data[,
     .(
-      successes = base::sum(known_success, na.rm = TRUE),
-      success_rate = base::mean(known_success, na.rm = TRUE),
-      n = .N
+      successes = base::sum(known_success * weight, na.rm = TRUE),
+      n = base::sum(col_of_1 * weight, na.rm = TRUE)
     ),
     by = mab_condition
-  ]
+  ][, success_rate := successes / n]
 
   if (base::nrow(past_results) != base::length(conditions)) {
     conditions_add <- base::setdiff(conditions, past_results$mab_condition)

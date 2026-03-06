@@ -12,6 +12,7 @@
 #' for each treatment block to impute from.
 #' @param resimulation Logical flag; Whether or not this MAB Trial is being run as a re-simulated RCT, as opposed to an original simulation from specified
 #' population parameters.
+#' @param true_prob True probabilities of success, used to generate outcomes in the case of an original simulation.
 #'
 #' @returns: A named list containing:
 #' \itemize{
@@ -27,6 +28,7 @@
 simulate_mab <- function(
   data,
   resimulation,
+  true_prob,
   algorithm,
   control_augment,
   random_assign_prop,
@@ -34,12 +36,12 @@ simulate_mab <- function(
   prior_periods,
   discount_rate,
   delayed_feedback,
-  whole_experiment,
+  whole_experiment = NULL,
   conditions,
   blocking,
   clustering,
   data_cols,
-  imputation_information,
+  imputation_information = NULL,
   verbose,
   ndraws,
   starts,
@@ -93,7 +95,8 @@ simulate_mab <- function(
     starts = starts,
     ends = ends,
     periods = periods,
-    bandits = bandits
+    bandits = bandits,
+    true_prob = true_prob
   )
 
   sim_results$final_data <- get_iaipw(
@@ -161,20 +164,21 @@ simulate_mab <- function(
 run_mab_trial <- function(
   data,
   resimulation,
+  true_prob,
   algorithm,
   control_augment,
   random_assign_prop,
   period_length = NULL,
   prior_periods,
   discount_rate,
-  whole_experiment,
+  whole_experiment = NULL,
   delayed_feedback,
   clustering,
   blocking,
   conditions,
   num_conditions,
   data_cols,
-  imputation_information,
+  imputation_information = NULL,
   ndraws,
   verbose,
   starts,
@@ -200,7 +204,8 @@ run_mab_trial <- function(
         delayed_feedback = delayed_feedback,
         assignment_date_col = data_cols$assignment_date_col,
         conditions = conditions,
-        discount_rate = discount_rate
+        discount_rate = discount_rate,
+        current_period = i
       )
       bandit <- get_bandit(
         past_results = past_results,
@@ -212,11 +217,13 @@ run_mab_trial <- function(
         ndraws = ndraws
       )
       bandits$bandit_stat[i, ] <- bandit[["bandit"]]
+    } else {
+      bandit[["assignment_prob"]] <- equal_probs
     }
 
     current_data <- assign_treatments(
       current_data = current_data,
-      probs = bandit[["assignment_prob"]] %||% equal_probs,
+      probs = bandit[["assignment_prob"]],
       blocking = blocking,
       clustering = clustering,
       cluster_col = data_cols$cluster_col,
@@ -227,26 +234,27 @@ run_mab_trial <- function(
 
     bandits$assignment_probs[i, ] <- (bandit[["assignment_prob"]] *
       (1 - random_assign_prop)) +
-      (base::rep(1 / num_conditions, num_conditions) *
-        random_assign_prop)
+      (equal_probs * random_assign_prop)
 
-    prepped_impute <- imputation_preparation(
-      current_data = current_data,
-      whole_experiment = whole_experiment,
-      imputation_information = imputation_information,
-      data_cols = data_cols,
-      clustering = clustering,
-      impute_cluster = impute_cluster,
-      blocking = blocking,
-      delayed_feedback,
-      current_period = i
-    )
+    if (resimulation) {
+      prepped_impute <- imputation_preparation(
+        current_data = current_data,
+        whole_experiment = whole_experiment,
+        imputation_information = imputation_information,
+        data_cols = data_cols,
+        clustering = clustering,
+        impute_cluster = impute_cluster,
+        blocking = blocking,
+        delayed_feedback,
+        current_period = i
+      )
 
-    data[starts[i]:ends[i], ] <- impute_success(
-      imputation_info = prepped$impute,
-      data_cols = data_cols,
-      delayed_feedback = delayed_feedback
-    )
+      data[starts[i]:ends[i], ] <- impute_success(
+        imputation_info = prepped$impute,
+        data_cols = data_cols,
+        delayed_feedback = delayed_feedback
+      )
+    } else {}
   }
   results <- end_mab_trial(
     data = data,
@@ -256,9 +264,9 @@ run_mab_trial <- function(
     periods = periods,
     ndraws = ndraws
   )
+
   return(results)
 }
-
 #-------------------------------------------------------------------------------
 
 #' @name end_mab_trial
