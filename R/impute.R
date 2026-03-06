@@ -519,16 +519,6 @@ impute_success.data.table <- function(
     current_data[, mab_success := base::get(success_col$name)]
   }
 
-  current_data[,
-    `:=`(
-      mab_condition = current_data$mab_condition,
-      impute_req = current_data$impute_req,
-      impute_block = current_data$impute_block,
-      mab_success = current_data$mab_success,
-      assignment_type = current_data$assignment_type
-    )
-  ]
-
   if (delayed_feedback) {
     dates <- imputation_info$impute_dates
     current_data[,

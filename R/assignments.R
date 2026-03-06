@@ -399,8 +399,10 @@ get_bandit.ucb1 <- function(
 #' depending on whether blocking and/or clustering are used.
 #'
 #' @name assign_treatments
-#' @inheritParams single_mab_simulation
-#' @inheritParams cols
+#' @inheritParams simulate_mab
+#' @inheritParams mab_from_rct.bernoulli
+#' @param condition_col Column name of `current_data` which holds original treatment assignments.
+#' @param cluster_col Column name of `current_data` which holds cluster assignments.
 #' @param probs Named numeric vector; probability of assignment for each treatment condition.
 #' @inheritParams get_past_results
 #' @returns Updated `tibble` or `data.table` with the new treatment conditions for each observation, and whether imputation is required.
@@ -409,9 +411,14 @@ get_bandit.ucb1 <- function(
 #' @details
 #' The number of rows which are randomly assigned in each period is `random_assign_prop` multiplied by
 #' the number of rows in the period. If this number is less than 1, then Bernoulli draws are made for each row
-#' with probability `random_assign_prob` to determine if that row will be assigned randomly. Else, the number of random
+#' with probability `random_assign_prop` to determine if that row will be assigned randomly. Else, the number of random
 #' rows is rounded to the nearest whole number, and then that many rows are selected to be assigned through
 #' complete random assignment. The row selections are also random.
+#'
+#' Clustering introduces difficulties with `random_assign_prop` so a more advanced algorithm is used to determine assignment. When `random_rows < 1`,
+#' Bernoulli draws are made for each cluster with probabilitiy `random_assign_prop`, so its possible for the number of rows to be assigned randomly is far
+#' larger than the provided proportion if cluster sizes are imbalanced. When `random_rows > 1`, a random permutation of the clusters is made and then
+#' clusters are selected for random assignment greedily until the cumulative count surpasses `random_rows`.
 #' @seealso
 #'* [randomizr::block_ra()]
 #'* [randomizr::complete_ra()]
@@ -443,13 +450,14 @@ assign_treatments <- function(
     } else {
       clusters <- base::unique(current_data[[cluster_col$name]])
       cluster_sizes <- base::table(current_data[[cluster_col$name]])
-      target_rows <- base::round(rows * random_assign_prop, 0)
-      shuffled <- base::sample(base::names(cluster_sizes))
-      cumulative <- base::cumsum(cluster_sizes[shuffled])
-      n_clusters <- base::which(cumulative >= target_rows)[1]
+
+      cluster_permutation <- base::sample(base::names(cluster_sizes))
+      cumulative_counts <- base::cumsum(cluster_sizes[cluster_permutation])
+      clusters_idx <- base::which(cumulative_counts >= random_rows)[1] # Take the first that is larger as last cluster
+
       base::which(
         current_data[[cluster_col$name]] %in%
-          shuffled[base::seq_len(n_clusters)]
+          shuffled[base::seq_len(cluster_idx)]
       )
     }
   } else {
@@ -464,7 +472,7 @@ assign_treatments <- function(
     }
   }
 
-  band_idx <- base::setdiff(seq_len(rows), rand_idx)
+  band_idx <- base::setdiff(base::seq_len(rows), rand_idx)
   random_probs <- base::rep(
     1 / base::length(conditions),
     base::length(conditions)
