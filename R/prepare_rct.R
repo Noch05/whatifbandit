@@ -413,7 +413,7 @@ create_cutoff.batch <- function(data, period_length) {
 #' @inheritParams prep_rct_data
 #' @param vars_keep Character vector of variables to keep
 #'
-#' @returns A `data.frame`/`data.table` subset to the user provided columns and 6 new columns:
+#' @returns A `data.frame`/`data.table` subsetted to all the user provided columns plus these 6 new columns:
 #' \itemize{
 #' \item `mab_success`: New variable to hold new success from Multi-arm bandit procedure, NA until assigned.
 #' \item `mab_condition`: New variable to hold new treatment condition from Multi-arm bandit procedure, NA until assigned.

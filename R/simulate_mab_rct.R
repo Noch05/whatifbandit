@@ -1,23 +1,22 @@
 #------------------------------------------------------------------------------
-#' @title Simulates Multi-Arm Bandit Trial From Prepared Inputs
+#' @title Simulates MAB Trial From Prepared Inputs and Performs Inference
 #' @name simulate_mab_rct.bernoulli
 #'
-#' @description Internal helper to [single_mab_simulation()]
-#' and [multiple_mab_simulation()]. Centralizes necessary functions to conduct a
-#' single Multi-Arm-Bandit Trial with adaptive inference. It assumes all inputs have
-#' been preprocessed by [pre_mab_simulation()].
+#' @description Internal helper. Centralizes necessary functions to conduct a
+#' a MAB trial with adaptive inference. It assumes all inputs have been preprocessed already
 #' @inheritParams mab_from_rct.bernoulli
-#' @inheritParams run_mab_trial
 #' @inheritParams prepare_rct
+#' @param starts  Numeric vector where element `i` is the starting row number of period `i`.
+#' @param ends  Numeric vector where element `i` is the ending row number of period `i`.
+#' @param imputation_information Object created by [imputation_precompute()] containing the conditional means and success dates
+#' for each treatment block to impute from.
 #'
 #' @returns: A named list containing:
 #' \itemize{
 #' \item `final_data`: The processed `tibble` or `data.table`, containing new columns pertaining to the results of the trial.
-#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson sampling posterior distributions for each period.
+#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson Sampling posterior distributions for each period.
 #' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period.
-#' \item `estimates`: A `tibble` or `data.table` containing the
-#' AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
-#' sample means and variances, for each treatment arm.
+#' \item `estimates`: A `tibble` or `data.table` containing all estimates of the means and variances related to the treatment arms.
 #' \item `settings`: A named list of the configuration settings used in the trial.
 #' }
 #' @keywords internal
@@ -25,71 +24,70 @@
 
 simulate_mab_rct.bernoulli <- function(
   data,
-  time_unit,
-  delayed_feedback,
   algorithm,
+  control_augment,
+  random_assign_prop,
   period_length,
   prior_periods,
+  discount_rate,
+  delayed_feedback,
   whole_experiment,
   conditions,
   blocking,
   clustering,
   data_cols,
-  verbose,
-  period_method,
-  control_augment,
   imputation_information,
+  verbose,
   ndraws,
-  random_assign_prop,
   starts,
-  ends,
-  impute_cluster
+  ends
 ) {
   periods <- base::length(starts)
-  bandits <- base::vector(mode = "list", length = 2)
-  bandits$bandit_stat <- base::vector(mode = "list", length = (periods + 1))
-  bandits$assignment_prob <- base::vector(mode = "list", length = periods)
   num_conditions <- length(conditions)
+  bandits <- base::vector(mode = "list", length = 2)
+  bandits$bandit_stat <- base::matrix(
+    NA,
+    nrow = periods + 1,
+    ncol = num_conditions,
+    dimnames = list(c(), base::names(conditions))
+  )
+  bandits$assignment_prob <- base::matrix(
+    NA,
+    nrow = periods,
+    ncol = num_conditions,
+    dimnames = list(c(), base::names(conditions))
+  )
 
-  bandits$bandit_stat[[1]] <- switch(
+  bandits$bandit_stat[1, ] <- switch(
     algorithm,
-    "thompson" = rlang::set_names(
-      rep(1 / num_conditions, num_conditions),
-      conditions
-    ),
-    "ucb1" = tibble::tibble(
-      mab_condition = conditions,
-      ucb = rep(0, num_conditions)
-    )
+    "thompson" = base::rep(1 / num_conditions, num_conditions),
+    "ucb1" = base::rep(0, num_conditions),
+    "static" = base::rep(1 / num_conditions, num_conditions),
   )
-  bandits$assignment_prob[[1]] <- rlang::set_names(
-    rep(1 / num_conditions, num_conditions),
-    conditions
-  )
+  bandits$assignment_prob[1, ] <- base::rep(1 / num_conditions, num_conditions)
+
   verbose_log(verbose, "Starting Bandit Trial")
 
   sim_results <- run_mab_trial(
     data = data,
-    time_unit = time_unit,
+    algorithm = algorithm,
+    control_augment = control_augment,
+    random_assign_prop,
     period_length = period_length,
     prior_periods = prior_periods,
-    algorithm = algorithm,
+    discount_rate = discount_rate,
     whole_experiment = whole_experiment,
     delayed_feedback = delayed_feedback,
     conditions = conditions,
     blocking = blocking,
     clustering = clustering,
     data_cols = data_cols,
-    verbose = verbose,
-    control_augment = control_augment,
     imputation_information = imputation_information,
+    verbose = verbose,
     ndraws = ndraws,
-    random_assign_prop,
     starts = starts,
     ends = ends,
     periods = periods,
-    impute_cluster = impute_cluster,
-    rct = TRUE,
     bandits = bandits
   )
 
@@ -133,17 +131,12 @@ simulate_mab_rct.bernoulli <- function(
 #'
 #' @description Performs a full Multi-Arm Bandit (MAB) trial using Thompson sampling or UCB1.
 #' The function provides loop around each step of the process for each treatment wave, performing adaptive
-#' treatment assignment, and outcome imputation. Supports flexible customization passed
-#' from [single_mab_simulation()] and [multiple_mab_simulation()] in treatment blocking strategy,
+#' treatment assignment, and outcome imputation. Supports flexible customizations in treatment blocking strategy,
 #' stationary/non-stationary bandits, control augmentation, and hybrid assignment.
 #'
 #' @inheritParams simulate_mab_rct.bernoulli
 #' @inheritParams mab_from_rct.bernoulli
 #' @inheritParams prepare_rct
-#' @param starts  Numeric vector where element `i` is the starting row number of period `i`.
-#' @param ends  Numeric vector where element `i` is the ending row number of period `i`.
-#' @param imputation_information Object created by [imputation_precompute()] containing the conditional means and success dates
-#' for each treatment block to impute from.
 #'
 #'
 #' @returns  A named list containing:
@@ -160,7 +153,6 @@ simulate_mab_rct.bernoulli <- function(
 #'
 run_mab_trial <- function(
   data,
-  time_unit,
   period_length = NULL,
   data_cols,
   clustering,

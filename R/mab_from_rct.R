@@ -310,25 +310,23 @@ mab_from_rct.bernoulli <- function(
   if (r == 1) {
     results <- simulate_mab_rct.bernoulli(
       data = prepped$data,
-      time_unit = prepped$char_args$time_unit,
+      algorithm = prepped$char_args$algorithm,
+      control_augment = control_augment,
+      random_assign_prop = random_assign_prop,
       period_length = period_length,
       prior_periods = prior_periods,
-      algorithm = prepped$char_args$algorithm,
-      whole_experiment = whole_experiment,
       delayed_feedback = delayed_feedback,
+      whole_experiment = whole_experiment,
+      discount_rate = discount_rate,
       conditions = prepped$conditions,
       blocking = blocking,
       clustering = clustering,
       data_cols = prepped$data_cols,
       verbose = verbose,
-      period_method = prepped$char_args$period_method,
-      control_augment = control_augment,
       imputation_information = prepped$imputation_information,
       ndraws = ndraws,
-      random_assign_prop = random_assign_prop,
       starts = prepped$period_starts,
-      ends = prepped$period_ends,
-      discount_rate = discount_rate
+      ends = prepped$period_ends
     )
     base::class(results) <- c("mab", base::class(results))
   } else {
@@ -339,25 +337,23 @@ mab_from_rct.bernoulli <- function(
         set.seed(x)
         results <- simulate_mab_rct.bernoulli(
           data = prepped$data,
-          time_unit = prepped$char_args$time_unit,
+          algorithm = prepped$char_args$algorithm,
+          control_augment = control_augment,
+          random_assign_prop = random_assign_prop,
           period_length = period_length,
           prior_periods = prior_periods,
-          discount_rate = discount_rate,
-          algorithm = prepped$char_args$algorithm,
-          whole_experiment = whole_experiment,
           delayed_feedback = delayed_feedback,
+          whole_experiment = whole_experiment,
+          discount_rate = discount_rate,
           conditions = prepped$conditions,
           blocking = blocking,
           clustering = clustering,
           data_cols = prepped$data_cols,
           verbose = FALSE,
-          period_method = prepped$char_args$period_method,
-          control_augment = control_augment,
           imputation_information = prepped$imputation_information,
           ndraws = ndraws,
-          random_assign_prop = random_assign_prop,
           starts = prepped$period_starts,
-          ends = prepped$period_ends,
+          ends = prepped$period_ends
         )
         results$assignment_quantities <- get_assignment_quantities(
           results,
