@@ -1,6 +1,6 @@
 #' Gather Past Results for Given Assignment Period
 #' @name get_past_results
-#' @description Summarizes results of prior periods to use for the current Multi-Arm-Bandit assignment. This function
+#' @description Summarizes results of prior periods to update assignment probabilities in the current period. This function
 #' calculates the number of success under each treatment and the total number of observations assigned to each treatment which are used
 #' to calculate UCB1 values or Thompson sampling probabilities. These values are weighted by the discount_rate provided.
 #'
@@ -166,7 +166,7 @@ get_past_results.data.table <- function(
 #' Thompson sampling is done using [bandit::best_binomial_bandit()] from
 #' the \href{https://cran.r-project.org/package=bandit}{bandit}
 #' package and UCB1 values are calculated using the well-defined formula that can be found
-#' in \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup (2014)}.
+#' in \href{https://doi.org/10.1023/A:1013689704352}{Auer et al. (2002)}.
 #'
 #' @name get_bandit
 #'

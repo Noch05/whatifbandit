@@ -47,31 +47,9 @@ simulate_mab <- function(
   starts,
   ends
 ) {
+  verbose_log(verbose, "Starting Bandit Trial")
   periods <- base::length(starts)
   num_conditions <- length(conditions)
-  bandits <- base::vector(mode = "list", length = 2)
-  bandits$bandit_stat <- base::matrix(
-    NA,
-    nrow = periods + 1,
-    ncol = num_conditions,
-    dimnames = list(c(), base::names(conditions))
-  )
-  bandits$assignment_prob <- base::matrix(
-    NA,
-    nrow = periods,
-    ncol = num_conditions,
-    dimnames = list(c(), base::names(conditions))
-  )
-
-  bandits$bandit_stat[1, ] <- switch(
-    algorithm,
-    "thompson" = base::rep(1 / num_conditions, num_conditions),
-    "ucb1" = base::rep(0, num_conditions),
-    "static" = NA,
-  )
-  bandits$assignment_prob[1, ] <- base::rep(1 / num_conditions, num_conditions)
-
-  verbose_log(verbose, "Starting Bandit Trial")
 
   sim_results <- run_mab_trial(
     data = data,
@@ -95,7 +73,6 @@ simulate_mab <- function(
     starts = starts,
     ends = ends,
     periods = periods,
-    bandits = bandits,
     true_prob = true_prob
   )
 
@@ -137,7 +114,7 @@ simulate_mab <- function(
 #' Runs Multi-Arm Bandit Trial
 #' @name run_mab_trial
 #'
-#' @description Performs a full Multi-Arm Bandit (MAB) trial using Thompson sampling or UCB1.
+#' @description Performs a full Multi-Arm Bandit (MAB) trial using Thompson Sampling or UCB1.
 #' The function provides loop around each step of the process for each treatment wave, performing adaptive
 #' treatment assignment, and outcome imputation. Supports flexible customizations in treatment blocking strategy,
 #' stationary/non-stationary bandits, control augmentation, and hybrid assignment.
@@ -145,18 +122,17 @@ simulate_mab <- function(
 #' @inheritParams simulate_mab_rct.bernoulli
 #' @inheritParams mab_from_rct.bernoulli
 #' @inheritParams prepare_rct
-#' @param bandits List of matrices, containing the pre-allocated spaces to store accumulated adaptive probabilities and calculations from the MAB algorithms in each period.
 #' @param num_conditions Number of conditions, equivalent to `length(conditions)`.
 #'
 #'
 #' @returns  A named list containing:
 #' \itemize{
 #' \item `final_data`: The processed `tibble` or `data.table`, containing new columns pertaining to the results of the trial.
-#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson sampling posterior distributions for each period.
+#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson Sampling posterior distributions for each period.
 #' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period.
 #' }
 #' @details
-#' The first period is used to start the trial, so the MAB loop
+#' The first period is used to initialize the trial, so the MAB loop
 #' starts at period number 2.
 #'
 #' @keywords internal
@@ -176,7 +152,6 @@ run_mab_trial <- function(
   clustering,
   blocking,
   conditions,
-  num_conditions,
   data_cols,
   imputation_information = NULL,
   ndraws,
@@ -184,11 +159,34 @@ run_mab_trial <- function(
   starts,
   ends,
   periods,
-  bandits
+  num_conditions
 ) {
+  bandits <- base::vector(mode = "list", length = 2)
+  bandits$bandit_stat <- base::matrix(
+    NA,
+    nrow = periods + 1,
+    ncol = num_conditions,
+    dimnames = list(c(), base::names(conditions))
+  )
+  bandits$assignment_prob <- base::matrix(
+    NA,
+    nrow = periods,
+    ncol = num_conditions,
+    dimnames = list(c(), base::names(conditions))
+  )
+
+  bandits$bandit_stat[1, ] <- switch(
+    algorithm,
+    "thompson" = base::rep(1 / num_conditions, num_conditions),
+    "ucb1" = base::rep(0, num_conditions),
+    "static" = NA,
+  )
+  bandits$assignment_prob[1, ] <- base::rep(1 / num_conditions, num_conditions)
+
   equal_probs <- bandits$assignment_prob[1, ] |>
     base::as.numeric() |>
     stats::setNames(conditions)
+
   for (i in 2:periods) {
     verbose_log(verbose, paste0("Period: ", i))
 
@@ -198,7 +196,7 @@ run_mab_trial <- function(
     prior_data <- data[starts[prior]:ends[i - 1], ]
 
     if (algorithm != "static") {
-      past_results <- get_past_results(
+      current_bandit <- get_past_results(
         current_data = current_data,
         prior_data = prior_data,
         delayed_feedback = delayed_feedback,
@@ -206,24 +204,23 @@ run_mab_trial <- function(
         conditions = conditions,
         discount_rate = discount_rate,
         current_period = i
-      )
-      bandit <- get_bandit(
-        past_results = past_results,
-        algorithm = algorithm,
-        num_conditions = num_conditions,
-        conditions = conditions,
-        current_period = i,
-        control_augment = control_augment,
-        ndraws = ndraws
-      )
-      bandits$bandit_stat[i, ] <- bandit[["bandit"]]
+      ) |>
+        get_bandit(
+          algorithm = algorithm,
+          num_conditions = num_conditions,
+          conditions = conditions,
+          current_period = i,
+          control_augment = control_augment,
+          ndraws = ndraws
+        )
+      bandits$bandit_stat[i, ] <- current_bandit[["bandit"]]
     } else {
-      bandit[["assignment_prob"]] <- equal_probs
+      current_bandit[["assignment_prob"]] <- equal_probs
     }
 
     current_data <- assign_treatments(
       current_data = current_data,
-      probs = bandit[["assignment_prob"]],
+      probs = current_bandit[["assignment_prob"]],
       blocking = blocking,
       clustering = clustering,
       cluster_col = data_cols$cluster_col,
@@ -232,7 +229,7 @@ run_mab_trial <- function(
       random_assign_prop = random_assign_prop
     )
 
-    bandits$assignment_probs[i, ] <- (bandit[["assignment_prob"]] *
+    bandits$assignment_probs[i, ] <- (current_bandit[["assignment_prob"]] *
       (1 - random_assign_prop)) +
       (equal_probs * random_assign_prop)
 
@@ -277,7 +274,8 @@ run_mab_trial <- function(
 #' @param data Finalized data from [run_mab_trial()].
 #' @param bandits Finalized bandits list of matrices from [run_mab_trial()].
 #' @param periods Numeric value of length 1; total number of periods in Multi-Arm-Bandit trial.
-#' @inheritParams single_mab_simulation
+#' @inheritParams run_mab_trial
+#' @inheritParams simulate_mab
 #' @returns  A named list containing:
 #' \itemize{
 #' \item `final_data`: The processed `tibble` or `data.table`, containing new columns pertaining to the results of the trial.
