@@ -417,21 +417,11 @@ check_impute.data.table <- function(
 #' Uses [randomizr::block_ra()] to impute the outcomes for observations
 #' who were assigned new treatments. The probabilities used to guide the imputation
 #' of the outcomes are pre-computed using the existing data from the original randomized experiment.
-#' @param current_data Updated `tibble`or `data.table` object containing new treatments from [assign_treatments()].
-#' @inheritParams run_mab_trial
-#' @param prior_data A `tibble` or `data.table` containing all the data from previous periods.
-#' Used to join together at the end for the next iteration of the simulation.
-#' @param imputation_info A `tibble` or `data.table` containing conditional probability of success by treatment block, for each
-#' combination that exists in `current_data`, calculated from the original experiment.
-#' Passed to [randomizr::block_ra()] to impute outcomes.
-#' @param dates Named date vector containing average success date by treatment block to impute new success dates for
-#' observations whose change in treatment also changes their outcome from failure to success.
-#' @param current_period Numeric value of length 1; current treatment wave of the simulation.
-#' @inheritParams get_past_results
-#' @inheritParams single_mab_simulation
-#' @inheritParams cols
+#' @inheritParams prepare_rct_data
+#' @inheritParams mab_from_rct.bernoulli
+#' @param imputation_info List containing all necessary information for imputation, generated each period by [imputation_preparation()]
 #' @details
-#' When `delayed_feedback = FALSE`, dates of success are imputed according to the average
+#' When `delayed_feedback = TRUE`, dates of success are imputed according to the average
 #' by each period and treatment block (treatment arm + any blocking). These imputations are required because
 #' these observations do not currently have dates of success, as no success was observed during the original experiment.
 #' Therefore if they go through the next iteration of the simulation without being imputed,
@@ -448,14 +438,9 @@ check_impute.data.table <- function(
 #'* [randomizr::block_ra()]
 #' @keywords internal
 impute_success <- function(
-  current_data,
   imputation_info,
-  success_col,
-  prior_data = NULL,
-  delayed_feedback,
-  dates = NULL,
-  success_date_col,
-  current_period = NULL
+  data_cols,
+  delayed_feedback
 ) {
   base::UseMethod("impute_success", current_data)
 }
@@ -466,24 +451,19 @@ impute_success <- function(
 #' @noRd
 
 impute_success.data.frame <- function(
-  current_data,
   imputation_info,
-  success_col,
-  prior_data,
-  delayed_feedback,
-  dates = NULL,
-  success_date_col,
-  current_period,
-  starts,
-  ends
+  data_cols,
+  delayed_feedback
 ) {
-  i <- current_period
+  current_data <- imputation_info$current_data
+  imputation_means <- imputation_info$impute_success
+
   impute_idx <- base::which(current_data$impute_req == 1)
 
   if (length(impute_idx) > 0) {
     imputations <- randomizr::block_ra(
       blocks = current_data$impute_block[impute_idx],
-      block_prob_each = imputation_info[, c("failure_rate", "success_rate")],
+      block_prob_each = imputation_means[, c("failure_rate", "success_rate")],
       num_arms = 2,
       conditions = c(0, 1),
       check_inputs = FALSE
@@ -497,6 +477,8 @@ impute_success.data.frame <- function(
   }
 
   if (delayed_feedback) {
+    dates <- imputation_info$impute_dates
+
     current_data$new_success_date <- dplyr::case_when(
       current_data$impute_req == 0 ~ current_data[[success_date_col$name]],
       current_data$mab_success == 1 &
@@ -506,9 +488,7 @@ impute_success.data.frame <- function(
       .default = base::as.Date(NA)
     )
   }
-
-  prior_data[starts[i]:ends[i]] <- current_data
-  return(prior_data)
+  return(current_data)
 }
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
@@ -517,24 +497,18 @@ impute_success.data.frame <- function(
 #' @title [impute_success()] for `data.table`s
 #' @noRd
 impute_success.data.table <- function(
-  current_data,
   imputation_info,
-  success_col,
-  prior_data,
-  delayed_feedback,
-  dates = NULL,
-  success_date_col,
-  current_period,
-  starts,
-  ends
+  data_cols,
+  delayed_feedback
 ) {
-  i <- current_period
+  current_data <- imputation_info$current_data
+  imputation_means <- imputation_info$impute_success
   impute_idx <- current_data[, base::which(impute_req == 1)]
 
   if (length(impute_idx) > 0) {
     imputations <- randomizr::block_ra(
       blocks = current_data[impute_idx, impute_block],
-      block_prob_each = imputation_info[, .(failure_rate, success_rate)],
+      block_prob_each = imputation_means[, .(failure_rate, success_rate)],
       num_arms = 2,
       conditions = c(0, 1),
       check_inputs = FALSE
@@ -545,8 +519,7 @@ impute_success.data.table <- function(
     current_data[, mab_success := base::get(success_col$name)]
   }
 
-  prior_data[
-    starts[i]:ends[i],
+  current_data[,
     `:=`(
       mab_condition = current_data$mab_condition,
       impute_req = current_data$impute_req,
@@ -557,8 +530,8 @@ impute_success.data.table <- function(
   ]
 
   if (delayed_feedback) {
-    prior_data[
-      starts[i]:ends[i],
+    dates <- imputation_info$impute_dates
+    current_data[,
       new_success_date := data.table::fcase(
         impute_req == 0                               , base::get(success_date_col$name) ,
         mab_success == 1 & get(success_col$name) == 0 , dates[impute_block]              ,
@@ -567,5 +540,5 @@ impute_success.data.table <- function(
     ]
   }
 
-  return(invisible(prior_data))
+  return(current_data)
 }

@@ -153,25 +153,24 @@ simulate_mab_rct.bernoulli <- function(
 #'
 run_mab_trial <- function(
   data,
-  period_length = NULL,
-  data_cols,
-  clustering,
-  blocking,
-  prior_periods,
   algorithm,
+  control_augment,
+  random_assign_prop,
+  period_length = NULL,
+  prior_periods,
+  discount_rate,
   whole_experiment,
   delayed_feedback,
+  clustering,
+  blocking,
   conditions,
-  verbose,
-  control_augment,
+  data_cols,
   imputation_information,
   ndraws,
-  random_assign_prop,
+  verbose,
   starts,
   ends,
   periods,
-  impute_cluster,
-  rct,
   bandits
 ) {
   for (i in 2:periods) {
@@ -199,7 +198,7 @@ run_mab_trial <- function(
       ndraws = ndraws
     )
 
-    bandits$bandit_stat[[i]] <- bandit[["bandit"]]
+    bandits$bandit_stat[i, ] <- bandit[["bandit"]]
 
     current_data <- assign_treatments(
       current_data = current_data,
@@ -212,7 +211,7 @@ run_mab_trial <- function(
       random_assign_prop = random_assign_prop
     )
 
-    bandits$assignment_prob[[i]] <- (bandit[["assignment_prob"]] *
+    bandits$assignment_probs[i, ] <- (bandit[["assignment_prob"]] *
       (1 - random_assign_prop)) +
       (rep(1 / num_conditions, num_conditions) *
         random_assign_prop)
@@ -229,18 +228,10 @@ run_mab_trial <- function(
       current_period = i
     )
 
-    data <- impute_success(
-      current_data = prepped_impute$current_data,
-      imputation_info = prepped_impute$impute_success,
-      dates = prepped_impute$impute_dates,
-      id_col = data_cols$id_col,
-      success_col = data_cols$success_col,
-      prior_data = data,
-      delayed_feedback = delayed_feedback,
-      success_date_col = data_cols$success_date_col,
-      current_period = i,
-      starts = starts,
-      ends <- ends
+    data[starts[i]:ends[i], ] <- impute_success(
+      imputation_info = prepped$impute,
+      data_cols = data_cols,
+      delayed_feedback = delayed_feedback
     )
   }
   results <- end_mab_trial(
