@@ -308,8 +308,9 @@ mab_from_rct.bernoulli <- function(
     keep_data = keep_data
   )
   if (r == 1) {
-    results <- simulate_mab_rct.bernoulli(
+    results <- simulate_mab(
       data = prepped$data,
+      resimulation = TRUE,
       algorithm = prepped$char_args$algorithm,
       control_augment = control_augment,
       random_assign_prop = random_assign_prop,
@@ -335,8 +336,9 @@ mab_from_rct.bernoulli <- function(
       seeds,
       function(x) {
         set.seed(x)
-        results <- simulate_mab_rct.bernoulli(
+        results <- simulate_mab(
           data = prepped$data,
+          resimulation = TRUE,
           algorithm = prepped$char_args$algorithm,
           control_augment = control_augment,
           random_assign_prop = random_assign_prop,
@@ -366,8 +368,9 @@ mab_from_rct.bernoulli <- function(
       },
       .options = furrr::furrr_options(
         globals = list(
-          simulate_mab_rct.bernoulli = simulate_mab_rct.bernoulli,
+          simulate_mab = simulate_mab,
           data = prepped$data,
+          resimulation = TRUE,
           data_cols = prepped$data_cols,
           imputation_information = prepped$imputation_information,
           time_unit = prepped$character_args$time_unit,

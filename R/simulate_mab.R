@@ -10,6 +10,8 @@
 #' @param ends  Numeric vector where element `i` is the ending row number of period `i`.
 #' @param imputation_information Object created by [imputation_precompute()] containing the conditional means and success dates
 #' for each treatment block to impute from.
+#' @param resimulation Logical flag; Whether or not this MAB Trial is being run as a re-simulated RCT, as opposed to an original simulation from specified
+#' population parameters.
 #'
 #' @returns: A named list containing:
 #' \itemize{
@@ -22,8 +24,9 @@
 #' @keywords internal
 #'
 
-simulate_mab_rct.bernoulli <- function(
+simulate_mab <- function(
   data,
+  resimulation,
   algorithm,
   control_augment,
   random_assign_prop,
@@ -70,6 +73,7 @@ simulate_mab_rct.bernoulli <- function(
 
   sim_results <- run_mab_trial(
     data = data,
+    resimulation = resimulation,
     algorithm = algorithm,
     control_augment = control_augment,
     random_assign_prop,
@@ -137,6 +141,7 @@ simulate_mab_rct.bernoulli <- function(
 #' @inheritParams simulate_mab_rct.bernoulli
 #' @inheritParams mab_from_rct.bernoulli
 #' @inheritParams prepare_rct
+#' @param bandits List of matrices, containing the pre-allocated spaces to store accumulated adaptive probabilities and calculations from the MAB algorithms in each period.
 #'
 #'
 #' @returns  A named list containing:
@@ -153,6 +158,7 @@ simulate_mab_rct.bernoulli <- function(
 #'
 run_mab_trial <- function(
   data,
+  resimulation,
   algorithm,
   control_augment,
   random_assign_prop,
@@ -186,7 +192,8 @@ run_mab_trial <- function(
       prior_data = prior_data,
       delayed_feedback = delayed_feedback,
       assignment_date_col = data_cols$assignment_date_col,
-      conditions = conditions
+      conditions = conditions,
+      discount_rate
     )
 
     bandit <- get_bandit(
