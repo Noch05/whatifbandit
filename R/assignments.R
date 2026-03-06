@@ -153,15 +153,14 @@ get_past_results.data.table <- function(
 #'
 #' @name get_bandit
 #'
-#' @inheritParams single_mab_simulation
-#' @param past_results A tibble/data.table containing summary of prior periods, with
+#' @inheritParams run_mab_trial
+#' @param past_results A `tibble`/`data.table`` containing summary of prior periods, with
 #' successes, number of observations, and success rates, which is created by [get_past_results()].
 #' @param current_period Numeric value of length 1; current period of the adaptive trial simulation.
 #'
 #' @returns A list of length 2 containing:
 #' \itemize{
-#' \item `bandit`: Bandit object, either a named numeric vector of Thompson sampling probabilities or a
-#' tibble/data.table of UCB1 values.
+#' \item `bandit`: Bandit object, either a named numeric vector of Thompson sampling probabilities UCB1 values.
 #' \item `assignment_probabilities:` Named numeric vector with a value for each condition
 #' containing the probability of being assigned that treatment.}
 #'
@@ -187,6 +186,11 @@ get_past_results.data.table <- function(
 #'
 #'
 #' @references
+#'
+#' Auer, Peter, Nicolò Cesa-Bianchi, and Paul Fischer. 2002.
+#' "Finite-Time Analysis of the Multiarmed Bandit Problem." \emph{Machine Learning}
+#' 47 (2): 235–56. \doi{10.1023/A:1013689704352}.
+#'
 #' Kuleshov, Volodymyr, and Doina Precup. 2014. "Algorithms for Multi-Armed Bandit Problems."
 #' \emph{arXiv}. \doi{10.48550/arXiv.1402.6028}.
 #'
@@ -197,8 +201,9 @@ get_past_results.data.table <- function(
 #' @keywords internal
 
 get_bandit <- function(
-  past_results,
+  past_results = NULL,
   algorithm,
+  num_conditions,
   conditions,
   current_period,
   control_augment = 0,
@@ -215,15 +220,15 @@ get_bandit <- function(
     "ucb1" = get_bandit.ucb1(
       past_results = past_results,
       conditions = conditions,
+      num_conditions = num_conditions,
       current_period = current_period
-    ),
-    rlang::abort("Invalid `algorithm`. Valid Algorithms: 'thomspon', 'ucb1'")
+    )
   )
 
   assignment_prob <- bandit[["assignment_prob"]]
 
   if (control_augment > 0) {
-    ctrl <- names(conditions) == "control"
+    ctrl <- base::names(conditions) == "control"
     if (assignment_prob[ctrl] < control_augment) {
       assignment_prob[ctrl] <- control_augment
       assignment_prob[!ctrl] <- (assignment_prob[!ctrl] /
@@ -231,10 +236,9 @@ get_bandit <- function(
         (1 - control_augment)
     }
   }
-  if (!isTRUE(all.equal(sum(assignment_prob), 1))) {
-    assignment_prob <- assignment_prob / sum(assignment_prob)
+  if (!base::isTRUE(base::all.equal(sum(assignment_prob), 1))) {
+    bandit[["assignment_prob"]] <- assignment_prob / sum(assignment_prob)
   }
-  bandit[["assignment_prob"]] <- assignment_prob
 
   return(bandit)
 }
@@ -320,14 +324,18 @@ bandit_invalid <- function(bandit) {
 #' @method get_bandit ucb1
 #' @title UCB1 Sampling Algorithm
 #' @description Calculates upper confidence bounds for each treatment arm
-#'
 #' @inheritParams get_bandit
 #' @returns A named list with 2 elements: a `tibble` or `data.table` containing UCB1 and success rate for each condition,
 #' and a named numeric vector of assignment probabilities, where the highest UCB1 out of the treatments
 #' is assigned 1, and the rest 0.
 #' @keywords internal
 
-get_bandit.ucb1 <- function(past_results, conditions, current_period) {
+get_bandit.ucb1 <- function(
+  past_results,
+  num_conditions,
+  conditions,
+  current_period
+) {
   correction <- 1e-10 ## Prevents Division by 0 when n = 0
 
   if (data.table::is.data.table(past_results)) {
@@ -352,15 +360,16 @@ get_bandit.ucb1 <- function(past_results, conditions, current_period) {
       past_results$ucb
     )]
   }
-  assignment_probs <- rlang::set_names(
-    rep(0, length(conditions)),
+  assignment_probs <- stats::setNames(
+    base::rep(0, num_conditions),
     conditions
   )
+  bandit <- stats::setNames(past_results$ucb, past_results$mab_condition)
 
   assignment_probs[[best_condition]] <- 1
 
   return(invisible(list(
-    bandit = past_results,
+    bandit = bandit,
     assignment_prob = assignment_probs
   )))
 }

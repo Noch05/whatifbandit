@@ -65,7 +65,7 @@ simulate_mab <- function(
     algorithm,
     "thompson" = base::rep(1 / num_conditions, num_conditions),
     "ucb1" = base::rep(0, num_conditions),
-    "static" = base::rep(1 / num_conditions, num_conditions),
+    "static" = NA,
   )
   bandits$assignment_prob[1, ] <- base::rep(1 / num_conditions, num_conditions)
 
@@ -82,6 +82,7 @@ simulate_mab <- function(
     discount_rate = discount_rate,
     whole_experiment = whole_experiment,
     delayed_feedback = delayed_feedback,
+    num_conditions = num_conditions,
     conditions = conditions,
     blocking = blocking,
     clustering = clustering,
@@ -142,6 +143,7 @@ simulate_mab <- function(
 #' @inheritParams mab_from_rct.bernoulli
 #' @inheritParams prepare_rct
 #' @param bandits List of matrices, containing the pre-allocated spaces to store accumulated adaptive probabilities and calculations from the MAB algorithms in each period.
+#' @param num_conditions Number of conditions, equivalent to `length(conditions)`.
 #'
 #'
 #' @returns  A named list containing:
@@ -170,6 +172,7 @@ run_mab_trial <- function(
   clustering,
   blocking,
   conditions,
+  num_conditions,
   data_cols,
   imputation_information,
   ndraws,
@@ -179,6 +182,9 @@ run_mab_trial <- function(
   periods,
   bandits
 ) {
+  equal_probs <- bandits$assignment_prob[1, ] |>
+    base::as.numeric() |>
+    stats::setNames(conditions)
   for (i in 2:periods) {
     verbose_log(verbose, paste0("Period: ", i))
 
@@ -187,32 +193,33 @@ run_mab_trial <- function(
     current_data <- data[starts[i]:ends[i], ]
     prior_data <- data[starts[prior]:ends[i - 1], ]
 
-    past_results <- get_past_results(
-      current_data = current_data,
-      prior_data = prior_data,
-      delayed_feedback = delayed_feedback,
-      assignment_date_col = data_cols$assignment_date_col,
-      conditions = conditions,
-      discount_rate
-    )
-
-    bandit <- get_bandit(
-      past_results = past_results,
-      algorithm = algorithm,
-      conditions = conditions,
-      current_period = i,
-      control_augment = control_augment,
-      ndraws = ndraws
-    )
-
-    bandits$bandit_stat[i, ] <- bandit[["bandit"]]
+    if (algorithm != "static") {
+      past_results <- get_past_results(
+        current_data = current_data,
+        prior_data = prior_data,
+        delayed_feedback = delayed_feedback,
+        assignment_date_col = data_cols$assignment_date_col,
+        conditions = conditions,
+        discount_rate = discount_rate
+      )
+      bandit <- get_bandit(
+        past_results = past_results,
+        algorithm = algorithm,
+        num_conditions = num_conditions,
+        conditions = conditions,
+        current_period = i,
+        control_augment = control_augment,
+        ndraws = ndraws
+      )
+      bandits$bandit_stat[i, ] <- bandit[["bandit"]]
+    }
 
     current_data <- assign_treatments(
       current_data = current_data,
-      probs = bandit[["assignment_prob"]],
+      probs = bandit[["assignment_prob"]] %||% equal_probs,
       blocking = blocking,
       clustering = clustering,
-      cluster_col,
+      cluster_col = data_cols$cluster_col,
       conditions = conditions,
       condition_col = data_cols$condition_col,
       random_assign_prop = random_assign_prop
@@ -220,7 +227,7 @@ run_mab_trial <- function(
 
     bandits$assignment_probs[i, ] <- (bandit[["assignment_prob"]] *
       (1 - random_assign_prop)) +
-      (rep(1 / num_conditions, num_conditions) *
+      (base::rep(1 / num_conditions, num_conditions) *
         random_assign_prop)
 
     prepped_impute <- imputation_preparation(
