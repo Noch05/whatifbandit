@@ -1,20 +1,18 @@
 #' Calculate Observation Level AIPW For Each Treatment Condition
 #' @name get_iaipw
 #' @description Calculates the augmented inverse probability weighted estimate (AIPW) of treatment
-#' success for each observation and treatment (i.e. on the level of a single unit).
-#' This method scales the estimated probabilities of success by
-#' the probability of being assigned the treatment, and weighted by a the conditional expectation of success
-#' from prior periods of an adaptive trial. The conditional expectation function used is a grouped mean by
-#' treatment arm.
+#' success for each observation and treatment (i.e. on the level of a single unit), and returns the final IPW weights
+#' for each observation, (i.e. the reciprocal specific weight for the treatment they were assigned)
 #'
 #' @param periods Numeric value of length 1; number of total periods in the simulation.
 #' @param assignment_probs A `tibble`/`data.table` containing the probabilities of being
 #' assigned each treatment at a given period.
+#' @inheritParams simulate_mab
+#' @param cluster_col Name of the column holding the clustering index
 #'
-#' @returns A `tibble`/`data.frame`, containing the data used in the Multi-Arm-Bandit, with
-#' new columns pertaining to the individual AIPW estimate for each person and condition, and
-#' probability of assignment for each treatment at each period.
-#'
+#' @returns A `tibble`/`data.frame`, containing the subset of `data`
+#' used in the MAB trial, along with new columns for probabilities of assignment to each treatment,
+#' aipw, and ipw weights for each observation.
 #' @details
 #' The specification for the individual AIPW estimates can be found
 #' in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}. The
@@ -248,10 +246,9 @@ get_iaipw.data.table <- function(
 #' Calculate Adaptive AIPW Estimates
 #' @name estimate_ipw_aipw
 #'
-#' @description Averages the observation level AIPW scores created by [get_iaipw()] across each period, then assigns
-#' each estimate an adaptive weight based on \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et. al (2021)}, and
-#' another weight based on the size of each period to calculate the final AIPW estimate and variance for each treatment.
-#' Sample means and variances are also provided for comparison.
+#' @description Uses provided Invidual AIPW scores created by [get_iaipw()] and computes the final
+#' AIPW estimate and variance using the formulas from  \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et. al (2021)}.
+#' Uses the constant allocation rate adaptive weight.
 #'
 #' @inheritParams get_iaipw
 #' @returns A `tibble`/`data.table` containing the AIPW estimate of treatment success, AIPW variance,
@@ -261,13 +258,21 @@ get_iaipw.data.table <- function(
 #' \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)} at
 #' equation 5 (estimate), equation 11 (variance), equation 15 (allocation rate).
 #'
-#' The formulas specified assume that each period is 1 observation but in the cases
-#' for this simulation where periods contain multiple observations the individual estimates
-#' from each period are averaged and weighted by size before being used in the final calculations.
+#' The estimator assumes pure sequential assignment, but we adapt the estimator to our batched assignment procedure.
+#' In the computations, of the individual estimates, regression estimates were only computed for each period,
+#' instead of for each observation, and similarly the adaptive weights used will only be computed per period, and them
+#' simply assigned to all the observations in that period, thus resulting in only a few unique weights. This
+#' keeps effective sample size large, ensuring the asymptotic properties are realized in large samples with only
+#' a few assignment periods, while also properly accounting for the assignment procedure.
+#'
+#' If clustering is specified, within each period individual AIPW estimates are aggregated by cluster, and then the sample size
+#' becomes the sum of the number of clusters in each period, the variance formula is not adjusted, so is not accounting
+#' for the clustering.
 #'
 #' The AIPW estimator is unbiased, consistent, and asymptotically normal under the conditions of the simulated trial
-#' of the so can be used for valid inference with a normal distribution. The sample means and variances
-#' are provided for comparison but these are biased and inconsistent under the conditions of the simulated trial
+#' of the so can be used for valid inference with a normal distribution. Treatment effects can aslo be estimated as
+#' as the difference in AIPW estimates with the variance of the difference as the sum of the variances. Simple Wald-Style
+#' tests with the normal distribution can be used here. Sample means are also provided for comparison but should not be used.
 #'
 #' @references
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
@@ -426,9 +431,34 @@ estimate_aipw.data.table <- function(
 }
 
 #' IPW Estimates for Probability of Success
+#' @description
+#' Computes the IPW estimates for the true probabilities of success using [estimatr::lm_robust()] to perform
+#' an IPW weighted regressionn for estimation. If blocking was used for the trial, blocks are included
+#' as fixed effects, and if clustering is specified CR2 variances are reported. Otherwise HC2 variances
+#' are used. Appropriate degrees of freedom are supplied along with the regression's F-statistic
 #'
-#' @description Placeholder
+#' @inheritParams get_iaipw
+#' @inheritParams simulate_mab
+#' @inheritParams get_iaipwcomponents
+#' @details
+#' These estimates follow the procedure in \href{}{Offer-Westort et al. (2021)}. The F-statistic
+#' provided can be used to conduct their randomization inference test, via simulating a null-F-distribution.
+#' Degrees of freedom are not provided for the f-statistic, because the traditional F-distribution is invalid
+#' under the adaptive procedure.
 #'
+#' The provided coefficients and variances can be used to conduct the typical t-tests on the coefficients
+#' restricted to constants, because appropriate HC2 and CR2 standard errors are used, so traditional asymptotic
+#' inference on the linear regression parameters is valid. Treatment effects can be estimated
+#' but they require using the covariance m
+#'
+#' @value
+#'
+#'
+
+#' @references
+#' Offer‐Westort, Molly, Alexander Coppock, and Donald P. Green. 2021.
+#' "Adaptive Experimental Design: Prospects and Applications in Political Science."
+#' \emph{American Journal of Political Science} 65 (4): 826–44. \doi{10.1111/ajps.12597}..
 #'
 estimate_ipw <- function(
   estimates,
@@ -445,7 +475,7 @@ estimate_ipw <- function(
       data = data,
       clusters = data[[cluster_col$name]],
       weights = ipw_weights,
-      se_type = "CR2"
+      se_type = "CR2",
     )
   } else if (blocking) {
     estimatr::lm_robust(

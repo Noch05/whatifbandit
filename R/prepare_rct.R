@@ -8,6 +8,7 @@
 #' @param blocking Logical; Whether or not treatment blocking is occuring
 #' @param clustering Logical; Whether or not treatment clustering is occuring
 #' @inheritParams mab_from_rct.bernoulli
+#' @param data_cols List holding the columns required from the provided data as strings and symbols.
 #'
 #' @returns Named list containing:
 #' \itemize{
