@@ -72,6 +72,8 @@ in the treatment assignment model. Default is \code{NULL}, where all prior perio
 \item{discount_rate}{Rate for discounting observations from earlier periods when updating assignment probabilities.
 A value between 0 and 1, where outcomes from \code{k} periods ago are weighted by \code{discount_rate^k}. Default is 1 for no discounting.}
 
+\item{data_cols}{List holding the columns required from the provided data as strings and symbols.}
+
 \item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon as a treatment is assigned, the outcome is realized and known.
 If \code{TRUE}, delayed feedback is assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not known to the simulation, until a certain date.
 When re-computing the adaptive assignment probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the assignment are treated as failures. a}
@@ -106,10 +108,10 @@ Named list containing:
 \item \code{data_cols}: List of necessary columns in \code{data} as strings and as symbols.
 \item \code{data}: Prepared \code{data.frame} or \code{data.table} containing all the necessary columns to
 conduct the adaptive trial simulation, subset from the originally provided data to reduce memory usage.
-columns required for \code{\link[=mab_simulation]{mab_simulation()}}.
+columns required for \code{\link[=simulate_mab]{simulate_mab()}}.
 \item \code{char_args} List of processed string arguments for compatibility.
 \item \code{imputation_information}: List containing necessary information
-for outcome and date imputation for \code{\link[=mab_simulation]{mab_simulation()}}.
+for outcome and date imputation for \code{\link[=simulate_mab]{simulate_mab()}}.
 \item \code{period_starts}: Numeric vector where element \code{i} is the starting row number of period \code{i}.
 \item \code{period_starts}: Numeric vector where element \code{i} is the ending row number of period \code{i}.
 }

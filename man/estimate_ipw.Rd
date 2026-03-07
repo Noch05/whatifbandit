@@ -6,6 +6,37 @@
 \usage{
 estimate_ipw(estimates, data, cluster_col, blocking, clustering, conditions)
 }
+\arguments{
+\item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
+of a traditional Randomized Controlled Trial (RCT).}
+
+\item{cluster_col}{Name of the column holding the clustering index}
+}
+\value{
+A final list of all estimates. The first element of the list is a \code{tibble}/\code{data.table},
+containing AIPW, IPW, and Sample estimated probabilities of success, and their variances. The F-statistic,
+and appropriate degrees of freedom are provided for tests. The second element is the covariance matrix
+from the IPW regression.
+}
 \description{
-Placeholder
+Computes the IPW estimates for the true probabilities of success using \code{\link[estimatr:lm_robust]{estimatr::lm_robust()}} to perform
+an IPW weighted regressionn for estimation. If blocking was used for the trial, blocks are included
+as fixed effects, and if clustering is specified CR2 variances are reported. Otherwise HC2 variances
+are used. Appropriate degrees of freedom are supplied along with the regression's F-statistic
+}
+\details{
+These estimates follow the procedure in \href{}{Offer-Westort et al. (2021)}. The F-statistic
+provided can be used to conduct their randomization inference test, via simulating a null-F-distribution.
+Degrees of freedom are not provided for the f-statistic, because the traditional F-distribution is invalid
+under the adaptive procedure.
+
+The provided coefficients and variances can be used to conduct the typical t-tests on the coefficients
+restricted to constants, because appropriate HC2 and CR2 standard errors are used, so traditional asymptotic
+inference on the linear regression parameters is valid. Treatment effect estimation requires
+using the appropriate variance estimate which includes the covariance of 2 coefficients.
+}
+\references{
+Offer‐Westort, Molly, Alexander Coppock, and Donald P. Green. 2021.
+"Adaptive Experimental Design: Prospects and Applications in Political Science."
+\emph{American Journal of Political Science} 65 (4): 826–44. \doi{10.1111/ajps.12597}..
 }

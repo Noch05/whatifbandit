@@ -16,33 +16,47 @@ estimate_aipw(
 )
 }
 \arguments{
+\item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
+of a traditional Randomized Controlled Trial (RCT).}
+
 \item{assignment_probs}{A \code{tibble}/\code{data.table} containing the probabilities of being
 assigned each treatment at a given period.}
 
+\item{cluster_col}{Name of the column holding the clustering index}
+
 \item{periods}{Numeric value of length 1; number of total periods in the simulation.}
+
+\item{verbose}{Logical; whether or not to print intermediate messages. Default is \code{FALSE}.}
 }
 \value{
 A \code{tibble}/\code{data.table} containing the AIPW estimate of treatment success, AIPW variance,
 sample proportion of successful treatments (sample mean), and sample mean variance.
 }
 \description{
-Averages the observation level AIPW scores created by \code{\link[=get_iaipw]{get_iaipw()}} across each period, then assigns
-each estimate an adaptive weight based on \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et. al (2021)}, and
-another weight based on the size of each period to calculate the final AIPW estimate and variance for each treatment.
-Sample means and variances are also provided for comparison.
+Uses provided Invidual AIPW scores created by \code{\link[=get_iaipw]{get_iaipw()}} and computes the final
+AIPW estimate and variance using the formulas from  \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et. al (2021)}.
+Uses the constant allocation rate adaptive weight.
 }
 \details{
 The formulas for the calculations in this function can be found in
 \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)} at
 equation 5 (estimate), equation 11 (variance), equation 15 (allocation rate).
 
-The formulas specified assume that each period is 1 observation but in the cases
-for this simulation where periods contain multiple observations the individual estimates
-from each period are averaged and weighted by size before being used in the final calculations.
+The estimator assumes pure sequential assignment, but we adapt the estimator to our batched assignment procedure.
+In the computations, of the individual estimates, regression estimates were only computed for each period,
+instead of for each observation, and similarly the adaptive weights used will only be computed per period, and them
+simply assigned to all the observations in that period, thus resulting in only a few unique weights. This
+keeps effective sample size large, ensuring the asymptotic properties are realized in large samples with only
+a few assignment periods, while also properly accounting for the assignment procedure.
+
+If clustering is specified, within each period individual AIPW estimates are aggregated by cluster, and then the sample size
+becomes the sum of the number of clusters in each period, the variance formula is not adjusted, so is not accounting
+for the clustering.
 
 The AIPW estimator is unbiased, consistent, and asymptotically normal under the conditions of the simulated trial
-of the so can be used for valid inference with a normal distribution. The sample means and variances
-are provided for comparison but these are biased and inconsistent under the conditions of the simulated trial
+of the so can be used for valid inference with a normal distribution. Treatment effects can aslo be estimated as
+as the difference in AIPW estimates with the variance of the difference as the sum of the variances. Simple Wald-Style
+tests with the normal distribution can be used here. Sample means are also provided for comparison but should not be used.
 }
 \references{
 Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.

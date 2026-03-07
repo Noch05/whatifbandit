@@ -10,6 +10,8 @@ create_cutoff(data, data_cols, period_length = NULL, period_method, time_unit)
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
 
+\item{data_cols}{List holding the columns required from the provided data as strings and symbols.}
+
 \item{period_length}{A positive integer; represents the length of each treatment period.
 If \code{period_method} is "date", this length refers the number of units specified in \code{time_unit}.
 (i.e., if \verb{"day"``, 10 would be 10 days). If }period_method\code{=}"batch"`, this refers to the number of units in each batch.}

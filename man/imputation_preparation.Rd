@@ -17,9 +17,6 @@ imputation_preparation(
 \arguments{
 \item{current_data}{A \code{data.frame} or \code{data.table} with only observations from the current sampling period.}
 
-\item{imputation_information}{Object created by \code{\link[=imputation_precompute]{imputation_precompute()}} containing the conditional means and success dates
-for each treatment block to impute from.}
-
 \item{whole_experiment}{Logical; if \code{TRUE}, uses all past experimental data for imputing outcomes.
 If \code{FALSE}, uses only data available up to the current period. In large datasets or with a high number
 of periods, setting this to \code{FALSE} can be more computationally intensive, though not a significant

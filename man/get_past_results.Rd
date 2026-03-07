@@ -18,6 +18,13 @@ get_past_results(
 \item{current_data}{A \code{data.frame} or \code{data.table} with only observations from the current sampling period.}
 
 \item{prior_data}{A \code{data.frame} or \code{data.table} with only the observations from the prior index.}
+
+\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon as a treatment is assigned, the outcome is realized and known.
+If \code{TRUE}, delayed feedback is assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not known to the simulation, until a certain date.
+When re-computing the adaptive assignment probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the assignment are treated as failures. a}
+
+\item{discount_rate}{Rate for discounting observations from earlier periods when updating assignment probabilities.
+A value between 0 and 1, where outcomes from \code{k} periods ago are weighted by \code{discount_rate^k}. Default is 1 for no discounting.}
 }
 \value{
 A \code{tibble} or \code{data.table} containing the number of successes, and number of people for each

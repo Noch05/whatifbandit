@@ -6,6 +6,13 @@
 \usage{
 fill_missing_conditions(estimates, conditions)
 }
+\arguments{
+\item{estimates}{a \code{tibble}/\code{data.table} containing the appropriate estimates}
+}
+\value{
+updated \code{estimates} object with missing conditions initalized.
+}
 \description{
-Fill Missing Conditions
+Accepts a \code{data.frame} like object, and a character of vector of \code{conditions}. It checks
+whether or not all provided conditions are present in the data, if not their values are initalized to NA
 }

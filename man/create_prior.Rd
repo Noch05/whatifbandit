@@ -7,6 +7,9 @@
 create_prior(prior_periods = NULL, current_period)
 }
 \arguments{
+\item{prior_periods}{A positive integer; number of previous periods to use
+in the treatment assignment model. Default is \code{NULL}, where all prior periods are considered. See below for details.}
+
 \item{current_period}{The current period of the simulation. Defined by loop structure inside \code{\link[=run_mab_trial]{run_mab_trial()}}.}
 }
 \value{

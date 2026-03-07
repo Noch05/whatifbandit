@@ -7,23 +7,27 @@
 get_iaipw(data, assignment_probs, periods, conditions, verbose)
 }
 \arguments{
+\item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
+of a traditional Randomized Controlled Trial (RCT).}
+
 \item{assignment_probs}{A \code{tibble}/\code{data.table} containing the probabilities of being
 assigned each treatment at a given period.}
 
 \item{periods}{Numeric value of length 1; number of total periods in the simulation.}
+
+\item{verbose}{Logical; whether or not to print intermediate messages. Default is \code{FALSE}.}
+
+\item{cluster_col}{Name of the column holding the clustering index}
 }
 \value{
-A \code{tibble}/\code{data.frame}, containing the data used in the Multi-Arm-Bandit, with
-new columns pertaining to the individual AIPW estimate for each person and condition, and
-probability of assignment for each treatment at each period.
+A \code{tibble}/\code{data.frame}, containing the subset of \code{data}
+used in the MAB trial, along with new columns for probabilities of assignment to each treatment,
+aipw, and ipw weights for each observation.
 }
 \description{
 Calculates the augmented inverse probability weighted estimate (AIPW) of treatment
-success for each observation and treatment (i.e. on the level of a single unit).
-This method scales the estimated probabilities of success by
-the probability of being assigned the treatment, and weighted by a the conditional expectation of success
-from prior periods of an adaptive trial. The conditional expectation function used is a grouped mean by
-treatment arm.
+success for each observation and treatment (i.e. on the level of a single unit), and returns the final IPW weights
+for each observation, (i.e. the reciprocal specific weight for the treatment they were assigned)
 }
 \details{
 The specification for the individual AIPW estimates can be found

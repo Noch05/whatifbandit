@@ -20,7 +20,7 @@ the re-simulation method. Replications can be conducted in parallel, by setting 
 \value{
 A named list containing
 \itemize{
-\item \verb{final_data_nest:} \code{tibble} or \code{data.table} containing the nested \code{tibble}s/\code{data.table}s from each trial. Only provided when \code{keep_data = TRUE}.
+\item \verb{final_data:} \code{tibble} or \code{data.table} containing the nested \code{tibble}s/\code{data.table}s from each trial. Only provided when \code{keep_data = TRUE}.
 \item \code{bandits}: A \code{tibble} or \code{data.table} containing the UCB1 values or Thompson Sampling posterior distributions for each period and trial. Wide format,
 each row is a period, and each columns is a treatment.
 \item \code{assignment_probs}: A \code{tibble} or \code{data.table} containing the probability of being assigned each treatment arm at a given period and trial. Wide format,
@@ -28,6 +28,7 @@ each row is a period, and each columns is a treatment.
 \item \code{estimates}: A \code{tibble} or \code{data.table} containing the all estimates and variances for each arm.
 Long format, treatment arm, and estimate type are columns along with the mean estimates
 and variance estimates.
+\item \code{ipw_vcov}: A 3d arrary containing the covariance matrix of coefficients of IPW estimates of each trial.
 }
 }
 \description{

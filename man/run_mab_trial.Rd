@@ -33,11 +33,6 @@ run_mab_trial(
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
 
-\item{resimulation}{Logical flag; Whether or not this MAB Trial is being run as a re-simulated RCT, as opposed to an original simulation from specified
-population parameters.}
-
-\item{true_prob}{True probabilities of success, used to generate outcomes in the case of an original simulation.}
-
 \item{algorithm}{A character string specifying the MAB algorithm to use. Options are \code{"Thompson"} or \code{"UCB1"}, ignoring case. Algorithm
 defines the adaptive assignment process. For more details on these specific algorithms see
 \href{https://www.jstor.org/stable/2332286}{Thompson 1933};\href{https://doi.org/10.1023/A:1013689704352Auer et al. 2002};
@@ -72,17 +67,10 @@ contributor to total run time. Default is \code{FALSE}.}
 If \code{TRUE}, delayed feedback is assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not known to the simulation, until a certain date.
 When re-computing the adaptive assignment probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the assignment are treated as failures. a}
 
-\item{imputation_information}{Object created by \code{\link[=imputation_precompute]{imputation_precompute()}} containing the conditional means and success dates
-for each treatment block to impute from.}
-
 \item{ndraws}{Number of draws used to approximate Thompson sampling probabilities. Used only when direct calculation fails or overflows. Default is
 5000 but can be raised or lowered depending on performance and accuracy concerns.}
 
 \item{verbose}{Logical; whether or not to print intermediate messages. Default is \code{FALSE}.}
-
-\item{starts}{Numeric vector where element \code{i} is the starting row number of period \code{i}.}
-
-\item{ends}{Numeric vector where element \code{i} is the ending row number of period \code{i}.}
 
 \item{num_conditions}{Number of conditions, equivalent to \code{length(conditions)}.}
 }

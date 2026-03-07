@@ -10,6 +10,8 @@ create_new_cols(data, data_cols, blocking, delayed_feedback, vars_keep)
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
 
+\item{data_cols}{List holding the columns required from the provided data as strings and symbols.}
+
 \item{blocking}{Logical; Whether or not treatment blocking is occuring}
 
 \item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon as a treatment is assigned, the outcome is realized and known.

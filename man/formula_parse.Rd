@@ -14,6 +14,9 @@ treatment blocking applies these within each block indpendently instead of the w
 in a cluster have the same treatment. When blocks and clusters are specified together each cluster must be fully nested in a single block. See below for details. To speciy without clustering or blocking
 simply do not provide them in the formula. Clusters can only ever be given by 1 variable, while blocks can be a combination of variables.}
 }
+\value{
+List of columns specified from formula.
+}
 \description{
 Parsers the input formula for \code{\link[=mab_from_rct.bernoulli]{mab_from_rct.bernoulli()}}
 }

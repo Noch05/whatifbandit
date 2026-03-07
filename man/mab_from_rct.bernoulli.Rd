@@ -120,29 +120,19 @@ not to be changed.}
 \item{...}{Additional named arguments passed to \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
 }
 \value{
-An object of class \code{mab}, containing:
+Depends on \code{ r} value if \code{ r = 1}, an S3 \code{mab} class object, and if \code{ r > 1}, an
+S3 \code{multi.mab}, with the following:
 \itemize{
-\item \code{final_data}: The processed \code{tibble} or \code{data.table}, containing new columns pertaining to the results of the trial. Specifically Contains:
-\itemize{
-\item \code{period_number}: Assigned period for simulation.
-\item \verb{mab_*}: New treatment conditions and outcomes under the simulation.
-\item \code{impute_req}: Whether observation required an imputed outcome.
-\item \verb{*block}: variables relating to the block specified for treatment blocking, and the concatenation
-of that block with an observations original treatment, and new treatment.
-\item \verb{aipw_*} Columns containing individual Augmented Inverse Probability Weighted estimates for each observation and treatment arm.
-\item \verb{prior_rate_*}: Columns containing success rate for each treatment arm, from all periods before the observations period of the simulation.
-\item \verb{*_assign_prob}: Columns containing probability of being assigned each treatment at the given period.
-}
-\item \code{bandits}: A \code{tibble} or \code{data.table} containing the UCB1 values or Thompson sampling posterior distributions for each period. Wide format,
+\item \code{final_data}: The processed \code{tibble} or \code{data.table}, containing new columns pertaining to the results of all simulated trials.
+\item \code{bandits}: A \code{tibble} or \code{data.table} containing the UCB1 values or Thompson sampling posterior distributions for each period of each trial. Wide format,
 each row is a period, and each columns is a treatment. Each row in this table represents the calculation from the given period
 after its values were imputed, so row 2 represents the calculations made in period 3, but represent the impact of period 2's new assignments.
-\item \code{assignment_probs}: A \code{tibble} or \code{data.table} containing the probability of being assigned each treatment arm at a given period. Wide format,
-each row is a period, and each columns is a treatment. Each row represents the probability of being assigned each treatment at each period, these have not
-been shifted like the bandits table.
+\item \code{assignment_probs}: A \code{tibble} or \code{data.table} containing the probability of being assigned each treatment arm at a given period and trial. Wide format,
+each row is a period, and each columns is a treatment. Each row represents the probability of being assigned each treatment at each period of each trial, these have not
+been shifted like the \code{bandits} table.
 \item \code{estimates}: A \code{tibble} or \code{data.table} containing the
-AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
-sample means and variances, for each treatment arm. Long format, treatment arm, and estimate type are columns along with the mean
-and variance.
+AIPW (Augmented Inverse Probability Weighting), IPW (Inverse Probabiity Weighted), estimates and variances.
+an F-statistic on the IPW regression is provided as well, along with traditional sample mean and variances for comparison.
 \item \code{settings}: A named list of the configuration settings used in the trial.
 }
 }
