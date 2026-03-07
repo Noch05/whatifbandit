@@ -105,7 +105,8 @@ simulate_mab <- function(
     final_data = sim_results$final_data,
     bandits = sim_results$bandits,
     assignment_probs = sim_results$assignment_probs,
-    estimates = estimates,
+    estimates = estimates$est,
+    ipw_vcov = estimates$vcov,
     settings = NULL
   )
   return(results)

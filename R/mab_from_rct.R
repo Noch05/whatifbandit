@@ -648,5 +648,12 @@ condense_results <- function(dt, keep_data, mabs, r) {
     }
   }
 
+  dims <- base::dim(mabs[[1]]$ipw_vcov)
+  results$ipw_vcov <- base::lapply(mabs, \(x) {
+    x$ipw_vocv
+  }) |>
+    base::unlist() |>
+    base::arrary(dim = c(dims, base::length(mabs)))
+
   return(results)
 }

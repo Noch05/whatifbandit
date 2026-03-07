@@ -448,10 +448,14 @@ estimate_aipw.data.table <- function(
 #'
 #' The provided coefficients and variances can be used to conduct the typical t-tests on the coefficients
 #' restricted to constants, because appropriate HC2 and CR2 standard errors are used, so traditional asymptotic
-#' inference on the linear regression parameters is valid. Treatment effects can be estimated
-#' but they require using the covariance m
+#' inference on the linear regression parameters is valid. Treatment effect estimation requires
+#' using the appropriate variance estimate which includes the covariance of 2 coefficients.
 #'
-#' @value
+#'
+#' @returns A final list of all estimates. The first element of the list is a `tibble`/`data.table`,
+#' containing AIPW, IPW, and Sample estimated probabilities of success, and their variances. The F-statistic,
+#' and appropriate degrees of freedom are provided for tests. The second element is the covariance matrix
+#' from the IPW regression.
 #'
 #'
 
@@ -476,6 +480,7 @@ estimate_ipw <- function(
       clusters = data[[cluster_col$name]],
       weights = ipw_weights,
       se_type = "CR2",
+      ci = FALSE
     )
   } else if (blocking) {
     estimatr::lm_robust(
@@ -483,7 +488,8 @@ estimate_ipw <- function(
       fixed_effects = ~block,
       data = data,
       se_type = "HC2",
-      weights = ipw_weights
+      weights = ipw_weights,
+      ci = FALSE
     )
   } else if (clustering) {
     estimatr::lm_robust(
@@ -491,14 +497,16 @@ estimate_ipw <- function(
       data = data,
       clusters = data[[cluster_col$name]],
       weights = ipw_weights,
-      se_type = "CR2"
+      se_type = "CR2",
+      ci = FALSE
     )
   } else {
     estimatr::lm_robust(
       mab_success ~ mab_condition - 1,
       data = data,
       se_type = "HC2",
-      weights = ipw_weights
+      weights = ipw_weights,
+      ci = FALSE
     )
   }
 
@@ -521,7 +529,7 @@ estimate_ipw <- function(
       var = c(var, NA),
       df = c(df, NA),
       mab_condition = c(base::names(coefs), "Joint"),
-      estimator = "IPW"
+      estimator = "IPW",
     )
     ipw <- fill_missing_conditions(ipw, conditions)
     estimates <- data.table::rbindlist(list(estimates, ipw), fill = TRUE)
@@ -536,11 +544,23 @@ estimate_ipw <- function(
       fill_missing_conditions(conditions) |>
       dplyr::bind_rows(estimates)
   }
-  return(estimates)
+  return(list(
+    est = estimates,
+    vcov = est_lm$vcov
+  ))
 }
 
 
 #' Fill Missing Conditions
+#' @description
+#' Accepts a `data.frame` like object, and a character of vector of `conditions`. It checks
+#' whether or not all provided conditions are present in the data, if not their values are initalized to NA
+#'
+#' @param estimates a `tibble`/`data.table` containing the appropriate estimates
+#' @inheritParams simulate_mab
+#'
+#'
+#' @returns updated `estimates` object with missing conditions initalized.
 #'
 #'
 fill_missing_conditions <- function(estimates, conditions) {
@@ -551,8 +571,8 @@ fill_missing_conditions <- function(estimates, conditions) {
         list(
           estimates,
           data.table::data.table(
-            mean = 0,
-            var = Inf,
+            mean = NA,
+            var = NA,
             mab_condition = missing_conditions,
             estimator = estimates$estimator[1]
           )
@@ -563,8 +583,8 @@ fill_missing_conditions <- function(estimates, conditions) {
       estimates <- dplyr::bind_rows(
         estimates,
         tibble::tibble(
-          mean = 0,
-          var = Inf,
+          mean = NA,
+          var = NA,
           mab_condition = missing_conditions,
           estimator = estimates$estimator[1]
         )
