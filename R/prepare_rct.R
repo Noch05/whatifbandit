@@ -15,10 +15,10 @@
 #' \item `data_cols`: List of necessary columns in `data` as strings and as symbols.
 #' \item `data`: Prepared `data.frame` or `data.table` containing all the necessary columns to
 #' conduct the adaptive trial simulation, subset from the originally provided data to reduce memory usage.
-#' columns required for [mab_simulation()].
+#' columns required for [simulate_mab()].
 #' \item `char_args` List of processed string arguments for compatibility.
 #' \item `imputation_information`: List containing necessary information
-#' for outcome and date imputation for [mab_simulation()].
+#' for outcome and date imputation for [simulate_mab()].
 #' \item `period_starts`: Numeric vector where element `i` is the starting row number of period `i`.
 #' \item `period_starts`: Numeric vector where element `i` is the ending row number of period `i`.
 #' }

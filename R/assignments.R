@@ -4,7 +4,7 @@
 #' calculates the number of success under each treatment and the total number of observations assigned to each treatment which are used
 #' to calculate UCB1 values or Thompson sampling probabilities. These values are weighted by the discount_rate provided.
 #'
-#' @inheritParams simulate_mab.rct
+#' @inheritParams simulate_mab
 #' @param current_data A `data.frame` or `data.table` with only observations from the current sampling period.
 #' @param prior_data A `data.frame` or `data.table` with only the observations from the prior index.
 #' @returns A `tibble` or `data.table` containing the number of successes, and number of people for each

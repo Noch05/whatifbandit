@@ -436,7 +436,7 @@ mab_from_rct.bernoulli <- function(
 #' Parsers the input formula for [mab_from_rct.bernoulli()]
 #' @name formula_parse
 #' @inheritParams mab_from_rct.bernoulli
-#' @returns
+#' @returns List of columns specified from formula.
 #' @keywords internal
 
 formula_parse <- function(formula) {

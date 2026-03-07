@@ -1,7 +1,6 @@
 #------------------------------------------------------------------------------
 #' @title Simulates MAB Trial From Prepared Inputs and Performs Inference
-#' @name simulate_mab_rct.bernoulli
-#'
+#' @name simulate_mab
 #' @description Internal helper. Centralizes necessary functions to conduct a
 #' a MAB trial with adaptive inference. It assumes all inputs have been preprocessed already
 #' @inheritParams mab_from_rct.bernoulli
@@ -424,7 +423,7 @@ end_mab_trial.data.table <- function(
 #' @name create_prior
 #' @description Used during [run_mab_trial()] to create a vector of prior periods dynamically based on the specified
 #' number of prior periods.
-#' @inheritParams mab_from_rct.bernoulli()
+#' @inheritParams mab_from_rct.bernoulli
 #' @param current_period The current period of the simulation. Defined by loop structure inside [run_mab_trial()].
 #' @returns Numeric value referring to the period index to look back from.
 #' the results for the current treatment assignment period.
