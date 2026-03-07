@@ -90,29 +90,19 @@
 #' not to be changed.
 #' @param ... Additional named arguments passed to [furrr::furrr_options()]
 #'
-#' @returns An object of class `mab`, containing:
+#' @returns Depends on ` r` value if ` r = 1`, an S3 `mab` class object, and if ` r > 1`, an
+#' S3 `multi.mab`, with the following:
 #' \itemize{
-#' \item `final_data`: The processed `tibble` or `data.table`, containing new columns pertaining to the results of the trial. Specifically Contains:
-#' \itemize{
-#' \item `period_number`: Assigned period for simulation.
-#' \item `mab_*`: New treatment conditions and outcomes under the simulation.
-#' \item `impute_req`: Whether observation required an imputed outcome.
-#' \item `*block`: variables relating to the block specified for treatment blocking, and the concatenation
-#' of that block with an observations original treatment, and new treatment.
-#' \item `aipw_*` Columns containing individual Augmented Inverse Probability Weighted estimates for each observation and treatment arm.
-#' \item `prior_rate_*`: Columns containing success rate for each treatment arm, from all periods before the observations period of the simulation.
-#' \item `*_assign_prob`: Columns containing probability of being assigned each treatment at the given period.
-#' }
-#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson sampling posterior distributions for each period. Wide format,
+#' \item `final_data`: The processed `tibble` or `data.table`, containing new columns pertaining to the results of all simulated trials.
+#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson sampling posterior distributions for each period of each trial. Wide format,
 #' each row is a period, and each columns is a treatment. Each row in this table represents the calculation from the given period
 #' after its values were imputed, so row 2 represents the calculations made in period 3, but represent the impact of period 2's new assignments.
-#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period. Wide format,
-#' each row is a period, and each columns is a treatment. Each row represents the probability of being assigned each treatment at each period, these have not
-#' been shifted like the bandits table.
+#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period and trial. Wide format,
+#' each row is a period, and each columns is a treatment. Each row represents the probability of being assigned each treatment at each period of each trial, these have not
+#' been shifted like the `bandits` table.
 #' \item `estimates`: A `tibble` or `data.table` containing the
-#' AIPW (Augmented Inverse Probability Weighting) treatment effect estimates and variances, and traditional
-#' sample means and variances, for each treatment arm. Long format, treatment arm, and estimate type are columns along with the mean
-#' and variance.
+#' AIPW (Augmented Inverse Probability Weighting), IPW (Inverse Probabiity Weighted), estimates and variances.
+#' an F-statistic on the IPW regression is provided as well, along with traditional sample mean and variances for comparison.
 #' \item `settings`: A named list of the configuration settings used in the trial.
 #' }
 #'
@@ -329,7 +319,6 @@ mab_from_rct.bernoulli <- function(
       starts = prepped$period_starts,
       ends = prepped$period_ends
     )
-    base::class(results) <- c("mab", base::class(results))
   } else {
     verbose_log(verbose, "Starting Simulations")
     mabs <- furrr::future_map(
@@ -414,7 +403,6 @@ mab_from_rct.bernoulli <- function(
       mabs = mabs,
       r = r
     )
-    base::class(results) <- c("multiple.mab", base::class(results))
   }
   results$settings <- list(
     original_data = data,
@@ -439,7 +427,7 @@ mab_from_rct.bernoulli <- function(
     r = r,
     seeds = seeds
   )
-  base::class(results) <- c("fixed", class(results))
+  results <- if (r > 1) multi.mab(results) else mab(results)
   return(results)
 }
 #------------------------------------------------------------------------------
@@ -584,7 +572,7 @@ get_assignment_quantities.data.table <- function(simulation, conditions) {
 #' @param mabs List of outputs from repeated [simulate_mab_rct.bernoulli()] calls.
 #' @returns A named list containing
 #' \itemize{
-#' \item `final_data_nest:` `tibble` or `data.table` containing the nested `tibble`s/`data.table`s from each trial. Only provided when `keep_data = TRUE`.
+#' \item `final_data:` `tibble` or `data.table` containing the nested `tibble`s/`data.table`s from each trial. Only provided when `keep_data = TRUE`.
 #' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson Sampling posterior distributions for each period and trial. Wide format,
 #' each row is a period, and each columns is a treatment.
 #' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period and trial. Wide format,
@@ -592,6 +580,7 @@ get_assignment_quantities.data.table <- function(simulation, conditions) {
 #' \item `estimates`: A `tibble` or `data.table` containing the all estimates and variances for each arm.
 #' Long format, treatment arm, and estimate type are columns along with the mean estimates
 #' and variance estimates.
+#' \item `ipw_vcov`: A 3d arrary containing the covariance matrix of coefficients of IPW estimates of each trial.
 #' }
 #' @details
 #' This function iterates over every element in `mabs` and extracts the required element to place in a condensed list
@@ -608,8 +597,8 @@ condense_results <- function(dt, keep_data, mabs, r) {
   )
 
   if (dt) {
-    results <- lapply(items, \(item) {
-      all <- lapply(seq_len(r), function(i) {
+    results <- base::lapply(items, \(item) {
+      all <- base::lapply(seq_len(r), function(i) {
         if (item == "assignment_quantities") {
           as.list(mabs[[i]][[item]])
         } else {
@@ -622,7 +611,7 @@ condense_results <- function(dt, keep_data, mabs, r) {
     })
     names(results) <- items
     if (keep_data) {
-      results$final_data_nest <- data.table::data.table(
+      results$final_data <- data.table::data.table(
         trial = base::seq_len(r),
         data = purrr::map(mabs, ~ .x$final_data)
       )
