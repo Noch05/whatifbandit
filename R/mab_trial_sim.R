@@ -43,7 +43,6 @@ check_p <- function(p, blocks = NULL, clusters = NULL) {
   }
 }
 
-
 #' Generate Block or Cluster Memberships
 #' @name generate_group_membership
 #' @description Takes a named probability vector for blocks or clusters and uses
@@ -99,60 +98,6 @@ generate_group_membership <- function(n, group, blocks = NULL) {
       )
     )
   }
-}
-
-
-#' Assign Treatments
-#' @name assign_treatments.rct
-#' @description Selects the appropriate [randomizr] randomization function based on whether
-#' blocks and/or clusters are present, and returns a vector of treatment
-#' assignments.
-#'
-#' @inheritParams mab_trial_sim.bernoulli
-#' @param assignment_probs A numeric vector of equal treatment assignment
-#'   probabilities (length = number of treatments, sums to 1).
-#' @param blocks A factor or character vector of block memberships, or `NULL`.
-#' @param clusters A factor or character vector of cluster memberships, or `NULL`.
-#'
-#' @returns A factor of length `n` with levels corresponding to treatment arms.
-#'
-#' @keywords internal
-assign_treatments.rct <- function(
-  n,
-  assignment_probs,
-  blocks = NULL,
-  clusters = NULL
-) {
-  undo_randomizr_defaults <- function(treatments, assignment_probs) {
-    if (base::is.null(base::names(assignment_probs))) {
-      treatments |> as.numeric() |> factor(labels = 1:length(assignment_probs))
-    } else {
-      treatments
-    }
-  }
-  treatments <- if (!base::is.null(blocks) && !base::is.null(clusters)) {
-    randomizr::block_and_cluster_ra(
-      blocks = blocks,
-      clusters = clusters,
-      prob_each = assignment_probs,
-      conditions = names(assignment_probs)
-    )
-  } else if (!base::is.null(blocks)) {
-    randomizr::block_ra(
-      blocks = blocks,
-      prob_each = assignment_probs,
-      conditions = names(assignment_probs)
-    )
-  } else if (!base::is.null(clusters)) {
-    randomizr::cluster_ra(
-      clusters = clusters,
-      prob_each = assignment_probs,
-      conditions = names(assignment_probs)
-    )
-  } else {
-    randomizr::complete_ra(n, prob_each = assignment_probs)
-  }
-  undo_randomizr_defaults(treatments, assignment_probs)
 }
 
 
@@ -271,6 +216,13 @@ mab_trial_sim.bernoulli <- function(
       )
     )
   }
+
+  data <- prepare_sim(
+    p = p,
+    blocks = blocks,
+    clusters = clusters,
+    control_augment,
+  )
 
   blocks <- generate_group_membership(n, blocks) |> base::as.character()
   clusters <- generate_group_membership(n, clusters, blocks = blocks) |>
