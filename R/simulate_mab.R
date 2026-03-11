@@ -13,6 +13,9 @@
 #' population parameters.
 #' @param true_prob True probabilities of success, used to generate outcomes in the case of an original simulation.
 #'
+#' @inheritParams mab_trial_sim.bernoulli
+#'
+#'
 #' @returns: A named list containing:
 #' \itemize{
 #' \item `final_data`: The processed `tibble` or `data.table`, containing new columns pertaining to the results of the trial.
@@ -44,7 +47,8 @@ simulate_mab <- function(
   verbose,
   ndraws,
   starts,
-  ends
+  ends,
+  ...
 ) {
   verbose_log(verbose, "Starting Bandit Trial")
   periods <- base::length(starts)
@@ -72,7 +76,8 @@ simulate_mab <- function(
     starts = starts,
     ends = ends,
     periods = periods,
-    true_prob = true_prob
+    true_prob = true_prob,
+    ...
   )
 
   sim_results$final_data <- get_iaipw(
@@ -122,6 +127,7 @@ simulate_mab <- function(
 #' @inheritParams simulate_mab_rct.bernoulli
 #' @inheritParams mab_from_rct.bernoulli
 #' @inheritParams prepare_rct
+#' @inheritParams mab_trial_sim.bernoulli
 #' @param num_conditions Number of conditions, equivalent to `length(conditions)`.
 #'
 #'
@@ -159,7 +165,8 @@ run_mab_trial <- function(
   starts,
   ends,
   periods,
-  num_conditions
+  num_conditions,
+  ...
 ) {
   bandits <- base::vector(mode = "list", length = 2)
   bandits$bandit_stat <- base::matrix(

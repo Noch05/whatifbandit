@@ -11,20 +11,19 @@
 #'
 #' @keywords internal
 check_p <- function(p, blocks = NULL, clusters = NULL) {
-  flat_p <- base::unlist(p)
-  if (base::any(flat_p > 1 | flat_p < 0)) {
+  if (base::any(p > 1 | p < 0)) {
     rlang::abort(c(
       "all `p` must be probabilities between 0 and 1",
-      "x" = base::paste0("You passed: ", base::paste0(flat_p, collapse = ", "))
+      "x" = base::paste0("You passed: ", base::paste0(p, collapse = ", "))
     ))
   }
   if (base::is.null(blocks) && base::is.null(clusters)) {
     return(0)
   }
 
-  n_clusters <- base::nlevels(clusters)
-  n_blocks <- base::nlevels(blocks)
-  n_treat <- base::length(p)
+  n_clusters <- base::length(base::unique(clusters))
+  n_blocks <- base::length(base::unique(blocks))
+  n_treat <- base::dim(p)[1] %|% length(p)
 
   req_prob <- if (n_clusters > 0) {
     n_treat * n_clusters
@@ -161,10 +160,10 @@ assign_treatments.rct <- function(
 #' @name extract_success_prob
 #' @description Looks up the success probability for each unit given their treatment
 #' assignment and, optionally, their block and/or cluster membership. Handles
-#' all supported `p` structures: plain vector, block-indexed list, cluster-indexed list, and
-#' block-then-cluster nested list.
+#' all supported `p` structures.
 #'
 #' @inheritParams mab_trial_sim.bernoulli
+#' @inheritParams mab_simulate
 #' @param treatments A character or factor vector of treatment assignments of
 #'   length `n`.
 #' @inheritParams assign_treatments.rct
@@ -177,60 +176,10 @@ extract_success_prob <- function(
   p,
   treatments,
   blocks = NULL,
-  clusters = NULL
-) {
-  idxs <- stats::setNames(
-    base::lapply(list(treatments, blocks, clusters), \(x) {
-      char <- base::as.character(x)
-      if (base::length(char) > 0) {
-        char
-      } else {
-        NULL
-      }
-    }),
-    c("treatments", "blocks", "clusters")
-  )
-  if (!base::is.null(blocks) && !base::is.null(clusters)) {
-    items <- list(idxs[["treatments"]], idxs[["blocks"]], idxs[["clusters"]])
-    purrr::pmap_vec(
-      items,
-      \(t, b, c) p[[t]][[b]][c],
-      .ptype = numeric()
-    )
-  } else if (!base::is.null(blocks) || !base::is.null(clusters)) {
-    items <- base::list(
-      idxs[["treatments"]],
-      idxs[["blocks"]] %||% idxs[["clusters"]]
-    )
-    purrr::pmap_vec(
-      items,
-      \(t, b) p[[t]][b],
-      .ptype = numeric()
-    )
-  } else {
-    p[idxs[["treatments"]]]
-  }
-}
-
-#' Add names to an Unnamed Vector
-#' @name add_names
-#' @description Adds `names` attribute to an unnamed vector based on the provided prefix.
-#' @param x Input vector to be named
-#' @param prefix String to be prepended to index of an element to create names. e.g. if "T",
-#' `names(x) <- c("T1", "T2",..., "Tn")`
-#' @returns Original vector with new names, or the original vector if it was already named.
-
-add_names <- function(x, prefix) {
-  if (base::is.null(base::names(x))) {
-    base::names(x) <- base::paste0(prefix, base::seq_along(x))
-  }
-  x
-}
-#' Create Arrary from P
-#' @description
-#' Create an arrary structure from p based on blocks and clusters
-#'
-array_p <- function(blocks, clusters) {}
+  clusters = NULL,
+  blocking,
+  clustering
+) {}
 
 #' Simulate an Adaptive Trial With Bernoulli Distributed Outcomes
 #' @description Simulates a response-adaptive randomized experiment with Bernoulli
@@ -238,24 +187,17 @@ array_p <- function(blocks, clusters) {}
 #' probabilities according to the specified `algorithm`. `algorithm = "static"` is the non-adaptive
 #' uniform baseline, where probabilities of being assigned to one treatment is the same as any other.
 #' @param n A positive integer. Total number of units to simulate.
-#' @param p The true probabilities of success for each treatment arm, where `length(p)` is the number of
-#' treatment arms. Can be:
-#'   \describe{
-#'     \item{Numeric vector}{A named vector where `names(p)` are the treatment
-#'       labels, e.g. `c(T1 = 0.2, T2 = 0.4)`. Used when there are no blocks
-#'       or clusters.}
-#'     \item{Matrix}{A matrix where `colnames(p) are the treatment labels, and the `rownames(p)`
-#' refer to the block or cluster. e.g.
-#'       `matrix(c(0.45, 0.3, 0.7 0.8), nrow = 2, ncol = 2, dimnames = list(c("B1", "B2"), c("T1","T2")))`.
-#'       Probabilities are accessed as `p[block, treatment]`.}
-#'     \item{3d arrary}{A 3d arrary where the outer index is the treatment labels, and
-#' the inner `rownames(x[, , i]) refer to the blocks, and the `colnames(x[, , i]`. Clusters should
-#' be fully nested within each block, so be careful when defining the array. For
-#' placeholders 0 can be used. e.g.
-#'       `array(c(0.3, 0, 0, 0.5, 0, 0.45, 0.7, 0, 0.8, 0, 0, 0.2), dim = c(2, 2, 3), dimnames = list(c("B1", "B2"), c("C1", "C2"), c("T1", "T2", "T3")))`
-#'        Accessed as `p[block, cluster, treatment]`.}
-#'   }
-#'   All probability values must be between 0 and 1.
+#' @param t Total number of assignment periods. Positive integer. Default is `t = n` for pure sequential (one unit per period) assignment.
+#' The sizes of each period will be equal as `n %/% t`,
+#' except for the last period which will be `n %% t` in the case `n %% t != 0`, when `period_sizes = NULL`.
+#' @param p The true probabilities of success for each treatment arm. Specified as an matrix,
+#' where `rownames(p)` are the treatment
+#' labels, and `colnames(p)` are the cluster or block labels, e.g.
+#'       `matrix(c(0.5, 0.3, 0.5, 0.6), nrow = 2, ncol = 2, dimnames(list(c("T1", "T2"), c("B1", "B2"))))`.
+#'       Probabilities are accessed as `p[treatment, block]`.
+#' With blocks and clusters utilize the clusters for the columns because clusters are fully nested in blocks.
+#' For no clusters or blocks simply use a matrix with 1 column.
+#'
 #' @param dt Logical. If `TRUE` returns a [data.table::data.table()]; otherwise returns a [tibble::tibble()]. Default `FALSE`.
 #' @param blocks A named numeric vector of block membership probabilities (must sum to 1), where `names(blocks)`
 #' are the block labels. Units are assigned to blocks via [randomizr::complete_ra()]. Pass `NULL` (default) for no blocking.
@@ -274,24 +216,16 @@ array_p <- function(blocks, clusters) {}
 #' @param time_model An optional function with signature `function(n, treatments, success, blocks = NULL, clusters = NULL, ...)`
 #' that returns a vector of [lubridate::period] objects to add to `dates_of_assignment` to produce `success_date`.
 #' Only used when`dates_of_assignment` is also supplied. Default `NULL`.
-#' #' @param t Total number of assignment periods. Positive integer. Default is `t = n` for pure sequential (one unit per period) assignment.
-#' The sizes of each period will be equal as `n %/% t`, except for the last
-#' period which will be `n %% t` in the case `n %% t != 0`, when `period_sizes = NULL`.
+#'
 #' @param algorithm Assignment algorithm, determines how probabilities of assignment
 #' are updated each period. Either `"thompson"` for Thompson Sampling, `"ucb1"` for
 #' the UCB1 algorithm, or `"static"` for uniform, non-adaptive assignment. Not case sensitive.
 #' @param period_sizes Numeric vector of `length(t)`, with the specific number of units to be assigned in each period. Used when it is required to assign different numbers of units
 #' to treatment across the periods of the trial.
 #' @param ... Additional arguments forwarded to `time_model`.
+#' @inheritParams mab_from_rct.bernoulli
 #'
-#' @returns A [tibble::tibble()] or [data.table::data.table()] with columns:
-#'   \describe{
-#'     \item{`id`}{Integer unit identifier.}
-#'     \item{`treatment`}{Treatment arm assigned to each unit.}
-#'     \item{`success`}{Binary outcome (0/1) drawn from a Bernoulli distribution.}
-#'     \item{`assignment_date`}{Date of assignment (if `dates_of_assignment` supplied).}
-#'     \item{`success_date`}{Date of outcome (if `dates_of_assignment` and `time_model` supplied).}
-#'   }
+#' @returns NULL
 #' @details
 #' When blocking and/or clustering are specified, these assignments will be randomly pregenerated before the start of the adaptive sequential assignment. These arguments allow simulating a trial
 #' when there may be hetergenous outcomes across a treatment block or treatment cluster, so different assignment probabilities can be provided for the same treatment, depending on the block and/or cluster
@@ -303,7 +237,7 @@ array_p <- function(blocks, clusters) {}
 #' @export
 #' @example inst/examples/mab_trial_sim.bernoulli_example.R
 mab_trial_sim.bernoulli <- function(
-n,
+  n,
   t = n,
   p,
   algorithm,
@@ -311,14 +245,17 @@ n,
   clusters = NULL,
   control_augment = 0,
   random_assign_prop = 0,
+  dates_of_assignment,
+  time_model,
   period_sizes = NULL,
-  prior_periods = "all",
+  prior_periods = NULL,
   dt,
-  ndraws = 5000
+  ndraws = 5000,
+  r,
+  keep_data,
   ...
 ) {
- check_posint(n, t, prior_periods)
-  p <- add_names(p, "T")
+  check_posint(n, t, prior_periods, ndraws)
   alg <- base::tolower(algorithm)
   if (!alg %in% c("static", "thompson", "ucb1")) {
     rlang::abort(
@@ -338,28 +275,10 @@ n,
   blocks <- generate_group_membership(n, blocks) |> base::as.character()
   clusters <- generate_group_membership(n, clusters, blocks = blocks) |>
     base::as.character()
-
-  assignment_probs <- stats::setNames(
-    base::rep(1 / base::length(p), base::length(p)),
-    names(p)
-  )
-  treatments <- assign_treatments.rct(
-    n = n,
-    assignment_probs = assignment_probs,
-    blocks = blocks,
-    clusters = clusters
-  )
+  blocking <- !base::is.null(blocks)
+  clustering <- !base::is.null(clusters)
 
   check_p(p, blocks = blocks, clusters = clusters)
-
-  success_prob <- extract_success_prob(
-    p = p,
-    treatments = treatments,
-    blocks = blocks,
-    clusters = clusters
-  )
-
-  success <- stats::rbinom(n, 1, prob = success_prob)
 
   assignment_dates <- if (base::is.null(dates_of_assignment)) {
     NULL
@@ -382,7 +301,7 @@ n,
       )
   }
 
-   period_sizes <- if (!base::is.null(period_sizes)) {
+  period_sizes <- if (!base::is.null(period_sizes)) {
     period_sizes
   } else {
     c(base::rep(base::floor(n / t), t - 1), n %% t)
