@@ -73,6 +73,24 @@ mab_trial_sim.bernoulli <- function(
   ...
 ) {
   algorithm <- base::tolower(algorithm)
+  check_sim(
+    n = n,
+    t = t,
+    p = p,
+    algorithm = algorithm,
+    blocks = bocks,
+    clusters = clusters,
+    control_augment = control_augment,
+    random_assign_prop = random_assign_prop,
+    dates_of_assignment = dates_of_assignment,
+    time_model = time_model,
+    period_sizes = period_sizes,
+    prior_periods = prior_periods,
+    dt = dt,
+    ndraws = ndraws,
+    r = r,
+    keep_data = keep_data
+  )
 
   data <- prepare_sim(
     p = p,
@@ -158,7 +176,7 @@ mab_trial_sim.bernoulli <- function(
 #' @keywords internal
 check_sim <- function(
   n,
-  t = n,
+  t,
   p,
   algorithm,
   blocks,
@@ -175,9 +193,9 @@ check_sim <- function(
   keep_data
 ) {
   check_logical(dt, keep_data)
-  check_posint(n, t, ndraws, r, prior_periods)
+  check_posint(n, t, ndraws, r, prior_periods, period_sizes)
   check_prop(control_augment, random_assign_prop)
-  check_p(p = p, blocks = blocks, clusters = clusters)
+
   if (!base::is.null(blocks) && !base::is.null(clusters)) {
     base::do.call(check_sum1, c(list(blocks), clusters))
   } else if (!base::is.null(clusters)) {
@@ -193,7 +211,7 @@ check_sim <- function(
   if (t > n) {
     rlang::abort(
       c("`t` cannot be larger than `n`"),
-      "x" = sprintf("You Passed: t: %d, n: %d", t, n)
+      "x" = base::sprintf("You Passed: t: %d, n: %d", t, n)
     )
   }
 
@@ -211,6 +229,12 @@ check_sim <- function(
       )
     )
   }
+  if (base::any(p > 1 | p < 0)) {
+    rlang::abort(c(
+      "all `p` must be probabilities between 0 and 1",
+      "x" = base::paste0("You passed: ", base::paste0(p, collapse = ", "))
+    ))
+  }
 }
 #' Validates Summing to 1
 #' @name check_sum1
@@ -224,57 +248,11 @@ check_sum1 <- function(...) {
     if (sum(arg) != 1) {
       rlang::abort(c(
         base::sprintf("`%s` must sum to 1", name),
-        "x" = base::paste0("You passed: ", base::paste0(arg, collapse = ", ")),
+        "x" = base::paste0("You passed: ", base::paste0(arg, collapse = ",")),
         "x" = base::paste0("Sum: ", base::sum(arg))
       ))
     }
   })
-}
-
-
-#' Validate Bernoulli Success Probabilities
-#' @name check_probs
-#' @description Checks that all provided probabilities are valid between 0 and 1, and that probabilities
-#' have been provided for all blocks and clusters
-#'
-#' @inheritParams extract_success_prob
-#' @inheritParams generate_bernoulli.rct
-#' @inheritParams assign_treatments.rct
-#'
-#' @returns Nothing. Throws an error if validation fails.
-#'
-#' @keywords internal
-check_p <- function(p, blocks = NULL, clusters = NULL) {
-  if (base::any(p > 1 | p < 0)) {
-    rlang::abort(c(
-      "all `p` must be probabilities between 0 and 1",
-      "x" = base::paste0("You passed: ", base::paste0(p, collapse = ", "))
-    ))
-  }
-  if (base::is.null(blocks) && base::is.null(clusters)) {
-    return(0)
-  }
-
-  n_clusters <- base::length(base::unique(clusters))
-  n_blocks <- base::length(base::unique(blocks))
-  n_treat <- base::dim(p)[1] %|% length(p)
-
-  req_prob <- if (n_clusters > 0) {
-    n_treat * n_clusters
-  } else if (n_blocks > 0) {
-    n_treat * n_blocks
-  } else {
-    n_treat
-  }
-
-  passed_prob <- base::length(flat_p)
-  if (passed_prob != req_prob) {
-    rlang::abort(c(
-      "Not enough probabilities provided",
-      "i" = base::sprintf("Required number: %d ", req_prob),
-      "x" = base::sprintf("You passed: %d", passed_prob)
-    ))
-  }
 }
 
 #' Generate Block or Cluster Memberships
