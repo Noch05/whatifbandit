@@ -506,6 +506,7 @@ check_mab_sim <- function(
   time_model,
   period_sizes,
   prior_periods,
+  discount_rate,
   dt,
   ndraws = 5000,
   r,
@@ -513,7 +514,7 @@ check_mab_sim <- function(
 ) {
   check_logical(dt, keep_data)
   check_posint(n, t, ndraws, r, prior_periods, period_sizes)
-  check_prop(control_augment, random_assign_prop)
+  check_prop(control_augment, random_assign_prop, discount_rate)
 
   if (!base::is.null(blocks) && !base::is.null(clusters)) {
     base::do.call(check_sum1, c(list(blocks), clusters))

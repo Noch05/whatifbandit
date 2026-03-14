@@ -65,6 +65,7 @@ mab_trial_sim.bernoulli <- function(
   time_model = NULL,
   period_sizes = NULL,
   prior_periods = NULL,
+  discount_rate = 1,
   dt,
   ndraws = 5000,
   r,
@@ -73,7 +74,7 @@ mab_trial_sim.bernoulli <- function(
 ) {
   algorithm <- base::tolower(algorithm)
   check_mab_sim(
-    n = n,
+    n = n
     t = t,
     p = p,
     algorithm = algorithm,
@@ -85,11 +86,16 @@ mab_trial_sim.bernoulli <- function(
     time_model = time_model,
     period_sizes = period_sizes,
     prior_periods = prior_periods,
+    discount_rate = discount_rate,
     dt = dt,
     ndraws = ndraws,
     r = r,
     keep_data = keep_data
   )
+
+  if (r == 1) {} else if (r > 1) {
+    furrr::future_map(seeds, \(seed) {})
+  }
 
   data <- prepare_sim(
     p = p,
@@ -166,6 +172,21 @@ mab_trial_sim.bernoulli <- function(
     assignment_date = assignment_dates,
     success_date = success_dates
   )
+}
+
+
+#' Prepare Data for Simulated MAB
+#' @name prep_mab
+#' @description
+#' Prepares data structures for simulated MAB trial
+#' @returns
+#' @keywords internal
+
+prep_mab <- function() {
+  df_func <- if (dt) data.table::data.table else tibble::tibble
+
+
+
 }
 
 
