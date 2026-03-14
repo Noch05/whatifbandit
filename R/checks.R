@@ -534,6 +534,18 @@ check_mab_sim <- function(
       "x" = base::sprintf("You Passed: t: %d, n: %d", t, n)
     )
   }
+  if (t != base::length(period_sizes)) {
+    rlang::abort(
+      c(
+        "When provided `period_sizes` must be length `t`",
+        "x" = base::sprintf("`t`: %d", t),
+        "x" = base::paste0(
+          "`legnth(period_sizes) = ",
+          base::length(period_sizes)
+        )
+      )
+    )
+  }
 
   if (!algorithm %in% c("static", "thompson", "ucb1")) {
     rlang::abort(
