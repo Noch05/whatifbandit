@@ -30,20 +30,20 @@ check_mab_sim.rct <- function(
   blocking,
   clustering
 ) {
-  if (!algorithm %in% c("thompson", "ucb1")) {
-    rlang::abort(c(
-      "'algorithm' must be 'thompson' or 'ucb1'.",
-      "x" = paste0("You passed: ", base::deparse(algorithm))
-    ))
-  }
+  purrr::pwalk(
+    base::list(
+      c(algorithm, period_method),
+      base::list(
+        c("thompson", "ucb1"),
+        c("individual", "batch", "date")
+      ),
+      c("algorithm", "period_method")
+    ),
+    \(arg, val, name) {
+      check_string(arg, val, name)
+    }
+  )
 
-  if (!period_method %in% c("individual", "batch", "date")) {
-    rlang::abort(c(
-      "Invalid `period_method`",
-      "x" = paste0("you passed: ", base::deparse(period_method)),
-      "i" = "Valid methods are `individual`, `batch`, `date`"
-    ))
-  }
   # Checking Logical values
   check_logical(
     verbose,
@@ -126,7 +126,6 @@ check_cols <- function(
 ) {
   # All possible columns
   all_cols <- c(
-    "id_col",
     "success_col",
     "condition_col",
     "date_col",
@@ -165,10 +164,6 @@ check_cols <- function(
     lubridate::is.POSIXt
   )
   required_types <- list(
-    id_col = list(
-      classes = data_types[c(1, 3, 4, 5)],
-      tests = test_funcs[c(1, 3, 4)]
-    ),
     success_col = list(classes = data_types[1:3], tests = test_funcs[1:2]),
     condition_col = list(classes = data_types[1:5], tests = test_funcs[1:4]),
     date_col = list(classes = data_types[6:7], tests = test_funcs[5:6]),
@@ -453,13 +448,7 @@ check_period_method <- function(
         "`time_unit` must be provided when assignment method is `date`."
       )
     }
-    if (!time_unit %in% c("day", "week", "month")) {
-      rlang::abort(c(
-        "Invalid Time Unit",
-        "x" = paste0("you passed: ", base::deparse(time_unit)),
-        "i" = "valid units are `day`, `month`, `week`"
-      ))
-    }
+    check_string(time_unit, c("day", "week", "month"), "Time Unit")
   }
   if (period_method %in% c("batch", "date")) {
     if (base::is.null(period_length)) {
@@ -546,21 +535,8 @@ check_mab_sim <- function(
       )
     )
   }
+  check_string(algorithm, c("static", "thompson", "ucb1"), "algorithm")
 
-  if (!algorithm %in% c("static", "thompson", "ucb1")) {
-    rlang::abort(
-      message = c(
-        "Invalid Assignment Algorithm",
-        "x" = base::sprintf("You passed: %s", algorithm),
-        "!" = base::sprintf(
-          "Valid Algorithms: %s, %s, %s",
-          "thompson",
-          "ucb1",
-          "static"
-        )
-      )
-    )
-  }
   if (base::any(p > 1 | p < 0)) {
     rlang::abort(c(
       "all `p` must be probabilities between 0 and 1",
@@ -575,6 +551,7 @@ check_mab_sim <- function(
 #' Checks specified numeric vector sums to 1, throws an error if not
 #' @param ... Arguments to check.
 #' @returns Nothing; Throws an error if the check fails
+#' @keywords internal
 check_sum1 <- function(...) {
   args <- rlang::dots_list(..., named = TRUE)
   purrr::iwalk(args, \(arg, name) {
@@ -586,4 +563,28 @@ check_sum1 <- function(...) {
       ))
     }
   })
+}
+
+#' Validates String Arguments
+#' @name check_string
+#' @description
+#' Checks specific string arguments against provided valid arguments
+#' @param arg Argument to check
+#' @param valid vector of valid arguments
+#' @param name name of the argument
+#' @returns Nothing; Throws an error if check fails
+
+check_string <- function(arg, valid, name) {
+  if (!arg %in% valid) {
+    rlang::abort(
+      c(
+        base::sprintf("Invalid `%s`", name),
+        "i" = base::sprintf(
+          "Valid Options: %s",
+          base::paste0(valid, collapse = ", ")
+        ),
+        "x" = base::sprintf("You Provided: %s", base::deparse(arg))
+      )
+    )
+  }
 }
