@@ -33,14 +33,14 @@ validate_inputs <- function(
   if (!algorithm %in% c("thompson", "ucb1")) {
     rlang::abort(c(
       "'algorithm' must be 'thompson' or 'ucb1'.",
-      "x" = paste0("You passed: ", algorithm)
+      "x" = paste0("You passed: ", base::deparse(algorithm))
     ))
   }
 
   if (!period_method %in% c("individual", "batch", "date")) {
     rlang::abort(c(
       "Invalid `period_method`",
-      "x" = paste0("you passed: ", period_method),
+      "x" = paste0("you passed: ", base::deparse(period_method)),
       "i" = "Valid methods are `individual`, `batch`, `date`"
     ))
   }
@@ -78,12 +78,12 @@ validate_inputs <- function(
   if (r > 1) {
     if (!is.integer(seeds) || length(seeds) != r) {
       rlang::abort(c(
-        "Argument 'seeds' must be an integer vector of length equal to `times`. Please provide a valid vector.",
+        "Argument 'seeds' must be an integer vector of length equal to `r`. Please provide a valid vector.",
         "x" = sprintf(
-          "You passed a %s vector of length %d, while times is %d.",
+          "You passed a %s vector of length %d, while `r` is %d.",
           base::typeof(seeds),
           base::length(seeds),
-          times
+          r
         ),
         "i" = "Reccomended to use `sample.int()` to create proper vector"
       ))
@@ -298,7 +298,7 @@ check_logical <- function(...) {
         rlang::abort(
           c(
             sprintf("`%s` must be a logical (TRUE or FALSE)", .y),
-            "x" = paste0("You Passed: ", .x)
+            "x" = base::paste0("You Passed: ", base::deparse(.x))
           )
         )
       }
@@ -322,7 +322,7 @@ check_prop <- function(...) {
       if (is.null(.x) || !is.numeric(.x) || .x < 0 || .x > 1) {
         rlang::abort(c(
           sprintf("`%s` must be a non-null double between 0 and 1.", .y),
-          "x" = paste0("You passed: ", .x)
+          "x" = paste0("You passed: ", base::deparse(.x))
         ))
       }
     }
@@ -349,13 +349,24 @@ check_posint <- function(...) {
   bad <- !vapply(args, posint, logical(1))
   purrr::walk2(names(args)[bad], args[bad], function(name, val) {
     rlang::abort(c(
-      sprintf("`%s` must be a positive integer", name),
-      "x" = paste0("You passed: ", val)
+      base::sprintf(
+        "`%s` must be a positive integer or vector
+      of positive integers",
+        name
+      ),
+      "x" = base::paste0(
+        "You passed: ",
+        base::deparse(val)
+      )
     ))
   })
 }
 posint <- function(x) {
-  return(is.numeric(x) && x > 0 && x %% 1 == 0)
+  if (base::is.numeric(x)) {
+    return(base::all(x > 0 & x %% 1 == 0))
+  } else {
+    return(FALSE)
+  }
 }
 #--------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
@@ -445,13 +456,13 @@ check_period_method <- function(
     if (!time_unit %in% c("day", "week", "month")) {
       rlang::abort(c(
         "Invalid Time Unit",
-        "x" = paste0("you passed: ", time_unit),
+        "x" = paste0("you passed: ", base::deparse(time_unit)),
         "i" = "valid units are `day`, `month`, `week`"
       ))
     }
   }
   if (period_method %in% c("batch", "date")) {
-    if (is.null(period_length)) {
+    if (base::is.null(period_length)) {
       rlang::abort(c(
         "`period_length`, must be provided when date or batch based periods are used."
       ))
@@ -459,14 +470,14 @@ check_period_method <- function(
     if (!posint(period_length)) {
       rlang::abort(c(
         "`period_length` must be a positive integer.",
-        "x" = paste0("You passed: ", period_length)
+        "x" = paste0("You passed: ", base::deparse(period_length))
       ))
     }
   }
   if (
     verbose &&
       !period_method %in% c("batch", "date") &&
-      !is.null(time_unit)
+      !base::is.null(time_unit)
   ) {
     rlang::warn(c(
       "i" = "`time_unit` is not required when assignment method is not `date`. It will be ignored"
