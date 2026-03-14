@@ -40,7 +40,6 @@
 #' @param period_sizes Numeric vector of `length(t)`, with the specific number of units to be assigned in each period. Used when it is required to assign different numbers of units
 #' to treatment across the periods of the trial.
 #' @param ... Additional arguments forwarded to `time_model`.
-#' @inheritParams mab_from_rct.bernoulli
 #'
 #' @returns NULL
 #' @details
@@ -73,7 +72,7 @@ mab_trial_sim.bernoulli <- function(
   ...
 ) {
   algorithm <- base::tolower(algorithm)
-  check_sim(
+  check_mab_sim(
     n = n,
     t = t,
     p = p,
@@ -169,91 +168,6 @@ mab_trial_sim.bernoulli <- function(
   )
 }
 
-#' Perform Validation Checks for [mab_trial_sim.bernoulli()]
-#' @name check_sim
-#' @inheritParams mab_trial_sim.bernoulli
-#' @returns Nothing; Throws an error if checks are not met
-#' @keywords internal
-check_sim <- function(
-  n,
-  t,
-  p,
-  algorithm,
-  blocks,
-  clusters,
-  control_augment,
-  random_assign_prop,
-  dates_of_assignment,
-  time_model,
-  period_sizes,
-  prior_periods,
-  dt,
-  ndraws = 5000,
-  r,
-  keep_data
-) {
-  check_logical(dt, keep_data)
-  check_posint(n, t, ndraws, r, prior_periods, period_sizes)
-  check_prop(control_augment, random_assign_prop)
-
-  if (!base::is.null(blocks) && !base::is.null(clusters)) {
-    base::do.call(check_sum1, c(list(blocks), clusters))
-  } else if (!base::is.null(clusters)) {
-    check_sum1(clusters = clusters)
-  } else if (!base::is.null(blocks)) {
-    check_sum1(blocks = blocks)
-  }
-
-  if (!base::is.null(time_model) && !base::is.function(time_model)) {
-    rlang::abort("`time_model` must be a function")
-  }
-
-  if (t > n) {
-    rlang::abort(
-      c("`t` cannot be larger than `n`"),
-      "x" = base::sprintf("You Passed: t: %d, n: %d", t, n)
-    )
-  }
-
-  if (!algorithm %in% c("static", "thompson", "ucb1")) {
-    rlang::abort(
-      message = c(
-        "Invalid Assignment Algorithm",
-        "x" = base::sprintf("You passed: %s", algorithm),
-        "!" = base::sprintf(
-          "Valid Algorithms: %s, %s, %s",
-          "thompson",
-          "ucb1",
-          "static"
-        )
-      )
-    )
-  }
-  if (base::any(p > 1 | p < 0)) {
-    rlang::abort(c(
-      "all `p` must be probabilities between 0 and 1",
-      "x" = base::paste0("You passed: ", base::paste0(p, collapse = ", "))
-    ))
-  }
-}
-#' Validates Summing to 1
-#' @name check_sum1
-#' @description
-#' Checks specified numeric vector sums to 1, throws an error if not
-#' @param ... Arguments to check.
-#' @returns Nothing; Throws an error if the check fails
-check_sum1 <- function(...) {
-  args <- rlang::dots_list(..., named = TRUE)
-  purrr::iwalk(args, \(arg, name) {
-    if (sum(arg) != 1) {
-      rlang::abort(c(
-        base::sprintf("`%s` must sum to 1", name),
-        "x" = base::paste0("You passed: ", base::paste0(arg, collapse = ",")),
-        "x" = base::paste0("Sum: ", base::sum(arg))
-      ))
-    }
-  })
-}
 
 #' Generate Block or Cluster Memberships
 #' @name generate_group_membership

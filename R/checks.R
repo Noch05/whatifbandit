@@ -1,5 +1,5 @@
 #' @title Validates Inputs For [mab_from_rct.bernoulli()]
-#' @name validate_inputs
+#' @name check_mab_sim.rct
 #' @description This function checks to ensure that all required arguments
 #' have been properly passed to the function before continuing with the simulation. When
 #' errors are thrown, user-friendly messages are provided to indicate which argument
@@ -9,7 +9,7 @@
 #' @inheritParams prep_rct_data
 #' @returns Throws an error if an argument is missing or misspecified.
 #' @keywords internal
-validate_inputs <- function(
+check_mab_sim.rct <- function(
   data,
   algorithm,
   control_augment,
@@ -105,7 +105,7 @@ validate_inputs <- function(
 #'
 #' @title Checking existence and declaration of columns
 #' @name check_cols
-#' @description Helper to [validate_inputs()]. This function accepts the user's
+#' @description Helper to [check_mab_sim.rct()]. This function accepts the user's
 #' settings for the Multi-Arm-Bandit trial, and checks whether columns in the data have been properly
 #' specified based on these settings.
 #' @inheritParams mab_from_rct.bernoulli
@@ -285,7 +285,7 @@ check_cols <- function(
 #' @title Checking if Inputs are Logical Values (TRUE and FALSE)
 #' @name check_logical
 #' @returns Throws an error if any input is not TRUE or FALSE
-#' @description Helper to [validate_inputs()]. This function accepts the user's
+#' @description Helper to [check_mab_sim.rct()]. This function accepts the user's
 #' settings for logical values in the Multi-Arm-Bandit trial, and checks whether they are valid.
 #' @param ... Arguments to check.
 #' @keywords internal
@@ -309,7 +309,7 @@ check_logical <- function(...) {
 #' @title Checking for Proportions
 #' @name check_prop
 #' @returns Throws an error if any input is not a valid proportion between 0 and 1
-#' @description Helper to [validate_inputs()]. This function accepts the user's
+#' @description Helper to [check_mab_sim.rct()]. This function accepts the user's
 #' settings for proportion arguments and checks if they are valid proportions between 0 and 1
 #' @inheritParams check_logical
 #' @keywords internal
@@ -339,7 +339,7 @@ check_prop <- function(...) {
 #' @name check_posint
 #' @returns Throws an error if any input is not a positive whole number or
 #' a valid string.
-#' @description Helper to [validate_inputs()]. This function accepts the user's
+#' @description Helper to [check_mab_sim.rct()]. This function accepts the user's
 #' settings for integer arguments and checks if they are valid positive
 #' integers or are a one of the valid strings for the argument.
 #' @inheritParams check_logical
@@ -374,7 +374,7 @@ posint <- function(x) {
 #' @name check_data
 #' @returns Throws an error if the data does not meet the specifications
 #' of the trial based on user settings.
-#' @description Helper to [validate_inputs()]. This function accepts the data and checks
+#' @description Helper to [check_mab_sim.rct()]. This function accepts the data and checks
 #' whether it has unique ID's whether the period length is valid.
 #' @inheritParams mab_from_rct.bernoulli
 #' @inheritParams prep_rct_data
@@ -431,7 +431,7 @@ check_data <- function(
 #' @name check_period_method
 #' @returns Throws an error if the user is missing necessary arguments to
 #' assign treatments or passes invalid ones.
-#' @description Helper to [validate_inputs()]. This function accepts arguments relating
+#' @description Helper to [check_mab_sim.rct()]. This function accepts arguments relating
 #' to how treatment waves are assigned, and checks if they are valid, and if all
 #' supporting arguments are passed as necessary.
 #' @inheritParams mab_from_rct.bernoulli
@@ -483,4 +483,94 @@ check_period_method <- function(
       "i" = "`time_unit` is not required when assignment method is not `date`. It will be ignored"
     ))
   }
+}
+#----------------------------------------------------------------------------
+#' Perform Validation Checks for [mab_trial_sim.bernoulli()]
+#' @description
+#' Ensures all arguments to [mab_trial_sim.bernoulli()] are properly
+#' provided accordingly.
+#' @name check_mab_sim
+#' @inheritParams mab_trial_sim.bernoulli
+#' @returns Nothing; Throws an error if checks are not met
+#' @keywords internal
+check_mab_sim <- function(
+  n,
+  t,
+  p,
+  algorithm,
+  blocks,
+  clusters,
+  control_augment,
+  random_assign_prop,
+  dates_of_assignment,
+  time_model,
+  period_sizes,
+  prior_periods,
+  dt,
+  ndraws = 5000,
+  r,
+  keep_data
+) {
+  check_logical(dt, keep_data)
+  check_posint(n, t, ndraws, r, prior_periods, period_sizes)
+  check_prop(control_augment, random_assign_prop)
+
+  if (!base::is.null(blocks) && !base::is.null(clusters)) {
+    base::do.call(check_sum1, c(list(blocks), clusters))
+  } else if (!base::is.null(clusters)) {
+    check_sum1(clusters = clusters)
+  } else if (!base::is.null(blocks)) {
+    check_sum1(blocks = blocks)
+  }
+
+  if (!base::is.null(time_model) && !base::is.function(time_model)) {
+    rlang::abort("`time_model` must be a function")
+  }
+
+  if (t > n) {
+    rlang::abort(
+      c("`t` cannot be larger than `n`"),
+      "x" = base::sprintf("You Passed: t: %d, n: %d", t, n)
+    )
+  }
+
+  if (!algorithm %in% c("static", "thompson", "ucb1")) {
+    rlang::abort(
+      message = c(
+        "Invalid Assignment Algorithm",
+        "x" = base::sprintf("You passed: %s", algorithm),
+        "!" = base::sprintf(
+          "Valid Algorithms: %s, %s, %s",
+          "thompson",
+          "ucb1",
+          "static"
+        )
+      )
+    )
+  }
+  if (base::any(p > 1 | p < 0)) {
+    rlang::abort(c(
+      "all `p` must be probabilities between 0 and 1",
+      "x" = base::paste0("You passed: ", base::paste0(p, collapse = ", "))
+    ))
+  }
+}
+#-------------------------------------------------------------------------------
+#' Validates Summing to 1
+#' @name check_sum1
+#' @description
+#' Checks specified numeric vector sums to 1, throws an error if not
+#' @param ... Arguments to check.
+#' @returns Nothing; Throws an error if the check fails
+check_sum1 <- function(...) {
+  args <- rlang::dots_list(..., named = TRUE)
+  purrr::iwalk(args, \(arg, name) {
+    if (sum(arg) != 1) {
+      rlang::abort(c(
+        base::sprintf("`%s` must sum to 1", name),
+        "x" = base::paste0("You passed: ", base::paste0(arg, collapse = ",")),
+        "x" = base::paste0("Sum: ", base::sum(arg))
+      ))
+    }
+  })
 }

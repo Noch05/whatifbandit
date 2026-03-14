@@ -4,7 +4,7 @@
 #' @description Internal helper. Centralizes necessary functions to conduct a
 #' a MAB trial with adaptive inference. It assumes all inputs have been preprocessed already
 #' @inheritParams mab_from_rct.bernoulli
-#' @inheritParams prepare_rct
+#' @inheritParams prepare_rct_data
 #' @param starts  Numeric vector where element `i` is the starting row number of period `i`.
 #' @param ends  Numeric vector where element `i` is the ending row number of period `i`.
 #' @param imputation_information Object created by [imputation_precompute()] containing the conditional means and success dates

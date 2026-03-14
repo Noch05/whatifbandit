@@ -76,7 +76,7 @@ prep_rct_data <- function(
   )
   # Input Validation
   if (check_args) {
-    validate_inputs(
+    check_mab_sim.rct(
       data = data,
       algorithm = char_args$algorithm,
       random_assign_prop = random_assign_prop,
