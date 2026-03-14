@@ -113,6 +113,8 @@ get_iaipw.data.frame <- function(
   )]
   data[["ipw_weights"]] <- 1 / data[["true_assign_prob"]]
 
+  check <- base::sum(base::is.na(data[, new_cols]))
+
   if (check != 0) {
     base::warning(paste0(check, " Individual AIPW Scores are NA"))
   }
