@@ -417,7 +417,7 @@ check_impute.data.table <- function(
 #' Uses [randomizr::block_ra()] to impute the outcomes for observations
 #' who were assigned new treatments. The probabilities used to guide the imputation
 #' of the outcomes are pre-computed using the existing data from the original randomized experiment.
-#' @inheritParams prepare_rct_data
+#' @inheritParams prep_rct_data
 #' @inheritParams mab_from_rct.bernoulli
 #' @param imputation_info List containing all necessary information for imputation, generated each period by [imputation_preparation()]
 #' @details

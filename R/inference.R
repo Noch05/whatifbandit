@@ -439,7 +439,6 @@ estimate_aipw.data.table <- function(
 #'
 #' @inheritParams get_iaipw
 #' @inheritParams simulate_mab
-#' @inheritParams get_iaipwcomponents
 #' @details
 #' These estimates follow the procedure in \href{}{Offer-Westort et al. (2021)}. The F-statistic
 #' provided can be used to conduct their randomization inference test, via simulating a null-F-distribution.

@@ -124,9 +124,8 @@ simulate_mab <- function(
 #' treatment assignment, and outcome imputation. Supports flexible customizations in treatment blocking strategy,
 #' stationary/non-stationary bandits, control augmentation, and hybrid assignment.
 #'
-#' @inheritParams simulate_mab_rct.bernoulli
 #' @inheritParams mab_from_rct.bernoulli
-#' @inheritParams prepare_rct
+#' @inheritParams prep_rct_data
 #' @inheritParams mab_trial_sim.bernoulli
 #' @param num_conditions Number of conditions, equivalent to `length(conditions)`.
 #'

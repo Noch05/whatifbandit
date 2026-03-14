@@ -26,7 +26,8 @@ run_mab_trial(
   starts,
   ends,
   periods,
-  num_conditions
+  num_conditions,
+  ...
 )
 }
 \arguments{
@@ -67,12 +68,20 @@ contributor to total run time. Default is \code{FALSE}.}
 If \code{TRUE}, delayed feedback is assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not known to the simulation, until a certain date.
 When re-computing the adaptive assignment probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the assignment are treated as failures. a}
 
+\item{clustering}{Logical; Whether or not treatment clustering is occuring}
+
+\item{blocking}{Logical; Whether or not treatment blocking is occuring}
+
+\item{data_cols}{List holding the columns required from the provided data as strings and symbols.}
+
 \item{ndraws}{Number of draws used to approximate Thompson sampling probabilities. Used only when direct calculation fails or overflows. Default is
 5000 but can be raised or lowered depending on performance and accuracy concerns.}
 
 \item{verbose}{Logical; whether or not to print intermediate messages. Default is \code{FALSE}.}
 
 \item{num_conditions}{Number of conditions, equivalent to \code{length(conditions)}.}
+
+\item{...}{Additional named arguments passed to \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
 }
 \value{
 A named list containing:

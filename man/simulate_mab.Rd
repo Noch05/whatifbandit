@@ -24,7 +24,8 @@ simulate_mab(
   verbose,
   ndraws,
   starts,
-  ends
+  ends,
+  ...
 )
 }
 \arguments{
@@ -70,6 +71,12 @@ If \code{FALSE}, uses only data available up to the current period. In large dat
 of periods, setting this to \code{FALSE} can be more computationally intensive, though not a significant
 contributor to total run time. Default is \code{FALSE}.}
 
+\item{blocking}{Logical; Whether or not treatment blocking is occuring}
+
+\item{clustering}{Logical; Whether or not treatment clustering is occuring}
+
+\item{data_cols}{List holding the columns required from the provided data as strings and symbols.}
+
 \item{imputation_information}{Object created by \code{\link[=imputation_precompute]{imputation_precompute()}} containing the conditional means and success dates
 for each treatment block to impute from.}
 
@@ -81,6 +88,8 @@ for each treatment block to impute from.}
 \item{starts}{Numeric vector where element \code{i} is the starting row number of period \code{i}.}
 
 \item{ends}{Numeric vector where element \code{i} is the ending row number of period \code{i}.}
+
+\item{...}{Additional named arguments passed to \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
 }
 \value{
 : A named list containing:

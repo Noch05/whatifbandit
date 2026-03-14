@@ -11,6 +11,10 @@ estimate_ipw(estimates, data, cluster_col, blocking, clustering, conditions)
 of a traditional Randomized Controlled Trial (RCT).}
 
 \item{cluster_col}{Name of the column holding the clustering index}
+
+\item{blocking}{Logical; Whether or not treatment blocking is occuring}
+
+\item{clustering}{Logical; Whether or not treatment clustering is occuring}
 }
 \value{
 A final list of all estimates. The first element of the list is a \code{tibble}/\code{data.table},

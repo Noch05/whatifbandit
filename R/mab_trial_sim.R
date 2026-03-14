@@ -74,7 +74,7 @@ mab_trial_sim.bernoulli <- function(
 ) {
   algorithm <- base::tolower(algorithm)
   check_mab_sim(
-    n = n
+    n = n,
     t = t,
     p = p,
     algorithm = algorithm,
@@ -184,9 +184,6 @@ mab_trial_sim.bernoulli <- function(
 
 prep_mab <- function() {
   df_func <- if (dt) data.table::data.table else tibble::tibble
-
-
-
 }
 
 
@@ -200,7 +197,7 @@ prep_mab <- function() {
 #' @param group A named numeric vector or named list (see [mab_trial_sim.bernoulli()]) of assignment probabilities.
 #' When blocks and cluster are together, clusters must be fully nested in blocks.
 #'   `names(group)` are used as the condition labels (block or cluster names).
-#' @inheritParams assign_treatments.rct
+#' @inheritParams mab_trial_sim.bernoulli
 #'
 #' @returns A factor of length `n` with levels corresponding to `names(group)` or `NULL` if `group = NULL`.
 #'
@@ -255,10 +252,11 @@ generate_group_membership <- function(n, group, blocks = NULL) {
 #' all supported `p` structures.
 #'
 #' @inheritParams mab_trial_sim.bernoulli
-#' @inheritParams mab_simulate
+#' @inheritParams simulate_mab
 #' @param treatments A character or factor vector of treatment assignments of
 #'   length `n`.
-#' @inheritParams assign_treatments.rct
+#' @param other_idx Character vector of block or cluster assigents to be used as the
+#' additionnal index for extracting from `p`.
 #'
 #' @returns A numeric vector of length `n` containing the per-unit success
 #'   probability.
@@ -267,8 +265,7 @@ generate_group_membership <- function(n, group, blocks = NULL) {
 extract_success_prob <- function(
   p,
   treatments,
-  blocks = NULL,
-  clusters = NULL,
+  other_idx,
   blocking,
   clustering
 ) {}
