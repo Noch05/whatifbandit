@@ -4,7 +4,7 @@
 #' @description Internal helper. Centralizes necessary functions to conduct a
 #' a MAB trial with adaptive inference. It assumes all inputs have been preprocessed already
 #' @inheritParams mab_from_rct.bernoulli
-#' @inheritParams prepare_rct_data
+#' @inheritParams prep_rct_data
 #' @param starts  Numeric vector where element `i` is the starting row number of period `i`.
 #' @param ends  Numeric vector where element `i` is the ending row number of period `i`.
 #' @param imputation_information Object created by [imputation_precompute()] containing the conditional means and success dates
@@ -169,9 +169,10 @@ run_mab_trial <- function(
   ...
 ) {
   bandits <- base::vector(mode = "list", length = 2)
+
   bandits$bandit_stat <- base::matrix(
     NA,
-    nrow = periods + 1,
+    nrow = periods,
     ncol = num_conditions,
     dimnames = list(c(), base::names(conditions))
   )
@@ -180,13 +181,6 @@ run_mab_trial <- function(
     nrow = periods,
     ncol = num_conditions,
     dimnames = list(c(), base::names(conditions))
-  )
-
-  bandits$bandit_stat[1, ] <- switch(
-    algorithm,
-    "thompson" = base::rep(1 / num_conditions, num_conditions),
-    "ucb1" = base::rep(0, num_conditions),
-    "static" = NA,
   )
   bandits$assignment_prob[1, ] <- base::rep(1 / num_conditions, num_conditions)
 
@@ -220,7 +214,7 @@ run_mab_trial <- function(
           control_augment = control_augment,
           ndraws = ndraws
         )
-      bandits$bandit_stat[i, ] <- current_bandit[["bandit"]]
+      bandits$bandit_stat[i - 1, ] <- current_bandit[["bandit"]]
     } else {
       current_bandit[["assignment_prob"]] <- equal_probs
     }
@@ -289,20 +283,6 @@ run_mab_trial <- function(
 #' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson sampling posterior distributions for each period.
 #' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period.
 #' }
-#' @details
-#'
-#' At this step the final UCB1 or Thompson sampling probabilities are calculated, without discounting.
-#' The entire table is shifted backward by one period so that each row reflects the calculation
-#' that occurs after completing a period. For example prior to this change, row 11, would indicate the calculations
-#' from period 11 before assignment, but now that occured after period 11's imputations.
-#'
-#' This has the impact of removing the original first row, where all the assignment
-#' probabilities are equal, and modifying the last row to represent the final calculation after the conclusion
-#' of the simulation.
-#'
-#' The assignment probabilities are not changed in this way, so for each period
-#' they still reflect the assignment probabilities used in that period.
-#'
 #' @seealso
 #' * [run_mab_trial()]
 #' @keywords internal
@@ -353,21 +333,16 @@ end_mab_trial.data.frame <- function(
     ndraws = ndraws
   )
 
-  bandits$bandit_stat[(periods + 1), ] <- final_bandit[["bandit"]]
-  assignment_probs <- tibble::as_tibble(bandits[["assignment_prob"]]) |>
-    dplyr::mutate(period_number = dplyr::row_number())
-
-  bandit_stats <- tibble::as_tibble(bandits[["bandit_stat"]]) |>
-    dplyr::mutate(dplyr::across(tidyselect::everything(), \(x) {
-      dplyr::lead(x, n = 1L, default = NA)
-    })) |>
-    dplyr::slice(base::seq_len(periods)) |>
-    dplyr::mutate(period_number == dplyr::row_number())
+  bandits$bandit_stat[periods, ] <- final_bandit[["bandit"]]
+  bandits <- base::lapply(bandits, \(x) {
+    tibble::as_tibble(x) |>
+      dplyr::mutate(period_number = dplyr::row_number())
+  })
 
   return(list(
     final_data = data,
-    bandits = bandit_stats,
-    assignment_probs = assignment_probs
+    bandits = bandits[["bandit_stat"]],
+    assignment_probs = bandits[["assignment_prob"]]
   ))
 }
 #-------------------------------------------------------------------------------
@@ -404,20 +379,12 @@ end_mab_trial.data.table <- function(
     control_augment = 0,
     ndraws = ndraws
   )
-  conditions <- as.character(conditions) # Converting to character for reference in Data.table Syntax
-
-  bandits$bandit_stat[periods + 1, ] <- final_bandit[["bandit"]]
+  bandits$bandit_stat[periods, ] <- final_bandit[["bandit"]]
+  bandit_stats <- data.table::as.data.table(bandits[["bandit_stat"]])
+  bandit_stats[, period_number := .I]
 
   assignment_probs <- data.table::as.data.table(bandits[["assignment_prob"]])
   assignment_probs[, period_number := .I]
-
-  bandit_stats <- data.table::as.data.table(bandits[["bandit_stat"]])
-  bandit_stats[,
-    (conditions) := base::lapply(.SD, function(col) {
-      data.table::shift(col, n = 1L, type = "lead", fill = NA)
-    }),
-    .SDcols = conditions
-  ][base::seq_len(periods), ][, period_number = .I]
 
   return(list(
     final_data = data,
