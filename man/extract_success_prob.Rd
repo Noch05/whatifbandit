@@ -4,7 +4,7 @@
 \alias{extract_success_prob}
 \title{Extract Success Probabilities Per-Unit}
 \usage{
-extract_success_prob(p, treatments, other_idx, blocking, clustering)
+extract_success_prob(p, treatments, size, other_idx = NULL)
 }
 \arguments{
 \item{p}{The true probabilities of success for each treatment arm. Specified as an matrix,
@@ -20,14 +20,10 @@ length \code{n}.}
 
 \item{other_idx}{Character vector of block or cluster assigents to be used as the
 additionnal index for extracting from \code{p}.}
-
-\item{blocking}{Logical; Whether or not treatment blocking is occuring}
-
-\item{clustering}{Logical; Whether or not treatment clustering is occuring}
 }
 \value{
-A numeric vector of length \code{n} containing the per-unit success
-probability.
+A numeric vector of length containing the per-unit success
+probabilities to be used for outcome observation.
 }
 \description{
 Looks up the success probability for each unit given their treatment

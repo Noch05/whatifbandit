@@ -257,15 +257,19 @@ generate_group_membership <- function(n, group, blocks = NULL) {
 #'   length `n`.
 #' @param other_idx Character vector of block or cluster assigents to be used as the
 #' additionnal index for extracting from `p`.
-#'
-#' @returns A numeric vector of length `n` containing the per-unit success
-#'   probability.
-#'
+#' @returns A numeric vector of length containing the per-unit success
+#'   probabilities to be used for outcome observation.
 #' @keywords internal
 extract_success_prob <- function(
   p,
   treatments,
-  other_idx,
-  blocking,
-  clustering
-) {}
+  size,
+  other_idx = NULL
+) {
+  if (!base::is.null(other_idx)) {
+    extract_mat <- base::matrix(data = c(treatments, other_idx), ncol = 2)
+    p[extract_mat]
+  } else {
+    return(p[treatments])
+  }
+}
