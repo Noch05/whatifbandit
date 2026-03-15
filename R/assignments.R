@@ -62,35 +62,19 @@ get_past_results.data.frame <- function(
   } else {
     prior_data$known_success <- prior_data$mab_success
   }
+  prior_data$weight <- discount_rate^(current_period - prior_data$period_number)
 
-  prior_data <- prior_data |>
-    dplyr::mutate(
-      discount_period = current_period - period_number,
-      col_of_1 = 1,
-      weight = discount_rate^discount_period
-    ) |>
+  prior_list <- prior_data |>
     dplyr::group_by(mab_condition) |>
     dplyr::summarize(
       successes = base::sum(known_success * weight, na.rm = TRUE),
-      n = base::sum(weight * col_of_1, na.rm = TRUE),
+      n = base::sum(weight, na.rm = TRUE),
       .groups = "drop"
     ) |>
-    dplyr::mutate(success_rate = successes / n)
+    as.list() |>
+    finalize_prior_list(conditions = conditions)
 
-  if (base::nrow(prior_data) != base::length(conditions)) {
-    conditions_add <- base::setdiff(conditions, prior_data$mab_condition)
-
-    replace <- tibble::tibble(
-      mab_condition = conditions_add,
-      successes = 0,
-      success_rate = 0,
-      n = 0
-    )
-
-    prior_data <- dplyr::bind_rows(prior_data, replace)
-    prior_data <- prior_data[order(prior_data$mab_condition), ]
-  }
-  return(prior_data)
+  return(prior_list)
 }
 #------------------------------------------------------------------------------
 
@@ -122,37 +106,60 @@ get_past_results.data.table <- function(
     prior_data[, known_success := mab_success]
   }
 
-  prior_data[, `:=`(
-    col_of_1 = 1,
-    discount_period = current_period - period_number
-  )][,
+  prior_data[, discount_period := current_period - period_number][,
     weight := discount_rate^discount_period
   ]
 
   past_results <- prior_data[,
     .(
       successes = base::sum(known_success * weight, na.rm = TRUE),
-      n = base::sum(col_of_1 * weight, na.rm = TRUE)
+      n = base::sum(weight, na.rm = TRUE)
     ),
     by = mab_condition
-  ][, success_rate := successes / n]
+  ]
+  prior_list <- as.list(past_results) |>
+    finalize_prior_list(conditions = conditions)
 
-  if (base::nrow(past_results) != base::length(conditions)) {
-    conditions_add <- base::setdiff(conditions, past_results$mab_condition)
-    replace <- data.table::data.table(
-      mab_condition = conditions_add,
-      successes = 0,
-      success_rate = 0,
-      n = 0
-    )
+  return(prior_list)
+}
+#---------------------------------------------------------------------------
 
-    past_results <- data.table::rbindlist(
-      list(past_results, replace),
-      use.names = TRUE
-    )
+#' Finalise Aggregated Prior Results
+#' @name finalize_prior_list
+#' @description Accepts the raw list output of an aggregation over `prior_data`
+#' (from [get_past_results()]), names each vector by condition, fills any
+#' conditions absent from the prior window with zeros, sorts alphabetically.
+#' @param prior_list Named list with elements `mab_condition`, `successes`, `n`,
+#' produced by converting a summarized data.frame/data.table via [base::as.list()].
+#' @param conditions Character vector of all treatment conditions in the trial.
+#' @returns A named list with elements `successes`, `n`, and `success_rate`,
+#' each a named numeric vector of length `length(conditions)`.
+#' @keywords internal
+finalize_prior_list <- function(prior_list, conditions) {
+  nms <- prior_list$mab_condition
+  prior_list$mab_condition <- NULL
+
+  missing <- if (base::length(nms) != base::length(conditions)) {
+    base::setdiff(conditions, nms)
+  } else {
+    NULL
   }
-  data.table::setorder(past_results, mab_condition)
-  return(invisible(past_results))
+
+  ord <- base::order(c(nms, missing))
+
+  prior_list <- base::lapply(
+    prior_list,
+    \(x) {
+      base::names(x) <- nms
+      if (!base::is.null(missing)) {
+        x[missing] <- 0
+      }
+      x <- x[ord]
+      return(x)
+    }
+  )
+
+  return(prior_list)
 }
 
 #-------------------------------------------------------------------------------
@@ -276,46 +283,45 @@ get_bandit.thompson <- function(
   current_period,
   ndraws
 ) {
-  bandit <- tryCatch(
+  bandit <- base::tryCatch(
     {
-      result <- rlang::set_names(
-        as.vector(bandit::best_binomial_bandit(
-          x = past_results$successes,
-          n = past_results$n,
-          alpha = 1,
-          beta = 1
-        )),
-        past_results$mab_condition
-      )
-      if (bandit_invalid(result)) {
-        stop("Invalid Bandit")
+      ts <- bandit::best_binomial_bandit(
+        x = past_results$successes,
+        n = past_results$n,
+        alpha = 1,
+        beta = 1
+      ) |>
+        base::as.vector()
+      if (bandit_invalid(ts)) {
+        base::stop("Invalid Bandit")
       }
-      result
+      return(ts)
     },
     error = function(e) {
       rlang::warn(c(
         "Thompson sampling calculation overflowed; simulation based posterior estimate was used instead",
         "i" = sprintf("Period: %d", current_period)
       ))
-      result <- rlang::set_names(
-        as.vector(bandit::best_binomial_bandit_sim(
-          x = past_results$successes,
-          n = past_results$n,
-          alpha = 1,
-          beta = 1,
-          ndraws = ndraws
-        )),
-        past_results$mab_condition
-      )
-
-      result
+      ts <- bandit::best_binomial_bandit_sim(
+        x = past_results$successes,
+        n = past_results$n,
+        alpha = 1,
+        beta = 1,
+        ndraws = ndraws
+      ) |>
+        base::as.vector()
+      return(ts)
     }
   )
+  base::names(bandit) <- base::names(past_results$successes)
 
   if (bandit_invalid(bandit)) {
     rlang::abort(c(
       "Thompson sampling simulation failed",
-      "x" = paste0("Most Recent Result:", paste0(bandit, collapse = " ")),
+      "x" = base::sprintf(
+        "Most Recent Result: %s",
+        base::paste0(bandit, collapse = ",")
+      ),
       "i" = "Consider setting `ndraws` higher or reducing `prior_periods`."
     ))
   }
@@ -349,41 +355,22 @@ get_bandit.ucb1 <- function(
   current_period
 ) {
   correction <- 1e-10 ## Prevents Division by 0 when n = 0
+  n_safe <- base::pmax(past_results$n, correction)
+  success_rates <- past_results$successes / n_safe
+  ucb1 <- success_rates +
+    base::sqrt((2 * base::log(current_period)) / n_safe)
 
-  if (data.table::is.data.table(past_results)) {
-    past_results[,
-      ucb := success_rate +
-        base::sqrt(
-          (2 * base::log(current_period - 1)) / (n + correction)
-        )
-    ]
-
-    best_condition <- past_results[
-      which.max(ucb),
-      mab_condition
-    ]
-  } else {
-    past_results$ucb <- past_results$success_rate +
-      base::sqrt(
-        (2 * base::log(current_period - 1)) / (past_results$n + correction)
-      )
-
-    best_condition <- past_results$mab_condition[base::which.max(
-      past_results$ucb
-    )]
-  }
+  best <- base::names(ucb1)[base::which.max(ucb1)]
   assignment_probs <- stats::setNames(
-    base::rep(0, num_conditions),
-    conditions
+    base::rep(0, base::length(ucb1)),
+    base::names(ucb1)
   )
-  bandit <- stats::setNames(past_results$ucb, past_results$mab_condition)
+  assignment_probs[[best]] <- 1
 
-  assignment_probs[[best_condition]] <- 1
-
-  return(invisible(list(
-    bandit = bandit,
+  return(base::list(
+    bandit = ucb1,
     assignment_prob = assignment_probs
-  )))
+  ))
 }
 #-------------------------------------------------------------------------------
 #' Adaptively Assign Treatments in a Period
