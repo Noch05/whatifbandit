@@ -242,11 +242,11 @@ run_mab_trial <- function(
       (equal_probs * random_assign_prop)
 
     if (resimulation) {
-      prepped_impute <- imputation_preparation(
+      prepped_impute <- impute_prep(
         current_data = current_data,
         whole_experiment = whole_experiment,
         imputation_information = imputation_information,
-        data_cols = data_cols,
+        block_cols = col_names[["block_cols"]],
         clustering = clustering,
         blocking = blocking,
         delayed_feedback,
@@ -255,7 +255,7 @@ run_mab_trial <- function(
       data <- impute_success(
         data = data,
         imputation_info = prepped_impute,
-        data_cols = data_cols,
+        success_col = col_names[["success_col"]],
         delayed_feedback = delayed_feedback,
         idx = current_idx
       )
