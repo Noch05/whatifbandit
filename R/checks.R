@@ -1,5 +1,5 @@
 #' @title Validates Inputs For [mab_from_rct.bernoulli()]
-#' @name check_mab_sim.rct
+#' @name check_rct_args
 #' @description This function checks to ensure that all required arguments
 #' have been properly passed to the function before continuing with the simulation. When
 #' errors are thrown, user-friendly messages are provided to indicate which argument
@@ -9,7 +9,7 @@
 #' @inheritParams prep_rct_data
 #' @returns Throws an error if an argument is missing or misspecified.
 #' @keywords internal
-check_mab_sim.rct <- function(
+check_rct_args <- function(
   data,
   algorithm,
   control_augment,
@@ -86,7 +86,7 @@ check_mab_sim.rct <- function(
           base::length(seeds),
           r
         ),
-        "i" = "Reccomended to use `sample.int()` to create proper vector"
+        "i" = "Recommended to use `sample.int()` to create proper vector"
       ))
     }
   }
@@ -106,7 +106,7 @@ check_mab_sim.rct <- function(
 #'
 #' @title Checking existence and declaration of columns
 #' @name check_cols
-#' @description Helper to [check_mab_sim.rct()]. This function accepts the user's
+#' @description Helper to [check_rct_args()]. This function accepts the user's
 #' settings for the Multi-Arm-Bandit trial, and checks whether columns in the data have been properly
 #' specified based on these settings.
 #' @inheritParams mab_from_rct.bernoulli
@@ -281,7 +281,7 @@ check_cols <- function(
 #' @title Checking if Inputs are Logical Values (TRUE and FALSE)
 #' @name check_logical
 #' @returns Throws an error if any input is not TRUE or FALSE
-#' @description Helper to [check_mab_sim.rct()]. This function accepts the user's
+#' @description Helper to [check_rct_args()]. This function accepts the user's
 #' settings for logical values in the Multi-Arm-Bandit trial, and checks whether they are valid.
 #' @param ... Arguments to check.
 #' @keywords internal
@@ -305,7 +305,7 @@ check_logical <- function(...) {
 #' @title Checking for Proportions
 #' @name check_prop
 #' @returns Throws an error if any input is not a valid proportion between 0 and 1
-#' @description Helper to [check_mab_sim.rct()]. This function accepts the user's
+#' @description Helper to [check_rct_args()]. This function accepts the user's
 #' settings for proportion arguments and checks if they are valid proportions between 0 and 1
 #' @inheritParams check_logical
 #' @keywords internal
@@ -335,7 +335,7 @@ check_prop <- function(...) {
 #' @name check_posint
 #' @returns Throws an error if any input is not a positive whole number or
 #' a valid string.
-#' @description Helper to [check_mab_sim.rct()]. This function accepts the user's
+#' @description Helper to [check_rct_args()]. This function accepts the user's
 #' settings for integer arguments and checks if they are valid positive
 #' integers or are a one of the valid strings for the argument.
 #' @inheritParams check_logical
@@ -370,7 +370,7 @@ posint <- function(x) {
 #' @name check_data
 #' @returns Throws an error if the data does not meet the specifications
 #' of the trial based on user settings.
-#' @description Helper to [check_mab_sim.rct()]. This function accepts the data and checks
+#' @description Helper to [check_rct_args()]. This function accepts the data and checks
 #' whether it has unique ID's whether the period length is valid.
 #' @inheritParams mab_from_rct.bernoulli
 #' @inheritParams prep_rct_data
@@ -386,9 +386,9 @@ check_data <- function(
   if (period_method == "batch" && period_length > nrow(data)) {
     rlang::abort(c(
       "`period_length` cannot be larger than data size",
-      "x" = sprintf(
+      "x" = base::sprintf(
         "You data has %d rows, and your batch size is %d rows",
-        nrow(data),
+        base::nrow(data),
         period_length
       )
     ))
@@ -397,7 +397,7 @@ check_data <- function(
     unit <- switch(
       time_unit,
       "day" = lubridate::days(1),
-      "month" = months(1),
+      "month" = base::months(1),
       "week" = lubridate::weeks(1)
     )
 
@@ -406,17 +406,17 @@ check_data <- function(
       max(data[[data_cols$date_col$name]])
     ) /
       unit
-    data_interval <- round(data_interval, 0)
+    data_interval <- base::round(data_interval, 0)
 
     if (period_length > data_interval) {
       rlang::abort(c(
         "`period_length` cannot be larger the date range of your data",
-        "x" = sprintf(
+        "x" = base::sprintf(
           "Your period length is %d %ss but your data only covers %d %ss",
           period_length,
-          tolower(time_unit),
+          base::tolower(time_unit),
           data_interval,
-          tolower(time_unit)
+          base::tolower(time_unit)
         )
       ))
     }
@@ -427,7 +427,7 @@ check_data <- function(
 #' @name check_period_method
 #' @returns Throws an error if the user is missing necessary arguments to
 #' assign treatments or passes invalid ones.
-#' @description Helper to [check_mab_sim.rct()]. This function accepts arguments relating
+#' @description Helper to [check_rct_args()]. This function accepts arguments relating
 #' to how treatment waves are assigned, and checks if they are valid, and if all
 #' supporting arguments are passed as necessary.
 #' @inheritParams mab_from_rct.bernoulli
@@ -530,7 +530,7 @@ check_mab_sim <- function(
         "When provided `period_sizes` must be length `t`",
         "x" = base::sprintf("`t`: %d", t),
         "x" = base::paste0(
-          "`legnth(period_sizes) = ",
+          "`length(period_sizes) = ",
           base::length(period_sizes)
         )
       )
@@ -584,7 +584,7 @@ check_string <- function(arg, valid, name) {
           "Valid Options: %s",
           base::paste0(valid, collapse = ", ")
         ),
-        "x" = base::sprintf("You Provided: %s", base::deparse(arg))
+        "x" = base::sprintf("You Provided: '%s'", arg)
       )
     )
   }
