@@ -129,7 +129,7 @@ imputation_precompute.data.table <- function(
     original_summary[, failure_rate := 1 - success_rate]
 
     data.table::setorder(original_summary, treatment_block)
-  } else if (!whole_experiment) {
+  } else {
     original_summary <- data[,
       .(
         count = .N,
@@ -178,8 +178,6 @@ imputation_precompute.data.table <- function(
     original_summary <- lapply(original_summary, \(x) {
       x[, period_number := NULL]
     })
-  } else {
-    rlang::abort("Specify Logical for `whole_experiment`")
   }
 
   if (delayed_feedback) {
@@ -247,7 +245,7 @@ imputation_preparation <- function(
     if (blocking) {
       current_data[,
         impute_block := do.call(paste, c(.SD, sep = "_")),
-        .SDcols = c("mab_condition", block_cols$name)
+        .SDcols = c("mab_condition", data_cols$block_cols$name)
       ]
     } else {
       current_data[, impute_block := base::as.character(mab_condition)]
@@ -256,7 +254,10 @@ imputation_preparation <- function(
     if (blocking) {
       current_data$impute_block <- do.call(
         paste,
-        c(current_data[, c("mab_condition", block_cols$name)], sep = "_")
+        c(
+          current_data[, c("mab_condition", data_cols$block_cols$name)],
+          sep = "_"
+        )
       )
     } else {
       current_data$impute_block <- base::as.character(

@@ -60,7 +60,7 @@ prep_rct_data <- function(
   }
   data_cols <- base::lapply(data_cols, \(col) {
     rlang_func <- if (base::length(col) > 1) rlang::syms else rlang::sym
-    base::list(name = col, sym = rlang_func(x))
+    base::list(name = col, sym = rlang_func(col))
   }) |>
     stats::setNames(base::names(data_cols))
 
@@ -76,7 +76,7 @@ prep_rct_data <- function(
   )
   # Input Validation
   if (check_args) {
-    check_mab_sim.rct(
+    check_rct_args(
       data = data,
       algorithm = char_args$algorithm,
       random_assign_prop = random_assign_prop,
@@ -277,7 +277,7 @@ create_cutoff.date <- function(
     if (time_unit == "month" && !is.null(month_col)) {
       first_month <- data[
         order(base::get(date_col$name)),
-        base::get(month_col$name)
+        ..month_col$name
       ][1]
 
       start_month <- lubridate::ymd(base::paste0(
@@ -328,7 +328,7 @@ create_cutoff.date <- function(
         dplyr::pull(!!month_col$sym)
 
       start_month <- lubridate::ymd(
-        paste0(lubridate::year(start_date), "-", first_month, "-01")
+        base::paste0(lubridate::year(start_date), "-", first_month, "-01")
       )
       data <- data |>
         dplyr::mutate(
@@ -494,7 +494,10 @@ create_new_cols.data.frame <- function(
         ),
         treatment_block = base::do.call(
           base::paste,
-          c(data[, c(data_cols$condition_col$name, data_cols$block_cols$name)])
+          c(
+            data[, c(data_cols$condition_col$name, data_cols$block_cols$name)],
+            sep = "_"
+          )
         )
       )
   } else {
@@ -553,7 +556,11 @@ create_new_cols.data.table <- function(
       .SDcols = c(data_cols$condition_col$name, block_cols$name)
     ]
   } else {
-    data[, treatment_block := as.character(get(data_cols$condition_col$name))]
+    data[,
+      treatment_block := base::as.character(base::get(
+        data_cols$condition_col$name
+      ))
+    ]
   }
   return(invisible(data))
 }

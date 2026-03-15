@@ -107,7 +107,7 @@ get_iaipw.data.frame <- function(
     )
   }
 
-  data[["true_assign_prob"]] <- data[cbind(
+  data[["true_assign_prob"]] <- data[base::cbind(
     seq_len(nrow(data)),
     match(paste0(data$mab_condition, "_assign_prob"), names(data))
   )]
@@ -226,15 +226,16 @@ get_iaipw.data.table <- function(
     ]
   }
 
-  cols <- base::paste0(dt$mab_condition, "_assign_prob")
-  data[, true_assign_prob := dt[cbind(seq_len(.N), match(cols, names(dt)))]][,
+  cols <- base::paste0(data$mab_condition, "_assign_prob")
+
+  ## Fix this is not supported
+  data[,
+    true_assign_prob := data[base::cbind(seq_len(.N), match(cols, names(data)))]
+  ][,
     ipw_weights := 1 / true_assign_prob
   ]
 
-  check <- base::sum(base::unlist(data[,
-    lapply(.SD, \(x) base::sum(base::is.na(x))),
-    .SDcols = new_cols
-  ]))
+  check <- base::sum(base::is.na(data[, ..new_cols]))
 
   if (check != 0) {
     base::warning(paste0(check, " Individual AIPW Scores are NA"))
@@ -347,21 +348,23 @@ estimate_aipw.data.frame <- function(
       estimator = "AIPW"
     ))
   }) |>
-    dplyr::bind_rows()
+    dplyr::bind_rows() |>
+    fill_missing_conditions(conditions = conditions)
 
   sample <- data |>
     dplyr::group_by(mab_condition) |>
     dplyr::summarize(
       mean = base::mean(mab_success),
       n = dplyr::n(),
-      estimator = "Sample"
-    ) |>
-    dplyr::ungroup() |>
+      estimator = "Sample",
+      .groups = "drop"
+    )
+  dplyr::ungroup() |>
     dplyr::mutate(
       var = (mean * (1 - mean)) / n,
     ) |>
     dplyr::select(-n) |>
-    fill_missing_conditions(conditions)
+    fill_missing_conditions(conditions = conditions)
 
   returns <- dplyr::bind_rows(estimates, sample) |>
     dplyr::arrange(estimator, mab_condition)
@@ -413,7 +416,8 @@ estimate_aipw.data.table <- function(
       estimator = "AIPW"
     )
   }) |>
-    data.table::rbindlist()
+    data.table::rbindlist() |>
+    fill_missing_conditions(conditions = conditions)
 
   sample <- data[,
     .(
