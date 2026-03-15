@@ -639,10 +639,10 @@ condense_results <- function(dt, keep_data, mabs, r) {
 
   dims <- base::dim(mabs[[1]]$ipw_vcov)
   results$ipw_vcov <- base::lapply(mabs, \(x) {
-    x$ipw_vocv
+    x$ipw_vcov
   }) |>
     base::unlist() |>
-    base::arrary(dim = c(dims, base::length(mabs)))
+    base::array(dim = c(dims, base::length(mabs)))
 
   return(results)
 }

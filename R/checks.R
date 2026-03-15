@@ -59,7 +59,8 @@ check_mab_sim.rct <- function(
     time_unit = time_unit,
     delayed_feedback = delayed_feedback,
     data_cols = data_cols,
-    verbose = verbose
+    verbose = verbose,
+    blocking = blocking
   )
 
   # Checking Period Method Arguments

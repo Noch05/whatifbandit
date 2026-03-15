@@ -78,7 +78,7 @@ mab_trial_sim.bernoulli <- function(
     t = t,
     p = p,
     algorithm = algorithm,
-    blocks = bocks,
+    blocks = blocks,
     clusters = clusters,
     control_augment = control_augment,
     random_assign_prop = random_assign_prop,

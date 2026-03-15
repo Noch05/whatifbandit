@@ -442,7 +442,7 @@ impute_success <- function(
   data_cols,
   delayed_feedback
 ) {
-  base::UseMethod("impute_success", current_data)
+  base::UseMethod("impute_success", imputation_info$current_data)
 }
 #-------------------------------------------------------------------------------
 #' @inheritParams impute_success

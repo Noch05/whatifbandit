@@ -240,14 +240,13 @@ run_mab_trial <- function(
         imputation_information = imputation_information,
         data_cols = data_cols,
         clustering = clustering,
-        impute_cluster = impute_cluster,
         blocking = blocking,
         delayed_feedback,
         current_period = i
       )
 
       data[starts[i]:ends[i], ] <- impute_success(
-        imputation_info = prepped$impute,
+        imputation_info = prepped_impute,
         data_cols = data_cols,
         delayed_feedback = delayed_feedback
       )
@@ -406,7 +405,7 @@ end_mab_trial.data.table <- function(
 #' @keywords internal
 
 create_prior <- function(prior_periods = NULL, current_period) {
-  if (!base::is.null(prior_periods)) {
+  if (base::is.null(prior_periods)) {
     1
   } else {
     current_period - prior_periods

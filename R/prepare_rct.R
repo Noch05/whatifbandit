@@ -66,12 +66,12 @@ prep_rct_data <- function(
 
   char_args <- base::lapply(
     base::list(
-      assignment_method = assignment_method,
+      period_method = period_method,
       algorithm = algorithm,
       time_unit = time_unit,
     ),
     \(arg) {
-      if (base::is.chararcter(arg)) base::tolower(arg) else arg
+      if (base::is.character(arg)) base::tolower(arg) else arg
     }
   )
   # Input Validation
@@ -516,7 +516,8 @@ create_new_cols.data.table <- function(
   data,
   data_cols,
   blocking,
-  delayed_feedback
+  delayed_feedback,
+  vars_keep
 ) {
   data <- data[, .SD, .SDcols = vars_keep]
   data[,
@@ -588,7 +589,7 @@ get_period_sizes.data.frame <- function(data) {
 #' @inheritParams get_period_sizes
 #' @noRd
 get_period_sizes.data.table <- function(data) {
-  counts <- data[, .(count = .N), group_by = period_nummber][order(
+  counts <- data[, .(count = .N), group_by = period_number][order(
     period_number
   )]
   counts$count

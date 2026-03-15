@@ -68,8 +68,8 @@ get_past_results.data.frame <- function(
       discount_period = current_period - period_number,
       col_of_1 = 1,
       weight = discount_rate^discount_period
-    )
-  dplyr::group_by(mab_condition) |>
+    ) |>
+    dplyr::group_by(mab_condition) |>
     dplyr::summarize(
       successes = base::sum(known_success * weight, na.rm = TRUE),
       n = base::sum(weight * col_of_1, na.rm = TRUE),

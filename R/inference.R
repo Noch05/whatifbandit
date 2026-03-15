@@ -227,7 +227,7 @@ get_iaipw.data.table <- function(
   }
 
   cols <- base::paste0(dt$mab_condition, "_assign_prob")
-  dt[, true_assign_prob := dt[cbind(seq_len(.N), match(cols, names(dt)))]][,
+  data[, true_assign_prob := dt[cbind(seq_len(.N), match(cols, names(dt)))]][,
     ipw_weights := 1 / true_assign_prob
   ]
 
@@ -426,7 +426,10 @@ estimate_aipw.data.table <- function(
 
   sample <- fill_missing_conditions(sample, conditions)
 
-  returns <- data.table::rbindlist(list(estimates, sample), use.names = TRUE)
+  returns <- data.table::rbindlist(
+    list(aipw_estimates, sample),
+    use.names = TRUE
+  )
   data.table::setorder(returns, estimator, mab_condition)
 
   return(returns)
