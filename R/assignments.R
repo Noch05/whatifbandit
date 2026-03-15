@@ -7,8 +7,8 @@
 #' @inheritParams simulate_mab
 #' @param current_data A `data.frame` or `data.table` with only observations from the current sampling period.
 #' @param prior_data A `data.frame` or `data.table` with only the observations from the prior index.
-#' @returns A `tibble` or `data.table` containing the number of successes, and number of people for each
-#' treatment condition.
+#' @returns A list containing 2 named vectors: the weighted number of successes, and the weighted number of assignments, where the names of each vector
+#' correspond to the treatment condition.
 #'
 #' @details
 #' When `delayed_feedback = TRUE`, the maximum value from the specified
