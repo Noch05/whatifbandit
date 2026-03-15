@@ -187,8 +187,8 @@ run_mab_trial <- function(
   )
 
   equal_probs <- bandits[["assignment_prob"]][1, ] |>
-    base::as.numeric() |>
-    stats::setNames(conditions)
+    base::as.numeric()
+  base::names(equal_probs) <- conditions
 
   col_names <- base::lapply(data_cols, \(col) {
     col[["name"]]

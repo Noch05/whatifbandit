@@ -533,9 +533,10 @@ get_assignment_quantities.data.frame <- function(simulation, conditions) {
     dplyr::group_by(mab_condition) |>
     dplyr::count()
 
-  count_vec <- stats::setNames(
-    count_summary[["n"]],
-    count_summary[["mab_condition"]]
+  count_vec <- as_named_vec(
+    df = count_summary,
+    val = "n",
+    name = "mab_condition"
   )
 
   if (length(count_vec) < length(conditions)) {
@@ -555,9 +556,10 @@ get_assignment_quantities.data.frame <- function(simulation, conditions) {
 get_assignment_quantities.data.table <- function(simulation, conditions) {
   count_summary <- simulation[["final_data"]][, .N, by = mab_condition]
   data.table::setorder(count_summary, mab_condition)
-  count_vec <- rlang::set_names(
-    count_summary[["N"]],
-    count_summary[["mab_condition"]]
+  count_vec <- as_named_vec(
+    df = count_summary,
+    val = "n",
+    name = "mab_condition"
   )
   if (length(count_vec) < length(conditions)) {
     missing_conds <- base::setdiff(

@@ -61,8 +61,7 @@ prep_rct_data <- function(
   data_cols <- base::lapply(data_cols, \(col) {
     rlang_func <- if (base::length(col) > 1) rlang::syms else rlang::sym
     base::list(name = col, sym = rlang_func(col))
-  }) |>
-    stats::setNames(base::names(data_cols))
+  })
 
   char_args <- base::lapply(
     base::list(
