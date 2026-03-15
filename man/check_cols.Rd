@@ -46,7 +46,7 @@ or are not present in the data, or are the wrong primitive data type. Additional
 if unnecessary columns have been provided, only when \code{verbose = TRUE}.
 }
 \description{
-Helper to \code{\link[=check_mab_sim.rct]{check_mab_sim.rct()}}. This function accepts the user's
+Helper to \code{\link[=check_rct_args]{check_rct_args()}}. This function accepts the user's
 settings for the Multi-Arm-Bandit trial, and checks whether columns in the data have been properly
 specified based on these settings.
 }

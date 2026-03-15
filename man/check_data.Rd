@@ -44,7 +44,7 @@ Throws an error if the data does not meet the specifications
 of the trial based on user settings.
 }
 \description{
-Helper to \code{\link[=check_mab_sim.rct]{check_mab_sim.rct()}}. This function accepts the data and checks
+Helper to \code{\link[=check_rct_args]{check_rct_args()}}. This function accepts the data and checks
 whether it has unique ID's whether the period length is valid.
 }
 \keyword{internal}

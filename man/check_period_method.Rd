@@ -30,7 +30,7 @@ Throws an error if the user is missing necessary arguments to
 assign treatments or passes invalid ones.
 }
 \description{
-Helper to \code{\link[=check_mab_sim.rct]{check_mab_sim.rct()}}. This function accepts arguments relating
+Helper to \code{\link[=check_rct_args]{check_rct_args()}}. This function accepts arguments relating
 to how treatment waves are assigned, and checks if they are valid, and if all
 supporting arguments are passed as necessary.
 }

@@ -13,7 +13,7 @@ check_prop(...)
 Throws an error if any input is not a valid proportion between 0 and 1
 }
 \description{
-Helper to \code{\link[=check_mab_sim.rct]{check_mab_sim.rct()}}. This function accepts the user's
+Helper to \code{\link[=check_rct_args]{check_rct_args()}}. This function accepts the user's
 settings for proportion arguments and checks if they are valid proportions between 0 and 1
 }
 \keyword{internal}

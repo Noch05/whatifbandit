@@ -27,8 +27,8 @@ When re-computing the adaptive assignment probabilities via Thompsom Samplings o
 A value between 0 and 1, where outcomes from \code{k} periods ago are weighted by \code{discount_rate^k}. Default is 1 for no discounting.}
 }
 \value{
-A \code{tibble} or \code{data.table} containing the number of successes, and number of people for each
-treatment condition.
+A list containing 2 named vectors: the weighted number of successes, and the weighted number of assignments, where the names of each vector
+correspond to the treatment condition.
 }
 \description{
 Summarizes results of prior periods to update assignment probabilities in the current period. This function
