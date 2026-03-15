@@ -234,7 +234,7 @@ run_mab_trial <- function(
       (equal_probs * random_assign_prop)
 
     if (resimulation) {
-      prepped_impute <- imputation_preparation(
+      data[starts[i]:ends[i], ] <- imputation_preparation(
         current_data = current_data,
         whole_experiment = whole_experiment,
         imputation_information = imputation_information,
@@ -243,13 +243,11 @@ run_mab_trial <- function(
         blocking = blocking,
         delayed_feedback,
         current_period = i
-      )
-
-      data[starts[i]:ends[i], ] <- impute_success(
-        imputation_info = prepped_impute,
-        data_cols = data_cols,
-        delayed_feedback = delayed_feedback
-      )
+      ) |>
+        impute_success(
+          data_cols = data_cols,
+          delayed_feedback = delayed_feedback
+        )
     } else {}
   }
   results <- end_mab_trial(
@@ -315,11 +313,11 @@ end_mab_trial.data.frame <- function(
     dplyr::group_by(mab_condition) |>
     dplyr::summarize(
       successes = base::sum(mab_success, na.rm = TRUE),
-      success_rate = base::mean(mab_success, na.rm = TRUE),
       n = dplyr::n(),
       .groups = "drop"
     ) |>
-    dplyr::ungroup()
+    base::as.list() |>
+    finalize_prior_list()
 
   final_bandit <- get_bandit(
     past_results = final_summary,
@@ -366,7 +364,7 @@ end_mab_trial.data.table <- function(
     ),
     by = mab_condition
   ]
-  data.table::setorder(final_summary, mab_condition)
+  final_summary <- base::as.list(final_summary) |> finalize_prior_list()
 
   final_bandit <- get_bandit(
     past_results = final_summary,

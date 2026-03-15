@@ -71,7 +71,7 @@ get_past_results.data.frame <- function(
       n = base::sum(weight, na.rm = TRUE),
       .groups = "drop"
     ) |>
-    as.list() |>
+    base::as.list() |>
     finalize_prior_list(conditions = conditions)
 
   return(prior_list)
@@ -117,7 +117,7 @@ get_past_results.data.table <- function(
     ),
     by = mab_condition
   ]
-  prior_list <- as.list(past_results) |>
+  prior_list <- base::as.list(past_results) |>
     finalize_prior_list(conditions = conditions)
 
   return(prior_list)
@@ -509,7 +509,7 @@ build_ra_args <- function(
 ) {
   get_col <- function(col) {
     if (dt) {
-      current_data[idx, base::get(col)]
+      current_data[idx, get(col)]
     } else {
       current_data[[col]][idx]
     }
