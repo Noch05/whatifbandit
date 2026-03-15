@@ -101,15 +101,15 @@ get_iaipw.data.frame <- function(
     mhat <- data[[base::sprintf("prior_rate_%s", condition)]]
 
     data[[base::sprintf("aipw_%s", condition)]] <- base::ifelse(
-      data$mab_condition == condition,
-      (data$mab_success / probability) + (1 - (1 / probability)) * mhat,
+      data[["mab_condition"]] == condition,
+      (data[["mab_success"]] / probability) + (1 - (1 / probability)) * mhat,
       mhat
     )
   }
 
   data[["true_assign_prob"]] <- data[base::cbind(
     seq_len(nrow(data)),
-    match(paste0(data$mab_condition, "_assign_prob"), names(data))
+    match(paste0(data[["mab_condition"]], "_assign_prob"), names(data))
   )]
   data[["ipw_weights"]] <- 1 / data[["true_assign_prob"]]
 
@@ -226,7 +226,7 @@ get_iaipw.data.table <- function(
     ]
   }
 
-  cols <- base::paste0(data$mab_condition, "_assign_prob")
+  cols <- base::paste0(data[["mab_condition"]], "_assign_prob")
 
   ## Fix this is not supported
   data[,
@@ -286,7 +286,7 @@ estimate_aipw <- function(
   data,
   assignment_probs,
   conditions,
-  cluster_col = data_cols$cluster_col,
+  cluster_col = data_cols[["cluster_col"]],
   clustering,
   periods,
   verbose
@@ -312,7 +312,7 @@ estimate_aipw.data.frame <- function(
 ) {
   data <- if (clustering) {
     data |>
-      dplyr::group_by(period_number, !!cluster_col$sym) |>
+      dplyr::group_by(period_number, !!cluster_col[["sym"]]) |>
       dplyr::summarize(
         mab_condition = mab_condition,
         dplyr::across(
@@ -389,7 +389,7 @@ estimate_aipw.data.table <- function(
   data <- if (clustering) {
     data[,
       .(base::lapply(.SD, mean), mab_condition = mab_condition),
-      by = c("period_number", cluster_col$name),
+      by = c("period_number", cluster_col[["name"]]),
       .SDcols = base::paste0("aipw_", conditions)
     ]
   } else {
@@ -485,7 +485,7 @@ estimate_ipw <- function(
       mab_success ~ mab_condition - 1,
       fixed_effects = ~block,
       data = data,
-      clusters = data[[cluster_col$name]],
+      clusters = data[[cluster_col[["name"]]]],
       weights = ipw_weights,
       se_type = "CR2",
       ci = FALSE
@@ -503,7 +503,7 @@ estimate_ipw <- function(
     estimatr::lm_robust(
       mab_success ~ mab_condition - 1,
       data = data,
-      clusters = data[[cluster_col$name]],
+      clusters = data[[cluster_col[["name"]]]],
       weights = ipw_weights,
       se_type = "CR2",
       ci = FALSE
@@ -518,14 +518,14 @@ estimate_ipw <- function(
     )
   }
 
-  coefs <- est_lm$coefficients
-  var <- (est_lm$std.error)^2
-  f <- if (base::is.null(est_lm$fstatistic)) {
-    est_lm$proj_statistic[1] |> as.numeric()
+  coefs <- est_lm[["coefficients"]]
+  var <- (est_lm[["std.error"]])^2
+  f <- if (base::is.null(est_lm[["fstatistic"]])) {
+    est_lm[["proj_statistic"]][1] |> as.numeric()
   } else {
-    est_lm$ftatistic[1] |> as.numeric()
+    est_lm[["ftatistic"]][1] |> as.numeric()
   }
-  df <- est_lm$df
+  df <- est_lm[["df"]]
 
   for (item in list(coefs, var, df)) {
     base::names(item) <- base::gsub("^mab_condition", "", base::names(item))
@@ -554,7 +554,7 @@ estimate_ipw <- function(
   }
   return(list(
     est = estimates,
-    vcov = est_lm$vcov
+    vcov = est_lm[["vcov"]]
   ))
 }
 
@@ -572,7 +572,7 @@ estimate_ipw <- function(
 #'
 #'
 fill_missing_conditions <- function(estimates, conditions) {
-  missing_conditions <- base::setdiff(conditions, estimates$mab_condition)
+  missing_conditions <- base::setdiff(conditions, estimates[["mab_condition"]])
   if (length(missing_conditions) > 0) {
     if (data.table::is.data.table(estimates)) {
       estimates <- data.table::rbindlist(
@@ -582,7 +582,7 @@ fill_missing_conditions <- function(estimates, conditions) {
             mean = NA,
             var = NA,
             mab_condition = missing_conditions,
-            estimator = estimates$estimator[1]
+            estimator = estimates[["estimator"]][1]
           )
         ),
         fill = TRUE
@@ -594,7 +594,7 @@ fill_missing_conditions <- function(estimates, conditions) {
           mean = NA,
           var = NA,
           mab_condition = missing_conditions,
-          estimator = estimates$estimator[1]
+          estimator = estimates[["estimator"]][1]
         )
       )
     }

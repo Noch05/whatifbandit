@@ -184,14 +184,14 @@ check_cols <- function(
 
   if (period_method == "date") {
     required_cols <- c(required_cols, "date_col")
-    if (time_unit == "month" && !base::is.null(data_cols$month_col)) {
+    if (time_unit == "month" && !base::is.null(data_cols[["month_col"]])) {
       required_cols <- c(required_cols, "month_col")
     }
   }
   if (delayed_feedback) {
     required_cols <- c(required_cols, "success_date_col", "assignment_date_col")
   }
-  if (!base::is.null(data_cols$cluster_col)) {
+  if (!base::is.null(data_cols[["cluster_col"]])) {
     required_cols <- c(required_cols, "cluster_cols")
   }
   req_reasons <- all_reasons[required_cols]
@@ -207,7 +207,7 @@ check_cols <- function(
           "x" = sprintf("reason: %s", ..2)
         ))
       }
-      provided_col <- data_cols[[..1]]$name
+      provided_col <- data_cols[[..1]][["name"]]
       if (!provided_col %in% names(data)) {
         rlang::abort(c(
           sprintf("Required column `%s` is not found in provided `data`.", ..1),
@@ -215,12 +215,12 @@ check_cols <- function(
           "x" = sprintf("Your column: %s", provided_col)
         ))
       }
-      data_type <- class(data[[data_cols[[..1]]$name]])
+      data_type <- class(data[[data_cols[[..1]][["name"]]]])
       if (
         !any(vapply(
-          ..3$tests,
+          ..3[["tests"]],
           \(x) {
-            `x`(data[[data_cols[[..1]]$name]])
+            `x`(data[[data_cols[[..1]][["name"]]]])
           },
           FUN.VALUE = logical(1)
         ))
@@ -230,7 +230,7 @@ check_cols <- function(
           "x" = sprintf("Your type: %s", paste(data_type, collapse = ", ")),
           "i" = sprintf(
             "Permissible types: %s",
-            paste(..3$classes, collapse = ", ")
+            paste(..3[["classes"]], collapse = ", ")
           )
         ))
       }
@@ -238,7 +238,7 @@ check_cols <- function(
   )
 
   if (blocking) {
-    purrr::walk(data_cols$block_cols$name, \(col) {
+    purrr::walk(data_cols[["block_cols"]][["name"]], \(col) {
       if (!col %in% base::names(data)) {
         rlang::abort(sprintf(
           "`%s is not in the data, but was chosen as a block.",
@@ -323,7 +323,7 @@ check_prop <- function(...) {
       }
     }
   )
-  if (args$control_augment > 0 && args$random_assign_prop > 0) {
+  if (args[["control_augment"]] > 0 && args[["random_assign_prop"]] > 0) {
     rlang::warn(c(
       "It is not recommended to use control augmentation with hybrid assignment;
                 control augmentation only affects bandit assignments."
@@ -402,8 +402,8 @@ check_data <- function(
     )
 
     data_interval <- lubridate::interval(
-      min(data[[data_cols$date_col$name]]),
-      max(data[[data_cols$date_col$name]])
+      min(data[[data_cols[["date_col"]][["name"]]]]),
+      max(data[[data_cols[["date_col"]][["name"]]]])
     ) /
       unit
     data_interval <- base::round(data_interval, 0)

@@ -271,8 +271,8 @@ mab_from_rct.bernoulli <- function(
     assignment_date_col = assignment_date_col,
     success_date_col = success_date_col
   )
-  blocking <- !base::is.null(data_cols$block_cols)
-  clustering <- !base::is.null(data$cluster_col)
+  blocking <- !base::is.null(data_cols[["block_cols"]])
+  clustering <- !base::is.null(data[["cluster_col"]])
 
   prepped <- prep_rct_data(
     data = data,
@@ -326,9 +326,9 @@ mab_from_rct.bernoulli <- function(
       function(x) {
         set.seed(x)
         results <- simulate_mab(
-          data = prepped$data,
+          data = prepped[["data"]],
           resimulation = TRUE,
-          algorithm = prepped$char_args$algorithm,
+          algorithm = prepped[["char_args"]][["algorithm"]],
           control_augment = control_augment,
           random_assign_prop = random_assign_prop,
           period_length = period_length,
@@ -336,22 +336,22 @@ mab_from_rct.bernoulli <- function(
           delayed_feedback = delayed_feedback,
           whole_experiment = whole_experiment,
           discount_rate = discount_rate,
-          conditions = prepped$conditions,
+          conditions = prepped[["conditions"]],
           blocking = blocking,
           clustering = clustering,
-          data_cols = prepped$data_cols,
+          data_cols = prepped[["data_cols"]],
           verbose = FALSE,
-          imputation_information = prepped$imputation_information,
+          imputation_information = prepped[["imputation_information"]],
           ndraws = ndraws,
-          starts = prepped$period_starts,
-          ends = prepped$period_ends
+          starts = prepped[["period_starts"]],
+          ends = prepped[["period_ends"]]
         )
-        results$assignment_quantities <- get_assignment_quantities(
+        results[["assignment_quantities"]] <- get_assignment_quantities(
           results,
-          prepped$conditions
+          prepped[["conditions"]]
         )
         if (!keep_data) {
-          results$final_data <- NULL
+          results[["final_data"]] <- NULL
         }
         return(results)
       },
@@ -461,8 +461,8 @@ formula_parse <- function(formula) {
     base::list(
       condition_col = conditions_col,
       success_col = outcome,
-      block_cols = block(other_vars[[1]]$args),
-      cluster_col = cluster(other_vars[[2]]$args)
+      block_cols = block(other_vars[[1]][["args"]]),
+      cluster_col = cluster(other_vars[[2]][["args"]])
     )
   )
 }
@@ -522,18 +522,21 @@ verbose_log <- function(log, message) {
 #' @returns Named numeric vector containing number of observations assigned to each treatment group
 #' @keywords internal
 get_assignment_quantities <- function(simulation, conditions) {
-  UseMethod("get_assignment_quantities", simulation$final_data)
+  UseMethod("get_assignment_quantities", simulation[["final_data"]])
 }
 #' @method get_assignment_quantities data.frame
 #' @description get_assignment_quantities for `data.frame`s
 #' @inheritParams get_assignment_quantities
 #' @noRd
 get_assignment_quantities.data.frame <- function(simulation, conditions) {
-  count_summary <- simulation$final_data |>
+  count_summary <- simulation[["final_data"]] |>
     dplyr::group_by(mab_condition) |>
     dplyr::count()
 
-  count_vec <- rlang::set_names(count_summary$n, count_summary$mab_condition)
+  count_vec <- stats::setNames(
+    count_summary[["n"]],
+    count_summary[["mab_condition"]]
+  )
 
   if (length(count_vec) < length(conditions)) {
     missing_conds <- base::setdiff(
@@ -550,9 +553,12 @@ get_assignment_quantities.data.frame <- function(simulation, conditions) {
 #' @inheritParams get_assignment_quantities
 #' @noRd
 get_assignment_quantities.data.table <- function(simulation, conditions) {
-  count_summary <- simulation$final_data[, .N, by = mab_condition]
+  count_summary <- simulation[["final_data"]][, .N, by = mab_condition]
   data.table::setorder(count_summary, mab_condition)
-  count_vec <- rlang::set_names(count_summary$N, count_summary$mab_condition)
+  count_vec <- rlang::set_names(
+    count_summary[["N"]],
+    count_summary[["mab_condition"]]
+  )
   if (length(count_vec) < length(conditions)) {
     missing_conds <- base::setdiff(
       conditions,
@@ -611,12 +617,12 @@ condense_results <- function(dt, keep_data, mabs, r) {
     })
     names(results) <- items
     if (keep_data) {
-      results$final_data <- data.table::data.table(
+      results[["final_data"]] <- data.table::data.table(
         trial = base::seq_len(r),
-        data = purrr::map(mabs, ~ .x$final_data)
+        data = purrr::map(mabs, ~ .x[["final_data"]])
       )
     } else {
-      results$final_data_nest <- NULL
+      results[["final_data_nest"]] <- NULL
     }
   } else {
     results <- purrr::map(items, function(item) {
@@ -628,18 +634,18 @@ condense_results <- function(dt, keep_data, mabs, r) {
     names(results) <- items
 
     if (keep_data) {
-      results$final_data_nest <- tibble::tibble(
+      results[["final_data_nest"]] <- tibble::tibble(
         trial = base::seq_len(r),
-        data = purrr::map(mabs, ~ .x$final_data)
+        data = purrr::map(mabs, ~ .x[["final_data"]])
       )
     } else {
-      results$final_data_nest <- NULL
+      results[["final_data_nest"]] <- NULL
     }
   }
 
-  dims <- base::dim(mabs[[1]]$ipw_vcov)
-  results$ipw_vcov <- base::lapply(mabs, \(x) {
-    x$ipw_vcov
+  dims <- base::dim(mabs[[1]][["ipw_vcov"]])
+  results[["ipw_vcov"]] <- base::lapply(mabs, \(x) {
+    x[["ipw_vcov"]]
   }) |>
     base::unlist() |>
     base::array(dim = c(dims, base::length(mabs)))

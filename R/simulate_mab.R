@@ -80,37 +80,37 @@ simulate_mab <- function(
     ...
   )
 
-  sim_results$final_data <- get_iaipw(
-    data = sim_results$final_data,
-    assignment_probs = sim_results$assignment_probs,
+  sim_results[["final_data"]] <- get_iaipw(
+    data = sim_results[["final_data"]],
+    assignment_probs = sim_results[["assignment_probs"]],
     conditions = conditions,
     periods = periods,
     verbose = verbose
   )
   estimates <- estimate_aipw(
-    data = sim_results$final_data,
-    assignment_probs = sim_results$assignment_probss,
+    data = sim_results[["final_data"]],
+    assignment_probs = sim_results[["assignment_probss"]],
     periods = periods,
     conditions = conditions,
     verbose = verbose,
     clustering = clustering,
-    cluster_col = data_cols$cluster_col
+    cluster_col = data_cols[["cluster_col"]]
   )
   estimates <- estimate_ipw(
-    data = sim_results$final_data,
+    data = sim_results[["final_data"]],
     estimates = estimates,
-    cluster_col = data_cols$cluster_col,
+    cluster_col = data_cols[["cluster_col"]],
     clustering = clustering,
     blocking = blocking,
     conditions = conditions
   )
 
   results <- list(
-    final_data = sim_results$final_data,
-    bandits = sim_results$bandits,
-    assignment_probs = sim_results$assignment_probs,
-    estimates = estimates$est,
-    ipw_vcov = estimates$vcov,
+    final_data = sim_results[["final_data"]],
+    bandits = sim_results[["bandits"]],
+    assignment_probs = sim_results[["assignment_probs"]],
+    estimates = estimates[["est"]],
+    ipw_vcov = estimates[["vcov"]],
     settings = NULL
   )
   return(results)
@@ -169,21 +169,24 @@ run_mab_trial <- function(
 ) {
   bandits <- base::vector(mode = "list", length = 2)
 
-  bandits$bandit_stat <- base::matrix(
+  bandits[["bandit_stat"]] <- base::matrix(
     NA,
     nrow = periods,
     ncol = num_conditions,
     dimnames = list(c(), base::names(conditions))
   )
-  bandits$assignment_prob <- base::matrix(
+  bandits[["assignment_prob"]] <- base::matrix(
     NA,
     nrow = periods,
     ncol = num_conditions,
     dimnames = list(c(), base::names(conditions))
   )
-  bandits$assignment_prob[1, ] <- base::rep(1 / num_conditions, num_conditions)
+  bandits[["assignment_prob"]][1, ] <- base::rep(
+    1 / num_conditions,
+    num_conditions
+  )
 
-  equal_probs <- bandits$assignment_prob[1, ] |>
+  equal_probs <- bandits[["assignment_prob"]][1, ] |>
     base::as.numeric() |>
     stats::setNames(conditions)
 
@@ -200,7 +203,7 @@ run_mab_trial <- function(
         current_data = current_data,
         prior_data = prior_data,
         delayed_feedback = delayed_feedback,
-        assignment_date_col = data_cols$assignment_date_col,
+        assignment_date_col = data_cols[["assignment_date_col"]],
         conditions = conditions,
         discount_rate = discount_rate,
         current_period = i
@@ -213,7 +216,7 @@ run_mab_trial <- function(
           control_augment = control_augment,
           ndraws = ndraws
         )
-      bandits$bandit_stat[i - 1, ] <- current_bandit[["bandit"]]
+      bandits[["bandit_stat"]][i - 1, ] <- current_bandit[["bandit"]]
     } else {
       current_bandit[["assignment_prob"]] <- equal_probs
     }
@@ -223,13 +226,13 @@ run_mab_trial <- function(
       probs = current_bandit[["assignment_prob"]],
       blocking = blocking,
       clustering = clustering,
-      cluster_col = data_cols$cluster_col,
+      cluster_col = data_cols[["cluster_col"]],
       conditions = conditions,
-      condition_col = data_cols$condition_col,
+      condition_col = data_cols[["condition_col"]],
       random_assign_prop = random_assign_prop
     )
 
-    bandits$assignment_probs[i, ] <- (current_bandit[["assignment_prob"]] *
+    bandits[["assignment_probs"]][i, ] <- (current_bandit[["assignment_prob"]] *
       (1 - random_assign_prop)) +
       (equal_probs * random_assign_prop)
 
@@ -329,7 +332,7 @@ end_mab_trial.data.frame <- function(
     ndraws = ndraws
   )
 
-  bandits$bandit_stat[periods, ] <- final_bandit[["bandit"]]
+  bandits[["bandit_stat"]][periods, ] <- final_bandit[["bandit"]]
   bandits <- base::lapply(bandits, \(x) {
     tibble::as_tibble(x) |>
       dplyr::mutate(period_number = dplyr::row_number())
@@ -375,7 +378,7 @@ end_mab_trial.data.table <- function(
     control_augment = 0,
     ndraws = ndraws
   )
-  bandits$bandit_stat[periods, ] <- final_bandit[["bandit"]]
+  bandits[["bandit_stat"]][periods, ] <- final_bandit[["bandit"]]
   bandit_stats <- data.table::as.data.table(bandits[["bandit_stat"]])
   bandit_stats[, period_number := .I]
 

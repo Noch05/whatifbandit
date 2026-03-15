@@ -509,7 +509,7 @@ build_ra_args <- function(
 ) {
   get_col <- function(col) {
     if (dt) {
-      current_data[idx, get(col)]
+      current_data[idx, ..col]
     } else {
       current_data[[col]][idx]
     }
@@ -574,8 +574,8 @@ assign_treatments.data.frame <- function(
   band_idx,
   random_probs
 ) {
-  current_data$assignment_type[band_idx] <- "bandit"
-  current_data$assignment_type[rand_idx] <- "random"
+  current_data[["assignment_type"]][band_idx] <- "bandit"
+  current_data[["assignment_type"]][rand_idx] <- "random"
 
   for (idx in list(band_idx, rand_idx)) {
     if (base::length(idx) == 0) {
@@ -592,14 +592,14 @@ assign_treatments.data.frame <- function(
       cluster_col = cluster_col,
       dt = FALSE
     )
-    current_data$mab_condition[idx] <- base::as.character(do.call(
-      ra$fn,
-      ra$args
+    current_data[["mab_condition"]][idx] <- base::as.character(do.call(
+      ra[["fn"]],
+      ra[["args"]]
     ))
   }
 
-  current_data$impute_req <- base::as.integer(
-    base::as.character(current_data$mab_condition) !=
+  current_data[["impute_req"]] <- base::as.integer(
+    base::as.character(current_data[["mab_condition"]]) !=
       base::as.character(current_data[[condition_col$name]])
   )
   current_data
