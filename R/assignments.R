@@ -53,16 +53,17 @@ get_past_results.data.frame <- function(
   current_period
 ) {
   if (delayed_feedback) {
-    current_date <- base::max(current_data[[assignment_date_col$name]])
+    current_date <- base::max(current_data[[assignment_date_col]])
 
-    prior_data$known_success <- base::as.integer(
+    prior_data[["known_success"]] <- base::as.integer(
       current_date >= prior_data[["new_success_date"]] &
         !base::is.na(prior_data[["new_success_date"]])
     )
   } else {
-    prior_data$known_success <- prior_data$mab_success
+    prior_data[["known_success"]] <- prior_data[["mab_success"]]
   }
-  prior_data$weight <- discount_rate^(current_period - prior_data$period_number)
+  prior_data[["weight"]] <- discount_rate^(current_period -
+    prior_data[["period_number"]])
 
   prior_list <- prior_data |>
     dplyr::group_by(mab_condition) |>
@@ -94,7 +95,7 @@ get_past_results.data.table <- function(
   current_period
 ) {
   if (delayed_feedback) {
-    current_date <- base::max(current_data[[assignment_date_col$name]])
+    current_date <- base::max(current_data[[assignment_date_col]])
 
     prior_data[,
       known_success := base::as.integer(
@@ -136,8 +137,8 @@ get_past_results.data.table <- function(
 #' each a named numeric vector of length `length(conditions)`.
 #' @keywords internal
 finalize_prior_list <- function(prior_list, conditions) {
-  nms <- prior_list$mab_condition
-  prior_list$mab_condition <- NULL
+  nms <- prior_list[["mab_condition"]]
+  prior_list[["mab_condition"]] <- NULL
 
   missing <- if (base::length(nms) != base::length(conditions)) {
     base::setdiff(conditions, nms)
@@ -286,8 +287,8 @@ get_bandit.thompson <- function(
   bandit <- base::tryCatch(
     {
       ts <- bandit::best_binomial_bandit(
-        x = past_results$successes,
-        n = past_results$n,
+        x = past_results[["successes"]],
+        n = past_results[["n"]],
         alpha = 1,
         beta = 1
       ) |>
@@ -303,8 +304,8 @@ get_bandit.thompson <- function(
         "i" = sprintf("Period: %d", current_period)
       ))
       ts <- bandit::best_binomial_bandit_sim(
-        x = past_results$successes,
-        n = past_results$n,
+        x = past_results[["successes"]],
+        n = past_results[["n"]],
         alpha = 1,
         beta = 1,
         ndraws = ndraws
@@ -313,7 +314,7 @@ get_bandit.thompson <- function(
       return(ts)
     }
   )
-  base::names(bandit) <- base::names(past_results$successes)
+  base::names(bandit) <- base::names(past_results[["successes"]])
 
   if (bandit_invalid(bandit)) {
     rlang::abort(c(
@@ -355,8 +356,8 @@ get_bandit.ucb1 <- function(
   current_period
 ) {
   correction <- 1e-10 ## Prevents Division by 0 when n = 0
-  n_safe <- base::pmax(past_results$n, correction)
-  success_rates <- past_results$successes / n_safe
+  n_safe <- base::pmax(past_results[["n"]], correction)
+  success_rates <- past_results[["successes"]] / n_safe
   ucb1 <- success_rates +
     base::sqrt((2 * base::log(current_period)) / n_safe)
 
@@ -422,16 +423,16 @@ assign_treatments <- function(
 
   rand_idx <- if (clustering && random_assign_prop > 0) {
     if (random_rows < 1) {
-      clusters <- base::unique(current_data[[cluster_col$name]])
+      clusters <- base::unique(current_data[[cluster_col]])
       rand_clusters <- clusters[base::as.logical(stats::rbinom(
         base::length(clusters),
         1,
         random_assign_prop
       ))]
-      which(current_data[[cluster_col$name]] %in% rand_clusters)
+      which(current_data[[cluster_col]] %in% rand_clusters)
     } else {
-      clusters <- base::unique(current_data[[cluster_col$name]])
-      cluster_sizes <- base::table(current_data[[cluster_col$name]])
+      clusters <- base::unique(current_data[[cluster_col]])
+      cluster_sizes <- base::table(current_data[[cluster_col]])
 
       cluster_permutation <- base::sample(base::names(cluster_sizes))
       cumulative_counts <- base::cumsum(cluster_sizes[cluster_permutation])
@@ -507,20 +508,12 @@ build_ra_args <- function(
   cluster_col,
   dt
 ) {
-  get_col <- function(col) {
-    if (dt) {
-      current_data[idx, ..col]
-    } else {
-      current_data[[col]][idx]
-    }
-  }
-
   if (blocking && clustering) {
     list(
       fn = randomizr::block_and_cluster_ra,
       args = list(
-        blocks = get_col("block"),
-        clusters = get_col(cluster_col$name),
+        blocks = current_data[["block"]][idx],
+        clusters = current_data[[cluster_col]][idx],
         prob_each = probs,
         conditions = conditions,
         check_inputs = TRUE
@@ -530,7 +523,7 @@ build_ra_args <- function(
     list(
       fn = randomizr::block_ra,
       args = list(
-        blocks = get_col("block"),
+        blocks = current_data[["block"]][idx],
         prob_each = probs,
         conditions = conditions,
         check_inputs = TRUE
@@ -540,7 +533,7 @@ build_ra_args <- function(
     list(
       fn = randomizr::cluster_ra,
       args = list(
-        clusters = get_col(cluster_col$name),
+        clusters = current_data[[cluster_col]][idx],
         prob_each = probs,
         conditions = conditions,
         check_inputs = TRUE
@@ -600,9 +593,9 @@ assign_treatments.data.frame <- function(
 
   current_data[["impute_req"]] <- base::as.integer(
     base::as.character(current_data[["mab_condition"]]) !=
-      base::as.character(current_data[[condition_col$name]])
+      base::as.character(current_data[[condition_col]])
   )
-  current_data
+  return(current_data)
 }
 
 #' @method assign_treatments data.table
@@ -647,8 +640,8 @@ assign_treatments.data.table <- function(
   current_data[,
     impute_req := base::as.integer(
       base::as.character(mab_condition) !=
-        base::as.character(get(condition_col$name))
+        base::as.character(get(condition_col))
     )
   ]
-  invisible(current_data)
+  return(invisible(current_data))
 }

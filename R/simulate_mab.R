@@ -190,12 +190,17 @@ run_mab_trial <- function(
     base::as.numeric() |>
     stats::setNames(conditions)
 
+  col_names <- base::lapply(data_cols, \(col) {
+    col[["name"]]
+  })
+
   for (i in 2:periods) {
+    current_idx <- starts[i]:ends[i]
     verbose_log(verbose, paste0("Period: ", i))
 
     prior <- create_prior(prior_periods = prior_periods, current_period = i)
 
-    current_data <- data[starts[i]:ends[i], ]
+    current_data <- data[current_idx, ]
     prior_data <- data[starts[prior]:ends[i - 1], ]
 
     if (algorithm != "static") {
@@ -203,7 +208,7 @@ run_mab_trial <- function(
         current_data = current_data,
         prior_data = prior_data,
         delayed_feedback = delayed_feedback,
-        assignment_date_col = data_cols[["assignment_date_col"]],
+        assignment_date_col = col_names[["assignment_date_col"]],
         conditions = conditions,
         discount_rate = discount_rate,
         current_period = i
@@ -226,9 +231,9 @@ run_mab_trial <- function(
       probs = current_bandit[["assignment_prob"]],
       blocking = blocking,
       clustering = clustering,
-      cluster_col = data_cols[["cluster_col"]],
+      cluster_col = col_names[["cluster_col"]],
+      conditions_col = col_names[["conditions_col"]],
       conditions = conditions,
-      condition_col = data_cols[["condition_col"]],
       random_assign_prop = random_assign_prop
     )
 
@@ -237,7 +242,7 @@ run_mab_trial <- function(
       (equal_probs * random_assign_prop)
 
     if (resimulation) {
-      data[starts[i]:ends[i], ] <- imputation_preparation(
+      prepped_impute <- imputation_preparation(
         current_data = current_data,
         whole_experiment = whole_experiment,
         imputation_information = imputation_information,
@@ -246,11 +251,14 @@ run_mab_trial <- function(
         blocking = blocking,
         delayed_feedback,
         current_period = i
-      ) |>
-        impute_success(
-          data_cols = data_cols,
-          delayed_feedback = delayed_feedback
-        )
+      )
+      data <- impute_success(
+        data = data,
+        imputation_info = prepped_impute,
+        data_cols = data_cols,
+        delayed_feedback = delayed_feedback,
+        idx = current_idx
+      )
     } else {}
   }
   results <- end_mab_trial(
@@ -362,7 +370,6 @@ end_mab_trial.data.table <- function(
   final_summary <- data[,
     .(
       successes = base::sum(mab_success, na.rm = TRUE),
-      success_rate = base::mean(mab_success, na.rm = TRUE),
       n = .N
     ),
     by = mab_condition
