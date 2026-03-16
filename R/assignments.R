@@ -387,6 +387,8 @@ get_bandit.ucb1 <- function(
 #' @param condition_col Column name of `current_data` which holds original treatment assignments.
 #' @param cluster_col Column name of `current_data` which holds cluster assignments.
 #' @param probs Named numeric vector; probability of assignment for each treatment condition.
+#' @param random_probs Probabilities of assignment for the rows which are completely randomly assigned. Simply a vector
+#' of `length(conditions)` with the same equal probability for all elements.
 #' @inheritParams get_past_results
 #' @returns Updated `tibble` or `data.table` with the new treatment conditions for each observation, and whether imputation is required.
 #' If this treatment is different then from under the original experiment, then 'impute_req = 1`, and else is 0 for the observation.
@@ -416,7 +418,8 @@ assign_treatments <- function(
   conditions,
   condition_col,
   cluster_col,
-  random_assign_prop
+  random_assign_prop,
+  random_probs
 ) {
   rows <- base::nrow(current_data)
   random_rows <- rows * random_assign_prop
@@ -456,10 +459,13 @@ assign_treatments <- function(
   }
 
   band_idx <- base::setdiff(base::seq_len(rows), rand_idx)
-  random_probs <- base::rep(
-    1 / base::length(conditions),
-    base::length(conditions)
+
+  assignment_type <- base::vector(
+    mode = "character",
+    length = base::nrow(current_data)
   )
+  assignment_type[band_idx] <- "bandit"
+  assignment_type[rand_idx] <- "random"
 
   if (data.table::is.data.table(current_data)) {
     assign_treatments.data.table(
@@ -472,7 +478,8 @@ assign_treatments <- function(
       cluster_col = cluster_col,
       rand_idx = rand_idx,
       band_idx = band_idx,
-      random_probs = random_probs
+      random_probs = random_probs,
+      assignment_type = assignment_type
     )
   } else {
     assign_treatments.data.frame(
@@ -485,7 +492,8 @@ assign_treatments <- function(
       cluster_col = cluster_col,
       rand_idx = rand_idx,
       band_idx = band_idx,
-      random_probs = random_probs
+      random_probs = random_probs,
+      assignment_type = assignment_type
     )
   }
 }
@@ -494,6 +502,8 @@ assign_treatments <- function(
 #' @name build_ra_args
 #' @description Selects the appropriate `{randomizr}` function and constructs its argument list
 #' based on whether blocking and/or clustering are requested.
+#' @inheritParams get_past_results
+#' @inheritParams assign_treatments
 #' @param idx Integer vector of row indices to assign.
 #' @param dt Logical. Whether `current_data` is a data.table.
 #' @returns A list with `fn` (the randomizr function) and `args` (its arguments).
@@ -552,6 +562,55 @@ build_ra_args <- function(
   }
 }
 
+#' Assign Treatments to Bandit and Random Subsets
+#' @name get_assignments
+#' @description Pre-allocates a character vector and fills treatment assignments
+#' for bandit and randomly assigned subsets separately, using the appropriate
+#' randomizr function built by [build_ra_args()].
+#' @inheritParams get_past_results
+#' @inheritParams assign_treatments
+#' @param band_idx Integer vector of bandit-assigned row indices
+#' @param rand_idx Integer vector of randomly-assigned row indices
+#' @returns Character vector of length `nrow(current_data)` with treatment assignments
+#' @keywords internal
+get_assignments <- function(
+  current_data,
+  band_idx,
+  rand_idx,
+  probs,
+  random_probs,
+  conditions,
+  blocking,
+  clustering,
+  cluster_col
+) {
+  assignments <- base::vector("character", base::nrow(current_data))
+
+  for (idx in base::list(band_idx, rand_idx)) {
+    if (base::length(idx) == 0) {
+      next
+    }
+    prob <- if (base::identical(idx, rand_idx)) random_probs else probs
+    ra <- build_ra_args(
+      idx = idx,
+      current_data = current_data,
+      probs = prob,
+      conditions = conditions,
+      blocking = blocking,
+      clustering = clustering,
+      cluster_col = cluster_col
+    )
+    assignments[idx] <- base::as.character(base::do.call(
+      ra[["fn"]],
+      ra[["args"]]
+    ))
+  }
+
+  return(assignments)
+}
+
+#----------------------------------------------------------------------------------
+
 #' @method assign_treatments data.frame
 #' @title [assign_treatments()] for data.frames
 #' @noRd
@@ -565,31 +624,21 @@ assign_treatments.data.frame <- function(
   cluster_col,
   rand_idx,
   band_idx,
-  random_probs
+  random_probs,
+  assignment_type
 ) {
-  current_data[["assignment_type"]][band_idx] <- "bandit"
-  current_data[["assignment_type"]][rand_idx] <- "random"
-
-  for (idx in list(band_idx, rand_idx)) {
-    if (base::length(idx) == 0) {
-      next
-    }
-    prob <- if (base::identical(idx, rand_idx)) random_probs else probs
-    ra <- build_ra_args(
-      idx = idx,
-      current_data = current_data,
-      p = prob,
-      conditions = conditions,
-      blocking = blocking,
-      clustering = clustering,
-      cluster_col = cluster_col,
-      dt = FALSE
-    )
-    current_data[["mab_condition"]][idx] <- base::as.character(do.call(
-      ra[["fn"]],
-      ra[["args"]]
-    ))
-  }
+  current_data[["assignment_type"]] <- assignment_type
+  current_data[["mab_condition"]] <- get_assignments(
+    current_data = current_data,
+    band_idx = band_idx,
+    rand_idx = rand_idx,
+    probs = probs,
+    random_probs = random_probs,
+    conditions = conditions,
+    blocking = blocking,
+    clustering = clustering,
+    cluster_col = cluster_col
+  )
 
   current_data[["impute_req"]] <- base::as.integer(
     base::as.character(current_data[["mab_condition"]]) !=
@@ -611,31 +660,23 @@ assign_treatments.data.table <- function(
   cluster_col,
   rand_idx,
   band_idx,
-  random_probs
+  random_probs,
+  assignment_type
 ) {
-  current_data[band_idx, assignment_type := "bandit"]
-  current_data[rand_idx, assignment_type := "random"]
-
-  for (idx in list(band_idx, rand_idx)) {
-    if (base::length(idx) == 0) {
-      next
-    }
-    prob <- if (base::identical(idx, rand_idx)) random_probs else probs
-    ra <- build_ra_args(
-      idx = idx,
+  current_data[, `:=`(
+    assignment_type = assignment_type,
+    mab_condition = get_assignments(
       current_data = current_data,
-      p = prob,
+      band_idx = band_idx,
+      rand_idx = rand_idx,
+      probs = probs,
+      random_probs = random_probs,
       conditions = conditions,
       blocking = blocking,
       clustering = clustering,
-      cluster_col = cluster_col,
-      dt = TRUE
+      cluster_col = cluster_col
     )
-    current_data[
-      idx,
-      mab_condition := base::as.character(do.call(ra$fn, ra$args))
-    ]
-  }
+  )]
 
   current_data[,
     impute_req := base::as.integer(
