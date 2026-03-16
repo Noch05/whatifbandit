@@ -13,12 +13,12 @@ produced by converting a summarized data.frame/data.table via \code{\link[base:l
 \item{conditions}{Character vector of all treatment conditions in the trial.}
 }
 \value{
-A named list with elements \code{successes}, \code{n}, and \code{success_rate},
+A named list with elements \code{successes}, \code{n},
 each a named numeric vector of length \code{length(conditions)}.
 }
 \description{
 Accepts the raw list output of an aggregation over \code{prior_data}
 (from \code{\link[=get_past_results]{get_past_results()}}), names each vector by condition, fills any
-conditions absent from the prior window with zeros, sorts alphabetically.
+conditions absent from the prior window with zeros, and sorts alphabetically.
 }
 \keyword{internal}

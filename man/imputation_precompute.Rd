@@ -24,9 +24,9 @@ When re-computing the adaptive assignment probabilities via Thompsom Samplings o
 \value{
 A named list containing:
 \itemize{
-\item \code{original_summary}: The \code{data.frame}(s) or \code{data.table}(s) containing the probability of success for each
+\item \code{original_summary}: The matrix or list of matrices containing the probability of success for each
 treatment block, at each period.
-\item \code{dates_summary}: A \code{data.frame} or \code{data.table} containing the average success date for
+\item \code{dates_summary}: A list of vectors containing the average success date for
 each treatment block at each treatment period.
 }
 }
@@ -38,8 +38,8 @@ success is calculated for each treatment block at every period.
 }
 \details{
 \code{\link[=imputation_precompute]{imputation_precompute()}} is an optimization, meant to reduce the cost of calculating these variables
-within the simulation loop. When \code{whole_experiment = TRUE}, \code{original_summary} is a single \code{data.frame} or \code{data.table},
-and used through the simulation. When \code{whole_experiment = FALSE}, \code{original_summary} is a list of \code{data.frame}s or \code{data.table}s,
+within the simulation loop. When \code{whole_experiment = TRUE}, \code{original_summary} is a single matrix,
+and used through the simulation. When \code{whole_experiment = FALSE}, \code{original_summary} is a list of matrices,
 each containing the cumulative probabilities of all periods up to the index \code{i}.
 
 If \code{perfect_assignment = FALSE}, \code{dates_summary} is not calculated, and is \code{NULL}.

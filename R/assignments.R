@@ -129,11 +129,11 @@ get_past_results.data.table <- function(
 #' @name finalize_prior_list
 #' @description Accepts the raw list output of an aggregation over `prior_data`
 #' (from [get_past_results()]), names each vector by condition, fills any
-#' conditions absent from the prior window with zeros, sorts alphabetically.
+#' conditions absent from the prior window with zeros, and sorts alphabetically.
 #' @param prior_list Named list with elements `mab_condition`, `successes`, `n`,
 #' produced by converting a summarized data.frame/data.table via [base::as.list()].
 #' @param conditions Character vector of all treatment conditions in the trial.
-#' @returns A named list with elements `successes`, `n`, and `success_rate`,
+#' @returns A named list with elements `successes`, `n`,
 #' each a named numeric vector of length `length(conditions)`.
 #' @keywords internal
 finalize_prior_list <- function(prior_list, conditions) {
@@ -181,8 +181,8 @@ finalize_prior_list <- function(prior_list, conditions) {
 #' @returns A list of length 2 containing:
 #' \itemize{
 #' \item `bandit`: Bandit object, either a named numeric vector of Thompson sampling probabilities UCB1 values.
-#' \item `assignment_probabilities:` Named numeric vector with a value for each condition
-#' containing the probability of being assigned that treatment.}
+#' \item `assignment_probabilities:` Named numeric vector with probabilities of being assigned to the given treatment, where `names(.)` are the treatments.
+#' Adjusted for control augmentation}
 #'
 #' @details
 #'
@@ -217,6 +217,10 @@ finalize_prior_list <- function(prior_list, conditions) {
 #' Loecher, Thomas Lotze and Markus. 2022.
 #' "Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis."
 #' \url{https://cran.r-project.org/package=bandit}.
+#'
+#' Thompson, William R. 1933. "On the Likelihood That One Unknown Probability Exceeds Another in View of the Evidence of Two Samples."
+#'  Biometrika 25 (3/4): 285–94. \doi{10.2307/2332286}
+
 #'
 #' @keywords internal
 
@@ -271,11 +275,8 @@ get_bandit <- function(
 #' package but the direct calculation can fail. If this occurs, a simulation based method is used
 #' instead to estimate the posterior distribution, and the user receives a warning.
 #'
-#'
-#' @returns A named list of length 2, where element 1 is the named numeric vector of Thompson
-#' Sampling probabilities, and element 2 is a reference to the same vector. The second element is
-#' adjusted later in the simulation based on what the user has set for `control_augment` and `random_assign_prop` to reflect the
-#' probability of assignment to a given treatment at that period.
+#' @returns A list containing 2 named vectors where `names()` correspond to treatments. Both vectors are the computed
+#' Thompson Sampling probabilities.
 #' @keywords internal
 
 get_bandit.thompson <- function(
@@ -344,9 +345,9 @@ bandit_invalid <- function(bandit) {
 #' @title UCB1 Sampling Algorithm
 #' @description Calculates upper confidence bounds for each treatment arm
 #' @inheritParams get_bandit
-#' @returns A named list with 2 elements: a `tibble` or `data.table` containing UCB1 and success rate for each condition,
-#' and a named numeric vector of assignment probabilities, where the highest UCB1 out of the treatments
-#' is assigned 1, and the rest 0.
+#' @returns A list containing 2 named vectors where `names()` correspond to treatments. The first vector
+#' is the computed UCB1 values, and the second is the corresponding assignment probabilities where the highest UCB1 is given
+#' `1` and all else are `0`.
 #' @keywords internal
 
 get_bandit.ucb1 <- function(

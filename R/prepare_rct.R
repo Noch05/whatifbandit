@@ -454,14 +454,14 @@ create_new_cols.data.frame <- function(
         period_number,
         base::sort(base::unique(period_number))
       ),
-      mab_success = dplyr::if_else(
-        period_number == 1,
-        !!data_cols$success_col$sym,
-        NA
-      ),
       mab_condition = dplyr::if_else(
         period_number == 1,
         base::as.character(!!data_cols$condition_col$sym),
+        NA
+      ),
+      mab_success = dplyr::if_else(
+        period_number == 1,
+        !!data_cols$success_col$sym,
         NA
       ),
       impute_req = dplyr::if_else(period_number == 1, 0, NA),
@@ -473,7 +473,7 @@ create_new_cols.data.frame <- function(
       )
     )
 
-  if (!delayed_feedback) {
+  if (delayed_feedback) {
     data <- data |>
       dplyr::mutate(
         new_success_date = dplyr::if_else(
@@ -530,10 +530,12 @@ create_new_cols.data.table <- function(
   ][
     period_number == 1,
     `:=`(
-      mab_success = base::get(data_cols$success_col$name),
-      mab_condition = base::as.character(base::get(
-        data_cols$condition_col$name
-      )),
+      mab_condition = base::as.character(
+        base::get(
+          data_cols$condition_col$name
+        ),
+        mab_success = base::get(data_cols$success_col$name),
+      ),
       impute_req = 0,
       impute_block = NA_character_,
       assignment_type = "initial"

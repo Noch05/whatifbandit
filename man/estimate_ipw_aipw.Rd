@@ -9,7 +9,7 @@ estimate_aipw(
   data,
   assignment_probs,
   conditions,
-  cluster_col = data_cols$cluster_col,
+  cluster_col = data_cols[["cluster_col"]],
   clustering,
   periods,
   verbose

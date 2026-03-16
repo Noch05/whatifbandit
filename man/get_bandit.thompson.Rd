@@ -16,10 +16,8 @@ successes, number of observations, and success rates, which is created by \code{
 5000 but can be raised or lowered depending on performance and accuracy concerns.}
 }
 \value{
-A named list of length 2, where element 1 is the named numeric vector of Thompson
-Sampling probabilities, and element 2 is a reference to the same vector. The second element is
-adjusted later in the simulation based on what the user has set for \code{control_augment} and \code{random_assign_prop} to reflect the
-probability of assignment to a given treatment at that period.
+A list containing 2 named vectors where \code{names()} correspond to treatments. Both vectors are the computed
+Thompson Sampling probabilities.
 }
 \description{
 Thompson sampling Algorithm

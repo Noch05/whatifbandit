@@ -234,7 +234,8 @@ run_mab_trial <- function(
       cluster_col = col_names[["cluster_col"]],
       conditions_col = col_names[["conditions_col"]],
       conditions = conditions,
-      random_assign_prop = random_assign_prop
+      random_assign_prop = random_assign_prop,
+      random_probs = equal_probs
     )
 
     bandits[["assignment_probs"]][i, ] <- (current_bandit[["assignment_prob"]] *
@@ -256,6 +257,7 @@ run_mab_trial <- function(
         data = data,
         imputation_info = prepped_impute,
         success_col = col_names[["success_col"]],
+        success_date_col = col_names[["success_date_col"]],
         delayed_feedback = delayed_feedback,
         idx = current_idx
       )

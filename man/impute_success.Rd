@@ -4,16 +4,34 @@
 \alias{impute_success}
 \title{Imputing New Outcomes of Multi-Arm-Bandit Trial}
 \usage{
-impute_success(imputation_info, data_cols, delayed_feedback)
+impute_success(
+  data,
+  imputation_info,
+  success_col,
+  success_date_col = NULL,
+  delayed_feedback,
+  impute_idx,
+  idx
+)
 }
 \arguments{
-\item{imputation_info}{List containing all necessary information for imputation, generated each period by \code{\link[=imputation_preparation]{imputation_preparation()}}}
+\item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
+of a traditional Randomized Controlled Trial (RCT).}
 
-\item{data_cols}{List holding the columns required from the provided data as strings and symbols.}
+\item{imputation_info}{List containing all necessary information for imputation, generated each period by \code{\link[=impute_prep]{impute_prep()}}}
+
+\item{success_date_col}{Column in \code{data}; contains original dates each success occurred. Only necessary when \code{delayed_feedback = TRUE}. Must be of type \code{Date}, not a character string.}
 
 \item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon as a treatment is assigned, the outcome is realized and known.
 If \code{TRUE}, delayed feedback is assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not known to the simulation, until a certain date.
 When re-computing the adaptive assignment probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the assignment are treated as failures. a}
+
+\item{impute_idx}{Index of rows in \code{current_data} that need to be imputed.}
+
+\item{idx}{Index of rows imputed in the period, used to update the original data.}
+}
+\value{
+Updated \code{data} object with all the updates from the current period of the simulation
 }
 \description{
 Imputes outcomes for the current treatment assignment period.
@@ -35,7 +53,7 @@ experiment.
 }
 \seealso{
 \itemize{
-\item \code{\link[=imputation_preparation]{imputation_preparation()}}
+\item \code{\link[=impute_prep]{impute_prep()}}
 \item \code{\link[=imputation_precompute]{imputation_precompute()}}
 \item \code{\link[randomizr:block_ra]{randomizr::block_ra()}}
 }

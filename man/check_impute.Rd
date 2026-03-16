@@ -4,13 +4,18 @@
 \alias{check_impute}
 \title{Checking Imputation Info}
 \usage{
-check_impute(imputation_information, current_data, current_period)
+check_impute(impute_success, current_data, impute_idx)
 }
 \arguments{
-\item{imputation_information}{The \code{success} element of the \code{imputation_information}
+\item{impute_success}{The \code{success} element of the \code{imputation_information}
 list created by \code{\link[=imputation_precompute]{imputation_precompute()}} for the given period.}
 
 \item{current_data}{A \code{data.frame} or \code{data.table} with only observations from the current sampling period.}
+
+\item{impute_idx}{Index of rows in \code{current_data} that need to be imputed.}
+}
+\value{
+Proper \code{impute_success} matrix as required by \code{\link[randomizr:block_ra]{randomizr::block_ra()}}
 }
 \description{
 Subsets or adds to the \code{tibble}/\code{data.table} created by \code{\link[=imputation_precompute]{imputation_precompute()}},

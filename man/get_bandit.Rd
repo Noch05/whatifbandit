@@ -38,8 +38,8 @@ and the default is 0. It is not recommended to use this in conjunction with \cod
 A list of length 2 containing:
 \itemize{
 \item \code{bandit}: Bandit object, either a named numeric vector of Thompson sampling probabilities UCB1 values.
-\item \verb{assignment_probabilities:} Named numeric vector with a value for each condition
-containing the probability of being assigned that treatment.}
+\item \verb{assignment_probabilities:} Named numeric vector with probabilities of being assigned to the given treatment, where \code{names(.)} are the treatments.
+Adjusted for control augmentation}
 }
 \description{
 Calculates the best treatment for a given period using either a UCB1 or Thompson Sampling algorithm.
@@ -78,5 +78,8 @@ Kuleshov, Volodymyr, and Doina Precup. 2014. "Algorithms for Multi-Armed Bandit 
 Loecher, Thomas Lotze and Markus. 2022.
 "Bandit: Functions for Simple a/B Split Test and Multi-Armed Bandit Analysis."
 \url{https://cran.r-project.org/package=bandit}.
+
+Thompson, William R. 1933. "On the Likelihood That One Unknown Probability Exceeds Another in View of the Evidence of Two Samples."
+Biometrika 25 (3/4): 285–94. \doi{10.2307/2332286}
 }
 \keyword{internal}

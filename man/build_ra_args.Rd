@@ -18,6 +18,16 @@ build_ra_args(
 \arguments{
 \item{idx}{Integer vector of row indices to assign.}
 
+\item{current_data}{A \code{data.frame} or \code{data.table} with only observations from the current sampling period.}
+
+\item{probs}{Named numeric vector; probability of assignment for each treatment condition.}
+
+\item{blocking}{Logical; Whether or not treatment blocking is occuring}
+
+\item{clustering}{Logical; Whether or not treatment clustering is occuring}
+
+\item{cluster_col}{Column name of \code{current_data} which holds cluster assignments.}
+
 \item{dt}{Logical. Whether \code{current_data} is a data.table.}
 }
 \value{

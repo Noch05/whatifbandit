@@ -15,9 +15,9 @@ successes, number of observations, and success rates, which is created by \code{
 \item{current_period}{Numeric value of length 1; current period of the adaptive trial simulation.}
 }
 \value{
-A named list with 2 elements: a \code{tibble} or \code{data.table} containing UCB1 and success rate for each condition,
-and a named numeric vector of assignment probabilities, where the highest UCB1 out of the treatments
-is assigned 1, and the rest 0.
+A list containing 2 named vectors where \code{names()} correspond to treatments. The first vector
+is the computed UCB1 values, and the second is the corresponding assignment probabilities where the highest UCB1 is given
+\code{1} and all else are \code{0}.
 }
 \description{
 Calculates upper confidence bounds for each treatment arm
