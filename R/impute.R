@@ -8,9 +8,9 @@
 #' @inheritParams prep_rct_data
 #' @returns A named list containing:
 #' \itemize{
-#' \item `original_summary`: The `data.frame`(s) or `data.table`(s) containing the probability of success for each
+#' \item `original_summary`: The matrix or list of matrices containing the probability of success for each
 #' treatment block, at each period.
-#' \item `dates_summary`: A `data.frame` or `data.table` containing the average success date for
+#' \item `dates_summary`: A list of vectors containing the average success date for
 #' each treatment block at each treatment period.
 #' }
 #' @details
@@ -77,7 +77,6 @@ imputation_precompute.data.frame <- function(
         )
       ) |>
       dplyr::ungroup() |>
-      dplyr::select(period_number, treatment_block, success_rate) |>
       dplyr::mutate(failure_rate = 1 - success_rate) |>
       dplyr::group_split(period_number) |>
       lapply(\(df) {
@@ -94,9 +93,10 @@ imputation_precompute.data.frame <- function(
         ),
         .groups = "drop"
       ) |>
+      dplyr::arrange(period_number) |>
       dplyr::group_split(period_number) |>
       base::lapply(\(df) {
-        base::as.date(as_named_vec(df, val = "mean_date", name = "treatment_block"))
+        base::as.Date(as_named_vec(df, val = "mean_date", name = "treatment_block"))
       })
   } else {
     NULL
@@ -124,7 +124,7 @@ imputation_precompute.data.table <- function(
   data_cols
 ) {
   original_summary <- if (whole_experiment) {
-    original_summary <- data[,
+    rct_sum <- data[,
       .(
         success_rate = base::mean(
           base::get(data_cols[["success_col"]][["name"]]),
@@ -133,10 +133,11 @@ imputation_precompute.data.table <- function(
       ),
       by = treatment_block
     ]
-    original_summary[, failure_rate := 1 - success_rate]
-    data.table::setorder(original_summary, treatment_block)
+    rct_sum[, failure_rate := 1 - success_rate]
+    data.table::setorder(rct_sum, treatment_block)
+    summary_to_matrix(rct_sum)
   } else {
-    original_summary <- data[,
+    rct_sum  <- data[,
       .(
         count = .N,
         n_success = base::sum(
@@ -146,9 +147,9 @@ imputation_precompute.data.table <- function(
       by = .(period_number, treatment_block)
     ]
 
-    data.table::setorder(original_summary, period_number, treatment_block)
+    data.table::setorder(rct_sum, period_number, treatment_block)
 
-    original_summary[,
+    rct_sum[,
       `:=`(
         cumulative_count = data.table::shift(
           base::cumsum(count),
@@ -164,25 +165,17 @@ imputation_precompute.data.table <- function(
       by = treatment_block
     ]
 
-    original_summary[,
+    rct_sum[,
       success_rate := data.table::fifelse(
         cumulative_count > 0,
         (cumulative_success / cumulative_count),
         0
       )
-    ]
-
-    original_summary <- original_summary[, .(
-      period_number,
-      treatment_block,
-      success_rate
-    )]
-
-    original_summary[, failure_rate := 1 - success_rate]
+    ][, failure_rate := 1 - success_rate]
     
-    split(original_summary, by = "period_number") |>
-      lapply(\(x) {
-        x[, period_number := NULL]
+    split(rct_sum, by = "period_number") |>
+      lapply(\(df) {
+        summary_to_matrix(df)
       })
   }
 
@@ -194,7 +187,7 @@ imputation_precompute.data.table <- function(
     )] |>
       split(by = "period_number") |>
       lapply(\(df) {
-        base::as.date(as_named_vec(df, val = "mean_date", name = "treatment_block"))
+        base::as.Date(as_named_vec(df, val = "mean_date", name = "treatment_block"))
       })
   } else {
     NULL
@@ -320,9 +313,8 @@ impute_prep <- function(
   impute_idx <- base::which(current_data[["impute_req"]] == 1)
 
   impute_success <- check_impute(
-    imputation_information = impute_success,
+    impute_success = impute_success,
     current_data = current_data,
-    current_period = current_period,
     impute_idx = impute_idx
   )
 
@@ -341,7 +333,7 @@ impute_prep <- function(
 #' @name check_impute
 #' @inheritParams get_past_results
 #' @inheritParams impute_success
-#' @param imputation_information The `success` element of the `imputation_information`
+#' @param impute_success The `success` element of the `imputation_information`
 #' list created by [imputation_precompute()] for the given period.
 #' @details
 #' [randomizr::block_ra()] does not see the names
@@ -357,109 +349,31 @@ impute_prep <- function(
 #' tibble/data.table.
 #'
 #' @keywords internal
-check_impute <- function(imputation_information, current_data, current_period, impute_idx) {
+check_impute <- function(impute_success, current_data, impute_idx) {
+  current_blocks    <- stats::na.omit(current_data[["impute_block"]][impute_idx])
+  imputation_blocks <- base::rownames(impute_success)
 
-  mean_rate <- base::mean(imputation_information[["success_rate"]])
-  current_blocks <- stats::na.omit(current_data[["impute_block"]][impute_idx])
-  imputation_blocks <- stats::na.omit(imputation_information[["treatment_block"]])
-
-  missing_blocks <- base::setdiff(current_blocks, imputation_blocks)
-
-  blocks_to_remove <- base::setdiff(imputation_blocks, current_blocks)
-
-
-
-  base::UseMethod("check_impute", imputation_information)
-}
-#--------------------------------------------------------------------------------
-#' @method check_impute data.frame
-#' @title [check_impute()] for data.frames
-#' @inheritParams check_impute
-#' @noRd
-
-check_impute.data.frame <- function(
-  imputation_information,
-  current_data,
-  current_period
-) {
-  mean_rate <- base::mean(imputation_information[["success_rate"]])
-
-  current_blocks <- stats::na.omit(current_data[["impute_block"]][
-    current_data[["impute_req"]] == 1
-  ])
-  imputation_blocks <- stats::na.omit(imputation_information[[
-    "treatment_block"
-  ]])
-
- 
-
-  if (base::length(missing_blocks) > 0) {
-    addition <- tibble::tibble(
-      treatment_block = missing_blocks,
-      success_rate = mean_rate,
-      failure_rate = 1 - mean_rate
-    )
-
-    imputation_information <- dplyr::bind_rows(imputation_information, addition)
-  }
-
-  if (base::length(blocks_to_remove) > 0) {
-    imputation_information <- imputation_information[
-      !imputation_information[["treatment_block"]] %in% blocks_to_remove,
-    ]
-  }
-
-  imputation_information <- imputation_information[
-    !duplicated(imputation_information[["treatment_block"]]),
-  ][order(imputation_information[["treatment_block"]]), ]
-
-  return(imputation_information)
-}
-#-------------------------------------------------------------------------------
-#' @method check_impute data.table
-#' @title [check_impute()] for `data.tables`
-#' @inheritParams check_impute
-#' @noRd
-check_impute.data.table <- function(
-  imputation_information,
-  current_data,
-  current_period
-) {
-  mean_rate <- base::mean(imputation_information[["success_rate"]])
-
-  current_blocks <- stats::na.omit(current_data[impute_req == 1, impute_block])
-
-  imputation_blocks <- stats::na.omit(imputation_information[[
-    "treatment_block"
-  ]])
-
-  missing_blocks <- base::setdiff(current_blocks, imputation_blocks)
-
+  missing_blocks   <- base::setdiff(current_blocks, imputation_blocks)
   blocks_to_remove <- base::setdiff(imputation_blocks, current_blocks)
 
   if (base::length(missing_blocks) > 0) {
-    addition <- data.table::data.table(
-      treatment_block = missing_blocks,
-      success_rate = mean_rate,
-      failure_rate = 1 - mean_rate
+    mean_rate <- base::mean(impute_success[, "success_rate"])
+    n_miss    <- base::length(missing_blocks)
+    addition  <- base::matrix(
+      c(base::rep(1 - mean_rate, n_miss), base::rep(mean_rate, n_miss)),
+      nrow = n_miss,
+      ncol     = 2,
+      dimnames = base::list(missing_blocks, c("failure_rate", "success_rate"))
     )
-
-    imputation_information <- data.table::rbindlist(
-      list(imputation_information, addition),
-      use.names = TRUE
-    )
+    impute_success <- base::rbind(impute_success, addition)
   }
 
   if (base::length(blocks_to_remove) > 0) {
-    imputation_information <- imputation_information[
-      !treatment_block %in% blocks_to_remove,
-    ]
+    keep <- !base::rownames(impute_success) %in% blocks_to_remove
+    impute_success <- impute_success[keep, , drop = FALSE]
   }
 
-  imputation_information <- imputation_information[!duplicated(treatment_block)]
-  data.table::setorder(imputation_information, treatment_block)
-
-  return(invisible(imputation_information))
+  return(impute_success[base::order(base::rownames(impute_success)), , drop = FALSE])
 }
 #------------------------------------------------------------------------------------
 
@@ -506,7 +420,7 @@ impute_success <- function(
   if (base::length(impute_idx) > 0) {
     imputations <- randomizr::block_ra(
       blocks = current_data[["impute_block"]][impute_idx],
-      block_prob_each = imputation_means[, c("failure_rate", "success_rate")],
+      block_prob_each = imputation_means,
       num_arms = 2,
       conditions = c(0, 1),
       check_inputs = FALSE
@@ -529,7 +443,7 @@ impute_success <- function(
   ) {
     current_data[["mab_success"]][impute_idx] <- imputations
     current_data[["mab_success"]][!impute_idx] <- current_data[[success_col]][!impute_idx]
-  }
+  
   else
   {
     current_data[["mab_success"]] <- current_data[[success_col]]
