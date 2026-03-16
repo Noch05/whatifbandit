@@ -51,7 +51,7 @@ simulate_mab <- function(
   ...
 ) {
   verbose_log(verbose, "Starting Bandit Trial")
-  periods <- base::length(starts)
+  periods <- length(starts)
   num_conditions <- length(conditions)
 
   sim_results <- run_mab_trial(
@@ -167,30 +167,30 @@ run_mab_trial <- function(
   num_conditions,
   ...
 ) {
-  bandits <- base::vector(mode = "list", length = 2)
+  bandits <- vector(mode = "list", length = 2)
 
-  bandits[["bandit_stat"]] <- base::matrix(
+  bandits[["bandit_stat"]] <- matrix(
     NA,
     nrow = periods,
     ncol = num_conditions,
-    dimnames = list(c(), base::names(conditions))
+    dimnames = list(c(), names(conditions))
   )
-  bandits[["assignment_prob"]] <- base::matrix(
+  bandits[["assignment_prob"]] <- matrix(
     NA,
     nrow = periods,
     ncol = num_conditions,
-    dimnames = list(c(), base::names(conditions))
+    dimnames = list(c(), names(conditions))
   )
-  bandits[["assignment_prob"]][1, ] <- base::rep(
+  bandits[["assignment_prob"]][1, ] <- rep(
     1 / num_conditions,
     num_conditions
   )
 
   equal_probs <- bandits[["assignment_prob"]][1, ] |>
-    base::as.numeric()
-  base::names(equal_probs) <- conditions
+    as.numeric()
+  names(equal_probs) <- conditions
 
-  col_names <- base::lapply(data_cols, \(col) {
+  col_names <- lapply(data_cols, \(col) {
     col[["name"]]
   })
 
@@ -305,7 +305,7 @@ end_mab_trial <- function(
   num_conditions,
   ndraws
 ) {
-  base::UseMethod("end_mab_trial", data)
+  UseMethod("end_mab_trial", data)
 }
 #-------------------------------------------------------------------------------
 #
@@ -325,11 +325,11 @@ end_mab_trial.data.frame <- function(
   final_summary <- data |>
     dplyr::group_by(mab_condition) |>
     dplyr::summarize(
-      successes = base::sum(mab_success, na.rm = TRUE),
+      successes = sum(mab_success, na.rm = TRUE),
       n = dplyr::n(),
       .groups = "drop"
     ) |>
-    base::as.list() |>
+    as.list() |>
     finalize_prior_list()
 
   final_bandit <- get_bandit(
@@ -343,7 +343,7 @@ end_mab_trial.data.frame <- function(
   )
 
   bandits[["bandit_stat"]][periods, ] <- final_bandit[["bandit"]]
-  bandits <- base::lapply(bandits, \(x) {
+  bandits <- lapply(bandits, \(x) {
     tibble::as_tibble(x) |>
       dplyr::mutate(period_number = dplyr::row_number())
   })
@@ -371,12 +371,12 @@ end_mab_trial.data.table <- function(
 ) {
   final_summary <- data[,
     .(
-      successes = base::sum(mab_success, na.rm = TRUE),
+      successes = sum(mab_success, na.rm = TRUE),
       n = .N
     ),
     by = mab_condition
   ]
-  final_summary <- base::as.list(final_summary) |> finalize_prior_list()
+  final_summary <- as.list(final_summary) |> finalize_prior_list()
 
   final_bandit <- get_bandit(
     past_results = final_summary,
@@ -415,7 +415,7 @@ end_mab_trial.data.table <- function(
 #' @keywords internal
 
 create_prior <- function(prior_periods = NULL, current_period) {
-  if (base::is.null(prior_periods)) {
+  if (is.null(prior_periods)) {
     1
   } else {
     current_period - prior_periods

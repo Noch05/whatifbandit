@@ -271,8 +271,8 @@ mab_from_rct.bernoulli <- function(
     assignment_date_col = assignment_date_col,
     success_date_col = success_date_col
   )
-  blocking <- !base::is.null(data_cols[["block_cols"]])
-  clustering <- !base::is.null(data[["cluster_col"]])
+  blocking <- !is.null(data_cols[["block_cols"]])
+  clustering <- !is.null(data[["cluster_col"]])
 
   prepped <- prep_rct_data(
     data = data,
@@ -398,7 +398,7 @@ mab_from_rct.bernoulli <- function(
     verbose_log(verbose, "Collating Results")
     results <- condense_results(
       dt = ((data.table::is.data.table(data)) ||
-        r * base::length(prepped$period_starts) > 100000),
+        r * length(prepped$period_starts) > 100000),
       keep_data = keep_data,
       mabs = mabs,
       r = r
@@ -414,7 +414,7 @@ mab_from_rct.bernoulli <- function(
     discount_rate = discount_rate,
     control_augment = control_augment,
     random_assign_prop = random_assign_prop,
-    control = base::as.character(control_condition),
+    control = as.character(control_condition),
     conditions = prepped$conditions,
     delayed_feedback = delayed_feedback,
     whole_experiment = whole_experiment,
@@ -444,21 +444,21 @@ formula_parse <- function(formula) {
 
   outcome <- formula[2]
 
-  obc <- base::strsplit(formula[3], "\\+") |>
-    base::lapply(base::trimws) |>
-    base::unlist()
+  obc <- strsplit(formula[3], "\\+") |>
+    lapply(trimws) |>
+    unlist()
 
   conditions_col <- obc[1]
-  other_vars <- base::lapply(
-    base::list(
-      obc[base::grepl("block\\((.*?)\\)", obc)],
-      obc[base::grepl("cluster\\((.*?)\\)", obc)]
+  other_vars <- lapply(
+    list(
+      obc[grepl("block\\((.*?)\\)", obc)],
+      obc[grepl("cluster\\((.*?)\\)", obc)]
     ),
     gather_args
   )
 
   return(
-    base::list(
+    list(
       condition_col = conditions_col,
       success_col = outcome,
       block_cols = block(other_vars[[1]][["args"]]),
@@ -473,16 +473,16 @@ formula_parse <- function(formula) {
 #' with elements `block, "x1"`.
 
 gather_args <- function(x) {
-  if (base::length(x) == 0) {
-    return(base::list(NULL))
+  if (length(x) == 0) {
+    return(list(NULL))
   }
   call <- rlang::parse_expr(x) |>
-    base::as.list()
+    as.list()
 
-  args <- base::vapply(
+  args <- vapply(
     call[-1],
     rlang::as_label,
-    base::character(1)
+    character(1)
   )
   return(list(call = call[[1]], args = args))
 }
@@ -490,7 +490,7 @@ gather_args <- function(x) {
 # Helpers not requiring documentation, simply identity functions for block and cluster cases.
 
 block <- function(...) {
-  base::c(...)
+  c(...)
 }
 cluster <- function(x) {
   x
@@ -508,7 +508,7 @@ cluster <- function(x) {
 
 verbose_log <- function(log, message) {
   if (log) {
-    base::cat(message, "\n")
+    cat(message, "\n")
   }
 }
 
@@ -540,9 +540,9 @@ get_assignment_quantities.data.frame <- function(simulation, conditions) {
   )
 
   if (length(count_vec) < length(conditions)) {
-    missing_conds <- base::setdiff(
+    missing_conds <- setdiff(
       conditions,
-      base::names(count_vec)
+      names(count_vec)
     )
     count_vec[missing_conds] <- 0
   }
@@ -562,9 +562,9 @@ get_assignment_quantities.data.table <- function(simulation, conditions) {
     name = "mab_condition"
   )
   if (length(count_vec) < length(conditions)) {
-    missing_conds <- base::setdiff(
+    missing_conds <- setdiff(
       conditions,
-      base::names(count_vec)
+      names(count_vec)
     )
     count_vec[missing_conds] <- 0
   }
@@ -605,8 +605,8 @@ condense_results <- function(dt, keep_data, mabs, r) {
   )
 
   if (dt) {
-    results <- base::lapply(items, \(item) {
-      all <- base::lapply(seq_len(r), function(i) {
+    results <- lapply(items, \(item) {
+      all <- lapply(seq_len(r), function(i) {
         if (item == "assignment_quantities") {
           as.list(mabs[[i]][[item]])
         } else {
@@ -620,7 +620,7 @@ condense_results <- function(dt, keep_data, mabs, r) {
     names(results) <- items
     if (keep_data) {
       results[["final_data"]] <- data.table::data.table(
-        trial = base::seq_len(r),
+        trial = seq_len(r),
         data = purrr::map(mabs, ~ .x[["final_data"]])
       )
     } else {
@@ -637,7 +637,7 @@ condense_results <- function(dt, keep_data, mabs, r) {
 
     if (keep_data) {
       results[["final_data_nest"]] <- tibble::tibble(
-        trial = base::seq_len(r),
+        trial = seq_len(r),
         data = purrr::map(mabs, ~ .x[["final_data"]])
       )
     } else {
@@ -645,12 +645,12 @@ condense_results <- function(dt, keep_data, mabs, r) {
     }
   }
 
-  dims <- base::dim(mabs[[1]][["ipw_vcov"]])
-  results[["ipw_vcov"]] <- base::lapply(mabs, \(x) {
+  dims <- dim(mabs[[1]][["ipw_vcov"]])
+  results[["ipw_vcov"]] <- lapply(mabs, \(x) {
     x[["ipw_vcov"]]
   }) |>
-    base::unlist() |>
-    base::array(dim = c(dims, base::length(mabs)))
+    unlist() |>
+    array(dim = c(dims, length(mabs)))
 
   return(results)
 }

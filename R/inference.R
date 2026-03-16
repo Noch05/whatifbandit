@@ -30,7 +30,7 @@
 #' @keywords internal
 get_iaipw <- function(data, assignment_probs, periods, conditions, verbose) {
   verbose_log(verbose, "Computing Individual AIPW Estimates")
-  base::UseMethod("get_iaipw", data)
+  UseMethod("get_iaipw", data)
 }
 #-------------------------------------------------------------------------------
 #' @method get_iaipw data.frame
@@ -61,8 +61,8 @@ get_iaipw.data.frame <- function(
     paste0(names(assignment_probs)[-1], "_assign_prob")
   )
 
-  data <- base::expand.grid(
-    period_number = base::seq_len(periods),
+  data <- expand.grid(
+    period_number = seq_len(periods),
     mab_condition = conditions
   ) |>
     dplyr::left_join(prior_data, by = c("period_number", "mab_condition")) |>
@@ -73,8 +73,8 @@ get_iaipw.data.frame <- function(
     dplyr::arrange(mab_condition, period_number) |>
     dplyr::group_by(mab_condition) |>
     dplyr::mutate(
-      cumulative_successes = dplyr::lag(base::cumsum(successes), default = 0),
-      cumulative_trials = dplyr::lag(base::cumsum(trials), default = 0),
+      cumulative_successes = dplyr::lag(cumsum(successes), default = 0),
+      cumulative_trials = dplyr::lag(cumsum(trials), default = 0),
       prior_period_success_rate = dplyr::if_else(
         cumulative_trials > 0,
         cumulative_successes / cumulative_trials,
@@ -95,28 +95,28 @@ get_iaipw.data.frame <- function(
     dplyr::left_join(assignment_probs, by = "period_number")
 
   for (condition in conditions) {
-    verbose_log(verbose, base::sprintf("Condition: %s", condition))
+    verbose_log(verbose, sprintf("Condition: %s", condition))
 
-    probability <- data[[base::sprintf("%s_assign_prob", condition)]]
-    mhat <- data[[base::sprintf("prior_rate_%s", condition)]]
+    probability <- data[[sprintf("%s_assign_prob", condition)]]
+    mhat <- data[[sprintf("prior_rate_%s", condition)]]
 
-    data[[base::sprintf("aipw_%s", condition)]] <- base::ifelse(
+    data[[sprintf("aipw_%s", condition)]] <- ifelse(
       data[["mab_condition"]] == condition,
       (data[["mab_success"]] / probability) + (1 - (1 / probability)) * mhat,
       mhat
     )
   }
 
-  data[["true_assign_prob"]] <- data[base::cbind(
+  data[["true_assign_prob"]] <- data[cbind(
     seq_len(nrow(data)),
     match(paste0(data[["mab_condition"]], "_assign_prob"), names(data))
   )]
   data[["ipw_weights"]] <- 1 / data[["true_assign_prob"]]
 
-  check <- base::sum(base::is.na(data[, new_cols]))
+  check <- sum(is.na(data[, new_cols]))
 
   if (check != 0) {
-    base::warning(paste0(check, " Individual AIPW Scores are NA"))
+    warning(paste0(check, " Individual AIPW Scores are NA"))
   }
   return(data)
 }
@@ -138,7 +138,7 @@ get_iaipw.data.table <- function(
 
   prior_data <- data[,
     .(
-      successes = base::sum(mab_success),
+      successes = sum(mab_success),
       trials = .N
     ),
     by = c("mab_condition", "period_number")
@@ -146,7 +146,7 @@ get_iaipw.data.table <- function(
   data.table::setkey(prior_data, period_number)
 
   full_grid <- data.table::CJ(
-    period_number = base::seq_len(periods),
+    period_number = seq_len(periods),
     mab_condition = conditions
   )
   full_grid <- merge(
@@ -162,13 +162,13 @@ get_iaipw.data.table <- function(
   full_grid[,
     `:=`(
       cumulative_successes = data.table::shift(
-        base::cumsum(successes),
+        cumsum(successes),
         n = 1L,
         type = "lag",
         fill = 0
       ),
       cumulative_trials = data.table::shift(
-        base::cumsum(trials),
+        cumsum(trials),
         n = 1L,
         type = "lag",
         fill = 0
@@ -212,33 +212,33 @@ get_iaipw.data.table <- function(
   )
 
   for (condition in conditions) {
-    verbose_log(verbose, base::sprintf("Condition: %s", condition))
-    probability <- base::sprintf("%s_assign_prob", condition)
-    mhat <- base::sprintf("prior_rate_%s", condition)
+    verbose_log(verbose, sprintf("Condition: %s", condition))
+    probability <- sprintf("%s_assign_prob", condition)
+    mhat <- sprintf("prior_rate_%s", condition)
 
     data[,
-      (base::sprintf("aipw_%s", condition)) := data.table::fifelse(
+      (sprintf("aipw_%s", condition)) := data.table::fifelse(
         mab_condition == condition,
-        (mab_success / base::get(probability)) +
-          (1 - (1 / base::get(probability))) * base::get(mhat),
-        base::get(mhat)
+        (mab_success / get(probability)) +
+          (1 - (1 / get(probability))) * get(mhat),
+        get(mhat)
       )
     ]
   }
 
-  cols <- base::paste0(data[["mab_condition"]], "_assign_prob")
+  cols <- paste0(data[["mab_condition"]], "_assign_prob")
 
   ## Fix this is not supported
   data[,
-    true_assign_prob := data[base::cbind(seq_len(.N), match(cols, names(data)))]
+    true_assign_prob := data[cbind(seq_len(.N), match(cols, names(data)))]
   ][,
     ipw_weights := 1 / true_assign_prob
   ]
 
-  check <- base::sum(base::is.na(data[, ..new_cols]))
+  check <- sum(is.na(data[, ..new_cols]))
 
   if (check != 0) {
-    base::warning(paste0(check, " Individual AIPW Scores are NA"))
+    warning(paste0(check, " Individual AIPW Scores are NA"))
   }
 
   return(invisible(data))
@@ -293,7 +293,7 @@ estimate_aipw <- function(
 ) {
   verbose_log(verbose, "Aggregating AIPW Estimates")
 
-  base::UseMethod("estimate_ipw_aipw", data)
+  UseMethod("estimate_ipw_aipw", data)
 }
 #-------------------------------------------------------------------------------
 #' @title Adaptive AIPW Estimates for `data.frame`s
@@ -327,16 +327,16 @@ estimate_aipw.data.frame <- function(
     data
   }
   rows <- nrow(data)
-  aipw_estimates <- base::lapply(conditions, \(condition) {
-    weights <- data[[base::sprintf("%s_assign_prob", condition)]] /
-      base::nrow(data)
-    sum_w <- base::sum(weights)
-    mean <- (base::sum(
+  aipw_estimates <- lapply(conditions, \(condition) {
+    weights <- data[[sprintf("%s_assign_prob", condition)]] /
+      nrow(data)
+    sum_w <- sum(weights)
+    mean <- (sum(
       data[[paste0("aipw_", condition)]] * weights,
       na.rm = TRUE
     )) /
       (sum_w)
-    var <- (base::sum(
+    var <- (sum(
       (data[[paste0("aipw_", condition)]] - mean)^2 * weights^2,
       na.rm = TRUE
     )) /
@@ -354,7 +354,7 @@ estimate_aipw.data.frame <- function(
   sample <- data |>
     dplyr::group_by(mab_condition) |>
     dplyr::summarize(
-      mean = base::mean(mab_success),
+      mean = mean(mab_success),
       n = dplyr::n(),
       estimator = "Sample",
       .groups = "drop"
@@ -388,23 +388,23 @@ estimate_aipw.data.table <- function(
 ) {
   data <- if (clustering) {
     data[,
-      .(base::lapply(.SD, mean), mab_condition = mab_condition),
+      .(lapply(.SD, mean), mab_condition = mab_condition),
       by = c("period_number", cluster_col[["name"]]),
-      .SDcols = base::paste0("aipw_", conditions)
+      .SDcols = paste0("aipw_", conditions)
     ]
   } else {
     data
   }
   rows <- nrow(data)
-  aipw_estimates <- base::lapply(conditions, \(condition) {
+  aipw_estimates <- lapply(conditions, \(condition) {
     weights <- data[[paste0(condition, "_assign_prob")]] / rows
-    sum_w <- base::sum(weights, na.rm = TRUE)
-    mean <- (base::sum(
+    sum_w <- sum(weights, na.rm = TRUE)
+    mean <- (sum(
       data[[paste0("aipw_", condition)]] * weights,
       na.rm = TRUE
     )) /
       (sum_w)
-    var <- (base::sum(
+    var <- (sum(
       (data[[paste0("aipw_", condition)]] - mean)^2 * weights^2,
       na.rm = TRUE
     )) /
@@ -421,7 +421,7 @@ estimate_aipw.data.table <- function(
 
   sample <- data[,
     .(
-      mean = base::mean(mab_success, na.rm = TRUE),
+      mean = mean(mab_success, na.rm = TRUE),
       variance = ((mean(mab_success) * (1 - mean(mab_success))) / .N),
       estimator = "Sample"
     ),
@@ -520,7 +520,7 @@ estimate_ipw <- function(
 
   coefs <- est_lm[["coefficients"]]
   var <- (est_lm[["std.error"]])^2
-  f <- if (base::is.null(est_lm[["fstatistic"]])) {
+  f <- if (is.null(est_lm[["fstatistic"]])) {
     est_lm[["proj_statistic"]][1] |> as.numeric()
   } else {
     est_lm[["ftatistic"]][1] |> as.numeric()
@@ -528,7 +528,7 @@ estimate_ipw <- function(
   df <- est_lm[["df"]]
 
   for (item in list(coefs, var, df)) {
-    base::names(item) <- base::gsub("^mab_condition", "", base::names(item))
+    names(item) <- gsub("^mab_condition", "", names(item))
   }
 
   if (data.table::is.data.table(data)) {
@@ -536,7 +536,7 @@ estimate_ipw <- function(
       mean = c(coefs, f),
       var = c(var, NA),
       df = c(df, NA),
-      mab_condition = c(base::names(coefs), "Joint"),
+      mab_condition = c(names(coefs), "Joint"),
       estimator = "IPW",
     )
     ipw <- fill_missing_conditions(ipw, conditions)
@@ -546,7 +546,7 @@ estimate_ipw <- function(
       mean = c(coefs, f),
       var = c(var, NA),
       df = c(df, NA),
-      mab_condition = c(base::names(coefs), "Joint"),
+      mab_condition = c(names(coefs), "Joint"),
       estimator = "IPW"
     ) |>
       fill_missing_conditions(conditions) |>
@@ -572,7 +572,7 @@ estimate_ipw <- function(
 #'
 #'
 fill_missing_conditions <- function(estimates, conditions) {
-  missing_conditions <- base::setdiff(conditions, estimates[["mab_condition"]])
+  missing_conditions <- setdiff(conditions, estimates[["mab_condition"]])
   if (length(missing_conditions) > 0) {
     if (data.table::is.data.table(estimates)) {
       estimates <- data.table::rbindlist(

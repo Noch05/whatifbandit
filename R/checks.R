@@ -31,9 +31,9 @@ check_rct_args <- function(
   clustering
 ) {
   purrr::pwalk(
-    base::list(
+    list(
       c(algorithm, period_method),
-      base::list(
+      list(
         c("thompson", "ucb1"),
         c("individual", "batch", "date")
       ),
@@ -82,8 +82,8 @@ check_rct_args <- function(
         "Argument 'seeds' must be an integer vector of length equal to `r`. Please provide a valid vector.",
         "x" = sprintf(
           "You passed a %s vector of length %d, while `r` is %d.",
-          base::typeof(seeds),
-          base::length(seeds),
+          typeof(seeds),
+          length(seeds),
           r
         ),
         "i" = "Recommended to use `sample.int()` to create proper vector"
@@ -184,14 +184,14 @@ check_cols <- function(
 
   if (period_method == "date") {
     required_cols <- c(required_cols, "date_col")
-    if (time_unit == "month" && !base::is.null(data_cols[["month_col"]])) {
+    if (time_unit == "month" && !is.null(data_cols[["month_col"]])) {
       required_cols <- c(required_cols, "month_col")
     }
   }
   if (delayed_feedback) {
     required_cols <- c(required_cols, "success_date_col", "assignment_date_col")
   }
-  if (!base::is.null(data_cols[["cluster_col"]])) {
+  if (!is.null(data_cols[["cluster_col"]])) {
     required_cols <- c(required_cols, "cluster_cols")
   }
   req_reasons <- all_reasons[required_cols]
@@ -239,7 +239,7 @@ check_cols <- function(
 
   if (blocking) {
     purrr::walk(data_cols[["block_cols"]][["name"]], \(col) {
-      if (!col %in% base::names(data)) {
+      if (!col %in% names(data)) {
         rlang::abort(sprintf(
           "`%s is not in the data, but was chosen as a block.",
           col
@@ -294,7 +294,7 @@ check_logical <- function(...) {
         rlang::abort(
           c(
             sprintf("`%s` must be a logical (TRUE or FALSE)", .y),
-            "x" = base::paste0("You Passed: ", base::deparse(.x))
+            "x" = paste0("You Passed: ", deparse(.x))
           )
         )
       }
@@ -318,7 +318,7 @@ check_prop <- function(...) {
       if (is.null(.x) || !is.numeric(.x) || .x < 0 || .x > 1) {
         rlang::abort(c(
           sprintf("`%s` must be a non-null double between 0 and 1.", .y),
-          "x" = paste0("You passed: ", base::deparse(.x))
+          "x" = paste0("You passed: ", deparse(.x))
         ))
       }
     }
@@ -345,21 +345,21 @@ check_posint <- function(...) {
   bad <- !vapply(args, posint, logical(1))
   purrr::walk2(names(args)[bad], args[bad], function(name, val) {
     rlang::abort(c(
-      base::sprintf(
+      sprintf(
         "`%s` must be a positive integer or vector
       of positive integers",
         name
       ),
-      "x" = base::paste0(
+      "x" = paste0(
         "You passed: ",
-        base::deparse(val)
+        deparse(val)
       )
     ))
   })
 }
 posint <- function(x) {
-  if (base::is.numeric(x)) {
-    return(base::all(x > 0 & x %% 1 == 0))
+  if (is.numeric(x)) {
+    return(all(x > 0 & x %% 1 == 0))
   } else {
     return(FALSE)
   }
@@ -386,9 +386,9 @@ check_data <- function(
   if (period_method == "batch" && period_length > nrow(data)) {
     rlang::abort(c(
       "`period_length` cannot be larger than data size",
-      "x" = base::sprintf(
+      "x" = sprintf(
         "You data has %d rows, and your batch size is %d rows",
-        base::nrow(data),
+        nrow(data),
         period_length
       )
     ))
@@ -397,7 +397,7 @@ check_data <- function(
     unit <- switch(
       time_unit,
       "day" = lubridate::days(1),
-      "month" = base::months(1),
+      "month" = months(1),
       "week" = lubridate::weeks(1)
     )
 
@@ -406,17 +406,17 @@ check_data <- function(
       max(data[[data_cols[["date_col"]][["name"]]]])
     ) /
       unit
-    data_interval <- base::round(data_interval, 0)
+    data_interval <- round(data_interval, 0)
 
     if (period_length > data_interval) {
       rlang::abort(c(
         "`period_length` cannot be larger the date range of your data",
-        "x" = base::sprintf(
+        "x" = sprintf(
           "Your period length is %d %ss but your data only covers %d %ss",
           period_length,
-          base::tolower(time_unit),
+          tolower(time_unit),
           data_interval,
-          base::tolower(time_unit)
+          tolower(time_unit)
         )
       ))
     }
@@ -441,9 +441,9 @@ check_period_method <- function(
 ) {
   if (period_method == "date") {
     if (
-      base::is.null(time_unit) ||
-        base::length(time_unit) != 1 ||
-        base::isTRUE(base::is.na(time_unit))
+      is.null(time_unit) ||
+        length(time_unit) != 1 ||
+        isTRUE(is.na(time_unit))
     ) {
       rlang::abort(
         "`time_unit` must be provided when assignment method is `date`."
@@ -452,7 +452,7 @@ check_period_method <- function(
     check_string(time_unit, c("day", "week", "month"), "Time Unit")
   }
   if (period_method %in% c("batch", "date")) {
-    if (base::is.null(period_length)) {
+    if (is.null(period_length)) {
       rlang::abort(c(
         "`period_length`, must be provided when date or batch based periods are used."
       ))
@@ -460,14 +460,14 @@ check_period_method <- function(
     if (!posint(period_length)) {
       rlang::abort(c(
         "`period_length` must be a positive integer.",
-        "x" = paste0("You passed: ", base::deparse(period_length))
+        "x" = paste0("You passed: ", deparse(period_length))
       ))
     }
   }
   if (
     verbose &&
       !period_method %in% c("batch", "date") &&
-      !base::is.null(time_unit)
+      !is.null(time_unit)
   ) {
     rlang::warn(c(
       "i" = "`time_unit` is not required when assignment method is not `date`. It will be ignored"
@@ -506,42 +506,42 @@ check_mab_sim <- function(
   check_posint(n, t, ndraws, r, prior_periods, period_sizes)
   check_prop(control_augment, random_assign_prop, discount_rate)
 
-  if (!base::is.null(blocks) && !base::is.null(clusters)) {
-    base::do.call(check_sum1, c(list(blocks), clusters))
-  } else if (!base::is.null(clusters)) {
+  if (!is.null(blocks) && !is.null(clusters)) {
+    do.call(check_sum1, c(list(blocks), clusters))
+  } else if (!is.null(clusters)) {
     check_sum1(clusters = clusters)
-  } else if (!base::is.null(blocks)) {
+  } else if (!is.null(blocks)) {
     check_sum1(blocks = blocks)
   }
 
-  if (!base::is.null(time_model) && !base::is.function(time_model)) {
+  if (!is.null(time_model) && !is.function(time_model)) {
     rlang::abort("`time_model` must be a function")
   }
 
   if (t > n) {
     rlang::abort(
       c("`t` cannot be larger than `n`"),
-      "x" = base::sprintf("You Passed: t: %d, n: %d", t, n)
+      "x" = sprintf("You Passed: t: %d, n: %d", t, n)
     )
   }
-  if (t != base::length(period_sizes)) {
+  if (t != length(period_sizes)) {
     rlang::abort(
       c(
         "When provided `period_sizes` must be length `t`",
-        "x" = base::sprintf("`t`: %d", t),
-        "x" = base::paste0(
+        "x" = sprintf("`t`: %d", t),
+        "x" = paste0(
           "`length(period_sizes) = ",
-          base::length(period_sizes)
+          length(period_sizes)
         )
       )
     )
   }
   check_string(algorithm, c("static", "thompson", "ucb1"), "algorithm")
 
-  if (base::any(p > 1 | p < 0)) {
+  if (any(p > 1 | p < 0)) {
     rlang::abort(c(
       "all `p` must be probabilities between 0 and 1",
-      "x" = base::paste0("You passed: ", base::paste0(p, collapse = ", "))
+      "x" = paste0("You passed: ", paste0(p, collapse = ", "))
     ))
   }
 }
@@ -558,9 +558,9 @@ check_sum1 <- function(...) {
   purrr::iwalk(args, \(arg, name) {
     if (sum(arg) != 1) {
       rlang::abort(c(
-        base::sprintf("`%s` must sum to 1", name),
-        "x" = base::paste0("You passed: ", base::paste0(arg, collapse = ",")),
-        "x" = base::paste0("Sum: ", base::sum(arg))
+        sprintf("`%s` must sum to 1", name),
+        "x" = paste0("You passed: ", paste0(arg, collapse = ",")),
+        "x" = paste0("Sum: ", sum(arg))
       ))
     }
   })
@@ -579,12 +579,12 @@ check_string <- function(arg, valid, name) {
   if (!arg %in% valid) {
     rlang::abort(
       c(
-        base::sprintf("Invalid `%s`", name),
-        "i" = base::sprintf(
+        sprintf("Invalid `%s`", name),
+        "i" = sprintf(
           "Valid Options: %s",
-          base::paste0(valid, collapse = ", ")
+          paste0(valid, collapse = ", ")
         ),
-        "x" = base::sprintf("You Provided: '%s'", arg)
+        "x" = sprintf("You Provided: '%s'", arg)
       )
     )
   }

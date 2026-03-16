@@ -30,7 +30,7 @@ imputation_precompute <- function(
   delayed_feedback,
   data_cols
 ) {
-  base::UseMethod("imputation_precompute", data)
+  UseMethod("imputation_precompute", data)
 }
 #-------------------------------------------------------------------------------
 
@@ -49,7 +49,7 @@ imputation_precompute.data.frame <- function(
     data |>
       dplyr::group_by(treatment_block) |>
       dplyr::summarize(
-        success_rate = base::mean(
+        success_rate = mean(
           !!data_cols[["success_col"]][["sym"]],
           na.rm = TRUE
         ),
@@ -62,14 +62,14 @@ imputation_precompute.data.frame <- function(
       dplyr::group_by(period_number, treatment_block) |>
       dplyr::summarize(
         count = dplyr::n(),
-        n_success = base::sum(!!data_cols[["success_col"]][["sym"]]),
+        n_success = sum(!!data_cols[["success_col"]][["sym"]]),
         .groups = "drop",
       ) |>
       dplyr::arrange(period_number, treatment_block) |>
       dplyr::group_by(treatment_block) |>
       dplyr::mutate(
-        cumulative_count = dplyr::lag(base::cumsum(count), default = 0),
-        cumulative_success = dplyr::lag(base::cumsum(n_success), default = 0),
+        cumulative_count = dplyr::lag(cumsum(count), default = 0),
+        cumulative_success = dplyr::lag(cumsum(n_success), default = 0),
         success_rate = dplyr::if_else(
           cumulative_count > 0,
           (cumulative_success / cumulative_count),
@@ -87,7 +87,7 @@ imputation_precompute.data.frame <- function(
     data |>
       dplyr::group_by(treatment_block, period_number) |>
       dplyr::summarize(
-        mean_date = base::mean(
+        mean_date = mean(
           !!data_cols[["success_date_col"]][["sym"]],
           na.rm = TRUE
         ),
@@ -95,8 +95,8 @@ imputation_precompute.data.frame <- function(
       ) |>
       dplyr::arrange(period_number) |>
       dplyr::group_split(period_number) |>
-      base::lapply(\(df) {
-        base::as.Date(as_named_vec(
+      lapply(\(df) {
+        as.Date(as_named_vec(
           df,
           val = "mean_date",
           name = "treatment_block"
@@ -130,8 +130,8 @@ imputation_precompute.data.table <- function(
   original_summary <- if (whole_experiment) {
     rct_sum <- data[,
       .(
-        success_rate = base::mean(
-          base::get(data_cols[["success_col"]][["name"]]),
+        success_rate = mean(
+          get(data_cols[["success_col"]][["name"]]),
           na.rm = TRUE
         )
       ),
@@ -144,8 +144,8 @@ imputation_precompute.data.table <- function(
     rct_sum <- data[,
       .(
         count = .N,
-        n_success = base::sum(
-          base::get(data_cols[["success_col"]][["name"]])
+        n_success = sum(
+          get(data_cols[["success_col"]][["name"]])
         )
       ),
       by = .(period_number, treatment_block)
@@ -156,12 +156,12 @@ imputation_precompute.data.table <- function(
     rct_sum[,
       `:=`(
         cumulative_count = data.table::shift(
-          base::cumsum(count),
+          cumsum(count),
           type = "lag",
           fill = 0
         ),
         cumulative_success = data.table::shift(
-          base::cumsum(n_success),
+          cumsum(n_success),
           type = "lag",
           fill = 0
         )
@@ -187,11 +187,11 @@ imputation_precompute.data.table <- function(
     data[, .(
       period_number,
       treatment_block,
-      base::get(data_cols[["success_date_col"]][["name"]])
+      get(data_cols[["success_date_col"]][["name"]])
     )] |>
       split(by = "period_number") |>
       lapply(\(df) {
-        base::as.Date(as_named_vec(
+        as.Date(as_named_vec(
           df,
           val = "mean_date",
           name = "treatment_block"
@@ -220,22 +220,22 @@ imputation_precompute.data.table <- function(
 #' columns `failure_rate` and `success_rate`.
 #' @keywords internal
 summary_to_matrix <- function(df) {
-  base::UseMethod("summary_to_matrix", df)
+  UseMethod("summary_to_matrix", df)
 }
 
 #' @method summary_to_matrix data.frame
 #' @noRd
 summary_to_matrix.data.frame <- function(df) {
-  m <- base::as.matrix(df[, c("failure_rate", "success_rate")])
-  base::rownames(m) <- df[["treatment_block"]]
+  m <- as.matrix(df[, c("failure_rate", "success_rate")])
+  rownames(m) <- df[["treatment_block"]]
   m
 }
 
 #' @method summary_to_matrix data.table
 #' @noRd
 summary_to_matrix.data.table <- function(df) {
-  m <- base::as.matrix(df[, .(failure_rate, success_rate)])
-  base::rownames(m) <- df[["treatment_block"]]
+  m <- as.matrix(df[, .(failure_rate, success_rate)])
+  rownames(m) <- df[["treatment_block"]]
   m
 }
 
@@ -286,7 +286,7 @@ impute_prep <- function(
         .SDcols = c("mab_condition", block_cols)
       ]
     } else {
-      current_data[, impute_block := base::as.character(mab_condition)]
+      current_data[, impute_block := as.character(mab_condition)]
     }
   } else {
     if (blocking) {
@@ -301,7 +301,7 @@ impute_prep <- function(
         )
       )
     } else {
-      current_data[["impute_block"]] <- base::as.character(
+      current_data[["impute_block"]] <- as.character(
         current_data[["mab_condition"]]
       )
     }
@@ -318,7 +318,7 @@ impute_prep <- function(
   } else {
     NULL
   }
-  impute_idx <- base::which(current_data[["impute_req"]] == 1)
+  impute_idx <- which(current_data[["impute_req"]] == 1)
 
   impute_success <- check_impute(
     impute_success = impute_success,
@@ -360,30 +360,30 @@ impute_prep <- function(
 #' @keywords internal
 check_impute <- function(impute_success, current_data, impute_idx) {
   current_blocks <- stats::na.omit(current_data[["impute_block"]][impute_idx])
-  imputation_blocks <- base::rownames(impute_success)
+  imputation_blocks <- rownames(impute_success)
 
-  missing_blocks <- base::setdiff(current_blocks, imputation_blocks)
-  blocks_to_remove <- base::setdiff(imputation_blocks, current_blocks)
+  missing_blocks <- setdiff(current_blocks, imputation_blocks)
+  blocks_to_remove <- setdiff(imputation_blocks, current_blocks)
 
-  if (base::length(missing_blocks) > 0) {
-    mean_rate <- base::mean(impute_success[, "success_rate"])
-    n_miss <- base::length(missing_blocks)
-    addition <- base::matrix(
-      c(base::rep(1 - mean_rate, n_miss), base::rep(mean_rate, n_miss)),
+  if (length(missing_blocks) > 0) {
+    mean_rate <- mean(impute_success[, "success_rate"])
+    n_miss <- length(missing_blocks)
+    addition <- matrix(
+      c(rep(1 - mean_rate, n_miss), rep(mean_rate, n_miss)),
       nrow = n_miss,
       ncol = 2,
-      dimnames = base::list(missing_blocks, c("failure_rate", "success_rate"))
+      dimnames = list(missing_blocks, c("failure_rate", "success_rate"))
     )
-    impute_success <- base::rbind(impute_success, addition)
+    impute_success <- rbind(impute_success, addition)
   }
 
-  if (base::length(blocks_to_remove) > 0) {
-    keep <- !base::rownames(impute_success) %in% blocks_to_remove
+  if (length(blocks_to_remove) > 0) {
+    keep <- !rownames(impute_success) %in% blocks_to_remove
     impute_success <- impute_success[keep, , drop = FALSE]
   }
 
   return(impute_success[
-    base::order(base::rownames(impute_success)),
+    order(rownames(impute_success)),
     ,
     drop = FALSE
   ])
@@ -428,7 +428,7 @@ impute_success <- function(
   impute_idx,
   idx
 ) {
-  base::UseMethod("impute_success", current_data)
+  UseMethod("impute_success", current_data)
 }
 
 #' Compute Imputations
@@ -442,18 +442,18 @@ compute_impute <- function(imputation_info) {
   current_data <- imputation_info[["current_data"]]
   imputation_means <- imputation_info[["impute_success"]]
   impute_idx <- imputation_info[["impute_idx"]]
-  non_impute_idx <- base::setdiff(
-    base::seq_len(base::nrow(current_data)),
+  non_impute_idx <- setdiff(
+    seq_len(nrow(current_data)),
     impute_idx
   )
 
-  imputations <- base::vector(
+  imputations <- vector(
     mode = "numeric",
-    length = base::nrow(current_data)
+    length = nrow(current_data)
   )
   imputations[non_impute_idx] <- current_data[[success_col]][non_impute_idx]
 
-  if (base::length(impute_idx) > 0) {
+  if (length(impute_idx) > 0) {
     imputations[impute_idx] <- randomizr::block_ra(
       blocks = current_data[["impute_block"]][impute_idx],
       block_prob_each = imputation_means,
@@ -490,7 +490,7 @@ impute_success.data.frame <- function(
         current_data[[success_col]] == 0 ~ dates[
         current_data[["impute_block"]]
       ],
-      .default = base::as.Date(NA)
+      .default = as.Date(NA)
     )
   }
 
@@ -525,9 +525,9 @@ impute_success.data.table <- function(
     dates <- imputation_info[["impute_dates"]]
     current_data[,
       new_success_date := data.table::fcase(
-        impute_req == 0                          , base::get(success_date_col) ,
-        mab_success == 1 & get(success_col) == 0 , dates[impute_block]         ,
-        default = base::as.Date(NA)
+        impute_req == 0                          , get(success_date_col) ,
+        mab_success == 1 & get(success_col) == 0 , dates[impute_block]   ,
+        default = as.Date(NA)
       )
     ]
     modified_cols <- c(modified_cols, "new_success_date")
@@ -535,5 +535,5 @@ impute_success.data.table <- function(
 
   data[idx, (modified_cols) := current_data[, ..modified_cols]]
 
-  return(base::invisible(data))
+  return(invisible(data))
 }
