@@ -214,7 +214,7 @@ mab_loop <- function(
     prior_data <- data[starts[prior]:ends[i - 1], ]
 
     if (algorithm != "static") {
-      current_bandit <- get_prior(
+      current_bandit <- compute_prior(
         current_data = current_data,
         prior_data = prior_data,
         delayed_feedback = delayed_feedback,
