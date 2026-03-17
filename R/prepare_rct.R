@@ -534,7 +534,7 @@ create_new_cols.data.table <- function(
         get(
           data_cols$condition_col$name
         ),
-        mab_success = ..(data_cols$success_col$name),
+        mab_success = get(data_cols$success_col$name),
       ),
       impute_req = 0,
       impute_block = NA_character_,
@@ -544,7 +544,7 @@ create_new_cols.data.table <- function(
   if (delayed_feedback) {
     data[
       period_number == 1,
-      new_success_date := ..(data_cols$success_date_col$name)
+      new_success_date := get(data_cols$success_date_col$name)
     ]
   }
   if (blocking) {
