@@ -8,7 +8,7 @@ check_impute(impute_success, current_data, impute_idx)
 }
 \arguments{
 \item{impute_success}{The \code{success} element of the \code{imputation_information}
-list created by \code{\link[=imputation_precompute]{imputation_precompute()}} for the given period.}
+list created by \code{\link[=precompute_imputation]{precompute_imputation()}} for the given period.}
 
 \item{current_data}{A \code{data.frame} or \code{data.table} with only observations from the current sampling period.}
 
@@ -18,7 +18,7 @@ list created by \code{\link[=imputation_precompute]{imputation_precompute()}} fo
 Proper \code{impute_success} matrix as required by \code{\link[randomizr:block_ra]{randomizr::block_ra()}}
 }
 \description{
-Subsets or adds to the \code{tibble}/\code{data.table} created by \code{\link[=imputation_precompute]{imputation_precompute()}},
+Subsets or adds to the \code{tibble}/\code{data.table} created by \code{\link[=precompute_imputation]{precompute_imputation()}},
 and sorts it to ensure compatibility with \code{\link[randomizr:block_ra]{randomizr::block_ra()}}.
 }
 \details{

@@ -33,7 +33,7 @@ A \code{tibble}/\code{data.table} containing the AIPW estimate of treatment succ
 sample proportion of successful treatments (sample mean), and sample mean variance.
 }
 \description{
-Uses provided Invidual AIPW scores created by \code{\link[=get_iaipw]{get_iaipw()}} and computes the final
+Uses provided Invidual AIPW scores created by \code{\link[=compute_iaipw]{compute_iaipw()}} and computes the final
 AIPW estimate and variance using the formulas from  \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et. al (2021)}.
 Uses the constant allocation rate adaptive weight.
 }

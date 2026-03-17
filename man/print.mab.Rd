@@ -7,7 +7,7 @@
 \method{print}{mab}(x, ...)
 }
 \arguments{
-\item{x}{A \code{mab} class object created by \code{\link[=mab_from_rct.bernoulli]{mab_from_rct.bernoulli()}}.}
+\item{x}{A \code{mab} class object created by \code{\link[=mab_from_rct]{mab_from_rct()}}.}
 
 \item{...}{Further arguments passed to or from other methods.}
 }
@@ -15,7 +15,7 @@
 Text summary of settings used for the Multi-Arm Bandit trial.
 }
 \description{
-Custom Print Display for objects of \code{mab} class returned by \code{\link[=mab_from_rct.bernoulli]{mab_from_rct.bernoulli()}}.
+Custom Print Display for objects of \code{mab} class returned by \code{\link[=mab_from_rct]{mab_from_rct()}}.
 Prevents the large list from being printed directly, and provides
 useful information about the settings of each trial.
 }

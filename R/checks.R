@@ -1,11 +1,11 @@
-#' @title Validates Inputs For [mab_from_rct.bernoulli()]
+#' @title Validates Inputs For [mab_from_rct()]
 #' @name check_rct_args
 #' @description This function checks to ensure that all required arguments
 #' have been properly passed to the function before continuing with the simulation. When
 #' errors are thrown, user-friendly messages are provided to indicate which argument
 #' was misspecified. Additionally, when `verbose = TRUE`, additional warning
 #' messages may be shown if unnecessary arguments are passed.
-#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams mab_from_rct
 #' @inheritParams prep_rct_data
 #' @returns Throws an error if an argument is missing or misspecified.
 #' @keywords internal
@@ -109,7 +109,7 @@ check_rct_args <- function(
 #' @description Helper to [check_rct_args()]. This function accepts the user's
 #' settings for the Multi-Arm-Bandit trial, and checks whether columns in the data have been properly
 #' specified based on these settings.
-#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams mab_from_rct
 #' @inheritParams prep_rct_data
 #' @returns Throws an error if columns which are required have not been declared
 #' or are not present in the data, or are the wrong primitive data type. Additionally throws warning messages,
@@ -372,7 +372,7 @@ posint <- function(x) {
 #' of the trial based on user settings.
 #' @description Helper to [check_rct_args()]. This function accepts the data and checks
 #' whether it has unique ID's whether the period length is valid.
-#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams mab_from_rct
 #' @inheritParams prep_rct_data
 #' @keywords internal
 check_data <- function(
@@ -430,7 +430,7 @@ check_data <- function(
 #' @description Helper to [check_rct_args()]. This function accepts arguments relating
 #' to how treatment waves are assigned, and checks if they are valid, and if all
 #' supporting arguments are passed as necessary.
-#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams mab_from_rct
 #' @inheritParams prep_rct_data
 #' @keywords internal
 check_period_method <- function(
@@ -475,12 +475,12 @@ check_period_method <- function(
   }
 }
 #----------------------------------------------------------------------------
-#' Perform Validation Checks for [mab_trial_sim.bernoulli()]
+#' Perform Validation Checks for [simulate_mab()]
 #' @description
-#' Ensures all arguments to [mab_trial_sim.bernoulli()] are properly
+#' Ensures all arguments to [simulate_mab()] are properly
 #' provided accordingly.
 #' @name check_mab_sim
-#' @inheritParams mab_trial_sim.bernoulli
+#' @inheritParams simulate_mab
 #' @returns Nothing; Throws an error if checks are not met
 #' @keywords internal
 check_mab_sim <- function(

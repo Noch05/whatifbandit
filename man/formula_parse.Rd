@@ -18,6 +18,6 @@ simply do not provide them in the formula. Clusters can only ever be given by 1 
 List of columns specified from formula.
 }
 \description{
-Parsers the input formula for \code{\link[=mab_from_rct.bernoulli]{mab_from_rct.bernoulli()}}
+Parsers the input formula for \code{\link[=mab_from_rct]{mab_from_rct()}}
 }
 \keyword{internal}

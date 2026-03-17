@@ -7,7 +7,7 @@
 #' key values to avoid doing so within the simulation loop.
 #' @param blocking Logical; Whether or not treatment blocking is occuring
 #' @param clustering Logical; Whether or not treatment clustering is occuring
-#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams mab_from_rct
 #' @param data_cols List holding the columns required from the provided data as strings and symbols.
 #'
 #' @returns Named list containing:
@@ -15,10 +15,10 @@
 #' \item `data_cols`: List of necessary columns in `data` as strings and as symbols.
 #' \item `data`: Prepared `data.frame` or `data.table` containing all the necessary columns to
 #' conduct the adaptive trial simulation, subset from the originally provided data to reduce memory usage.
-#' columns required for [simulate_mab()].
+#' columns required for [run_mab()].
 #' \item `char_args` List of processed string arguments for compatibility.
 #' \item `imputation_information`: List containing necessary information
-#' for outcome and date imputation for [simulate_mab()].
+#' for outcome and date imputation for [run_mab()].
 #' \item `period_starts`: Numeric vector where element `i` is the starting row number of period `i`.
 #' \item `period_starts`: Numeric vector where element `i` is the ending row number of period `i`.
 #' }
@@ -133,7 +133,7 @@ prep_rct_data <- function(
   # Pre-computing Important values to be accessed for the simulation
   verbose_log(verbose, "Precomputing")
 
-  imputation_information <- imputation_precompute(
+  imputation_information <- precompute_imputation(
     data = data,
     whole_experiment = whole_experiment,
     data_cols = data_cols,
@@ -163,7 +163,7 @@ prep_rct_data <- function(
 #' using the conditions column in the provided data, and if `control_augment` is greater
 #' than 0, it also labels the control condition. Throws an error of `control_condition` is not
 #' present.
-#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams mab_from_rct
 #' @inheritParams prep_rct_data
 #' @keywords internal
 create_conditions <- function(
@@ -215,7 +215,7 @@ create_conditions <- function(
 #' `date_col` and `month_col` in `data_cols`, and the `period_length`. Creates a new
 #' column indicating with period each observation belongs to.
 #'
-#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams mab_from_rct
 #' @inheritParams prep_rct_data
 #' @details
 #' The assignment periods do not strictly have to line up with the original experiment, it
@@ -255,7 +255,7 @@ create_cutoff <- function(
 #------------------------------------------------------------------------------------------
 #' @method create_cutoff date
 #' @title [create_cutoff()] Date Based Periods
-#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams mab_from_rct
 #' @noRd
 create_cutoff.date <- function(
   data,
@@ -365,7 +365,7 @@ create_cutoff.date <- function(
 
 #' @method create_cutoff individual
 #' @title [create_cutoff()] Individual Periods
-#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams mab_from_rct
 #' @noRd
 #'
 create_cutoff.individual <- function(data) {
@@ -384,7 +384,7 @@ create_cutoff.individual <- function(data) {
 #----------------------------------------------------------------------------------
 #' @method create_cutoff batch
 #' @title [create_cutoff()] Batch Based Periods
-#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams mab_from_rct
 #' @noRd
 #'
 create_cutoff.batch <- function(data, period_length) {
@@ -409,7 +409,7 @@ create_cutoff.batch <- function(data, period_length) {
 #' These are initialized as `NA` except for observations with `period_number` = 1, whose values are copied
 #' from the provided columns, and used as the starting point for the simulation.
 #'
-#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams mab_from_rct
 #' @inheritParams prep_rct_data
 #' @param vars_keep Character vector of variables to keep
 #'
@@ -569,7 +569,7 @@ create_new_cols.data.table <- function(
 #' @title Compute exact period sizes
 #' @name get_period_sizes
 #'
-#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams mab_from_rct
 #'
 #' @returns Numeric vector of `length(max(period_nummber))` with each element representing the number of units in each period.
 #'

@@ -7,7 +7,7 @@
 compute_impute(imputation_info)
 }
 \arguments{
-\item{imputation_info}{List containing all necessary information for imputation, generated each period by \code{\link[=impute_prep]{impute_prep()}}}
+\item{imputation_info}{List containing all necessary information for imputation, generated each period by \code{\link[=prep_imputation]{prep_imputation()}}}
 }
 \value{
 Numeric vector of imputed outcomes

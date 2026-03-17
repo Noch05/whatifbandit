@@ -1,10 +1,10 @@
 #' Precomputing Key Values for Outcome Imputation
-#' @name imputation_precompute
+#' @name precompute_imputation
 #' @description Pre-computes key values required for the outcome imputation step of the MAB
 #' procedure. Calculates the probabilities of success for each treatment block (treatment arm + any blocking specified),
 #' using the grouped means of the original experimental data. When `delayed_feedback = TRUE`, the average date of
 #' success is calculated for each treatment block at every period.
-#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams mab_from_rct
 #' @inheritParams prep_rct_data
 #' @returns A named list containing:
 #' \itemize{
@@ -14,7 +14,7 @@
 #' each treatment block at each treatment period.
 #' }
 #' @details
-#' [imputation_precompute()] is an optimization, meant to reduce the cost of calculating these variables
+#' [precompute_imputation()] is an optimization, meant to reduce the cost of calculating these variables
 #' within the simulation loop. When `whole_experiment = TRUE`, `original_summary` is a single matrix,
 #' and used through the simulation. When `whole_experiment = FALSE`, `original_summary` is a list of matrices,
 #' each containing the cumulative probabilities of all periods up to the index `i`.
@@ -24,22 +24,22 @@
 #' No covariates are used in the calculation, these are all simply grouped means.
 #' @keywords internal
 
-imputation_precompute <- function(
+precompute_imputation <- function(
   data,
   whole_experiment,
   delayed_feedback,
   data_cols
 ) {
-  UseMethod("imputation_precompute", data)
+  UseMethod("precompute_imputation", data)
 }
 #-------------------------------------------------------------------------------
 
-#' @method imputation_precompute data.frame
-#' @title [imputation_precompute()] for data.frames
-#' @inheritParams imputation_precompute
+#' @method precompute_imputation data.frame
+#' @title [precompute_imputation()] for data.frames
+#' @inheritParams precompute_imputation
 #' @noRd
 
-imputation_precompute.data.frame <- function(
+precompute_imputation.data.frame <- function(
   data,
   whole_experiment,
   delayed_feedback,
@@ -115,13 +115,13 @@ imputation_precompute.data.frame <- function(
 }
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-#' @method imputation_precompute data.table
+#' @method precompute_imputation data.table
 #' @title
-#' [imputation_precompute()] for `data.table`s
-#' @inheritParams imputation_precompute
+#' [precompute_imputation()] for `data.table`s
+#' @inheritParams precompute_imputation
 #' @noRd
 
-imputation_precompute.data.table <- function(
+precompute_imputation.data.table <- function(
   data,
   whole_experiment,
   delayed_feedback,
@@ -244,19 +244,19 @@ summary_to_matrix.data.table <- function(df) {
 #' @title Outcome Imputation Preparation
 #' @description Executes all preparations necessary to impute outcomes for
 #' each iteration of the simulation loop. Adds an additional column to the current data,
-#' subsets necessary information from the [imputation_precompute()] output, and checks to ensure
+#' subsets necessary information from the [precompute_imputation()] output, and checks to ensure
 #' compatibility with [randomizr::block_ra()].
-#' @inheritParams get_past_results
-#' @inheritParams run_mab_trial
+#' @inheritParams compute_prior
+#' @inheritParams mab_loop
 #' @inheritParams impute_success
 #' @param block_cols Names of the blocking columns
 #' @returns A named list containing:
 #' \itemize{
 #' \item `current_data`: A `tibble` or `data.table` containing `impute_block` column to guide the outcome imputations
 #' \item `impute_success`: A matrix object containing probabilities of success by `treatment_block` used to impute
-#' outcomes. Subsetted from the [imputation_precompute()] output.
+#' outcomes. Subsetted from the [precompute_imputation()] output.
 #' \item `impute_dates`: Named date vector by treatment condition, containing the dates of success
-#' to impute if delayed_feedback is FALSE. Subsetted from the [imputation_precompute()] output.}
+#' to impute if delayed_feedback is FALSE. Subsetted from the [precompute_imputation()] output.}
 #'
 #' @details
 #' The goal of this function is to set up the imputation procedure and prevent
@@ -270,7 +270,7 @@ summary_to_matrix.data.table <- function(df) {
 #'
 #' @keywords internal
 
-impute_prep <- function(
+prep_imputation <- function(
   current_data,
   block_cols,
   imputation_information,
@@ -335,14 +335,14 @@ impute_prep <- function(
 }
 #-------------------------------------------------------------------------------
 #' Checking Imputation Info
-#' @description Subsets or adds to the `tibble`/`data.table` created by [imputation_precompute()],
+#' @description Subsets or adds to the `tibble`/`data.table` created by [precompute_imputation()],
 #' and sorts it to ensure compatibility with [randomizr::block_ra()].
 #'
 #' @name check_impute
-#' @inheritParams get_past_results
+#' @inheritParams compute_prior
 #' @inheritParams impute_success
 #' @param impute_success The `success` element of the `imputation_information`
-#' list created by [imputation_precompute()] for the given period.
+#' list created by [precompute_imputation()] for the given period.
 #' @details
 #' [randomizr::block_ra()] does not see the names
 #' of the probabilities passed per block, so the imputation information must be subsetted
@@ -397,8 +397,8 @@ check_impute <- function(impute_success, current_data, impute_idx) {
 #' who were assigned new treatments. The probabilities used to guide the imputation
 #' of the outcomes are pre-computed using the existing data from the original randomized experiment.
 #' @inheritParams prep_rct_data
-#' @inheritParams mab_from_rct.bernoulli
-#' @param imputation_info List containing all necessary information for imputation, generated each period by [impute_prep()]
+#' @inheritParams mab_from_rct
+#' @param imputation_info List containing all necessary information for imputation, generated each period by [prep_imputation()]
 #' @param impute_idx Index of rows in `current_data` that need to be imputed.
 #' @param idx Index of rows imputed in the period, used to update the original data.
 #' @returns Updated `data` object with all the updates from the current period of the simulation
@@ -415,8 +415,8 @@ check_impute <- function(impute_success, current_data, impute_idx) {
 #' experiment.
 #'
 #' @seealso
-#'* [impute_prep()]
-#'* [imputation_precompute()]
+#'* [prep_imputation()]
+#'* [precompute_imputation()]
 #'* [randomizr::block_ra()]
 #' @keywords internal
 impute_success <- function(

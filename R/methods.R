@@ -1,9 +1,9 @@
 #' Print Generic For `mab`
 #' @description
-#' Custom Print Display for objects of `mab` class returned by [mab_from_rct.bernoulli()].
+#' Custom Print Display for objects of `mab` class returned by [mab_from_rct()].
 #' Prevents the large list from being printed directly, and provides
 #' useful information about the settings of each trial.
-#' @param x A `mab` class object created by [mab_from_rct.bernoulli()].
+#' @param x A `mab` class object created by [mab_from_rct()].
 #' @param ... Further arguments passed to or from other methods.
 #' @method print mab
 #' @name print.mab
@@ -35,7 +35,7 @@
 #' print(x)
 print.mab <- function(x, ...) {
   print_mab(x)
-  base::cat("----------------------------------------------------- \n")
+  cat("----------------------------------------------------- \n")
 }
 #-------------------------------------------------------------------------------
 #' Print Helper for `mab` and `multiple.mab`
@@ -47,45 +47,45 @@ print.mab <- function(x, ...) {
 print_mab <- function(mab) {
   settings <- mab$settings
 
-  base::cat(
+  cat(
     "Summary for MAB Procedure: \n ----------------------------------------------------- \n"
   )
 
-  base::cat("Bandit Algorithm:     ", settings$algorithm, "\n")
-  base::cat("Control Augmentation: ", settings$control_augment, "\n")
-  base::cat("Bandit Assignment:    ", 1 - settings$random_assign_prop, "\n")
-  base::cat("Randomized Assignment:", settings$random_assign_prop, "\n")
-  base::cat("Perfect Assignment:   ", settings$perfect_assignment, "\n")
-  base::cat("Whole Experiment:     ", settings$whole_experiment, "\n")
+  cat("Bandit Algorithm:     ", settings$algorithm, "\n")
+  cat("Control Augmentation: ", settings$control_augment, "\n")
+  cat("Bandit Assignment:    ", 1 - settings$random_assign_prop, "\n")
+  cat("Randomized Assignment:", settings$random_assign_prop, "\n")
+  cat("Perfect Assignment:   ", settings$perfect_assignment, "\n")
+  cat("Whole Experiment:     ", settings$whole_experiment, "\n")
   if (settings$blocking) {
-    base::cat("Blocking Variables:   ", settings$block_cols, "\n")
+    cat("Blocking Variables:   ", settings$block_cols, "\n")
   }
-  base::cat("Assignment Method:    ", settings$assignment_method, "\n")
+  cat("Assignment Method:    ", settings$assignment_method, "\n")
 
   if (settings$assignment_method %in% c("batch", "date")) {
-    base::cat("Period Length:        ", settings$period_length)
+    cat("Period Length:        ", settings$period_length)
   }
   if (settings$assignment_method == "batch") {
-    base::cat(" People\n")
+    cat(" People\n")
   }
   if (settings$assignment_method == "date") {
-    base::cat("", settings$time_unit)
+    cat("", settings$time_unit)
     if (settings$period_length > 1) {
-      base::cat("s\n")
+      cat("s\n")
     } else {
-      base::cat("\n")
+      cat("\n")
     }
   }
 
-  base::cat(
+  cat(
     "Total Periods:        ",
     max(mab$bandits$period_number),
     "periods\n"
   )
-  base::cat("Prior Periods:        ", settings$prior_periods, "periods\n")
-  base::cat("Number of Treatments: ", length(settings$conditions), "\n")
+  cat("Prior Periods:        ", settings$prior_periods, "periods\n")
+  cat("Number of Treatments: ", length(settings$conditions), "\n")
   if (settings$control_augment > 0) {
-    base::cat("Control Group:        ", settings$control, "\n")
+    cat("Control Group:        ", settings$control, "\n")
   }
 }
 
@@ -134,7 +134,7 @@ print_mab <- function(mab) {
 #' @example inst/examples/summary.mab_example.R
 summary.mab <- function(object, level = 0.95, ...) {
   check_level(level)
-  periods <- base::max(object$bandits$period_number)
+  periods <- max(object$bandits$period_number)
   col2 <- switch(
     object$settings$algorithm,
     "ucb1" = "UCB1_Value",
@@ -148,7 +148,7 @@ summary.mab <- function(object, level = 0.95, ...) {
   quantities <- tibble::as_tibble(quantities) |>
     dplyr::mutate(mab_condition = names(quantities))
 
-  normalq <- base::abs(stats::qnorm((1 - level) / 2))
+  normalq <- abs(stats::qnorm((1 - level) / 2))
 
   object$bandits[periods, ] |>
     tidyr::pivot_longer(
@@ -244,7 +244,7 @@ plot.mab <- function(x, type, level = .95, save = FALSE, path = NULL, ...) {
 plot_arms <- function(x, ...) {
   rlang::check_installed("ggplot2")
   data <- x$bandits
-  periods <- base::max(data$period_number)
+  periods <- max(data$period_number)
 
   if (x$settings$algorithm == "ucb1") {
     ylab <- "UCB1 Values"
@@ -268,8 +268,8 @@ plot_arms <- function(x, ...) {
     )) +
     ggplot2::geom_line(...) +
     ggplot2::scale_y_continuous(
-      breaks = base::seq(0, 1, 0.1),
-      limits = base::range(0, 1)
+      breaks = seq(0, 1, 0.1),
+      limits = range(0, 1)
     ) +
     ggplot2::labs(
       x = "Assignment Period",
@@ -311,8 +311,8 @@ plot_assign <- function(x, ...) {
       color = "Treatment Arm"
     ) +
     ggplot2::scale_y_continuous(
-      breaks = base::seq(0, 1, 0.1),
-      limits = base::range(0, 1)
+      breaks = seq(0, 1, 0.1),
+      limits = range(0, 1)
     ) +
     ggplot2::theme_minimal()
 }
@@ -327,7 +327,7 @@ plot_assign <- function(x, ...) {
 plot_estimates <- function(x, level = 0.95, ...) {
   rlang::check_installed("ggplot2")
   check_level(level)
-  normalq <- base::abs(stats::qnorm((1 - level) / 2))
+  normalq <- abs(stats::qnorm((1 - level) / 2))
 
   x$estimates |>
     dplyr::filter(estimator == "AIPW") |>
@@ -401,9 +401,9 @@ check_level <- function(level) {
 print.multiple.mab <- function(x, ...) {
   settings <- x$settings
   print_mab(x)
-  base::cat("Trials Conducted:     ", settings$trials, "trials\n")
-  base::cat("Keep Final Data:      ", settings$keep_data, "\n")
-  base::cat("----------------------------------------------------- \n")
+  cat("Trials Conducted:     ", settings$trials, "trials\n")
+  cat("Keep Final Data:      ", settings$keep_data, "\n")
+  cat("----------------------------------------------------- \n")
 }
 #------------------------------------------------------------------------------
 #' Summary Generic For `multiple.mab` Class
@@ -465,7 +465,7 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
       values_to = "value"
     ) |>
     dplyr::group_by(mab_condition) |>
-    dplyr::summarize(mean = base::mean(value), standard_dev = stats::sd(value))
+    dplyr::summarize(mean = mean(value), standard_dev = stats::sd(value))
 
   quantiles <- object$estimates |>
     dplyr::filter(estimator == "AIPW") |>
@@ -480,8 +480,8 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
     dplyr::filter(estimator == "AIPW") |>
     dplyr::group_by(mab_condition, estimator) |>
     dplyr::summarize(
-      estimate_avg = base::mean(mean, na.rm = TRUE),
-      SE_avg = sqrt(base::mean(variance, na.rm = TRUE)),
+      estimate_avg = mean(mean, na.rm = TRUE),
+      SE_avg = sqrt(mean(variance, na.rm = TRUE)),
       SE_empirical = stats::sd(mean),
       .groups = "drop",
     ) |>
@@ -511,7 +511,7 @@ summary.multiple.mab <- function(object, level = 0.95, ...) {
   summary <- dplyr::left_join(estimate, bandits, by = c("mab_condition")) |>
     dplyr::rename(times_best = "n") |>
     dplyr::mutate(
-      times_best = dplyr::if_else(base::is.na(times_best), 0, times_best),
+      times_best = dplyr::if_else(is.na(times_best), 0, times_best),
       level = level
     ) |>
     dplyr::select(-estimator) |>
@@ -686,7 +686,7 @@ plot_hist <- function(x, quantity, params) {
 plot_mult_estimates <- function(x, cdf, level, ...) {
   rlang::check_installed("ggplot2")
   check_level(level)
-  if (base::is.null(cdf)) {
+  if (is.null(cdf)) {
     rlang::abort("Invalid CDF: Valid CDF's are, empirical`, and `normal`")
   }
   cols <- switch(

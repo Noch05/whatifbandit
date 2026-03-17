@@ -1,423 +1,276 @@
-#------------------------------------------------------------------------------
-#' @title Simulates MAB Trial From Prepared Inputs and Performs Inference
-#' @name simulate_mab
-#' @description Internal helper. Centralizes necessary functions to conduct a
-#' a MAB trial with adaptive inference. It assumes all inputs have been preprocessed already
-#' @inheritParams mab_from_rct.bernoulli
-#' @inheritParams prep_rct_data
-#' @param starts  Numeric vector where element `i` is the starting row number of period `i`.
-#' @param ends  Numeric vector where element `i` is the ending row number of period `i`.
-#' @param imputation_information Object created by [imputation_precompute()] containing the conditional means and success dates
-#' for each treatment block to impute from.
-#' @param resimulation Logical flag; Whether or not this MAB Trial is being run as a re-simulated RCT, as opposed to an original simulation from specified
-#' population parameters.
-#' @param true_prob True probabilities of success, used to generate outcomes in the case of an original simulation.
+#' Simulate an Adaptive Trial With Bernoulli Distributed Outcomes
+#' @description Simulates a response-adaptive randomized experiment with Bernoulli
+#' distributed outcomes. At each period, observed outcomes are used to update assignment
+#' probabilities according to the specified `algorithm`. `algorithm = "static"` is the non-adaptive
+#' uniform baseline, where probabilities of being assigned to one treatment is the same as any other.
+#' @param n A positive integer. Total number of units to simulate.
+#' @param t Total number of assignment periods. Positive integer. Default is `t = n` for pure sequential (one unit per period) assignment.
+#' The sizes of each period will be equal as `n %/% t`,
+#' except for the last period which will be `n %% t` in the case `n %% t != 0`, when `period_sizes = NULL`.
+#' @param p The true probabilities of success for each treatment arm. Specified as an matrix,
+#' where `rownames(p)` are the treatment
+#' labels, and `colnames(p)` are the cluster or block labels, e.g.
+#'       `matrix(c(0.5, 0.3, 0.5, 0.6), nrow = 2, ncol = 2, dimnames(list(c("T1", "T2"), c("B1", "B2"))))`.
+#'       Probabilities are accessed as `p[treatment, block]`.
+#' With blocks and clusters utilize the clusters for the columns because clusters are fully nested in blocks.
+#' For no clusters or blocks simply use a matrix with 1 column.
 #'
-#' @inheritParams mab_trial_sim.bernoulli
-#'
-#'
-#' @returns: A named list containing:
-#' \itemize{
-#' \item `final_data`: The processed `tibble` or `data.table`, containing new columns pertaining to the results of the trial.
-#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson Sampling posterior distributions for each period.
-#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period.
-#' \item `estimates`: A `tibble` or `data.table` containing all estimates of the means and variances related to the treatment arms.
-#' \item `settings`: A named list of the configuration settings used in the trial.
+#' @param dt Logical. If `TRUE` returns a [data.table::data.table()]; otherwise returns a [tibble::tibble()]. Default `FALSE`.
+#' @param blocks A named numeric vector of block membership probabilities (must sum to 1), where `names(blocks)`
+#' are the block labels. Units are assigned to blocks via [randomizr::complete_ra()]. Pass `NULL` (default) for no blocking.
+#' @param clusters Cluster membership probabilities. Can be:
+#' \describe{
+#' \item{Numeric vector}{A named vector where `names(clusters)` are the cluster labels e. g. `C(C1 = 0.4, C2 = 0.6)`.
+#' Used when there is not blocking.}
+#' \item{Named list of vectors}{A named list where `names(clusters)` are block labels, and each element is a named vector
+#' of per-block cluster proportions, e.g.
+#' `list(B1 = c(C1 = 0.4, C2=0.6), B2 = c(C3 = 0.2, C4 = 0.8))`
+#' Clusters are accessed as `clusters[[block]][cluster]`. Insided each block, cluster proportions must sum to 1, and the same cluster cannot appear in multiple blocks.}
 #' }
-#' @keywords internal
+#' Units are assigned to clusters via [randomizr::complete_ra()]. Pass `NULL` (default) for no clustering.
+#' @param dates_of_assignment An optional vector of dates representing when units are assigned.
+#' If shorter than `n` it is recycled and sorted. If NULL` (default) no assignment dates are recorded.
+#' @param time_model An optional function with signature `function(n, treatments, success, blocks = NULL, clusters = NULL, ...)`
+#' that returns a vector of [lubridate::period] objects to add to `dates_of_assignment` to produce `success_date`.
+#' Only used when`dates_of_assignment` is also supplied. Default `NULL`.
 #'
-
+#' @param algorithm Assignment algorithm, determines how probabilities of assignment
+#' are updated each period. Either `"thompson"` for Thompson Sampling, `"ucb1"` for
+#' the UCB1 algorithm, or `"static"` for uniform, non-adaptive assignment. Not case sensitive.
+#' @param period_sizes Numeric vector of `length(t)`, with the specific number of units to be assigned in each period. Used when it is required to assign different numbers of units
+#' to treatment across the periods of the trial.
+#' @param ... Additional arguments forwarded to `time_model`.
+#'
+#' @returns NULL
+#' @details
+#' When blocking and/or clustering are specified, these assignments will be randomly pregenerated before the start of the adaptive sequential assignment. These arguments allow simulating a trial
+#' when there may be hetergenous outcomes across a treatment block or treatment cluster, so different assignment probabilities can be provided for the same treatment, depending on the block and/or cluster
+#' of a unit.
+#'
+#' Clustering is challenging under an adaptive trial, because then the probabilities of assignment being adaptive can have little impact on the new assignments, given that an early treatment assignment to a cluster
+#' must remain the same across the whole trial. As such this function assumes clusters do not persist across periods, so are all respecitvely assigned at the same time. If a design is provided, as such periods are
+#' too small for the clusters to fit in a period, its possible for assignment to vary within the same cluster in the experiment.
+#' @export
+#' @example inst/examples/simulate_mab_example.R
 simulate_mab <- function(
-  data,
-  resimulation,
-  true_prob,
+  n,
+  t = n,
+  p,
   algorithm,
-  control_augment,
-  random_assign_prop,
-  period_length,
-  prior_periods,
-  discount_rate,
-  delayed_feedback,
-  whole_experiment = NULL,
-  conditions,
-  blocking,
-  clustering,
-  data_cols,
-  imputation_information = NULL,
-  verbose,
-  ndraws,
-  starts,
-  ends,
+  blocks = NULL,
+  clusters = NULL,
+  control_augment = 0,
+  random_assign_prop = 0,
+  dates_of_assignment,
+  time_model = NULL,
+  period_sizes = NULL,
+  prior_periods = NULL,
+  discount_rate = 1,
+  dt,
+  ndraws = 5000,
+  r,
+  keep_data,
   ...
 ) {
-  verbose_log(verbose, "Starting Bandit Trial")
-  periods <- length(starts)
-  num_conditions <- length(conditions)
-
-  sim_results <- run_mab_trial(
-    data = data,
-    resimulation = resimulation,
+  time_model_args <- rlang::dots_list(..., .named = TRUE)
+  algorithm <- tolower(algorithm)
+  check_mab_sim(
+    n = n,
+    t = t,
+    p = p,
     algorithm = algorithm,
+    blocks = blocks,
+    clusters = clusters,
     control_augment = control_augment,
-    random_assign_prop,
-    period_length = period_length,
+    random_assign_prop = random_assign_prop,
+    dates_of_assignment = dates_of_assignment,
+    time_model = time_model,
+    period_sizes = period_sizes,
     prior_periods = prior_periods,
     discount_rate = discount_rate,
-    whole_experiment = whole_experiment,
-    delayed_feedback = delayed_feedback,
-    num_conditions = num_conditions,
-    conditions = conditions,
-    blocking = blocking,
-    clustering = clustering,
-    data_cols = data_cols,
-    imputation_information = imputation_information,
-    verbose = verbose,
+    dt = dt,
     ndraws = ndraws,
-    starts = starts,
-    ends = ends,
-    periods = periods,
-    true_prob = true_prob,
-    ...
+    r = r,
+    keep_data = keep_data
   )
 
-  sim_results[["final_data"]] <- get_iaipw(
-    data = sim_results[["final_data"]],
-    assignment_probs = sim_results[["assignment_probs"]],
-    conditions = conditions,
-    periods = periods,
-    verbose = verbose
-  )
-  estimates <- estimate_aipw(
-    data = sim_results[["final_data"]],
-    assignment_probs = sim_results[["assignment_probss"]],
-    periods = periods,
-    conditions = conditions,
-    verbose = verbose,
-    clustering = clustering,
-    cluster_col = data_cols[["cluster_col"]]
-  )
-  estimates <- estimate_ipw(
-    data = sim_results[["final_data"]],
-    estimates = estimates,
-    cluster_col = data_cols[["cluster_col"]],
-    clustering = clustering,
-    blocking = blocking,
-    conditions = conditions
-  )
-
-  results <- list(
-    final_data = sim_results[["final_data"]],
-    bandits = sim_results[["bandits"]],
-    assignment_probs = sim_results[["assignment_probs"]],
-    estimates = estimates[["est"]],
-    ipw_vcov = estimates[["vcov"]],
-    settings = NULL
-  )
-  return(results)
-}
-
-#' Runs Multi-Arm Bandit Trial
-#' @name run_mab_trial
-#'
-#' @description Performs a full Multi-Arm Bandit (MAB) trial using Thompson Sampling or UCB1.
-#' The function provides loop around each step of the process for each treatment wave, performing adaptive
-#' treatment assignment, and outcome imputation. Supports flexible customizations in treatment blocking strategy,
-#' stationary/non-stationary bandits, control augmentation, and hybrid assignment.
-#'
-#' @inheritParams mab_from_rct.bernoulli
-#' @inheritParams prep_rct_data
-#' @inheritParams mab_trial_sim.bernoulli
-#' @param num_conditions Number of conditions, equivalent to `length(conditions)`.
-#'
-#'
-#' @returns  A named list containing:
-#' \itemize{
-#' \item `final_data`: The processed `tibble` or `data.table`, containing new columns pertaining to the results of the trial.
-#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson Sampling posterior distributions for each period.
-#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period.
-#' }
-#' @details
-#' The first period is used to initialize the trial, so the MAB loop
-#' starts at period number 2.
-#'
-#' @keywords internal
-#'
-run_mab_trial <- function(
-  data,
-  resimulation,
-  true_prob,
-  algorithm,
-  control_augment,
-  random_assign_prop,
-  period_length = NULL,
-  prior_periods,
-  discount_rate,
-  whole_experiment = NULL,
-  delayed_feedback,
-  clustering,
-  blocking,
-  conditions,
-  data_cols,
-  imputation_information = NULL,
-  ndraws,
-  verbose,
-  starts,
-  ends,
-  periods,
-  num_conditions,
-  ...
-) {
-  bandits <- vector(mode = "list", length = 2)
-
-  bandits[["bandit_stat"]] <- matrix(
-    NA,
-    nrow = periods,
-    ncol = num_conditions,
-    dimnames = list(c(), names(conditions))
-  )
-  bandits[["assignment_prob"]] <- matrix(
-    NA,
-    nrow = periods,
-    ncol = num_conditions,
-    dimnames = list(c(), names(conditions))
-  )
-  bandits[["assignment_prob"]][1, ] <- rep(
-    1 / num_conditions,
-    num_conditions
-  )
-
-  equal_probs <- bandits[["assignment_prob"]][1, ] |>
-    as.numeric()
-  names(equal_probs) <- conditions
-
-  col_names <- lapply(data_cols, \(col) {
-    col[["name"]]
-  })
-
-  for (i in 2:periods) {
-    current_idx <- starts[i]:ends[i]
-    verbose_log(verbose, paste0("Period: ", i))
-
-    prior <- create_prior(prior_periods = prior_periods, current_period = i)
-
-    current_data <- data[current_idx, ]
-    prior_data <- data[starts[prior]:ends[i - 1], ]
-
-    if (algorithm != "static") {
-      current_bandit <- get_past_results(
-        current_data = current_data,
-        prior_data = prior_data,
-        delayed_feedback = delayed_feedback,
-        assignment_date_col = col_names[["assignment_date_col"]],
-        conditions = conditions,
-        discount_rate = discount_rate,
-        current_period = i
-      ) |>
-        get_bandit(
-          algorithm = algorithm,
-          num_conditions = num_conditions,
-          conditions = conditions,
-          current_period = i,
-          control_augment = control_augment,
-          ndraws = ndraws
-        )
-      bandits[["bandit_stat"]][i - 1, ] <- current_bandit[["bandit"]]
-    } else {
-      current_bandit[["assignment_prob"]] <- equal_probs
-    }
-
-    current_data <- assign_treatments(
-      current_data = current_data,
-      probs = current_bandit[["assignment_prob"]],
-      blocking = blocking,
-      clustering = clustering,
-      cluster_col = col_names[["cluster_col"]],
-      conditions_col = col_names[["conditions_col"]],
-      conditions = conditions,
-      random_assign_prop = random_assign_prop,
-      random_probs = equal_probs
-    )
-
-    bandits[["assignment_probs"]][i, ] <- (current_bandit[["assignment_prob"]] *
-      (1 - random_assign_prop)) +
-      (equal_probs * random_assign_prop)
-
-    if (resimulation) {
-      prepped_impute <- impute_prep(
-        current_data = current_data,
-        whole_experiment = whole_experiment,
-        imputation_information = imputation_information,
-        block_cols = col_names[["block_cols"]],
-        clustering = clustering,
-        blocking = blocking,
-        delayed_feedback,
-        current_period = i
-      )
-      data <- impute_success(
-        data = data,
-        imputation_info = prepped_impute,
-        success_col = col_names[["success_col"]],
-        success_date_col = col_names[["success_date_col"]],
-        delayed_feedback = delayed_feedback,
-        idx = current_idx
-      )
-    } else {}
+  if (r == 1) {} else if (r > 1) {
+    furrr::future_map(seeds, \(seed) {})
   }
-  results <- end_mab_trial(
-    data = data,
-    bandits = bandits,
-    algorithm = algorithm,
-    conditions = conditions,
-    num_conditions = num_conditions,
-    periods = periods,
-    ndraws = ndraws
+
+  data <- prepare_sim(
+    p = p,
+    blocks = blocks,
+    clusters = clusters,
+    control_augment,
   )
 
-  return(results)
-}
-#-------------------------------------------------------------------------------
+  blocks <- generate_group_membership(n, blocks) |> as.character()
+  clusters <- generate_group_membership(n, clusters, blocks = blocks) |>
+    as.character()
+  blocking <- !is.null(blocks)
+  clustering <- !is.null(clusters)
 
-#' @name end_mab_trial
-#' @title Ends Multi-Arm Bandit Trial
-#' @description Condenses output from [run_mab_trial()] into
-#' manageable structure.
-#' @param data Finalized data from [run_mab_trial()].
-#' @param bandits Finalized bandits list of matrices from [run_mab_trial()].
-#' @param periods Numeric value of length 1; total number of periods in Multi-Arm-Bandit trial.
-#' @inheritParams run_mab_trial
-#' @inheritParams simulate_mab
-#' @returns  A named list containing:
-#' \itemize{
-#' \item `final_data`: The processed `tibble` or `data.table`, containing new columns pertaining to the results of the trial.
-#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson sampling posterior distributions for each period.
-#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period.
-#' }
-#' @seealso
-#' * [run_mab_trial()]
-#' @keywords internal
+  check_p(p, blocks = blocks, clusters = clusters)
 
-end_mab_trial <- function(
-  data,
-  bandits,
-  algorithm,
-  periods,
-  conditions,
-  num_conditions,
-  ndraws
-) {
-  UseMethod("end_mab_trial", data)
-}
-#-------------------------------------------------------------------------------
-#
-#' @method end_mab_trial `data.frame`
-#' @inheritParams end_mab_trial
-#' @title [end_mab_trial()] for `data.frame`s
-#' @noRd
-end_mab_trial.data.frame <- function(
-  data,
-  bandits,
-  algorithm,
-  periods,
-  conditions,
-  num_conditions,
-  ndraws
-) {
-  final_summary <- data |>
-    dplyr::group_by(mab_condition) |>
-    dplyr::summarize(
-      successes = sum(mab_success, na.rm = TRUE),
-      n = dplyr::n(),
-      .groups = "drop"
-    ) |>
-    as.list() |>
-    finalize_prior_list()
-
-  final_bandit <- get_bandit(
-    past_results = final_summary,
-    algorithm = algorithm,
-    num_conditions = num_conditions,
-    conditions = conditions,
-    current_period = (periods + 1),
-    control_augment = 0,
-    ndraws = ndraws
-  )
-
-  bandits[["bandit_stat"]][periods, ] <- final_bandit[["bandit"]]
-  bandits <- lapply(bandits, \(x) {
-    tibble::as_tibble(x) |>
-      dplyr::mutate(period_number = dplyr::row_number())
-  })
-
-  return(list(
-    final_data = data,
-    bandits = bandits[["bandit_stat"]],
-    assignment_probs = bandits[["assignment_prob"]]
-  ))
-}
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-#' @method end_mab_trial `data.table`
-#' @inheritParams end_mab_trial
-#' @title [end_mab_trial()] for `data.table`s
-#' @noRd
-end_mab_trial.data.table <- function(
-  data,
-  bandits,
-  algorithm,
-  periods,
-  conditions,
-  num_conditions,
-  ndraws
-) {
-  final_summary <- data[,
-    .(
-      successes = sum(mab_success, na.rm = TRUE),
-      n = .N
-    ),
-    by = mab_condition
-  ]
-  final_summary <- as.list(final_summary) |> finalize_prior_list()
-
-  final_bandit <- get_bandit(
-    past_results = final_summary,
-    algorithm = algorithm,
-    num_conditions = num_conditions,
-    conditions = conditions,
-    current_period = (periods + 1),
-    control_augment = 0,
-    ndraws = ndraws
-  )
-  bandits[["bandit_stat"]][periods, ] <- final_bandit[["bandit"]]
-  bandit_stats <- data.table::as.data.table(bandits[["bandit_stat"]])
-  bandit_stats[, period_number := .I]
-
-  assignment_probs <- data.table::as.data.table(bandits[["assignment_prob"]])
-  assignment_probs[, period_number := .I]
-
-  return(list(
-    final_data = data,
-    bandits = bandit_stats,
-    assignment_probs = assignment_probs
-  ))
-}
-#------------------------------------------------------------------------------
-#' Create Prior Periods
-#' @name create_prior
-#' @description Used during [run_mab_trial()] to create a vector of prior periods dynamically based on the specified
-#' number of prior periods.
-#' @inheritParams mab_from_rct.bernoulli
-#' @param current_period The current period of the simulation. Defined by loop structure inside [run_mab_trial()].
-#' @returns Numeric value referring to the period index to look back from.
-#' the results for the current treatment assignment period.
-#'
-#' @seealso
-#' * [run_mab_trial()]
-#' @keywords internal
-
-create_prior <- function(prior_periods = NULL, current_period) {
-  if (is.null(prior_periods)) {
-    1
+  assignment_dates <- if (is.null(dates_of_assignment)) {
+    NULL
+  } else if (length(dates_of_assignment) < n) {
+    sort(rep_len(dates_of_assignment, n))
   } else {
-    current_period - prior_periods
+    dates_of_assignment
+  }
+
+  success_dates <- NULL
+  if (!is.null(time_model) && !is.null(assignment_dates)) {
+    success_dates <- assignment_dates +
+      time_model(
+        n = n,
+        treatments = treatments,
+        success = success,
+        blocks = blocks,
+        clusters = clusters,
+        ...
+      )
+  }
+
+  period_sizes <- if (!is.null(period_sizes)) {
+    period_sizes
+  } else {
+    c(rep(floor(n / t), t - 1), n %% t)
+  }
+  period_sizes[t] <- if (period_sizes[t] == 0) {
+    period_sizes[t - 1]
+  } else {
+    period_sizes[t]
+  }
+  ends <- cumsum(period_sizes)
+  starts <- c(1, ends[-t] + 1)
+
+  df_func <- if (dt) {
+    \(...) {
+      data.table::data.table(..., key = "period_number")
+    }
+  } else {
+    tibble::tibble
+  }
+
+  df <- df_func(
+    mab_condition = NA_character_,
+    outcome = NA_real_,
+    block = blocks,
+    cluster = clusters,
+    period_number = rep(seq_len(t), times = period_sizes)
+  )
+
+  result_func <- if (dt) data.table::data.table else tibble::tibble
+  result_func(
+    id = 1:n,
+    treatment = treatments,
+    success = success,
+    block = blocks,
+    cluster = clusters,
+    assignment_date = assignment_dates,
+    success_date = success_dates
+  )
+}
+
+
+#' Prepare Data for Simulated MAB
+#' @name prep_mab
+#' @description
+#' Prepares data structures for simulated MAB trial
+#' @returns
+#' @keywords internal
+
+prep_mab <- function() {
+  df_func <- if (dt) data.table::data.table else tibble::tibble
+}
+
+
+#' Generate Block or Cluster Memberships
+#' @name generate_group_membership
+#' @description Takes a named probability vector for blocks or clusters and uses
+#' [randomizr::complete_ra()] to randomly assign each of `n` units to a
+#' block or cluster according to those probabilities.
+#'
+#' @param n A positive integer. Number of units to assign.
+#' @param group A named numeric vector or named list (see [simulate_mab()]) of assignment probabilities.
+#' When blocks and cluster are together, clusters must be fully nested in blocks.
+#'   `names(group)` are used as the condition labels (block or cluster names).
+#' @inheritParams simulate_mab
+#'
+#' @returns A factor of length `n` with levels corresponding to `names(group)` or `NULL` if `group = NULL`.
+#'
+#' @keywords internal
+generate_group_membership <- function(n, group, blocks = NULL) {
+  if (is.null(group)) {
+    return(NULL)
+  } else {
+    if (is.list(group)) {
+      if (is.null(blocks)) {
+        rlang::abort("Nested clusters require `blocks` to be specified.")
+      }
+      if (!setequal(names(group), levels(blocks))) {
+        rlang::abort("`names(clusters)` must match block labels.")
+      }
+      clusters <- vector("character", n) |>
+        factor(levels = unlist(lapply(group, names)))
+      for (b in names(group)) {
+        probs <- group[[b]]
+        idx <- blocks == b
+        clusters[idx] <- randomizr::complete_ra(
+          N = sum(idx),
+          prob_each = probs,
+          conditions = names(probs)
+        )
+      }
+      return(clusters)
+    }
+    if (is.null(names(group))) {
+      rlang::abort("`names()` for blocks and/or clusters cannot be `NULL`")
+    }
+    if (!dplyr::near(sum(group), 1)) {
+      rlang::abort(
+        "Assignment probabilities for blocks and/or clusters must sum to 1"
+      )
+    }
+    return(
+      randomizr::complete_ra(
+        N = n,
+        prob_each = group,
+        conditions = names(group)
+      )
+    )
+  }
+}
+
+
+#' Extract Success Probabilities Per-Unit
+#' @name extract_success_prob
+#' @description Looks up the success probability for each unit given their treatment
+#' assignment and, optionally, their block and/or cluster membership. Handles
+#' all supported `p` structures.
+#'
+#' @inheritParams simulate_mab
+#' @inheritParams run_mab
+#' @param treatments A character or factor vector of treatment assignments of
+#'   length `n`.
+#' @param other_idx Character vector of block or cluster assigents to be used as the
+#' additionnal index for extracting from `p`.
+#' @returns A numeric vector of length containing the per-unit success
+#'   probabilities to be used for outcome observation.
+#' @keywords internal
+extract_success_prob <- function(
+  p,
+  treatments,
+  size,
+  other_idx = NULL
+) {
+  if (!is.null(other_idx)) {
+    extract_mat <- matrix(data = c(treatments, other_idx), ncol = 2)
+    p[extract_mat]
+  } else {
+    return(p[treatments])
   }
 }

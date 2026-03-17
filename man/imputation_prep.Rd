@@ -2,10 +2,10 @@
 % Please edit documentation in R/impute.R
 \name{imputation_prep}
 \alias{imputation_prep}
-\alias{impute_prep}
+\alias{prep_imputation}
 \title{Outcome Imputation Preparation}
 \usage{
-impute_prep(
+prep_imputation(
   current_data,
   block_cols,
   imputation_information,
@@ -36,14 +36,14 @@ A named list containing:
 \itemize{
 \item \code{current_data}: A \code{tibble} or \code{data.table} containing \code{impute_block} column to guide the outcome imputations
 \item \code{impute_success}: A matrix object containing probabilities of success by \code{treatment_block} used to impute
-outcomes. Subsetted from the \code{\link[=imputation_precompute]{imputation_precompute()}} output.
+outcomes. Subsetted from the \code{\link[=precompute_imputation]{precompute_imputation()}} output.
 \item \code{impute_dates}: Named date vector by treatment condition, containing the dates of success
-to impute if delayed_feedback is FALSE. Subsetted from the \code{\link[=imputation_precompute]{imputation_precompute()}} output.}
+to impute if delayed_feedback is FALSE. Subsetted from the \code{\link[=precompute_imputation]{precompute_imputation()}} output.}
 }
 \description{
 Executes all preparations necessary to impute outcomes for
 each iteration of the simulation loop. Adds an additional column to the current data,
-subsets necessary information from the \code{\link[=imputation_precompute]{imputation_precompute()}} output, and checks to ensure
+subsets necessary information from the \code{\link[=precompute_imputation]{precompute_imputation()}} output, and checks to ensure
 compatibility with \code{\link[randomizr:block_ra]{randomizr::block_ra()}}.
 }
 \details{

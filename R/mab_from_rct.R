@@ -1,6 +1,6 @@
 #' @title
 #' Simulate a Multi-Arm-Bandit Trial from an Existing Randomized Controlled Trial, With Bernoulli Distributed Outcomes.
-#' @name mab_from_rct.bernoulli
+#' @name mab_from_rct
 #' @description Simulates a response-adaptive, Multi-Arm-Bandit (MAB) trial using experimental data
 #' from an original randomized controlled trial (RCT), and adaptive inference strategies
 #' described in \href{https://www.pnas.org/doi/pdf/10.1073/pnas.2014602118}{Hadad et al. (2021)}
@@ -238,7 +238,7 @@
 #'
 #' @example inst/examples/single_mab_simulation_example.R
 #' @export
-mab_from_rct.bernoulli <- function(
+mab_from_rct <- function(
   formula,
   data,
   algorithm,
@@ -298,7 +298,7 @@ mab_from_rct.bernoulli <- function(
     keep_data = keep_data
   )
   if (r == 1) {
-    results <- simulate_mab(
+    results <- run_mab(
       data = prepped$data,
       resimulation = TRUE,
       algorithm = prepped$char_args$algorithm,
@@ -325,7 +325,7 @@ mab_from_rct.bernoulli <- function(
       seeds,
       function(x) {
         set.seed(x)
-        results <- simulate_mab(
+        results <- run_mab(
           data = prepped[["data"]],
           resimulation = TRUE,
           algorithm = prepped[["char_args"]][["algorithm"]],
@@ -357,7 +357,7 @@ mab_from_rct.bernoulli <- function(
       },
       .options = furrr::furrr_options(
         globals = list(
-          simulate_mab = simulate_mab,
+          run_mab = run_mab,
           data = prepped$data,
           resimulation = TRUE,
           data_cols = prepped$data_cols,
@@ -433,9 +433,9 @@ mab_from_rct.bernoulli <- function(
 #------------------------------------------------------------------------------
 #' Formula Parser
 #' @description
-#' Parsers the input formula for [mab_from_rct.bernoulli()]
+#' Parsers the input formula for [mab_from_rct()]
 #' @name formula_parse
-#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams mab_from_rct
 #' @returns List of columns specified from formula.
 #' @keywords internal
 
@@ -515,9 +515,9 @@ verbose_log <- function(log, message) {
 
 #' @name get_assignment_quantitites
 #' @title Calculates Number of Observations Assigned to Each Treatment
-#' @description Takes the output from [simulate_mab_rct.bernoulli()], and
+#' @description Takes the output from [mab_from_rct()], and
 #' calculates the number of observations assigned to each treatment group in the adaptive trial.
-#' @param simulation Output from [simulate_mab_rct.bernoulli()]
+#' @param simulation Output from [mab_from_rct()]
 #' @param conditions Character vector containing the names of all the treatment conditions in the trial.
 #' @returns Named numeric vector containing number of observations assigned to each treatment group
 #' @keywords internal
@@ -574,10 +574,10 @@ get_assignment_quantities.data.table <- function(simulation, conditions) {
 
 #' @name condense_results
 #' @title Condenses results of repeated simulations.
-#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams mab_from_rct
 #' @param dt Logical; Whether to output `data.table`s or `tibble`s. When` r * number_of_periods > 100000`, `dt = TRUE`, even if the user passed data is not a
 #' `data.table`.
-#' @param mabs List of outputs from repeated [simulate_mab_rct.bernoulli()] calls.
+#' @param mabs List of outputs from repeated [run_mab()] calls.
 #' @returns A named list containing
 #' \itemize{
 #' \item `final_data:` `tibble` or `data.table` containing the nested `tibble`s/`data.table`s from each trial. Only provided when `keep_data = TRUE`.

@@ -108,10 +108,10 @@ Named list containing:
 \item \code{data_cols}: List of necessary columns in \code{data} as strings and as symbols.
 \item \code{data}: Prepared \code{data.frame} or \code{data.table} containing all the necessary columns to
 conduct the adaptive trial simulation, subset from the originally provided data to reduce memory usage.
-columns required for \code{\link[=simulate_mab]{simulate_mab()}}.
+columns required for \code{\link[=run_mab]{run_mab()}}.
 \item \code{char_args} List of processed string arguments for compatibility.
 \item \code{imputation_information}: List containing necessary information
-for outcome and date imputation for \code{\link[=simulate_mab]{simulate_mab()}}.
+for outcome and date imputation for \code{\link[=run_mab]{run_mab()}}.
 \item \code{period_starts}: Numeric vector where element \code{i} is the starting row number of period \code{i}.
 \item \code{period_starts}: Numeric vector where element \code{i} is the ending row number of period \code{i}.
 }

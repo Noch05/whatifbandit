@@ -18,7 +18,7 @@ impute_success(
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
 
-\item{imputation_info}{List containing all necessary information for imputation, generated each period by \code{\link[=impute_prep]{impute_prep()}}}
+\item{imputation_info}{List containing all necessary information for imputation, generated each period by \code{\link[=prep_imputation]{prep_imputation()}}}
 
 \item{success_date_col}{Column in \code{data}; contains original dates each success occurred. Only necessary when \code{delayed_feedback = TRUE}. Must be of type \code{Date}, not a character string.}
 
@@ -53,8 +53,8 @@ experiment.
 }
 \seealso{
 \itemize{
-\item \code{\link[=impute_prep]{impute_prep()}}
-\item \code{\link[=imputation_precompute]{imputation_precompute()}}
+\item \code{\link[=prep_imputation]{prep_imputation()}}
+\item \code{\link[=precompute_imputation]{precompute_imputation()}}
 \item \code{\link[randomizr:block_ra]{randomizr::block_ra()}}
 }
 }

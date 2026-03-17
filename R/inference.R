@@ -1,5 +1,5 @@
 #' Calculate Observation Level AIPW For Each Treatment Condition
-#' @name get_iaipw
+#' @name compute_iaipw
 #' @description Calculates the augmented inverse probability weighted estimate (AIPW) of treatment
 #' success for each observation and treatment (i.e. on the level of a single unit), and returns the final IPW weights
 #' for each observation, (i.e. the reciprocal specific weight for the treatment they were assigned)
@@ -7,7 +7,7 @@
 #' @param periods Numeric value of length 1; number of total periods in the simulation.
 #' @param assignment_probs A `tibble`/`data.table` containing the probabilities of being
 #' assigned each treatment at a given period.
-#' @inheritParams simulate_mab
+#' @inheritParams run_mab
 #' @param cluster_col Name of the column holding the clustering index
 #'
 #' @returns A `tibble`/`data.frame`, containing the subset of `data`
@@ -28,18 +28,24 @@
 #' (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 #'
 #' @keywords internal
-get_iaipw <- function(data, assignment_probs, periods, conditions, verbose) {
+compute_iaipw <- function(
+  data,
+  assignment_probs,
+  periods,
+  conditions,
+  verbose
+) {
   verbose_log(verbose, "Computing Individual AIPW Estimates")
-  UseMethod("get_iaipw", data)
+  UseMethod("compute_iaipw", data)
 }
 #-------------------------------------------------------------------------------
-#' @method get_iaipw data.frame
+#' @method compute_iaipw data.frame
 #' @title
-#' [get_iaipw()] for `data.frame`s
-#' @inheritParams get_iaipw
+#' [compute_iaipw()] for `data.frame`s
+#' @inheritParams compute_iaipw
 #' @noRd
 
-get_iaipw.data.frame <- function(
+compute_iaipw.data.frame <- function(
   data,
   assignment_probs,
   periods,
@@ -121,12 +127,12 @@ get_iaipw.data.frame <- function(
   return(data)
 }
 # ------------------------------------------------------------------------------
-#' @method get_iaipw data.table
-#' @title [get_iaipw()] for `data.table`s
-#' @inheritParams get_iaipw
+#' @method compute_iaipw data.table
+#' @title [compute_iaipw()] for `data.table`s
+#' @inheritParams compute_iaipw
 #' @noRd
 
-get_iaipw.data.table <- function(
+compute_iaipw.data.table <- function(
   data,
   assignment_probs,
   periods,
@@ -249,11 +255,11 @@ get_iaipw.data.table <- function(
 #' Calculate Adaptive AIPW Estimates
 #' @name estimate_ipw_aipw
 #'
-#' @description Uses provided Invidual AIPW scores created by [get_iaipw()] and computes the final
+#' @description Uses provided Invidual AIPW scores created by [compute_iaipw()] and computes the final
 #' AIPW estimate and variance using the formulas from  \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et. al (2021)}.
 #' Uses the constant allocation rate adaptive weight.
 #'
-#' @inheritParams get_iaipw
+#' @inheritParams compute_iaipw
 #' @returns A `tibble`/`data.table` containing the AIPW estimate of treatment success, AIPW variance,
 #' sample proportion of successful treatments (sample mean), and sample mean variance.
 #' @details
@@ -446,8 +452,8 @@ estimate_aipw.data.table <- function(
 #' as fixed effects, and if clustering is specified CR2 variances are reported. Otherwise HC2 variances
 #' are used. Appropriate degrees of freedom are supplied along with the regression's F-statistic
 #'
-#' @inheritParams get_iaipw
-#' @inheritParams simulate_mab
+#' @inheritParams compute_iaipw
+#' @inheritParams run_mab
 #' @details
 #' These estimates follow the procedure in \href{}{Offer-Westort et al. (2021)}. The F-statistic
 #' provided can be used to conduct their randomization inference test, via simulating a null-F-distribution.
@@ -565,7 +571,7 @@ estimate_ipw <- function(
 #' whether or not all provided conditions are present in the data, if not their values are initalized to NA
 #'
 #' @param estimates a `tibble`/`data.table` containing the appropriate estimates
-#' @inheritParams simulate_mab
+#' @inheritParams run_mab
 #'
 #'
 #' @returns updated `estimates` object with missing conditions initalized.

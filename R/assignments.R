@@ -1,10 +1,10 @@
 #' Gather Past Results for Given Assignment Period
-#' @name get_past_results
+#' @name compute_prior
 #' @description Summarizes results of prior periods to update assignment probabilities in the current period. This function
 #' calculates the number of success under each treatment and the total number of observations assigned to each treatment which are used
 #' to calculate UCB1 values or Thompson sampling probabilities. These values are weighted by the discount_rate provided.
 #'
-#' @inheritParams simulate_mab
+#' @inheritParams run_mab
 #' @param current_data A `data.frame` or `data.table` with only observations from the current sampling period.
 #' @param prior_data A `data.frame` or `data.table` with only the observations from the prior index.
 #' @returns A list containing 2 named vectors: the weighted number of successes, and the weighted number of assignments, where the names of each vector
@@ -20,11 +20,11 @@
 #'
 #'
 #' @seealso
-#' * [run_mab_trial()]
-#' * [get_bandit()]
+#' * [mab_loop()]
+#' * [compute_bandit()]
 #' @keywords internal
 #'
-get_past_results <- function(
+compute_prior <- function(
   current_data,
   prior_data,
   delayed_feedback,
@@ -33,17 +33,17 @@ get_past_results <- function(
   conditions,
   current_period
 ) {
-  UseMethod("get_past_results", current_data)
+  UseMethod("compute_prior", current_data)
 }
 
 #----------------------------------------------------------------------------------
-#' @method get_past_results data.frame
+#' @method compute_prior data.frame
 #' @title
-#' [get_past_results()] for data.frames
-#' @inheritParams get_past_results
+#' [compute_prior()] for data.frames
+#' @inheritParams compute_prior
 #' @noRd
 
-get_past_results.data.frame <- function(
+compute_prior.data.frame <- function(
   current_data,
   prior_data,
   delayed_feedback,
@@ -79,13 +79,13 @@ get_past_results.data.frame <- function(
 }
 #------------------------------------------------------------------------------
 
-#' @method get_past_results data.table
+#' @method compute_prior data.table
 #' @title
-#' [get_past_results()] for data.tables
-#' @inheritParams get_past_results
+#' [compute_prior()] for data.tables
+#' @inheritParams compute_prior
 #' @noRd
 
-get_past_results.data.table <- function(
+compute_prior.data.table <- function(
   current_data,
   prior_data,
   delayed_feedback,
@@ -128,7 +128,7 @@ get_past_results.data.table <- function(
 #' Finalise Aggregated Prior Results
 #' @name finalize_prior_list
 #' @description Accepts the raw list output of an aggregation over `prior_data`
-#' (from [get_past_results()]), names each vector by condition, fills any
+#' (from [compute_prior()]), names each vector by condition, fills any
 #' conditions absent from the prior window with zeros, and sorts alphabetically.
 #' @param prior_list Named list with elements `mab_condition`, `successes`, `n`,
 #' produced by converting a summarized data.frame/data.table via [as.list()].
@@ -171,11 +171,11 @@ finalize_prior_list <- function(prior_list, conditions) {
 #' package and UCB1 values are calculated using the well-defined formula that can be found
 #' in \href{https://doi.org/10.1023/A:1013689704352}{Auer et al. (2002)}.
 #'
-#' @name get_bandit
+#' @name compute_bandit
 #'
-#' @inheritParams run_mab_trial
+#' @inheritParams mab_loop
 #' @param past_results A `tibble`/`data.table`` containing summary of prior periods, with
-#' successes, number of observations, and success rates, which is created by [get_past_results()].
+#' successes, number of observations, and success rates, which is created by [compute_prior()].
 #' @param current_period Numeric value of length 1; current period of the adaptive trial simulation.
 #'
 #' @returns A list of length 2 containing:
@@ -224,7 +224,7 @@ finalize_prior_list <- function(prior_list, conditions) {
 #'
 #' @keywords internal
 
-get_bandit <- function(
+compute_bandit <- function(
   past_results = NULL,
   algorithm,
   num_conditions,
@@ -235,13 +235,13 @@ get_bandit <- function(
 ) {
   bandit <- switch(
     algorithm,
-    "thompson" = get_bandit.thompson(
+    "thompson" = compute_bandit.thompson(
       past_results = past_results,
       conditions = conditions,
       current_period = current_period,
       ndraws = ndraws
     ),
-    "ucb1" = get_bandit.ucb1(
+    "ucb1" = compute_bandit.ucb1(
       past_results = past_results,
       conditions = conditions,
       num_conditions = num_conditions,
@@ -267,9 +267,9 @@ get_bandit <- function(
   return(bandit)
 }
 #-------------------------------------------------------------------
-#' @method get_bandit thompson
+#' @method compute_bandit thompson
 #' @title Thompson sampling Algorithm
-#' @inheritParams get_bandit
+#' @inheritParams compute_bandit
 #' @details
 #' Thompson Sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
 #' package but the direct calculation can fail. If this occurs, a simulation based method is used
@@ -279,7 +279,7 @@ get_bandit <- function(
 #' Thompson Sampling probabilities.
 #' @keywords internal
 
-get_bandit.thompson <- function(
+compute_bandit.thompson <- function(
   past_results,
   conditions,
   current_period,
@@ -341,16 +341,16 @@ bandit_invalid <- function(bandit) {
   return(any(is.na(bandit)) || isTRUE(all.equal(sum(bandit), 0)))
 }
 #-------------------------------------------------------------------
-#' @method get_bandit ucb1
+#' @method compute_bandit ucb1
 #' @title UCB1 Sampling Algorithm
 #' @description Calculates upper confidence bounds for each treatment arm
-#' @inheritParams get_bandit
+#' @inheritParams compute_bandit
 #' @returns A list containing 2 named vectors where `names()` correspond to treatments. The first vector
 #' is the computed UCB1 values, and the second is the corresponding assignment probabilities where the highest UCB1 is given
 #' `1` and all else are `0`.
 #' @keywords internal
 
-get_bandit.ucb1 <- function(
+compute_bandit.ucb1 <- function(
   past_results,
   num_conditions,
   conditions,
@@ -377,20 +377,20 @@ get_bandit.ucb1 <- function(
 #-------------------------------------------------------------------------------
 #' Adaptively Assign Treatments in a Period
 #' @description Assigns new treatments for an assignment wave based on the assignment probabilities provided from
-#' [get_bandit()], and the proportion of randomly assigned observations specified in `random_assign_prop`.
+#' [compute_bandit()], and the proportion of randomly assigned observations specified in `random_assign_prop`.
 #' Assignments are made randomly with the given probabilities using [randomizr::block_ra()],
 #' [randomizr::complete_ra()], [randomizr::cluster_ra()], or [randomizr::block_and_cluster_ra()]
 #' depending on whether blocking and/or clustering are used.
 #'
 #' @name assign_treatments
-#' @inheritParams simulate_mab
-#' @inheritParams mab_from_rct.bernoulli
+#' @inheritParams run_mab
+#' @inheritParams mab_from_rct
 #' @param condition_col Column name of `current_data` which holds original treatment assignments.
 #' @param cluster_col Column name of `current_data` which holds cluster assignments.
 #' @param probs Named numeric vector; probability of assignment for each treatment condition.
 #' @param random_probs Probabilities of assignment for the rows which are completely randomly assigned. Simply a vector
 #' of `length(conditions)` with the same equal probability for all elements.
-#' @inheritParams get_past_results
+#' @inheritParams compute_prior
 #' @returns Updated `tibble` or `data.table` with the new treatment conditions for each observation, and whether imputation is required.
 #' If this treatment is different then from under the original experiment, then 'impute_req = 1`, and else is 0 for the observation.
 #'
@@ -503,7 +503,7 @@ assign_treatments <- function(
 #' @name build_ra_args
 #' @description Selects the appropriate `{randomizr}` function and constructs its argument list
 #' based on whether blocking and/or clustering are requested.
-#' @inheritParams get_past_results
+#' @inheritParams compute_prior
 #' @inheritParams assign_treatments
 #' @param idx Integer vector of row indices to assign.
 #' @param dt Logical. Whether `current_data` is a data.table.
@@ -564,17 +564,17 @@ build_ra_args <- function(
 }
 
 #' Assign Treatments to Bandit and Random Subsets
-#' @name get_assignments
+#' @name compute_assignments
 #' @description Pre-allocates a character vector and fills treatment assignments
 #' for bandit and randomly assigned subsets separately, using the appropriate
 #' randomizr function built by [build_ra_args()].
-#' @inheritParams get_past_results
+#' @inheritParams compute_prior
 #' @inheritParams assign_treatments
 #' @param band_idx Integer vector of bandit-assigned row indices
 #' @param rand_idx Integer vector of randomly-assigned row indices
 #' @returns Character vector of length `nrow(current_data)` with treatment assignments
 #' @keywords internal
-get_assignments <- function(
+compute_assignments <- function(
   current_data,
   band_idx,
   rand_idx,
@@ -629,7 +629,7 @@ assign_treatments.data.frame <- function(
   assignment_type
 ) {
   current_data[["assignment_type"]] <- assignment_type
-  current_data[["mab_condition"]] <- get_assignments(
+  current_data[["mab_condition"]] <- compute_assignments(
     current_data = current_data,
     band_idx = band_idx,
     rand_idx = rand_idx,
@@ -666,7 +666,7 @@ assign_treatments.data.table <- function(
 ) {
   current_data[, `:=`(
     assignment_type = assignment_type,
-    mab_condition = get_assignments(
+    mab_condition = compute_assignments(
       current_data = current_data,
       band_idx = band_idx,
       rand_idx = rand_idx,

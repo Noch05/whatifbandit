@@ -2,7 +2,7 @@
 % Please edit documentation in R/checks.R
 \name{check_mab_sim}
 \alias{check_mab_sim}
-\title{Perform Validation Checks for \code{\link[=mab_trial_sim.bernoulli]{mab_trial_sim.bernoulli()}}}
+\title{Perform Validation Checks for \code{\link[=simulate_mab]{simulate_mab()}}}
 \usage{
 check_mab_sim(
   n,
@@ -73,7 +73,7 @@ to treatment across the periods of the trial.}
 Nothing; Throws an error if checks are not met
 }
 \description{
-Ensures all arguments to \code{\link[=mab_trial_sim.bernoulli]{mab_trial_sim.bernoulli()}} are properly
+Ensures all arguments to \code{\link[=simulate_mab]{simulate_mab()}} are properly
 provided accordingly.
 }
 \keyword{internal}

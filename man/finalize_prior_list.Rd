@@ -8,7 +8,7 @@ finalize_prior_list(prior_list, conditions)
 }
 \arguments{
 \item{prior_list}{Named list with elements \code{mab_condition}, \code{successes}, \code{n},
-produced by converting a summarized data.frame/data.table via \code{\link[base:list]{base::as.list()}}.}
+produced by converting a summarized data.frame/data.table via \code{\link[=as.list]{as.list()}}.}
 
 \item{conditions}{Character vector of all treatment conditions in the trial.}
 }
@@ -18,7 +18,7 @@ each a named numeric vector of length \code{length(conditions)}.
 }
 \description{
 Accepts the raw list output of an aggregation over \code{prior_data}
-(from \code{\link[=get_past_results]{get_past_results()}}), names each vector by condition, fills any
+(from \code{\link[=compute_prior]{compute_prior()}}), names each vector by condition, fills any
 conditions absent from the prior window with zeros, and sorts alphabetically.
 }
 \keyword{internal}

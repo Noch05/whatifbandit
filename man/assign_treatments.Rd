@@ -44,7 +44,7 @@ If this treatment is different then from under the original experiment, then 'im
 }
 \description{
 Assigns new treatments for an assignment wave based on the assignment probabilities provided from
-\code{\link[=get_bandit]{get_bandit()}}, and the proportion of randomly assigned observations specified in \code{random_assign_prop}.
+\code{\link[=compute_bandit]{compute_bandit()}}, and the proportion of randomly assigned observations specified in \code{random_assign_prop}.
 Assignments are made randomly with the given probabilities using \code{\link[randomizr:block_ra]{randomizr::block_ra()}},
 \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}, \code{\link[randomizr:cluster_ra]{randomizr::cluster_ra()}}, or \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}}
 depending on whether blocking and/or clustering are used.
