@@ -115,7 +115,7 @@ compute_iaipw.data.table <- function(
 ) {
   mhats <- data[,
     .(
-      successes = sum(mab_success),
+      successes = sum(mab_success, na.rm = TRUE),
       n = .N
     ),
     by = .SD,
@@ -135,15 +135,15 @@ compute_iaipw.data.table <- function(
     n = data.table::fifelse(is.na(n), 0, n)
   )]
   data.table::setorder(mhats, mab_condition, period_number)
-  mhats[,
+
+  mhats <- mhats[,
     mhat := data.table:shift(
       data.table::fifelse(cumsum(n) > 0, cumsum(successes) / cumsum(n), 0),
       n = 1L,
       fill = 0,
       type = "lag"
     )
-  ]
-  mhats <- mhats[, .(period_number, mab_condition, mhat)] |>
+  ][, .(period_number, mab_condition, mhat)] |>
     data.table::dcast(
       formula = period_number ~ mab_condition,
       value.var = "mhat"
@@ -158,8 +158,8 @@ compute_iaipw.data.table <- function(
   iaipw_estimates <- lapply(
     conditions,
     \(condition) {
-      prob <- assignment_probs[periods_vec, condition]
-      mhat <- mhats[periods_vec, condition]
+      prob <- assignment_probs[periods_vec, ..condition] |> as.vector()
+      mhat <- mhats[periods_vec, ..condition] |> as.vector()
       indicator <- (as.integer(conditions_vec == condition) / prob)
       iaipw <- (indicator * success_vec) + (1 - indicator) * mhat
       return(iaipw)
@@ -484,11 +484,13 @@ estimate_sample.data.table <- function(data, conditions) {
   sample <- data[,
     .(
       mean = mean(mab_success, na.rm = TRUE),
-      variance = ((mean(mab_success) * (1 - mean(mab_success))) / .N),
-      estimator = "Sample"
+      n = .N
     ),
     by = mab_condition
-  ] |>
+  ][, `:=`(
+    var = ((mean) * (1 - mean)) / n,
+    estimator = "Sample"
+  )][, .(mean, var, estimator)] |>
     fill_missing_conditions(conditions = conditions)
   return(sample)
 }

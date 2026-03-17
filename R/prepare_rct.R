@@ -140,7 +140,7 @@ prep_rct_data <- function(
     delayed_feedback = delayed_feedback
   )
 
-  period_sizes <- get_period_sizes(data)
+  period_sizes <- compute_period_sizes(data)
   end_idxs <- cumsum(period_sizes)
   start_idxs <- c(1, end_idxs[-length(period_sizes)] + 1)
 
@@ -534,7 +534,7 @@ create_new_cols.data.table <- function(
         get(
           data_cols$condition_col$name
         ),
-        mab_success = get(data_cols$success_col$name),
+        mab_success = ..(data_cols$success_col$name),
       ),
       impute_req = 0,
       impute_block = NA_character_,
@@ -544,7 +544,7 @@ create_new_cols.data.table <- function(
   if (delayed_feedback) {
     data[
       period_number == 1,
-      new_success_date := get(data_cols$success_date_col$name)
+      new_success_date := ..(data_cols$success_date_col$name)
     ]
   }
   if (blocking) {
@@ -567,24 +567,24 @@ create_new_cols.data.table <- function(
 }
 
 #' @title Compute exact period sizes
-#' @name get_period_sizes
+#' @name compute_period_sizes
 #'
 #' @inheritParams mab_from_rct
 #'
 #' @returns Numeric vector of `length(max(period_nummber))` with each element representing the number of units in each period.
 #'
 #' @keywords internal
-get_period_sizes <- function(
+compute_period_sizes <- function(
   data
 ) {
-  UseMethod("get_period_sizes", data)
+  UseMethod("compute_period_sizes", data)
 }
 
-#' @title [get_period_sizes()] for `data.frames`s
-#' @method  get_period_sizes data.frame
-#' @inheritParams get_period_sizes
+#' @title [compute_period_sizes()] for `data.frames`s
+#' @method  compute_period_sizes data.frame
+#' @inheritParams compute_period_sizes
 #' @noRd
-get_period_sizes.data.frame <- function(data) {
+compute_period_sizes.data.frame <- function(data) {
   data |>
     dplyr::group_by(period_number) |>
     dplyr::summarize(count = dplyr::n()) |>
@@ -592,11 +592,11 @@ get_period_sizes.data.frame <- function(data) {
     dplyr::pull(count)
 }
 
-#' @title [get_period_sizes()] for `data.tables`s
-#' @method  get_period_sizes data.table
-#' @inheritParams get_period_sizes
+#' @title [compute_period_sizes()] for `data.tables`s
+#' @method  compute_period_sizes data.table
+#' @inheritParams compute_period_sizes
 #' @noRd
-get_period_sizes.data.table <- function(data) {
+compute_period_sizes.data.table <- function(data) {
   counts <- data[, .(count = .N), group_by = period_number][order(
     period_number
   )]
