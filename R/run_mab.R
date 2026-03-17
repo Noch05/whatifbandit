@@ -83,7 +83,7 @@ run_mab <- function(
 
   verbose_log(verbose, "Computing final simulation estimates")
 
-  sim_results[["final_data"]] <- compute_iaipw(
+  iaipw_estimates <- compute_iaipw(
     data = sim_results[["final_data"]],
     assignment_probs = sim_results[["assignment_probs"]],
     conditions = conditions,
@@ -353,7 +353,7 @@ collect_mab_results.data.frame <- function(
   )
 
   bandits[["bandit_stat"]][periods, ] <- final_bandit[["bandit"]]
-  bandits <- lapply(bandits, \(x) {
+  df_bandits <- lapply(bandits, \(x) {
     tibble::as_tibble(x) |>
       dplyr::mutate(period_number = dplyr::row_number())
   })
@@ -374,10 +374,20 @@ collect_mab_results.data.frame <- function(
     assignment_quantities[missing] <- 0
   }
 
+  matrix_idx <- cbind(
+    data[["period_number"]],
+    match(data[["mab_condition"]], conditions)
+  )
+  data <- data |>
+    dplyr::mutate(
+      mab_assign_prob = bandits[["assignment_prob"]][matrix_idx],
+      ipw_weights <- 1 / mab_assign_prob
+    )
+
   return(list(
     final_data = data,
-    bandits = bandits[["bandit_stat"]],
-    assignment_probs = bandits[["assignment_prob"]],
+    bandits = df_bandits[["bandit_stat"]],
+    assignment_probs = df_bandits[["assignment_prob"]],
     assignment_quantities = assignment_quantities
   ))
 }

@@ -8,11 +8,8 @@
 #' @param assignment_probs A `tibble`/`data.table` containing the probabilities of being
 #' assigned each treatment at a given period.
 #' @inheritParams run_mab
-#' @param cluster_col Name of the column holding the clustering index
 #'
-#' @returns A `tibble`/`data.frame`, containing the subset of `data`
-#' used in the MAB trial, along with new columns for probabilities of assignment to each treatment,
-#' aipw, and ipw weights for each observation.
+#' @returns A named list with the individual aipw estimates vectors for each treatment condition
 #' @details
 #' The specification for the individual AIPW estimates can be found
 #' in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}. The
@@ -78,7 +75,8 @@ compute_iaipw.data.frame <- function(
     ) |>
     dplyr::ungroup() |>
     dplyr::select(period_number, mab_condition, mhat) |>
-    tidyr::pivot_wider(mames_from = mab_condition, values_from = mhat)
+    dplyr::arrange(period_number) |>
+    tidyr::pivot_wider(names_from = mab_condition, values_from = mhat)
 
   periods_vec <- data[["period_number"]]
   conditions_vec <- data[["mab_condition"]]
@@ -95,18 +93,13 @@ compute_iaipw.data.frame <- function(
     }
   )
   names(iaipw_estimates) <- conditions
-  matrix_idx <- cbind(periods_vec, match(conditions_vec, conditions))
-  data[["mab_assign_prob"]] <- as.matrix(assignment_probs[, conditions])[
-    matrix_idx
-  ]
-  data[["ipw_weights"]] <- 1 / data[["true_assign_prob"]]
 
   check <- vapply(iaipw_estimates, \(x) sum(is.na(x)), numeric(1)) |> sum()
 
   if (check != 0) {
     warning(paste0(check, " Individual AIPW Scores are NA"))
   }
-  return(list(data = data, iaipw_estimates = iaipw_estimates))
+  return(iaipw_estimates)
 }
 # ------------------------------------------------------------------------------
 #' @method compute_iaipw data.table
