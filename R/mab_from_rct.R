@@ -325,7 +325,7 @@ mab_from_rct <- function(
       seeds,
       function(x) {
         set.seed(x)
-        results <- run_mab(
+        single_mab <- run_mab(
           data = prepped[["data"]],
           resimulation = TRUE,
           algorithm = prepped[["char_args"]][["algorithm"]],
@@ -346,8 +346,8 @@ mab_from_rct <- function(
           starts = prepped[["period_starts"]],
           ends = prepped[["period_ends"]]
         )
-        results[["assignment_quantities"]] <- get_assignment_quantities(
-          results,
+        single_mab[["assignment_quantities"]] <- get_assignment_quantities(
+          single_mab,
           prepped[["conditions"]]
         )
         if (!keep_data) {
@@ -512,65 +512,6 @@ verbose_log <- function(log, message) {
   }
 }
 
-
-#' @name get_assignment_quantitites
-#' @title Calculates Number of Observations Assigned to Each Treatment
-#' @description Takes the output from [mab_from_rct()], and
-#' calculates the number of observations assigned to each treatment group in the adaptive trial.
-#' @param simulation Output from [mab_from_rct()]
-#' @param conditions Character vector containing the names of all the treatment conditions in the trial.
-#' @returns Named numeric vector containing number of observations assigned to each treatment group
-#' @keywords internal
-get_assignment_quantities <- function(simulation, conditions) {
-  UseMethod("get_assignment_quantities", simulation[["final_data"]])
-}
-#' @method get_assignment_quantities data.frame
-#' @description get_assignment_quantities for `data.frame`s
-#' @inheritParams get_assignment_quantities
-#' @noRd
-get_assignment_quantities.data.frame <- function(simulation, conditions) {
-  count_summary <- simulation[["final_data"]] |>
-    dplyr::group_by(mab_condition) |>
-    dplyr::count()
-
-  count_vec <- as_named_vec(
-    df = count_summary,
-    val = "n",
-    name = "mab_condition"
-  )
-
-  if (length(count_vec) < length(conditions)) {
-    missing_conds <- setdiff(
-      conditions,
-      names(count_vec)
-    )
-    count_vec[missing_conds] <- 0
-  }
-  return(count_vec)
-}
-#-------------------------------------------------------------------
-#' @method get_assignment_quantities data.table
-#' @description get_assignment_quantities for `data.table`s
-#' @inheritParams get_assignment_quantities
-#' @noRd
-get_assignment_quantities.data.table <- function(simulation, conditions) {
-  count_summary <- simulation[["final_data"]][, .N, by = mab_condition]
-  data.table::setorder(count_summary, mab_condition)
-  count_vec <- as_named_vec(
-    df = count_summary,
-    val = "n",
-    name = "mab_condition"
-  )
-  if (length(count_vec) < length(conditions)) {
-    missing_conds <- setdiff(
-      conditions,
-      names(count_vec)
-    )
-    count_vec[missing_conds] <- 0
-  }
-  return(count_vec)
-}
-#-----------------------------------------------------------------
 
 #' @name condense_results
 #' @title Condenses results of repeated simulations.

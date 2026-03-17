@@ -25,6 +25,7 @@ run_mab(
   ndraws,
   starts,
   ends,
+  keep_data = keep_data,
   ...
 )
 }
@@ -88,6 +89,8 @@ for each treatment block to impute from.}
 \item{starts}{Numeric vector where element \code{i} is the starting row number of period \code{i}.}
 
 \item{ends}{Numeric vector where element \code{i} is the ending row number of period \code{i}.}
+
+\item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended \code{FALSE}. When\code{ r = 1} the final data is always kept and reported.}
 
 \item{...}{Additional named arguments passed to \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
 }

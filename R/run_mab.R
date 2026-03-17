@@ -48,6 +48,7 @@ run_mab <- function(
   ndraws,
   starts,
   ends,
+  keep_data = keep_data,
   ...
 ) {
   verbose_log(verbose, "Starting Bandit Trial")
@@ -207,7 +208,7 @@ mab_loop <- function(
     current_idx <- starts[i]:ends[i]
     verbose_log(verbose, paste0("Period: ", i))
 
-    prior <- create_prior(prior_periods = prior_periods, current_period = i)
+    prior <- compute_lookback(prior_periods = prior_periods, current_period = i)
 
     current_data <- data[current_idx, ]
     prior_data <- data[starts[prior]:ends[i - 1], ]
@@ -357,14 +358,31 @@ collect_mab_results.data.frame <- function(
       dplyr::mutate(period_number = dplyr::row_number())
   })
 
+  assignment_quantities <- data |>
+    dplyr::group_by(mab_condition) |>
+    dplyr::count() |>
+    as_named_vec(
+      val = "n",
+      name = "mab_condition"
+    )
+
+  if (length(assignment_quantities) < length(conditions)) {
+    missing <- setdiff(
+      conditions,
+      names(assignment_quantities)
+    )
+    assignment_quantities[missing] <- 0
+  }
+
   return(list(
     final_data = data,
     bandits = bandits[["bandit_stat"]],
-    assignment_probs = bandits[["assignment_prob"]]
+    assignment_probs = bandits[["assignment_prob"]],
+    assignment_quantities = assignment_quantities
   ))
 }
 #-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
+
 #' @method collect_mab_results `data.table`
 #' @inheritParams collect_mab_results
 #' @title [collect_mab_results()] for `data.table`s
@@ -403,15 +421,24 @@ collect_mab_results.data.table <- function(
   assignment_probs <- data.table::as.data.table(bandits[["assignment_prob"]])
   assignment_probs[, period_number := .I]
 
+  assignment_quantities <- data[, .(count = .N), by = mab_condition] |>
+    as_named_vec(val = "count", name = "mab_condition")
+
+  if (length(assignment_quantities) < length(conditions)) {
+    missing <- setdiff(conditions, names(assignment_quantities))
+    assignment_quantities[missing] <- 0
+  }
+
   return(list(
     final_data = data,
     bandits = bandit_stats,
-    assignment_probs = assignment_probs
+    assignment_probs = assignment_probs,
+    assignment_quantities = assignment_quantities
   ))
 }
 #------------------------------------------------------------------------------
 #' Create Prior Periods
-#' @name create_prior
+#' @name compute_lookback
 #' @description Used during [mab_loop()] to create a vector of prior periods dynamically based on the specified
 #' number of prior periods.
 #' @inheritParams mab_from_rct
@@ -423,7 +450,7 @@ collect_mab_results.data.table <- function(
 #' * [mab_loop()]
 #' @keywords internal
 
-create_prior <- function(prior_periods = NULL, current_period) {
+compute_lookback <- function(prior_periods = NULL, current_period) {
   if (is.null(prior_periods)) {
     1
   } else {
