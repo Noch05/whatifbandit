@@ -4,7 +4,7 @@
 \alias{compute_iaipw}
 \title{Calculate Observation Level AIPW For Each Treatment Condition}
 \usage{
-compute_iaipw(data, assignment_probs, periods, conditions, verbose)
+compute_iaipw(data, assignment_probs, periods, conditions)
 }
 \arguments{
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
@@ -14,8 +14,6 @@ of a traditional Randomized Controlled Trial (RCT).}
 assigned each treatment at a given period.}
 
 \item{periods}{Numeric value of length 1; number of total periods in the simulation.}
-
-\item{verbose}{Logical; whether or not to print intermediate messages. Default is \code{FALSE}.}
 
 \item{cluster_col}{Name of the column holding the clustering index}
 }

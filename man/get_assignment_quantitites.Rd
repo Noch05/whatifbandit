@@ -8,7 +8,7 @@
 get_assignment_quantities(simulation, conditions)
 }
 \arguments{
-\item{simulation}{Output from \code{\link[=run_mab_rct]{run_mab_rct()}}}
+\item{simulation}{Output from \code{\link[=mab_from_rct]{mab_from_rct()}}}
 
 \item{conditions}{Character vector containing the names of all the treatment conditions in the trial.}
 }
@@ -16,7 +16,7 @@ get_assignment_quantities(simulation, conditions)
 Named numeric vector containing number of observations assigned to each treatment group
 }
 \description{
-Takes the output from \code{\link[=run_mab_rct]{run_mab_rct()}}, and
+Takes the output from \code{\link[=mab_from_rct]{mab_from_rct()}}, and
 calculates the number of observations assigned to each treatment group in the adaptive trial.
 }
 \keyword{internal}

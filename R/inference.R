@@ -32,10 +32,8 @@ compute_iaipw <- function(
   data,
   assignment_probs,
   periods,
-  conditions,
-  verbose
+  conditions
 ) {
-  verbose_log(verbose, "Computing Individual AIPW Estimates")
   UseMethod("compute_iaipw", data)
 }
 #-------------------------------------------------------------------------------
@@ -49,8 +47,7 @@ compute_iaipw.data.frame <- function(
   data,
   assignment_probs,
   periods,
-  conditions,
-  verbose
+  conditions
 ) {
   new_cols <- paste0("aipw_", conditions)
   data[new_cols] <- NA_real_
@@ -101,8 +98,6 @@ compute_iaipw.data.frame <- function(
     dplyr::left_join(assignment_probs, by = "period_number")
 
   for (condition in conditions) {
-    verbose_log(verbose, sprintf("Condition: %s", condition))
-
     probability <- data[[sprintf("%s_assign_prob", condition)]]
     mhat <- data[[sprintf("prior_rate_%s", condition)]]
 
@@ -136,8 +131,7 @@ compute_iaipw.data.table <- function(
   data,
   assignment_probs,
   periods,
-  conditions,
-  verbose
+  conditions
 ) {
   new_cols <- paste0("aipw_", conditions)
   data[, (new_cols) := NA_real_]
@@ -218,7 +212,6 @@ compute_iaipw.data.table <- function(
   )
 
   for (condition in conditions) {
-    verbose_log(verbose, sprintf("Condition: %s", condition))
     probability <- sprintf("%s_assign_prob", condition)
     mhat <- sprintf("prior_rate_%s", condition)
 
@@ -253,7 +246,7 @@ compute_iaipw.data.table <- function(
 
 #-------------------------------------------------------------------------------
 #' Calculate Adaptive AIPW Estimates
-#' @name estimate_ipw_aipw
+#' @name estimate_aipw
 #'
 #' @description Uses provided Invidual AIPW scores created by [compute_iaipw()] and computes the final
 #' AIPW estimate and variance using the formulas from  \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et. al (2021)}.
@@ -281,7 +274,7 @@ compute_iaipw.data.table <- function(
 #' The AIPW estimator is unbiased, consistent, and asymptotically normal under the conditions of the simulated trial
 #' of the so can be used for valid inference with a normal distribution. Treatment effects can aslo be estimated as
 #' as the difference in AIPW estimates with the variance of the difference as the sum of the variances. Simple Wald-Style
-#' tests with the normal distribution can be used here. Sample means are also provided for comparison but should not be used.
+#' tests with the normal distribution can be used here.
 #'
 #' @references
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
@@ -294,16 +287,13 @@ estimate_aipw <- function(
   conditions,
   cluster_col = data_cols[["cluster_col"]],
   clustering,
-  periods,
-  verbose
+  periods
 ) {
-  verbose_log(verbose, "Aggregating AIPW Estimates")
-
   UseMethod("estimate_ipw_aipw", data)
 }
 #-------------------------------------------------------------------------------
 #' @title Adaptive AIPW Estimates for `data.frame`s
-#' @method estimate_ipw_aipw data.frame
+#' @method estimate_aipw data.frame
 #' @inheritParams estimate_ipw_aipw
 #' @noRd
 #'
@@ -313,8 +303,7 @@ estimate_aipw.data.frame <- function(
   conditions,
   clustering,
   cluster_col,
-  periods,
-  verbose
+  periods
 ) {
   data <- if (clustering) {
     data |>
@@ -357,30 +346,12 @@ estimate_aipw.data.frame <- function(
     dplyr::bind_rows() |>
     fill_missing_conditions(conditions = conditions)
 
-  sample <- data |>
-    dplyr::group_by(mab_condition) |>
-    dplyr::summarize(
-      mean = mean(mab_success),
-      n = dplyr::n(),
-      estimator = "Sample",
-      .groups = "drop"
-    )
-  dplyr::ungroup() |>
-    dplyr::mutate(
-      var = (mean * (1 - mean)) / n,
-    ) |>
-    dplyr::select(-n) |>
-    fill_missing_conditions(conditions = conditions)
-
-  returns <- dplyr::bind_rows(estimates, sample) |>
-    dplyr::arrange(estimator, mab_condition)
-
-  return(returns)
+  return(aipw_estimates)
 }
 #-------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #' @title Adaptive AIPW Estimates for `data.table`s
-#' @method estimate_ipw_aipw data.table
+#' @method estimate_aipw data.table
 #' @inheritParams estimate_ipw_aipw
 #' @noRd
 estimate_aipw.data.table <- function(
@@ -389,8 +360,7 @@ estimate_aipw.data.table <- function(
   conditions,
   clustering,
   cluster_col,
-  periods,
-  verbose
+  periods
 ) {
   data <- if (clustering) {
     data[,
@@ -425,24 +395,7 @@ estimate_aipw.data.table <- function(
     data.table::rbindlist() |>
     fill_missing_conditions(conditions = conditions)
 
-  sample <- data[,
-    .(
-      mean = mean(mab_success, na.rm = TRUE),
-      variance = ((mean(mab_success) * (1 - mean(mab_success))) / .N),
-      estimator = "Sample"
-    ),
-    by = mab_condition
-  ]
-
-  sample <- fill_missing_conditions(sample, conditions)
-
-  returns <- data.table::rbindlist(
-    list(aipw_estimates, sample),
-    use.names = TRUE
-  )
-  data.table::setorder(returns, estimator, mab_condition)
-
-  return(returns)
+  return(aipw_estimates)
 }
 
 #' IPW Estimates for Probability of Success
@@ -466,11 +419,8 @@ estimate_aipw.data.table <- function(
 #' using the appropriate variance estimate which includes the covariance of 2 coefficients.
 #'
 #'
-#' @returns A final list of all estimates. The first element of the list is a `tibble`/`data.table`,
-#' containing AIPW, IPW, and Sample estimated probabilities of success, and their variances. The F-statistic,
-#' and appropriate degrees of freedom are provided for tests. The second element is the covariance matrix
-#' from the IPW regression.
-#'
+#' @returns A list of the IPW estimates in a `tibble`/`data.table`, along with the variances of the coefficients,
+#' F-statistic and degrees of freedom, and the covariance matrix from the IPW regression.
 #'
 
 #' @references
@@ -538,32 +488,77 @@ estimate_ipw <- function(
   }
 
   if (data.table::is.data.table(data)) {
-    ipw <- data.table::data.table(
+    ipw_estimates <- data.table::data.table(
       mean = c(coefs, f),
       var = c(var, NA),
       df = c(df, NA),
       mab_condition = c(names(coefs), "Joint"),
       estimator = "IPW",
     )
-    ipw <- fill_missing_conditions(ipw, conditions)
-    estimates <- data.table::rbindlist(list(estimates, ipw), fill = TRUE)
+    ipw_estimates <- fill_missing_conditions(ipw, conditions = conditions)
   } else {
-    estimates <- tibble::tibble(
+    ipw_estimates <- tibble::tibble(
       mean = c(coefs, f),
       var = c(var, NA),
       df = c(df, NA),
-      mab_condition = c(names(coefs), "Joint"),
+      mab_condition = c(names(coefs), "Joint-F"),
       estimator = "IPW"
     ) |>
-      fill_missing_conditions(conditions) |>
-      dplyr::bind_rows(estimates)
+      fill_missing_conditions(conditions = conditions)
   }
   return(list(
-    est = estimates,
+    ipw = ipw_estimates,
     vcov = est_lm[["vcov"]]
   ))
 }
 
+#' Biased Sample Estimates
+#' @name estimate_sample
+#' @description
+#' Computes Sample Mean and its variance using the traditional formula, which is biased under the adaptive experiment.
+#' Only provided for comparison, and should not be used for any inference purposes. No adjustment for clustering is made.
+#'
+#' @inheritParams estimate_aipw
+#' @returns `data.table` or `tibble` with the biased sample estimates.
+#' @keywords internal
+estimate_sample <- function(data, conditions) {
+  UseMethod("estimate_sample", data)
+}
+
+#' @method estimate_sample data.frame
+#' @title Estimate Sample for `data.frames`
+#' @noRd
+estimate_sample.data.frame <- function(data, conditions) {
+  data |>
+    dplyr::group_by(mab_condition) |>
+    dplyr::summarize(
+      mean = mean(mab_success),
+      n = dplyr::n(),
+      .groups = "drop"
+    ) |>
+    dplyr::mutate(
+      var = (mean * (1 - mean)) / n,
+      estimator = "Sample"
+    ) |>
+    dplyr::select(-n) |>
+    fill_missing_conditions(conditions = conditions)
+}
+
+#' @method estimate_sample data.table
+#' @title Estimate Sample for `data.tables`
+#' @noRd
+estimate_sample.data.table <- function(data, conditions) {
+  sample <- data[,
+    .(
+      mean = mean(mab_success, na.rm = TRUE),
+      variance = ((mean(mab_success) * (1 - mean(mab_success))) / .N),
+      estimator = "Sample"
+    ),
+    by = mab_condition
+  ]
+  sample <- fill_missing_conditions(estimates = sample, conditions = conditions)
+  return(sample)
+}
 
 #' Fill Missing Conditions
 #' @description
@@ -606,4 +601,18 @@ fill_missing_conditions <- function(estimates, conditions) {
     }
   }
   return(estimates)
+}
+#' Combine Estimates
+#' @name combine_estimates
+#' @description
+#' Combines the AIPW, IPW, and Sample estimates into a single object to be returned.
+#' @returns Final estimates a list with 2 elements. First the `data.frame`/`data.table` of
+#' all the estimates across methods, and second the IPW regression variance-covariance matrix
+combine_estimates <- function(estimates, vcov) {
+  est <- if (data.table::is.data.table(estimates[[1]])) {
+    data.table::rbindlist(estimates, fill = TRUE)
+  } else {
+    dplyr::bind_rows(estimates)
+  }
+  list(estimates = est, vcov = vcov)
 }

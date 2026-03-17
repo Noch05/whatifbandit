@@ -17,10 +17,8 @@ of a traditional Randomized Controlled Trial (RCT).}
 \item{clustering}{Logical; Whether or not treatment clustering is occuring}
 }
 \value{
-A final list of all estimates. The first element of the list is a \code{tibble}/\code{data.table},
-containing AIPW, IPW, and Sample estimated probabilities of success, and their variances. The F-statistic,
-and appropriate degrees of freedom are provided for tests. The second element is the covariance matrix
-from the IPW regression.
+A list of the IPW estimates in a \code{tibble}/\code{data.table}, along with the variances of the coefficients,
+F-statistic and degrees of freedom, and the covariance matrix from the IPW regression.
 }
 \description{
 Computes the IPW estimates for the true probabilities of success using \code{\link[estimatr:lm_robust]{estimatr::lm_robust()}} to perform

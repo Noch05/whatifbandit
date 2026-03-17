@@ -80,29 +80,38 @@ run_mab <- function(
     ...
   )
 
+  verbose_log(verbose, "Computing final simulation estimates")
+
   sim_results[["final_data"]] <- compute_iaipw(
     data = sim_results[["final_data"]],
     assignment_probs = sim_results[["assignment_probs"]],
     conditions = conditions,
-    periods = periods,
-    verbose = verbose
+    periods = periods
   )
-  estimates <- estimate_aipw(
+  aipw_estimates <- estimate_aipw(
     data = sim_results[["final_data"]],
     assignment_probs = sim_results[["assignment_probss"]],
     periods = periods,
     conditions = conditions,
-    verbose = verbose,
     clustering = clustering,
     cluster_col = data_cols[["cluster_col"]]
   )
-  estimates <- estimate_ipw(
+
+  ipw_estimates <- estimate_ipw(
     data = sim_results[["final_data"]],
     estimates = estimates,
     cluster_col = data_cols[["cluster_col"]],
     clustering = clustering,
     blocking = blocking,
     conditions = conditions
+  )
+  sample_estimates <- estimate_sample(
+    data = sim_results[["final_data"]],
+    conditions = conditions,
+  )
+  estimates <- combine_estimates(
+    estimates = list(aipw_estimates, ipw_estimates[["ipw"]], sample_estimates),
+    vcov = ipw_estimates[["vcov"]]
   )
 
   results <- list(
