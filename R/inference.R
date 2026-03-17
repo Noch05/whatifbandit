@@ -202,14 +202,13 @@ compute_iaipw.data.table <- function(
     c("period_number", paste0(names(assignment_probs)[-1], "_assign_prob"))
   )
 
-  data <- merge(data, full_grid, all = TRUE, by = "period_number")
-  data <- merge(
-    data,
-    assignment_probs,
-    by = "period_number",
-    all = TRUE,
-    suffixes = c("", "_assign_prob")
-  )
+  data <- merge(data, full_grid, all = TRUE, by = "period_number") |>
+    merge(
+      assignment_probs,
+      by = "period_number",
+      all = TRUE,
+      suffixes = c("", "_assign_prob")
+    )
 
   for (condition in conditions) {
     probability <- sprintf("%s_assign_prob", condition)
@@ -555,8 +554,8 @@ estimate_sample.data.table <- function(data, conditions) {
       estimator = "Sample"
     ),
     by = mab_condition
-  ]
-  sample <- fill_missing_conditions(estimates = sample, conditions = conditions)
+  ] |>
+    fill_missing_conditions(conditions = conditions)
   return(sample)
 }
 

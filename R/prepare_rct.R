@@ -600,5 +600,5 @@ get_period_sizes.data.table <- function(data) {
   counts <- data[, .(count = .N), group_by = period_number][order(
     period_number
   )]
-  counts$count
+  counts[["count"]]
 }

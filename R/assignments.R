@@ -111,14 +111,14 @@ compute_prior.data.table <- function(
     weight := discount_rate^discount_period
   ]
 
-  past_results <- prior_data[,
+  prior_list <- prior_data[,
     .(
       successes = sum(known_success * weight, na.rm = TRUE),
       n = sum(weight, na.rm = TRUE)
     ),
     by = mab_condition
-  ]
-  prior_list <- as.list(past_results) |>
+  ] |>
+    as.list() |>
     finalize_prior_list(conditions = conditions)
 
   return(prior_list)

@@ -402,8 +402,9 @@ collect_mab_results.data.table <- function(
       n = .N
     ),
     by = mab_condition
-  ]
-  final_summary <- as.list(final_summary) |> finalize_prior_list()
+  ] |>
+    as.list() |>
+    finalize_prior_list()
 
   final_bandit <- compute_bandit(
     past_results = final_summary,
