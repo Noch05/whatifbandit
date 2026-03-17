@@ -20,8 +20,6 @@ of a traditional Randomized Controlled Trial (RCT).}
 \item{assignment_probs}{A \code{tibble}/\code{data.table} containing the probabilities of being
 assigned each treatment at a given period.}
 
-\item{cluster_col}{Name of the column holding the clustering index}
-
 \item{periods}{Numeric value of length 1; number of total periods in the simulation.}
 }
 \value{

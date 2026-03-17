@@ -14,13 +14,9 @@ of a traditional Randomized Controlled Trial (RCT).}
 assigned each treatment at a given period.}
 
 \item{periods}{Numeric value of length 1; number of total periods in the simulation.}
-
-\item{cluster_col}{Name of the column holding the clustering index}
 }
 \value{
-A \code{tibble}/\code{data.frame}, containing the subset of \code{data}
-used in the MAB trial, along with new columns for probabilities of assignment to each treatment,
-aipw, and ipw weights for each observation.
+A named list with the individual aipw estimate vectors for each treatment condition.
 }
 \description{
 Calculates the augmented inverse probability weighted estimate (AIPW) of treatment

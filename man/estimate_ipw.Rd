@@ -10,8 +10,6 @@ estimate_ipw(estimates, data, cluster_col, blocking, clustering, conditions)
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
 
-\item{cluster_col}{Name of the column holding the clustering index}
-
 \item{blocking}{Logical; Whether or not treatment blocking is occuring}
 
 \item{clustering}{Logical; Whether or not treatment clustering is occuring}

@@ -440,6 +440,15 @@ collect_mab_results.data.table <- function(
     assignment_quantities[missing] <- 0
   }
 
+  matrix_idx <- cbind(
+    data[["period_number"]],
+    match(data[["mab_condition"]], conditions)
+  )
+  assign_vec <- bandits[["assignment_prob"]][matrix_idx]
+  data[, `:=`(
+    mab_assign_prob = assign_vec,
+    ipw_weights = 1 / assign_vec
+  )]
   return(list(
     final_data = data,
     bandits = bandit_stats,

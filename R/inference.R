@@ -9,7 +9,7 @@
 #' assigned each treatment at a given period.
 #' @inheritParams run_mab
 #'
-#' @returns A named list with the individual aipw estimates vectors for each treatment condition
+#' @returns A named list with the individual aipw estimate vectors for each treatment condition.
 #' @details
 #' The specification for the individual AIPW estimates can be found
 #' in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}. The
@@ -75,8 +75,8 @@ compute_iaipw.data.frame <- function(
     ) |>
     dplyr::ungroup() |>
     dplyr::select(period_number, mab_condition, mhat) |>
-    dplyr::arrange(period_number) |>
-    tidyr::pivot_wider(names_from = mab_condition, values_from = mhat)
+    tidyr::pivot_wider(names_from = mab_condition, values_from = mhat) |>
+    dplyr::arrange(period_number)
 
   periods_vec <- data[["period_number"]]
   conditions_vec <- data[["mab_condition"]]
@@ -113,113 +113,67 @@ compute_iaipw.data.table <- function(
   periods,
   conditions
 ) {
-  new_cols <- paste0("aipw_", conditions)
-  data[, (new_cols) := NA_real_]
-
-  prior_data <- data[,
+  mhats <- data[,
     .(
       successes = sum(mab_success),
-      trials = .N
+      n = .N
     ),
-    by = c("mab_condition", "period_number")
-  ]
-  data.table::setkey(prior_data, period_number)
-
-  full_grid <- data.table::CJ(
-    period_number = seq_len(periods),
-    mab_condition = conditions
-  )
-  full_grid <- merge(
-    full_grid,
-    prior_data,
-    by = c("period_number", "mab_condition"),
-    suffixes = c("", ""),
-    all = TRUE
-  )
-  full_grid[is.na(full_grid)] <- 0
-
-  data.table::setorder(full_grid, mab_condition, period_number)
-  full_grid[,
-    `:=`(
-      cumulative_successes = data.table::shift(
-        cumsum(successes),
-        n = 1L,
-        type = "lag",
-        fill = 0
-      ),
-      cumulative_trials = data.table::shift(
-        cumsum(trials),
-        n = 1L,
-        type = "lag",
-        fill = 0
-      )
-    ),
-    by = c("mab_condition")
-  ]
-  full_grid[,
-    prior_period_success_rate := data.table::fifelse(
-      cumulative_trials > 0,
-      cumulative_successes / cumulative_trials,
-      0
-    )
-  ]
-
-  full_grid <- data.table::dcast(
-    data = full_grid[, .(
-      period_number,
-      mab_condition,
-      prior_period_success_rate
-    )],
-    formula = period_number ~ mab_condition,
-    value.var = "prior_period_success_rate"
-  )
-  data.table::setnames(
-    full_grid,
-    c("period_number", paste0("prior_rate_", names(full_grid)[-1]))
-  )
-  data.table::setnames(
-    assignment_probs,
-    c("period_number", paste0(names(assignment_probs)[-1], "_assign_prob"))
-  )
-
-  data <- merge(data, full_grid, all = TRUE, by = "period_number") |>
+    by = .SD,
+    .SDcols = c("mab_condition", "period_number")
+  ] |>
     merge(
-      assignment_probs,
-      by = "period_number",
-      all = TRUE,
-      suffixes = c("", "_assign_prob")
+      data.table::CJ(
+        period_number = seq_len(periods),
+        mab_condition = conditions
+      ),
+      by = c("period_number", "mab_condition"),
+      all.x = TRUE
     )
 
-  for (condition in conditions) {
-    probability <- sprintf("%s_assign_prob", condition)
-    mhat <- sprintf("prior_rate_%s", condition)
-
-    data[,
-      (sprintf("aipw_%s", condition)) := data.table::fifelse(
-        mab_condition == condition,
-        (mab_success / get(probability)) +
-          (1 - (1 / get(probability))) * get(mhat),
-        get(mhat)
-      )
-    ]
-  }
-
-  cols <- paste0(data[["mab_condition"]], "_assign_prob")
-
-  ## Fix this is not supported
-  data[,
-    true_assign_prob := data[cbind(seq_len(.N), match(cols, names(data)))]
-  ][,
-    ipw_weights := 1 / true_assign_prob
+  mhats[, `:=`(
+    successes = data.table::fifelse(is.na(successes), 0, successes),
+    n = data.table::fifelse(is.na(n), 0, n)
+  )]
+  data.table::setorder(mhats, mab_condition, period_number)
+  mhats[,
+    mhat := data.table:shift(
+      data.table::fifelse(cumsum(n) > 0, cumsum(successes) / cumsum(n), 0),
+      n = 1L,
+      fill = 0,
+      type = "lag"
+    )
   ]
+  mhats <- mhats[, .(period_number, mab_condition, mhat)] |>
+    data.table::dcast(
+      formula = period_number ~ mab_condition,
+      value.var = "mhat"
+    )
 
-  check <- sum(is.na(data[, ..new_cols]))
+  data.table::setorder(mhats, period_number)
+
+  periods_vec <- data[["period_number"]]
+  conditions_vec <- data[["mab_condition"]]
+  success_vec <- data[["mab_success"]]
+
+  iaipw_estimates <- lapply(
+    conditions,
+    \(condition) {
+      prob <- assignment_probs[periods_vec, condition]
+      mhat <- mhats[periods_vec, condition]
+      indicator <- (as.integer(conditions_vec == condition) / prob)
+      iaipw <- (indicator * success_vec) + (1 - indicator) * mhat
+      return(iaipw)
+    }
+  )
+  names(iaipw_estimates) <- conditions
+
+  check <- vapply(iaipw_estimates, \(x) sum(is.na(x)), numeric(1)) |> sum()
 
   if (check != 0) {
     warning(paste0(check, " Individual AIPW Scores are NA"))
   }
 
-  return(invisible(data))
+  return(iaipw_estimates)
 }
 
 
