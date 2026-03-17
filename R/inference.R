@@ -49,77 +49,64 @@ compute_iaipw.data.frame <- function(
   periods,
   conditions
 ) {
-  new_cols <- paste0("aipw_", conditions)
-  data[new_cols] <- NA_real_
-
-  prior_data <- data |>
+  mhats <- data |>
     dplyr::group_by(period_number, mab_condition) |>
     dplyr::summarize(
       successes = sum(mab_success, na.rm = TRUE),
-      trials = dplyr::n(),
+      n = dplyr::n(),
       .groups = "drop"
-    )
-  names(assignment_probs) <- c(
-    "period_number",
-    paste0(names(assignment_probs)[-1], "_assign_prob")
-  )
-
-  data <- expand.grid(
-    period_number = seq_len(periods),
-    mab_condition = conditions
-  ) |>
-    dplyr::left_join(prior_data, by = c("period_number", "mab_condition")) |>
-    dplyr::mutate(dplyr::across(
-      c(successes, trials),
-      ~ tidyr::replace_na(.x, 0)
-    )) |>
+    ) |>
+    dplyr::right_join(
+      expand.grid(
+        period_number = seq_len(periods),
+        mab_condition = condition,
+        stringsAsFactors = FALSE
+      ),
+      by = c("period_number", "mab_condition")
+    ) |>
+    dplyr::mutate(dplyr::across(c(successes, n), \(x) {
+      tidyr::replace_na(x, 0)
+    })) |>
     dplyr::arrange(mab_condition, period_number) |>
     dplyr::group_by(mab_condition) |>
     dplyr::mutate(
-      cumulative_successes = dplyr::lag(cumsum(successes), default = 0),
-      cumulative_trials = dplyr::lag(cumsum(trials), default = 0),
-      prior_period_success_rate = dplyr::if_else(
-        cumulative_trials > 0,
-        cumulative_successes / cumulative_trials,
-        0
+      mhat = dplyr::lag(
+        dplyr::if_else(cumsum(n) > 0, cumsum(successes) / cumsum(n), 0),
+        n = 1L,
+        default = 0
       )
     ) |>
-    dplyr::select(period_number, mab_condition, prior_period_success_rate) |>
-    tidyr::pivot_wider(
-      names_from = mab_condition,
-      values_from = "prior_period_success_rate",
-      names_prefix = "prior_rate_"
-    ) |>
-    dplyr::right_join(data, by = "period_number") |>
-    dplyr::select(
-      !!!rlang::syms(names(data)),
-      tidyr::starts_with("prior_rate_")
-    ) |>
-    dplyr::left_join(assignment_probs, by = "period_number")
+    dplyr::ungroup() |>
+    dplyr::select(period_number, mab_condition, mhat) |>
+    tidyr::pivot_wider(mames_from = mab_condition, values_from = mhat)
 
-  for (condition in conditions) {
-    probability <- data[[sprintf("%s_assign_prob", condition)]]
-    mhat <- data[[sprintf("prior_rate_%s", condition)]]
+  periods_vec <- data[["period_number"]]
+  conditions_vec <- data[["mab_condition"]]
+  success_vec <- data[["mab_success"]]
 
-    data[[sprintf("aipw_%s", condition)]] <- ifelse(
-      data[["mab_condition"]] == condition,
-      (data[["mab_success"]] / probability) + (1 - (1 / probability)) * mhat,
-      mhat
-    )
-  }
-
-  data[["true_assign_prob"]] <- data[cbind(
-    seq_len(nrow(data)),
-    match(paste0(data[["mab_condition"]], "_assign_prob"), names(data))
-  )]
+  iaipw_estimates <- lapply(
+    conditions,
+    \(condition) {
+      prob <- assignment_probs[[condition]][periods_vec]
+      mhat <- mhats[[condition]][periods_vec]
+      indicator <- (as.integer(conditions_vec == condition) / prob)
+      iaipw <- (indicator * success_vec) + (1 - indicator) * mhat
+      return(iaipw)
+    }
+  )
+  names(iaipw_estimates) <- conditions
+  matrix_idx <- cbind(periods_vec, match(conditions_vec, conditions))
+  data[["mab_assign_prob"]] <- as.matrix(assignment_probs[, conditions])[
+    matrix_idx
+  ]
   data[["ipw_weights"]] <- 1 / data[["true_assign_prob"]]
 
-  check <- sum(is.na(data[, new_cols]))
+  check <- vapply(iaipw_estimates, \(x) sum(is.na(x)), numeric(1)) |> sum()
 
   if (check != 0) {
     warning(paste0(check, " Individual AIPW Scores are NA"))
   }
-  return(data)
+  return(list(data = data, iaipw_estimates = iaipw_estimates))
 }
 # ------------------------------------------------------------------------------
 #' @method compute_iaipw data.table
