@@ -33,7 +33,70 @@ compute_prior <- function(
   conditions,
   current_period
 ) {
-  UseMethod("compute_prior", current_data)
+  # Faster execution using vectors and `tapply()` when data is small
+  if (nrow(prior_data < 30000)) {
+    compute_prior.fast(
+      current_data = current_data,
+      prior_data = prior_data,
+      delayed_feedback = delayed_feedback,
+      assignment_date_col = assignment_date_col,
+      discount_rate = discount_rate,
+      conditions = conditions,
+      current_period = current_period
+    )
+  } else {
+    UseMethod("compute_prior", current_data)
+  }
+}
+
+
+#' @method compute_prior fast
+#' @title
+#' [compute_prior()] using lower level base `R` for efficiency when data size is small
+#' @inheritParams compute_prior
+#' @noRd
+compute_prior.fast <- function(
+  current_data,
+  prior_data,
+  delayed_feedback,
+  assignment_date_col = NULL,
+  discount_rate,
+  conditions,
+  current_period
+) {
+  if (delayed_feedback) {
+    current_date <- max(current_data[[assignment_date_col]])
+    known_success <- as.integer(
+      current_date >= prior_data[["new_success_date"]] &
+        !is.na(prior_data[["new_success_date"]])
+    )
+  } else {
+    known_success <- prior_data[["mab_success"]]
+  }
+  weight <- discount_rate^(current_period -
+    prior_data[["period_number"]])
+
+  successes <- tapply(
+    X = (prior_data[["known_success"]] * prior_data[["weight"]]),
+    INDEX = prior_data[["mab_condition"]],
+    FUN = sum
+  )
+  n <- tapply(
+    X = prior_data[["weight"]],
+    INDEX = prior_data[["mab_condition"]],
+    FUN = sum
+  )
+  if (!identical(names(successes), names(n))) {
+    n <- n[names(successes)]
+  }
+
+  prior_list <- list(
+    mab_condition = names(successes),
+    successes = successes,
+    n = n
+  ) |>
+    finalize_prior_list(conditions = conditions)
+  return(prior_list)
 }
 
 #----------------------------------------------------------------------------------
@@ -110,7 +173,6 @@ compute_prior.data.table <- function(
   prior_data[, discount_period := current_period - period_number][,
     weight := discount_rate^discount_period
   ]
-
   prior_list <- prior_data[,
     .(
       successes = sum(known_success * weight, na.rm = TRUE),
