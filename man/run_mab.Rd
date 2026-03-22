@@ -26,7 +26,9 @@ run_mab(
   starts,
   ends,
   keep_data = keep_data,
-  ...
+  r = r,
+  time_model = NULL,
+  time_model_args = NULL
 )
 }
 \arguments{
@@ -92,7 +94,14 @@ for each treatment block to impute from.}
 
 \item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended \code{FALSE}. When\code{ r = 1} the final data is always kept and reported.}
 
-\item{...}{Additional named arguments passed to \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
+\item{r}{Positive integer; number of replications (under different random seed). Replications of the MAB procedure on a fixed dataset provides important diagnostic information on the stochasticity/variance of
+the re-simulation method. Replications can be conducted in parallel, by setting an appropriate \code{\link[future:plan]{future::plan()}}. See details below.}
+
+\item{time_model}{An optional function with signature \verb{function(n, conditions, success, blocks = NULL, clusters = NULL, ...)}
+that returns a vector of \link[lubridate:period]{lubridate::period} objects to add to \code{dates_of_assignment} to produce \code{success_date}.
+Only used when\code{dates_of_assignment} is also supplied. Default \code{NULL}.}
+
+\item{time_model_args}{Arguments passed to \code{time_model} function}
 }
 \value{
 : A named list containing:

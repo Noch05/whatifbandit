@@ -30,7 +30,7 @@
 #' Units are assigned to clusters via [randomizr::complete_ra()]. Pass `NULL` (default) for no clustering.
 #' @param dates_of_assignment An optional vector of dates representing when units are assigned.
 #' If shorter than `n` it is recycled and sorted. If NULL` (default) no assignment dates are recorded.
-#' @param time_model An optional function with signature `function(n, treatments, success, blocks = NULL, clusters = NULL, ...)`
+#' @param time_model An optional function with signature `function(n, conditions, success, blocks = NULL, clusters = NULL, ...)`
 #' that returns a vector of [lubridate::period] objects to add to `dates_of_assignment` to produce `success_date`.
 #' Only used when`dates_of_assignment` is also supplied. Default `NULL`.
 #'

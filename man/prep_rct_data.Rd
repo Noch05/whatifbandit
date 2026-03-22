@@ -94,8 +94,6 @@ not to be changed.}
 \item{r}{Positive integer; number of replications (under different random seed). Replications of the MAB procedure on a fixed dataset provides important diagnostic information on the stochasticity/variance of
 the re-simulation method. Replications can be conducted in parallel, by setting an appropriate \code{\link[future:plan]{future::plan()}}. See details below.}
 
-\item{seeds}{An integer vector of \code{length(r)} containing valid seeds to define random state for each re-simulation.}
-
 \item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended \code{FALSE}. When\code{ r = 1} the final data is always kept and reported.}
 
 \item{blocking}{Logical; Whether or not treatment blocking is occuring}

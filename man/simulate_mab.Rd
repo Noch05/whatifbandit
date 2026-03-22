@@ -61,7 +61,7 @@ Units are assigned to clusters via \code{\link[randomizr:complete_ra]{randomizr:
 \item{dates_of_assignment}{An optional vector of dates representing when units are assigned.
 If shorter than \code{n} it is recycled and sorted. If NULL` (default) no assignment dates are recorded.}
 
-\item{time_model}{An optional function with signature \verb{function(n, treatments, success, blocks = NULL, clusters = NULL, ...)}
+\item{time_model}{An optional function with signature \verb{function(n, conditions, success, blocks = NULL, clusters = NULL, ...)}
 that returns a vector of \link[lubridate:period]{lubridate::period} objects to add to \code{dates_of_assignment} to produce \code{success_date}.
 Only used when\code{dates_of_assignment} is also supplied. Default \code{NULL}.}
 

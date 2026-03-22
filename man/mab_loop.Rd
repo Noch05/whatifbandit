@@ -27,7 +27,8 @@ mab_loop(
   ends,
   periods,
   num_conditions,
-  ...
+  time_model,
+  time_model_args
 )
 }
 \arguments{
@@ -81,7 +82,9 @@ When re-computing the adaptive assignment probabilities via Thompsom Samplings o
 
 \item{num_conditions}{Number of conditions, equivalent to \code{length(conditions)}.}
 
-\item{...}{Additional named arguments passed to \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
+\item{time_model}{An optional function with signature \verb{function(n, conditions, success, blocks = NULL, clusters = NULL, ...)}
+that returns a vector of \link[lubridate:period]{lubridate::period} objects to add to \code{dates_of_assignment} to produce \code{success_date}.
+Only used when\code{dates_of_assignment} is also supplied. Default \code{NULL}.}
 }
 \value{
 A named list containing:

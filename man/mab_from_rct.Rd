@@ -24,7 +24,6 @@ mab_from_rct(
   whole_experiment = FALSE,
   ndraws = 5000,
   r = 1,
-  seeds = NULL,
   verbose = FALSE,
   check_args = TRUE,
   keep_data = FALSE,
@@ -107,8 +106,6 @@ contributor to total run time. Default is \code{FALSE}.}
 
 \item{r}{Positive integer; number of replications (under different random seed). Replications of the MAB procedure on a fixed dataset provides important diagnostic information on the stochasticity/variance of
 the re-simulation method. Replications can be conducted in parallel, by setting an appropriate \code{\link[future:plan]{future::plan()}}. See details below.}
-
-\item{seeds}{An integer vector of \code{length(r)} containing valid seeds to define random state for each re-simulation.}
 
 \item{verbose}{Logical; whether or not to print intermediate messages. Default is \code{FALSE}.}
 

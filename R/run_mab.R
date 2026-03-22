@@ -12,6 +12,7 @@
 #' @param resimulation Logical flag; Whether or not this MAB Trial is being run as a re-simulated RCT, as opposed to an original simulation from specified
 #' population parameters.
 #' @param true_prob True probabilities of success, used to generate outcomes in the case of an original simulation.
+#' @param time_model_args Arguments passed to `time_model` function
 #'
 #' @inheritParams simulate_mab
 #'
@@ -49,7 +50,9 @@ run_mab <- function(
   starts,
   ends,
   keep_data = keep_data,
-  ...
+  r = r,
+  time_model = NULL,
+  time_model_args = NULL
 ) {
   verbose_log(verbose, "Starting Bandit Trial")
   periods <- length(starts)
@@ -78,7 +81,8 @@ run_mab <- function(
     ends = ends,
     periods = periods,
     true_prob = true_prob,
-    ...
+    time_model = time_model,
+    time_model = time_model_args
   )
 
   verbose_log(verbose, "Computing final simulation estimates")
@@ -114,11 +118,13 @@ run_mab <- function(
     estimates = list(aipw_estimates, ipw_estimates[["ipw"]], sample_estimates),
     vcov = ipw_estimates[["vcov"]]
   )
+  final_data <- if (keep_data || r == 1) sim_results[["final_data"]] else NULL
 
   results <- list(
-    final_data = sim_results[["final_data"]],
+    final_data = final_data,
     bandits = sim_results[["bandits"]],
     assignment_probs = sim_results[["assignment_probs"]],
+    assignment_quantities = sim_results[["assignment_quantities"]],
     estimates = estimates[["est"]],
     ipw_vcov = estimates[["vcov"]],
     settings = NULL
@@ -175,7 +181,8 @@ mab_loop <- function(
   ends,
   periods,
   num_conditions,
-  ...
+  time_model,
+  time_model_args
 ) {
   bandits <- vector(mode = "list", length = 2)
 

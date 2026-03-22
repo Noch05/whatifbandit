@@ -84,7 +84,6 @@
 #' @param r Positive integer; number of replications (under different random seed). Replications of the MAB procedure on a fixed dataset provides important diagnostic information on the stochasticity/variance of
 #' the re-simulation method. Replications can be conducted in parallel, by setting an appropriate [future::plan()]. See details below.
 #'
-#' @param seeds An integer vector of `length(r)` containing valid seeds to define random state for each re-simulation.
 #' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended `FALSE`. When` r = 1` the final data is always kept and reported.
 #' @param check_args Logical; Whether or not to robustly check whether arguments are valid. Default is TRUE, and recommended
 #' not to be changed.
@@ -258,7 +257,6 @@ mab_from_rct <- function(
   whole_experiment = FALSE,
   ndraws = 5000,
   r = 1,
-  seeds = NULL,
   verbose = FALSE,
   check_args = TRUE,
   keep_data = FALSE,
@@ -294,7 +292,6 @@ mab_from_rct <- function(
     verbose = verbose,
     ndraws = ndraws,
     r = r,
-    seeds = seeds,
     keep_data = keep_data
   )
   if (r == 1) {
@@ -317,15 +314,16 @@ mab_from_rct <- function(
       imputation_information = prepped$imputation_information,
       ndraws = ndraws,
       starts = prepped$period_starts,
-      ends = prepped$period_ends
+      ends = prepped$period_ends,
+      keep_data = keep_data,
+      r = r
     )
   } else {
     verbose_log(verbose, "Starting Simulations")
     mabs <- furrr::future_map(
-      seeds,
+      seq_len(r),
       function(x) {
-        set.seed(x)
-        single_mab <- run_mab(
+        run_mab(
           data = prepped[["data"]],
           resimulation = TRUE,
           algorithm = prepped[["char_args"]][["algorithm"]],
@@ -344,16 +342,10 @@ mab_from_rct <- function(
           imputation_information = prepped[["imputation_information"]],
           ndraws = ndraws,
           starts = prepped[["period_starts"]],
-          ends = prepped[["period_ends"]]
+          ends = prepped[["period_ends"]],
+          keep_data = keep_data,
+          r = r
         )
-        single_mab[["assignment_quantities"]] <- get_assignment_quantities(
-          single_mab,
-          prepped[["conditions"]]
-        )
-        if (!keep_data) {
-          results[["final_data"]] <- NULL
-        }
-        return(results)
       },
       .options = furrr::furrr_options(
         globals = list(
@@ -374,7 +366,8 @@ mab_from_rct <- function(
           control_augment = control_augment,
           keep_data = keep_data,
           ndraws = ndraws,
-          random_assign_prop = random_assign_prop
+          random_assign_prop = random_assign_prop,
+          r = r,
         ),
         packages = c(
           "whatifbandit",
@@ -418,14 +411,12 @@ mab_from_rct <- function(
     conditions = prepped$conditions,
     delayed_feedback = delayed_feedback,
     whole_experiment = whole_experiment,
-    blocking = blocking,
     block_cols = prepped$data_cols$block_cols$name,
     cluster_col = prepped$data_cols$cluster_col$name,
     ndraws = ndraws,
     delayed_feedback = delayed_feedback,
-    keep_data = keep_data,
-    r = r,
-    seeds = seeds
+    keep_data = !is.null(results$final_data),
+    r = r
   )
   results <- if (r > 1) multi.mab(results) else mab(results)
   return(results)
