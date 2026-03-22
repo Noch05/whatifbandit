@@ -7,12 +7,11 @@
 check_names(...)
 }
 \arguments{
-\item{...}{objects to check
-Checks if provided objects have \code{names} attribute}
+\item{...}{objects to check}
 }
 \value{
 Nothing; Throws an error if check fails
 }
 \description{
-Validates Names
+Checks if provided objects have \code{names} attribute
 }

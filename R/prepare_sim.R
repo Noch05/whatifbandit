@@ -7,17 +7,44 @@
 
 prep_sim_data <- function(
   n,
+  p,
   blocks = NULL,
   clusters = NULL,
+  blocking,
+  clustering,
   period_idxs,
   assignment_dates = NULL
 ) {
   df_func <- if (dt) data.table::data.table else tibble::tibble
+
   blocks_clusters <- generate_groups(
     n = n,
     blocks = blocks,
     clusters = clusters
   )
+  period_number <- findInterval(seq_len(n), period_idxs[["start_idxs"]])
+  current_idx <- period_idxs[["start_idxs"]][1]:period_idxs[["end_idxs"]][1]
+
+  data <- df_func(
+    period_number = period_number,
+    block = blocks,
+    cluster = clusters,
+    assignment_dates = assignment_dates,
+    mab_condition = NA,
+    mab_success = NA,
+    new_success_date = NA
+  )
+  data <- assign_treatments(
+    current_data = data[current_idx, ],
+    probs = p / length(p),
+    blocking = blocking,
+    clustering = clustering,
+    conditions = names(p),
+    random_assign_prop = 0,
+    resimulation = FALSE,
+    cluster_col = "clusters"
+  ) |>
+    generate_outcomes(p = p, )
 }
 
 
@@ -43,11 +70,16 @@ generate_groups <- function(n, blocks = NULL, clusters = NULL) {
   } else if (any(null_check)) {
     group <- blocks %||% clusters
     name <- names(supplied_groups)[!null_check]
-    return_vecs[[name]] <- randomizr::complete_ra(
+    return_vec <- randomizr::complete_ra(
       N = n,
       prob_each = group,
       conditions = names(group)
     )
+    if (name == "clusters") {
+      return_vec <- return_vec[order(return_vec)]
+    }
+    return_vecs[[name]] <- return_vec
+
     return(return_vecs)
   } else {
     computed_blocks <- randomizr::complete_ra(
@@ -66,8 +98,9 @@ generate_groups <- function(n, blocks = NULL, clusters = NULL) {
         conditions = names(probs)
       )
     }
-    return_vecs[["clusters"]] <- computed_clusters
-    return_vecs[["blocks"]] <- computed_blocks
+    ord <- order(computed_clusters)
+    return_vecs[["clusters"]] <- computed_clusters[ord]
+    return_vecs[["blocks"]] <- computed_blocks[ord]
     return(return_vecs)
   }
   return(return_vecs)

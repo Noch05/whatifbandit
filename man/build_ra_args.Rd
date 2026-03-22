@@ -7,11 +7,11 @@
 build_ra_args(
   idx,
   current_data,
-  probs,
+  probs = NULL,
   conditions,
   blocking,
   clustering,
-  cluster_col,
+  cluster_col = NULL,
   dt
 )
 }

@@ -9,11 +9,11 @@ compute_assignments(
   band_idx,
   rand_idx,
   probs,
-  random_probs,
+  random_probs = NULL,
   conditions,
   blocking,
   clustering,
-  cluster_col
+  cluster_col = NULL
 )
 }
 \arguments{

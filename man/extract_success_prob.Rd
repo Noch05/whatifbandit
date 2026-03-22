@@ -4,7 +4,7 @@
 \alias{extract_success_prob}
 \title{Extract Success Probabilities Per-Unit}
 \usage{
-extract_success_prob(p, treatments, size, other_idx = NULL)
+extract_success_prob(p, conditions, other_idx = NULL)
 }
 \arguments{
 \item{p}{The true probabilities of success for each treatment arm. Specified as an matrix,
@@ -15,7 +15,7 @@ Probabilities are accessed as \code{p[treatment, block]}.
 With blocks and clusters utilize the clusters for the columns because clusters are fully nested in blocks.
 For no clusters or blocks simply use a matrix with 1 column.}
 
-\item{treatments}{A character or factor vector of treatment assignments of
+\item{conditions}{A character or factor vector of treatment assignments of
 length \code{n}.}
 
 \item{other_idx}{Character vector of block or cluster assigents to be used as the

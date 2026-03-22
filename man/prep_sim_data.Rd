@@ -6,8 +6,11 @@
 \usage{
 prep_sim_data(
   n,
+  p,
   blocks = NULL,
   clusters = NULL,
+  blocking,
+  clustering,
   period_idxs,
   assignment_dates = NULL
 )

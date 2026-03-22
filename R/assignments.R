@@ -479,10 +479,11 @@ assign_treatments <- function(
   blocking = NULL,
   clustering = NULL,
   conditions,
-  condition_col,
-  cluster_col,
+  condition_col = NULL,
+  cluster_col = NULL,
   random_assign_prop,
-  random_probs
+  random_probs = NULL,
+  resimulation
 ) {
   rows <- nrow(current_data)
   random_rows <- rows * random_assign_prop
@@ -542,7 +543,8 @@ assign_treatments <- function(
       rand_idx = rand_idx,
       band_idx = band_idx,
       random_probs = random_probs,
-      assignment_type = assignment_type
+      assignment_type = assignment_type,
+      resimulation = resimulation
     )
   } else {
     assign_treatments.data.frame(
@@ -556,7 +558,8 @@ assign_treatments <- function(
       rand_idx = rand_idx,
       band_idx = band_idx,
       random_probs = random_probs,
-      assignment_type = assignment_type
+      assignment_type = assignment_type,
+      resimulation = resimulation
     )
   }
 }
@@ -574,11 +577,11 @@ assign_treatments <- function(
 build_ra_args <- function(
   idx,
   current_data,
-  probs,
+  probs = NULL,
   conditions,
   blocking,
   clustering,
-  cluster_col,
+  cluster_col = NULL,
   dt
 ) {
   if (blocking && clustering) {
@@ -641,11 +644,11 @@ compute_assignments <- function(
   band_idx,
   rand_idx,
   probs,
-  random_probs,
+  random_probs = NULL,
   conditions,
   blocking,
   clustering,
-  cluster_col
+  cluster_col = NULL
 ) {
   assignments <- vector("character", nrow(current_data))
 
@@ -683,12 +686,13 @@ assign_treatments.data.frame <- function(
   blocking,
   clustering,
   conditions,
-  condition_col,
-  cluster_col,
+  condition_col = NULL,
+  cluster_col = NULL,
   rand_idx,
   band_idx,
-  random_probs,
-  assignment_type
+  random_probs = NULL,
+  assignment_type,
+  resimulation
 ) {
   current_data[["assignment_type"]] <- assignment_type
   current_data[["mab_condition"]] <- compute_assignments(
@@ -703,10 +707,12 @@ assign_treatments.data.frame <- function(
     cluster_col = cluster_col
   )
 
-  current_data[["impute_req"]] <- as.integer(
-    as.character(current_data[["mab_condition"]]) !=
-      as.character(current_data[[condition_col]])
-  )
+  if (!resimulation) {
+    current_data[["impute_req"]] <- as.integer(
+      as.character(current_data[["mab_condition"]]) !=
+        as.character(current_data[[condition_col]])
+    )
+  }
   return(current_data)
 }
 
@@ -719,12 +725,13 @@ assign_treatments.data.table <- function(
   blocking,
   clustering,
   conditions,
-  condition_col,
-  cluster_col,
+  condition_col = NULL,
+  cluster_col = NULL,
   rand_idx,
   band_idx,
-  random_probs,
-  assignment_type
+  random_probs = NULL,
+  assignment_type,
+  resimulation
 ) {
   current_data[, `:=`(
     assignment_type = assignment_type,
@@ -741,10 +748,12 @@ assign_treatments.data.table <- function(
     )
   )]
 
-  current_data[,
-    impute_req := as.integer(
-      as.character(mab_condition) != as.character(get(condition_col))
-    )
-  ]
+  if (resimulation) {
+    current_data[,
+      impute_req := as.integer(
+        as.character(mab_condition) != as.character(get(condition_col))
+      )
+    ]
+  }
   return(invisible(current_data))
 }

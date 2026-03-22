@@ -252,7 +252,8 @@ mab_loop <- function(
       conditions_col = col_names[["conditions_col"]],
       conditions = conditions,
       random_assign_prop = random_assign_prop,
-      random_probs = equal_probs
+      random_probs = equal_probs,
+      resimulation = resimulation
     )
 
     bandits[["assignment_probs"]][i, ] <- (current_bandit[["assignment_prob"]] *

@@ -99,8 +99,15 @@ simulate_mab <- function(
     n = n,
     assignment_dates = assignment_dates
   )
+  blocking <- !is.null(blocks)
+  clustering <- !is.null(clusters)
 
   if (r == 1) {} else if (r > 1) {
+    opts <- do.call(
+      furrr:::furrr_options,
+      c(list(seed = TRUE), other_args$furrr_args)
+    )
+
     furrr::future_map(seq_len(1), \() {}, .options = furrr_options())
   }
 }
@@ -114,7 +121,7 @@ simulate_mab <- function(
 #'
 #' @inheritParams simulate_mab
 #' @inheritParams run_mab
-#' @param treatments A character or factor vector of treatment assignments of
+#' @param conditions A character or factor vector of treatment assignments of
 #'   length `n`.
 #' @param other_idx Character vector of block or cluster assigents to be used as the
 #' additionnal index for extracting from `p`.
@@ -123,14 +130,28 @@ simulate_mab <- function(
 #' @keywords internal
 extract_success_prob <- function(
   p,
-  treatments,
-  size,
+  conditions,
   other_idx = NULL
 ) {
   if (!is.null(other_idx)) {
-    extract_mat <- matrix(data = c(treatments, other_idx), ncol = 2)
+    extract_mat <- matrix(data = c(conditions, other_idx), ncol = 2)
     p[extract_mat]
   } else {
-    return(p[treatments])
+    return(p[conditions])
   }
 }
+
+#' Generate Outcomes Per-Unit
+#' @name generate_outcomes
+#' @description
+#' Uses provided success probabilities to draw a Bernoulli outcome for each unit. If `time_model` is provided, it is also used to compute
+#' dates of success
+#' @inheritParams simulate_mab
+#'
+
+generate_outcomes <- function(
+  current_data,
+  success_probs,
+  time_model = NULL,
+  time_model_args = NULL
+) {}

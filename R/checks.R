@@ -617,8 +617,8 @@ check_string <- function(arg, valid, name) {
 #' Validates Names
 #' @name check_names
 #' @description
-#' @param ... objects to check
 #' Checks if provided objects have `names` attribute
+#' @param ... objects to check
 #' @returns Nothing; Throws an error if check fails
 check_names <- function(...) {
   args <- rlang::dots_list(..., .named = TRUE)
