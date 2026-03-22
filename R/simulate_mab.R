@@ -146,12 +146,17 @@ extract_success_prob <- function(
 #' @description
 #' Uses provided success probabilities to draw a Bernoulli outcome for each unit. If `time_model` is provided, it is also used to compute
 #' dates of success
+#' @inheritParams impute_
 #' @inheritParams simulate_mab
-#'
+#' @returns updated `data.table`
 
 generate_outcomes <- function(
   current_data,
+  full_data,
   success_probs,
+  starts,
+  ends,
+  current_period,
   time_model = NULL,
   time_model_args = NULL
 ) {}

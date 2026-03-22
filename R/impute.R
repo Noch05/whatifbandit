@@ -248,7 +248,7 @@ summary_to_matrix.data.table <- function(df) {
 #' compatibility with [randomizr::block_ra()].
 #' @inheritParams compute_prior
 #' @inheritParams mab_loop
-#' @inheritParams impute_success
+#' @inheritParams impute_outcomes
 #' @param block_cols Names of the blocking columns
 #' @returns A named list containing:
 #' \itemize{
@@ -340,7 +340,7 @@ prep_imputation <- function(
 #'
 #' @name check_impute
 #' @inheritParams compute_prior
-#' @inheritParams impute_success
+#' @inheritParams impute_outcomes
 #' @param impute_success The `success` element of the `imputation_information`
 #' list created by [precompute_imputation()] for the given period.
 #' @details
@@ -391,7 +391,7 @@ check_impute <- function(impute_success, current_data, impute_idx) {
 #------------------------------------------------------------------------------------
 
 #' Imputing New Outcomes of Multi-Arm-Bandit Trial
-#' @name impute_success
+#' @name impute_outcomes
 #' @description Imputes outcomes for the current treatment assignment period.
 #' Uses [randomizr::block_ra()] to impute the outcomes for observations
 #' who were assigned new treatments. The probabilities used to guide the imputation
@@ -419,7 +419,7 @@ check_impute <- function(impute_success, current_data, impute_idx) {
 #'* [precompute_imputation()]
 #'* [randomizr::block_ra()]
 #' @keywords internal
-impute_success <- function(
+impute_outcomes <- function(
   data,
   imputation_info,
   success_col,
@@ -428,14 +428,14 @@ impute_success <- function(
   impute_idx,
   idx
 ) {
-  UseMethod("impute_success", current_data)
+  UseMethod("impute_outcomes", current_data)
 }
 
 #' Compute Imputations
 #' @name compute_impute
 #' @description
 #' Performs all `data.table`/`data.frame` agnostic portions of `impute_sucess`
-#' @inheritParams impute_success
+#' @inheritParams impute_outcomes
 #' @returns Numeric vector of imputed outcomes
 
 compute_impute <- function(imputation_info) {
@@ -465,12 +465,12 @@ compute_impute <- function(imputation_info) {
   return(imputations)
 }
 #-------------------------------------------------------------------------------
-#' @inheritParams impute_success
-#' @method impute_success data.frame
-#' @title [impute_success()] for `data.frames`
+#' @inheritParams impute_outcomes
+#' @method impute_outcomes data.frame
+#' @title [impute_outcomes()] for `data.frames`
 #' @noRd
 
-impute_success.data.frame <- function(
+impute_outcomes.data.frame <- function(
   data,
   imputation_info,
   success_col,
@@ -498,11 +498,11 @@ impute_success.data.frame <- function(
   return(data)
 }
 #-------------------------------------------------------------------------------
-#' @inheritParams impute_success
-#' @method impute_success data.table
-#' @title [impute_success()] for `data.table`s
+#' @inheritParams impute_outcomes
+#' @method impute_outcomes data.table
+#' @title [impute_outcomes()] for `data.table`s
 #' @noRd
-impute_success.data.table <- function(
+impute_outcomes.data.table <- function(
   data,
   imputation_info,
   success_col,

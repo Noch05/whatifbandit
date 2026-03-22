@@ -6,7 +6,11 @@
 \usage{
 generate_outcomes(
   current_data,
+  full_data,
   success_probs,
+  starts,
+  ends,
+  current_period,
   time_model = NULL,
   time_model_args = NULL
 )
@@ -15,6 +19,9 @@ generate_outcomes(
 \item{time_model}{An optional function with signature \verb{function(n, conditions, success, blocks = NULL, clusters = NULL, ...)}
 that returns a vector of \link[lubridate:period]{lubridate::period} objects to add to \code{dates_of_assignment} to produce \code{success_date}.
 Only used when\code{dates_of_assignment} is also supplied. Default \code{NULL}. Other optional arguments CANNOT share names as arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
+}
+\value{
+updated \code{data.table}
 }
 \description{
 Uses provided success probabilities to draw a Bernoulli outcome for each unit. If \code{time_model} is provided, it is also used to compute
