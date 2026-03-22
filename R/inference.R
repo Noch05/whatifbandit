@@ -218,117 +218,51 @@ estimate_aipw <- function(
   data,
   assignment_probs,
   conditions,
+  iaipw,
   cluster_col = data_cols[["cluster_col"]],
   clustering,
   periods
 ) {
-  UseMethod("estimate_ipw_aipw", data)
-}
-#-------------------------------------------------------------------------------
-#' @title Adaptive AIPW Estimates for `data.frame`s
-#' @method estimate_aipw data.frame
-#' @inheritParams estimate_ipw_aipw
-#' @noRd
-#'
-estimate_aipw.data.frame <- function(
-  data,
-  assignment_probs,
-  conditions,
-  clustering,
-  cluster_col,
-  periods
-) {
-  data <- if (clustering) {
-    data |>
-      dplyr::group_by(period_number, !!cluster_col[["sym"]]) |>
-      dplyr::summarize(
-        mab_condition = mab_condition,
-        dplyr::across(
-          dplyr::all_of(paste0("aipw_", conditions)),
-          mean,
-          .names = {
-            .col
-          }
-        )
+  dt <- data.table::is.data.table(data)
+  iaipw_scores <- if (clustering) {
+    if (dt) {
+      data.table::cbindlist(
+        list(data, as.data.table(iaipw))
+      )[,
+        lapply(.SD, mean),
+        .SDcols = names(iaipw),
+        by = c("period_number", cluster_col[["name"]])
+      ][, .SD, .SDcols = names(iaipw)] |>
+        as.list()
+    } else {
+      cbind(data, as_tibble(iaipw)) |>
+        dplyr::group_by(period_number, !!cluster_col[["sym"]]) |>
+        dplyr::summarize(dplyr::across(dplyr::all_of(names(iaipw)), mean)) |>
+        dplyr::select(dplyr::all_of(names(iaipw))) |>
+        as.list()
+    }
+  } else {
+    iaipw
+  }
+
+  bind_func <- if (dt) data.table::rbindlist else dplyr::bind_rows
+  aipw_estimates <- purrr::map2(
+    iaipw_scores,
+    names(iaipw_scores),
+    \(score, name) {
+      weights <- sqrt(assignment_probs[, name] / length(score))[data[[
+        "period_number"
+      ]]]
+      sum_w <- sum(weights)
+      mean <- sum(score * weights) / sum_w
+      var <- sum((weights^2) * ((score - mean)^2)) / ((sum_w)^2)
+      return(
+        list(mean = mean, var = var, mab_condition = name, estimator = "AIPW")
       )
-  } else {
-    data
-  }
-  rows <- nrow(data)
-  aipw_estimates <- lapply(conditions, \(condition) {
-    weights <- data[[sprintf("%s_assign_prob", condition)]] /
-      nrow(data)
-    sum_w <- sum(weights)
-    mean <- (sum(
-      data[[paste0("aipw_", condition)]] * weights,
-      na.rm = TRUE
-    )) /
-      (sum_w)
-    var <- (sum(
-      (data[[paste0("aipw_", condition)]] - mean)^2 * weights^2,
-      na.rm = TRUE
-    )) /
-      (sum_w^2)
-    return(tibble::tibble(
-      mean = mean,
-      var = var,
-      mab_condition = condition,
-      estimator = "AIPW"
-    ))
-  }) |>
-    dplyr::bind_rows() |>
+    }
+  ) |>
+    bind_func() |>
     fill_missing_conditions(conditions = conditions)
-
-  return(aipw_estimates)
-}
-#-------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#' @title Adaptive AIPW Estimates for `data.table`s
-#' @method estimate_aipw data.table
-#' @inheritParams estimate_ipw_aipw
-#' @noRd
-estimate_aipw.data.table <- function(
-  data,
-  assignment_probs,
-  conditions,
-  clustering,
-  cluster_col,
-  periods
-) {
-  data <- if (clustering) {
-    data[,
-      .(lapply(.SD, mean), mab_condition = mab_condition),
-      by = c("period_number", cluster_col[["name"]]),
-      .SDcols = paste0("aipw_", conditions)
-    ]
-  } else {
-    data
-  }
-  rows <- nrow(data)
-  aipw_estimates <- lapply(conditions, \(condition) {
-    weights <- data[[paste0(condition, "_assign_prob")]] / rows
-    sum_w <- sum(weights, na.rm = TRUE)
-    mean <- (sum(
-      data[[paste0("aipw_", condition)]] * weights,
-      na.rm = TRUE
-    )) /
-      (sum_w)
-    var <- (sum(
-      (data[[paste0("aipw_", condition)]] - mean)^2 * weights^2,
-      na.rm = TRUE
-    )) /
-      (sum_w^2)
-    data.table::data.table(
-      mean = mean,
-      var = var,
-      mab_condition = condition,
-      estimator = "AIPW"
-    )
-  }) |>
-    data.table::rbindlist() |>
-    fill_missing_conditions(conditions = conditions)
-
-  return(aipw_estimates)
 }
 
 #' IPW Estimates for Probability of Success
