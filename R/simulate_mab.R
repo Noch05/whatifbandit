@@ -28,18 +28,18 @@
 #' Clusters are accessed as `clusters[[block]][cluster]`. Insided each block, cluster proportions must sum to 1, and the same cluster cannot appear in multiple blocks.}
 #' }
 #' Units are assigned to clusters via [randomizr::complete_ra()]. Pass `NULL` (default) for no clustering.
-#' @param dates_of_assignment An optional vector of dates representing when units are assigned.
+#' @param assignment_dates An optional `Date` vector of dates representing when units are assigned.
 #' If shorter than `n` it is recycled and sorted. If NULL` (default) no assignment dates are recorded.
 #' @param time_model An optional function with signature `function(n, conditions, success, blocks = NULL, clusters = NULL, ...)`
 #' that returns a vector of [lubridate::period] objects to add to `dates_of_assignment` to produce `success_date`.
-#' Only used when`dates_of_assignment` is also supplied. Default `NULL`.
+#' Only used when`dates_of_assignment` is also supplied. Default `NULL`. Other optional arguments CANNOT share names as arguments in [furrr::furrr_options()]
 #'
 #' @param algorithm Assignment algorithm, determines how probabilities of assignment
 #' are updated each period. Either `"thompson"` for Thompson Sampling, `"ucb1"` for
 #' the UCB1 algorithm, or `"static"` for uniform, non-adaptive assignment. Not case sensitive.
 #' @param period_sizes Numeric vector of `length(t)`, with the specific number of units to be assigned in each period. Used when it is required to assign different numbers of units
 #' to treatment across the periods of the trial.
-#' @param ... Additional arguments forwarded to `time_model`.
+#' @param ... Additional named arguments forwarded to `time_model` and [furrr::furrr_options()].
 #'
 #' @returns NULL
 #' @details
@@ -61,7 +61,7 @@ simulate_mab <- function(
   clusters = NULL,
   control_augment = 0,
   random_assign_prop = 0,
-  dates_of_assignment,
+  assignment_dates = NULL,
   time_model = NULL,
   period_sizes = NULL,
   prior_periods = NULL,
@@ -72,7 +72,6 @@ simulate_mab <- function(
   keep_data,
   ...
 ) {
-  time_model_args <- rlang::dots_list(..., .named = TRUE)
   algorithm <- tolower(algorithm)
   check_mab_sim(
     n = n,
@@ -83,7 +82,7 @@ simulate_mab <- function(
     clusters = clusters,
     control_augment = control_augment,
     random_assign_prop = random_assign_prop,
-    dates_of_assignment = dates_of_assignment,
+    assignment_dates = assignment_dates,
     time_model = time_model,
     period_sizes = period_sizes,
     prior_periods = prior_periods,
@@ -94,85 +93,16 @@ simulate_mab <- function(
     keep_data = keep_data
   )
 
+  other_args <- split_args(...)
+  period_idxs <- gen_period_idx(n = n, t = t, period_sizes = period_sizes)
+  assignment_dates <- gen_assignment_dates(
+    n = n,
+    assignment_dates = assignment_dates
+  )
+
   if (r == 1) {} else if (r > 1) {
-    furrr::future_map(seeds, \(seed) {})
+    furrr::future_map(seq_len(1), \() {}, .options = furrr_options())
   }
-
-  data <- prepare_sim(
-    p = p,
-    blocks = blocks,
-    clusters = clusters,
-    control_augment,
-  )
-
-  blocks <- generate_group_membership(n, blocks) |> as.character()
-  clusters <- generate_group_membership(n, clusters, blocks = blocks) |>
-    as.character()
-  blocking <- !is.null(blocks)
-  clustering <- !is.null(clusters)
-
-  check_p(p, blocks = blocks, clusters = clusters)
-
-  assignment_dates <- if (is.null(dates_of_assignment)) {
-    NULL
-  } else if (length(dates_of_assignment) < n) {
-    sort(rep_len(dates_of_assignment, n))
-  } else {
-    dates_of_assignment
-  }
-
-  success_dates <- NULL
-  if (!is.null(time_model) && !is.null(assignment_dates)) {
-    success_dates <- assignment_dates +
-      time_model(
-        n = n,
-        treatments = treatments,
-        success = success,
-        blocks = blocks,
-        clusters = clusters,
-        ...
-      )
-  }
-
-  period_sizes <- if (!is.null(period_sizes)) {
-    period_sizes
-  } else {
-    c(rep(floor(n / t), t - 1), n %% t)
-  }
-  period_sizes[t] <- if (period_sizes[t] == 0) {
-    period_sizes[t - 1]
-  } else {
-    period_sizes[t]
-  }
-  ends <- cumsum(period_sizes)
-  starts <- c(1, ends[-t] + 1)
-
-  df_func <- if (dt) {
-    \(...) {
-      data.table::data.table(..., key = "period_number")
-    }
-  } else {
-    tibble::tibble
-  }
-
-  df <- df_func(
-    mab_condition = NA_character_,
-    outcome = NA_real_,
-    block = blocks,
-    cluster = clusters,
-    period_number = rep(seq_len(t), times = period_sizes)
-  )
-
-  result_func <- if (dt) data.table::data.table else tibble::tibble
-  result_func(
-    id = 1:n,
-    treatment = treatments,
-    success = success,
-    block = blocks,
-    cluster = clusters,
-    assignment_date = assignment_dates,
-    success_date = success_dates
-  )
 }
 
 

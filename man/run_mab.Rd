@@ -99,7 +99,7 @@ the re-simulation method. Replications can be conducted in parallel, by setting 
 
 \item{time_model}{An optional function with signature \verb{function(n, conditions, success, blocks = NULL, clusters = NULL, ...)}
 that returns a vector of \link[lubridate:period]{lubridate::period} objects to add to \code{dates_of_assignment} to produce \code{success_date}.
-Only used when\code{dates_of_assignment} is also supplied. Default \code{NULL}.}
+Only used when\code{dates_of_assignment} is also supplied. Default \code{NULL}. Other optional arguments CANNOT share names as arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
 
 \item{time_model_args}{Arguments passed to \code{time_model} function}
 }

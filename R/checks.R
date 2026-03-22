@@ -492,7 +492,7 @@ check_mab_sim <- function(
   clusters,
   control_augment,
   random_assign_prop,
-  dates_of_assignment,
+  assignment_dates,
   time_model,
   period_sizes,
   prior_periods,
@@ -533,6 +533,13 @@ check_mab_sim <- function(
           "`length(period_sizes) = ",
           length(period_sizes)
         )
+      )
+    )
+  }
+  if (!lubridate::is.Date(assignment_dates)) {
+    rlang::abort(
+      c(
+        "When provided `assignment_dates` must a `Date` vector"
       )
     )
   }

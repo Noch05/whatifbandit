@@ -13,7 +13,7 @@ simulate_mab(
   clusters = NULL,
   control_augment = 0,
   random_assign_prop = 0,
-  dates_of_assignment,
+  assignment_dates = NULL,
   time_model = NULL,
   period_sizes = NULL,
   prior_periods = NULL,
@@ -58,19 +58,19 @@ Clusters are accessed as \code{clusters[[block]][cluster]}. Insided each block, 
 }
 Units are assigned to clusters via \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}. Pass \code{NULL} (default) for no clustering.}
 
-\item{dates_of_assignment}{An optional vector of dates representing when units are assigned.
+\item{assignment_dates}{An optional \code{Date} vector of dates representing when units are assigned.
 If shorter than \code{n} it is recycled and sorted. If NULL` (default) no assignment dates are recorded.}
 
 \item{time_model}{An optional function with signature \verb{function(n, conditions, success, blocks = NULL, clusters = NULL, ...)}
 that returns a vector of \link[lubridate:period]{lubridate::period} objects to add to \code{dates_of_assignment} to produce \code{success_date}.
-Only used when\code{dates_of_assignment} is also supplied. Default \code{NULL}.}
+Only used when\code{dates_of_assignment} is also supplied. Default \code{NULL}. Other optional arguments CANNOT share names as arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
 
 \item{period_sizes}{Numeric vector of \code{length(t)}, with the specific number of units to be assigned in each period. Used when it is required to assign different numbers of units
 to treatment across the periods of the trial.}
 
 \item{dt}{Logical. If \code{TRUE} returns a \code{\link[data.table:data.table]{data.table::data.table()}}; otherwise returns a \code{\link[tibble:tibble]{tibble::tibble()}}. Default \code{FALSE}.}
 
-\item{...}{Additional arguments forwarded to \code{time_model}.}
+\item{...}{Additional named arguments forwarded to \code{time_model} and \code{\link[furrr:furrr_options]{furrr::furrr_options()}}.}
 }
 \description{
 Simulates a response-adaptive randomized experiment with Bernoulli

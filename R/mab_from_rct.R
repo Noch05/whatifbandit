@@ -270,7 +270,7 @@ mab_from_rct <- function(
     success_date_col = success_date_col
   )
   blocking <- !is.null(data_cols[["block_cols"]])
-  clustering <- !is.null(data[["cluster_col"]])
+  clustering <- !is.null(data_cols[["cluster_col"]])
 
   prepped <- prep_rct_data(
     data = data,
@@ -367,7 +367,7 @@ mab_from_rct <- function(
           keep_data = keep_data,
           ndraws = ndraws,
           random_assign_prop = random_assign_prop,
-          r = r,
+          r = r
         ),
         packages = c(
           "whatifbandit",
