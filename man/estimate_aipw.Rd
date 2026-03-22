@@ -8,6 +8,7 @@ estimate_aipw(
   data,
   assignment_probs,
   conditions,
+  iaipw,
   cluster_col = data_cols[["cluster_col"]],
   clustering,
   periods

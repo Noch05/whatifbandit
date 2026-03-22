@@ -30,12 +30,12 @@ simulate_mab(
 
 \item{t}{Total number of assignment periods. Positive integer. Default is \code{t = n} for pure sequential (one unit per period) assignment.
 The sizes of each period will be equal as \code{n \%/\% t},
-except for the last period which will be \code{n \%\% t} in the case \code{n \%\% t != 0}, when \code{period_sizes = NULL}.}
+except for the last period which will be \code{n \%/\% t + n \%\% t}, when \code{period_sizes = NULL}.}
 
 \item{p}{The true probabilities of success for each treatment arm. Specified as an matrix,
 where \code{rownames(p)} are the treatment
 labels, and \code{colnames(p)} are the cluster or block labels, e.g.
-\code{matrix(c(0.5, 0.3, 0.5, 0.6), nrow = 2, ncol = 2, dimnames(list(c("T1", "T2"), c("B1", "B2"))))}.
+\verb{matrix(c(0.5, 0.3, 0.5, 0.6git ), nrow = 2, ncol = 2, dimnames(list(c("T1", "T2"), c("B1", "B2"))))}.
 Probabilities are accessed as \code{p[treatment, block]}.
 With blocks and clusters utilize the clusters for the columns because clusters are fully nested in blocks.
 For no clusters or blocks simply use a matrix with 1 column.}
@@ -62,8 +62,8 @@ Units are assigned to clusters via \code{\link[randomizr:complete_ra]{randomizr:
 If shorter than \code{n} it is recycled and sorted. If NULL` (default) no assignment dates are recorded.}
 
 \item{time_model}{An optional function with signature \verb{function(n, conditions, success, blocks = NULL, clusters = NULL, ...)}
-that returns a vector of \link[lubridate:period]{lubridate::period} objects to add to \code{dates_of_assignment} to produce \code{success_date}.
-Only used when\code{dates_of_assignment} is also supplied. Default \code{NULL}. Other optional arguments CANNOT share names as arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
+that returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{dates_of_assignment} to produce \code{success_date}. Used to simulate delayed feedback mechanism
+during the trial, so outcomes are imperfectly observed. Only used when\code{dates_of_assignment} is also supplied. Default \code{NULL}. Other optional arguments CANNOT share names as arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
 
 \item{period_sizes}{Numeric vector of \code{length(t)}, with the specific number of units to be assigned in each period. Used when it is required to assign different numbers of units
 to treatment across the periods of the trial.}

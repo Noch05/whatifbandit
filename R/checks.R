@@ -531,8 +531,16 @@ check_mab_sim <- function(
     check_names(blocks)
   }
 
-  if (!is.null(time_model) && !is.function(time_model)) {
-    rlang::abort("`time_model` must be a function")
+  if (!is.null(time_model)) {
+    if (!is.function(time_model)) {
+      rlang::abort("`time_model` must be a function")
+    }
+    if (is.null(assignment_dates)) {
+      rlang::abort(c(
+        "`assignment_dates` must be supplied when a `time_model` is provided.",
+        "x" = "`assignment_dates` is NULL"
+      ))
+    }
   }
 
   if (t > n) {
@@ -553,11 +561,9 @@ check_mab_sim <- function(
       )
     )
   }
-  if (!lubridate::is.Date(assignment_dates)) {
+  if (!is.null(assignment_dates) && !lubridate::is.Date(assignment_dates)) {
     rlang::abort(
-      c(
-        "When provided `assignment_dates` must a `Date` vector"
-      )
+      "`assignment_dates` must be a `Date` vector"
     )
   }
   check_string(algorithm, c("static", "thompson", "ucb1"), "algorithm")

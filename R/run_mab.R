@@ -5,13 +5,13 @@
 #' a MAB trial with adaptive inference. It assumes all inputs have been preprocessed already
 #' @inheritParams mab_from_rct
 #' @inheritParams prep_rct_data
+#' @inheritParams simulate_mab
 #' @param starts  Numeric vector where element `i` is the starting row number of period `i`.
 #' @param ends  Numeric vector where element `i` is the ending row number of period `i`.
 #' @param imputation_information Object created by [precompute_imputation()] containing the conditional means and success dates
 #' for each treatment block to impute from.
 #' @param resimulation Logical flag; Whether or not this MAB Trial is being run as a re-simulated RCT, as opposed to an original simulation from specified
 #' population parameters.
-#' @param true_prob True probabilities of success, used to generate outcomes in the case of an original simulation.
 #' @param time_model_args Arguments passed to `time_model` function
 #'
 #' @inheritParams simulate_mab
@@ -31,11 +31,10 @@
 run_mab <- function(
   data,
   resimulation,
-  true_prob,
+  p = NULL,
   algorithm,
   control_augment,
   random_assign_prop,
-  period_length,
   prior_periods,
   discount_rate,
   delayed_feedback,
@@ -64,7 +63,6 @@ run_mab <- function(
     algorithm = algorithm,
     control_augment = control_augment,
     random_assign_prop,
-    period_length = period_length,
     prior_periods = prior_periods,
     discount_rate = discount_rate,
     whole_experiment = whole_experiment,
@@ -80,7 +78,7 @@ run_mab <- function(
     starts = starts,
     ends = ends,
     periods = periods,
-    true_prob = true_prob,
+    p = p,
     time_model = time_model,
     time_model = time_model_args
   )
@@ -95,7 +93,8 @@ run_mab <- function(
   )
   aipw_estimates <- estimate_aipw(
     data = sim_results[["final_data"]],
-    assignment_probs = sim_results[["assignment_probss"]],
+    assignment_probs = sim_results[["assignment_probs"]],
+    iaipw = iaipw_estimates,
     periods = periods,
     conditions = conditions,
     clustering = clustering,
@@ -161,11 +160,10 @@ run_mab <- function(
 mab_loop <- function(
   data,
   resimulation,
-  true_prob,
+  p,
   algorithm,
   control_augment,
   random_assign_prop,
-  period_length = NULL,
   prior_periods,
   discount_rate,
   whole_experiment = NULL,
@@ -279,7 +277,16 @@ mab_loop <- function(
         delayed_feedback = delayed_feedback,
         idx = current_idx
       )
-    } else {}
+    } else {
+      data <- generate_outcomes(
+        current_data = current_data,
+        data = data,
+        p = p,
+        idx = current_idx,
+        time_model = time_model,
+        time_model_args = time_model_args
+      )
+    }
   }
   results <- collect_mab_results(
     data = data,

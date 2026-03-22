@@ -6,22 +6,33 @@
 \usage{
 generate_outcomes(
   current_data,
-  full_data,
-  success_probs,
-  starts,
-  ends,
-  current_period,
+  data,
+  p,
+  idx,
   time_model = NULL,
   time_model_args = NULL
 )
 }
 \arguments{
+\item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
+of a traditional Randomized Controlled Trial (RCT).}
+
+\item{p}{The true probabilities of success for each treatment arm. Specified as an matrix,
+where \code{rownames(p)} are the treatment
+labels, and \code{colnames(p)} are the cluster or block labels, e.g.
+\verb{matrix(c(0.5, 0.3, 0.5, 0.6git ), nrow = 2, ncol = 2, dimnames(list(c("T1", "T2"), c("B1", "B2"))))}.
+Probabilities are accessed as \code{p[treatment, block]}.
+With blocks and clusters utilize the clusters for the columns because clusters are fully nested in blocks.
+For no clusters or blocks simply use a matrix with 1 column.}
+
+\item{idx}{Index of rows imputed in the period, used to update the original data.}
+
 \item{time_model}{An optional function with signature \verb{function(n, conditions, success, blocks = NULL, clusters = NULL, ...)}
-that returns a vector of \link[lubridate:period]{lubridate::period} objects to add to \code{dates_of_assignment} to produce \code{success_date}.
-Only used when\code{dates_of_assignment} is also supplied. Default \code{NULL}. Other optional arguments CANNOT share names as arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
+that returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{dates_of_assignment} to produce \code{success_date}. Used to simulate delayed feedback mechanism
+during the trial, so outcomes are imperfectly observed. Only used when\code{dates_of_assignment} is also supplied. Default \code{NULL}. Other optional arguments CANNOT share names as arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
 }
 \value{
-updated \code{data.table}
+Updated \code{data} object containing all the outcomes generated in the period, such as the treatment assignments, treatment outcomes. and new success dates
 }
 \description{
 Uses provided success probabilities to draw a Bernoulli outcome for each unit. If \code{time_model} is provided, it is also used to compute
