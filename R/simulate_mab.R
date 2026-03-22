@@ -94,84 +94,14 @@ simulate_mab <- function(
   )
 
   other_args <- split_args(...)
-  period_idxs <- gen_period_idx(n = n, t = t, period_sizes = period_sizes)
-  assignment_dates <- gen_assignment_dates(
+  period_idxs <- generate_period_idx(n = n, t = t, period_sizes = period_sizes)
+  assignment_dates <- generate_assignment_dates(
     n = n,
     assignment_dates = assignment_dates
   )
 
   if (r == 1) {} else if (r > 1) {
     furrr::future_map(seq_len(1), \() {}, .options = furrr_options())
-  }
-}
-
-
-#' Prepare Data for Simulated MAB
-#' @name prep_mab
-#' @description
-#' Prepares data structures for simulated MAB trial
-#' @returns
-#' @keywords internal
-
-prep_mab <- function() {
-  df_func <- if (dt) data.table::data.table else tibble::tibble
-}
-
-
-#' Generate Block or Cluster Memberships
-#' @name generate_group_membership
-#' @description Takes a named probability vector for blocks or clusters and uses
-#' [randomizr::complete_ra()] to randomly assign each of `n` units to a
-#' block or cluster according to those probabilities.
-#'
-#' @param n A positive integer. Number of units to assign.
-#' @param group A named numeric vector or named list (see [simulate_mab()]) of assignment probabilities.
-#' When blocks and cluster are together, clusters must be fully nested in blocks.
-#'   `names(group)` are used as the condition labels (block or cluster names).
-#' @inheritParams simulate_mab
-#'
-#' @returns A factor of length `n` with levels corresponding to `names(group)` or `NULL` if `group = NULL`.
-#'
-#' @keywords internal
-generate_group_membership <- function(n, group, blocks = NULL) {
-  if (is.null(group)) {
-    return(NULL)
-  } else {
-    if (is.list(group)) {
-      if (is.null(blocks)) {
-        rlang::abort("Nested clusters require `blocks` to be specified.")
-      }
-      if (!setequal(names(group), levels(blocks))) {
-        rlang::abort("`names(clusters)` must match block labels.")
-      }
-      clusters <- vector("character", n) |>
-        factor(levels = unlist(lapply(group, names)))
-      for (b in names(group)) {
-        probs <- group[[b]]
-        idx <- blocks == b
-        clusters[idx] <- randomizr::complete_ra(
-          N = sum(idx),
-          prob_each = probs,
-          conditions = names(probs)
-        )
-      }
-      return(clusters)
-    }
-    if (is.null(names(group))) {
-      rlang::abort("`names()` for blocks and/or clusters cannot be `NULL`")
-    }
-    if (!dplyr::near(sum(group), 1)) {
-      rlang::abort(
-        "Assignment probabilities for blocks and/or clusters must sum to 1"
-      )
-    }
-    return(
-      randomizr::complete_ra(
-        N = n,
-        prob_each = group,
-        conditions = names(group)
-      )
-    )
   }
 }
 

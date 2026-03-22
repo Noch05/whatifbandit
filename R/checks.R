@@ -508,10 +508,27 @@ check_mab_sim <- function(
 
   if (!is.null(blocks) && !is.null(clusters)) {
     do.call(check_sum1, c(list(blocks), clusters))
+    do.call(check_names, c(list(blocks), clusters, list(clusters)))
+
+    if (!setequal(names(clusters), names(blocks))) {
+      rlang::abort(c(
+        "`names(clusters)` must match `names(block)` for nested structure.",
+        "x" = sprintf(
+          "block labels: %s",
+          paste(names(blocks), collapse = ", ")
+        ),
+        "x" = sprintf(
+          "cluster labels: %s",
+          paste(names(clusters), collapse = ", ")
+        )
+      ))
+    }
   } else if (!is.null(clusters)) {
     check_sum1(clusters = clusters)
+    check_names(clusters)
   } else if (!is.null(blocks)) {
     check_sum1(blocks = blocks)
+    check_names(blocks)
   }
 
   if (!is.null(time_model) && !is.function(time_model)) {
@@ -563,7 +580,7 @@ check_mab_sim <- function(
 check_sum1 <- function(...) {
   args <- rlang::dots_list(..., named = TRUE)
   purrr::iwalk(args, \(arg, name) {
-    if (sum(arg) != 1) {
+    if (!dplyr::near(sum(arg), 1)) {
       rlang::abort(c(
         sprintf("`%s` must sum to 1", name),
         "x" = paste0("You passed: ", paste0(arg, collapse = ",")),
@@ -595,4 +612,19 @@ check_string <- function(arg, valid, name) {
       )
     )
   }
+}
+
+#' Validates Names
+#' @name check_names
+#' @description
+#' @param ... objects to check
+#' Checks if provided objects have `names` attribute
+#' @returns Nothing; Throws an error if check fails
+check_names <- function(...) {
+  args <- rlang::dots_list(..., .named = TRUE)
+  purrr::iwalk(args, \(arg, name) {
+    if (is.null(names(arg))) {
+      rlang::abort(c(sprintf("%s must have the `names` attribute", name)))
+    }
+  })
 }
