@@ -23,7 +23,6 @@
 #' * [mab_loop()]
 #' * [compute_bandit()]
 #' @keywords internal
-#'
 compute_prior <- function(
   current_data,
   prior_data,
@@ -234,7 +233,6 @@ finalize_prior_list <- function(prior_list, conditions) {
 #' in \href{https://doi.org/10.1023/A:1013689704352}{Auer et al. (2002)}.
 #'
 #' @name compute_bandit
-#'
 #' @inheritParams mab_loop
 #' @param past_results A `tibble`/`data.table`` containing summary of prior periods, with
 #' successes, number of observations, and success rates, which is created by [compute_prior()].
@@ -282,8 +280,6 @@ finalize_prior_list <- function(prior_list, conditions) {
 #'
 #' Thompson, William R. 1933. "On the Likelihood That One Unknown Probability Exceeds Another in View of the Evidence of Two Samples."
 #'  Biometrika 25 (3/4): 285–94. \doi{10.2307/2332286}
-
-#'
 #' @keywords internal
 
 compute_bandit <- function(

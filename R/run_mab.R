@@ -301,7 +301,6 @@ mab_loop <- function(
   return(results)
 }
 #-------------------------------------------------------------------------------
-
 #' @name collect_mab_results
 #' @title Ends Multi-Arm Bandit Trial
 #' @description Condenses output from [mab_loop()] into
@@ -333,7 +332,6 @@ collect_mab_results <- function(
   UseMethod("collect_mab_results", data)
 }
 #-------------------------------------------------------------------------------
-#
 #' @method collect_mab_results `data.frame`
 #' @inheritParams collect_mab_results
 #' @title [collect_mab_results()] for `data.frame`s
@@ -407,7 +405,6 @@ collect_mab_results.data.frame <- function(
   ))
 }
 #-------------------------------------------------------------------------------
-
 #' @method collect_mab_results `data.table`
 #' @inheritParams collect_mab_results
 #' @title [collect_mab_results()] for `data.table`s

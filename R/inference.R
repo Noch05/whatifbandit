@@ -224,34 +224,36 @@ estimate_aipw <- function(
   periods
 ) {
   dt <- data.table::is.data.table(data)
-  iaipw_scores <- if (clustering) {
+  iaipw_periods <- if (clustering) {
     if (dt) {
-      data.table::cbindlist(
+      iaipw_scores <- data.table::cbindlist(
         list(data, as.data.table(iaipw))
       )[,
         lapply(.SD, mean),
-        .SDcols = names(iaipw),
+        .SDcols = conditions,
         by = c("period_number", cluster_col[["name"]])
-      ][, .SD, .SDcols = names(iaipw)] |>
+      ] |>
         as.list()
     } else {
-      cbind(data, as_tibble(iaipw)) |>
+      iaipw_scores <- cbind(data, as_tibble(iaipw)) |>
         dplyr::group_by(period_number, !!cluster_col[["sym"]]) |>
-        dplyr::summarize(dplyr::across(dplyr::all_of(names(iaipw)), mean)) |>
-        dplyr::select(dplyr::all_of(names(iaipw))) |>
+        dplyr::summarize(dplyr::across(dplyr::all_of(conditions), mean)) |>
         as.list()
     }
+    list(
+      iaipw = iaipw_scores[conditions],
+      period_numbers = iaipw_scores[["period_number"]]
+    )
   } else {
-    iaipw
+    list(iaipw = iaipw, period_numbers = data[["period_number"]])
   }
 
   bind_func <- if (dt) data.table::rbindlist else dplyr::bind_rows
-  aipw_estimates <- purrr::map2(
-    iaipw_scores,
-    names(iaipw_scores),
+  aipw_estimates <- purrr::imap(
+    iaipw_periods[["iaipw"]],
     \(score, name) {
-      weights <- sqrt(assignment_probs[, name] / length(score))[data[[
-        "period_number"
+      weights <- sqrt(assignment_probs[, name] / length(score))[iaipw_periods[[
+        "period_numbers"
       ]]]
       sum_w <- sum(weights)
       mean <- sum(score * weights) / sum_w

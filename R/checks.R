@@ -100,8 +100,6 @@ check_rct_args <- function(
     delayed_feedback
   )
 }
-
-
 #---------------------------------------------------------------------------------------
 #'
 #' @title Checking existence and declaration of columns
