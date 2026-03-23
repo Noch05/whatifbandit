@@ -342,7 +342,7 @@ check_prop <- function(...) {
 #' @keywords internal
 check_posint <- function(...) {
   args <- rlang::dots_list(..., .named = TRUE)
-  bad <- !vapply(args, posint, logical(1))
+  bad <- !vapply(args, \(arg) posint(arg) || is.null(arg), logical(1))
   purrr::walk2(names(args)[bad], args[bad], function(name, val) {
     rlang::abort(c(
       sprintf(
@@ -358,9 +358,7 @@ check_posint <- function(...) {
   })
 }
 posint <- function(x) {
-  if (is.null(x)) {
-    return(TRUE)
-  } else if (is.numeric(x)) {
+  if (is.numeric(x)) {
     return(all(x > 0 & x %% 1 == 0))
   } else {
     return(FALSE)
@@ -490,14 +488,14 @@ check_mab_sim <- function(
   t,
   p,
   algorithm,
-  blocks,
-  clusters,
+  blocks = NULL,
+  clusters = NULL,
   control_augment,
   random_assign_prop,
   assignment_dates,
-  time_model,
-  period_sizes,
-  prior_periods,
+  time_model = NULL,
+  period_sizes = NULL,
+  prior_periods = NULL,
   discount_rate,
   dt,
   ndraws = 5000,
@@ -507,30 +505,25 @@ check_mab_sim <- function(
   check_logical(dt, keep_data)
   check_posint(n, t, ndraws, r, prior_periods, period_sizes)
   check_prop(control_augment, random_assign_prop, discount_rate)
+  check_string(algorithm, c("static", "thompson", "ucb1"), "algorithm")
 
-  if (!is.null(blocks) && !is.null(clusters)) {
-    do.call(check_sum1, c(list(blocks), clusters))
-    do.call(check_names, c(list(blocks), clusters, list(clusters)))
+  if (t > n) {
+    rlang::abort(
+      c("`t` cannot be larger than `n`"),
+      "x" = sprintf("You Passed: t: %d, n: %d", t, n)
+    )
+  }
 
-    if (!setequal(names(clusters), names(blocks))) {
-      rlang::abort(c(
-        "`names(clusters)` must match `names(block)` for nested structure.",
-        "x" = sprintf(
-          "block labels: %s",
-          paste(names(blocks), collapse = ", ")
-        ),
-        "x" = sprintf(
-          "cluster labels: %s",
-          paste(names(clusters), collapse = ", ")
-        )
-      ))
-    }
-  } else if (!is.null(clusters)) {
-    check_sum1(clusters = clusters)
-    check_names(clusters)
-  } else if (!is.null(blocks)) {
-    check_sum1(blocks = blocks)
-    check_names(blocks)
+  if (!is.null(period_sizes) && t != length(period_sizes)) {
+    rlang::abort(c(
+      "When provided `period_sizes` must be length `t`",
+      "x" = sprintf("`t`: %d", t),
+      "x" = sprintf("`length(period_sizes)` = %d", length(period_sizes))
+    ))
+  }
+
+  if (!is.null(assignment_dates) && !lubridate::is.Date(assignment_dates)) {
+    rlang::abort("`assignment_dates` must be a `Date` vector")
   }
 
   if (!is.null(time_model)) {
@@ -545,35 +538,52 @@ check_mab_sim <- function(
     }
   }
 
-  if (t > n) {
-    rlang::abort(
-      c("`t` cannot be larger than `n`"),
-      "x" = sprintf("You Passed: t: %d, n: %d", t, n)
-    )
+  if (!is.matrix(p) || !is.numeric(p)) {
+    rlang::abort("`p` must be a numeric matrix")
   }
-  if (t != length(period_sizes)) {
-    rlang::abort(
-      c(
-        "When provided `period_sizes` must be length `t`",
-        "x" = sprintf("`t`: %d", t),
-        "x" = paste0(
-          "`length(period_sizes) = ",
-          length(period_sizes)
-        )
-      )
-    )
+  if (is.null(rownames(p))) {
+    rlang::abort(c(
+      "`p` must have rownames corresponding to treatment conditions.",
+      "x" = "`rownames(p)` is NULL"
+    ))
   }
-  if (!is.null(assignment_dates) && !lubridate::is.Date(assignment_dates)) {
-    rlang::abort(
-      "`assignment_dates` must be a `Date` vector"
-    )
-  }
-  check_string(algorithm, c("static", "thompson", "ucb1"), "algorithm")
 
   if (any(p > 1 | p < 0)) {
     rlang::abort(c(
       "all `p` must be probabilities between 0 and 1",
       "x" = paste0("You passed: ", paste0(p, collapse = ", "))
+    ))
+  }
+
+  if (!is.null(blocks) && !is.null(clusters)) {
+    do.call(check_sum1, c(list(blocks), clusters))
+    do.call(check_names, c(list(blocks), clusters, list(clusters)))
+    if (!setequal(names(clusters), names(blocks))) {
+      rlang::abort(c(
+        "`names(clusters)` must match `names(blocks)` for nested structure.",
+        "x" = sprintf(
+          "block labels: %s",
+          paste(names(blocks), collapse = ", ")
+        ),
+        "x" = sprintf(
+          "cluster labels: %s",
+          paste(names(clusters), collapse = ", ")
+        )
+      ))
+    }
+    check_p_colnames(p, unlist(lapply(clusters, names)))
+  } else if (!is.null(clusters)) {
+    check_sum1(clusters = clusters)
+    check_names(clusters)
+    check_p_colnames(p, names(clusters))
+  } else if (!is.null(blocks)) {
+    check_sum1(blocks = blocks)
+    check_names(blocks)
+    check_p_colnames(p, names(blocks))
+  } else if (ncol(p) != 1) {
+    rlang::abort(c(
+      "`p` must have exactly 1 column when no blocks or clusters are provided.",
+      "x" = sprintf("`ncol(p)` = %d", ncol(p))
     ))
   }
 }
@@ -635,4 +645,21 @@ check_names <- function(...) {
       rlang::abort(c(sprintf("%s must have the `names` attribute", name)))
     }
   })
+}
+
+#' Validates column names for `p` matrix
+#' @description
+#' Checks if `colnames(p)` matches provided labels
+#' @inheritParams simulate_mab
+#' @param expected Expected set of group labels
+#' @returns Nothing; Throws an error if condition is not met
+
+check_p_colnames <- function(p, expected) {
+  if (!setequal(colnames(p), expected)) {
+    rlang::abort(c(
+      "`colnames(p)` must match group labels.",
+      "x" = sprintf("Expected: %s", paste(expected, collapse = ", ")),
+      "x" = sprintf("Got: %s", paste(colnames(p), collapse = ", "))
+    ))
+  }
 }
