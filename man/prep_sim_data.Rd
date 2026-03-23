@@ -14,16 +14,24 @@ prep_sim_data(
   conditions,
   equal_probs,
   period_idxs,
+  simulate_dates,
   assignment_dates = NULL,
   time_model = NULL,
   time_model_args = NULL,
   dt
 )
 }
+\arguments{
+\item{simulate_dates}{Logical; whether or not new success dates should be generated using
+\code{time_model}. Does not guarantee these new dates are used for assignment, \code{delayed_feedback} controls
+that behavior.}
+}
 \value{
-\code{tibble} or \code{data.table} containing
+Initalized \code{data.table} or \code{tibble} with the first period simulation conducted, and all
+required columns for \code{\link[=run_mab]{run_mab()}}
 }
 \description{
-Prepares data structures for simulated MAB trial
+Initializes the data a simulated MAB trial. Generates block and
+cluster assignments, allocates all required columns, and assigns treatments and
+outcomes for the first period using equal assignment probabilities.
 }
-\keyword{internal}

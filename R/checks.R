@@ -491,6 +491,7 @@ check_mab_sim <- function(
   control_augment,
   random_assign_prop,
   assignment_dates,
+  delayed_feedback,
   time_model = NULL,
   period_sizes = NULL,
   prior_periods = NULL,
@@ -520,21 +521,32 @@ check_mab_sim <- function(
       "x" = sprintf("`length(period_sizes)` = %d", length(period_sizes))
     ))
   }
-
   if (!is.null(assignment_dates) && !lubridate::is.Date(assignment_dates)) {
     rlang::abort("`assignment_dates` must be a `Date` vector")
   }
 
-  if (!is.null(time_model)) {
-    if (!is.function(time_model)) {
-      rlang::abort("`time_model` must be a function")
+  if (!is.null(time_model) && !is.function(time_model)) {
+    rlang::abort("`time_model` must be a function")
+  }
+
+  if (delayed_feedback) {
+    if (is.null(time_model)) {
+      rlang::abort(c(
+        "`time_model` must be provided when `delayed_feedback = TRUE`.",
+        "x" = "`time_model` is NULL"
+      ))
     }
     if (is.null(assignment_dates)) {
       rlang::abort(c(
-        "`assignment_dates` must be supplied when a `time_model` is provided.",
+        "`assignment_dates` must be provided when `delayed_feedback = TRUE`.",
         "x" = "`assignment_dates` is NULL"
       ))
     }
+  } else if (!is.null(time_model) && !is.null(assignment_dates)) {
+    rlang::warn(c(
+      "`time_model` and `assignment_dates` are provided but `delayed_feedback = FALSE`.",
+      "i" = "Counterfactual success dates will be simulated but not used for assignment."
+    ))
   }
 
   if (!is.matrix(p) || !is.numeric(p)) {

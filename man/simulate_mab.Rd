@@ -13,6 +13,7 @@ simulate_mab(
   clusters = NULL,
   control_augment = 0,
   random_assign_prop = 0,
+  delayed_feedback = FALSE,
   assignment_dates = NULL,
   time_model = NULL,
   period_sizes = NULL,
@@ -68,12 +69,18 @@ this in conjunction with \code{control_augment}. When batch sizes are small and 
 a probability instead of a raw proportion. Under clustering, its possible that \code{random_assign_prop} may not reflect the true proportion of units
 selected due to the constraint that all units within a cluster have to be assigned the same treatment.}
 
+\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon as a treatment is assigned, the outcome is realized and known.
+If \code{TRUE}, delayed feedback is assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not known to the simulation, until a certain date.
+When re-computing the adaptive assignment probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the assignment are treated as failures. a}
+
 \item{assignment_dates}{An optional \code{Date} vector of dates representing when units are assigned.
 If shorter than \code{n} it is recycled and sorted. If NULL` (default) no assignment dates are recorded.}
 
 \item{time_model}{An optional function with signature \verb{function(n, conditions, success, blocks = NULL, clusters = NULL, ...)}
 that returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{dates_of_assignment} to produce \code{success_date}. Used to simulate delayed feedback mechanism
-during the trial, so outcomes are imperfectly observed. Only used when\code{dates_of_assignment} is also supplied. Default \code{NULL}. Other optional arguments CANNOT share names as arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
+during the trial, so outcomes are imperfectly observed. Only used when\code{dates_of_assignment} is also supplied. Dates can be generated even when \code{delayed_feedback == FALSE},
+but they will not be used.
+Default \code{NULL}. Other optional arguments CANNOT share names as arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
 
 \item{period_sizes}{Numeric vector of \code{length(t)}, with the specific number of units to be assigned in each period. Used when it is required to assign different numbers of units
 to treatment across the periods of the trial.}

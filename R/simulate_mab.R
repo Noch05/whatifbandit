@@ -31,7 +31,9 @@
 #' If shorter than `n` it is recycled and sorted. If NULL` (default) no assignment dates are recorded.
 #' @param time_model An optional function with signature `function(n, conditions, success, blocks = NULL, clusters = NULL, ...)`
 #' that returns a vector of [lubridate::period] objects which will then be added to `dates_of_assignment` to produce `success_date`. Used to simulate delayed feedback mechanism
-#' during the trial, so outcomes are imperfectly observed. Only used when`dates_of_assignment` is also supplied. Default `NULL`. Other optional arguments CANNOT share names as arguments in [furrr::furrr_options()]
+#' during the trial, so outcomes are imperfectly observed. Only used when`dates_of_assignment` is also supplied. Dates can be generated even when `delayed_feedback == FALSE`,
+#' but they will not be used.
+#' Default `NULL`. Other optional arguments CANNOT share names as arguments in [furrr::furrr_options()]
 #' @param algorithm Assignment algorithm, determines how probabilities of assignment
 #' are updated each period. Either `"thompson"` for Thompson Sampling, `"ucb1"` for
 #' the UCB1 algorithm, or `"static"` for uniform, non-adaptive assignment. Not case sensitive.
@@ -60,6 +62,7 @@ simulate_mab <- function(
   clusters = NULL,
   control_augment = 0,
   random_assign_prop = 0,
+  delayed_feedback = FALSE,
   assignment_dates = NULL,
   time_model = NULL,
   period_sizes = NULL,
@@ -83,6 +86,7 @@ simulate_mab <- function(
     control_augment = control_augment,
     random_assign_prop = random_assign_prop,
     assignment_dates = assignment_dates,
+    delayed_feedback = delayed_feedback,
     time_model = time_model,
     period_sizes = period_sizes,
     prior_periods = prior_periods,
@@ -91,7 +95,7 @@ simulate_mab <- function(
     ndraws = ndraws,
     r = r,
     keep_data = keep_data,
-    verbose
+    verbose = verbose
   )
 
   other_args <- split_args(..., time_model = time_model)
@@ -102,12 +106,13 @@ simulate_mab <- function(
   )
   blocking <- !is.null(blocks)
   clustering <- !is.null(clusters)
-  delayed_feedback <- !is.null(assignment_dates)
   resimulation <- FALSE
+  simulate_dates <- is.function(time_model) && !is.null(assignment_dates)
   rownames(p) <- tolower(rownames(p))
   conditions <- sort(rownames(p))
   p <- p[conditions, ]
-  equal_prob <- stats::setNames(1 / nrow(p), conditions)
+
+  equal_probs <- stats::setNames(1 / nrow(p), conditions)
 
   data_cols <- list(
     cluster_col = list(name = "cluster", sym = rlang::sym("cluster")),
@@ -133,6 +138,7 @@ simulate_mab <- function(
       conditions = conditions,
       equal_probs = equal_probs,
       assignment_dates = assignment_dates,
+      simulate_dates = simulate_dates,
       time_model = time_model,
       time_model_args = time_model_args
     )
@@ -145,7 +151,7 @@ simulate_mab <- function(
       random_assign_prop = random_assign_prop,
       prior_periods = prior_periods,
       discount_rate = discount_rate,
-      delayed_feedback = FALSE,
+      delayed_feedback = delayed_feedback,
       conditions = conditions,
       blocking = blocking,
       clustering = clustering,
@@ -157,7 +163,7 @@ simulate_mab <- function(
       keep_data = keep_data,
       r = r,
       time_model = time_model,
-      time_model_args = time_model_args
+      time_model_args = other_args$time_model_args
     )
   } else if (r > 1) {
     furrr_opt <- do.call(
@@ -176,10 +182,11 @@ simulate_mab <- function(
           clustering = clustering,
           period_idxs = period_idxs,
           conditions = conditions,
+          simulate_dates = simulate_dates,
           equal_probs = equal_probs,
           assignment_dates = assignment_dates,
           time_model = time_model,
-          time_model_args = time_model_args
+          time_model_args = other_args[["time_model_args"]]
         )
         run_mab(
           data = data,
@@ -202,7 +209,7 @@ simulate_mab <- function(
           keep_data = keep_data,
           r = r,
           time_model = time_model,
-          time_model_args = time_model_args
+          time_model_args = other_args[["time_model_args"]]
         )
       },
       .options = furrr_opt,
@@ -244,9 +251,15 @@ simulate_mab <- function(
 #' Prepares Data for Simulated MAB
 #' @name prep_sim_data
 #' @description
-#' Prepares data structures for simulated MAB trial
-#' @returns `tibble` or `data.table` containing
-#' @keywords internal
+#' Initializes the data a simulated MAB trial. Generates block and
+#' cluster assignments, allocates all required columns, and assigns treatments and
+#' outcomes for the first period using equal assignment probabilities.
+#' @param simulate_dates Logical; whether or not new success dates should be generated using
+#' `time_model`. Does not guarantee these new dates are used for assignment, `delayed_feedback` controls
+#' that behavior.
+#'
+#' @returns Initalized `data.table` or `tibble` with the first period simulation conducted, and all
+#' required columns for [run_mab()]
 
 prep_sim_data <- function(
   n,
@@ -258,6 +271,7 @@ prep_sim_data <- function(
   conditions,
   equal_probs,
   period_idxs,
+  simulate_dates,
   assignment_dates = NULL,
   time_model = NULL,
   time_model_args = NULL,
@@ -282,7 +296,7 @@ prep_sim_data <- function(
     mab_success = rep(NA_real_, n)
   )
 
-  if (!is.null(time_model)) {
+  if (simulate_dates) {
     cols[["new_success_date"]] <- rep(as.Date(NA), n)
   }
 
@@ -303,6 +317,7 @@ prep_sim_data <- function(
       p = p,
       idx = current_idx,
       data = data,
+      simulate_dates = simulate_dates,
       time_model = time_model,
       time_model_args = time_model_args
     )
@@ -412,6 +427,7 @@ generate_outcomes <- function(
   data,
   p,
   idx,
+  simulate_dates,
   time_model = NULL,
   time_model_args = NULL
 ) {
@@ -426,7 +442,7 @@ generate_outcomes <- function(
     1,
     prob = probs
   )
-  success_times <- if (!is.null(current_data[["assignment_date"]])) {
+  success_times <- if (simulate_dates) {
     do.call(
       time_model,
       c(
@@ -444,7 +460,7 @@ generate_outcomes <- function(
     NULL
   }
   modified_cols <- c("mab_condition", "mab_success")
-  if (!is.null(success_times)) {
+  if (simulate_dates) {
     current_data[["new_success_date"]] <- current_data[["assignment_date"]] +
       success_times
     modified_cols <- c(modified_cols, "new_success_date")
