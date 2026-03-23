@@ -14,7 +14,7 @@ mab_from_rct(
   period_method,
   time_unit = NULL,
   period_length,
-  prior_periods,
+  prior_periods = NULL,
   discount_rate = 1,
   date_col = NULL,
   month_col = NULL,

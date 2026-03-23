@@ -10,11 +10,10 @@
 #' @param p The true probabilities of success for each treatment arm. Specified as an matrix,
 #' where `rownames(p)` are the treatment
 #' labels, and `colnames(p)` are the cluster or block labels, e.g.
-#'       `matrix(c(0.5, 0.3, 0.5, 0.6git ), nrow = 2, ncol = 2, dimnames(list(c("T1", "T2"), c("B1", "B2"))))`.
+#'       `matrix(c(0.5, 0.3, 0.5, 0.6), nrow = 2, ncol = 2, dimnames(list(c("T1", "T2"), c("B1", "B2"))))`.
 #'       Probabilities are accessed as `p[treatment, block]`.
 #' With blocks and clusters utilize the clusters for the columns because clusters are fully nested in blocks.
 #' For no clusters or blocks simply use a matrix with 1 column.
-#'
 #' @param dt Logical. If `TRUE` returns a [data.table::data.table()]; otherwise returns a [tibble::tibble()]. Default `FALSE`.
 #' @param blocks A named numeric vector of block membership probabilities (must sum to 1), where `names(blocks)`
 #' are the block labels. Units are assigned to blocks via [randomizr::complete_ra()]. Pass `NULL` (default) for no blocking.

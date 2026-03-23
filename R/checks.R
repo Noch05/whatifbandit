@@ -358,7 +358,9 @@ check_posint <- function(...) {
   })
 }
 posint <- function(x) {
-  if (is.numeric(x)) {
+  if (is.null(x)) {
+    return(TRUE)
+  } else if (is.numeric(x)) {
     return(all(x > 0 & x %% 1 == 0))
   } else {
     return(FALSE)
@@ -584,7 +586,7 @@ check_mab_sim <- function(
 #' @returns Nothing; Throws an error if the check fails
 #' @keywords internal
 check_sum1 <- function(...) {
-  args <- rlang::dots_list(..., named = TRUE)
+  args <- rlang::dots_list(..., .named = TRUE)
   purrr::iwalk(args, \(arg, name) {
     if (!dplyr::near(sum(arg), 1)) {
       rlang::abort(c(
