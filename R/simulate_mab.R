@@ -110,9 +110,22 @@ simulate_mab <- function(
   simulate_dates <- is.function(time_model) && !is.null(assignment_dates)
   rownames(p) <- tolower(rownames(p))
   conditions <- sort(rownames(p))
+  names(conditions) <- ifelse(conditions == "control", "control", "treatment")
+
   p <- p[conditions, ]
 
   equal_probs <- stats::setNames(1 / nrow(p), conditions)
+
+  if (!"control" %in% names(conditions) && control_augment > 0) {
+    rlang::abort(c(
+      "a Control group must be specified when `control_augment` > 0",
+      "x" = sprintf(
+        "Treatment conditions specified: %s",
+        paste(conditions, sep = ", ")
+      ),
+      "x" = paste0("Control Augment: ", control_augment)
+    ))
+  }
 
   data_cols <- list(
     cluster_col = list(name = "cluster", sym = rlang::sym("cluster")),
@@ -124,6 +137,10 @@ simulate_mab <- function(
       name = "success_date",
       sym = rlang::sym("success_date")
     )
+  )
+  furrr_opt <- do.call(
+    furrr::furrr_options,
+    c(list(seed = TRUE), other_args$furrr_args)
   )
   verbose_log(verbose, "Starting Simulations")
   if (r == 1) {
@@ -151,6 +168,7 @@ simulate_mab <- function(
       random_assign_prop = random_assign_prop,
       prior_periods = prior_periods,
       discount_rate = discount_rate,
+      simulate_dates = simulate_dates,
       delayed_feedback = delayed_feedback,
       conditions = conditions,
       blocking = blocking,
@@ -166,10 +184,6 @@ simulate_mab <- function(
       time_model_args = other_args$time_model_args
     )
   } else if (r > 1) {
-    furrr_opt <- do.call(
-      furrr::furrr_options,
-      c(list(seed = TRUE), other_args$furrr_args)
-    )
     mabs <- furrr::future_map(
       seq_len(r),
       \(.) {
@@ -197,6 +211,7 @@ simulate_mab <- function(
           random_assign_prop = random_assign_prop,
           prior_periods = prior_periods,
           discount_rate = discount_rate,
+          simulate_dates = simulate_dates,
           delayed_feedback = delayed_feedback,
           conditions = conditions,
           blocking = blocking,
@@ -217,7 +232,7 @@ simulate_mab <- function(
     )
     verbose_log(verbose, "Collating Results")
     results <- condense_results(
-      dt = (data.table::is.data.table(data) || r * t > 100000),
+      dt = dt || (r * t > 100000),
       keep_data = keep_data,
       mabs = mabs,
       r = r
@@ -235,16 +250,16 @@ simulate_mab <- function(
     control_augment = control_augment,
     random_assign_prop = random_assign_prop,
     conditions = conditions,
-    control_conditon = conditions[conditions == control],
+    control_conditon = conditions[conditions == "control"],
     delayed_feedback = delayed_feedback,
+    simulate_dates = simulate_dates,
     blocks = blocks,
     cluster = clusters,
     ndraws = ndraws,
-    delayed_feedback = delayed_feedback,
     keep_data = !is.null(results$final_data),
     r = r,
     time_model = time_model,
-    time_model_args = time_model_args,
+    time_model_args = other_args$time_model_args,
     furrr_options = furrr_opt
   )
 }
@@ -311,7 +326,7 @@ prep_sim_data <- function(
     prob = equal_prob,
     random_assign_prop = 0,
     resimulation = FALSE,
-    cluster_col = "clusters"
+    cluster_col = "cluster"
   ) |>
     generate_outcomes(
       p = p,
@@ -471,6 +486,7 @@ generate_outcomes <- function(
   } else {
     data[idx, ] <- current_data
   }
+  invisible(data)
 }
 
 

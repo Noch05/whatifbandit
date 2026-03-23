@@ -13,6 +13,7 @@ run_mab(
   random_assign_prop,
   prior_periods,
   discount_rate,
+  simulate_dates,
   delayed_feedback,
   whole_experiment = NULL,
   conditions,
@@ -24,8 +25,8 @@ run_mab(
   ndraws,
   starts,
   ends,
-  keep_data = keep_data,
-  r = r,
+  keep_data,
+  r,
   time_model = NULL,
   time_model_args = NULL
 )

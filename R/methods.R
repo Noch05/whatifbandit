@@ -135,7 +135,8 @@ print_mab <- function(mab) {
 summary.mab <- function(object, level = 0.95, ...) {
   check_level(level)
   periods <- max(object$bandits$period_number)
-  col2 <- switch(object$settings$algorithm,
+  col2 <- switch(
+    object$settings$algorithm,
     "ucb1" = "UCB1_Value",
     "thompson" = "Probability_Of_Best_Arm"
   )
@@ -216,7 +217,8 @@ summary.mab <- function(object, level = 0.95, ...) {
 
 plot.mab <- function(x, type, level = .95, save = FALSE, path = NULL, ...) {
   rlang::check_installed("ggplot2")
-  plot <- switch(type,
+  plot <- switch(
+    type,
     "arm" = plot_arms(x = x, ...),
     "assign" = plot_assign(x = x, ...),
     "estimate" = plot_estimates(x = x, level = level, ...),
@@ -569,7 +571,8 @@ plot.multiple.mab <- function(
   ...
 ) {
   rlang::check_installed("ggplot2")
-  plot <- switch(type,
+  plot <- switch(
+    type,
     "summary" = plot_summary(x = x, ...),
     "hist" = plot_hist(
       x = x,
@@ -624,7 +627,8 @@ plot_summary <- function(x, ...) {
 #' @keywords internal
 plot_hist <- function(x, quantity, params) {
   rlang::check_installed("ggplot2")
-  data <- switch(quantity,
+  data <- switch(
+    quantity,
     "estimate" = {
       x$estimates
     },
@@ -640,7 +644,8 @@ plot_hist <- function(x, quantity, params) {
       "Invalid `quantity`, valid values are 'estimate' and 'assignment'"
     )
   )
-  plot_labels <- switch(quantity,
+  plot_labels <- switch(
+    quantity,
     "estimate" = list(
       x = "Estimate",
       title = "Estimate Distributions Across Trials"
@@ -684,7 +689,8 @@ plot_mult_estimates <- function(x, cdf, level, ...) {
   if (is.null(cdf)) {
     rlang::abort("Invalid CDF: Valid CDF's are, empirical`, and `normal`")
   }
-  cols <- switch(cdf,
+  cols <- switch(
+    cdf,
     "empirical" = c("upper_empirical", "lower_empirical"),
     "normal" = c("upper_normal", "lower_normal"),
     rlang::abort("Invalid `CDF`: valid CDFs are `normal` or `empirical`")

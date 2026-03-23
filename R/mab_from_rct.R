@@ -294,6 +294,10 @@ mab_from_rct <- function(
     r = r,
     keep_data = keep_data
   )
+  furrr_opt <- do.call(
+    furrr::furrr_options,
+    c(list(seed = TRUE), rlang::dots_list(..., .named = TRUE))
+  )
   if (r == 1) {
     results <- run_mab(
       data = prepped$data,
@@ -320,10 +324,6 @@ mab_from_rct <- function(
     )
   } else {
     verbose_log(verbose, "Starting Simulations")
-    furrr_opt <- do.call(
-      furrr::furrr_options,
-      c(list(seed = TRUE), rlang::dots_list(..., .named = TRUE))
-    )
     mabs <- furrr::future_map(
       seq_len(r),
       \(.) {
@@ -369,14 +369,13 @@ mab_from_rct <- function(
     period_method = prepped$char_args$period_method,
     time_unit = prepped$char_args$time_unit,
     period_length = period_length,
-    period_sizes = period_sizes,
+    period_sizes = prepped$period_sizes,
     prior_periods = prior_periods,
     discount_rate = discount_rate,
     control_augment = control_augment,
     random_assign_prop = random_assign_prop,
     control = as.character(control_condition),
     conditions = prepped$conditions,
-    delayed_feedback = delayed_feedback,
     whole_experiment = whole_experiment,
     blocks = prepped$data_cols$block_cols$name,
     cluster = prepped$data_cols$cluster_col$name,

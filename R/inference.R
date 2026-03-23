@@ -56,7 +56,7 @@ compute_iaipw.data.frame <- function(
     dplyr::right_join(
       expand.grid(
         period_number = seq_len(periods),
-        mab_condition = condition,
+        mab_condition = conditions,
         stringsAsFactors = FALSE
       ),
       by = c("period_number", "mab_condition")
@@ -127,7 +127,7 @@ compute_iaipw.data.table <- function(
         mab_condition = conditions
       ),
       by = c("period_number", "mab_condition"),
-      all.x = TRUE
+      all.y = TRUE
     )
 
   mhats[, `:=`(
@@ -137,7 +137,7 @@ compute_iaipw.data.table <- function(
   data.table::setorder(mhats, mab_condition, period_number)
 
   mhats <- mhats[,
-    mhat := data.table:shift(
+    mhat := data.table::shift(
       data.table::fifelse(cumsum(n) > 0, cumsum(successes) / cumsum(n), 0),
       n = 1L,
       fill = 0,
@@ -265,6 +265,7 @@ estimate_aipw <- function(
   ) |>
     bind_func() |>
     fill_missing_conditions(conditions = conditions)
+  return(aipw_estimates)
 }
 
 #' IPW Estimates for Probability of Success
@@ -298,7 +299,6 @@ estimate_aipw <- function(
 #' \emph{American Journal of Political Science} 65 (4): 826–44. \doi{10.1111/ajps.12597}..
 #'
 estimate_ipw <- function(
-  estimates,
   data,
   cluster_col,
   blocking,
@@ -348,12 +348,12 @@ estimate_ipw <- function(
   f <- if (is.null(est_lm[["fstatistic"]])) {
     est_lm[["proj_statistic"]][1] |> as.numeric()
   } else {
-    est_lm[["ftatistic"]][1] |> as.numeric()
+    est_lm[["fstatistic"]][1] |> as.numeric()
   }
   df <- est_lm[["df"]]
 
   for (item in list(coefs, var, df)) {
-    names(item) <- gsub("^mab_condition", "", names(item))
+    names(item) <<- gsub("^mab_condition", "", names(item))
   }
 
   if (data.table::is.data.table(data)) {
@@ -364,7 +364,10 @@ estimate_ipw <- function(
       mab_condition = c(names(coefs), "Joint"),
       estimator = "IPW",
     )
-    ipw_estimates <- fill_missing_conditions(ipw, conditions = conditions)
+    ipw_estimates <- fill_missing_conditions(
+      ipw_estimates,
+      conditions = conditions
+    )
   } else {
     ipw_estimates <- tibble::tibble(
       mean = c(coefs, f),
@@ -426,7 +429,7 @@ estimate_sample.data.table <- function(data, conditions) {
   ][, `:=`(
     var = ((mean) * (1 - mean)) / n,
     estimator = "Sample"
-  )][, .(mean, var, estimator)] |>
+  )][, .(mean, var, mab_condition, estimator)] |>
     fill_missing_conditions(conditions = conditions)
   return(sample)
 }

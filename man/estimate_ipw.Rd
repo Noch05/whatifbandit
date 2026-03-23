@@ -4,7 +4,7 @@
 \alias{estimate_ipw}
 \title{IPW Estimates for Probability of Success}
 \usage{
-estimate_ipw(estimates, data, cluster_col, blocking, clustering, conditions)
+estimate_ipw(data, cluster_col, blocking, clustering, conditions)
 }
 \arguments{
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results

@@ -37,6 +37,7 @@ run_mab <- function(
   random_assign_prop,
   prior_periods,
   discount_rate,
+  simulate_dates,
   delayed_feedback,
   whole_experiment = NULL,
   conditions,
@@ -48,8 +49,8 @@ run_mab <- function(
   ndraws,
   starts,
   ends,
-  keep_data = keep_data,
-  r = r,
+  keep_data,
+  r,
   time_model = NULL,
   time_model_args = NULL
 ) {
@@ -66,6 +67,7 @@ run_mab <- function(
     prior_periods = prior_periods,
     discount_rate = discount_rate,
     whole_experiment = whole_experiment,
+    simulate_dates = simulate_dates,
     delayed_feedback = delayed_feedback,
     num_conditions = num_conditions,
     conditions = conditions,
@@ -103,7 +105,6 @@ run_mab <- function(
 
   ipw_estimates <- estimate_ipw(
     data = sim_results[["final_data"]],
-    estimates = estimates,
     cluster_col = data_cols[["cluster_col"]],
     clustering = clustering,
     blocking = blocking,
@@ -124,7 +125,7 @@ run_mab <- function(
     bandits = sim_results[["bandits"]],
     assignment_probs = sim_results[["assignment_probs"]],
     assignment_quantities = sim_results[["assignment_quantities"]],
-    estimates = estimates[["est"]],
+    estimates = estimates[["estimates"]],
     ipw_vcov = estimates[["vcov"]],
     settings = NULL
   )
@@ -167,6 +168,7 @@ mab_loop <- function(
   prior_periods,
   discount_rate,
   whole_experiment = NULL,
+  simulate_dates,
   delayed_feedback,
   clustering,
   blocking,
@@ -254,7 +256,7 @@ mab_loop <- function(
       resimulation = resimulation
     )
 
-    bandits[["assignment_probs"]][i, ] <- (current_bandit[["assignment_prob"]] *
+    bandits[["assignment_prob"]][i, ] <- (current_bandit[["assignment_prob"]] *
       (1 - random_assign_prop)) +
       (equal_probs * random_assign_prop)
 
@@ -283,6 +285,7 @@ mab_loop <- function(
         data = data,
         p = p,
         idx = current_idx,
+        simulate_dates = simulate_dates,
         time_model = time_model,
         time_model_args = time_model_args
       )
@@ -394,7 +397,7 @@ collect_mab_results.data.frame <- function(
   data <- data |>
     dplyr::mutate(
       mab_assign_prob = bandits[["assignment_prob"]][matrix_idx],
-      ipw_weights <- 1 / mab_assign_prob
+      ipw_weights = 1 / mab_assign_prob
     )
 
   return(list(
@@ -461,6 +464,7 @@ collect_mab_results.data.table <- function(
     mab_assign_prob = assign_vec,
     ipw_weights = 1 / assign_vec
   )]
+
   return(list(
     final_data = data,
     bandits = bandit_stats,

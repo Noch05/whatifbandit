@@ -184,11 +184,10 @@ precompute_imputation.data.table <- function(
   }
 
   dates_summary <- if (delayed_feedback) {
-    data[, .(
-      period_number,
-      treatment_block,
-      get(data_cols[["success_date_col"]][["name"]])
-    )] |>
+    data[,
+      .(mean_date = mean(get(data_cols[["success_date_col"]][["name"]]))),
+      by = .(period_number, treatment_block)
+    ] |>
       split(by = "period_number") |>
       lapply(\(df) {
         as.Date(as_named_vec(

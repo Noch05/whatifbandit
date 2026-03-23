@@ -22,7 +22,6 @@ prep_rct_data(
   ndraws,
   check_args,
   r,
-  seeds,
   keep_data,
   blocking,
   clustering

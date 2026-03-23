@@ -190,7 +190,7 @@ check_cols <- function(
     required_cols <- c(required_cols, "success_date_col", "assignment_date_col")
   }
   if (!is.null(data_cols[["cluster_col"]])) {
-    required_cols <- c(required_cols, "cluster_cols")
+    required_cols <- c(required_cols, "cluster_col")
   }
   req_reasons <- all_reasons[required_cols]
   required_types <- required_types[required_cols]

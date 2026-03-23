@@ -47,7 +47,6 @@ prep_rct_data <- function(
   ndraws,
   check_args,
   r,
-  seeds,
   keep_data,
   blocking,
   clustering
@@ -91,7 +90,6 @@ prep_rct_data <- function(
       verbose = verbose,
       ndraws = ndraws,
       r = r,
-      seeds = seeds,
       keep_data = keep_data,
       blocking = blocking,
       clustering = clustering
@@ -532,11 +530,9 @@ create_new_cols.data.table <- function(
     period_number == 1,
     `:=`(
       mab_condition = as.character(
-        get(
-          data_cols$condition_col$name
-        ),
-        mab_success = get(data_cols$success_col$name),
+        get(data_cols$condition_col$name)
       ),
+      mab_success = get(data_cols$success_col$name),
       impute_req = 0,
       impute_block = NA_character_,
       assignment_type = "initial"
@@ -551,11 +547,11 @@ create_new_cols.data.table <- function(
   if (blocking) {
     data[,
       block := do.call(paste, c(.SD, sep = "_")),
-      .SDcols = block_cols$name
+      .SDcols = data_cols$block_cols$name
     ]
     data[,
       treatment_block := do.call(paste, c(.SD, sep = "_")),
-      .SDcols = c(data_cols$condition_col$name, block_cols$name)
+      .SDcols = c(data_cols$condition_col$name, data_cols$block_cols$name)
     ]
   } else {
     data[,
@@ -598,7 +594,7 @@ compute_period_sizes.data.frame <- function(data) {
 #' @inheritParams compute_period_sizes
 #' @noRd
 compute_period_sizes.data.table <- function(data) {
-  counts <- data[, .(count = .N), group_by = period_number][order(
+  counts <- data[, .(count = .N), by = period_number][order(
     period_number
   )]
   counts[["count"]]

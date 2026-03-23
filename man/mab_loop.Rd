@@ -14,6 +14,7 @@ mab_loop(
   prior_periods,
   discount_rate,
   whole_experiment = NULL,
+  simulate_dates,
   delayed_feedback,
   clustering,
   blocking,

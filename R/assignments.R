@@ -33,7 +33,7 @@ compute_prior <- function(
   current_period
 ) {
   # Faster execution using vectors and `tapply()` when data is small
-  if (nrow(prior_data < 30000)) {
+  if (nrow(prior_data) < 30000) {
     compute_prior.fast(
       current_data = current_data,
       prior_data = prior_data,
@@ -159,8 +159,7 @@ compute_prior.data.table <- function(
   if (delayed_feedback) {
     current_date <- max(current_data[[assignment_date_col]])
 
-    prior_data[
-      ,
+    prior_data[,
       known_success := as.integer(
         current_date >= new_success_date &
           !is.na(new_success_date)
@@ -170,8 +169,7 @@ compute_prior.data.table <- function(
     prior_data[, known_success := mab_success]
   }
 
-  prior_data[, discount_period := current_period - period_number][
-    ,
+  prior_data[, discount_period := current_period - period_number][,
     weight := discount_rate^discount_period
   ]
   prior_list <- prior_data[,
@@ -293,7 +291,8 @@ compute_bandit <- function(
   control_augment = 0,
   ndraws
 ) {
-  bandit <- switch(algorithm,
+  bandit <- switch(
+    algorithm,
     "thompson" = compute_bandit.thompson(
       past_results = past_results,
       conditions = conditions,
@@ -503,8 +502,8 @@ assign_treatments <- function(
       clusters_idx <- which(cumulative_counts >= random_rows)[1] # Take the first that is larger as last cluster
 
       which(
-        current_data[[cluster_col$name]] %in%
-          shuffled[seq_len(cluster_idx)]
+        current_data[[cluster_col]] %in%
+          cluster_permutation[seq_len(clusters_idx)]
       )
     }
   } else {
@@ -746,8 +745,7 @@ assign_treatments.data.table <- function(
   )]
 
   if (resimulation) {
-    current_data[
-      ,
+    current_data[,
       impute_req := as.integer(
         as.character(mab_condition) != as.character(get(condition_col))
       )
