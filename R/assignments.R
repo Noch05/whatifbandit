@@ -159,7 +159,8 @@ compute_prior.data.table <- function(
   if (delayed_feedback) {
     current_date <- max(current_data[[assignment_date_col]])
 
-    prior_data[,
+    prior_data[
+      ,
       known_success := as.integer(
         current_date >= new_success_date &
           !is.na(new_success_date)
@@ -169,7 +170,8 @@ compute_prior.data.table <- function(
     prior_data[, known_success := mab_success]
   }
 
-  prior_data[, discount_period := current_period - period_number][,
+  prior_data[, discount_period := current_period - period_number][
+    ,
     weight := discount_rate^discount_period
   ]
   prior_list <- prior_data[,
@@ -291,8 +293,7 @@ compute_bandit <- function(
   control_augment = 0,
   ndraws
 ) {
-  bandit <- switch(
-    algorithm,
+  bandit <- switch(algorithm,
     "thompson" = compute_bandit.thompson(
       past_results = past_results,
       conditions = conditions,
@@ -745,7 +746,8 @@ assign_treatments.data.table <- function(
   )]
 
   if (resimulation) {
-    current_data[,
+    current_data[
+      ,
       impute_req := as.integer(
         as.character(mab_condition) != as.character(get(condition_col))
       )

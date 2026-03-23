@@ -235,8 +235,7 @@ create_cutoff <- function(
   period_method,
   time_unit
 ) {
-  data <- switch(
-    period_method,
+  data <- switch(period_method,
     "individual" = create_cutoff.individual(data = data),
     "batch" = create_cutoff.batch(data = data, period_length = period_length),
     "date" = create_cutoff.date(
@@ -264,8 +263,7 @@ create_cutoff.date <- function(
   month_col,
   period_length
 ) {
-  time_length <- switch(
-    time_unit,
+  time_length <- switch(time_unit,
     "day" = lubridate::days(1),
     "week" = lubridate::weeks(1),
     "month" = months(1)
@@ -286,7 +284,8 @@ create_cutoff.date <- function(
         "-01"
       ))
 
-      data[,
+      data[
+        ,
         month_date := lubridate::ymd(
           paste0(
             lubridate::year(get(date_col$name)),
@@ -296,7 +295,8 @@ create_cutoff.date <- function(
           )
         )
       ]
-      data[,
+      data[
+        ,
         period_number := floor(
           lubridate::interval(start_month, month_date) /
             months(1) /
@@ -309,7 +309,8 @@ create_cutoff.date <- function(
       data.table::setkey(data, period_number)
       data.table::setorderv(data, cols = c(date_col$name, "period_number"))
     } else {
-      data[,
+      data[
+        ,
         period_number := floor(
           lubridate::interval(start_date, get(date_col$name)) /
             time_length /
@@ -522,7 +523,8 @@ create_new_cols.data.table <- function(
   vars_keep
 ) {
   data <- data[, .SD, .SDcols = vars_keep]
-  data[,
+  data[
+    ,
     period_number := match(
       period_number,
       sort(unique(period_number))
@@ -557,7 +559,8 @@ create_new_cols.data.table <- function(
       .SDcols = c(data_cols$condition_col$name, block_cols$name)
     ]
   } else {
-    data[,
+    data[
+      ,
       treatment_block := as.character(get(
         data_cols$condition_col$name
       ))

@@ -392,8 +392,7 @@ check_data <- function(
     ))
   }
   if (period_method == "date") {
-    unit <- switch(
-      time_unit,
+    unit <- switch(time_unit,
       "day" = lubridate::days(1),
       "month" = months(1),
       "week" = lubridate::weeks(1)
