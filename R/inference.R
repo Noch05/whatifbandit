@@ -136,8 +136,7 @@ compute_iaipw.data.table <- function(
   )]
   data.table::setorder(mhats, mab_condition, period_number)
 
-  mhats <- mhats[
-    ,
+  mhats <- mhats[,
     mhat := data.table:shift(
       data.table::fifelse(cumsum(n) > 0, cumsum(successes) / cumsum(n), 0),
       n = 1L,

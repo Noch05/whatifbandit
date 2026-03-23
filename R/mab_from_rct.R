@@ -320,9 +320,13 @@ mab_from_rct <- function(
     )
   } else {
     verbose_log(verbose, "Starting Simulations")
+    furrr_opt <- do.call(
+      furrr::furrr_options,
+      c(list(seed = TRUE), rlang::dots_list(..., .named = TRUE))
+    )
     mabs <- furrr::future_map(
       seq_len(r),
-      function(x) {
+      \(.) {
         run_mab(
           data = prepped[["data"]],
           resimulation = TRUE,
@@ -347,45 +351,7 @@ mab_from_rct <- function(
           r = r
         )
       },
-      .options = furrr::furrr_options(
-        globals = list(
-          run_mab = run_mab,
-          data = prepped$data,
-          resimulation = TRUE,
-          data_cols = prepped$data_cols,
-          imputation_information = prepped$imputation_information,
-          time_unit = prepped$character_args$time_unit,
-          period_length = period_length,
-          prior_periods = prepped$character_args$prior_periods,
-          algorithm = prepped$character_args$algorithm,
-          whole_experiment = whole_experiment,
-          perfect_assignment = prepped$character_args$perfect_assignment,
-          conditions = prepped$conditions,
-          blocking = blocking,
-          assignment_method = assignment_method,
-          control_augment = control_augment,
-          keep_data = keep_data,
-          ndraws = ndraws,
-          random_assign_prop = random_assign_prop,
-          r = r
-        ),
-        packages = c(
-          "whatifbandit",
-          "dplyr",
-          "rlang",
-          "tidyr",
-          "bandit",
-          "tibble",
-          "lubridate",
-          "purrr",
-          "furrr",
-          "randomizr",
-          "data.table",
-          "estimatr"
-        ),
-        seed = TRUE,
-        ...
-      ),
+      .options = furrr_opt,
       .progress = verbose
     )
     verbose_log(verbose, "Collating Results")
@@ -403,6 +369,7 @@ mab_from_rct <- function(
     period_method = prepped$char_args$period_method,
     time_unit = prepped$char_args$time_unit,
     period_length = period_length,
+    period_sizes = period_sizes,
     prior_periods = prior_periods,
     discount_rate = discount_rate,
     control_augment = control_augment,
@@ -411,12 +378,13 @@ mab_from_rct <- function(
     conditions = prepped$conditions,
     delayed_feedback = delayed_feedback,
     whole_experiment = whole_experiment,
-    block_cols = prepped$data_cols$block_cols$name,
-    cluster_col = prepped$data_cols$cluster_col$name,
+    blocks = prepped$data_cols$block_cols$name,
+    cluster = prepped$data_cols$cluster_col$name,
     ndraws = ndraws,
     delayed_feedback = delayed_feedback,
     keep_data = !is.null(results$final_data),
-    r = r
+    r = r,
+    furrr_options = furrr_opt
   )
   results <- if (r > 1) multi.mab(results) else mab(results)
   return(results)

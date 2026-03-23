@@ -151,7 +151,8 @@ prep_rct_data <- function(
     char_args = char_args,
     conditions = conditions,
     period_starts = start_idxs,
-    period_ends = end_idxs
+    period_ends = end_idxs,
+    period_sizes = period_sizes
   ))
 }
 #---------------------------------------------------------------------------------

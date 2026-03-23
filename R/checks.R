@@ -615,7 +615,6 @@ check_sum1 <- function(...) {
 #' @param valid vector of valid arguments
 #' @param name name of the argument
 #' @returns Nothing; Throws an error if check fails
-
 check_string <- function(arg, valid, name) {
   if (!arg %in% valid) {
     rlang::abort(

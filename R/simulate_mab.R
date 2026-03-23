@@ -104,8 +104,10 @@ simulate_mab <- function(
   clustering <- !is.null(clusters)
   delayed_feedback <- !is.null(assignment_dates)
   resimulation <- FALSE
+  rownames(p) <- tolower(rownames(p))
   conditions <- sort(rownames(p))
   p <- p[conditions, ]
+  equal_prob <- stats::setNames(1 / nrow(p), conditions)
 
   data_cols <- list(
     cluster_col = list(name = "cluster", sym = rlang::sym("cluster")),
@@ -118,15 +120,126 @@ simulate_mab <- function(
       sym = rlang::sym("success_date")
     )
   )
-
-  if (r == 1) {} else if (r > 1) {
-    opts <- do.call(
-      furrr:::furrr_options,
+  verbose_log(verbose, "Starting Simulations")
+  if (r == 1) {
+    data <- prep_sim_data(
+      n = n,
+      p = p,
+      blocks = blocks,
+      clusters = clusters,
+      blocking = blocking,
+      clustering = clustering,
+      period_idxs = period_idxs,
+      conditions = conditions,
+      equal_probs = equal_probs,
+      assignment_dates = assignment_dates,
+      time_model = time_model,
+      time_model_args = time_model_args
+    )
+    results <- run_mab(
+      data = data,
+      resimulation = FALSE,
+      p = p,
+      algorithm = algorithm,
+      control_augment = control_augment,
+      random_assign_prop = random_assign_prop,
+      prior_periods = prior_periods,
+      discount_rate = discount_rate,
+      delayed_feedback = FALSE,
+      conditions = conditions,
+      blocking = blocking,
+      clustering = clustering,
+      data_cols = data_cols,
+      verbose = verbose,
+      ndraws = ndraws,
+      starts = period_idxs[["start_idxs"]],
+      ends = period_idxs[["end_idxs"]],
+      keep_data = keep_data,
+      r = r,
+      time_model = time_model,
+      time_model_args = time_model_args
+    )
+  } else if (r > 1) {
+    furrr_opt <- do.call(
+      furrr::furrr_options,
       c(list(seed = TRUE), other_args$furrr_args)
     )
-
-    furrr::future_map(seq_len(1), \() {}, .options = furrr_options())
+    mabs <- furrr::future_map(
+      seq_len(r),
+      \(.) {
+        data <- prep_sim_data(
+          n = n,
+          p = p,
+          blocks = blocks,
+          clusters = clusters,
+          blocking = blocking,
+          clustering = clustering,
+          period_idxs = period_idxs,
+          conditions = conditions,
+          equal_probs = equal_probs,
+          assignment_dates = assignment_dates,
+          time_model = time_model,
+          time_model_args = time_model_args
+        )
+        run_mab(
+          data = data,
+          resimulation = FALSE,
+          p = p,
+          algorithm = algorithm,
+          control_augment = control_augment,
+          random_assign_prop = random_assign_prop,
+          prior_periods = prior_periods,
+          discount_rate = discount_rate,
+          delayed_feedback = delayed_feedback,
+          conditions = conditions,
+          blocking = blocking,
+          clustering = clustering,
+          data_cols = data_cols,
+          verbose = verbose,
+          ndraws = ndraws,
+          starts = period_idxs[["start_idxs"]],
+          ends = period_idxs[["end_idxs"]],
+          keep_data = keep_data,
+          r = r,
+          time_model = time_model,
+          time_model_args = time_model_args
+        )
+      },
+      .options = furrr_opt,
+      .progress = verbose
+    )
+    verbose_log(verbose, "Collating Results")
+    results <- condense_results(
+      dt = (data.table::is.data.table(data) || r * t > 100000),
+      keep_data = keep_data,
+      mabs = mabs,
+      r = r
+    )
   }
+
+  results$settings <- list(
+    n = n,
+    t = t,
+    p = p,
+    algorithm = algorithm,
+    period_sizes = period_idxs$period_sizes,
+    prior_periods = prior_periods,
+    discount_rate = discount_rate,
+    control_augment = control_augment,
+    random_assign_prop = random_assign_prop,
+    conditions = conditions,
+    control_conditon = conditions[conditions == control],
+    delayed_feedback = delayed_feedback,
+    blocks = blocks,
+    cluster = clusters,
+    ndraws = ndraws,
+    delayed_feedback = delayed_feedback,
+    keep_data = !is.null(results$final_data),
+    r = r,
+    time_model = time_model,
+    time_model_args = time_model_args,
+    furrr_options = furrr_opt
+  )
 }
 #' Prepares Data for Simulated MAB
 #' @name prep_sim_data
@@ -142,6 +255,8 @@ prep_sim_data <- function(
   clusters = NULL,
   blocking,
   clustering,
+  conditions,
+  equal_probs,
   period_idxs,
   assignment_dates = NULL,
   time_model = NULL,
@@ -175,10 +290,11 @@ prep_sim_data <- function(
 
   data <- assign_treatments(
     current_data = data[current_idx, ],
-    probs = p / length(p),
+    probs = equal_probs,
     blocking = blocking,
     clustering = clustering,
-    conditions = names(p),
+    conditions = conditions,
+    prob = equal_prob,
     random_assign_prop = 0,
     resimulation = FALSE,
     cluster_col = "clusters"
@@ -190,6 +306,7 @@ prep_sim_data <- function(
       time_model = time_model,
       time_model_args = time_model_args
     )
+
   return(invisible(data))
 }
 
@@ -362,6 +479,7 @@ generate_period_idx <- function(n, t, period_sizes = NULL) {
   ends <- cumsum(period_sizes)
   starts <- c(1, ends[-t] + 1)
   return(list(
+    period_sizes = period_sizes,
     start_idxs = starts,
     end_idxs = ends
   ))

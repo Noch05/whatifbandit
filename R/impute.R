@@ -169,8 +169,7 @@ precompute_imputation.data.table <- function(
       by = treatment_block
     ]
 
-    rct_sum[
-      ,
+    rct_sum[,
       success_rate := data.table::fifelse(
         cumulative_count > 0,
         (cumulative_success / cumulative_count),
@@ -384,7 +383,8 @@ check_impute <- function(impute_success, current_data, impute_idx) {
   }
 
   return(impute_success[
-    order(rownames(impute_success)), ,
+    order(rownames(impute_success)),
+    ,
     drop = FALSE
   ])
 }
@@ -523,11 +523,10 @@ impute_outcomes.data.table <- function(
 
   if (delayed_feedback) {
     dates <- imputation_info[["impute_dates"]]
-    current_data[
-      ,
+    current_data[,
       new_success_date := data.table::fcase(
-        impute_req == 0, get(success_date_col),
-        mab_success == 1 & get(success_col) == 0, dates[impute_block],
+        impute_req == 0                          , get(success_date_col) ,
+        mab_success == 1 & get(success_col) == 0 , dates[impute_block]   ,
         default = as.Date(NA)
       )
     ]

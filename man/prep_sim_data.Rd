@@ -11,6 +11,8 @@ prep_sim_data(
   clusters = NULL,
   blocking,
   clustering,
+  conditions,
+  equal_probs,
   period_idxs,
   assignment_dates = NULL,
   time_model = NULL,
