@@ -1,6 +1,6 @@
 Package: whatifbandit
 Title: Analyzing Randomized Experiments as Multi-Arm Bandits
-Version: 0.3.0.9004
+Version: 0.3.0.9005
 Authors@R: c(
     person("Noah", "Ochital", , "noahochital@icloud.com", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0009-0009-0398-2963")),
@@ -22,9 +22,9 @@ Description: Simulates the results of completed randomized controlled
 License: GPL (>= 3)
 URL: https://github.com/Noch05/whatifbandit
 BugReports: https://github.com/Noch05/whatifbandit/issues
-Depends: 
+Depends:
     R (>= 4.1.0)
-Imports: 
+Imports:
     bandit,
     data.table,
     dplyr,
@@ -37,12 +37,12 @@ Imports:
     rlang,
     tibble,
     tidyr
-Suggests: 
+Suggests:
     future,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
-VignetteBuilder: 
+VignetteBuilder:
     knitr
 Config/testthat/edition: 3
 Config/testthat/parallel: true
