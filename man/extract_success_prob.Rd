@@ -8,9 +8,9 @@ extract_success_prob(p, conditions, other_idx = NULL)
 }
 \arguments{
 \item{p}{The true probabilities of success for each treatment arm. Specified as an matrix,
-where \code{rownames(p)} are the treatment
+where \code{rownames(p)} are the treatment. If there is a control condition, specify its rowname as \code{"Control"}
 labels, and \code{colnames(p)} are the cluster or block labels, e.g.
-\code{matrix(c(0.5, 0.3, 0.5, 0.6), nrow = 2, ncol = 2, dimnames(list(c("T1", "T2"), c("B1", "B2"))))}.
+\code{matrix(c(0.5, 0.3, 0.5, 0.6), nrow = 2, ncol = 2, dimnames(list(c("Control", "T1"), c("B1", "B2"))))}.
 Probabilities are accessed as \code{p[treatment, block]}.
 With blocks and clusters utilize the clusters for the columns because clusters are fully nested in blocks.
 For no clusters or blocks simply use a matrix with 1 column.}

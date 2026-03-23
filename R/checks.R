@@ -392,7 +392,8 @@ check_data <- function(
     ))
   }
   if (period_method == "date") {
-    unit <- switch(time_unit,
+    unit <- switch(
+      time_unit,
       "day" = lubridate::days(1),
       "month" = months(1),
       "week" = lubridate::weeks(1)
@@ -497,9 +498,10 @@ check_mab_sim <- function(
   dt,
   ndraws = 5000,
   r,
-  keep_data
+  keep_data,
+  verbose
 ) {
-  check_logical(dt, keep_data)
+  check_logical(dt, keep_data, verbose)
   check_posint(n, t, ndraws, r, prior_periods, period_sizes)
   check_prop(control_augment, random_assign_prop, discount_rate)
   check_string(algorithm, c("static", "thompson", "ucb1"), "algorithm")

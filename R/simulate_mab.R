@@ -8,9 +8,9 @@
 #' The sizes of each period will be equal as `n %/% t`,
 #' except for the last period which will be `n %/% t + n %% t`, when `period_sizes = NULL`.
 #' @param p The true probabilities of success for each treatment arm. Specified as an matrix,
-#' where `rownames(p)` are the treatment
+#' where `rownames(p)` are the treatment. If there is a control condition, specify its rowname as `"Control"`
 #' labels, and `colnames(p)` are the cluster or block labels, e.g.
-#'       `matrix(c(0.5, 0.3, 0.5, 0.6), nrow = 2, ncol = 2, dimnames(list(c("T1", "T2"), c("B1", "B2"))))`.
+#'       `matrix(c(0.5, 0.3, 0.5, 0.6), nrow = 2, ncol = 2, dimnames(list(c("Control", "T1"), c("B1", "B2"))))`.
 #'       Probabilities are accessed as `p[treatment, block]`.
 #' With blocks and clusters utilize the clusters for the columns because clusters are fully nested in blocks.
 #' For no clusters or blocks simply use a matrix with 1 column.
@@ -32,13 +32,13 @@
 #' @param time_model An optional function with signature `function(n, conditions, success, blocks = NULL, clusters = NULL, ...)`
 #' that returns a vector of [lubridate::period] objects which will then be added to `dates_of_assignment` to produce `success_date`. Used to simulate delayed feedback mechanism
 #' during the trial, so outcomes are imperfectly observed. Only used when`dates_of_assignment` is also supplied. Default `NULL`. Other optional arguments CANNOT share names as arguments in [furrr::furrr_options()]
-#'
 #' @param algorithm Assignment algorithm, determines how probabilities of assignment
 #' are updated each period. Either `"thompson"` for Thompson Sampling, `"ucb1"` for
 #' the UCB1 algorithm, or `"static"` for uniform, non-adaptive assignment. Not case sensitive.
 #' @param period_sizes Numeric vector of `length(t)`, with the specific number of units to be assigned in each period. Used when it is required to assign different numbers of units
 #' to treatment across the periods of the trial.
 #' @param ... Additional named arguments forwarded to `time_model` and [furrr::furrr_options()].
+#' @inheritParams mab_from_rct
 #'
 #' @returns NULL
 #' @details
@@ -69,6 +69,7 @@ simulate_mab <- function(
   ndraws = 5000,
   r,
   keep_data,
+  verbose,
   ...
 ) {
   algorithm <- tolower(algorithm)
@@ -89,7 +90,8 @@ simulate_mab <- function(
     dt = dt,
     ndraws = ndraws,
     r = r,
-    keep_data = keep_data
+    keep_data = keep_data,
+    verbose
   )
 
   other_args <- split_args(..., time_model = time_model)
@@ -100,6 +102,22 @@ simulate_mab <- function(
   )
   blocking <- !is.null(blocks)
   clustering <- !is.null(clusters)
+  delayed_feedback <- !is.null(assignment_dates)
+  resimulation <- FALSE
+  conditions <- sort(rownames(p))
+  p <- p[conditions, ]
+
+  data_cols <- list(
+    cluster_col = list(name = "cluster", sym = rlang::sym("cluster")),
+    assignment_date_col = list(
+      name = "assignment_date",
+      sym = rlang::sym("assignment_date")
+    ),
+    success_date_col = list(
+      name = "success_date",
+      sym = rlang::sym("success_date")
+    )
+  )
 
   if (r == 1) {} else if (r > 1) {
     opts <- do.call(
