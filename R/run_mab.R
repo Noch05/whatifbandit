@@ -127,7 +127,8 @@ run_mab <- function(
     assignment_quantities = sim_results[["assignment_quantities"]],
     estimates = estimates[["estimates"]],
     ipw_vcov = estimates[["vcov"]],
-    settings = NULL
+    args = NULL,
+    call = NULL
   )
   return(results)
 }

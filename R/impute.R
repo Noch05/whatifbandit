@@ -167,20 +167,18 @@ precompute_imputation.data.table <- function(
         )
       ),
       by = treatment_block
-    ]
-
-    rct_sum[,
+    ][,
       success_rate := data.table::fifelse(
         cumulative_count > 0,
-        (cumulative_success / cumulative_count),
+        cumulative_success / cumulative_count,
         0
       )
-    ][, failure_rate := 1 - success_rate]
+    ][,
+      failure_rate := 1 - success_rate
+    ]
 
     split(rct_sum, by = "period_number") |>
-      lapply(\(df) {
-        summary_to_matrix(df)
-      })
+      lapply(summary_to_matrix)
   }
 
   dates_summary <- if (delayed_feedback) {
@@ -207,37 +205,6 @@ precompute_imputation.data.table <- function(
 
   return(imputation_information)
 }
-#-------------------------------------------------------------------------------
-#' Convert Treatment Block Summary to Matrix
-#' @name summary_to_matrix
-#' @description Converts a summarized data.frame or data.table containing
-#' `treatment_block`, `success_rate`, and `failure_rate` columns into a
-#' named matrix for use with [randomizr::block_ra()].
-#' @param df A `data.frame` or `data.table` with columns `treatment_block`,
-#' `success_rate`, and `failure_rate`.
-#' @returns A numeric matrix with row names equal to `treatment_block` and
-#' columns `failure_rate` and `success_rate`.
-#' @keywords internal
-summary_to_matrix <- function(df) {
-  UseMethod("summary_to_matrix", df)
-}
-
-#' @method summary_to_matrix data.frame
-#' @noRd
-summary_to_matrix.data.frame <- function(df) {
-  m <- as.matrix(df[, c("failure_rate", "success_rate")])
-  rownames(m) <- df[["treatment_block"]]
-  m
-}
-
-#' @method summary_to_matrix data.table
-#' @noRd
-summary_to_matrix.data.table <- function(df) {
-  m <- as.matrix(df[, .(failure_rate, success_rate)])
-  rownames(m) <- df[["treatment_block"]]
-  m
-}
-
 #-------------------------------------------------------------------------------
 #' @name imputation_prep
 #' @title Outcome Imputation Preparation

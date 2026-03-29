@@ -118,8 +118,7 @@ compute_iaipw.data.table <- function(
       successes = sum(mab_success, na.rm = TRUE),
       n = .N
     ),
-    by = .SD,
-    .SDcols = c("mab_condition", "period_number")
+    by = .(mab_condition, period_number)
   ] |>
     merge(
       data.table::CJ(

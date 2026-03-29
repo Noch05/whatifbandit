@@ -169,9 +169,7 @@ compute_prior.data.table <- function(
     prior_data[, known_success := mab_success]
   }
 
-  prior_data[, discount_period := current_period - period_number][,
-    weight := discount_rate^discount_period
-  ]
+  prior_data[, weight := discount_rate^(current_period - period_number)]
   prior_list <- prior_data[,
     .(
       successes = sum(known_success * weight, na.rm = TRUE),

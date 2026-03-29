@@ -39,9 +39,7 @@ check_rct_args <- function(
       ),
       c("algorithm", "period_method")
     ),
-    \(arg, val, name) {
-      check_string(arg, val, name)
-    }
+    check_string
   )
 
   # Checking Logical values
@@ -217,9 +215,7 @@ check_cols <- function(
       if (
         !any(vapply(
           ..3[["tests"]],
-          \(x) {
-            `x`(data[[data_cols[[..1]][["name"]]]])
-          },
+          \(fn) fn(data[[data_cols[[..1]][["name"]]]]),
           FUN.VALUE = logical(1)
         ))
       ) {
@@ -257,21 +253,17 @@ check_cols <- function(
     )
     non_req_reasons <- non_req_reasons[non_required_cols]
 
-    purrr::walk2(
-      non_req_reasons,
-      non_req_reasons,
-      ~ {
-        if (.x %in% names(data_cols)) {
-          rlang::warn(c(
-            "i" = sprintf(
-              "`%s` is not required because %s. It will be ignored.",
-              .x,
-              .y
-            )
-          ))
-        }
+    purrr::iwalk(non_req_reasons, \(reason, col_name) {
+      if (col_name %in% names(data_cols)) {
+        rlang::warn(c(
+          "i" = sprintf(
+            "`%s` is not required because %s. It will be ignored.",
+            col_name,
+            reason
+          )
+        ))
       }
-    )
+    })
   }
 }
 

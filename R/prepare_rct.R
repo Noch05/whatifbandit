@@ -105,13 +105,7 @@ prep_rct_data <- function(
   # Preparing Data to be simulated
   verbose_log(verbose, "Preparing Data")
   vars_keep <- c(
-    lapply(
-      data_cols,
-      \(col) {
-        col$name
-      }
-    ) |>
-      unlist(),
+    unlist(lapply(data_cols, `[[`, "name")),
     "period_number"
   )
 

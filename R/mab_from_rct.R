@@ -262,6 +262,8 @@ mab_from_rct <- function(
   keep_data = FALSE,
   ...
 ) {
+  cl <- match.call()
+  args <- mget(formalArgs(mab_from_rct))
   data_cols <- c(
     formula_parse(formula),
     date_col = date_col,
@@ -359,197 +361,19 @@ mab_from_rct <- function(
       dt = ((data.table::is.data.table(data)) ||
         r * length(prepped$period_starts) > 100000),
       keep_data = keep_data,
-      mabs = mabs,
-      r = r
+      mabs = mabs
     )
   }
-  results$settings <- list(
-    original_data = data,
-    algorithm = prepped$char_args$algorithm,
-    period_method = prepped$char_args$period_method,
-    time_unit = prepped$char_args$time_unit,
-    period_length = period_length,
-    period_sizes = prepped$period_sizes,
-    prior_periods = prior_periods,
-    discount_rate = discount_rate,
-    control_augment = control_augment,
-    random_assign_prop = random_assign_prop,
-    control = as.character(control_condition),
-    conditions = prepped$conditions,
-    whole_experiment = whole_experiment,
-    blocks = prepped$data_cols$block_cols$name,
-    cluster = prepped$data_cols$cluster_col$name,
-    ndraws = ndraws,
-    delayed_feedback = delayed_feedback,
-    keep_data = !is.null(results$final_data),
-    r = r,
-    furrr_options = furrr_opt
+
+  results$args <- c(
+    args,
+    blocks = data_cols$block_cols$name,
+    cluster = data_cols$cluster_col$name
   )
-  results <- if (r > 1) multi.mab(results) else mab(results)
-  return(results)
-}
-#------------------------------------------------------------------------------
-#' Formula Parser
-#' @description
-#' Parsers the input formula for [mab_from_rct()]
-#' @name formula_parse
-#' @inheritParams mab_from_rct
-#' @returns List of columns specified from formula.
-#' @keywords internal
-
-formula_parse <- function(formula) {
-  formula <- as.character(formula)
-
-  outcome <- formula[2]
-
-  obc <- strsplit(formula[3], "\\+") |>
-    lapply(trimws) |>
-    unlist()
-
-  conditions_col <- obc[1]
-  other_vars <- lapply(
-    list(
-      obc[grepl("block\\((.*?)\\)", obc)],
-      obc[grepl("cluster\\((.*?)\\)", obc)]
-    ),
-    gather_args
-  )
+  results$furrr <- furrr_opt
+  results$call <- cl
 
   return(
-    list(
-      condition_col = conditions_col,
-      success_col = outcome,
-      block_cols = block(other_vars[[1]][["args"]]),
-      cluster_col = cluster(other_vars[[2]][["args"]])
-    )
+    construct_mab(results)
   )
-}
-#' Gather Args
-#' @description Helper for formula parsing. Parses the expression, and splits the function call from the arguments.
-#' @param x String representing an `R` expression, like `"block(x1)"`.
-#' @returns A list containing the function call, and the arguments so `"Block(x1)"` gets turned into a list
-#' with elements `block, "x1"`.
-
-gather_args <- function(x) {
-  if (length(x) == 0) {
-    return(list(NULL))
-  }
-  call <- rlang::parse_expr(x) |>
-    as.list()
-
-  args <- vapply(
-    call[-1],
-    rlang::as_label,
-    character(1)
-  )
-  return(list(call = call[[1]], args = args))
-}
-
-# Helpers not requiring documentation, simply identity functions for block and cluster cases.
-
-block <- function(...) {
-  c(...)
-}
-cluster <- function(x) {
-  x
-}
-
-#' Verbose Printer
-#' @description Shorthand Function for checking `verbose` and then printing if TRUE
-#' @name verbose_log
-#' @param message The message to be printed to screen, as a string.
-#' @param log Logical; Whether or not to print the message, this will always be
-#' the `verbose` argument passed from higher functions.
-#' @returns Text output of `message` to the console when `log = TRUE`. If
-#' `log = FALSE`, returns nothing.
-#' @keywords internal
-
-verbose_log <- function(log, message) {
-  if (log) {
-    cat(message, "\n")
-  }
-}
-
-
-#' @name condense_results
-#' @title Condenses results of repeated simulations.
-#' @inheritParams mab_from_rct
-#' @param dt Logical; Whether to output `data.table`s or `tibble`s. When` r * number_of_periods > 100000`, `dt = TRUE`, even if the user passed data is not a
-#' `data.table`.
-#' @param mabs List of outputs from repeated [run_mab()] calls.
-#' @returns A named list containing
-#' \itemize{
-#' \item `final_data:` `tibble` or `data.table` containing the nested `tibble`s/`data.table`s from each trial. Only provided when `keep_data = TRUE`.
-#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson Sampling posterior distributions for each period and trial. Wide format,
-#' each row is a period, and each columns is a treatment.
-#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period and trial. Wide format,
-#' each row is a period, and each columns is a treatment.
-#' \item `estimates`: A `tibble` or `data.table` containing the all estimates and variances for each arm.
-#' Long format, treatment arm, and estimate type are columns along with the mean estimates
-#' and variance estimates.
-#' \item `ipw_vcov`: A 3d arrary containing the covariance matrix of coefficients of IPW estimates of each trial.
-#' }
-#' @details
-#' This function iterates over every element in `mabs` and extracts the required element to place in a condensed list
-#' for the final output.
-#'
-#' @keywords internal
-
-condense_results <- function(dt, keep_data, mabs, r) {
-  items <- c(
-    "bandits",
-    "assignment_probs",
-    "estimates",
-    "assignment_quantities"
-  )
-
-  if (dt) {
-    results <- lapply(items, \(item) {
-      all <- lapply(seq_len(r), function(i) {
-        if (item == "assignment_quantities") {
-          as.list(mabs[[i]][[item]])
-        } else {
-          mabs[[i]][[item]]
-        }
-      })
-      result <- data.table::rbindlist(all, idcol = "trial", use.names = TRUE)
-      result[, trial := as.numeric(trial)]
-      return(result)
-    })
-    names(results) <- items
-    if (keep_data) {
-      results[["final_data"]] <- data.table::data.table(
-        trial = seq_len(r),
-        data = purrr::map(mabs, ~ .x[["final_data"]])
-      )
-    } else {
-      results[["final_data_nest"]] <- NULL
-    }
-  } else {
-    results <- purrr::map(items, function(item) {
-      result <- purrr::map(seq_len(r), function(i) mabs[[i]][[item]]) |>
-        dplyr::bind_rows(.id = "trial") |>
-        dplyr::mutate(trial = as.numeric(trial))
-      return(result)
-    })
-    names(results) <- items
-
-    if (keep_data) {
-      results[["final_data_nest"]] <- tibble::tibble(
-        trial = seq_len(r),
-        data = purrr::map(mabs, ~ .x[["final_data"]])
-      )
-    } else {
-      results[["final_data_nest"]] <- NULL
-    }
-  }
-
-  dims <- dim(mabs[[1]][["ipw_vcov"]])
-  results[["ipw_vcov"]] <- lapply(mabs, \(x) {
-    x[["ipw_vcov"]]
-  }) |>
-    unlist() |>
-    array(dim = c(dims, length(mabs)))
-
-  return(results)
 }

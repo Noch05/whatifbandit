@@ -1,3 +1,16 @@
+#' Constructs `mab` and its other class variants
+#' @name construct_mab
+#' @description Simple control flow for constructing the proper `mab` classes as output
+#' to [simulate_mab()] and [mab_from_rct()]
+#' @param mab Named list output of [simulate_mab()] or [mab_from_rct()].
+#' @returns Input `mab` with appropriate S3 class
+
+construct_mab <- function(mab) {
+  new_mab <- if (mab$args$r > 1) {
+    new_multi_mab
+  }
+}
+
 new_mab <- function(
   final_data,
   bandits,

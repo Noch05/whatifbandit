@@ -68,35 +68,40 @@ simulate_mab <- function(
   period_sizes = NULL,
   prior_periods = NULL,
   discount_rate = 1,
-  dt,
+  dt = FALSE,
   ndraws = 5000,
-  r,
-  keep_data,
-  verbose,
+  r = 1,
+  keep_data = FALSE,
+  verbose = FALSE,
+  check_args = FALSE,
   ...
 ) {
+  cl <- match.call()
+  args <- mget(formalArgs(simulate_mab))
   algorithm <- tolower(algorithm)
-  check_mab_sim(
-    n = n,
-    t = t,
-    p = p,
-    algorithm = algorithm,
-    blocks = blocks,
-    clusters = clusters,
-    control_augment = control_augment,
-    random_assign_prop = random_assign_prop,
-    assignment_dates = assignment_dates,
-    delayed_feedback = delayed_feedback,
-    time_model = time_model,
-    period_sizes = period_sizes,
-    prior_periods = prior_periods,
-    discount_rate = discount_rate,
-    dt = dt,
-    ndraws = ndraws,
-    r = r,
-    keep_data = keep_data,
-    verbose = verbose
-  )
+  if (check_args) {
+    check_mab_sim(
+      n = n,
+      t = t,
+      p = p,
+      algorithm = algorithm,
+      blocks = blocks,
+      clusters = clusters,
+      control_augment = control_augment,
+      random_assign_prop = random_assign_prop,
+      assignment_dates = assignment_dates,
+      delayed_feedback = delayed_feedback,
+      time_model = time_model,
+      period_sizes = period_sizes,
+      prior_periods = prior_periods,
+      discount_rate = discount_rate,
+      dt = dt,
+      ndraws = ndraws,
+      r = r,
+      keep_data = keep_data,
+      verbose = verbose
+    )
+  }
 
   other_args <- split_args(..., time_model = time_model)
   period_idxs <- generate_period_idx(n = n, t = t, period_sizes = period_sizes)
@@ -234,34 +239,13 @@ simulate_mab <- function(
     results <- condense_results(
       dt = dt || (r * t > 100000),
       keep_data = keep_data,
-      mabs = mabs,
-      r = r
+      mabs = mabs
     )
   }
 
-  results$settings <- list(
-    n = n,
-    t = t,
-    p = p,
-    algorithm = algorithm,
-    period_sizes = period_idxs$period_sizes,
-    prior_periods = prior_periods,
-    discount_rate = discount_rate,
-    control_augment = control_augment,
-    random_assign_prop = random_assign_prop,
-    conditions = conditions,
-    control_conditon = conditions[conditions == "control"],
-    delayed_feedback = delayed_feedback,
-    simulate_dates = simulate_dates,
-    blocks = blocks,
-    cluster = clusters,
-    ndraws = ndraws,
-    keep_data = !is.null(results$final_data),
-    r = r,
-    time_model = time_model,
-    time_model_args = other_args$time_model_args,
-    furrr_options = furrr_opt
-  )
+  results$args <- args
+  results$cl <- cl
+  return(construct_mab(results))
 }
 #' Prepares Data for Simulated MAB
 #' @name prep_sim_data
