@@ -368,11 +368,10 @@ mab_from_rct <- function(
   results$args <- c(
     args,
     blocks = data_cols$block_cols$name,
-    cluster = data_cols$cluster_col$name
+    clusters = data_cols$cluster_col$name
   )
   results$furrr <- furrr_opt
   results$call <- cl
-
   return(
     construct_mab(results)
   )

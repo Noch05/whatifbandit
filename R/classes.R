@@ -1,52 +1,31 @@
 #' Constructs `mab` and its other class variants
 #' @name construct_mab
-#' @description Simple control flow for constructing the proper `mab` classes as output
-#' to [simulate_mab()] and [mab_from_rct()]
+#' @description Simple construction for proper `mab` subclasses as output
+#' to [simulate_mab()] and [mab_from_rct()].
 #' @param mab Named list output of [simulate_mab()] or [mab_from_rct()].
+#' @param type Type of simulated trial, either `"rct"` or `"param"` to denote whether it was an rct re-simulation or an simulation form population parameters.
+#' @param multi Logical; `TRUE` denotes multiple trials.
+
 #' @returns Input `mab` with appropriate S3 class
+#' @keywords internal
 
-construct_mab <- function(mab) {
-  new_mab <- if (mab$args$r > 1) {
-    new_multi_mab
+construct_mab <- function(mab, type, multi) {
+  class <- if (multi) {
+    c(paste0("multi_", type, "_mab"), "multi_mab")
+  } else {
+    c(paste0(type, "_mab"), "mab")
   }
-}
-
-new_mab <- function(
-  final_data,
-  bandits,
-  assignment_probs,
-  estimates,
-  ipw_vcov,
-  settings,
-  subclass
-) {
   structure(
     list(
-      final_data = final_data,
-      bandits = bandits,
-      assignment_probs = assignment_probs,
-      estimates = estimates,
-      ipw_vcov = ipw_vcov,
-      settings = settings
+      new_data = mab$final_data,
+      bandit = list(
+        statistic = mab$bandits,
+        assignment_prob = mab$assignment_prob,
+        assignment_quant = mab$assignment_quantities
+      ),
+      estimates = list(point = mab$estimates, vcov = mab$ipw_vcov),
+      config = list(args = mab$args, call = mab$call)
     ),
-    class = c(subclass, "mab")
-  )
-}
-
-new_multi_mab <- function(
-  trials,
-  estimates,
-  assignment_quantities,
-  settings,
-  subclass
-) {
-  structure(
-    list(
-      trials = trials, # list of mab objects
-      estimates = estimates,
-      assignment_quantities = assignment_quantities,
-      settings = settings
-    ),
-    class = c(subclass, "multi_mab")
+    class = class
   )
 }
