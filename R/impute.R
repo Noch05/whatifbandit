@@ -239,6 +239,7 @@ prep_imputation <- function(
   imputation_information,
   whole_experiment,
   blocking,
+  impute_idx,
   delayed_feedback,
   current_period
 ) {
@@ -281,7 +282,6 @@ prep_imputation <- function(
   } else {
     NULL
   }
-  impute_idx <- which(current_data[["impute_req"]] == 1)
 
   impute_success <- check_impute(
     impute_success = impute_success,
@@ -416,15 +416,13 @@ compute_impute <- function(imputation_info, success_col) {
   )
   imputations[non_impute_idx] <- current_data[[success_col]][non_impute_idx]
 
-  if (length(impute_idx) > 0) {
-    imputations[impute_idx] <- randomizr::block_ra(
-      blocks = current_data[["impute_block"]][impute_idx],
-      block_prob_each = imputation_means,
-      num_arms = 2,
-      conditions = c(0, 1),
-      check_inputs = FALSE
-    )
-  }
+  imputations[impute_idx] <- randomizr::block_ra(
+    blocks = current_data[["impute_block"]][impute_idx],
+    block_prob_each = imputation_means,
+    num_arms = 2,
+    conditions = c(0, 1),
+    check_inputs = FALSE
+  )
   return(imputations)
 }
 #-------------------------------------------------------------------------------

@@ -259,24 +259,36 @@ mab_loop <- function(
       (equal_probs * random_assign_prop)
 
     if (resimulation) {
-      prepped_impute <- prep_imputation(
-        current_data = current_data,
-        whole_experiment = whole_experiment,
-        imputation_information = imputation_information,
-        block_cols = col_names[["block_cols"]],
-        blocking = blocking,
-        delayed_feedback,
-        current_period = i
-      )
-      col_names[["success_col"]]
-      data <- impute_outcomes(
-        data = data,
-        imputation_info = prepped_impute,
-        success_col = col_names[["success_col"]],
-        success_date_col = col_names[["success_date_col"]],
-        delayed_feedback = delayed_feedback,
-        idx = current_idx
-      )
+      impute_idx <- which(current_data[["impute_req"]] == 1)
+      if (length(impute_idx) > 0) {
+        prepped_impute <- prep_imputation(
+          current_data = current_data,
+          whole_experiment = whole_experiment,
+          imputation_information = imputation_information,
+          block_cols = col_names[["block_cols"]],
+          blocking = blocking,
+          impute_idx = impute_idx,
+          delayed_feedback,
+          current_period = i
+        )
+        col_names[["success_col"]]
+        data <- impute_outcomes(
+          data = data,
+          imputation_info = prepped_impute,
+          success_col = col_names[["success_col"]],
+          success_date_col = col_names[["success_date_col"]],
+          delayed_feedback = delayed_feedback,
+          idx = current_idx
+        )
+      } else {
+        current_data[["mab_success"]] <- current_data[["success"]]
+        if (delayed_feedback) {
+          current_data[["new_sucess_date"]] <- current_data[[col_names[[
+            "success_date_col"
+          ]]]]
+        }
+        data[current_idx, ] <- current_data
+      }
     } else {
       data <- generate_outcomes(
         current_data = current_data,

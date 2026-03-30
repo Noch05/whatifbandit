@@ -78,8 +78,6 @@ compute_iaipw.data.frame <- function(
     tidyr::pivot_wider(names_from = mab_condition, values_from = mhat) |>
     dplyr::arrange(period_number)
 
-  print(mhats)
-
   periods_vec <- data[["period_number"]]
   conditions_vec <- data[["mab_condition"]]
   success_vec <- data[["mab_success"]]
