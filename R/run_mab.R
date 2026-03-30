@@ -489,6 +489,6 @@ compute_lookback <- function(prior_periods = NULL, current_period) {
   if (is.null(prior_periods)) {
     1
   } else {
-    current_period - prior_periods
+    max(current_period - prior_periods, 1)
   }
 }
