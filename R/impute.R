@@ -342,6 +342,7 @@ check_impute <- function(impute_success, current_data, impute_idx) {
 
   if (length(blocks_to_remove) > 0) {
     keep <- !rownames(impute_success) %in% blocks_to_remove
+
     impute_success <- impute_success[keep, , drop = FALSE]
   }
 
@@ -388,10 +389,9 @@ impute_outcomes <- function(
   success_col,
   success_date_col = NULL,
   delayed_feedback,
-  impute_idx,
   idx
 ) {
-  UseMethod("impute_outcomes", current_data)
+  UseMethod("impute_outcomes", data)
 }
 
 #' Compute Imputations
@@ -401,7 +401,7 @@ impute_outcomes <- function(
 #' @inheritParams impute_outcomes
 #' @returns Numeric vector of imputed outcomes
 
-compute_impute <- function(imputation_info) {
+compute_impute <- function(imputation_info, success_col) {
   current_data <- imputation_info[["current_data"]]
   imputation_means <- imputation_info[["impute_success"]]
   impute_idx <- imputation_info[["impute_idx"]]
@@ -439,11 +439,13 @@ impute_outcomes.data.frame <- function(
   success_col,
   success_date_col,
   delayed_feedback,
-  impute_idx,
   idx
 ) {
   current_data <- imputation_info[["current_data"]]
-  current_data[["mab_success"]] <- compute_impute(imputation_info)
+  current_data[["mab_success"]] <- compute_impute(
+    imputation_info,
+    success_col = success_col
+  )
   if (delayed_feedback) {
     dates <- imputation_info[["impute_dates"]]
 
@@ -471,11 +473,12 @@ impute_outcomes.data.table <- function(
   success_col,
   success_date_col,
   delayed_feedback,
-  impute_idx,
   idx
 ) {
   current_data <- imputation_info[["current_data"]]
-  current_data[, mab_success := compute_impute(imputation_info)]
+  current_data[,
+    mab_success := compute_impute(imputation_info, success_col = success_col)
+  ]
   modified_cols <- c(
     "mab_condition",
     "mab_success",

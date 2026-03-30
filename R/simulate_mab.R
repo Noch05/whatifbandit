@@ -239,7 +239,7 @@ simulate_mab <- function(
 
   results$args <- args
   results$cl <- cl
-  return(construct_mab(results))
+  return(construct_mab(results, type = "param", multi = r > 1))
 }
 #' Prepares Data for Simulated MAB
 #' @name prep_sim_data

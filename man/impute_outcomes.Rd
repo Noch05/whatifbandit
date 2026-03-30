@@ -10,7 +10,6 @@ impute_outcomes(
   success_col,
   success_date_col = NULL,
   delayed_feedback,
-  impute_idx,
   idx
 )
 }
@@ -26,9 +25,9 @@ of a traditional Randomized Controlled Trial (RCT).}
 If \code{TRUE}, delayed feedback is assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not known to the simulation, until a certain date.
 When re-computing the adaptive assignment probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the assignment are treated as failures. a}
 
-\item{impute_idx}{Index of rows in \code{current_data} that need to be imputed.}
-
 \item{idx}{Index of rows imputed in the period, used to update the original data.}
+
+\item{impute_idx}{Index of rows in \code{current_data} that need to be imputed.}
 }
 \value{
 Updated \code{data} object with all the updates from the current period of the simulation

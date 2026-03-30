@@ -325,7 +325,7 @@ mab_from_rct <- function(
       conditions = prepped$conditions,
       blocking = blocking,
       clustering = clustering,
-      col_names = prepped$col_names,
+      col_names = col_names,
       verbose = verbose,
       imputation_information = prepped$imputation_information,
       ndraws = ndraws,
@@ -378,6 +378,6 @@ mab_from_rct <- function(
   results$furrr <- furrr_opt
   results$call <- cl
   return(
-    construct_mab(results)
+    construct_mab(results, type = "rct", multi = r > 1)
   )
 }

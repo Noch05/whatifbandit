@@ -248,10 +248,11 @@ estimate_aipw <- function(
   }
 
   bind_func <- if (dt) data.table::rbindlist else dplyr::bind_rows
+
   aipw_estimates <- purrr::imap(
     iaipw_periods[["iaipw"]],
     \(score, name) {
-      weights <- sqrt(assignment_probs[, name] / length(score))[iaipw_periods[[
+      weights <- sqrt(assignment_probs[[name]] / length(score))[iaipw_periods[[
         "period_numbers"
       ]]]
       sum_w <- sum(weights)
@@ -311,8 +312,7 @@ estimate_ipw <- function(
       data = data,
       clusters = data[[cluster_col]],
       weights = ipw_weights,
-      se_type = "CR2",
-      ci = FALSE
+      se_type = "CR2"
     )
   } else if (blocking) {
     estimatr::lm_robust(
@@ -320,8 +320,7 @@ estimate_ipw <- function(
       fixed_effects = ~block,
       data = data,
       se_type = "HC2",
-      weights = ipw_weights,
-      ci = FALSE
+      weights = ipw_weights
     )
   } else if (clustering) {
     estimatr::lm_robust(
@@ -329,16 +328,14 @@ estimate_ipw <- function(
       data = data,
       clusters = data[[cluster_col]],
       weights = ipw_weights,
-      se_type = "CR2",
-      ci = FALSE
+      se_type = "CR2"
     )
   } else {
     estimatr::lm_robust(
       mab_success ~ mab_condition - 1,
       data = data,
       se_type = "HC2",
-      weights = ipw_weights,
-      ci = FALSE
+      weights = ipw_weights
     )
   }
 
@@ -351,16 +348,17 @@ estimate_ipw <- function(
   }
   df <- est_lm[["df"]]
 
-  for (item in list(coefs, var, df)) {
-    names(item) <<- gsub("^mab_condition", "", names(item))
-  }
+  fix_names <- \(x) setNames(x, gsub("^mab_condition", "", names(x)))
+  coefs <- fix_names(coefs)
+  var <- fix_names(var)
+  df <- fix_names(df)
 
   if (data.table::is.data.table(data)) {
     ipw_estimates <- data.table::data.table(
       mean = c(coefs, f),
       var = c(var, NA),
       df = c(df, NA),
-      mab_condition = c(names(coefs), "Joint"),
+      mab_condition = c(names(coefs), "Joint-F"),
       estimator = "IPW",
     )
     ipw_estimates <- fill_missing_conditions(

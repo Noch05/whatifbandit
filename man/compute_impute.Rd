@@ -4,7 +4,7 @@
 \alias{compute_impute}
 \title{Compute Imputations}
 \usage{
-compute_impute(imputation_info)
+compute_impute(imputation_info, success_col)
 }
 \arguments{
 \item{imputation_info}{List containing all necessary information for imputation, generated each period by \code{\link[=prep_imputation]{prep_imputation()}}}

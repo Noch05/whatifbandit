@@ -33,7 +33,7 @@ formula_parse <- function(formula) {
     lapply(trimws) |>
     unlist()
 
-  conditions_col <- obc[1]
+  condition_col <- obc[1]
   other_vars <- lapply(
     list(
       obc[grepl("block\\((.*?)\\)", obc)],
@@ -43,7 +43,7 @@ formula_parse <- function(formula) {
   )
 
   parsed <- list(
-    condition_col = conditions_col,
+    condition_col = condition_col,
     success_col = outcome,
     block_cols = block(other_vars[[1]][["args"]]),
     cluster_col = cluster(other_vars[[2]][["args"]])

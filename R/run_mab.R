@@ -112,7 +112,7 @@ run_mab <- function(
   )
   sample_estimates <- estimate_sample(
     data = sim_results[["final_data"]],
-    conditions = conditions,
+    conditions = conditions
   )
   estimates <- combine_estimates(
     estimates = list(aipw_estimates, ipw_estimates[["ipw"]], sample_estimates),
@@ -191,13 +191,13 @@ mab_loop <- function(
     NA,
     nrow = periods,
     ncol = num_conditions,
-    dimnames = list(c(), names(conditions))
+    dimnames = list(c(), conditions)
   )
   bandits[["assignment_prob"]] <- matrix(
     NA,
     nrow = periods,
     ncol = num_conditions,
-    dimnames = list(c(), names(conditions))
+    dimnames = list(c(), conditions)
   )
   bandits[["assignment_prob"]][1, ] <- rep(
     1 / num_conditions,
@@ -246,7 +246,7 @@ mab_loop <- function(
       blocking = blocking,
       clustering = clustering,
       cluster_col = col_names[["cluster_col"]],
-      conditions_col = col_names[["conditions_col"]],
+      condition_col = col_names[["condition_col"]],
       conditions = conditions,
       random_assign_prop = random_assign_prop,
       random_probs = equal_probs,
@@ -267,6 +267,7 @@ mab_loop <- function(
         delayed_feedback,
         current_period = i
       )
+      col_names[["success_col"]]
       data <- impute_outcomes(
         data = data,
         imputation_info = prepped_impute,
@@ -352,7 +353,7 @@ collect_mab_results.data.frame <- function(
       .groups = "drop"
     ) |>
     as.list() |>
-    finalize_prior_list()
+    finalize_prior_list(conditions = conditions)
 
   final_bandit <- compute_bandit(
     past_results = final_summary,
@@ -425,7 +426,7 @@ collect_mab_results.data.table <- function(
     by = mab_condition
   ] |>
     as.list() |>
-    finalize_prior_list()
+    finalize_prior_list(conditions = conditions)
 
   final_bandit <- compute_bandit(
     past_results = final_summary,
