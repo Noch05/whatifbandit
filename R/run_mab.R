@@ -93,6 +93,7 @@ run_mab <- function(
     conditions = conditions,
     periods = periods
   )
+
   aipw_estimates <- estimate_aipw(
     data = sim_results[["final_data"]],
     assignment_probs = sim_results[["assignment_probs"]],

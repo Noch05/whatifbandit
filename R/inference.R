@@ -78,6 +78,8 @@ compute_iaipw.data.frame <- function(
     tidyr::pivot_wider(names_from = mab_condition, values_from = mhat) |>
     dplyr::arrange(period_number)
 
+  print(mhats)
+
   periods_vec <- data[["period_number"]]
   conditions_vec <- data[["mab_condition"]]
   success_vec <- data[["mab_success"]]
@@ -87,7 +89,9 @@ compute_iaipw.data.frame <- function(
     \(condition) {
       prob <- assignment_probs[[condition]][periods_vec]
       mhat <- mhats[[condition]][periods_vec]
-      indicator <- (as.integer(conditions_vec == condition) / prob)
+      indicator <- (as.integer(conditions_vec == condition)) / prob
+      # If prob is 0, indicator is NaN
+      indicator[is.na(indicator)] <- 0
       iaipw <- (indicator * success_vec) + (1 - indicator) * mhat
       return(iaipw)
     }
