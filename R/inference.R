@@ -77,7 +77,6 @@ compute_iaipw.data.frame <- function(
     dplyr::select(period_number, mab_condition, mhat) |>
     tidyr::pivot_wider(names_from = mab_condition, values_from = mhat) |>
     dplyr::arrange(period_number)
-
   periods_vec <- data[["period_number"]]
   conditions_vec <- data[["mab_condition"]]
   success_vec <- data[["mab_success"]]
@@ -159,9 +158,10 @@ compute_iaipw.data.table <- function(
   iaipw_estimates <- lapply(
     conditions,
     \(condition) {
-      prob <- assignment_probs[periods_vec, ..condition] |> as.vector()
-      mhat <- mhats[periods_vec, ..condition] |> as.vector()
+      prob <- assignment_probs[periods_vec, ..condition][[1]]
+      mhat <- mhats[periods_vec, ..condition][[1]]
       indicator <- (as.integer(conditions_vec == condition) / prob)
+      indicator[is.na(indicator)] <- 0
       iaipw <- (indicator * success_vec) + (1 - indicator) * mhat
       return(iaipw)
     }
@@ -361,7 +361,7 @@ estimate_ipw <- function(
       var = c(var, NA),
       df = c(df, NA),
       mab_condition = c(names(coefs), "Joint-F"),
-      estimator = "IPW",
+      estimator = "IPW"
     )
     ipw_estimates <- fill_missing_conditions(
       ipw_estimates,

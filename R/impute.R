@@ -497,7 +497,7 @@ impute_outcomes.data.table <- function(
     modified_cols <- c(modified_cols, "new_success_date")
   }
 
-  data[idx, (modified_cols) := current_data[, ..modified_cols]]
+  data[idx, (modified_cols) := current_data[, modified_cols, with = FALSE]]
 
   return(invisible(data))
 }

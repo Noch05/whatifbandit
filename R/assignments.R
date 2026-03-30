@@ -68,7 +68,7 @@ compute_prior.fast <- function(
     known_success <- as.integer(
       current_date >= prior_data[["new_success_date"]] &
         !is.na(prior_data[["new_success_date"]]) &
-        prior_data["mab_success"] == 1
+        prior_data[["mab_success"]] == 1
     )
   } else {
     known_success <- prior_data[["mab_success"]]
@@ -121,7 +121,7 @@ compute_prior.data.frame <- function(
     prior_data[["known_success"]] <- as.integer(
       current_date >= prior_data[["new_success_date"]] &
         !is.na(prior_data[["new_success_date"]]) &
-        prior_data["mab_success"] == 1
+        prior_data[["mab_success"]] == 1
     )
   } else {
     prior_data[["known_success"]] <- prior_data[["mab_success"]]
