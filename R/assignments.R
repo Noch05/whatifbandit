@@ -67,7 +67,8 @@ compute_prior.fast <- function(
     current_date <- max(current_data[[assignment_date_col]])
     known_success <- as.integer(
       current_date >= prior_data[["new_success_date"]] &
-        !is.na(prior_data[["new_success_date"]])
+        !is.na(prior_data[["new_success_date"]]) &
+        prior_data["mab_success"] == 1
     )
   } else {
     known_success <- prior_data[["mab_success"]]
@@ -76,12 +77,12 @@ compute_prior.fast <- function(
     prior_data[["period_number"]])
 
   successes <- tapply(
-    X = (prior_data[["known_success"]] * prior_data[["weight"]]),
+    X = (known_success * weight),
     INDEX = prior_data[["mab_condition"]],
     FUN = sum
   )
   n <- tapply(
-    X = prior_data[["weight"]],
+    X = weight,
     INDEX = prior_data[["mab_condition"]],
     FUN = sum
   )
@@ -119,7 +120,8 @@ compute_prior.data.frame <- function(
 
     prior_data[["known_success"]] <- as.integer(
       current_date >= prior_data[["new_success_date"]] &
-        !is.na(prior_data[["new_success_date"]])
+        !is.na(prior_data[["new_success_date"]]) &
+        prior_data["mab_success"] == 1
     )
   } else {
     prior_data[["known_success"]] <- prior_data[["mab_success"]]
@@ -162,7 +164,8 @@ compute_prior.data.table <- function(
     prior_data[,
       known_success := as.integer(
         current_date >= new_success_date &
-          !is.na(new_success_date)
+          !is.na(new_success_date) &
+          mab_success == 1
       )
     ]
   } else {
@@ -353,7 +356,7 @@ compute_bandit.thompson <- function(
       if (bandit_invalid(ts)) {
         stop("Invalid Bandit")
       }
-      return(ts)
+      ts
     },
     error = function(e) {
       rlang::warn(c(
@@ -368,7 +371,7 @@ compute_bandit.thompson <- function(
         ndraws = ndraws
       ) |>
         as.vector()
-      return(ts)
+      ts
     }
   )
   names(bandit) <- names(past_results[["successes"]])
@@ -441,7 +444,7 @@ compute_bandit.ucb1 <- function(
 #' @name assign_treatments
 #' @inheritParams run_mab
 #' @inheritParams mab_from_rct
-#' @param condition_col Column name of `current_data` which holds original treatment assignments.
+#' @param conditions_col Column name of `current_data` which holds original treatment assignments.
 #' @param cluster_col Column name of `current_data` which holds cluster assignments.
 #' @param probs Named numeric vector; probability of assignment for each treatment condition.
 #' @param random_probs Probabilities of assignment for the rows which are completely randomly assigned. Simply a vector
@@ -473,7 +476,7 @@ assign_treatments <- function(
   blocking = NULL,
   clustering = NULL,
   conditions,
-  condition_col = NULL,
+  conditions_col = NULL,
   cluster_col = NULL,
   random_assign_prop,
   random_probs = NULL,
@@ -532,7 +535,7 @@ assign_treatments <- function(
       blocking = blocking,
       clustering = clustering,
       conditions = conditions,
-      condition_col = condition_col,
+      conditions_col = conditions_col,
       cluster_col = cluster_col,
       rand_idx = rand_idx,
       band_idx = band_idx,
@@ -547,7 +550,7 @@ assign_treatments <- function(
       blocking = blocking,
       clustering = clustering,
       conditions = conditions,
-      condition_col = condition_col,
+      conditions_col = conditions_col,
       cluster_col = cluster_col,
       rand_idx = rand_idx,
       band_idx = band_idx,
@@ -680,7 +683,7 @@ assign_treatments.data.frame <- function(
   blocking,
   clustering,
   conditions,
-  condition_col = NULL,
+  conditions_col = NULL,
   cluster_col = NULL,
   rand_idx,
   band_idx,
@@ -704,7 +707,7 @@ assign_treatments.data.frame <- function(
   if (!resimulation) {
     current_data[["impute_req"]] <- as.integer(
       as.character(current_data[["mab_condition"]]) !=
-        as.character(current_data[[condition_col]])
+        as.character(current_data[[conditions_col]])
     )
   }
   return(current_data)
@@ -719,7 +722,7 @@ assign_treatments.data.table <- function(
   blocking,
   clustering,
   conditions,
-  condition_col = NULL,
+  conditions_col = NULL,
   cluster_col = NULL,
   rand_idx,
   band_idx,
@@ -745,7 +748,7 @@ assign_treatments.data.table <- function(
   if (resimulation) {
     current_data[,
       impute_req := as.integer(
-        as.character(mab_condition) != as.character(get(condition_col))
+        as.character(mab_condition) != as.character(get(conditions_col))
       )
     ]
   }

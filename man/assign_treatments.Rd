@@ -10,7 +10,7 @@ assign_treatments(
   blocking = NULL,
   clustering = NULL,
   conditions,
-  condition_col = NULL,
+  conditions_col = NULL,
   cluster_col = NULL,
   random_assign_prop,
   random_probs = NULL,
@@ -26,7 +26,7 @@ assign_treatments(
 
 \item{clustering}{Logical; Whether or not treatment clustering is occuring}
 
-\item{condition_col}{Column name of \code{current_data} which holds original treatment assignments.}
+\item{conditions_col}{Column name of \code{current_data} which holds original treatment assignments.}
 
 \item{cluster_col}{Column name of \code{current_data} which holds cluster assignments.}
 

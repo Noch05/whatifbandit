@@ -263,7 +263,6 @@ mab_loop <- function(
         whole_experiment = whole_experiment,
         imputation_information = imputation_information,
         block_cols = col_names[["block_cols"]],
-        clustering = clustering,
         blocking = blocking,
         delayed_feedback,
         current_period = i
