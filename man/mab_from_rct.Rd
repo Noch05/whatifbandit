@@ -81,9 +81,9 @@ in the treatment assignment model. Default is \code{NULL}, where all prior perio
 \item{discount_rate}{Rate for discounting observations from earlier periods when updating assignment probabilities.
 A value between 0 and 1, where outcomes from \code{k} periods ago are weighted by \code{discount_rate^k}. Default is 1 for no discounting.}
 
-\item{date_col}{Column in \code{data}; contains original date of event/trial. Only necessary when assigning by "Date". Must be of type \code{Date}, not a character string.}
+\item{date_col}{Bare column in \code{data}; contains original date of event/trial. Only necessary when assigning by "Date". Must be of type \code{Date}.}
 
-\item{month_col}{Column in \code{data}; contains month of treatment. Only necessary when \code{time_unit = "month"}, and when periods should be determined directly by
+\item{month_col}{Bare column in \code{data}; contains month of treatment. Only necessary when \code{time_unit = "month"}, and when periods should be determined directly by
 the calendar months instead of month based time periods. This column can be a string/factor variable with the month names or numeric with the month number. It can easily
 be created from your \code{date_col} via \code{lubridate::month(data[[date_col]])} or \code{format(data[[date_col]], "\%m")}.}
 
@@ -91,10 +91,10 @@ be created from your \code{date_col} via \code{lubridate::month(data[[date_col]]
 If \code{TRUE}, delayed feedback is assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not known to the simulation, until a certain date.
 When re-computing the adaptive assignment probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the assignment are treated as failures. a}
 
-\item{assignment_date_col}{Column in \code{data}; contains original dates treatments were assigned to observations. Only necessary when \code{delayed_feedback = TRUE}. Used to simulate imperfect
+\item{assignment_date_col}{Bare column in \code{data}; contains original dates treatments were assigned to observations. Only necessary when \code{delayed_feedback = TRUE}. Used to simulate imperfect
 observation of outcomes in the simulation. Must be of type \code{Date}, not a character string.}
 
-\item{success_date_col}{Column in \code{data}; contains original dates each success occurred. Only necessary when \code{delayed_feedback = TRUE}. Must be of type \code{Date}, not a character string.}
+\item{success_date_col}{Bare column in \code{data}; contains original dates each success occurred. Only necessary when \code{delayed_feedback = TRUE}. Must be of type \code{Date}, not a character string.}
 
 \item{whole_experiment}{Logical; if \code{TRUE}, uses all past experimental data for imputing outcomes.
 If \code{FALSE}, uses only data available up to the current period. In large datasets or with a high number

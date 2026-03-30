@@ -57,8 +57,8 @@
 #' @param discount_rate Rate for discounting observations from earlier periods when updating assignment probabilities.
 #' A value between 0 and 1, where outcomes from `k` periods ago are weighted by `discount_rate^k`. Default is 1 for no discounting.
 #'
-#' @param date_col Column in `data`; contains original date of event/trial. Only necessary when assigning by "Date". Must be of type `Date`, not a character string.
-#' @param month_col Column in `data`; contains month of treatment. Only necessary when `time_unit = "month"`, and when periods should be determined directly by
+#' @param date_col Bare column in `data`; contains original date of event/trial. Only necessary when assigning by "Date". Must be of type `Date`.
+#' @param month_col Bare column in `data`; contains month of treatment. Only necessary when `time_unit = "month"`, and when periods should be determined directly by
 #' the calendar months instead of month based time periods. This column can be a string/factor variable with the month names or numeric with the month number. It can easily
 #' be created from your `date_col` via `lubridate::month(data[[date_col]])` or `format(data[[date_col]], "%m")`.
 #'
@@ -66,9 +66,9 @@
 #' If `TRUE`, delayed feedback is assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not known to the simulation, until a certain date.
 #' When re-computing the adaptive assignment probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the assignment are treated as failures. a
 #'
-#' @param success_date_col Column in `data`; contains original dates each success occurred. Only necessary when `delayed_feedback = TRUE`. Must be of type `Date`, not a character string.
+#' @param success_date_col Bare column in `data`; contains original dates each success occurred. Only necessary when `delayed_feedback = TRUE`. Must be of type `Date`, not a character string.
 #'
-#' @param assignment_date_col Column in `data`; contains original dates treatments were assigned to observations. Only necessary when `delayed_feedback = TRUE`. Used to simulate imperfect
+#' @param assignment_date_col Bare column in `data`; contains original dates treatments were assigned to observations. Only necessary when `delayed_feedback = TRUE`. Used to simulate imperfect
 #' observation of outcomes in the simulation. Must be of type `Date`, not a character string.
 #'
 #' @param whole_experiment Logical; if `TRUE`, uses all past experimental data for imputing outcomes.
@@ -263,7 +263,6 @@ mab_from_rct <- function(
   ...
 ) {
   cl <- match.call()
-  args <- mget(formalArgs(mab_from_rct))
   col_names <- c(
     formula_parse(formula),
     date_col = deparse(substitute(date_col)),
@@ -271,6 +270,18 @@ mab_from_rct <- function(
     assignment_date_col = deparse(substitute(assignment_date_col)),
     success_date_col = deparse(substitute(success_date_col))
   )
+  col_names <- col_names[!vapply(col_names, \(x) all(x == "NULL"), logical(1))]
+  args <- mget(setdiff(formalArgs(mab_from_rct), names(col_names)))
+  args <- c(
+    args,
+    blocks = col_names$block_cols,
+    clusters = col_names$cluster_col,
+    date_col = col_names$date_col,
+    month_col = col_names$month_col,
+    assignment_date_col = col_names$assignment_date_col,
+    success_date_col = col_names$success_date_col
+  )
+
   blocking <- !is.null(col_names[["block_cols"]])
   clustering <- !is.null(col_names[["cluster_col"]])
 
@@ -307,7 +318,6 @@ mab_from_rct <- function(
       algorithm = prepped$char_args$algorithm,
       control_augment = control_augment,
       random_assign_prop = random_assign_prop,
-      period_length = period_length,
       prior_periods = prior_periods,
       delayed_feedback = delayed_feedback,
       whole_experiment = whole_experiment,
@@ -335,7 +345,6 @@ mab_from_rct <- function(
           algorithm = prepped[["char_args"]][["algorithm"]],
           control_augment = control_augment,
           random_assign_prop = random_assign_prop,
-          period_length = period_length,
           prior_periods = prior_periods,
           delayed_feedback = delayed_feedback,
           whole_experiment = whole_experiment,
@@ -364,12 +373,8 @@ mab_from_rct <- function(
       mabs = mabs
     )
   }
+  results$args <- args
 
-  results$args <- c(
-    args,
-    blocks = col_names$block_cols,
-    clusters = col_names$cluster_col
-  )
   results$furrr <- furrr_opt
   results$call <- cl
   return(

@@ -72,8 +72,8 @@ simulate_mab <- function(
   ndraws = 5000,
   r = 1,
   keep_data = FALSE,
+  check_args = TRUE,
   verbose = FALSE,
-  check_args = FALSE,
   ...
 ) {
   cl <- match.call()

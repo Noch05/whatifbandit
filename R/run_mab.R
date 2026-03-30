@@ -82,7 +82,7 @@ run_mab <- function(
     periods = periods,
     p = p,
     time_model = time_model,
-    time_model = time_model_args
+    time_model_args = time_model_args
   )
 
   verbose_log(verbose, "Computing final simulation estimates")

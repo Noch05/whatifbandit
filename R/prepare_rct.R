@@ -99,7 +99,7 @@ prep_rct_data <- function(
 
   # Preparing Data to be simulated
   verbose_log(verbose, "Preparing Data")
-  vars_keep <- c(unlist(col_names), "period_number")
+  vars_keep <- c(unlist(col_names), "period_number") |> unname()
 
   data <- create_cutoff(
     data = data,
@@ -436,7 +436,7 @@ create_new_cols.data.frame <- function(
   vars_keep
 ) {
   data <- data |>
-    dplyr::select(all_of(vars_keep)) |>
+    dplyr::select(dplyr::all_of(vars_keep)) |>
     dplyr::mutate(
       period_number = match(
         period_number,

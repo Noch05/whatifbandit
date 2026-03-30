@@ -49,7 +49,7 @@ formula_parse <- function(formula) {
     cluster_col = cluster(other_vars[[2]][["args"]])
   )
 
-  return(parsed[!vapply(parsed, is.null, logical(1))])
+  return(parsed)
 }
 #' Gather Args
 #' @description Helper for formula parsing. Parses the expression, and splits the function call from the arguments.

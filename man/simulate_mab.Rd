@@ -23,8 +23,8 @@ simulate_mab(
   ndraws = 5000,
   r = 1,
   keep_data = FALSE,
+  check_args = TRUE,
   verbose = FALSE,
-  check_args = FALSE,
   ...
 )
 }
@@ -102,10 +102,10 @@ the re-simulation method. Replications can be conducted in parallel, by setting 
 
 \item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended \code{FALSE}. When\code{ r = 1} the final data is always kept and reported.}
 
-\item{verbose}{Logical; whether or not to print intermediate messages. Default is \code{FALSE}.}
-
 \item{check_args}{Logical; Whether or not to robustly check whether arguments are valid. Default is TRUE, and recommended
 not to be changed.}
+
+\item{verbose}{Logical; whether or not to print intermediate messages. Default is \code{FALSE}.}
 
 \item{...}{Additional named arguments forwarded to \code{time_model} and \code{\link[furrr:furrr_options]{furrr::furrr_options()}}.}
 }
