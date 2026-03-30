@@ -282,12 +282,15 @@ prep_imputation <- function(
   } else {
     NULL
   }
+  impute_idx <- which(current_data[["impute_req"]] == 1)
 
-  impute_success <- check_impute(
-    impute_success = impute_success,
-    current_data = current_data,
-    impute_idx = impute_idx
-  )
+  if (length(impute_idx) > 0) {
+    impute_success <- check_impute(
+      impute_success = impute_success,
+      current_data = current_data,
+      impute_idx = impute_idx
+    )
+  }
 
   return(list(
     current_data = current_data,
@@ -416,13 +419,15 @@ compute_impute <- function(imputation_info, success_col) {
   )
   imputations[non_impute_idx] <- current_data[[success_col]][non_impute_idx]
 
-  imputations[impute_idx] <- randomizr::block_ra(
-    blocks = current_data[["impute_block"]][impute_idx],
-    block_prob_each = imputation_means,
-    num_arms = 2,
-    conditions = c(0, 1),
-    check_inputs = FALSE
-  )
+  if (length(impute_idx) > 0) {
+    imputations[impute_idx] <- randomizr::block_ra(
+      blocks = current_data[["impute_block"]][impute_idx],
+      block_prob_each = imputation_means,
+      num_arms = 2,
+      conditions = c(0, 1),
+      check_inputs = FALSE
+    )
+  }
   return(imputations)
 }
 #-------------------------------------------------------------------------------
