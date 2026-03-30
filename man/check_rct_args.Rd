@@ -16,7 +16,7 @@ check_rct_args(
   discount_rate,
   delayed_feedback,
   whole_experiment,
-  data_cols,
+  col_names,
   verbose,
   ndraws,
   r,
@@ -75,6 +75,8 @@ When re-computing the adaptive assignment probabilities via Thompsom Samplings o
 If \code{FALSE}, uses only data available up to the current period. In large datasets or with a high number
 of periods, setting this to \code{FALSE} can be more computationally intensive, though not a significant
 contributor to total run time. Default is \code{FALSE}.}
+
+\item{col_names}{List holding the columns required from the provided data as strings and symbols.}
 
 \item{verbose}{Logical; whether or not to print intermediate messages. Default is \code{FALSE}.}
 

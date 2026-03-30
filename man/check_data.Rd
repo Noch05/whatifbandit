@@ -6,7 +6,7 @@
 \usage{
 check_data(
   data,
-  data_cols,
+  col_names,
   period_method,
   period_length,
   time_unit,
@@ -16,6 +16,8 @@ check_data(
 \arguments{
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
+
+\item{col_names}{List holding the columns required from the provided data as strings and symbols.}
 
 \item{period_method}{A character string; one of \code{"date"}, \code{"batch"}, or \code{"individual"}, to define the assignment into treatment waves. When using
 \code{"batch"} or \code{"individual"}, ensure your dataset is pre-arranged in the proper order observations should be considered so that

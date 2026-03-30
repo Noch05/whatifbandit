@@ -21,7 +21,7 @@ check_rct_args <- function(
   discount_rate,
   delayed_feedback,
   whole_experiment,
-  data_cols,
+  col_names,
   verbose,
   ndraws,
   r,
@@ -56,7 +56,7 @@ check_rct_args <- function(
     period_method = period_method,
     time_unit = time_unit,
     delayed_feedback = delayed_feedback,
-    data_cols = data_cols,
+    col_names = col_names,
     verbose = verbose,
     blocking = blocking
   )
@@ -91,7 +91,7 @@ check_rct_args <- function(
   # Checking Data Structure
   check_data(
     data = data,
-    data_cols = data_cols,
+    col_names = col_names,
     period_method = period_method,
     period_length = period_length,
     time_unit = time_unit,
@@ -116,7 +116,7 @@ check_cols <- function(
   period_method,
   time_unit,
   delayed_feedback,
-  data_cols,
+  col_names,
   data,
   verbose,
   blocking
@@ -180,14 +180,14 @@ check_cols <- function(
 
   if (period_method == "date") {
     required_cols <- c(required_cols, "date_col")
-    if (time_unit == "month" && !is.null(data_cols[["month_col"]])) {
+    if (time_unit == "month" && !is.null(col_names[["month_col"]])) {
       required_cols <- c(required_cols, "month_col")
     }
   }
   if (delayed_feedback) {
     required_cols <- c(required_cols, "success_date_col", "assignment_date_col")
   }
-  if (!is.null(data_cols[["cluster_col"]])) {
+  if (!is.null(col_names[["cluster_col"]])) {
     required_cols <- c(required_cols, "cluster_col")
   }
   req_reasons <- all_reasons[required_cols]
@@ -197,13 +197,13 @@ check_cols <- function(
   purrr::pwalk(
     list(required_cols, req_reasons, required_types),
     ~ {
-      if (!..1 %in% names(data_cols)) {
+      if (!..1 %in% names(col_names)) {
         rlang::abort(c(
-          sprintf("Required column `%s` is not declared in `data_cols`.", ..1),
+          sprintf("Required column `%s` is not declared in `col_names`.", ..1),
           "x" = sprintf("reason: %s", ..2)
         ))
       }
-      provided_col <- data_cols[[..1]][["name"]]
+      provided_col <- col_names[[..1]]
       if (!provided_col %in% names(data)) {
         rlang::abort(c(
           sprintf("Required column `%s` is not found in provided `data`.", ..1),
@@ -211,11 +211,11 @@ check_cols <- function(
           "x" = sprintf("Your column: %s", provided_col)
         ))
       }
-      data_type <- class(data[[data_cols[[..1]][["name"]]]])
+      data_type <- class(data[[col_names[[..1]]]])
       if (
         !any(vapply(
           ..3[["tests"]],
-          \(fn) fn(data[[data_cols[[..1]][["name"]]]]),
+          \(fn) fn(data[[col_names[[..1]]]]),
           FUN.VALUE = logical(1)
         ))
       ) {
@@ -232,7 +232,7 @@ check_cols <- function(
   )
 
   if (blocking) {
-    purrr::walk(data_cols[["block_cols"]][["name"]], \(col) {
+    purrr::walk(col_names[["block_cols"]], \(col) {
       if (!col %in% names(data)) {
         rlang::abort(sprintf(
           "`%s is not in the data, but was chosen as a block.",
@@ -254,7 +254,7 @@ check_cols <- function(
     non_req_reasons <- non_req_reasons[non_required_cols]
 
     purrr::iwalk(non_req_reasons, \(reason, col_name) {
-      if (col_name %in% names(data_cols)) {
+      if (col_name %in% names(col_names)) {
         rlang::warn(c(
           "i" = sprintf(
             "`%s` is not required because %s. It will be ignored.",
@@ -367,7 +367,7 @@ posint <- function(x) {
 #' @keywords internal
 check_data <- function(
   data,
-  data_cols,
+  col_names,
   period_method,
   period_length,
   time_unit,
@@ -392,8 +392,8 @@ check_data <- function(
     )
 
     data_interval <- lubridate::interval(
-      min(data[[data_cols[["date_col"]][["name"]]]]),
-      max(data[[data_cols[["date_col"]][["name"]]]])
+      min(data[[col_names[["date_col"]]]]),
+      max(data[[col_names[["date_col"]]]])
     ) /
       unit
     data_interval <- round(data_interval, 0)

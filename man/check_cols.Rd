@@ -8,7 +8,7 @@ check_cols(
   period_method,
   time_unit,
   delayed_feedback,
-  data_cols,
+  col_names,
   data,
   verbose,
   blocking
@@ -30,6 +30,8 @@ in the same period because the dates are less than one month apart.}
 \item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon as a treatment is assigned, the outcome is realized and known.
 If \code{TRUE}, delayed feedback is assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not known to the simulation, until a certain date.
 When re-computing the adaptive assignment probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the assignment are treated as failures. a}
+
+\item{col_names}{List holding the columns required from the provided data as strings and symbols.}
 
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
