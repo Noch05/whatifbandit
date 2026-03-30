@@ -4,13 +4,13 @@
 \alias{create_new_cols}
 \title{Create Necessary Columns for Multi-Arm Bandit Trial}
 \usage{
-create_new_cols(data, data_cols, blocking, delayed_feedback, vars_keep)
+create_new_cols(data, col_names, blocking, delayed_feedback, vars_keep)
 }
 \arguments{
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
 
-\item{data_cols}{List holding the columns required from the provided data as strings and symbols.}
+\item{col_names}{List holding the columns required from the provided data as strings and symbols.}
 
 \item{blocking}{Logical; Whether or not treatment blocking is occuring}
 

@@ -43,7 +43,7 @@ run_mab <- function(
   conditions,
   blocking,
   clustering,
-  data_cols,
+  col_names,
   imputation_information = NULL,
   verbose,
   ndraws,
@@ -73,7 +73,7 @@ run_mab <- function(
     conditions = conditions,
     blocking = blocking,
     clustering = clustering,
-    data_cols = data_cols,
+    col_names = col_names,
     imputation_information = imputation_information,
     verbose = verbose,
     ndraws = ndraws,
@@ -100,12 +100,12 @@ run_mab <- function(
     periods = periods,
     conditions = conditions,
     clustering = clustering,
-    cluster_col = data_cols[["cluster_col"]]
+    cluster_col = col_names[["cluster_col"]]
   )
 
   ipw_estimates <- estimate_ipw(
     data = sim_results[["final_data"]],
-    cluster_col = data_cols[["cluster_col"]],
+    cluster_col = col_names[["cluster_col"]],
     clustering = clustering,
     blocking = blocking,
     conditions = conditions
@@ -174,7 +174,7 @@ mab_loop <- function(
   clustering,
   blocking,
   conditions,
-  data_cols,
+  col_names,
   imputation_information = NULL,
   ndraws,
   verbose,
@@ -207,10 +207,6 @@ mab_loop <- function(
   equal_probs <- bandits[["assignment_prob"]][1, ] |>
     as.numeric()
   names(equal_probs) <- conditions
-
-  col_names <- lapply(data_cols, \(col) {
-    col[["name"]]
-  })
 
   for (i in 2:periods) {
     current_idx <- starts[i]:ends[i]

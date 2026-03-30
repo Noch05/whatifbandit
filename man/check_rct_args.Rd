@@ -76,8 +76,6 @@ If \code{FALSE}, uses only data available up to the current period. In large dat
 of periods, setting this to \code{FALSE} can be more computationally intensive, though not a significant
 contributor to total run time. Default is \code{FALSE}.}
 
-\item{data_cols}{List holding the columns required from the provided data as strings and symbols.}
-
 \item{verbose}{Logical; whether or not to print intermediate messages. Default is \code{FALSE}.}
 
 \item{ndraws}{Number of draws used to approximate Thompson sampling probabilities. Used only when direct calculation fails or overflows. Default is

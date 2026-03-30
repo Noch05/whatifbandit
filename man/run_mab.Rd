@@ -19,7 +19,7 @@ run_mab(
   conditions,
   blocking,
   clustering,
-  data_cols,
+  col_names,
   imputation_information = NULL,
   verbose,
   ndraws,
@@ -80,7 +80,7 @@ contributor to total run time. Default is \code{FALSE}.}
 
 \item{clustering}{Logical; Whether or not treatment clustering is occuring}
 
-\item{data_cols}{List holding the columns required from the provided data as strings and symbols.}
+\item{col_names}{List holding the columns required from the provided data as strings and symbols.}
 
 \item{imputation_information}{Object created by \code{\link[=precompute_imputation]{precompute_imputation()}} containing the conditional means and success dates
 for each treatment block to impute from.}

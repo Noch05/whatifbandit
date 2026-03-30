@@ -8,11 +8,11 @@
 #' @param blocking Logical; Whether or not treatment blocking is occuring
 #' @param clustering Logical; Whether or not treatment clustering is occuring
 #' @inheritParams mab_from_rct
-#' @param data_cols List holding the columns required from the provided data as strings and symbols.
+#' @param col_names List holding the columns required from the provided data as strings and symbols.
 #'
 #' @returns Named list containing:
 #' \itemize{
-#' \item `data_cols`: List of necessary columns in `data` as strings and as symbols.
+#' \item `col_names`: List of necessary columns in `data` as strings and as symbols.
 #' \item `data`: Prepared `data.frame` or `data.table` containing all the necessary columns to
 #' conduct the adaptive trial simulation, subset from the originally provided data to reduce memory usage.
 #' columns required for [run_mab()].
@@ -40,7 +40,7 @@ prep_rct_data <- function(
   period_length,
   prior_periods,
   discount_rate,
-  data_cols,
+  col_names,
   delayed_feedback,
   whole_experiment,
   verbose,
@@ -57,16 +57,11 @@ prep_rct_data <- function(
   if (data.table::is.data.table(data)) {
     data <- data.table::copy(data)
   }
-  data_cols <- lapply(data_cols, \(col) {
-    rlang_func <- if (length(col) > 1) rlang::syms else rlang::sym
-    list(name = col, sym = rlang_func(col))
-  })
-
   char_args <- lapply(
     list(
       period_method = period_method,
       algorithm = algorithm,
-      time_unit = time_unit,
+      time_unit = time_unit
     ),
     \(arg) {
       if (is.character(arg)) tolower(arg) else arg
@@ -84,7 +79,7 @@ prep_rct_data <- function(
       period_length = period_length,
       prior_periods = prior_periods,
       discount_rate = discount_rate,
-      data_cols = data_cols,
+      col_names = col_names,
       delayed_feedback = delayed_feedback,
       whole_experiment = whole_experiment,
       verbose = verbose,
@@ -98,26 +93,23 @@ prep_rct_data <- function(
   conditions <- create_conditions(
     control_condition = control_condition,
     data = data,
-    condition_col = data_cols$condition_col,
+    condition_col = col_names$condition_col,
     control_augment = control_augment
   )
 
   # Preparing Data to be simulated
   verbose_log(verbose, "Preparing Data")
-  vars_keep <- c(
-    unlist(lapply(data_cols, `[[`, "name")),
-    "period_number"
-  )
+  vars_keep <- c(unlist(col_names), "period_number")
 
   data <- create_cutoff(
     data = data,
-    data_cols = data_cols,
+    col_names = col_names,
     period_length = period_length,
     period_method = char_args$period_method,
     time_unit = char_args$time_unit
   ) |>
     create_new_cols(
-      data_cols = data_cols,
+      col_names = col_names,
       delayed_feedback = delayed_feedback,
       blocking = blocking,
       vars_keep = vars_keep
@@ -128,7 +120,7 @@ prep_rct_data <- function(
   imputation_information <- precompute_imputation(
     data = data,
     whole_experiment = whole_experiment,
-    data_cols = data_cols,
+    col_names = col_names,
     delayed_feedback = delayed_feedback
   )
 
@@ -137,7 +129,6 @@ prep_rct_data <- function(
   start_idxs <- c(1, end_idxs[-length(period_sizes)] + 1)
 
   return(list(
-    data_cols = data_cols,
     data = data,
     imputation_information = imputation_information,
     char_args = char_args,
@@ -166,7 +157,7 @@ create_conditions <- function(
   control_augment
 ) {
   conditions <- sort(as.character(unique(data[[
-    condition_col$name
+    condition_col
   ]])))
   if (control_augment > 0) {
     if (length(control_condition) != 1) {
@@ -205,7 +196,7 @@ create_conditions <- function(
 #' @name create_cutoff
 #' @description Used to assign each observation a new treatment assignment period, based
 #' on user-supplied specifications, and user supplied data from
-#' `date_col` and `month_col` in `data_cols`, and the `period_length`. Creates a new
+#' `date_col` and `month_col` in `col_names`, and the `period_length`. Creates a new
 #' column indicating with period each observation belongs to.
 #'
 #' @inheritParams mab_from_rct
@@ -223,7 +214,7 @@ create_conditions <- function(
 #------------------------------------------------------------------------------------------
 create_cutoff <- function(
   data,
-  data_cols,
+  col_names,
   period_length = NULL,
   period_method,
   time_unit
@@ -235,8 +226,8 @@ create_cutoff <- function(
     "date" = create_cutoff.date(
       data = data,
       period_length = period_length,
-      date_col = data_cols$date_col,
-      month_col = data_cols$month_col,
+      date_col = col_names$date_col,
+      month_col = col_names$month_col,
       time_unit = time_unit
     ),
     rlang::abort(
@@ -263,13 +254,13 @@ create_cutoff.date <- function(
     "week" = lubridate::weeks(1),
     "month" = months(1)
   )
-  start_date <- min(data[[date_col$name]])
+  start_date <- min(data[[date_col]])
 
   if (data.table::is.data.table(data)) {
     if (time_unit == "month" && !is.null(month_col)) {
       first_month <- data[
-        order(get(date_col$name)),
-        ..month_col$name
+        order(get(date_col)),
+        ..month_col
       ][1]
 
       start_month <- lubridate::ymd(paste0(
@@ -282,9 +273,9 @@ create_cutoff.date <- function(
       data[,
         month_date := lubridate::ymd(
           paste0(
-            lubridate::year(get(date_col$name)),
+            lubridate::year(get(date_col)),
             "-",
-            get(month_col$name),
+            get(month_col),
             "-01"
           )
         )
@@ -300,24 +291,28 @@ create_cutoff.date <- function(
       data[, month_date := NULL]
 
       data.table::setkey(data, period_number)
-      data.table::setorderv(data, cols = c(date_col$name, "period_number"))
+      data.table::setorderv(data, cols = c(date_col, "period_number"))
     } else {
       data[,
         period_number := floor(
-          lubridate::interval(start_date, get(date_col$name)) /
+          lubridate::interval(start_date, get(date_col)) /
             time_length /
             period_length
         ) +
           1
       ]
       data.table::setkey(data, period_number)
-      data.table::setorderv(data, cols = c(date_col$name, "period_number"))
+      data.table::setorderv(data, cols = c(date_col, "period_number"))
     }
   } else {
     if (time_unit == "month" && !is.null(month_col)) {
       first_month <- data |>
-        dplyr::slice_min(order_by = !!date_col$sym, n = 1, with_ties = FALSE) |>
-        dplyr::pull(!!month_col$sym)
+        dplyr::slice_min(
+          order_by = .data[[date_col]],
+          n = 1,
+          with_ties = FALSE
+        ) |>
+        dplyr::pull(.data[[month_col]])
 
       start_month <- lubridate::ymd(
         paste0(lubridate::year(start_date), "-", first_month, "-01")
@@ -325,9 +320,9 @@ create_cutoff.date <- function(
       data <- data |>
         dplyr::mutate(
           month_date = lubridate::ymd(paste0(
-            lubridate::year(!!date_col$sym),
+            lubridate::year(.data[[date_col]]),
             "-",
-            !!month_col$sym,
+            .data[[month_col]],
             "-01"
           )),
           period_number = floor(
@@ -337,18 +332,18 @@ create_cutoff.date <- function(
           )
         ) |>
         dplyr::select(-month_date) |>
-        dplyr::arrange(!!date_col$sym, period_number)
+        dplyr::arrange(.data[[date_col]], period_number)
     } else {
       data <- data |>
         dplyr::mutate(
           period_number = floor(
-            lubridate::interval(start_date, !!date_col$sym) /
+            lubridate::interval(start_date, .data[[date_col]]) /
               time_length /
               period_length
           ) +
             1
         ) |>
-        dplyr::arrange(!!date_col$sym, period_number)
+        dplyr::arrange(.data[[date_col]], period_number)
     }
   }
   return(data)
@@ -419,7 +414,7 @@ create_cutoff.batch <- function(data, period_length) {
 #' @keywords internal
 create_new_cols <- function(
   data,
-  data_cols,
+  col_names,
   blocking,
   delayed_feedback,
   vars_keep
@@ -435,7 +430,7 @@ create_new_cols <- function(
 
 create_new_cols.data.frame <- function(
   data,
-  data_cols,
+  col_names,
   blocking,
   delayed_feedback,
   vars_keep
@@ -449,13 +444,13 @@ create_new_cols.data.frame <- function(
       ),
       mab_condition = dplyr::if_else(
         period_number == 1,
-        as.character(!!data_cols$condition_col$sym),
-        NA
+        as.character(.data[[col_names$condition_col]]),
+        NA_character_
       ),
       mab_success = dplyr::if_else(
         period_number == 1,
-        !!data_cols$success_col$sym,
-        NA
+        .data[[col_names$success_col]],
+        NA_real_
       ),
       impute_req = dplyr::if_else(period_number == 1, 0, NA),
       impute_block = NA_character_,
@@ -471,7 +466,7 @@ create_new_cols.data.frame <- function(
       dplyr::mutate(
         new_success_date = dplyr::if_else(
           period_number == 1,
-          !!data_cols$success_date_col$sym,
+          .data[[col_names$success_date_col]],
           NA
         )
       )
@@ -482,12 +477,12 @@ create_new_cols.data.frame <- function(
       dplyr::mutate(
         block = do.call(
           paste,
-          c(data[, data_cols$block_cols$name], sep = "_")
+          c(data[, col_names$block_cols], sep = "_")
         ),
         treatment_block = do.call(
           paste,
           c(
-            data[, c(data_cols$condition_col$name, data_cols$block_cols$name)],
+            data[, c(col_names$condition_col, col_names$block_cols)],
             sep = "_"
           )
         )
@@ -495,7 +490,7 @@ create_new_cols.data.frame <- function(
   } else {
     data <- data |>
       dplyr::mutate(
-        treatment_block = as.character(!!data_cols$condition_col$sym)
+        treatment_block = as.character(.data[[col_names$condition_col]])
       )
   }
 
@@ -509,7 +504,7 @@ create_new_cols.data.frame <- function(
 
 create_new_cols.data.table <- function(
   data,
-  data_cols,
+  col_names,
   blocking,
   delayed_feedback,
   vars_keep
@@ -524,9 +519,9 @@ create_new_cols.data.table <- function(
     period_number == 1,
     `:=`(
       mab_condition = as.character(
-        get(data_cols$condition_col$name)
+        get(col_names$condition_col)
       ),
-      mab_success = get(data_cols$success_col$name),
+      mab_success = get(col_names$success_col),
       impute_req = 0,
       impute_block = NA_character_,
       assignment_type = "initial"
@@ -535,22 +530,22 @@ create_new_cols.data.table <- function(
   if (delayed_feedback) {
     data[
       period_number == 1,
-      new_success_date := get(data_cols$success_date_col$name)
+      new_success_date := get(col_names$success_date_col)
     ]
   }
   if (blocking) {
     data[,
       block := do.call(paste, c(.SD, sep = "_")),
-      .SDcols = data_cols$block_cols$name
+      .SDcols = col_names$block_cols
     ]
     data[,
       treatment_block := do.call(paste, c(.SD, sep = "_")),
-      .SDcols = c(data_cols$condition_col$name, data_cols$block_cols$name)
+      .SDcols = c(col_names$condition_col, col_names$block_cols)
     ]
   } else {
     data[,
       treatment_block := as.character(get(
-        data_cols$condition_col$name
+        col_names$condition_col
       ))
     ]
   }

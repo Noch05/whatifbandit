@@ -19,7 +19,7 @@ mab_loop(
   clustering,
   blocking,
   conditions,
-  data_cols,
+  col_names,
   imputation_information = NULL,
   ndraws,
   verbose,
@@ -77,7 +77,7 @@ When re-computing the adaptive assignment probabilities via Thompsom Samplings o
 
 \item{blocking}{Logical; Whether or not treatment blocking is occuring}
 
-\item{data_cols}{List holding the columns required from the provided data as strings and symbols.}
+\item{col_names}{List holding the columns required from the provided data as strings and symbols.}
 
 \item{ndraws}{Number of draws used to approximate Thompson sampling probabilities. Used only when direct calculation fails or overflows. Default is
 5000 but can be raised or lowered depending on performance and accuracy concerns.}

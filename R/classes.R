@@ -5,8 +5,7 @@
 #' @param mab Named list output of [simulate_mab()] or [mab_from_rct()].
 #' @param type Type of simulated trial, either `"rct"` or `"param"` to denote whether it was an rct re-simulation or an simulation form population parameters.
 #' @param multi Logical; `TRUE` denotes multiple trials.
-
-#' @returns Input `mab` with appropriate S3 class
+#' @returns Input `mab` with appropriate S3 class, restructured for output
 #' @keywords internal
 
 construct_mab <- function(mab, type, multi) {
@@ -24,7 +23,7 @@ construct_mab <- function(mab, type, multi) {
         assignment_quant = mab$assignment_quantities
       ),
       estimates = list(point = mab$estimates, vcov = mab$ipw_vcov),
-      config = list(args = mab$args, call = mab$call)
+      config = list(args = mab$args, call = mab$call, parallel = mab$furrr)
     ),
     class = class
   )

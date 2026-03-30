@@ -28,7 +28,7 @@ precompute_imputation <- function(
   data,
   whole_experiment,
   delayed_feedback,
-  data_cols
+  col_names
 ) {
   UseMethod("precompute_imputation", data)
 }
@@ -43,16 +43,13 @@ precompute_imputation.data.frame <- function(
   data,
   whole_experiment,
   delayed_feedback,
-  data_cols
+  col_names
 ) {
   original_summary <- if (whole_experiment) {
     data |>
       dplyr::group_by(treatment_block) |>
       dplyr::summarize(
-        success_rate = mean(
-          !!data_cols[["success_col"]][["sym"]],
-          na.rm = TRUE
-        ),
+        success_rate = mean(.data[[col_names[["cluster_col"]]]], na.rm = TRUE),
         .groups = "drop"
       ) |>
       dplyr::mutate(failure_rate = 1 - success_rate) |>
@@ -62,7 +59,7 @@ precompute_imputation.data.frame <- function(
       dplyr::group_by(period_number, treatment_block) |>
       dplyr::summarize(
         count = dplyr::n(),
-        n_success = sum(!!data_cols[["success_col"]][["sym"]]),
+        n_success = sum(.data[[col_names[["success_col"]]]]),
         .groups = "drop",
       ) |>
       dplyr::arrange(period_number, treatment_block) |>
@@ -88,7 +85,7 @@ precompute_imputation.data.frame <- function(
       dplyr::group_by(treatment_block, period_number) |>
       dplyr::summarize(
         mean_date = mean(
-          !!data_cols[["success_date_col"]][["sym"]],
+          .data[[col_names[["success_date_col"]]]],
           na.rm = TRUE
         ),
         .groups = "drop"
@@ -125,13 +122,13 @@ precompute_imputation.data.table <- function(
   data,
   whole_experiment,
   delayed_feedback,
-  data_cols
+  col_names
 ) {
   original_summary <- if (whole_experiment) {
     rct_sum <- data[,
       .(
         success_rate = mean(
-          get(data_cols[["success_col"]][["name"]]),
+          get(col_names[["success_col"]]),
           na.rm = TRUE
         )
       ),
@@ -145,7 +142,7 @@ precompute_imputation.data.table <- function(
       .(
         count = .N,
         n_success = sum(
-          get(data_cols[["success_col"]][["name"]])
+          get(col_names[["success_col"]])
         )
       ),
       by = .(period_number, treatment_block)
@@ -183,7 +180,7 @@ precompute_imputation.data.table <- function(
 
   dates_summary <- if (delayed_feedback) {
     data[,
-      .(mean_date = mean(get(data_cols[["success_date_col"]][["name"]]))),
+      .(mean_date = mean(get(col_names[["success_date_col"]]))),
       by = .(period_number, treatment_block)
     ] |>
       split(by = "period_number") |>

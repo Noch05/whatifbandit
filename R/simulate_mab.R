@@ -132,16 +132,10 @@ simulate_mab <- function(
     ))
   }
 
-  data_cols <- list(
-    cluster_col = list(name = "cluster", sym = rlang::sym("cluster")),
-    assignment_date_col = list(
-      name = "assignment_date",
-      sym = rlang::sym("assignment_date")
-    ),
-    success_date_col = list(
-      name = "success_date",
-      sym = rlang::sym("success_date")
-    )
+  col_names <- list(
+    cluster_col = "cluster",
+    assignment_date_col = "assignment_date",
+    success_date_col = "success_date"
   )
   furrr_opt <- do.call(
     furrr::furrr_options,
@@ -178,7 +172,7 @@ simulate_mab <- function(
       conditions = conditions,
       blocking = blocking,
       clustering = clustering,
-      data_cols = data_cols,
+      col_names = col_names,
       verbose = verbose,
       ndraws = ndraws,
       starts = period_idxs[["start_idxs"]],
@@ -221,7 +215,7 @@ simulate_mab <- function(
           conditions = conditions,
           blocking = blocking,
           clustering = clustering,
-          data_cols = data_cols,
+          col_names = col_names,
           verbose = verbose,
           ndraws = ndraws,
           starts = period_idxs[["start_idxs"]],

@@ -42,14 +42,14 @@ formula_parse <- function(formula) {
     gather_args
   )
 
-  return(
-    list(
-      condition_col = conditions_col,
-      success_col = outcome,
-      block_cols = block(other_vars[[1]][["args"]]),
-      cluster_col = cluster(other_vars[[2]][["args"]])
-    )
+  parsed <- list(
+    condition_col = conditions_col,
+    success_col = outcome,
+    block_cols = block(other_vars[[1]][["args"]]),
+    cluster_col = cluster(other_vars[[2]][["args"]])
   )
+
+  return(parsed[!vapply(parsed, is.null, logical(1))])
 }
 #' Gather Args
 #' @description Helper for formula parsing. Parses the expression, and splits the function call from the arguments.

@@ -4,13 +4,13 @@
 \alias{create_cutoff}
 \title{Create Treatment Wave Cutoffs}
 \usage{
-create_cutoff(data, data_cols, period_length = NULL, period_method, time_unit)
+create_cutoff(data, col_names, period_length = NULL, period_method, time_unit)
 }
 \arguments{
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
 
-\item{data_cols}{List holding the columns required from the provided data as strings and symbols.}
+\item{col_names}{List holding the columns required from the provided data as strings and symbols.}
 
 \item{period_length}{A positive integer; represents the length of each treatment period.
 If \code{period_method} is "date", this length refers the number of units specified in \code{time_unit}.
@@ -35,7 +35,7 @@ representing an observation's new assignment period.
 \description{
 Used to assign each observation a new treatment assignment period, based
 on user-supplied specifications, and user supplied data from
-\code{date_col} and \code{month_col} in \code{data_cols}, and the \code{period_length}. Creates a new
+\code{date_col} and \code{month_col} in \code{col_names}, and the \code{period_length}. Creates a new
 column indicating with period each observation belongs to.
 }
 \details{

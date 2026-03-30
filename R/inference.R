@@ -218,7 +218,7 @@ estimate_aipw <- function(
   assignment_probs,
   conditions,
   iaipw,
-  cluster_col = data_cols[["cluster_col"]],
+  cluster_col,
   clustering,
   periods
 ) {
@@ -230,12 +230,12 @@ estimate_aipw <- function(
       )[,
         lapply(.SD, mean),
         .SDcols = conditions,
-        by = c("period_number", cluster_col[["name"]])
+        by = c("period_number", cluster_col)
       ] |>
         as.list()
     } else {
       iaipw_scores <- cbind(data, as_tibble(iaipw)) |>
-        dplyr::group_by(period_number, !!cluster_col[["sym"]]) |>
+        dplyr::group_by(period_number, .data[[cluster_col]]) |>
         dplyr::summarize(dplyr::across(dplyr::all_of(conditions), mean)) |>
         as.list()
     }
@@ -309,7 +309,7 @@ estimate_ipw <- function(
       mab_success ~ mab_condition - 1,
       fixed_effects = ~block,
       data = data,
-      clusters = data[[cluster_col[["name"]]]],
+      clusters = data[[cluster_col]],
       weights = ipw_weights,
       se_type = "CR2",
       ci = FALSE
@@ -327,7 +327,7 @@ estimate_ipw <- function(
     estimatr::lm_robust(
       mab_success ~ mab_condition - 1,
       data = data,
-      clusters = data[[cluster_col[["name"]]]],
+      clusters = data[[cluster_col]],
       weights = ipw_weights,
       se_type = "CR2",
       ci = FALSE

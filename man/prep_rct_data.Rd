@@ -15,7 +15,7 @@ prep_rct_data(
   period_length,
   prior_periods,
   discount_rate,
-  data_cols,
+  col_names,
   delayed_feedback,
   whole_experiment,
   verbose,
@@ -71,7 +71,7 @@ in the treatment assignment model. Default is \code{NULL}, where all prior perio
 \item{discount_rate}{Rate for discounting observations from earlier periods when updating assignment probabilities.
 A value between 0 and 1, where outcomes from \code{k} periods ago are weighted by \code{discount_rate^k}. Default is 1 for no discounting.}
 
-\item{data_cols}{List holding the columns required from the provided data as strings and symbols.}
+\item{col_names}{List holding the columns required from the provided data as strings and symbols.}
 
 \item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon as a treatment is assigned, the outcome is realized and known.
 If \code{TRUE}, delayed feedback is assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not known to the simulation, until a certain date.
@@ -102,7 +102,7 @@ the re-simulation method. Replications can be conducted in parallel, by setting 
 \value{
 Named list containing:
 \itemize{
-\item \code{data_cols}: List of necessary columns in \code{data} as strings and as symbols.
+\item \code{col_names}: List of necessary columns in \code{data} as strings and as symbols.
 \item \code{data}: Prepared \code{data.frame} or \code{data.table} containing all the necessary columns to
 conduct the adaptive trial simulation, subset from the originally provided data to reduce memory usage.
 columns required for \code{\link[=run_mab]{run_mab()}}.

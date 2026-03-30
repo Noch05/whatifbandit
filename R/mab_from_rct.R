@@ -264,15 +264,15 @@ mab_from_rct <- function(
 ) {
   cl <- match.call()
   args <- mget(formalArgs(mab_from_rct))
-  data_cols <- c(
+  col_names <- c(
     formula_parse(formula),
-    date_col = date_col,
-    month_col = month_col,
-    assignment_date_col = assignment_date_col,
-    success_date_col = success_date_col
+    date_col = deparse(substitute(date_col)),
+    month_col = deparse(substitute(month_col)),
+    assignment_date_col = deparse(substitute(assignment_date_col)),
+    success_date_col = deparse(substitute(success_date_col))
   )
-  blocking <- !is.null(data_cols[["block_cols"]])
-  clustering <- !is.null(data_cols[["cluster_col"]])
+  blocking <- !is.null(col_names[["block_cols"]])
+  clustering <- !is.null(col_names[["cluster_col"]])
 
   prepped <- prep_rct_data(
     data = data,
@@ -289,7 +289,7 @@ mab_from_rct <- function(
     whole_experiment = whole_experiment,
     blocking = blocking,
     clustering = clustering,
-    data_cols = data_cols,
+    col_names = col_names,
     check_args = check_args,
     verbose = verbose,
     ndraws = ndraws,
@@ -315,7 +315,7 @@ mab_from_rct <- function(
       conditions = prepped$conditions,
       blocking = blocking,
       clustering = clustering,
-      data_cols = prepped$data_cols,
+      col_names = prepped$col_names,
       verbose = verbose,
       imputation_information = prepped$imputation_information,
       ndraws = ndraws,
@@ -343,7 +343,7 @@ mab_from_rct <- function(
           conditions = prepped[["conditions"]],
           blocking = blocking,
           clustering = clustering,
-          data_cols = prepped[["data_cols"]],
+          col_names = col_names,
           verbose = FALSE,
           imputation_information = prepped[["imputation_information"]],
           ndraws = ndraws,
@@ -367,8 +367,8 @@ mab_from_rct <- function(
 
   results$args <- c(
     args,
-    blocks = data_cols$block_cols$name,
-    clusters = data_cols$cluster_col$name
+    blocks = col_names$block_cols,
+    clusters = col_names$cluster_col
   )
   results$furrr <- furrr_opt
   results$call <- cl
