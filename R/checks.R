@@ -25,7 +25,6 @@ check_rct_args <- function(
   verbose,
   ndraws,
   r,
-  seeds,
   keep_data,
   blocking,
   clustering
@@ -74,20 +73,6 @@ check_rct_args <- function(
   check_prop(control_augment, random_assign_prop, discount_rate)
   check_posint(r, ndraws, prior_periods)
 
-  if (r > 1) {
-    if (!is.integer(seeds) || length(seeds) != r) {
-      rlang::abort(c(
-        "Argument 'seeds' must be an integer vector of length equal to `r`. Please provide a valid vector.",
-        "x" = sprintf(
-          "You passed a %s vector of length %d, while `r` is %d.",
-          typeof(seeds),
-          length(seeds),
-          r
-        ),
-        "i" = "Recommended to use `sample.int()` to create proper vector"
-      ))
-    }
-  }
   # Checking Data Structure
   check_data(
     data = data,

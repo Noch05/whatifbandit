@@ -123,21 +123,31 @@ verbose_log <- function(log, message) {
 #' @keywords internal
 
 condense_results <- function(dt, keep_data, mabs) {
+  r <- length(mabs)
+  names(mabs) <- as.character(1:r)
   elements <- c(
     "bandits",
     "assignment_probs",
     "assignment_quantities",
     "estimates"
   )
-  r <- length(mabs)
+
   extract <- \(item) lapply(mabs, `[[`, item)
 
   bind_dt <- \(item) {
-    data.table::rbindlist(
-      extract(item),
-      idcol = "trial",
-      use.names = TRUE
-    )[, trial := as.numeric(trial)]
+    if (item == "assignment_quantities") {
+      data.table::rbindlist(
+        extract(item) |> lapply(as.list),
+        idcol = "trial",
+        use.names = TRUE
+      )[, trial := as.numeric(trial)]
+    } else {
+      data.table::rbindlist(
+        extract(item),
+        idcol = "trial",
+        use.names = TRUE
+      )[, trial := as.numeric(trial)]
+    }
   }
 
   bind_df <- \(item) {
