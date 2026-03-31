@@ -284,8 +284,16 @@ prep_sim_data <- function(
 
   cols <- list(
     period_number = period_number,
-    block = blocks_clusters[["blocks"]],
-    cluster = blocks_clusters[["clusters"]],
+    block = if (!is.null(blocks_clusters[["blocks"]])) {
+      as.character(blocks_clusters[["blocks"]])
+    } else {
+      NULL
+    },
+    cluster = if (!is.null(blocks_clusters[["clusters"]])) {
+      as.character(blocks_clusters[["clusters"]])
+    } else {
+      NULL
+    },
     assignment_date = assignment_dates,
     mab_condition = rep(NA_character_, n),
     mab_success = rep(NA_real_, n),
@@ -402,7 +410,7 @@ extract_success_prob <- function(
 ) {
   if (!is.null(other_idx)) {
     extract_mat <- matrix(
-      data = c(conditions, as.character(other_idx)),
+      data = c(conditions, other_idx),
       ncol = 2
     )
     p[extract_mat]

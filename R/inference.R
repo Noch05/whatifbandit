@@ -238,7 +238,10 @@ estimate_aipw <- function(
     } else {
       iaipw_scores <- cbind(data, tibble::as_tibble(iaipw)) |>
         dplyr::group_by(period_number, .data[[cluster_col]]) |>
-        dplyr::summarize(dplyr::across(dplyr::all_of(conditions), mean)) |>
+        dplyr::summarize(dplyr::across(
+          dplyr::all_of(unname(conditions)),
+          mean
+        )) |>
         as.list()
     }
     list(
