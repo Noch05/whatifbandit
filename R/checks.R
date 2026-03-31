@@ -157,6 +157,10 @@ check_cols <- function(
     assignment_date_col = list(
       classes = data_types[6:7],
       tests = test_funcs[5:6]
+    ),
+    cluster_col = list(
+      classes = data_types[c(1, 3, 4, 5, 6)],
+      tests = test_funcs[c(1, 3, 4, 5, 6)]
     )
   )
 

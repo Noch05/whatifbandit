@@ -228,7 +228,7 @@ estimate_aipw <- function(
   iaipw_periods <- if (clustering) {
     if (dt) {
       iaipw_scores <- data.table::cbindlist(
-        list(data, as.data.table(iaipw))
+        list(data, data.table::as.data.table(iaipw))
       )[,
         lapply(.SD, mean),
         .SDcols = conditions,
@@ -236,7 +236,7 @@ estimate_aipw <- function(
       ] |>
         as.list()
     } else {
-      iaipw_scores <- cbind(data, as_tibble(iaipw)) |>
+      iaipw_scores <- cbind(data, tibble::as_tibble(iaipw)) |>
         dplyr::group_by(period_number, .data[[cluster_col]]) |>
         dplyr::summarize(dplyr::across(dplyr::all_of(conditions), mean)) |>
         as.list()
