@@ -305,6 +305,11 @@ compute_bandit <- function(
       conditions = conditions,
       num_conditions = num_conditions,
       current_period = current_period
+    ),
+    list(
+      # Default for 'static' assignment
+      bandit = rep(NA, num_conditions),
+      assignment_prob = rep(1 / num_conditions, num_conditions)
     )
   )
 

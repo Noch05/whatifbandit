@@ -20,7 +20,6 @@ check_rct_args(
   verbose,
   ndraws,
   r,
-  seeds,
   keep_data,
   blocking,
   clustering

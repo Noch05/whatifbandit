@@ -4,13 +4,11 @@
 \alias{estimate_ipw}
 \title{IPW Estimates for Probability of Success}
 \usage{
-estimate_ipw(data, cluster_col, blocking, clustering, conditions)
+estimate_ipw(data, cluster_col, clustering, conditions)
 }
 \arguments{
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
-
-\item{blocking}{Logical; Whether or not treatment blocking is occuring}
 
 \item{clustering}{Logical; Whether or not treatment clustering is occuring}
 }
@@ -34,6 +32,10 @@ The provided coefficients and variances can be used to conduct the typical t-tes
 restricted to constants, because appropriate HC2 and CR2 standard errors are used, so traditional asymptotic
 inference on the linear regression parameters is valid. Treatment effect estimation requires
 using the appropriate variance estimate which includes the covariance of 2 coefficients.
+
+Block fixed effects are not used for estimation due to the prevalence of numerical instability
+in the estimates. Assignment probabilities are the same for all blocks, so the IPW estimator is still
+unbiased without the prescence of the fixed effects.
 }
 \references{
 Offer‐Westort, Molly, Alexander Coppock, and Donald P. Green. 2021.

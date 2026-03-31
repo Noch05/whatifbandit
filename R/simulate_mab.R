@@ -401,7 +401,10 @@ extract_success_prob <- function(
   other_idx = NULL
 ) {
   if (!is.null(other_idx)) {
-    extract_mat <- matrix(data = c(conditions, other_idx), ncol = 2)
+    extract_mat <- matrix(
+      data = c(conditions, as.character(other_idx)),
+      ncol = 2
+    )
     p[extract_mat]
   } else {
     return(p[conditions, ])

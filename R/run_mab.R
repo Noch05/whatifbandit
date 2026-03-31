@@ -217,28 +217,24 @@ mab_loop <- function(
     current_data <- data[current_idx, ]
     prior_data <- data[starts[prior]:ends[i - 1], ]
 
-    if (algorithm != "static") {
-      current_bandit <- compute_prior(
-        current_data = current_data,
-        prior_data = prior_data,
-        delayed_feedback = delayed_feedback,
-        assignment_date_col = col_names[["assignment_date_col"]],
+    current_bandit <- compute_prior(
+      current_data = current_data,
+      prior_data = prior_data,
+      delayed_feedback = delayed_feedback,
+      assignment_date_col = col_names[["assignment_date_col"]],
+      conditions = conditions,
+      discount_rate = discount_rate,
+      current_period = i
+    ) |>
+      compute_bandit(
+        algorithm = algorithm,
+        num_conditions = num_conditions,
         conditions = conditions,
-        discount_rate = discount_rate,
-        current_period = i
-      ) |>
-        compute_bandit(
-          algorithm = algorithm,
-          num_conditions = num_conditions,
-          conditions = conditions,
-          current_period = i,
-          control_augment = control_augment,
-          ndraws = ndraws
-        )
-      bandits[["bandit_stat"]][i - 1, ] <- current_bandit[["bandit"]]
-    } else {
-      current_bandit[["assignment_prob"]] <- equal_probs
-    }
+        current_period = i,
+        control_augment = control_augment,
+        ndraws = ndraws
+      )
+    bandits[["bandit_stat"]][i - 1, ] <- current_bandit[["bandit"]]
 
     current_data <- assign_treatments(
       current_data = current_data,
