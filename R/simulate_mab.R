@@ -115,11 +115,12 @@ simulate_mab <- function(
   simulate_dates <- is.function(time_model) && !is.null(assignment_dates)
   rownames(p) <- tolower(rownames(p))
   conditions <- sort(rownames(p))
+  print(conditions)
   names(conditions) <- ifelse(conditions == "control", "control", "treatment")
 
-  p <- p[conditions, ]
+  p <- p[conditions, , drop = FALSE]
 
-  equal_probs <- stats::setNames(1 / nrow(p), conditions)
+  equal_probs <- stats::setNames(rep(1 / nrow(p), nrow(p)), conditions)
 
   if (!"control" %in% names(conditions) && control_augment > 0) {
     rlang::abort(c(
@@ -156,7 +157,8 @@ simulate_mab <- function(
       assignment_dates = assignment_dates,
       simulate_dates = simulate_dates,
       time_model = time_model,
-      time_model_args = time_model_args
+      time_model_args = time_model_args,
+      dt = dt
     )
     results <- run_mab(
       data = data,
@@ -199,7 +201,8 @@ simulate_mab <- function(
           equal_probs = equal_probs,
           assignment_dates = assignment_dates,
           time_model = time_model,
-          time_model_args = other_args[["time_model_args"]]
+          time_model_args = other_args[["time_model_args"]],
+          dt = dt
         )
         run_mab(
           data = data,
@@ -286,7 +289,8 @@ prep_sim_data <- function(
     cluster = blocks_clusters[["clusters"]],
     assignment_date = assignment_dates,
     mab_condition = rep(NA_character_, n),
-    mab_success = rep(NA_real_, n)
+    mab_success = rep(NA_real_, n),
+    assignment_type = rep(NA_character_, n)
   )
 
   if (simulate_dates) {
@@ -301,7 +305,6 @@ prep_sim_data <- function(
     blocking = blocking,
     clustering = clustering,
     conditions = conditions,
-    prob = equal_prob,
     random_assign_prop = 0,
     resimulation = FALSE,
     cluster_col = "cluster"
@@ -402,7 +405,7 @@ extract_success_prob <- function(
     extract_mat <- matrix(data = c(conditions, other_idx), ncol = 2)
     p[extract_mat]
   } else {
-    return(p[conditions])
+    return(p[conditions, ])
   }
 }
 
@@ -430,6 +433,7 @@ generate_outcomes <- function(
     conditions = conditions,
     other_idx = current_data[["cluster"]] %||% current_data[["block"]]
   )
+
   outcomes <- rbinom(
     nrow(current_data),
     1,
@@ -460,8 +464,10 @@ generate_outcomes <- function(
   }
 
   if (data.table::is.data.table(data)) {
-    data[idx, (modified_cols) := current_data[, ..modified_cols]]
+    data[idx, (modified_cols) := current_data[, modified_cols, with = FALSE]]
   } else {
+    print(data)
+    print(current_data)
     data[idx, ] <- current_data
   }
   invisible(data)
