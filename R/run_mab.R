@@ -108,7 +108,6 @@ run_mab <- function(
     data = sim_results[["final_data"]],
     cluster_col = col_names[["cluster_col"]],
     clustering = clustering,
-    blocking = blocking,
     conditions = conditions
   )
   sample_estimates <- estimate_sample(

@@ -290,6 +290,10 @@ estimate_aipw <- function(
 #' inference on the linear regression parameters is valid. Treatment effect estimation requires
 #' using the appropriate variance estimate which includes the covariance of 2 coefficients.
 #'
+#' Block fixed effects are not used for estimation due to the prevalence of numerical instability
+#' in the estimates. Assignment probabilities are the same for all blocks, so the IPW estimator is still
+#' unbiased without the prescence of the fixed effects.
+#'
 #'
 #' @returns A list of the IPW estimates in a `tibble`/`data.table`, along with the variances of the coefficients,
 #' F-statistic and degrees of freedom, and the covariance matrix from the IPW regression.
@@ -303,28 +307,10 @@ estimate_aipw <- function(
 estimate_ipw <- function(
   data,
   cluster_col,
-  blocking,
   clustering,
   conditions
 ) {
-  est_lm <- if (blocking && clustering) {
-    estimatr::lm_robust(
-      mab_success ~ mab_condition - 1,
-      fixed_effects = ~block,
-      data = data,
-      clusters = data[[cluster_col]],
-      weights = ipw_weights,
-      se_type = "CR2"
-    )
-  } else if (blocking) {
-    estimatr::lm_robust(
-      mab_success ~ mab_condition - 1,
-      fixed_effects = ~block,
-      data = data,
-      se_type = "HC2",
-      weights = ipw_weights
-    )
-  } else if (clustering) {
+  est_lm <- if (clustering) {
     estimatr::lm_robust(
       mab_success ~ mab_condition - 1,
       data = data,
