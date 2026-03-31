@@ -115,7 +115,6 @@ simulate_mab <- function(
   simulate_dates <- is.function(time_model) && !is.null(assignment_dates)
   rownames(p) <- tolower(rownames(p))
   conditions <- sort(rownames(p))
-  print(conditions)
   names(conditions) <- ifelse(conditions == "control", "control", "treatment")
 
   p <- p[conditions, , drop = FALSE]
@@ -457,17 +456,27 @@ generate_outcomes <- function(
     NULL
   }
   modified_cols <- c("mab_condition", "mab_success")
+  is_dt <- data.table::is.data.table(current_data)
+
+  if (is_dt) {
+    current_data[, mab_success := outcomes]
+  } else {
+    current_data[["mab_success"]] <- outcomes
+  }
+
   if (simulate_dates) {
-    current_data[["new_success_date"]] <- current_data[["assignment_date"]] +
-      success_times
+    if (is_dt) {
+      current_data[, new_success_date := assignment_date + success_times]
+    } else {
+      current_data[["new_success_date"]] <- current_data[["assignment_date"]] +
+        success_times
+    }
     modified_cols <- c(modified_cols, "new_success_date")
   }
 
-  if (data.table::is.data.table(data)) {
+  if (is_dt) {
     data[idx, (modified_cols) := current_data[, modified_cols, with = FALSE]]
   } else {
-    print(data)
-    print(current_data)
     data[idx, ] <- current_data
   }
   invisible(data)
