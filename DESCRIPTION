@@ -1,6 +1,6 @@
 Package: whatifbandit
 Title: Analyzing Randomized Experiments as Multi-Arm Bandits
-Version: 0.3.0.9006
+Version: 0.3.0.9008
 Authors@R: c(
     person("Noah", "Ochital", , "noahochital@icloud.com", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0009-0009-0398-2963")),
@@ -30,7 +30,6 @@ Imports:
     dplyr,
     estimatr,
     furrr,
-    ggplot2,
     lubridate,
     purrr,
     randomizr,
@@ -40,6 +39,7 @@ Imports:
 Suggests:
     future,
     knitr,
+    ggplot2,
     rmarkdown,
     testthat (>= 3.0.0)
 VignetteBuilder:
