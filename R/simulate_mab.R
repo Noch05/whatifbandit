@@ -243,6 +243,7 @@ simulate_mab <- function(
   results$cl <- cl
   return(construct_mab(results, type = "param", multi = r > 1))
 }
+
 #' Prepares Data for Simulated MAB
 #' @name prep_sim_data
 #' @description
@@ -387,6 +388,76 @@ generate_groups <- function(n, blocks = NULL, clusters = NULL) {
   return(return_vecs)
 }
 
+#' Generate Start and End Indexes
+#' @description
+#' Generates the start and end indexes for each period based on provided information
+#' @name generate_period_idx
+#' @inheritParams simulate_mab
+#' @returns list of numeric vectors featuring start and end indexes for each period of the simulation
+#' @keywords internal
+#' @details When not provided period sizes are calculated as `n %/% t` for all periods, with the last as `n %/% t  + n %% t`.
+
+generate_period_idx <- function(n, t, period_sizes = NULL) {
+  period_sizes <-
+    if (!is.null(period_sizes)) {
+      period_sizes
+    } else {
+      size <- floor(n / t)
+      period_sizes <- c(rep(size, t - 1), n - (size * (t - 1)))
+      period_sizes
+    }
+  ends <- cumsum(period_sizes)
+  starts <- c(1, ends[-t] + 1)
+  return(list(
+    period_sizes = period_sizes,
+    start_idxs = starts,
+    end_idxs = ends
+  ))
+}
+
+#' Generate Assignment Dates
+#' @name generate_assignment_dates
+#' @description
+#' Generates a `length(n)` vector of assignment dates based on provided information.
+#' @inheritParams simulate_mab
+#' @returns vector of assignment dates
+#' @keywords internal
+#'
+generate_assignment_dates <- function(n, assignment_dates) {
+  if (is.null(assignment_dates)) {
+    NULL
+  } else if (length(assignment_dates) < n) {
+    sort(rep_len(assignment_dates, n))
+  } else {
+    assignment_dates
+  }
+}
+
+#' Split Function Arguments
+#' @name split_args
+#' @inheritParams simulate_mab
+#' @description
+#' Uses [formalArgs()] to match arguments provided to `...` of [simulate_mab()] to [furrr::furrr_options()] and the user specified `time_model`
+#' @returns A named list with 2 elements, `furr_args` and `time_model_args` each a list of the respective arguments to
+#' [furrr::furrr_options()] and the user specified `time_model`
+#' @keywords internal
+
+split_args <- function(time_model = NULL, ...) {
+  all_args <- rlang::dots_list(..., .named = TRUE)
+  furrr_args <- all_args[
+    names(all_args) %in% formalArgs(furrr::furrr_options)
+  ]
+  time_model_args <- if (!is.null(time_model)) {
+    all_args[names(all_args) %in% formalArgs(time_model)]
+  } else {
+    NULL
+  }
+  return(list(
+    furrr_args = furrr_args,
+    time_model_args = time_model_args
+  ))
+}
+
 
 #' Extract Success Probabilities Per-Unit
 #' @name extract_success_prob
@@ -491,75 +562,4 @@ generate_outcomes <- function(
     data[idx, ] <- current_data
   }
   invisible(data)
-}
-
-
-#' Generate Start and End Indexes
-#' @description
-#' Generates the start and end indexes for each period based on provided information
-#' @name generate_period_idx
-#' @inheritParams simulate_mab
-#' @returns list of numeric vectors featuring start and end indexes for each period of the simulation
-#' @keywords internal
-#' @details When not provided period sizes are calculated as `n %/% t` for all periods, with the last as `n %/% t  + n %% t`.
-
-generate_period_idx <- function(n, t, period_sizes = NULL) {
-  period_sizes <-
-    if (!is.null(period_sizes)) {
-      period_sizes
-    } else {
-      size <- floor(n / t)
-      period_sizes <- c(rep(size, t - 1), n - (size * (t - 1)))
-      period_sizes
-    }
-  ends <- cumsum(period_sizes)
-  starts <- c(1, ends[-t] + 1)
-  return(list(
-    period_sizes = period_sizes,
-    start_idxs = starts,
-    end_idxs = ends
-  ))
-}
-
-#' Generate Assignment Dates
-#' @name generate_assignment_dates
-#' @description
-#' Generates a `length(n)` vector of assignment dates based on provided information.
-#' @inheritParams simulate_mab
-#' @returns vector of assignment dates
-#' @keywords internal
-#'
-generate_assignment_dates <- function(n, assignment_dates) {
-  if (is.null(assignment_dates)) {
-    NULL
-  } else if (length(assignment_dates) < n) {
-    sort(rep_len(assignment_dates, n))
-  } else {
-    assignment_dates
-  }
-}
-
-#' Split Function Arguments
-#' @name split_args
-#' @inheritParams simulate_mab
-#' @description
-#' Uses [formalArgs()] to match arguments provided to `...` of [simulate_mab()] to [furrr::furrr_options()] and the user specified `time_model`
-#' @returns A named list with 2 elements, `furr_args` and `time_model_args` each a list of the respective arguments to
-#' [furrr::furrr_options()] and the user specified `time_model`
-#' @keywords internal
-
-split_args <- function(time_model = NULL, ...) {
-  all_args <- rlang::dots_list(..., .named = TRUE)
-  furrr_args <- all_args[
-    names(all_args) %in% formalArgs(furrr::furrr_options)
-  ]
-  time_model_args <- if (!is.null(time_model)) {
-    all_args[names(all_args) %in% formalArgs(time_model)]
-  } else {
-    NULL
-  }
-  return(list(
-    furrr_args = furrr_args,
-    time_model_args = time_model_args
-  ))
 }

@@ -202,6 +202,26 @@ precompute_imputation.data.table <- function(
 
   return(imputation_information)
 }
+
+#-----------------------------------------------------------------------------
+#' Convert Treatment Block Summary to Matrix
+#' @name summary_to_matrix
+#' @description Converts a summarized data.frame or data.table containing
+#' `treatment_block`, `success_rate`, and `failure_rate` columns into a
+#' named matrix for use with [randomizr::block_ra()].
+#' @param df A `data.frame` or `data.table` with columns `treatment_block`,
+#' `success_rate`, and `failure_rate`.
+#' @returns A numeric matrix with row names equal to `treatment_block` and
+#' columns `failure_rate` and `success_rate`.
+#' @keywords internal
+summary_to_matrix <- function(df) {
+  matrix(
+    c(df[["failure_rate"]], df[["success_rate"]]),
+    ncol = 2,
+    nrow = nrow(df),
+    dimnames = list(df[["treatment_block"]], c("failure_rate", "success_rate"))
+  )
+}
 #-------------------------------------------------------------------------------
 #' @name imputation_prep
 #' @title Outcome Imputation Preparation
