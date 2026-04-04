@@ -10,8 +10,10 @@
 #' @param ends  Numeric vector where element `i` is the ending row number of period `i`.
 #' @param imputation_information Object created by [precompute_imputation()] containing the conditional means and success dates
 #' for each treatment block to impute from.
-#' @param  Logical flag; Whether or not this MAB Trial is being run as a re-simulated RCT, as opposed to an original simulation from specified
-#' population parameters.
+#' @param sim_type String; Type of simulation to conduct, either `"resim"`, `"param"`, or "`test"`, for a resimulated rct,
+#' simulation from population parameters, or simulation for the randomization joint test.
+#' @param estimators Character vector; Which estimators to compute, can include `"aipw"`, `"ipw"`, "sample", and any combination
+#' of them in a vector.
 #' @param time_model_args Arguments passed to `time_model` function
 #'
 #' @inheritParams simulate_mab
@@ -31,6 +33,7 @@
 run_mab <- function(
   data,
   sim_type,
+  estimators = c("aipw", "ipw", "sample"),
   p = NULL,
   algorithm,
   control_augment,
@@ -60,7 +63,7 @@ run_mab <- function(
 
   sim_results <- mab_loop(
     data = data,
-    resimulation = resimulation,
+    sim_type = sim_type,
     algorithm = algorithm,
     control_augment = control_augment,
     random_assign_prop,
@@ -94,30 +97,45 @@ run_mab <- function(
     periods = periods
   )
 
-  aipw_estimates <- estimate_aipw(
-    data = sim_results[["final_data"]],
-    assignment_probs = sim_results[["assignment_probs"]],
-    iaipw = iaipw_estimates,
-    periods = periods,
-    conditions = conditions,
-    clustering = clustering,
-    cluster_col = col_names[["cluster_col"]]
-  )
+  aipw_estimates <- if ("aipw" %in% estimators) {
+    estimate_aipw(
+      data = sim_results[["final_data"]],
+      assignment_probs = sim_results[["assignment_probs"]],
+      iaipw = iaipw_estimates,
+      periods = periods,
+      conditions = conditions,
+      clustering = clustering,
+      cluster_col = col_names[["cluster_col"]]
+    )
+  } else {
+    NULL
+  }
 
-  ipw_estimates <- estimate_ipw(
-    data = sim_results[["final_data"]],
-    cluster_col = col_names[["cluster_col"]],
-    clustering = clustering,
-    conditions = conditions
-  )
-  sample_estimates <- estimate_sample(
-    data = sim_results[["final_data"]],
-    conditions = conditions
-  )
+  ipw_estimates <- if ("ipw" %in% estimators) {
+    estimate_ipw(
+      data = sim_results[["final_data"]],
+      cluster_col = col_names[["cluster_col"]],
+      clustering = clustering,
+      conditions = conditions
+    )
+  } else {
+    NULL
+  }
+
+  sample_estimates <- if ("sample" %in% estimators) {
+    estimate_sample(
+      data = sim_results[["final_data"]],
+      conditions = conditions
+    )
+  } else {
+    NULL
+  }
+
   estimates <- combine_estimates(
     estimates = list(aipw_estimates, ipw_estimates[["ipw"]], sample_estimates),
     vcov = ipw_estimates[["vcov"]]
   )
+
   final_data <- if (keep_data || r == 1) sim_results[["final_data"]] else NULL
 
   results <- list(
@@ -161,7 +179,7 @@ run_mab <- function(
 #'
 mab_loop <- function(
   data,
-  resimulation,
+  sim_type,
   p,
   algorithm,
   control_augment,
@@ -246,14 +264,14 @@ mab_loop <- function(
       conditions = conditions,
       random_assign_prop = random_assign_prop,
       random_probs = equal_probs,
-      resimulation = resimulation
+      sim_type = sim_type
     )
 
     bandits[["assignment_prob"]][i, ] <- (current_bandit[["assignment_prob"]] *
       (1 - random_assign_prop)) +
       (equal_probs * random_assign_prop)
 
-    if (resimulation) {
+    if (sim_type == "resim") {
       prepped_impute <- prep_imputation(
         current_data = current_data,
         whole_experiment = whole_experiment,
@@ -272,7 +290,7 @@ mab_loop <- function(
         delayed_feedback = delayed_feedback,
         idx = current_idx
       )
-    } else {
+    } else if (sim_type == "param") {
       data <- generate_outcomes(
         current_data = current_data,
         data = data,
@@ -282,6 +300,13 @@ mab_loop <- function(
         time_model = time_model,
         time_model_args = time_model_args
       )
+    } else {
+      # Randomization Inference, No Change in Outcomes
+      if (data.table::is.data.table(data)) {
+        data[current_idx, mab_condition := current_data[, mab_condition]]
+      } else {
+        data[["mab_condition"]][current_idx] <- current_data[["mab_condition"]]
+      }
     }
   }
   results <- collect_mab_results(

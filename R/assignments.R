@@ -485,7 +485,7 @@ assign_treatments <- function(
   cluster_col = NULL,
   random_assign_prop,
   random_probs = NULL,
-  resimulation
+  sim_type
 ) {
   rows <- nrow(current_data)
   random_rows <- rows * random_assign_prop
@@ -546,7 +546,7 @@ assign_treatments <- function(
       band_idx = band_idx,
       random_probs = random_probs,
       assignment_type = assignment_type,
-      resimulation = resimulation
+      sim_type = sim_type
     )
   } else {
     assign_treatments.data.frame(
@@ -561,7 +561,7 @@ assign_treatments <- function(
       band_idx = band_idx,
       random_probs = random_probs,
       assignment_type = assignment_type,
-      resimulation = resimulation
+      sim_type = sim_type
     )
   }
 }
@@ -694,7 +694,7 @@ assign_treatments.data.frame <- function(
   band_idx,
   random_probs = NULL,
   assignment_type,
-  resimulation
+  sim_type
 ) {
   current_data[["assignment_type"]] <- assignment_type
   current_data[["mab_condition"]] <- compute_assignments(
@@ -709,7 +709,7 @@ assign_treatments.data.frame <- function(
     cluster_col = cluster_col
   )
 
-  if (resimulation) {
+  if (sim_type == "resim") {
     current_data[["impute_req"]] <- as.integer(
       as.character(current_data[["mab_condition"]]) !=
         as.character(current_data[[condition_col]])
@@ -734,7 +734,7 @@ assign_treatments.data.table <- function(
   band_idx,
   random_probs = NULL,
   assignment_type,
-  resimulation
+  sim_type
 ) {
   current_data[, `:=`(
     assignment_type = assignment_type,
@@ -751,7 +751,7 @@ assign_treatments.data.table <- function(
     )
   )]
 
-  if (resimulation) {
+  if (sim_type == "resim") {
     current_data[,
       impute_req := as.integer(
         as.character(mab_condition) != as.character(get(condition_col))

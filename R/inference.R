@@ -470,7 +470,7 @@ fill_missing_conditions <- function(estimates, conditions) {
 #' Combines the AIPW, IPW, and Sample estimates into a single object to be returned.
 #' @returns Final estimates a list with 2 elements. First the `data.frame`/`data.table` of
 #' all the estimates across methods, and second the IPW regression variance-covariance matrix
-combine_estimates <- function(estimates, vcov) {
+combine_estimates <- function(estimates, vcov = NULL) {
   est <- if (data.table::is.data.table(estimates[[1]])) {
     data.table::rbindlist(estimates, fill = TRUE)
   } else {
