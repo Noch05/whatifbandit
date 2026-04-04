@@ -314,7 +314,7 @@ mab_from_rct <- function(
   if (r == 1) {
     results <- run_mab(
       data = prepped$data,
-      resimulation = TRUE,
+      sim_type = "resim",
       algorithm = prepped$char_args$algorithm,
       control_augment = control_augment,
       random_assign_prop = random_assign_prop,
@@ -341,7 +341,7 @@ mab_from_rct <- function(
       \(.) {
         run_mab(
           data = prepped[["data"]],
-          resimulation = TRUE,
+          sim_type = "resim",
           algorithm = prepped[["char_args"]][["algorithm"]],
           control_augment = control_augment,
           random_assign_prop = random_assign_prop,

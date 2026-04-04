@@ -31,6 +31,7 @@ Imports:
     estimatr,
     furrr,
     lubridate,
+    methods,
     purrr,
     randomizr,
     rlang,

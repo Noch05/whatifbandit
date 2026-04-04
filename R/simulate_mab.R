@@ -77,7 +77,7 @@ simulate_mab <- function(
   ...
 ) {
   cl <- match.call()
-  args <- mget(formalArgs(simulate_mab))
+  args <- mget(methods::formalArgs(simulate_mab))
   algorithm <- tolower(algorithm)
   if (check_args) {
     check_mab_sim(
@@ -161,7 +161,7 @@ simulate_mab <- function(
     )
     results <- run_mab(
       data = data,
-      resimulation = FALSE,
+      sim_type = "param",
       p = p,
       algorithm = algorithm,
       control_augment = control_augment,
@@ -205,7 +205,7 @@ simulate_mab <- function(
         )
         run_mab(
           data = data,
-          resimulation = FALSE,
+          sim_type = "param",
           p = p,
           algorithm = algorithm,
           control_augment = control_augment,
@@ -314,7 +314,7 @@ prep_sim_data <- function(
     clustering = clustering,
     conditions = conditions,
     random_assign_prop = 0,
-    resimulation = FALSE,
+    sim_type = "param",
     cluster_col = "cluster"
   ) |>
     generate_outcomes(
@@ -437,7 +437,7 @@ generate_assignment_dates <- function(n, assignment_dates) {
 #' @name split_args
 #' @inheritParams simulate_mab
 #' @description
-#' Uses [formalArgs()] to match arguments provided to `...` of [simulate_mab()] to [furrr::furrr_options()] and the user specified `time_model`
+#' Uses [methods::formalArgs()] to match arguments provided to `...` of [simulate_mab()] to [furrr::furrr_options()] and the user specified `time_model`
 #' @returns A named list with 2 elements, `furr_args` and `time_model_args` each a list of the respective arguments to
 #' [furrr::furrr_options()] and the user specified `time_model`
 #' @keywords internal
@@ -445,10 +445,10 @@ generate_assignment_dates <- function(n, assignment_dates) {
 split_args <- function(time_model = NULL, ...) {
   all_args <- rlang::dots_list(..., .named = TRUE)
   furrr_args <- all_args[
-    names(all_args) %in% formalArgs(furrr::furrr_options)
+    names(all_args) %in% methods::formalArgs(furrr::furrr_options)
   ]
   time_model_args <- if (!is.null(time_model)) {
-    all_args[names(all_args) %in% formalArgs(time_model)]
+    all_args[names(all_args) %in% methods::formalArgs(time_model)]
   } else {
     NULL
   }
