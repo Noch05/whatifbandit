@@ -2,9 +2,15 @@
 % Please edit documentation in R/prepare_rct.R
 \name{compute_period_sizes}
 \alias{compute_period_sizes}
+\alias{compute_period_sizes.data.frame}
+\alias{compute_period_sizes.data.table}
 \title{Compute exact period sizes}
 \usage{
 compute_period_sizes(data)
+
+\method{compute_period_sizes}{data.frame}(data)
+
+\method{compute_period_sizes}{data.table}(data)
 }
 \arguments{
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
@@ -15,5 +21,9 @@ Numeric vector of \code{length(max(period_nummber))} with each element represent
 }
 \description{
 Compute exact period sizes
+
+\code{\link[=compute_period_sizes]{compute_period_sizes()}} for \code{data.frames}s
+
+\code{\link[=compute_period_sizes]{compute_period_sizes()}} for \code{data.tables}s
 }
 \keyword{internal}

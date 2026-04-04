@@ -139,14 +139,12 @@ prep_rct_data <- function(
   ))
 }
 #---------------------------------------------------------------------------------
-#' @title Creating proper conditions vector
-#' @name create_conditions
-#' @returns Character vector of unique treatment conditions. Throws error if an invalid specification
-#' is used.
-#' @description This function creates a character vector of treatment conditions
+#' @describeIn prep_rct_data This function creates a character vector of treatment conditions
 #' using the conditions column in the provided data, and if `control_augment` is greater
 #' than 0, it also labels the control condition. Throws an error of `control_condition` is not
 #' present.
+#' @returns Character vector of unique treatment conditions. Throws error if an invalid specification
+#' is used.
 #' @inheritParams mab_from_rct
 #' @inheritParams prep_rct_data
 #' @keywords internal
@@ -238,9 +236,7 @@ create_cutoff <- function(
 }
 #------------------------------------------------------------------------------------------
 #' @method create_cutoff date
-#' @title [create_cutoff()] Date Based Periods
-#' @inheritParams mab_from_rct
-#' @noRd
+#' @rdname create_cutoff
 create_cutoff.date <- function(
   data,
   time_unit,
@@ -352,9 +348,7 @@ create_cutoff.date <- function(
 #--------------------------------------------------------------------------
 
 #' @method create_cutoff individual
-#' @title [create_cutoff()] Individual Periods
-#' @inheritParams mab_from_rct
-#' @noRd
+#' @rdname create_cutoff
 #'
 create_cutoff.individual <- function(data) {
   if (data.table::is.data.table(data)) {
@@ -371,9 +365,7 @@ create_cutoff.individual <- function(data) {
 }
 #----------------------------------------------------------------------------------
 #' @method create_cutoff batch
-#' @title [create_cutoff()] Batch Based Periods
-#' @inheritParams mab_from_rct
-#' @noRd
+#' @rdname create_cutoff
 #'
 create_cutoff.batch <- function(data, period_length) {
   if (data.table::is.data.table(data)) {
@@ -424,9 +416,7 @@ create_new_cols <- function(
 # --------------------------------------------------
 
 #' @title [create_new_cols()] for `data.frame`s and `tibble`s
-#' @method create_new_cols data.frame
-#' @inheritParams create_new_cols
-#' @noRd
+#' @rdname create_new_cols
 
 create_new_cols.data.frame <- function(
   data,
@@ -498,9 +488,7 @@ create_new_cols.data.frame <- function(
 }
 #---------------------------------------------------------------------------------
 #' @title [create_new_cols()] for `data.table`s
-#' @method create_new_cols data.table
-#' @inheritParams create_new_cols
-#' @noRd
+#' @rdname create_new_cols
 
 create_new_cols.data.table <- function(
   data,
@@ -554,11 +542,8 @@ create_new_cols.data.table <- function(
 
 #' @title Compute exact period sizes
 #' @name compute_period_sizes
-#'
 #' @inheritParams mab_from_rct
-#'
 #' @returns Numeric vector of `length(max(period_nummber))` with each element representing the number of units in each period.
-#'
 #' @keywords internal
 compute_period_sizes <- function(
   data
@@ -567,9 +552,7 @@ compute_period_sizes <- function(
 }
 
 #' @title [compute_period_sizes()] for `data.frames`s
-#' @method  compute_period_sizes data.frame
-#' @inheritParams compute_period_sizes
-#' @noRd
+#' @rdname compute_period_sizes
 compute_period_sizes.data.frame <- function(data) {
   data |>
     dplyr::group_by(period_number) |>
@@ -579,9 +562,7 @@ compute_period_sizes.data.frame <- function(data) {
 }
 
 #' @title [compute_period_sizes()] for `data.tables`s
-#' @method  compute_period_sizes data.table
-#' @inheritParams compute_period_sizes
-#' @noRd
+#' @rdname compute_period_sizes
 compute_period_sizes.data.table <- function(data) {
   counts <- data[, .(count = .N), by = period_number][order(
     period_number

@@ -2,9 +2,15 @@
 % Please edit documentation in R/prepare_rct.R
 \name{create_new_cols}
 \alias{create_new_cols}
+\alias{create_new_cols.data.frame}
+\alias{create_new_cols.data.table}
 \title{Create Necessary Columns for Multi-Arm Bandit Trial}
 \usage{
 create_new_cols(data, col_names, blocking, delayed_feedback, vars_keep)
+
+\method{create_new_cols}{data.frame}(data, col_names, blocking, delayed_feedback, vars_keep)
+
+\method{create_new_cols}{data.table}(data, col_names, blocking, delayed_feedback, vars_keep)
 }
 \arguments{
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results

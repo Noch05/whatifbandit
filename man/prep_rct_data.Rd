@@ -2,6 +2,7 @@
 % Please edit documentation in R/prepare_rct.R
 \name{prep_rct_data}
 \alias{prep_rct_data}
+\alias{create_conditions}
 \title{Pre-Simulation Setup to Simulate a MAB Trial From an RCT}
 \usage{
 prep_rct_data(
@@ -26,6 +27,8 @@ prep_rct_data(
   blocking,
   clustering
 )
+
+create_conditions(control_condition, data, condition_col, control_augment)
 }
 \arguments{
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
@@ -126,6 +129,9 @@ for outcome and date imputation for \code{\link[=run_mab]{run_mab()}}.
 \item \code{period_starts}: Numeric vector where element \code{i} is the starting row number of period \code{i}.
 \item \code{period_starts}: Numeric vector where element \code{i} is the ending row number of period \code{i}.
 }
+
+Character vector of unique treatment conditions. Throws error if an invalid specification
+is used.
 }
 \description{
 Common function for all the actions that need to take place before
@@ -137,4 +143,12 @@ key values to avoid doing so within the simulation loop.
 If a \code{data.table} is passed it is copied to avoid modifying the
 original dataset in the users environment.
 }
+\section{Functions}{
+\itemize{
+\item \code{create_conditions()}: This function creates a character vector of treatment conditions
+using the conditions column in the provided data, and if \code{control_augment} is greater
+than 0, it also labels the control condition. Throws an error of \code{control_condition} is not
+present.
+
+}}
 \keyword{internal}

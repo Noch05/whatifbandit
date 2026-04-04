@@ -2,9 +2,18 @@
 % Please edit documentation in R/prepare_rct.R
 \name{create_cutoff}
 \alias{create_cutoff}
+\alias{create_cutoff.date}
+\alias{create_cutoff.individual}
+\alias{create_cutoff.batch}
 \title{Create Treatment Wave Cutoffs}
 \usage{
 create_cutoff(data, col_names, period_length = NULL, period_method, time_unit)
+
+\method{create_cutoff}{date}(data, time_unit, date_col, month_col, period_length)
+
+\method{create_cutoff}{individual}(data)
+
+\method{create_cutoff}{batch}(data, period_length)
 }
 \arguments{
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
@@ -31,6 +40,14 @@ when it is not specified months are simply used as the time interval. For exampl
 has dates starting on July 26th, under month based assignment and a specified \code{month_col} the
 dates July 26th and August 3st would be in different periods, but if the \code{month_col} was not
 specified, they would be in the same period because the dates are less than one month apart.}
+
+\item{date_col}{Bare column in \code{data}; contains original date of event/trial. Only necessary when
+assigning by "Date". Must be of type \code{Date}. @param month_col Bare column in \code{data}; contains
+month of treatment. Only necessary when \code{time_unit = "month"}, and when periods should be
+determined directly by the calendar months instead of month based time periods. This column can
+be a string/factor variable with the month names or numeric with the month number. It can easily
+be created from your \code{date_col} via \code{lubridate::month(data[[date_col]])} or
+\code{format(data[[date_col]], "\%m")}.}
 }
 \value{
 Updated \code{tibble}/\code{data.table} with the new \code{period_number} column. \code{period_number} is an integer
