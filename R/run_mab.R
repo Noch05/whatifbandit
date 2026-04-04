@@ -4,13 +4,13 @@
 #' @description Internal helper. Centralizes necessary functions to conduct a
 #' a MAB trial with adaptive inference. It assumes all inputs have been preprocessed already
 #' @inheritParams mab_from_rct
-#' @inheritParams prep_rct_data
+#' @inheritParams prep_resim_data
 #' @inheritParams simulate_mab
 #' @param starts  Numeric vector where element `i` is the starting row number of period `i`.
 #' @param ends  Numeric vector where element `i` is the ending row number of period `i`.
 #' @param imputation_information Object created by [precompute_imputation()] containing the conditional means and success dates
 #' for each treatment block to impute from.
-#' @param resimulation Logical flag; Whether or not this MAB Trial is being run as a re-simulated RCT, as opposed to an original simulation from specified
+#' @param  Logical flag; Whether or not this MAB Trial is being run as a re-simulated RCT, as opposed to an original simulation from specified
 #' population parameters.
 #' @param time_model_args Arguments passed to `time_model` function
 #'
@@ -30,7 +30,7 @@
 
 run_mab <- function(
   data,
-  resimulation,
+  sim_type,
   p = NULL,
   algorithm,
   control_augment,
@@ -142,7 +142,7 @@ run_mab <- function(
 #' stationary/non-stationary bandits, control augmentation, and hybrid assignment.
 #'
 #' @inheritParams mab_from_rct
-#' @inheritParams prep_rct_data
+#' @inheritParams prep_resim_data
 #' @inheritParams simulate_mab
 #' @param num_conditions Number of conditions, equivalent to `length(conditions)`.
 #'

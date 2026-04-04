@@ -22,10 +22,6 @@ build_ra_args(
 
 \item{probs}{Named numeric vector; probability of assignment for each treatment condition.}
 
-\item{blocking}{Logical; Whether or not treatment blocking is occuring}
-
-\item{clustering}{Logical; Whether or not treatment clustering is occuring}
-
 \item{cluster_col}{Column name of \code{current_data} which holds cluster assignments.}
 
 \item{dt}{Logical. Whether \code{current_data} is a data.table.}

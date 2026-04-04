@@ -22,10 +22,6 @@ assign_treatments(
 
 \item{probs}{Named numeric vector; probability of assignment for each treatment condition.}
 
-\item{blocking}{Logical; Whether or not treatment blocking is occuring}
-
-\item{clustering}{Logical; Whether or not treatment clustering is occuring}
-
 \item{condition_col}{Column name of \code{current_data} which holds original treatment assignments.}
 
 \item{cluster_col}{Column name of \code{current_data} which holds cluster assignments.}
@@ -38,9 +34,6 @@ selected due to the constraint that all units within a cluster have to be assign
 
 \item{random_probs}{Probabilities of assignment for the rows which are completely randomly assigned. Simply a vector
 of \code{length(conditions)} with the same equal probability for all elements.}
-
-\item{resimulation}{Logical flag; Whether or not this MAB Trial is being run as a re-simulated RCT, as opposed to an original simulation from specified
-population parameters.}
 }
 \value{
 Updated \code{tibble} or \code{data.table} with the new treatment conditions for each observation, and whether imputation is required.

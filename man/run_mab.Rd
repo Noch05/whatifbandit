@@ -35,9 +35,6 @@ run_mab(
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
 
-\item{resimulation}{Logical flag; Whether or not this MAB Trial is being run as a re-simulated RCT, as opposed to an original simulation from specified
-population parameters.}
-
 \item{p}{The true probabilities of success for each treatment arm. Specified as an matrix,
 where \code{rownames(p)} are the treatment. If there is a control condition, specify its rowname as \code{"Control"}
 labels, and \code{colnames(p)} are the cluster or block labels, e.g.
@@ -76,12 +73,6 @@ If \code{FALSE}, uses only data available up to the current period. In large dat
 of periods, setting this to \code{FALSE} can be more computationally intensive, though not a significant
 contributor to total run time. Default is \code{FALSE}.}
 
-\item{blocking}{Logical; Whether or not treatment blocking is occuring}
-
-\item{clustering}{Logical; Whether or not treatment clustering is occuring}
-
-\item{col_names}{List holding the columns required from the provided data as strings and symbols.}
-
 \item{imputation_information}{Object created by \code{\link[=precompute_imputation]{precompute_imputation()}} containing the conditional means and success dates
 for each treatment block to impute from.}
 
@@ -106,6 +97,9 @@ but they will not be used.
 Default \code{NULL}. Other optional arguments CANNOT share names as arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
 
 \item{time_model_args}{Arguments passed to \code{time_model} function}
+
+\item{Logical}{flag; Whether or not this MAB Trial is being run as a re-simulated RCT, as opposed to an original simulation from specified
+population parameters.}
 }
 \value{
 : A named list containing:

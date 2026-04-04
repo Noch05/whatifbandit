@@ -110,3 +110,38 @@ construct_mab <- function(mab, type, multi) {
     class = class
   )
 }
+
+
+#' @title Joint Hypothesis Test for Multi-Arm Bandit Trials
+#' @name joint_test
+#' @description Conducts a joint hypothesis test of no treatment effects across all arms, i.e. that all arms
+#' have the same true probability of success, either using parametric bootstrap or the randomization inference
+#' procedure adapted from \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
+#' See details for a description of both methods
+#' @param mab A `single_rct_mab` or `single_param_mab` object.
+#' @param method A character string; either `"bootstrap"` or `"randomization"`.
+#' @param r A positive integer; number of simulations used to build the null distribution.
+#' Default is 1000.
+#'
+#' @returns A `mab.test` object containing
+#' \itemize{
+#'   \item `f_statistic`: The observed F-statistic from the IPW regression.
+#'   \item `null_distribution`: A numeric vector of F-statistics under the null.
+#'   \item `p_value`: The proportion of simulated F-statistics more extreme than observed.
+#'   \item `method`: The method used.
+#'   \item `config`: The configuration for the simulation of the adaptive trial
+#' }
+#'
+#' #' @references
+#' Offer-Westort, Molly, Alexander Coppock, and Donald P. Green.
+#' "Adaptive Experimental Design: Prospects and Applications in Political Science."
+#'  American Journal of Political Science 65, no. 4 (2021): 826–44. \doi{10.1111/ajps.12597}.
+#'
+joint_test <- function(mab, method, r = 1000) {
+  check_posint(r)
+  check_string(
+    tolower(method),
+    valid = c("bootstrap", "randomization"),
+    "method"
+  )
+}

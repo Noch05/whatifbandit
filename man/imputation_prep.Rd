@@ -26,8 +26,6 @@ If \code{FALSE}, uses only data available up to the current period. In large dat
 of periods, setting this to \code{FALSE} can be more computationally intensive, though not a significant
 contributor to total run time. Default is \code{FALSE}.}
 
-\item{blocking}{Logical; Whether or not treatment blocking is occuring}
-
 \item{impute_idx}{Index of rows in \code{current_data} that need to be imputed.}
 
 \item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon as a treatment is assigned, the outcome is realized and known.
