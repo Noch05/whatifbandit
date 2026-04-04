@@ -8,11 +8,14 @@
 #' @inheritParams simulate_mab
 #' @param starts  Numeric vector where element `i` is the starting row number of period `i`.
 #' @param ends  Numeric vector where element `i` is the ending row number of period `i`.
-#' @param imputation_information Object created by [precompute_imputation()] containing the conditional means and success dates
+#' @param imputation_information Object created by [precompute_imputation()] containing the conditional
+#' means and success dates
 #' for each treatment block to impute from.
-#' @param sim_type String; Type of simulation to conduct, either `"resim"`, `"param"`, or "`test"`, for a resimulated rct,
+#' @param sim_type String; Type of simulation to conduct, either `"resim"`, `"param"`, or "`test"`,
+#' for a resimulated rct,
 #' simulation from population parameters, or simulation for the randomization joint test.
-#' @param estimators Character vector; Which estimators to compute, can include `"aipw"`, `"ipw"`, "sample", and any combination
+#' @param estimators Character vector; Which estimators to compute, can include `"aipw"`, `"ipw"`,
+#' "sample", and any combination
 #' of them in a vector.
 #' @param time_model_args Arguments passed to `time_model` function.
 #' @inheritParams simulate_mab
@@ -22,9 +25,12 @@
 #' \itemize{
 #' \item `final_data`: The processed `tibble` or `data.table`, with the trial's results.
 #' \item `bandits`: A `tibble` or `data.table` containing the UCB1 or Thompson Sampling values for each period.
-#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period.
-#' \item `assignment_quantities`: A numeric vector of the total number of observations assigned to each treatment arm.
-#' \item `estimates`: A `tibble` or `data.table` containing the estimates of the specified estimators for each treatment arm.
+#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each
+#' treatment arm at a given period.
+#' \item `assignment_quantities`: A numeric vector of the total number of observations assigned to each
+#' treatment arm.
+#' \item `estimates`: A `tibble` or `data.table` containing the estimates of the specified estimators for
+#' each treatment arm.
 #' \item `ipw_vcov`: Covariance matrix from IPW estimation.
 #' \item `call`: `NULL`; initialized for later assignment.
 #' \item `args`: `NULL`; initialized for later assignment.
@@ -169,7 +175,8 @@ run_mab <- function(
 #' \itemize{
 #' \item `final_data`: The processed `tibble` or `data.table`, with the trial's results.
 #' \item `bandits`: A `tibble` or `data.table` containing the UCB1 or Thompson Sampling values for each period.
-#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period.
+#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each
+#' treatment arm at a given period.
 #' \item `assignment_quantities`: A numeric vector of the total number of observations assigned to each treatment arm.
 #' }
 #' @details
@@ -335,7 +342,8 @@ mab_loop <- function(
 #' \itemize{
 #' \item `final_data`: The processed `tibble` or `data.table`, with the trial's results.
 #' \item `bandits`: A `tibble` or `data.table` containing the UCB1 or Thompson Sampling values for each period.
-#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period.
+#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being
+#' assigned each treatment arm at a given period.
 #' \item `assignment_quantities`: A numeric vector of the total number of observations assigned to each treatment arm.
 #' }
 #' @description Condenses output from [mab_loop()] into
@@ -495,7 +503,6 @@ collect_mab_results.data.table <- function(
 #' @returns Numeric value referring to the period index to look back from.
 #' @describeIn mab_loop Used during [mab_loop()] to create a vector of prior periods dynamically based on the specified
 #' number of prior periods.
-#' @family simulation
 #' @keywords internal
 
 compute_lookback <- function(prior_periods = NULL, current_period) {

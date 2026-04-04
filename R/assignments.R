@@ -1,8 +1,9 @@
 #' Gather Past Results for Given Assignment Period
 #' @name compute_prior
-#' @description Summarizes results of prior periods to update assignment probabilities in the current period. This function
-#' calculates the number of success under each treatment and the total number of observations assigned to each treatment which are used
-#' to calculate UCB1 values or Thompson sampling probabilities. These values are weighted by the discount_rate provided.
+#' @description Summarizes results of prior periods to update assignment probabilities in the current period.
+#' This function calculates the number of success under each treatment and the total number of observations
+#' assigned to each treatment which are used to calculate UCB1 values or Thompson sampling probabilities.
+#' These values are weighted by the discount_rate provided.
 #'
 #' @inheritParams run_mab
 #' @param current_data A `data.frame` or `data.table` with only observations from the current sampling period.
@@ -18,10 +19,7 @@
 #' of assigning this treatments periods, as it simulates the researchers not having
 #' received that information yet.
 #'
-#'
-#' @seealso
-#' * [mab_loop()]
-#' * [compute_bandit()]
+#' @family assign
 #' @keywords internal
 compute_prior <- function(
   current_data,
@@ -176,9 +174,7 @@ compute_prior.data.table <- function(
 }
 #---------------------------------------------------------------------------
 
-#' Finalise Aggregated Prior Results
-#' @name finalize_prior_list
-#' @description Accepts the raw list output of an aggregation over `prior_data`
+#' @describeIn compute_prior Accepts the raw list output of an aggregation over `prior_data`
 #' (from [compute_prior()]), names each vector by condition, fills any
 #' conditions absent from the prior window with zeros, and sorts alphabetically.
 #' @param prior_list Named list with elements `mab_condition`, `successes`, `n`,
@@ -271,6 +267,7 @@ finalize_prior_list <- function(prior_list, conditions) {
 #' Thompson, William R. 1933. "On the Likelihood That One Unknown Probability Exceeds Another in View of the Evidence of Two Samples."
 #'  Biometrika 25 (3/4): 285–94. \doi{10.2307/2332286}
 #' @keywords internal
+#' @family assign
 
 compute_bandit <- function(
   past_results = NULL,
@@ -374,9 +371,7 @@ compute_bandit.thompson <- function(
 
   return(list(bandit = bandit, assignment_prob = bandit))
 }
-#' @name bandit_invalid
-#' @title Checks Validity of Thompson Sampling probabilities
-#' @description Checks if the Thompson Sampling probabilities either sum arbitrarily close
+#' @describeIn compute_bandit Checks if the Thompson Sampling probabilities either sum arbitrarily close
 #' to 0 or if any of them are NA, indicating the direct calculation failed or did not converge.
 #' @param bandit a numeric vector of Thompson Sampling probabilities.
 #' @returns Logical; TRUE if the vector is invalid, FALSE if valid
@@ -450,6 +445,7 @@ compute_bandit.ucb1 <- function(
 #'* [randomizr::cluster_ra()]
 #'* [randomizr::block_and_cluster_ra()]
 #' @keywords internal
+#' @family assign
 assign_treatments <- function(
   current_data,
   probs,
@@ -540,16 +536,14 @@ assign_treatments <- function(
     )
   }
 }
-
-#' Build `{randomizr}`` function and arguments
+#' @describeIn assign_treatments Selects the appropriate `{randomizr}` function and constructs its argument list
+#' based on whether blocking and/or clustering are requested.
 #' @inheritParams compute_prior
 #' @inheritParams assign_treatments
 #' @param idx Integer vector of row indices to assign.
 #' @param dt Logical. Whether `current_data` is a data.table.
 #' @returns A list with `fn` (the randomizr function) and `args` (its arguments).
 #' @keywords internal
-#' @describeIn assign_treatments Selects the appropriate `{randomizr}` function and constructs its argument list
-#' based on whether blocking and/or clustering are requested.
 build_ra_args <- function(
   idx,
   current_data,
@@ -604,16 +598,16 @@ build_ra_args <- function(
   }
 }
 
-#' Assign Treatments to Bandit and Random Subsets
+#' @describeIn assign_treatments Pre-allocates a character vector and fills treatment assignments
+#' for bandit and randomly assigned subsets separately, using the appropriate
+#' randomizr function built by [build_ra_args()].
 #' @inheritParams compute_prior
 #' @inheritParams assign_treatments
 #' @param band_idx Integer vector of bandit-assigned row indices
 #' @param rand_idx Integer vector of randomly-assigned row indices
 #' @returns Character vector of length `nrow(current_data)` with treatment assignments.
 #' @keywords internal
-#' @describeIn assign_treatments Pre-allocates a character vector and fills treatment assignments
-#' for bandit and randomly assigned subsets separately, using the appropriate
-#' randomizr function built by [build_ra_args()].
+
 compute_assignments <- function(
   current_data,
   band_idx,

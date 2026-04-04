@@ -3,6 +3,7 @@
 \name{compute_bandit}
 \alias{compute_bandit}
 \alias{compute_bandit.thompson}
+\alias{bandit_invalid}
 \alias{compute_bandit.ucb1}
 \title{Calculate Multi-Arm Bandit Decision Based on Algorithm}
 \usage{
@@ -17,6 +18,8 @@ compute_bandit(
 )
 
 \method{compute_bandit}{thompson}(past_results, conditions, current_period, ndraws)
+
+bandit_invalid(bandit)
 
 \method{compute_bandit}{ucb1}(past_results, num_conditions, conditions, current_period)
 }
@@ -37,8 +40,11 @@ defines the adaptive assignment process. For more details on these specific algo
 \item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as "Control". Ranges from 0 to 1,
 and the default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.}
 
-\item{ndraws}{Number of draws used to approximate Thompson sampling probabilities. Used only when direct calculation fails or overflows. Default is
-5000 but can be raised or lowered depending on performance and accuracy concerns.}
+\item{ndraws}{Number of draws used to approximate Thompson sampling probabilities. Used only when
+direct calculation fails or overflows. Default is 5000 but can be raised or lowered depending on
+performance and accuracy concerns.}
+
+\item{bandit}{a numeric vector of Thompson Sampling probabilities.}
 }
 \value{
 A list of length 2 containing:
@@ -46,6 +52,8 @@ A list of length 2 containing:
 \item \code{bandit}: Bandit object, either a named numeric vector of Thompson sampling probabilities UCB1 values.
 \item \verb{assignment_probabilities:} Named numeric vector with probabilities of being assigned to the given treatment, where \code{names(.)} are the treatments.
 Adjusted for control augmentation}
+
+Logical; TRUE if the vector is invalid, FALSE if valid
 }
 \description{
 Calculates the best treatment for a given period using either a UCB1 or Thompson Sampling algorithm.
@@ -73,6 +81,12 @@ the new vector is \verb{(0.2, 0, 0.8)} assuming the first element is control. If
 were the control group the resulting vector would not be changed because it already meets the
 control group threshold.
 }
+\section{Functions}{
+\itemize{
+\item \code{bandit_invalid()}: Checks if the Thompson Sampling probabilities either sum arbitrarily close
+to 0 or if any of them are NA, indicating the direct calculation failed or did not converge.
+
+}}
 \references{
 Auer, Peter, Nicolò Cesa-Bianchi, and Paul Fischer. 2002.
 "Finite-Time Analysis of the Multiarmed Bandit Problem." \emph{Machine Learning}
@@ -88,4 +102,10 @@ Loecher, Thomas Lotze and Markus. 2022.
 Thompson, William R. 1933. "On the Likelihood That One Unknown Probability Exceeds Another in View of the Evidence of Two Samples."
 Biometrika 25 (3/4): 285–94. \doi{10.2307/2332286}
 }
+\seealso{
+Other assign: 
+\code{\link{assign_treatments}()},
+\code{\link{compute_prior}()}
+}
+\concept{assign}
 \keyword{internal}

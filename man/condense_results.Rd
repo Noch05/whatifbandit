@@ -10,7 +10,10 @@ condense_results(dt, keep_data, mabs)
 \item{dt}{Logical; Whether to output \code{data.table}s or \code{tibble}s. When\code{ r * number_of_periods > 100000}, \code{dt = TRUE}, even if the user passed data is not a
 \code{data.table}.}
 
-\item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended \code{FALSE}. When\code{ r = 1} the final data is always kept and reported.}
+\item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended
+\code{FALSE}. When\code{ r = 1} the final data is always kept and reported. @param check_args Logical;
+Whether or not to robustly check whether arguments are valid. Default is TRUE, and recommended
+not to be changed. @param ... Additional named arguments passed to \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
 
 \item{mabs}{List of outputs from repeated \code{\link[=run_mab]{run_mab()}} calls.}
 }

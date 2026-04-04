@@ -51,15 +51,17 @@ defines the adaptive assignment process. For more details on these specific algo
 
 \item{num_conditions}{Number of conditions, equivalent to \code{length(conditions)}.}
 
-\item{ndraws}{Number of draws used to approximate Thompson sampling probabilities. Used only when direct calculation fails or overflows. Default is
-5000 but can be raised or lowered depending on performance and accuracy concerns.}
+\item{ndraws}{Number of draws used to approximate Thompson sampling probabilities. Used only when
+direct calculation fails or overflows. Default is 5000 but can be raised or lowered depending on
+performance and accuracy concerns.}
 }
 \value{
 A named list containing:
 \itemize{
 \item \code{final_data}: The processed \code{tibble} or \code{data.table}, with the trial's results.
 \item \code{bandits}: A \code{tibble} or \code{data.table} containing the UCB1 or Thompson Sampling values for each period.
-\item \code{assignment_probs}: A \code{tibble} or \code{data.table} containing the probability of being assigned each treatment arm at a given period.
+\item \code{assignment_probs}: A \code{tibble} or \code{data.table} containing the probability of being
+assigned each treatment arm at a given period.
 \item \code{assignment_quantities}: A numeric vector of the total number of observations assigned to each treatment arm.
 }
 }

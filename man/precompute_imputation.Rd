@@ -2,24 +2,39 @@
 % Please edit documentation in R/impute.R
 \name{precompute_imputation}
 \alias{precompute_imputation}
+\alias{precompute_imputation.data.frame}
+\alias{precompute_imputation.data.table}
+\alias{summary_to_matrix}
 \title{Precomputing Key Values for Outcome Imputation}
 \usage{
 precompute_imputation(data, whole_experiment, delayed_feedback, col_names)
+
+\method{precompute_imputation}{data.frame}(data, whole_experiment, delayed_feedback, col_names)
+
+\method{precompute_imputation}{data.table}(data, whole_experiment, delayed_feedback, col_names)
+
+summary_to_matrix(df)
 }
 \arguments{
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
 
-\item{whole_experiment}{Logical; if \code{TRUE}, uses all past experimental data for imputing outcomes.
-If \code{FALSE}, uses only data available up to the current period. In large datasets or with a high number
-of periods, setting this to \code{FALSE} can be more computationally intensive, though not a significant
-contributor to total run time. Default is \code{FALSE}.}
+\item{whole_experiment}{Logical; if \code{TRUE}, uses all past experimental data for imputing
+outcomes. If \code{FALSE}, uses only data available up to the current period. In large datasets or
+with a high number of periods, setting this to \code{FALSE} can be more computationally intensive,
+though not a significant contributor to total run time. Default is \code{FALSE}.}
 
-\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon as a treatment is assigned, the outcome is realized and known.
-If \code{TRUE}, delayed feedback is assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not known to the simulation, until a certain date.
-When re-computing the adaptive assignment probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the assignment are treated as failures. a}
+\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon
+as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is
+assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
+known to the simulation, until a certain date. When re-computing the adaptive assignment
+probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the
+assignment are treated as failures. a}
 
 \item{col_names}{List holding the columns required from the provided data as strings and symbols.}
+
+\item{df}{A \code{data.frame} or \code{data.table} with columns \code{treatment_block},
+\code{success_rate}, and \code{failure_rate}.}
 }
 \value{
 A named list containing:
@@ -29,6 +44,9 @@ treatment block, at each period.
 \item \code{dates_summary}: A list of vectors containing the average success date for
 each treatment block at each treatment period.
 }
+
+A numeric matrix with row names equal to \code{treatment_block} and
+columns \code{failure_rate} and \code{success_rate}.
 }
 \description{
 Pre-computes key values required for the outcome imputation step of the MAB
@@ -43,7 +61,19 @@ and used through the simulation. When \code{whole_experiment = FALSE}, \code{ori
 each containing the cumulative probabilities of all periods up to the index \code{i}.
 
 If \code{perfect_assignment = FALSE}, \code{dates_summary} is not calculated, and is \code{NULL}.
-
 No covariates are used in the calculation, these are all simply grouped means.
 }
+\section{Functions}{
+\itemize{
+\item \code{summary_to_matrix()}: Converts a summarized data.frame or data.table containing
+\code{treatment_block}, \code{success_rate}, and \code{failure_rate} columns into a
+named matrix for use with \code{\link[randomizr:block_ra]{randomizr::block_ra()}}.
+
+}}
+\seealso{
+Other imputation: 
+\code{\link{impute_outcomes}()},
+\code{\link{prep_imputation}()}
+}
+\concept{imputation}
 \keyword{internal}

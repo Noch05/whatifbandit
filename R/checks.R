@@ -1,7 +1,7 @@
 #' @title Validates Inputs For [mab_from_rct()]
 #' @name check_rct_args
 #' @description This function checks to ensure that all required arguments
-#' have been properly passed to the function before continuing with the simulation. When
+#' have been properly passed to [mab_from_rct()] before continuing with the simulation. When
 #' errors are thrown, user-friendly messages are provided to indicate which argument
 #' was misspecified. Additionally, when `verbose = TRUE`, additional warning
 #' messages may be shown if unnecessary arguments are passed.
@@ -9,6 +9,7 @@
 #' @inheritParams prep_rct_data
 #' @returns Throws an error if an argument is missing or misspecified.
 #' @keywords internal
+#' @family checks
 check_rct_args <- function(
   data,
   algorithm,
@@ -41,7 +42,6 @@ check_rct_args <- function(
     check_string
   )
 
-  # Checking Logical values
   check_logical(
     verbose,
     whole_experiment,
@@ -49,7 +49,6 @@ check_rct_args <- function(
     keep_data
   )
 
-  # Checking Column Proper Columns are Provided
   check_cols(
     data = data,
     period_method = period_method,
@@ -60,7 +59,6 @@ check_rct_args <- function(
     blocking = blocking
   )
 
-  # Checking Period Method Arguments
   check_period_method(
     period_method = period_method,
     time_unit = time_unit,
@@ -68,12 +66,9 @@ check_rct_args <- function(
     period_length = period_length
   )
 
-  # Checking Numeric Arguments
-
   check_prop(control_augment, random_assign_prop, discount_rate)
   check_posint(r, ndraws, prior_periods)
 
-  # Checking Data Structure
   check_data(
     data = data,
     col_names = col_names,
@@ -84,10 +79,7 @@ check_rct_args <- function(
   )
 }
 #---------------------------------------------------------------------------------------
-#'
-#' @title Checking existence and declaration of columns
-#' @name check_cols
-#' @description Helper to [check_rct_args()]. This function accepts the user's
+#' @describeIn check_rct_args Helper to [check_rct_args()]. This function accepts the user's
 #' settings for the Multi-Arm-Bandit trial, and checks whether columns in the data have been properly
 #' specified based on these settings.
 #' @inheritParams mab_from_rct
@@ -106,7 +98,6 @@ check_cols <- function(
   verbose,
   blocking
 ) {
-  # All possible columns
   all_cols <- c(
     "success_col",
     "condition_col",
@@ -118,7 +109,6 @@ check_cols <- function(
     "cluster_col"
   )
 
-  # Reason each column might be required
   all_reasons <- list(
     success_col = "it is always required",
     condition_col = "it is always required",
@@ -164,7 +154,6 @@ check_cols <- function(
     )
   )
 
-  # Determine required columns based on settings
   required_cols <- c("success_col", "condition_col")
 
   if (period_method == "date") {
@@ -182,7 +171,6 @@ check_cols <- function(
   req_reasons <- all_reasons[required_cols]
   required_types <- required_types[required_cols]
 
-  # Check for missing required columns
   purrr::pwalk(
     list(required_cols, req_reasons, required_types),
     ~ {
@@ -231,7 +219,6 @@ check_cols <- function(
     })
   }
 
-  # Now handle non-required columns that are present but unnecessary
   if (verbose) {
     non_required_cols <- setdiff(all_cols, required_cols)
     non_req_reasons <- list(
@@ -256,13 +243,19 @@ check_cols <- function(
   }
 }
 
+#' Argument Check Helper Functions
+#' @name check_helpers
+#' @family checks
+#' @param ... Arguments to check
+#' @description
+#' This set of functions is common across the main argument checkers, and they each
+#' check a clear condition on a set of arguments, such ensuring the proper data type.
+NULL
+
+
 #------------------------------------------------------------------------------
-#' @title Checking if Inputs are Logical Values (TRUE and FALSE)
-#' @name check_logical
+#' @describeIn check_helpers Checks for valid logical arguments
 #' @returns Throws an error if any input is not TRUE or FALSE
-#' @description Helper to [check_rct_args()]. This function accepts the user's
-#' settings for logical values in the Multi-Arm-Bandit trial, and checks whether they are valid.
-#' @param ... Arguments to check.
 #' @keywords internal
 check_logical <- function(...) {
   args <- rlang::dots_list(..., .named = TRUE)
@@ -281,12 +274,9 @@ check_logical <- function(...) {
   )
 }
 #--------------------------------------------------------------------------------
-#' @title Checking for Proportions
-#' @name check_prop
-#' @returns Throws an error if any input is not a valid proportion between 0 and 1
-#' @description Helper to [check_rct_args()]. This function accepts the user's
-#' settings for proportion arguments and checks if they are valid proportions between 0 and 1
-#' @inheritParams check_logical
+#' @describeIn check_helpers This function accepts the user's
+#' settings for proportion arguments and checks if they are valid proportions between 0 and 1.
+#' @returns Throws an error if any input is not a valid proportion between 0 and 1.
 #' @keywords internal
 check_prop <- function(...) {
   args <- rlang::dots_list(..., .named = TRUE)
@@ -310,14 +300,10 @@ check_prop <- function(...) {
   }
 }
 #-------------------------------------------------------------------------------
-#' @title Checking If Inputs Are Positive Integers or a Valid String
-#' @name check_posint
-#' @returns Throws an error if any input is not a positive whole number or
-#' a valid string.
-#' @description Helper to [check_rct_args()]. This function accepts the user's
-#' settings for integer arguments and checks if they are valid positive
-#' integers or are a one of the valid strings for the argument.
-#' @inheritParams check_logical
+#' @describeIn check_helpers This function accepts the user's
+#' settings for positive integer arguments and checks if they are valid positive integers.
+#' @returns Throws an error if any input is not a valid positive integer.
+#' @keywords internal
 #' @keywords internal
 check_posint <- function(...) {
   args <- rlang::dots_list(..., .named = TRUE)
@@ -345,12 +331,10 @@ posint <- function(x) {
 }
 #--------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-#' @title Checking for Valid Input Data
-#' @name check_data
-#' @returns Throws an error if the data does not meet the specifications
+#' @describeIn check_rct_args Throws an error if the provided dataset does not meet the specifications
 #' of the trial based on user settings.
-#' @description Helper to [check_rct_args()]. This function accepts the data and checks
-#' whether it has unique ID's whether the period length is valid.
+#' @returns Nothing; Throws an error if the provided dataset does not meet the specifications
+#' of the trial based on user settings.
 #' @inheritParams mab_from_rct
 #' @inheritParams prep_rct_data
 #' @keywords internal
@@ -402,13 +386,11 @@ check_data <- function(
   }
 }
 # ----------------------------------------------------------------------------
-#' @title Checking For Valid Assignment Methods
-#' @name check_period_method
-#' @returns Throws an error if the user is missing necessary arguments to
-#' assign treatments or passes invalid ones.
-#' @description Helper to [check_rct_args()]. This function accepts arguments relating
+#' @describeIn check_rct_args Helper to [check_rct_args()]. This function accepts arguments relating
 #' to how treatment waves are assigned, and checks if they are valid, and if all
 #' supporting arguments are passed as necessary.
+#' @returns Throws an error if the user is missing necessary arguments to
+#' assign treatments or passes invalid ones.
 #' @inheritParams mab_from_rct
 #' @inheritParams prep_rct_data
 #' @keywords internal
@@ -455,12 +437,14 @@ check_period_method <- function(
 }
 #----------------------------------------------------------------------------
 #' Perform Validation Checks for [simulate_mab()]
-#' @description
-#' Ensures all arguments to [simulate_mab()] are properly
-#' provided accordingly.
+#' @description This function checks to ensure that all required arguments
+#' have been properly passed to [simulate_mab()] before continuing with the simulation. When
+#' errors are thrown, user-friendly messages are provided to indicate which argument
+#' was misspecified. Additionally, when `verbose = TRUE`, additional warning
+#' messages may be shown if unnecessary arguments are passed.
 #' @name check_mab_sim
 #' @inheritParams simulate_mab
-#' @returns Nothing; Throws an error if checks are not met
+#' @returns Nothing; Throws an error if all checks are not met.
 #' @keywords internal
 check_mab_sim <- function(
   n,
@@ -580,12 +564,8 @@ check_mab_sim <- function(
   }
 }
 #-------------------------------------------------------------------------------
-#' Validates Summing to 1
-#' @name check_sum1
-#' @description
-#' Checks specified numeric vector sums to 1, throws an error if not
-#' @param ... Arguments to check.
-#' @returns Nothing; Throws an error if the check fails
+#' @describeIn check_helpers Checks if specified numeric vectors each sum to 1.
+#' @returns Nothing; Throws an error if a numeric vector does not sum to 1.
 #' @keywords internal
 check_sum1 <- function(...) {
   args <- rlang::dots_list(..., .named = TRUE)
@@ -600,14 +580,11 @@ check_sum1 <- function(...) {
   })
 }
 
-#' Validates String Arguments
-#' @name check_string
-#' @description
-#' Checks specific string arguments against provided valid arguments
-#' @param arg Argument to check
-#' @param valid vector of valid arguments
-#' @param name name of the argument
-#' @returns Nothing; Throws an error if check fails
+#' @describeIn check_helpers Checks specific string arguments against provided valid arguments.
+#' @param arg Argument to check.
+#' @param valid vector of valid arguments.
+#' @param name name of the argument.
+#' @returns Nothing; Throws an error of the string argument is invalid.
 check_string <- function(arg, valid, name) {
   if (!arg %in% valid) {
     rlang::abort(
@@ -622,13 +599,8 @@ check_string <- function(arg, valid, name) {
     )
   }
 }
-
-#' Validates Names
-#' @name check_names
-#' @description
-#' Checks if provided objects have `names` attribute
-#' @param ... objects to check
-#' @returns Nothing; Throws an error if check fails
+#' @describeIn check_helpers Checks if provided objects have `names` attribute.
+#' @returns Nothing; Throws an if an argument does not have `names` attribute.
 check_names <- function(...) {
   args <- rlang::dots_list(..., .named = TRUE)
   purrr::iwalk(args, \(arg, name) {
@@ -638,12 +610,10 @@ check_names <- function(...) {
   })
 }
 
-#' Validates column names for `p` matrix
-#' @description
-#' Checks if `colnames(p)` matches provided labels
+#' @describeIn check_mab_sim Checks if `colnames(p)` matches provided labels
 #' @inheritParams simulate_mab
-#' @param expected Expected set of group labels
-#' @returns Nothing; Throws an error if condition is not met
+#' @param expected Expected set of group labels.
+#' @returns Nothing; Throws an error if `colnames(p)` doesn't match provided labels.
 
 check_p_colnames <- function(p, expected) {
   if (!setequal(colnames(p), expected)) {

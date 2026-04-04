@@ -60,17 +60,19 @@ utils::globalVariables(c(
   "standard_dev",
   "cum_n"
 ))
+#' Misellaneous Helper Functions
+#' @name misc_helpers
+NULL
 
 #-------------------------------------------------------------------------------
 #' Column as a Named Vector
-#' @name as_named_vec
+#' @rdname misc_helpers
 #' @description
 #' Converts `data.frame` column into a vector using another column as the names for the vector
 #' @param df `data.frame` used.
 #' @param val Column name of values
-#' @param name Column value of names
+#' @param name Column name of names
 #' @returns vector with values `val` and names `name`
-#'
 #' @keywords internal
 as_named_vec <- function(df, val, name) {
   x <- df[[val]]
@@ -80,7 +82,7 @@ as_named_vec <- function(df, val, name) {
 
 #' Verbose Printer
 #' @description Shorthand Function for checking `verbose` and then printing if TRUE
-#' @name verbose_log
+#' @rdname misc_helpers
 #' @param message The message to be printed to screen, as a string.
 #' @param log Logical; Whether or not to print the message, this will always be
 #' the `verbose` argument passed from higher functions.
@@ -96,10 +98,8 @@ verbose_log <- function(log, message) {
 #------------------------------------------
 #------------------------------------------------------------------------------
 #' Formula Parser
-#' @description
-#' Parsers the input formula for [mab_from_rct()]
-#' @name formula_parse
-#' @inheritParams mab_from_rct
+#' @description Parsers the input formula for [mab_from_rct()]
+#' @param formula `formula` passed from [mab_from_rct()]
 #' @returns List of columns specified from formula.
 #' @keywords internal
 
@@ -131,10 +131,11 @@ formula_parse <- function(formula) {
   return(parsed)
 }
 #' Gather Args
-#' @description Helper for formula parsing. Parses the expression, and splits the function call from the arguments.
 #' @param x String representing an `R` expression, like `"block(x1)"`.
 #' @returns A list containing the function call, and the arguments so `"Block(x1)"` gets turned into a list
 #' with elements `block, "x1"`.
+#' @describeIn formula_parse Helper for formula parsing. Parses the expression, and splits the function call from the arguments.
+#' @keywords internal
 
 gather_args <- function(x) {
   if (length(x) == 0) {
@@ -151,11 +152,17 @@ gather_args <- function(x) {
   return(list(call = call[[1]], args = args))
 }
 
-# Helpers not requiring documentation, simply identity functions for block and cluster cases.
-
+#' @describeIn formula_parse Block
+#' @param ... Blocking variables from `formula`
+#' @returns Vector of blocking variables
+#' @keywords internal
 block <- function(...) {
   c(...)
 }
-cluster <- function(x) {
-  x
+#' @describeIn formula_parse Cluster
+#' @param c cluster variable from `formula`
+#' @returns cluster variable
+#' @keywords internal
+cluster <- function(c) {
+  c
 }

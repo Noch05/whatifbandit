@@ -2,6 +2,9 @@
 % Please edit documentation in R/impute.R
 \name{impute_outcomes}
 \alias{impute_outcomes}
+\alias{compute_impute}
+\alias{impute_outcomes.data.frame}
+\alias{impute_outcomes.data.table}
 \title{Imputing New Outcomes of Multi-Arm-Bandit Trial}
 \usage{
 impute_outcomes(
@@ -12,6 +15,26 @@ impute_outcomes(
   delayed_feedback,
   idx
 )
+
+compute_impute(imputation_info, success_col)
+
+\method{impute_outcomes}{data.frame}(
+  data,
+  imputation_info,
+  success_col,
+  success_date_col,
+  delayed_feedback,
+  idx
+)
+
+\method{impute_outcomes}{data.frame}(
+  data,
+  imputation_info,
+  success_col,
+  success_date_col,
+  delayed_feedback,
+  idx
+)
 }
 \arguments{
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
@@ -19,11 +42,15 @@ of a traditional Randomized Controlled Trial (RCT).}
 
 \item{imputation_info}{List containing all necessary information for imputation, generated each period by \code{\link[=prep_imputation]{prep_imputation()}}}
 
-\item{success_date_col}{Bare column in \code{data}; contains original dates each success occurred. Only necessary when \code{delayed_feedback = TRUE}. Must be of type \code{Date}, not a character string.}
+\item{success_date_col}{Bare column in \code{data}; contains original dates each success occurred.
+Only necessary when \code{delayed_feedback = TRUE}. Must be of type \code{Date}, not a character string.}
 
-\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon as a treatment is assigned, the outcome is realized and known.
-If \code{TRUE}, delayed feedback is assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not known to the simulation, until a certain date.
-When re-computing the adaptive assignment probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the assignment are treated as failures. a}
+\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon
+as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is
+assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
+known to the simulation, until a certain date. When re-computing the adaptive assignment
+probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the
+assignment are treated as failures. a}
 
 \item{idx}{Index of rows imputed in the period, used to update the original data.}
 
@@ -31,6 +58,8 @@ When re-computing the adaptive assignment probabilities via Thompsom Samplings o
 }
 \value{
 Updated \code{data} object with all the updates from the current period of the simulation
+
+Numeric vector of imputed outcomes
 }
 \description{
 Imputes outcomes for the current treatment assignment period.
@@ -50,11 +79,15 @@ imputed as success again, will have their original date kept. This assumes that 
 treatment effect on the date of success, which may or may not be valid depending on the context of the
 experiment.
 }
-\seealso{
+\section{Functions}{
 \itemize{
-\item \code{\link[=prep_imputation]{prep_imputation()}}
-\item \code{\link[=precompute_imputation]{precompute_imputation()}}
-\item \code{\link[randomizr:block_ra]{randomizr::block_ra()}}
+\item \code{compute_impute()}: Performs all \code{data.table}/\code{data.frame} agnostic portions of \code{impute_sucess}
+
+}}
+\seealso{
+Other imputation: 
+\code{\link{precompute_imputation}()},
+\code{\link{prep_imputation}()}
 }
-}
+\concept{imputation}
 \keyword{internal}

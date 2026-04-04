@@ -2,22 +2,48 @@
 % Please edit documentation in R/utils.R
 \name{formula_parse}
 \alias{formula_parse}
+\alias{gather_args}
+\alias{block}
+\alias{cluster}
 \title{Formula Parser}
 \usage{
 formula_parse(formula)
+
+gather_args(x)
+
+block(...)
+
+cluster(c)
 }
 \arguments{
-\item{formula}{A \code{formula} object specifying outcome variable, treatment indicator, treatment blocking and treatment clustering. The treatment variable should always be the first variable following \code{~}
-(Additional covariates to be added in later updates). Clustering and blocking variables
-should being included in specific \code{block()} or \code{cluster()} groups in the formula, e.g. \code{outcome ~ treatment + block(x1, x2, x3) + cluster(x4)}. Given a set of probabilities for assigning treatments,
-treatment blocking applies these within each block indpendently instead of the whole sample, while for clustering assignment occurs at the cluster level instead of the individual level, so all observations
-in a cluster have the same treatment. When blocks and clusters are specified together each cluster must be fully nested in a single block. See below for details. To speciy without clustering or blocking
-simply do not provide them in the formula. Clusters can only ever be given by 1 variable, while blocks can be a combination of variables.}
+\item{formula}{\code{formula} passed from \code{\link[=mab_from_rct]{mab_from_rct()}}}
+
+\item{x}{String representing an \code{R} expression, like \code{"block(x1)"}.}
+
+\item{...}{Blocking variables from \code{formula}}
+
+\item{c}{cluster variable from \code{formula}}
 }
 \value{
 List of columns specified from formula.
+
+A list containing the function call, and the arguments so \code{"Block(x1)"} gets turned into a list
+with elements \verb{block, "x1"}.
+
+Vector of blocking variables
+
+cluster variable
 }
 \description{
 Parsers the input formula for \code{\link[=mab_from_rct]{mab_from_rct()}}
 }
+\section{Functions}{
+\itemize{
+\item \code{gather_args()}: Helper for formula parsing. Parses the expression, and splits the function call from the arguments.
+
+\item \code{block()}: Block
+
+\item \code{cluster()}: Cluster
+
+}}
 \keyword{internal}

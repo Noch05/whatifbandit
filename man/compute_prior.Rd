@@ -5,6 +5,7 @@
 \alias{compute_prior.fast}
 \alias{compute_prior.data.frame}
 \alias{compute_prior.data.table}
+\alias{finalize_prior_list}
 \title{Gather Past Results for Given Assignment Period}
 \usage{
 compute_prior(
@@ -46,27 +47,42 @@ compute_prior(
   conditions,
   current_period
 )
+
+finalize_prior_list(prior_list, conditions)
 }
 \arguments{
 \item{current_data}{A \code{data.frame} or \code{data.table} with only observations from the current sampling period.}
 
 \item{prior_data}{A \code{data.frame} or \code{data.table} with only the observations from the prior index.}
 
-\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon as a treatment is assigned, the outcome is realized and known.
-If \code{TRUE}, delayed feedback is assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not known to the simulation, until a certain date.
-When re-computing the adaptive assignment probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the assignment are treated as failures. a}
+\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon
+as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is
+assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
+known to the simulation, until a certain date. When re-computing the adaptive assignment
+probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the
+assignment are treated as failures. a}
 
-\item{discount_rate}{Rate for discounting observations from earlier periods when updating assignment probabilities.
-A value between 0 and 1, where outcomes from \code{k} periods ago are weighted by \code{discount_rate^k}. Default is 1 for no discounting.}
+\item{discount_rate}{Rate for discounting observations from earlier periods when updating
+assignment probabilities. A value between 0 and 1, where outcomes from \code{k} periods ago are
+weighted by \code{discount_rate^k}. Default is 1 for no discounting.}
+
+\item{conditions}{Character vector of all treatment conditions in the trial.}
+
+\item{prior_list}{Named list with elements \code{mab_condition}, \code{successes}, \code{n},
+produced by converting a summarized data.frame/data.table via \code{\link[=as.list]{as.list()}}.}
 }
 \value{
 A list containing 2 named vectors: the weighted number of successes, and the weighted number of assignments, where the names of each vector
 correspond to the treatment condition.
+
+A named list with elements \code{successes}, \code{n},
+each a named numeric vector of length \code{length(conditions)}.
 }
 \description{
-Summarizes results of prior periods to update assignment probabilities in the current period. This function
-calculates the number of success under each treatment and the total number of observations assigned to each treatment which are used
-to calculate UCB1 values or Thompson sampling probabilities. These values are weighted by the discount_rate provided.
+Summarizes results of prior periods to update assignment probabilities in the current period.
+This function calculates the number of success under each treatment and the total number of observations
+assigned to each treatment which are used to calculate UCB1 values or Thompson sampling probabilities.
+These values are weighted by the discount_rate provided.
 }
 \details{
 When \code{delayed_feedback = TRUE}, the maximum value from the specified
@@ -76,10 +92,17 @@ All successes that occur past this date are masked and treated as failures for t
 of assigning this treatments periods, as it simulates the researchers not having
 received that information yet.
 }
-\seealso{
+\section{Functions}{
 \itemize{
-\item \code{\link[=mab_loop]{mab_loop()}}
-\item \code{\link[=compute_bandit]{compute_bandit()}}
+\item \code{finalize_prior_list()}: Accepts the raw list output of an aggregation over \code{prior_data}
+(from \code{\link[=compute_prior]{compute_prior()}}), names each vector by condition, fills any
+conditions absent from the prior window with zeros, and sorts alphabetically.
+
+}}
+\seealso{
+Other assign: 
+\code{\link{assign_treatments}()},
+\code{\link{compute_bandit}()}
 }
-}
+\concept{assign}
 \keyword{internal}
