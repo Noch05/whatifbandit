@@ -3,6 +3,8 @@
 #' @name run_mab
 #' @description Internal helper. Centralizes necessary functions to conduct a
 #' a MAB trial with adaptive inference. It assumes all inputs have been preprocessed already.
+#' @param data `tibble` or `data.table` holding necessary information to complete the simulation.
+#' Also used to store simulation outputs.
 #' @inheritParams mab_from_rct
 #' @inheritParams prep_rct_data
 #' @inheritParams simulate_mab
@@ -172,6 +174,7 @@ run_mab <- function(
 #' @inheritParams prep_rct_data
 #' @inheritParams simulate_mab
 #' @param num_conditions Number of conditions, equivalent to `length(conditions)`.
+#' @param periods Number of simulation periods.
 #' @returns  A named list containing:
 #' \itemize{
 #' \item `final_data`: The processed `tibble` or `data.table`, with the trial's results.
@@ -235,86 +238,95 @@ mab_loop <- function(
     as.numeric()
   names(equal_probs) <- conditions
 
-  for (i in 2:periods) {
-    current_idx <- starts[i]:ends[i]
-    verbose_log(verbose, paste0("Period: ", i))
+  if (periods > 1) {
+    for (i in 2:periods) {
+      current_idx <- starts[i]:ends[i]
+      verbose_log(verbose, paste0("Period: ", i))
 
-    prior <- compute_lookback(prior_periods = prior_periods, current_period = i)
-
-    current_data <- data[current_idx, ]
-    prior_data <- data[starts[prior]:ends[i - 1], ]
-
-    current_bandit <- compute_prior(
-      current_data = current_data,
-      prior_data = prior_data,
-      delayed_feedback = delayed_feedback,
-      assignment_date_col = col_names[["assignment_date_col"]],
-      conditions = conditions,
-      discount_rate = discount_rate,
-      current_period = i
-    ) |>
-      compute_bandit(
-        algorithm = algorithm,
-        num_conditions = num_conditions,
-        conditions = conditions,
-        current_period = i,
-        control_augment = control_augment,
-        ndraws = ndraws
-      )
-    bandits[["bandit_stat"]][i - 1, ] <- current_bandit[["bandit"]]
-
-    current_data <- assign_treatments(
-      current_data = current_data,
-      probs = current_bandit[["assignment_prob"]],
-      blocking = blocking,
-      clustering = clustering,
-      cluster_col = col_names[["cluster_col"]],
-      condition_col = col_names[["condition_col"]],
-      conditions = conditions,
-      random_assign_prop = random_assign_prop,
-      random_probs = equal_probs,
-      sim_type = sim_type
-    )
-
-    bandits[["assignment_prob"]][i, ] <- (current_bandit[["assignment_prob"]] *
-      (1 - random_assign_prop)) +
-      (equal_probs * random_assign_prop)
-
-    if (sim_type == "resim") {
-      prepped_impute <- prep_imputation(
-        current_data = current_data,
-        whole_experiment = whole_experiment,
-        imputation_information = imputation_information,
-        block_cols = col_names[["block_cols"]],
-        blocking = blocking,
-        delayed_feedback = delayed_feedback,
+      prior <- compute_lookback(
+        prior_periods = prior_periods,
         current_period = i
       )
-      col_names[["success_col"]]
-      data <- impute_outcomes(
-        data = data,
-        imputation_info = prepped_impute,
-        success_col = col_names[["success_col"]],
-        success_date_col = col_names[["success_date_col"]],
-        delayed_feedback = delayed_feedback,
-        idx = current_idx
-      )
-    } else if (sim_type == "param") {
-      data <- generate_outcomes(
+
+      current_data <- data[current_idx, ]
+      prior_data <- data[starts[prior]:ends[i - 1], ]
+
+      current_bandit <- compute_prior(
         current_data = current_data,
-        data = data,
-        p = p,
-        idx = current_idx,
-        simulate_dates = simulate_dates,
-        time_model = time_model,
-        time_model_args = time_model_args
+        prior_data = prior_data,
+        delayed_feedback = delayed_feedback,
+        assignment_date_col = col_names[["assignment_date_col"]],
+        conditions = conditions,
+        discount_rate = discount_rate,
+        current_period = i
+      ) |>
+        compute_bandit(
+          algorithm = algorithm,
+          num_conditions = num_conditions,
+          conditions = conditions,
+          current_period = i,
+          control_augment = control_augment,
+          ndraws = ndraws
+        )
+      bandits[["bandit_stat"]][i - 1, ] <- current_bandit[["bandit"]]
+
+      current_data <- assign_treatments(
+        current_data = current_data,
+        probs = current_bandit[["assignment_prob"]],
+        blocking = blocking,
+        clustering = clustering,
+        cluster_col = col_names[["cluster_col"]],
+        condition_col = col_names[["condition_col"]],
+        conditions = conditions,
+        random_assign_prop = random_assign_prop,
+        random_probs = equal_probs,
+        sim_type = sim_type
       )
-    } else {
-      # Randomization Inference, No Change in Outcomes
-      if (data.table::is.data.table(data)) {
-        data[current_idx, mab_condition := current_data[, mab_condition]]
+
+      bandits[["assignment_prob"]][i, ] <- (current_bandit[[
+        "assignment_prob"
+      ]] *
+        (1 - random_assign_prop)) +
+        (equal_probs * random_assign_prop)
+
+      if (sim_type == "resim") {
+        prepped_impute <- prep_imputation(
+          current_data = current_data,
+          whole_experiment = whole_experiment,
+          imputation_information = imputation_information,
+          block_cols = col_names[["block_cols"]],
+          blocking = blocking,
+          delayed_feedback = delayed_feedback,
+          current_period = i
+        )
+        col_names[["success_col"]]
+        data <- impute_outcomes(
+          data = data,
+          imputation_info = prepped_impute,
+          success_col = col_names[["success_col"]],
+          success_date_col = col_names[["success_date_col"]],
+          delayed_feedback = delayed_feedback,
+          idx = current_idx
+        )
+      } else if (sim_type == "param") {
+        data <- generate_outcomes(
+          current_data = current_data,
+          data = data,
+          p = p,
+          idx = current_idx,
+          simulate_dates = simulate_dates,
+          time_model = time_model,
+          time_model_args = time_model_args
+        )
       } else {
-        data[["mab_condition"]][current_idx] <- current_data[["mab_condition"]]
+        # Randomization Inference, No Change in Outcomes
+        if (data.table::is.data.table(data)) {
+          data[current_idx, mab_condition := current_data[, mab_condition]]
+        } else {
+          data[["mab_condition"]][current_idx] <- current_data[[
+            "mab_condition"
+          ]]
+        }
       }
     }
   }

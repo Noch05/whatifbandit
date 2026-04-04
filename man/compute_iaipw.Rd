@@ -13,8 +13,8 @@ compute_iaipw(data, assignment_probs, periods, conditions)
 \method{compute_iaipw}{data.table}(data, assignment_probs, periods, conditions)
 }
 \arguments{
-\item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
-of a traditional Randomized Controlled Trial (RCT).}
+\item{data}{\code{tibble} or \code{data.table} holding necessary information to complete the simulation.
+Also used to store simulation outputs.}
 
 \item{assignment_probs}{A \code{tibble}/\code{data.table} containing the probabilities of being
 assigned each treatment at a given period.}

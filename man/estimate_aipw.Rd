@@ -15,14 +15,16 @@ estimate_aipw(
 )
 }
 \arguments{
-\item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
-of a traditional Randomized Controlled Trial (RCT).}
+\item{data}{\code{tibble} or \code{data.table} holding necessary information to complete the simulation.
+Also used to store simulation outputs.}
 
 \item{assignment_probs}{A \code{tibble}/\code{data.table} containing the probabilities of being
 assigned each treatment at a given period.}
 
 \item{conditions}{Character vector of treatment condition labels. If a control group is specified
 the \code{names} attribute should be present with the control group labelled \code{"control"}.}
+
+\item{iaipw}{Invidual AIPW scores computed by \code{\link[=compute_iaipw]{compute_iaipw()}}.}
 
 \item{cluster_col}{String; name of column with cluster indicies.}
 

@@ -68,6 +68,8 @@ weighted by \code{discount_rate^k}. Default is 1 for no discounting.}
 
 \item{conditions}{Character vector of all treatment conditions in the trial.}
 
+\item{current_period}{The current period number.}
+
 \item{prior_list}{Named list with elements \code{mab_condition}, \code{successes}, \code{n},
 produced by converting a summarized data.frame/data.table via \code{\link[=as.list]{as.list()}}.}
 }

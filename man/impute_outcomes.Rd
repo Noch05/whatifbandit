@@ -42,6 +42,8 @@ of a traditional Randomized Controlled Trial (RCT).}
 
 \item{imputation_info}{List containing all necessary information for imputation, generated each period by \code{\link[=prep_imputation]{prep_imputation()}}}
 
+\item{success_col}{String; name of column holding outcomes from original experiment.}
+
 \item{success_date_col}{Bare column in \code{data}; contains original dates each success occurred.
 Only necessary when \code{delayed_feedback = TRUE}. Must be of type \code{Date}, not a character string.}
 
@@ -53,6 +55,8 @@ probabilities via Thompsom Samplings or UCB1 outcomes that have not been observe
 assignment are treated as failures. a}
 
 \item{idx}{Index of rows imputed in the period, used to update the original data.}
+
+\item{success__date_col}{String; name of column holding outcome observation date from original experiment.}
 }
 \value{
 Updated \code{data} object with all the updates from the current period of the simulation

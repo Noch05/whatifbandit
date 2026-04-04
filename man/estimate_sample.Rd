@@ -13,8 +13,8 @@ estimate_sample(data, conditions)
 \method{estimate_sample}{data.table}(data, conditions)
 }
 \arguments{
-\item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
-of a traditional Randomized Controlled Trial (RCT).}
+\item{data}{\code{tibble} or \code{data.table} holding necessary information to complete the simulation.
+Also used to store simulation outputs.}
 
 \item{conditions}{Character vector of treatment condition labels. If a control group is specified
 the \code{names} attribute should be present with the control group labelled \code{"control"}.}

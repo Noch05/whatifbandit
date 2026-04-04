@@ -6,6 +6,7 @@
 #' These values are weighted by the discount_rate provided.
 #'
 #' @inheritParams run_mab
+#' @param current_period The current period number.
 #' @param current_data A `data.frame` or `data.table` with only observations from the current sampling period.
 #' @param prior_data A `data.frame` or `data.table` with only the observations from the prior index.
 #' @returns A list containing 2 named vectors: the weighted number of successes, and the weighted number of assignments, where the names of each vector

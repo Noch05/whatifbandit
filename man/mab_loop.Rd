@@ -97,6 +97,8 @@ performance and accuracy concerns.}
 
 \item{verbose}{Logical; whether or not to print intermediate messages. Default is \code{FALSE}.}
 
+\item{periods}{Number of simulation periods.}
+
 \item{num_conditions}{Number of conditions, equivalent to \code{length(conditions)}.}
 
 \item{time_model}{An optional function with signature \verb{function(n, conditions, success, blocks = NULL, clusters = NULL, ...)}

@@ -227,6 +227,7 @@ summary_to_matrix <- function(df) {
 #' @inheritParams mab_loop
 #' @inheritParams impute_outcomes
 #' @param block_cols Names of the blocking columns
+#' @param impute_idx Index of rows which require imputed outcomes for this period.
 #' @returns A named list containing:
 #' \itemize{
 #' \item `current_data`: A `tibble` or `data.table` containing `impute_block` column to guide the outcome imputations
@@ -372,6 +373,8 @@ check_impute <- function(impute_success, current_data, impute_idx) {
 #' @inheritParams mab_from_rct
 #' @param imputation_info List containing all necessary information for imputation, generated each period by [prep_imputation()]
 #' @param idx Index of rows imputed in the period, used to update the original data.
+#' @param success_col String; name of column holding outcomes from original experiment.
+#' @param success__date_col String; name of column holding outcome observation date from original experiment.
 #' @returns Updated `data` object with all the updates from the current period of the simulation
 #' @details
 #' When `delayed_feedback = TRUE`, dates of success are imputed according to the average

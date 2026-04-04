@@ -184,6 +184,7 @@ compute_iaipw.data.table <- function(
 #'
 #' @inheritParams compute_iaipw
 #' @inheritParams run_mab
+#' @param iaipw Invidual AIPW scores computed by [compute_iaipw()].
 #' @param cluster_col String; name of column with cluster indicies.
 #' @returns A `tibble`/`data.table` containing the AIPW estimate of treatment success, AIPW variance,
 #' sample proportion of successful treatments (sample mean), and sample mean variance.
@@ -273,6 +274,7 @@ estimate_aipw <- function(
 }
 
 #' IPW Estimates for Probability of Success
+#' @name estimate_ipw
 #' @description
 #' Computes the IPW estimates for the true probabilities of success using [estimatr::lm_robust()] to perform
 #' an IPW weighted regressionn for estimation. If blocking was used for the trial, blocks are included

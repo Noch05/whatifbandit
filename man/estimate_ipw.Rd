@@ -7,8 +7,8 @@
 estimate_ipw(data, cluster_col, clustering, conditions)
 }
 \arguments{
-\item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
-of a traditional Randomized Controlled Trial (RCT).}
+\item{data}{\code{tibble} or \code{data.table} holding necessary information to complete the simulation.
+Also used to store simulation outputs.}
 
 \item{cluster_col}{String; name of column with cluster indicies.}
 
