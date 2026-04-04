@@ -2,9 +2,42 @@
 % Please edit documentation in R/assignments.R
 \name{compute_prior}
 \alias{compute_prior}
+\alias{compute_prior.fast}
+\alias{compute_prior.data.frame}
+\alias{compute_prior.data.table}
 \title{Gather Past Results for Given Assignment Period}
 \usage{
 compute_prior(
+  current_data,
+  prior_data,
+  delayed_feedback,
+  assignment_date_col = NULL,
+  discount_rate,
+  conditions,
+  current_period
+)
+
+\method{compute_prior}{fast}(
+  current_data,
+  prior_data,
+  delayed_feedback,
+  assignment_date_col = NULL,
+  discount_rate,
+  conditions,
+  current_period
+)
+
+\method{compute_prior}{data.frame}(
+  current_data,
+  prior_data,
+  delayed_feedback,
+  assignment_date_col = NULL,
+  discount_rate,
+  conditions,
+  current_period
+)
+
+\method{compute_prior}{data.table}(
   current_data,
   prior_data,
   delayed_feedback,

@@ -2,6 +2,7 @@
 % Please edit documentation in R/run_mab.R
 \name{mab_loop}
 \alias{mab_loop}
+\alias{compute_lookback}
 \title{Runs Multi-Arm Bandit Trial}
 \usage{
 mab_loop(
@@ -30,6 +31,8 @@ mab_loop(
   time_model,
   time_model_args
 )
+
+compute_lookback(prior_periods = NULL, current_period)
 }
 \arguments{
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
@@ -91,23 +94,43 @@ that returns a vector of \link[lubridate:period]{lubridate::period} objects whic
 during the trial, so outcomes are imperfectly observed. Only used when\code{dates_of_assignment} is also supplied. Dates can be generated even when \code{delayed_feedback == FALSE},
 but they will not be used.
 Default \code{NULL}. Other optional arguments CANNOT share names as arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
+
+\item{current_period}{The current period of the simulation. Defined by loop structure inside \code{\link[=mab_loop]{mab_loop()}}.}
 }
 \value{
 A named list containing:
 \itemize{
-\item \code{final_data}: The processed \code{tibble} or \code{data.table}, containing new columns pertaining to the results of the trial.
-\item \code{bandits}: A \code{tibble} or \code{data.table} containing the UCB1 values or Thompson Sampling posterior distributions for each period.
+\item \code{final_data}: The processed \code{tibble} or \code{data.table}, with the trial's results.
+\item \code{bandits}: A \code{tibble} or \code{data.table} containing the UCB1 or Thompson Sampling values for each period.
 \item \code{assignment_probs}: A \code{tibble} or \code{data.table} containing the probability of being assigned each treatment arm at a given period.
+\item \code{assignment_quantities}: A numeric vector of the total number of observations assigned to each treatment arm.
 }
+
+Numeric value referring to the period index to look back from.
 }
 \description{
 Performs a full Multi-Arm Bandit (MAB) trial using Thompson Sampling or UCB1.
 The function provides loop around each step of the process for each treatment wave, performing adaptive
-treatment assignment, and outcome imputation. Supports flexible customizations in treatment blocking strategy,
-stationary/non-stationary bandits, control augmentation, and hybrid assignment.
+treatment assignment, and outcome imputation or generation as needed.
 }
 \details{
-The first period is used to initialize the trial, so the MAB loop
+The first period is used to initialize the trial, so the loop
 starts at period number 2.
 }
+\section{Functions}{
+\itemize{
+\item \code{compute_lookback()}: Used during \code{\link[=mab_loop]{mab_loop()}} to create a vector of prior periods dynamically based on the specified
+number of prior periods.
+
+}}
+\seealso{
+Other simulation: 
+\code{\link{collect_mab_results}()},
+\code{\link{run_mab}()}
+
+Other simulation: 
+\code{\link{collect_mab_results}()},
+\code{\link{run_mab}()}
+}
+\concept{simulation}
 \keyword{internal}

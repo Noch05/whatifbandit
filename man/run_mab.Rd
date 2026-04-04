@@ -109,20 +109,30 @@ during the trial, so outcomes are imperfectly observed. Only used when\code{date
 but they will not be used.
 Default \code{NULL}. Other optional arguments CANNOT share names as arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
 
-\item{time_model_args}{Arguments passed to \code{time_model} function}
+\item{time_model_args}{Arguments passed to \code{time_model} function.}
 }
 \value{
 : A named list containing:
 \itemize{
-\item \code{final_data}: The processed \code{tibble} or \code{data.table}, containing new columns pertaining to the results of the trial.
-\item \code{bandits}: A \code{tibble} or \code{data.table} containing the UCB1 values or Thompson Sampling posterior distributions for each period.
+\item \code{final_data}: The processed \code{tibble} or \code{data.table}, with the trial's results.
+\item \code{bandits}: A \code{tibble} or \code{data.table} containing the UCB1 or Thompson Sampling values for each period.
 \item \code{assignment_probs}: A \code{tibble} or \code{data.table} containing the probability of being assigned each treatment arm at a given period.
-\item \code{estimates}: A \code{tibble} or \code{data.table} containing all estimates of the means and variances related to the treatment arms.
-\item \code{settings}: A named list of the configuration settings used in the trial.
+\item \code{assignment_quantities}: A numeric vector of the total number of observations assigned to each treatment arm.
+\item \code{estimates}: A \code{tibble} or \code{data.table} containing the estimates of the specified estimators for each treatment arm.
+\item \code{ipw_vcov}: Covariance matrix from IPW estimation.
+\item \code{call}: \code{NULL}; initialized for later assignment.
+\item \code{args}: \code{NULL}; initialized for later assignment.
+\item \code{furrr}: \code{NULL}; initialized for later assignment.
 }
 }
 \description{
 Internal helper. Centralizes necessary functions to conduct a
-a MAB trial with adaptive inference. It assumes all inputs have been preprocessed already
+a MAB trial with adaptive inference. It assumes all inputs have been preprocessed already.
 }
+\seealso{
+Other simulation: 
+\code{\link{collect_mab_results}()},
+\code{\link{mab_loop}()}
+}
+\concept{simulation}
 \keyword{internal}

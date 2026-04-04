@@ -58,4 +58,12 @@ Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 20
 "Confidence Intervals for Policy Evaluation in Adaptive Experiments." \emph{Proceedings of the National Academy of Sciences of the United States of America} 118
 (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 }
+\seealso{
+Other estimation: 
+\code{\link{compute_iaipw}()},
+\code{\link{estimate_ipw}()},
+\code{\link{estimate_sample}()},
+\code{\link{inference_helpers}}
+}
+\concept{estimation}
 \keyword{internal}

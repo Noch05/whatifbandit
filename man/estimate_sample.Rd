@@ -2,9 +2,15 @@
 % Please edit documentation in R/inference.R
 \name{estimate_sample}
 \alias{estimate_sample}
-\title{Biased Sample Estimates}
+\alias{estimate_sample.data.frame}
+\alias{estimate_sample.data.table}
+\title{Sample Estimates}
 \usage{
 estimate_sample(data, conditions)
+
+\method{estimate_sample}{data.frame}(data, conditions)
+
+\method{estimate_sample}{data.table}(data, conditions)
 }
 \arguments{
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
@@ -14,7 +20,16 @@ of a traditional Randomized Controlled Trial (RCT).}
 \code{data.table} or \code{tibble} with the biased sample estimates.
 }
 \description{
-Computes Sample Mean and its variance using the traditional formula, which is biased under the adaptive experiment.
-Only provided for comparison, and should not be used for any inference purposes. No adjustment for clustering is made.
+Computes sample proportion and its variance using the traditional formula, which is biased under the adaptive experiment.
+Only provided for comparison, and should not be used for any inference purposes unless there is only 1 period.
+No adjustment for clustering is made.
 }
+\seealso{
+Other estimation: 
+\code{\link{compute_iaipw}()},
+\code{\link{estimate_aipw}()},
+\code{\link{estimate_ipw}()},
+\code{\link{inference_helpers}}
+}
+\concept{estimation}
 \keyword{internal}

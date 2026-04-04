@@ -2,6 +2,8 @@
 % Please edit documentation in R/assignments.R
 \name{compute_bandit}
 \alias{compute_bandit}
+\alias{compute_bandit.thompson}
+\alias{compute_bandit.ucb1}
 \title{Calculate Multi-Arm Bandit Decision Based on Algorithm}
 \usage{
 compute_bandit(
@@ -13,9 +15,13 @@ compute_bandit(
   control_augment = 0,
   ndraws
 )
+
+\method{compute_bandit}{thompson}(past_results, conditions, current_period, ndraws)
+
+\method{compute_bandit}{ucb1}(past_results, num_conditions, conditions, current_period)
 }
 \arguments{
-\item{past_results}{A \code{tibble}/`data.table`` containing summary of prior periods, with
+\item{past_results}{A \code{tibble}/\code{data.table} containing summary of prior periods, with
 successes, number of observations, and success rates, which is created by \code{\link[=compute_prior]{compute_prior()}}.}
 
 \item{algorithm}{A character string specifying the MAB algorithm to use. Options are \code{"Thompson"} or \code{"UCB1"}, ignoring case. Algorithm

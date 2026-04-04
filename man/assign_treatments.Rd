@@ -2,6 +2,10 @@
 % Please edit documentation in R/assignments.R
 \name{assign_treatments}
 \alias{assign_treatments}
+\alias{build_ra_args}
+\alias{compute_assignments}
+\alias{assign_treatments.data.frame}
+\alias{assign_treatments.data.table}
 \title{Adaptively Assign Treatments in a Period}
 \usage{
 assign_treatments(
@@ -14,6 +18,59 @@ assign_treatments(
   cluster_col = NULL,
   random_assign_prop,
   random_probs = NULL,
+  sim_type
+)
+
+build_ra_args(
+  idx,
+  current_data,
+  probs = NULL,
+  conditions,
+  blocking,
+  clustering,
+  cluster_col = NULL,
+  dt
+)
+
+compute_assignments(
+  current_data,
+  band_idx,
+  rand_idx,
+  probs,
+  random_probs = NULL,
+  conditions,
+  blocking,
+  clustering,
+  cluster_col = NULL
+)
+
+\method{assign_treatments}{data.frame}(
+  current_data,
+  probs,
+  blocking,
+  clustering,
+  conditions,
+  condition_col = NULL,
+  cluster_col = NULL,
+  rand_idx,
+  band_idx,
+  random_probs = NULL,
+  assignment_type,
+  sim_type
+)
+
+\method{assign_treatments}{data.table}(
+  current_data,
+  probs,
+  blocking,
+  clustering,
+  conditions,
+  condition_col = NULL,
+  cluster_col = NULL,
+  rand_idx,
+  band_idx,
+  random_probs = NULL,
+  assignment_type,
   sim_type
 )
 }
@@ -41,10 +98,22 @@ of \code{length(conditions)} with the same equal probability for all elements.}
 
 \item{sim_type}{String; Type of simulation to conduct, either \code{"resim"}, \code{"param"}, or "\verb{test"}, for a resimulated rct,
 simulation from population parameters, or simulation for the randomization joint test.}
+
+\item{idx}{Integer vector of row indices to assign.}
+
+\item{dt}{Logical. Whether \code{current_data} is a data.table.}
+
+\item{band_idx}{Integer vector of bandit-assigned row indices}
+
+\item{rand_idx}{Integer vector of randomly-assigned row indices}
 }
 \value{
 Updated \code{tibble} or \code{data.table} with the new treatment conditions for each observation, and whether imputation is required.
 If this treatment is different then from under the original experiment, then 'impute_req = 1`, and else is 0 for the observation.
+
+A list with \code{fn} (the randomizr function) and \code{args} (its arguments).
+
+Character vector of length \code{nrow(current_data)} with treatment assignments.
 }
 \description{
 Assigns new treatments for an assignment wave based on the assignment probabilities provided from
@@ -65,6 +134,16 @@ Bernoulli draws are made for each cluster with probabilitiy \code{random_assign_
 larger than the provided proportion if cluster sizes are imbalanced. When \code{random_rows > 1}, a random permutation of the clusters is made and then
 clusters are selected for random assignment greedily until the cumulative count surpasses \code{random_rows}.
 }
+\section{Functions}{
+\itemize{
+\item \code{build_ra_args()}: Selects the appropriate \code{{randomizr}} function and constructs its argument list
+based on whether blocking and/or clustering are requested.
+
+\item \code{compute_assignments()}: Pre-allocates a character vector and fills treatment assignments
+for bandit and randomly assigned subsets separately, using the appropriate
+randomizr function built by \code{\link[=build_ra_args]{build_ra_args()}}.
+
+}}
 \seealso{
 \itemize{
 \item \code{\link[randomizr:block_ra]{randomizr::block_ra()}}

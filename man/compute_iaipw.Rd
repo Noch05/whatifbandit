@@ -2,9 +2,15 @@
 % Please edit documentation in R/inference.R
 \name{compute_iaipw}
 \alias{compute_iaipw}
+\alias{compute_iaipw.data.frame}
+\alias{compute_iaipw.data.table}
 \title{Calculate Observation Level AIPW For Each Treatment Condition}
 \usage{
 compute_iaipw(data, assignment_probs, periods, conditions)
+
+\method{compute_iaipw}{data.frame}(data, assignment_probs, periods, conditions)
+
+\method{compute_iaipw}{data.table}(data, assignment_probs, periods, conditions)
 }
 \arguments{
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
@@ -36,4 +42,12 @@ Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 20
 "Confidence Intervals for Policy Evaluation in Adaptive Experiments." \emph{Proceedings of the National Academy of Sciences of the United States of America} 118
 (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 }
+\seealso{
+Other estimation: 
+\code{\link{estimate_aipw}()},
+\code{\link{estimate_ipw}()},
+\code{\link{estimate_sample}()},
+\code{\link{inference_helpers}}
+}
+\concept{estimation}
 \keyword{internal}

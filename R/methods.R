@@ -132,7 +132,7 @@ construct_mab <- function(mab, type, multi) {
 #'   \item `config`: The configuration for the simulation of the adaptive trial
 #' }
 #'
-#' #' @references
+#' @references
 #' Offer-Westort, Molly, Alexander Coppock, and Donald P. Green.
 #' "Adaptive Experimental Design: Prospects and Applications in Political Science."
 #'  American Journal of Political Science 65, no. 4 (2021): 826–44. \doi{10.1111/ajps.12597}.
@@ -147,4 +147,5 @@ joint_test <- function(mab, method, r = 1000) {
   if (!inherits(mab, "single_mab")) {
     rlang::abort(c("Joint-tests can only be performed on `single_mab` objects"))
   }
+  UseMethod("joint_test", mab)
 }

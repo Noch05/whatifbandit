@@ -2,9 +2,31 @@
 % Please edit documentation in R/run_mab.R
 \name{collect_mab_results}
 \alias{collect_mab_results}
+\alias{collect_mab_results.data.frame}
+\alias{collect_mab_results.data.table}
 \title{Ends Multi-Arm Bandit Trial}
 \usage{
 collect_mab_results(
+  data,
+  bandits,
+  algorithm,
+  periods,
+  conditions,
+  num_conditions,
+  ndraws
+)
+
+\method{collect_mab_results}{data.frame}(
+  data,
+  bandits,
+  algorithm,
+  periods,
+  conditions,
+  num_conditions,
+  ndraws
+)
+
+\method{collect_mab_results}{data.table}(
   data,
   bandits,
   algorithm,
@@ -35,18 +57,20 @@ defines the adaptive assignment process. For more details on these specific algo
 \value{
 A named list containing:
 \itemize{
-\item \code{final_data}: The processed \code{tibble} or \code{data.table}, containing new columns pertaining to the results of the trial.
-\item \code{bandits}: A \code{tibble} or \code{data.table} containing the UCB1 values or Thompson sampling posterior distributions for each period.
+\item \code{final_data}: The processed \code{tibble} or \code{data.table}, with the trial's results.
+\item \code{bandits}: A \code{tibble} or \code{data.table} containing the UCB1 or Thompson Sampling values for each period.
 \item \code{assignment_probs}: A \code{tibble} or \code{data.table} containing the probability of being assigned each treatment arm at a given period.
+\item \code{assignment_quantities}: A numeric vector of the total number of observations assigned to each treatment arm.
 }
 }
 \description{
 Condenses output from \code{\link[=mab_loop]{mab_loop()}} into
-manageable structure.
+manageable structure. Contains methods for \code{data.frame} and \code{data.table}.
 }
 \seealso{
-\itemize{
-\item \code{\link[=mab_loop]{mab_loop()}}
+Other simulation: 
+\code{\link{mab_loop}()},
+\code{\link{run_mab}()}
 }
-}
+\concept{simulation}
 \keyword{internal}

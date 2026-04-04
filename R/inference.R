@@ -23,7 +23,7 @@
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
 #' "Confidence Intervals for Policy Evaluation in Adaptive Experiments." \emph{Proceedings of the National Academy of Sciences of the United States of America} 118
 #' (15): e2014602118. \doi{10.1073/pnas.2014602118}.
-#'
+#' @family estimation
 #' @keywords internal
 compute_iaipw <- function(
   data,
@@ -35,10 +35,7 @@ compute_iaipw <- function(
 }
 #-------------------------------------------------------------------------------
 #' @method compute_iaipw data.frame
-#' @title
-#' [compute_iaipw()] for `data.frame`s
-#' @inheritParams compute_iaipw
-#' @noRd
+#' @rdname compute_iaipw
 
 compute_iaipw.data.frame <- function(
   data,
@@ -104,9 +101,7 @@ compute_iaipw.data.frame <- function(
 }
 # ------------------------------------------------------------------------------
 #' @method compute_iaipw data.table
-#' @title [compute_iaipw()] for `data.table`s
-#' @inheritParams compute_iaipw
-#' @noRd
+#' @rdname compute_iaipw
 
 compute_iaipw.data.table <- function(
   data,
@@ -214,6 +209,7 @@ compute_iaipw.data.table <- function(
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
 #' "Confidence Intervals for Policy Evaluation in Adaptive Experiments." \emph{Proceedings of the National Academy of Sciences of the United States of America} 118
 #' (15): e2014602118. \doi{10.1073/pnas.2014602118}.
+#' @family estimation
 #' @keywords internal
 estimate_aipw <- function(
   data,
@@ -300,7 +296,7 @@ estimate_aipw <- function(
 #'
 #' @returns A list of the IPW estimates in a `tibble`/`data.table`, along with the variances of the coefficients,
 #' F-statistic and degrees of freedom, and the covariance matrix from the IPW regression.
-#'
+#' @family estimation
 
 #' @references
 #' Offer‐Westort, Molly, Alexander Coppock, and Donald P. Green. 2021.
@@ -372,22 +368,23 @@ estimate_ipw <- function(
   ))
 }
 
-#' Biased Sample Estimates
+#' Sample Estimates
 #' @name estimate_sample
 #' @description
-#' Computes Sample Mean and its variance using the traditional formula, which is biased under the adaptive experiment.
-#' Only provided for comparison, and should not be used for any inference purposes. No adjustment for clustering is made.
+#' Computes sample proportion and its variance using the traditional formula, which is biased under the adaptive experiment.
+#' Only provided for comparison, and should not be used for any inference purposes unless there is only 1 period.
+#' No adjustment for clustering is made.
 #'
 #' @inheritParams estimate_aipw
 #' @returns `data.table` or `tibble` with the biased sample estimates.
 #' @keywords internal
+#' @family estimation
 estimate_sample <- function(data, conditions) {
   UseMethod("estimate_sample", data)
 }
 
 #' @method estimate_sample data.frame
-#' @title Estimate Sample for `data.frames`
-#' @noRd
+#' @rdname estimate_sample
 estimate_sample.data.frame <- function(data, conditions) {
   data |>
     dplyr::group_by(mab_condition) |>
@@ -405,8 +402,7 @@ estimate_sample.data.frame <- function(data, conditions) {
 }
 
 #' @method estimate_sample data.table
-#' @title Estimate Sample for `data.tables`
-#' @noRd
+#' @rdname estimate_sample
 estimate_sample.data.table <- function(data, conditions) {
   sample <- data[,
     .(
@@ -422,54 +418,64 @@ estimate_sample.data.table <- function(data, conditions) {
   return(sample)
 }
 
+#' Helper Functions for Inference
+#' @name inference_helpers
+#' @description Internal helpers for estimation in [run_mab()].
+#' @keywords internal
+NULL
+
+
 #' Fill Missing Conditions
 #' @description
 #' Accepts a `data.frame` like object, and a character of vector of `conditions`. It checks
 #' whether or not all provided conditions are present in the data, if not their values are initalized to NA
-#'
-#' @param estimates a `tibble`/`data.table` containing the appropriate estimates
-#' @inheritParams run_mab
-#'
-#'
-#' @returns updated `estimates` object with missing conditions initalized.
-#'
-#'
-fill_missing_conditions <- function(estimates, conditions) {
-  missing_conditions <- setdiff(conditions, estimates[["mab_condition"]])
+#' @param x A `tibble`/`data.table` containing the appropriate estimates
+#' @param conditions Character vector of treatment condition labels.
+#' @returns An updated `estimates` object with missing conditions initalized.
+#' @rdname inference_helpers
+#' @family estimation
+fill_missing_conditions <- function(x, conditions) {
+  missing_conditions <- setdiff(conditions, x[["mab_condition"]])
   if (length(missing_conditions) > 0) {
-    if (data.table::is.data.table(estimates)) {
-      estimates <- data.table::rbindlist(
+    if (data.table::is.data.table(x)) {
+      x <- data.table::rbindlist(
         list(
-          estimates,
+          x,
           data.table::data.table(
             mean = NA,
             var = NA,
             mab_condition = missing_conditions,
-            estimator = estimates[["estimator"]][1]
+            estimator = x[["estimator"]][1]
           )
         ),
         fill = TRUE
       )
     } else {
-      estimates <- dplyr::bind_rows(
-        estimates,
+      x <- dplyr::bind_rows(
+        x,
         tibble::tibble(
           mean = NA,
           var = NA,
           mab_condition = missing_conditions,
-          estimator = estimates[["estimator"]][1]
+          estimator = x[["estimator"]][1]
         )
       )
     }
   }
-  return(estimates)
+  return(x)
 }
 #' Combine Estimates
-#' @name combine_estimates
 #' @description
 #' Combines the AIPW, IPW, and Sample estimates into a single object to be returned.
-#' @returns Final estimates a list with 2 elements. First the `data.frame`/`data.table` of
-#' all the estimates across methods, and second the IPW regression variance-covariance matrix
+#' @param estimates List of `tibbles` or `data.tables` to bind together.
+#' @param vcov Covariance matrix from IPW regression.
+#' @returns A list of 2 elements:
+#' \itemize{
+#' \item `estimates`: Input `estimates` bound together by rows.
+#' \item `vcov`: `vcov` input
+#' }
+#' @family estimation
+#' @rdname inference_helpers
 combine_estimates <- function(estimates, vcov = NULL) {
   est <- if (data.table::is.data.table(estimates[[1]])) {
     data.table::rbindlist(estimates, fill = TRUE)

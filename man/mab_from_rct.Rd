@@ -122,17 +122,24 @@ S3 \code{muti_rct_mab}, with the following:
 \itemize{
 \item \code{new_data}: \code{tibble} or \code{data.table} containing the new treatment assignments and outcomes under the simulation.
 If \code{ r >1} and \code{keep_data = TRUE}, the tables from each trial are nested inside.
-\item \code{bandits}: A list containing \code{tibbles} or \code{data.tables} with the computed UCB1 or Thompsom Sampling values,
-the assignment probabilities, for treatment at each period of each trial. Additionally contains overall assignment quantities
-for each treatment in each trial.
-\item \code{estimates}: A list with 2 elements
+\item \code{bandits}: A list with 3 elements:
+\itemize{
+\item \code{statistic}: Thompson Sampling or UCB1 statistics computed for each treatment at each period of each trial.
+\item \code{assignment_prob}: Assignment probabilities for each treatment at each period of each trial.
+\item \code{assignment_quant}: Assignment quantities for each treatment in each trial.
+}
+\item \code{estimates}: A list with 2 elements:
 \itemize{
 \item \code{point}: A \code{tibble} or \code{data.table} containing point estimates, and variances for the AIPW, IPW, and Sample estimators
 for each treatment in each trial. IPW also includes a joint-F statistic, and degrees of freedom
 \item \code{vcov}: Variance covariance matrix of the IPW regression for each trial.
 }
-\item \code{config}: Configuration list containing all of the arguments used to call the function, the call object as created by
-\code{match.call()}, and the \link[furrr:furrr_options]{furrr::furrr_options} object used for any parallelization.
+\item \code{config}: Configuration list of 3 elements:
+\itemize{
+\item \code{args}: List of arguments passed to \code{\link[=mab_from_rct]{mab_from_rct()}}.
+\item \code{call}: The original call to \code{\link[=mab_from_rct]{mab_from_rct()}}.
+\item \code{parallel}: The \code{\link[furrr:furrr_options]{furrr::furrr_options()}} object used for parallelization.
+}
 }
 }
 \description{
@@ -143,8 +150,6 @@ and \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-West
 treatment effects. See the details and vignettes to learn more.
 }
 \details{
-For all the items laballed as a \code{data.frame} or \code{data.table}, \code{data.table}s will be used if the user passed \code{data} is a
-\code{data.table}, \code{data.frame}s used otherwise.
 \subsection{Clustering}{
 
 Under adaptive probabilities of assignment,

@@ -2,7 +2,7 @@
 #' @title Simulates MAB Trial From Prepared Inputs and Performs Inference
 #' @name run_mab
 #' @description Internal helper. Centralizes necessary functions to conduct a
-#' a MAB trial with adaptive inference. It assumes all inputs have been preprocessed already
+#' a MAB trial with adaptive inference. It assumes all inputs have been preprocessed already.
 #' @inheritParams mab_from_rct
 #' @inheritParams prep_rct_data
 #' @inheritParams simulate_mab
@@ -14,21 +14,24 @@
 #' simulation from population parameters, or simulation for the randomization joint test.
 #' @param estimators Character vector; Which estimators to compute, can include `"aipw"`, `"ipw"`, "sample", and any combination
 #' of them in a vector.
-#' @param time_model_args Arguments passed to `time_model` function
-#'
+#' @param time_model_args Arguments passed to `time_model` function.
 #' @inheritParams simulate_mab
 #'
 #'
 #' @returns: A named list containing:
 #' \itemize{
-#' \item `final_data`: The processed `tibble` or `data.table`, containing new columns pertaining to the results of the trial.
-#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson Sampling posterior distributions for each period.
+#' \item `final_data`: The processed `tibble` or `data.table`, with the trial's results.
+#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 or Thompson Sampling values for each period.
 #' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period.
-#' \item `estimates`: A `tibble` or `data.table` containing all estimates of the means and variances related to the treatment arms.
-#' \item `settings`: A named list of the configuration settings used in the trial.
+#' \item `assignment_quantities`: A numeric vector of the total number of observations assigned to each treatment arm.
+#' \item `estimates`: A `tibble` or `data.table` containing the estimates of the specified estimators for each treatment arm.
+#' \item `ipw_vcov`: Covariance matrix from IPW estimation.
+#' \item `call`: `NULL`; initialized for later assignment.
+#' \item `args`: `NULL`; initialized for later assignment.
+#' \item `furrr`: `NULL`; initialized for later assignment.
 #' }
 #' @keywords internal
-#'
+#' @family simulation
 
 run_mab <- function(
   data,
@@ -146,37 +149,35 @@ run_mab <- function(
     estimates = estimates[["estimates"]],
     ipw_vcov = estimates[["vcov"]],
     args = NULL,
-    call = NULL
+    call = NULL,
+    furrr = NULL
   )
   return(results)
 }
 
 #' Runs Multi-Arm Bandit Trial
 #' @name mab_loop
-#'
 #' @description Performs a full Multi-Arm Bandit (MAB) trial using Thompson Sampling or UCB1.
 #' The function provides loop around each step of the process for each treatment wave, performing adaptive
-#' treatment assignment, and outcome imputation. Supports flexible customizations in treatment blocking strategy,
-#' stationary/non-stationary bandits, control augmentation, and hybrid assignment.
+#' treatment assignment, and outcome imputation or generation as needed.
 #'
 #' @inheritParams mab_from_rct
 #' @inheritParams prep_rct_data
 #' @inheritParams simulate_mab
 #' @param num_conditions Number of conditions, equivalent to `length(conditions)`.
-#'
-#'
 #' @returns  A named list containing:
 #' \itemize{
-#' \item `final_data`: The processed `tibble` or `data.table`, containing new columns pertaining to the results of the trial.
-#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson Sampling posterior distributions for each period.
+#' \item `final_data`: The processed `tibble` or `data.table`, with the trial's results.
+#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 or Thompson Sampling values for each period.
 #' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period.
+#' \item `assignment_quantities`: A numeric vector of the total number of observations assigned to each treatment arm.
 #' }
 #' @details
-#' The first period is used to initialize the trial, so the MAB loop
+#' The first period is used to initialize the trial, so the loop
 #' starts at period number 2.
 #'
 #' @keywords internal
-#'
+#' @family simulation
 mab_loop <- function(
   data,
   sim_type,
@@ -325,8 +326,6 @@ mab_loop <- function(
 #-------------------------------------------------------------------------------
 #' @name collect_mab_results
 #' @title Ends Multi-Arm Bandit Trial
-#' @description Condenses output from [mab_loop()] into
-#' manageable structure.
 #' @param data Finalized data from [mab_loop()].
 #' @param bandits Finalized bandits list of matrices from [mab_loop()].
 #' @param periods Numeric value of length 1; total number of periods in Multi-Arm-Bandit trial.
@@ -334,13 +333,15 @@ mab_loop <- function(
 #' @inheritParams run_mab
 #' @returns  A named list containing:
 #' \itemize{
-#' \item `final_data`: The processed `tibble` or `data.table`, containing new columns pertaining to the results of the trial.
-#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson sampling posterior distributions for each period.
+#' \item `final_data`: The processed `tibble` or `data.table`, with the trial's results.
+#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 or Thompson Sampling values for each period.
 #' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period.
+#' \item `assignment_quantities`: A numeric vector of the total number of observations assigned to each treatment arm.
 #' }
-#' @seealso
-#' * [mab_loop()]
+#' @description Condenses output from [mab_loop()] into
+#' manageable structure. Contains methods for `data.frame` and `data.table`.
 #' @keywords internal
+#' @family simulation
 
 collect_mab_results <- function(
   data,
@@ -354,10 +355,8 @@ collect_mab_results <- function(
   UseMethod("collect_mab_results", data)
 }
 #-------------------------------------------------------------------------------
-#' @method collect_mab_results `data.frame`
-#' @inheritParams collect_mab_results
-#' @title [collect_mab_results()] for `data.frame`s
-#' @noRd
+#' @method collect_mab_results data.frame
+#' @rdname collect_mab_results
 collect_mab_results.data.frame <- function(
   data,
   bandits,
@@ -427,10 +426,8 @@ collect_mab_results.data.frame <- function(
   ))
 }
 #-------------------------------------------------------------------------------
-#' @method collect_mab_results `data.table`
-#' @inheritParams collect_mab_results
-#' @title [collect_mab_results()] for `data.table`s
-#' @noRd
+#' @method collect_mab_results data.table
+#' @rdname collect_mab_results
 collect_mab_results.data.table <- function(
   data,
   bandits,
@@ -493,16 +490,12 @@ collect_mab_results.data.table <- function(
 }
 #------------------------------------------------------------------------------
 #' Create Prior Periods
-#' @name compute_lookback
-#' @description Used during [mab_loop()] to create a vector of prior periods dynamically based on the specified
-#' number of prior periods.
 #' @inheritParams mab_from_rct
 #' @param current_period The current period of the simulation. Defined by loop structure inside [mab_loop()].
 #' @returns Numeric value referring to the period index to look back from.
-#' the results for the current treatment assignment period.
-#'
-#' @seealso
-#' * [mab_loop()]
+#' @describeIn mab_loop Used during [mab_loop()] to create a vector of prior periods dynamically based on the specified
+#' number of prior periods.
+#' @family simulation
 #' @keywords internal
 
 compute_lookback <- function(prior_periods = NULL, current_period) {

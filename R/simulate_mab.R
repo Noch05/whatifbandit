@@ -47,17 +47,24 @@
 #' \itemize{
 #' \item `new_data`: `tibble` or `data.table` containing the new treatment assignments and outcomes under the simulation.
 #' If ` r >1` and `keep_data = TRUE`, the tables from each trial are nested inside.
-#' \item `bandits`: A list containing `tibbles` or `data.tables` with the computed UCB1 or Thompsom Sampling values,
-#' the assignment probabilities, for treatment at each period of each trial. Additionally contains overall assignment quantities
-#' for each treatment in each trial.
-#' \item `estimates`: A list with 2 elements
+#' \item `bandits`: A list with 3 elements:
+#' \itemize{
+#' \item `statistic`: Thompson Sampling or UCB1 statistics computed for each treatment at each period of each trial.
+#' \item `assignment_prob`: Assignment probabilities for each treatment at each period of each trial.
+#' \item `assignment_quant`: Assignment quantities for each treatment in each trial.
+#' }
+#' \item `estimates`: A list with 2 elements:
 #' \itemize{
 #' \item `point`: A `tibble` or `data.table` containing point estimates, and variances for the AIPW, IPW, and Sample estimators
 #' for each treatment in each trial. IPW also includes a joint-F statistic, and degrees of freedom
 #' \item `vcov`: Variance covariance matrix of the IPW regression for each trial.
 #' }
-#' \item `config`: Configuration list containing all of the arguments used to call the function, the call object as created by
-#' `match.call()`, and the [furrr::furrr_options] object used for any parallelization.
+#' \item `config`: Configuration list of 3 elements:
+#' \itemize{
+#' \item `args`: List of arguments passed to [simulate_mab()].
+#' \item `call`: The original call to [simulate_mab()].
+#' \item `parallel`: The [furrr::furrr_options()] object used for parallelization.
+#' }
 #' }
 #' @details
 #' When blocking and/or clustering are specified, these assignments will be randomly pregenerated before the start of the adaptive sequential assignment. These arguments allow simulating a trial

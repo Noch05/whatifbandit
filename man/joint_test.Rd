@@ -23,15 +23,15 @@ A \code{mab.test} object containing
 \item \code{method}: The method used.
 \item \code{config}: The configuration for the simulation of the adaptive trial
 }
-
-#' @references
-Offer-Westort, Molly, Alexander Coppock, and Donald P. Green.
-"Adaptive Experimental Design: Prospects and Applications in Political Science."
-American Journal of Political Science 65, no. 4 (2021): 826–44. \doi{10.1111/ajps.12597}.
 }
 \description{
 Conducts a joint hypothesis test of no treatment effects across all arms, i.e. that all arms
 have the same true probability of success, either using parametric bootstrap or the randomization inference
 procedure adapted from \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
 See details for a description of both methods
+}
+\references{
+Offer-Westort, Molly, Alexander Coppock, and Donald P. Green.
+"Adaptive Experimental Design: Prospects and Applications in Political Science."
+American Journal of Political Science 65, no. 4 (2021): 826–44. \doi{10.1111/ajps.12597}.
 }
