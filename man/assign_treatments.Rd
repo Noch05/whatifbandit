@@ -83,7 +83,8 @@ compute_assignments(
 
 \item{clustering}{Logical; Whether or not treatment clustering is occuring}
 
-\item{conditions}{Character vector of all treatment conditions in the trial.}
+\item{conditions}{Character vector of treatment condition labels. If a control group is specified
+the \code{names} attribute should be present with the control group labelled \code{"control"}.}
 
 \item{condition_col}{Column name of \code{current_data} which holds original treatment assignments.}
 

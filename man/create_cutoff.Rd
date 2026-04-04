@@ -42,7 +42,9 @@ dates July 26th and August 3st would be in different periods, but if the \code{m
 specified, they would be in the same period because the dates are less than one month apart.}
 
 \item{date_col}{Bare column in \code{data}; contains original date of event/trial. Only necessary when
-assigning by "Date". Must be of type \code{Date}. @param month_col Bare column in \code{data}; contains
+assigning by "Date". Must be of type \code{Date}.}
+
+\item{month_col}{Bare column in \code{data}; contains
 month of treatment. Only necessary when \code{time_unit = "month"}, and when periods should be
 determined directly by the calendar months instead of month based time periods. This column can
 be a string/factor variable with the month names or numeric with the month number. It can easily

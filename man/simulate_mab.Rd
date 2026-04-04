@@ -111,9 +111,10 @@ stochasticity/variance of the re-simulation method. Replications can be conducte
 setting an appropriate \code{\link[future:plan]{future::plan()}}. See details below.}
 
 \item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended
-\code{FALSE}. When\code{ r = 1} the final data is always kept and reported. @param check_args Logical;
-Whether or not to robustly check whether arguments are valid. Default is TRUE, and recommended
-not to be changed. @param ... Additional named arguments passed to \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
+\code{FALSE}. When\code{ r = 1} the final data is always kept and reported.}
+
+\item{check_args}{Logical; whether or not to validate passed arguments. Default is \code{TRUE} and recommended
+not to be changed.}
 
 \item{verbose}{Logical; whether or not to print intermediate messages. Default is \code{FALSE}.}
 

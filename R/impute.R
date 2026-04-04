@@ -371,7 +371,6 @@ check_impute <- function(impute_success, current_data, impute_idx) {
 #' @inheritParams prep_rct_data
 #' @inheritParams mab_from_rct
 #' @param imputation_info List containing all necessary information for imputation, generated each period by [prep_imputation()]
-#' @param impute_idx Index of rows in `current_data` that need to be imputed.
 #' @param idx Index of rows imputed in the period, used to update the original data.
 #' @returns Updated `data` object with all the updates from the current period of the simulation
 #' @details

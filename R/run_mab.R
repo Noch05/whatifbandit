@@ -18,7 +18,8 @@
 #' "sample", and any combination
 #' of them in a vector.
 #' @param time_model_args Arguments passed to `time_model` function.
-#' @inheritParams simulate_mab
+#' @param conditions Character vector of treatment condition labels. If a control group is specified
+#' the `names` attribute should be present with the control group labelled `"control"`.
 #'
 #'
 #' @returns: A named list containing:

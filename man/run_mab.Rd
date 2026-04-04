@@ -91,6 +91,9 @@ outcomes. If \code{FALSE}, uses only data available up to the current period. In
 with a high number of periods, setting this to \code{FALSE} can be more computationally intensive,
 though not a significant contributor to total run time. Default is \code{FALSE}.}
 
+\item{conditions}{Character vector of treatment condition labels. If a control group is specified
+the \code{names} attribute should be present with the control group labelled \code{"control"}.}
+
 \item{blocking}{Logical; Whether or not treatment blocking is occuring}
 
 \item{clustering}{Logical; Whether or not treatment clustering is occuring}
@@ -112,9 +115,7 @@ performance and accuracy concerns.}
 \item{ends}{Numeric vector where element \code{i} is the ending row number of period \code{i}.}
 
 \item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended
-\code{FALSE}. When\code{ r = 1} the final data is always kept and reported. @param check_args Logical;
-Whether or not to robustly check whether arguments are valid. Default is TRUE, and recommended
-not to be changed. @param ... Additional named arguments passed to \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
+\code{FALSE}. When\code{ r = 1} the final data is always kept and reported.}
 
 \item{r}{Positive integer; number of replications (under different random seed). Replications of
 the MAB procedure on a fixed dataset provides important diagnostic information on the

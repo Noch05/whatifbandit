@@ -10,7 +10,12 @@ estimate_ipw(data, cluster_col, clustering, conditions)
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
 
+\item{cluster_col}{String; name of column with cluster indicies.}
+
 \item{clustering}{Logical; Whether or not treatment clustering is occuring}
+
+\item{conditions}{Character vector of treatment condition labels. If a control group is specified
+the \code{names} attribute should be present with the control group labelled \code{"control"}.}
 }
 \value{
 A list of the IPW estimates in a \code{tibble}/\code{data.table}, along with the variances of the coefficients,

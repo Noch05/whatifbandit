@@ -4,7 +4,7 @@
 #' success for each observation and treatment (i.e. on the level of a single unit), and returns the final IPW weights
 #' for each observation, (i.e. the reciprocal specific weight for the treatment they were assigned)
 #'
-#' @param periods Numeric value of length 1; number of total periods in the simulation.
+#' @param periods Total periods in the simulation.
 #' @param assignment_probs A `tibble`/`data.table` containing the probabilities of being
 #' assigned each treatment at a given period.
 #' @inheritParams run_mab
@@ -183,6 +183,8 @@ compute_iaipw.data.table <- function(
 #' Uses the constant allocation rate adaptive weight.
 #'
 #' @inheritParams compute_iaipw
+#' @inheritParams run_mab
+#' @param cluster_col String; name of column with cluster indicies.
 #' @returns A `tibble`/`data.table` containing the AIPW estimate of treatment success, AIPW variance,
 #' sample proportion of successful treatments (sample mean), and sample mean variance.
 #' @details
@@ -279,6 +281,7 @@ estimate_aipw <- function(
 #'
 #' @inheritParams compute_iaipw
 #' @inheritParams run_mab
+#' @inheritParams estimate_aipw
 #' @details
 #' These estimates follow the procedure in
 #' \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
@@ -338,7 +341,7 @@ estimate_ipw <- function(
   }
   df <- est_lm[["df"]]
 
-  fix_names <- \(x) setNames(x, gsub("^mab_condition", "", names(x)))
+  fix_names <- \(x) stats::setNames(x, gsub("^mab_condition", "", names(x)))
   coefs <- fix_names(coefs)
   var <- fix_names(var)
   df <- fix_names(df)
@@ -377,7 +380,6 @@ estimate_ipw <- function(
 #' Computes sample proportion and its variance using the traditional formula, which is biased under the adaptive experiment.
 #' Only provided for comparison, and should not be used for any inference purposes unless there is only 1 period.
 #' No adjustment for clustering is made.
-#'
 #' @inheritParams estimate_aipw
 #' @returns `data.table` or `tibble` with the biased sample estimates.
 #' @keywords internal

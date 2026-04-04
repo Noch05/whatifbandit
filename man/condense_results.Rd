@@ -11,9 +11,7 @@ condense_results(dt, keep_data, mabs)
 \code{data.table}.}
 
 \item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended
-\code{FALSE}. When\code{ r = 1} the final data is always kept and reported. @param check_args Logical;
-Whether or not to robustly check whether arguments are valid. Default is TRUE, and recommended
-not to be changed. @param ... Additional named arguments passed to \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
+\code{FALSE}. When\code{ r = 1} the final data is always kept and reported.}
 
 \item{mabs}{List of outputs from repeated \code{\link[=run_mab]{run_mab()}} calls.}
 }

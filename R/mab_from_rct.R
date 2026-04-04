@@ -68,7 +68,9 @@
 #' weighted by `discount_rate^k`. Default is 1 for no discounting.
 #'
 #' @param date_col Bare column in `data`; contains original date of event/trial. Only necessary when
-#' assigning by "Date". Must be of type `Date`. @param month_col Bare column in `data`; contains
+#' assigning by "Date". Must be of type `Date`.
+#'
+#' @param month_col Bare column in `data`; contains
 #' month of treatment. Only necessary when `time_unit = "month"`, and when periods should be
 #' determined directly by the calendar months instead of month based time periods. This column can
 #' be a string/factor variable with the month names or numeric with the month number. It can easily
@@ -100,6 +102,8 @@
 #' performance and accuracy concerns.
 #'
 #' @param verbose Logical; whether or not to print intermediate messages. Default is `FALSE`.
+#' @param check_args Logical; whether or not to validate passed arguments. Default is `TRUE` and recommended
+#' not to be changed.
 #'
 #' @param r Positive integer; number of replications (under different random seed). Replications of
 #' the MAB procedure on a fixed dataset provides important diagnostic information on the
@@ -107,9 +111,10 @@
 #' setting an appropriate [future::plan()]. See details below.
 #'
 #' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended
-#' `FALSE`. When` r = 1` the final data is always kept and reported. @param check_args Logical;
-#' Whether or not to robustly check whether arguments are valid. Default is TRUE, and recommended
-#' not to be changed. @param ... Additional named arguments passed to [furrr::furrr_options()]
+#' `FALSE`. When` r = 1` the final data is always kept and reported.
+#'
+#'
+#' @param ... Additional named arguments passed to [furrr::furrr_options()]
 #'
 #' @returns Depends on ` r` value if ` r = 1`, an S3 `single_rct_mab` class object, and if ` r > 1`,
 #' an S3 `muti_rct_mab`, with the following: \itemize{ \item `new_data`: `tibble` or `data.table`

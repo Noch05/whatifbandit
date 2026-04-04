@@ -92,7 +92,9 @@ assignment probabilities. A value between 0 and 1, where outcomes from \code{k} 
 weighted by \code{discount_rate^k}. Default is 1 for no discounting.}
 
 \item{date_col}{Bare column in \code{data}; contains original date of event/trial. Only necessary when
-assigning by "Date". Must be of type \code{Date}. @param month_col Bare column in \code{data}; contains
+assigning by "Date". Must be of type \code{Date}.}
+
+\item{month_col}{Bare column in \code{data}; contains
 month of treatment. Only necessary when \code{time_unit = "month"}, and when periods should be
 determined directly by the calendar months instead of month based time periods. This column can
 be a string/factor variable with the month names or numeric with the month number. It can easily
@@ -130,10 +132,13 @@ setting an appropriate \code{\link[future:plan]{future::plan()}}. See details be
 
 \item{verbose}{Logical; whether or not to print intermediate messages. Default is \code{FALSE}.}
 
+\item{check_args}{Logical; whether or not to validate passed arguments. Default is \code{TRUE} and recommended
+not to be changed.}
+
 \item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended
-\code{FALSE}. When\code{ r = 1} the final data is always kept and reported. @param check_args Logical;
-Whether or not to robustly check whether arguments are valid. Default is TRUE, and recommended
-not to be changed. @param ... Additional named arguments passed to \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
+\code{FALSE}. When\code{ r = 1} the final data is always kept and reported.}
+
+\item{...}{Additional named arguments passed to \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
 }
 \value{
 Depends on \code{ r} value if \code{ r = 1}, an S3 \code{single_rct_mab} class object, and if \code{ r > 1},

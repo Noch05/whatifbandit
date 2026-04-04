@@ -51,6 +51,9 @@ defines the adaptive assignment process. For more details on these specific algo
 
 \item{periods}{Numeric value of length 1; total number of periods in Multi-Arm-Bandit trial.}
 
+\item{conditions}{Character vector of treatment condition labels. If a control group is specified
+the \code{names} attribute should be present with the control group labelled \code{"control"}.}
+
 \item{num_conditions}{Number of conditions, equivalent to \code{length(conditions)}.}
 
 \item{ndraws}{Number of draws used to approximate Thompson sampling probabilities. Used only when

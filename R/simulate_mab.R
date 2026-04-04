@@ -273,6 +273,11 @@ simulate_mab <- function(
 #' Initializes the data a simulated MAB trial. Generates block and
 #' cluster assignments, allocates all required columns, and assigns treatments and
 #' outcomes for the first period using equal assignment probabilities.
+#' @inheritParams simulate_mab
+#' @inheritParams run_mab
+#' @param period_idxs List containing vectors which map their entries to the starting row and ending
+#' row of each period.
+#' @param equal_probs Vector of equal assignment probabilities.
 #' @param simulate_dates Logical; whether or not new success dates should be generated using
 #' `time_model`. Does not guarantee these new dates are used for assignment, `delayed_feedback` controls
 #' that behavior.
@@ -520,6 +525,9 @@ extract_success_prob <- function(
 #' dates of success
 #' @inheritParams impute_outcomes
 #' @inheritParams simulate_mab
+#' @inheritParams prep_sim_data
+#' @inheritParams run_mab
+#' @inheritParams compute_prior
 #' @returns Updated `data` object containing all the outcomes generated in the period, such as the treatment assignments, treatment outcomes. and new success dates
 
 generate_outcomes <- function(
@@ -538,7 +546,7 @@ generate_outcomes <- function(
     other_idx = current_data[["cluster"]] %||% current_data[["block"]]
   )
 
-  outcomes <- rbinom(
+  outcomes <- stats::rbinom(
     nrow(current_data),
     1,
     prob = probs

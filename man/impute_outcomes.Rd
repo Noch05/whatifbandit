@@ -53,8 +53,6 @@ probabilities via Thompsom Samplings or UCB1 outcomes that have not been observe
 assignment are treated as failures. a}
 
 \item{idx}{Index of rows imputed in the period, used to update the original data.}
-
-\item{impute_idx}{Index of rows in \code{current_data} that need to be imputed.}
 }
 \value{
 Updated \code{data} object with all the updates from the current period of the simulation

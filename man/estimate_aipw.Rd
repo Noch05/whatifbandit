@@ -21,7 +21,14 @@ of a traditional Randomized Controlled Trial (RCT).}
 \item{assignment_probs}{A \code{tibble}/\code{data.table} containing the probabilities of being
 assigned each treatment at a given period.}
 
-\item{periods}{Numeric value of length 1; number of total periods in the simulation.}
+\item{conditions}{Character vector of treatment condition labels. If a control group is specified
+the \code{names} attribute should be present with the control group labelled \code{"control"}.}
+
+\item{cluster_col}{String; name of column with cluster indicies.}
+
+\item{clustering}{Logical; Whether or not treatment clustering is occuring}
+
+\item{periods}{Total periods in the simulation.}
 }
 \value{
 A \code{tibble}/\code{data.table} containing the AIPW estimate of treatment success, AIPW variance,

@@ -104,15 +104,16 @@ though not a significant contributor to total run time. Default is \code{FALSE}.
 direct calculation fails or overflows. Default is 5000 but can be raised or lowered depending on
 performance and accuracy concerns.}
 
+\item{check_args}{Logical; whether or not to validate passed arguments. Default is \code{TRUE} and recommended
+not to be changed.}
+
 \item{r}{Positive integer; number of replications (under different random seed). Replications of
 the MAB procedure on a fixed dataset provides important diagnostic information on the
 stochasticity/variance of the re-simulation method. Replications can be conducted in parallel, by
 setting an appropriate \code{\link[future:plan]{future::plan()}}. See details below.}
 
 \item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended
-\code{FALSE}. When\code{ r = 1} the final data is always kept and reported. @param check_args Logical;
-Whether or not to robustly check whether arguments are valid. Default is TRUE, and recommended
-not to be changed. @param ... Additional named arguments passed to \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
+\code{FALSE}. When\code{ r = 1} the final data is always kept and reported.}
 
 \item{blocking}{Logical; Whether or not treatment blocking is occuring}
 

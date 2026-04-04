@@ -15,6 +15,9 @@ estimate_sample(data, conditions)
 \arguments{
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
+
+\item{conditions}{Character vector of treatment condition labels. If a control group is specified
+the \code{names} attribute should be present with the control group labelled \code{"control"}.}
 }
 \value{
 \code{data.table} or \code{tibble} with the biased sample estimates.
