@@ -20,6 +20,6 @@ A named list with 2 elements, \code{furr_args} and \code{time_model_args} each a
 \code{\link[furrr:furrr_options]{furrr::furrr_options()}} and the user specified \code{time_model}
 }
 \description{
-Uses \code{\link[=formalArgs]{formalArgs()}} to match arguments provided to \code{...} of \code{\link[=simulate_mab]{simulate_mab()}} to \code{\link[furrr:furrr_options]{furrr::furrr_options()}} and the user specified \code{time_model}
+Uses \code{\link[methods:methodUtilities]{methods::formalArgs()}} to match arguments provided to \code{...} of \code{\link[=simulate_mab]{simulate_mab()}} to \code{\link[furrr:furrr_options]{furrr::furrr_options()}} and the user specified \code{time_model}
 }
 \keyword{internal}

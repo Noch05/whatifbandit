@@ -14,13 +14,17 @@ assign_treatments(
   cluster_col = NULL,
   random_assign_prop,
   random_probs = NULL,
-  resimulation
+  sim_type
 )
 }
 \arguments{
 \item{current_data}{A \code{data.frame} or \code{data.table} with only observations from the current sampling period.}
 
 \item{probs}{Named numeric vector; probability of assignment for each treatment condition.}
+
+\item{blocking}{Logical; Whether or not treatment blocking is occuring}
+
+\item{clustering}{Logical; Whether or not treatment clustering is occuring}
 
 \item{condition_col}{Column name of \code{current_data} which holds original treatment assignments.}
 
@@ -34,6 +38,9 @@ selected due to the constraint that all units within a cluster have to be assign
 
 \item{random_probs}{Probabilities of assignment for the rows which are completely randomly assigned. Simply a vector
 of \code{length(conditions)} with the same equal probability for all elements.}
+
+\item{sim_type}{String; Type of simulation to conduct, either \code{"resim"}, \code{"param"}, or "\verb{test"}, for a resimulated rct,
+simulation from population parameters, or simulation for the randomization joint test.}
 }
 \value{
 Updated \code{tibble} or \code{data.table} with the new treatment conditions for each observation, and whether imputation is required.

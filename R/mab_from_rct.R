@@ -89,20 +89,22 @@
 #' not to be changed.
 #' @param ... Additional named arguments passed to [furrr::furrr_options()]
 #'
-#' @returns Depends on ` r` value if ` r = 1`, an S3 `mab` class object, and if ` r > 1`, an
-#' S3 `multi.mab`, with the following:
+#' @returns Depends on ` r` value if ` r = 1`, an S3 `single_rct_mab` class object, and if ` r > 1`, an
+#' S3 `muti_rct_mab`, with the following:
 #' \itemize{
-#' \item `final_data`: The processed `tibble` or `data.table`, containing new columns pertaining to the results of all simulated trials.
-#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson sampling posterior distributions for each period of each trial. Wide format,
-#' each row is a period, and each columns is a treatment. Each row in this table represents the calculation from the given period
-#' after its values were imputed, so row 2 represents the calculations made in period 3, but represent the impact of period 2's new assignments.
-#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period and trial. Wide format,
-#' each row is a period, and each columns is a treatment. Each row represents the probability of being assigned each treatment at each period of each trial, these have not
-#' been shifted like the `bandits` table.
-#' \item `estimates`: A `tibble` or `data.table` containing the
-#' AIPW (Augmented Inverse Probability Weighting), IPW (Inverse Probabiity Weighted), estimates and variances.
-#' an F-statistic on the IPW regression is provided as well, along with traditional sample mean and variances for comparison.
-#' \item `settings`: A named list of the configuration settings used in the trial.
+#' \item `new_data`: `tibble` or `data.table` containing the new treatment assignments and outcomes under the simulation.
+#' If ` r >1` and `keep_data = TRUE`, the tables from each trial are nested inside.
+#' \item `bandits`: A list containing `tibbles` or `data.tables` with the computed UCB1 or Thompsom Sampling values,
+#' the assignment probabilities, for treatment at each period of each trial. Additionally contains overall assignment quantities
+#' for each treatment in each trial.
+#' \item `estimates`: A list with 2 elements
+#' \itemize{
+#' \item `point`: A `tibble` or `data.table` containing point estimates, and variances for the AIPW, IPW, and Sample estimators
+#' for each treatment in each trial. IPW also includes a joint-F statistic, and degrees of freedom
+#' \item `vcov`: Variance covariance matrix of the IPW regression for each trial.
+#' }
+#' \item `config`: Configuration list containing all of the arguments used to call the function, the call object as created by
+#' `match.call()`, and the [furrr::furrr_options] object used for any parallelization.
 #' }
 #'
 #' @details
@@ -233,9 +235,8 @@
 #' "Furrr: Apply Mapping Functions in Parallel Using Futures."
 #' \url{https://cran.r-project.org/package=furrr}.
 #'
-#' @seealso \href{https://furrr.futureverse.org}{furrr}, \href{https://future.futureverse.org}{future}, [summary.mab()], [plot.mab()].
+#' @seealso \href{https://furrr.futureverse.org}{furrr}, \href{https://future.futureverse.org}{future}
 #'
-#' @example inst/examples/single_mab_simulation_example.R
 #' @export
 mab_from_rct <- function(
   formula,
@@ -271,7 +272,7 @@ mab_from_rct <- function(
     success_date_col = deparse(substitute(success_date_col))
   )
   col_names <- col_names[!vapply(col_names, \(x) all(x == "NULL"), logical(1))]
-  args <- mget(setdiff(formalArgs(mab_from_rct), names(col_names)))
+  args <- mget(setdiff(methods::formalArgs(mab_from_rct), names(col_names)))
   args <- c(
     args,
     blocks = col_names$block_cols,

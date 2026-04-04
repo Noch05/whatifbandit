@@ -4,7 +4,7 @@
 #' @description Internal helper. Centralizes necessary functions to conduct a
 #' a MAB trial with adaptive inference. It assumes all inputs have been preprocessed already
 #' @inheritParams mab_from_rct
-#' @inheritParams prep_resim_data
+#' @inheritParams prep_rct_data
 #' @inheritParams simulate_mab
 #' @param starts  Numeric vector where element `i` is the starting row number of period `i`.
 #' @param ends  Numeric vector where element `i` is the ending row number of period `i`.
@@ -160,7 +160,7 @@ run_mab <- function(
 #' stationary/non-stationary bandits, control augmentation, and hybrid assignment.
 #'
 #' @inheritParams mab_from_rct
-#' @inheritParams prep_resim_data
+#' @inheritParams prep_rct_data
 #' @inheritParams simulate_mab
 #' @param num_conditions Number of conditions, equivalent to `length(conditions)`.
 #'

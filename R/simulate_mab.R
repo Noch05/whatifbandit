@@ -42,7 +42,23 @@
 #' @param ... Additional named arguments forwarded to `time_model` and [furrr::furrr_options()].
 #' @inheritParams mab_from_rct
 #'
-#' @returns NULL
+#' @returns Depends on ` r` value if ` r = 1`, an S3 `single_param_mab` class object, and if ` r > 1`, an
+#' S3 `muti_param_mab`, with the following:
+#' \itemize{
+#' \item `new_data`: `tibble` or `data.table` containing the new treatment assignments and outcomes under the simulation.
+#' If ` r >1` and `keep_data = TRUE`, the tables from each trial are nested inside.
+#' \item `bandits`: A list containing `tibbles` or `data.tables` with the computed UCB1 or Thompsom Sampling values,
+#' the assignment probabilities, for treatment at each period of each trial. Additionally contains overall assignment quantities
+#' for each treatment in each trial.
+#' \item `estimates`: A list with 2 elements
+#' \itemize{
+#' \item `point`: A `tibble` or `data.table` containing point estimates, and variances for the AIPW, IPW, and Sample estimators
+#' for each treatment in each trial. IPW also includes a joint-F statistic, and degrees of freedom
+#' \item `vcov`: Variance covariance matrix of the IPW regression for each trial.
+#' }
+#' \item `config`: Configuration list containing all of the arguments used to call the function, the call object as created by
+#' `match.call()`, and the [furrr::furrr_options] object used for any parallelization.
+#' }
 #' @details
 #' When blocking and/or clustering are specified, these assignments will be randomly pregenerated before the start of the adaptive sequential assignment. These arguments allow simulating a trial
 #' when there may be hetergenous outcomes across a treatment block or treatment cluster, so different assignment probabilities can be provided for the same treatment, depending on the block and/or cluster
@@ -52,7 +68,7 @@
 #' must remain the same across the whole trial. As such this function assumes clusters do not persist across periods, so are all respecitvely assigned at the same time. If a design is provided, as such periods are
 #' too small for the clusters to fit in a period, its possible for assignment to vary within the same cluster in the experiment.
 #' @export
-#' @example inst/examples/simulate_mab_example.R
+
 simulate_mab <- function(
   n,
   t = n,

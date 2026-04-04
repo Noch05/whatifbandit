@@ -105,7 +105,7 @@ construct_mab <- function(mab, type, multi) {
         assignment_quant = mab$assignment_quantities
       ),
       estimates = list(point = mab$estimates, vcov = mab$ipw_vcov),
-      config = list(args = mab$args, call = mab$call, parallel = mab$furrr)
+      config = list(args = mab$args, call = mab$cl, parallel = mab$furrr)
     ),
     class = class
   )
@@ -144,4 +144,7 @@ joint_test <- function(mab, method, r = 1000) {
     valid = c("bootstrap", "randomization"),
     "method"
   )
+  if (!inherits(mab, "single_mab")) {
+    rlang::abort(c("Joint-tests can only be performed on `single_mab` objects"))
+  }
 }

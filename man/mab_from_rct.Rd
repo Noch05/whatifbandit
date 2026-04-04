@@ -117,20 +117,22 @@ not to be changed.}
 \item{...}{Additional named arguments passed to \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
 }
 \value{
-Depends on \code{ r} value if \code{ r = 1}, an S3 \code{mab} class object, and if \code{ r > 1}, an
-S3 \code{multi.mab}, with the following:
+Depends on \code{ r} value if \code{ r = 1}, an S3 \code{single_rct_mab} class object, and if \code{ r > 1}, an
+S3 \code{muti_rct_mab}, with the following:
 \itemize{
-\item \code{final_data}: The processed \code{tibble} or \code{data.table}, containing new columns pertaining to the results of all simulated trials.
-\item \code{bandits}: A \code{tibble} or \code{data.table} containing the UCB1 values or Thompson sampling posterior distributions for each period of each trial. Wide format,
-each row is a period, and each columns is a treatment. Each row in this table represents the calculation from the given period
-after its values were imputed, so row 2 represents the calculations made in period 3, but represent the impact of period 2's new assignments.
-\item \code{assignment_probs}: A \code{tibble} or \code{data.table} containing the probability of being assigned each treatment arm at a given period and trial. Wide format,
-each row is a period, and each columns is a treatment. Each row represents the probability of being assigned each treatment at each period of each trial, these have not
-been shifted like the \code{bandits} table.
-\item \code{estimates}: A \code{tibble} or \code{data.table} containing the
-AIPW (Augmented Inverse Probability Weighting), IPW (Inverse Probabiity Weighted), estimates and variances.
-an F-statistic on the IPW regression is provided as well, along with traditional sample mean and variances for comparison.
-\item \code{settings}: A named list of the configuration settings used in the trial.
+\item \code{new_data}: \code{tibble} or \code{data.table} containing the new treatment assignments and outcomes under the simulation.
+If \code{ r >1} and \code{keep_data = TRUE}, the tables from each trial are nested inside.
+\item \code{bandits}: A list containing \code{tibbles} or \code{data.tables} with the computed UCB1 or Thompsom Sampling values,
+the assignment probabilities, for treatment at each period of each trial. Additionally contains overall assignment quantities
+for each treatment in each trial.
+\item \code{estimates}: A list with 2 elements
+\itemize{
+\item \code{point}: A \code{tibble} or \code{data.table} containing point estimates, and variances for the AIPW, IPW, and Sample estimators
+for each treatment in each trial. IPW also includes a joint-F statistic, and degrees of freedom
+\item \code{vcov}: Variance covariance matrix of the IPW regression for each trial.
+}
+\item \code{config}: Configuration list containing all of the arguments used to call the function, the call object as created by
+\code{match.call()}, and the \link[furrr:furrr_options]{furrr::furrr_options} object used for any parallelization.
 }
 }
 \description{
@@ -274,5 +276,5 @@ Vaughan, Davis, Matt Dancho, and RStudio. 2022.
 \url{https://cran.r-project.org/package=furrr}.
 }
 \seealso{
-\href{https://furrr.futureverse.org}{furrr}, \href{https://future.futureverse.org}{future}, \code{\link[=summary.mab]{summary.mab()}}, \code{\link[=plot.mab]{plot.mab()}}.
+\href{https://furrr.futureverse.org}{furrr}, \href{https://future.futureverse.org}{future}
 }

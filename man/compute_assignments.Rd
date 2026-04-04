@@ -28,6 +28,10 @@ compute_assignments(
 \item{random_probs}{Probabilities of assignment for the rows which are completely randomly assigned. Simply a vector
 of \code{length(conditions)} with the same equal probability for all elements.}
 
+\item{blocking}{Logical; Whether or not treatment blocking is occuring}
+
+\item{clustering}{Logical; Whether or not treatment clustering is occuring}
+
 \item{cluster_col}{Column name of \code{current_data} which holds cluster assignments.}
 }
 \value{

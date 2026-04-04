@@ -9,6 +9,8 @@ estimate_ipw(data, cluster_col, clustering, conditions)
 \arguments{
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
+
+\item{clustering}{Logical; Whether or not treatment clustering is occuring}
 }
 \value{
 A list of the IPW estimates in a \code{tibble}/\code{data.table}, along with the variances of the coefficients,

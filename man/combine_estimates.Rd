@@ -4,7 +4,7 @@
 \alias{combine_estimates}
 \title{Combine Estimates}
 \usage{
-combine_estimates(estimates, vcov)
+combine_estimates(estimates, vcov = NULL)
 }
 \value{
 Final estimates a list with 2 elements. First the \code{data.frame}/\code{data.table} of

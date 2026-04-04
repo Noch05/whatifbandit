@@ -109,6 +109,25 @@ not to be changed.}
 
 \item{...}{Additional named arguments forwarded to \code{time_model} and \code{\link[furrr:furrr_options]{furrr::furrr_options()}}.}
 }
+\value{
+Depends on \code{ r} value if \code{ r = 1}, an S3 \code{single_param_mab} class object, and if \code{ r > 1}, an
+S3 \code{muti_param_mab}, with the following:
+\itemize{
+\item \code{new_data}: \code{tibble} or \code{data.table} containing the new treatment assignments and outcomes under the simulation.
+If \code{ r >1} and \code{keep_data = TRUE}, the tables from each trial are nested inside.
+\item \code{bandits}: A list containing \code{tibbles} or \code{data.tables} with the computed UCB1 or Thompsom Sampling values,
+the assignment probabilities, for treatment at each period of each trial. Additionally contains overall assignment quantities
+for each treatment in each trial.
+\item \code{estimates}: A list with 2 elements
+\itemize{
+\item \code{point}: A \code{tibble} or \code{data.table} containing point estimates, and variances for the AIPW, IPW, and Sample estimators
+for each treatment in each trial. IPW also includes a joint-F statistic, and degrees of freedom
+\item \code{vcov}: Variance covariance matrix of the IPW regression for each trial.
+}
+\item \code{config}: Configuration list containing all of the arguments used to call the function, the call object as created by
+\code{match.call()}, and the \link[furrr:furrr_options]{furrr::furrr_options} object used for any parallelization.
+}
+}
 \description{
 Simulates a response-adaptive randomized experiment with Bernoulli
 distributed outcomes. At each period, observed outcomes are used to update assignment
