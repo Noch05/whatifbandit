@@ -23,7 +23,9 @@ as fixed effects, and if clustering is specified CR2 variances are reported. Oth
 are used. Appropriate degrees of freedom are supplied along with the regression's F-statistic
 }
 \details{
-These estimates follow the procedure in \href{}{Offer-Westort et al. (2021)}. The F-statistic
+These estimates follow the procedure in
+\href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
+The F-statistic
 provided can be used to conduct their randomization inference test, via simulating a null-F-distribution.
 Degrees of freedom are not provided for the f-statistic, because the traditional F-distribution is invalid
 under the adaptive procedure.

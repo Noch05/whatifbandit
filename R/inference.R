@@ -178,7 +178,8 @@ compute_iaipw.data.table <- function(
 #' @name estimate_aipw
 #'
 #' @description Uses provided Invidual AIPW scores created by [compute_iaipw()] and computes the final
-#' AIPW estimate and variance using the formulas from  \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et. al (2021)}.
+#' AIPW estimate and variance using the formulas from
+#' \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et. al (2021)}.
 #' Uses the constant allocation rate adaptive weight.
 #'
 #' @inheritParams compute_iaipw
@@ -279,7 +280,9 @@ estimate_aipw <- function(
 #' @inheritParams compute_iaipw
 #' @inheritParams run_mab
 #' @details
-#' These estimates follow the procedure in \href{}{Offer-Westort et al. (2021)}. The F-statistic
+#' These estimates follow the procedure in
+#' \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
+#' The F-statistic
 #' provided can be used to conduct their randomization inference test, via simulating a null-F-distribution.
 #' Degrees of freedom are not provided for the f-statistic, because the traditional F-distribution is invalid
 #' under the adaptive procedure.

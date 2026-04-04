@@ -236,7 +236,8 @@ finalize_prior_list <- function(prior_list, conditions) {
 #' `control_augment` or `random_assign_prop` are greater than 0, as these arguments will alter the probabilities
 #' of assignment.
 #'
-#' Thompson sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
+#' Thompson sampling is calculated using the
+#' \href{https://cran.r-project.org/package=bandit}{bandit}
 #' package but the direct calculation can result in errors or overflow. If this occurs, a simulation based method
 #' from the same package is used instead to estimate the posterior distribution.
 #' If this occurs a warning will be presented. `ndraws` specifies the number of iterations for the

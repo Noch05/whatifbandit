@@ -55,8 +55,10 @@ of a traditional Randomized Controlled Trial (RCT).}
 
 \item{algorithm}{A character string specifying the MAB algorithm to use. Options are \code{"Thompson"} or \code{"UCB1"}, ignoring case. Algorithm
 defines the adaptive assignment process. For more details on these specific algorithms see
-\href{https://www.jstor.org/stable/2332286}{Thompson 1933};\href{https://doi.org/10.1023/A:1013689704352Auer et al. 2002};
-\href{https://proceedings.mlr.press/v23/agrawal12.html}{Agrawal and Goyal 2012};\href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
+\href{https://www.jstor.org/stable/2332286}{Thompson 1933};
+\href{https://doi.org/10.1023/A:1013689704352}{Auer et al. 2002};
+\href{https://proceedings.mlr.press/v23/agrawal12.html}{Agrawal and Goyal 2012};
+\href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
 \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}
 
 \item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as "Control". Ranges from 0 to 1,

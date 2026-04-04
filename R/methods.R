@@ -116,7 +116,8 @@ construct_mab <- function(mab, type, multi) {
 #' @name joint_test
 #' @description Conducts a joint hypothesis test of no treatment effects across all arms, i.e. that all arms
 #' have the same true probability of success, either using parametric bootstrap or the randomization inference
-#' procedure adapted from \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
+#' procedure adapted from
+#' \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
 #' See details for a description of both methods
 #' @param mab A `single_rct_mab` or `single_param_mab` object.
 #' @param method A character string; either `"bootstrap"` or `"randomization"`.

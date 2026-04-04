@@ -29,8 +29,10 @@ successes, number of observations, and success rates, which is created by \code{
 
 \item{algorithm}{A character string specifying the MAB algorithm to use. Options are \code{"Thompson"} or \code{"UCB1"}, ignoring case. Algorithm
 defines the adaptive assignment process. For more details on these specific algorithms see
-\href{https://www.jstor.org/stable/2332286}{Thompson 1933};\href{https://doi.org/10.1023/A:1013689704352Auer et al. 2002};
-\href{https://proceedings.mlr.press/v23/agrawal12.html}{Agrawal and Goyal 2012};\href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
+\href{https://www.jstor.org/stable/2332286}{Thompson 1933};
+\href{https://doi.org/10.1023/A:1013689704352}{Auer et al. 2002};
+\href{https://proceedings.mlr.press/v23/agrawal12.html}{Agrawal and Goyal 2012};
+\href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
 \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}
 
 \item{num_conditions}{Number of conditions, equivalent to \code{length(conditions)}.}
@@ -67,7 +69,8 @@ The Thompson \code{assignment_probabilities} are the same as the \code{bandit} v
 \code{control_augment} or \code{random_assign_prop} are greater than 0, as these arguments will alter the probabilities
 of assignment.
 
-Thompson sampling is calculated using the \href{https://cran.r-project.org/package=bandit}{bandit}
+Thompson sampling is calculated using the
+\href{https://cran.r-project.org/package=bandit}{bandit}
 package but the direct calculation can result in errors or overflow. If this occurs, a simulation based method
 from the same package is used instead to estimate the posterior distribution.
 If this occurs a warning will be presented. \code{ndraws} specifies the number of iterations for the
