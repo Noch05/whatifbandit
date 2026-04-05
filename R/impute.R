@@ -374,7 +374,7 @@ check_impute <- function(impute_success, current_data, impute_idx) {
 #' @param imputation_info List containing all necessary information for imputation, generated each period by [prep_imputation()]
 #' @param idx Index of rows imputed in the period, used to update the original data.
 #' @param success_col String; name of column holding outcomes from original experiment.
-#' @param success__date_col String; name of column holding outcome observation date from original experiment.
+#' @param success_date_col String; name of column holding outcome observation date from original experiment.
 #' @returns Updated `data` object with all the updates from the current period of the simulation
 #' @details
 #' When `delayed_feedback = TRUE`, dates of success are imputed according to the average

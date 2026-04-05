@@ -34,7 +34,8 @@ utils::globalVariables(c(
   "mhat",
   "month_date",
   "n",
-  ":="
+  ":=",
+  "cluster_means"
 ))
 
 #' Misellaneous Helper Functions

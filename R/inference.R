@@ -232,7 +232,7 @@ estimate_aipw <- function(
       iaipw_scores <- data.table::cbindlist(
         list(data, data.table::as.data.table(iaipw))
       )[,
-        lapply(.SD, mean),
+        lapply(.SD, \(x) mean(x, na.rm = TRUE)),
         .SDcols = conditions,
         by = c("period_number", cluster_col)
       ] |>
@@ -242,7 +242,7 @@ estimate_aipw <- function(
         dplyr::group_by(period_number, .data[[cluster_col]]) |>
         dplyr::summarize(dplyr::across(
           dplyr::all_of(unname(conditions)),
-          mean
+          \(x) mean(x, na.rm = TRUE)
         )) |>
         as.list()
     }
@@ -406,7 +406,7 @@ estimate_ipw <- function(
 
 #' @keywords internal
 #' @family estimation
-estimate_sample <- function(data, conditions, clluster_col, clustering) {
+estimate_sample <- function(data, conditions, cluster_col, clustering) {
   UseMethod("estimate_sample", data)
 }
 
@@ -415,38 +415,75 @@ estimate_sample <- function(data, conditions, clluster_col, clustering) {
 estimate_sample.data.frame <- function(
   data,
   conditions,
-  clustering,
-  cluster_col
+  cluster_col,
+  clustering
 ) {
-  data |>
-    dplyr::group_by(mab_condition) |>
-    dplyr::summarize(
-      mean = mean(mab_success),
-      n = dplyr::n(),
-      .groups = "drop"
-    ) |>
-    dplyr::mutate(
-      var = (mean * (1 - mean)) / n,
-      estimator = "Sample"
-    ) |>
-    dplyr::select(-n) |>
-    fill_missing_conditions(conditions = conditions)
+  if (clustering) {
+    data |>
+      dplyr::group_by(period_number, mab_condition, .data[[cluster_col]]) |>
+      dplyr::summarize(
+        cluster_means = mean(mab_success, na.rm = TRUE),
+        .groups = "drop"
+      ) |>
+      dplyr::group_by(mab_condition) |>
+      dplyr::summarize(
+        mean = mean(cluster_means, na.rm = TRUE),
+        var = var(cluster_means, na.rm = TRUE) / dplyr::n(),
+        estimator = "Sample",
+        .groups = "drop"
+      ) |>
+      fill_missing_conditions(conditions = conditions)
+  } else {
+    data |>
+      dplyr::group_by(mab_condition) |>
+      dplyr::summarize(
+        mean = mean(mab_success, na.rm = TRUE),
+        n = dplyr::n(),
+        .groups = "drop"
+      ) |>
+      dplyr::mutate(
+        var = (mean * (1 - mean)) / n,
+        estimator = "Sample"
+      ) |>
+      dplyr::select(-n) |>
+      fill_missing_conditions(conditions = conditions)
+  }
 }
 
 #' @method estimate_sample data.table
 #' @rdname estimate_sample
-estimate_sample.data.table <- function(data, conditions) {
-  sample <- data[,
-    .(
-      mean = mean(mab_success, na.rm = TRUE),
-      n = .N
-    ),
-    by = mab_condition
-  ][, `:=`(
-    var = ((mean) * (1 - mean)) / n,
-    estimator = "Sample"
-  )][, .(mean, var, mab_condition, estimator)] |>
-    fill_missing_conditions(conditions = conditions)
+estimate_sample.data.table <- function(
+  data,
+  conditions,
+  cluster_col,
+  clustering
+) {
+  if (clustering) {
+    sample <- data[,
+      .(cluster_means = mean(mab_success, na.rm = TRUE)),
+      by = c("period_number", "mab_condition", cluster_col)
+    ][,
+      .(
+        mean = mean(cluster_means, na.rm = TRUE),
+        var = var(cluster_means, na.rm = TRUE) / .N,
+        estimator = "Sample"
+      ),
+      by = mab_condition
+    ][, .(mean, var, mab_condition, estimator)] |>
+      fill_missing_conditions(conditions = conditions)
+  } else {
+    sample <- data[,
+      .(
+        mean = mean(mab_success, na.rm = TRUE),
+        n = .N
+      ),
+      by = mab_condition
+    ][, `:=`(
+      var = ((mean) * (1 - mean)) / n,
+      estimator = "Sample"
+    )][, .(mean, var, mab_condition, estimator)] |>
+      fill_missing_conditions(conditions = conditions)
+  }
   return(sample)
 }
 

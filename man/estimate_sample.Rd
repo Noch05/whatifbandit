@@ -6,11 +6,11 @@
 \alias{estimate_sample.data.table}
 \title{Sample Estimates}
 \usage{
-estimate_sample(data, conditions, clluster_col, clustering)
+estimate_sample(data, conditions, cluster_col, clustering)
 
-\method{estimate_sample}{data.frame}(data, conditions, clustering, cluster_col)
+\method{estimate_sample}{data.frame}(data, conditions, cluster_col, clustering)
 
-\method{estimate_sample}{data.table}(data, conditions)
+\method{estimate_sample}{data.table}(data, conditions, cluster_col, clustering)
 }
 \arguments{
 \item{data}{\code{tibble} or \code{data.table} holding necessary information to complete the simulation.
@@ -19,9 +19,9 @@ Also used to store simulation outputs.}
 \item{conditions}{Character vector of treatment condition labels. If a control group is specified
 the \code{names} attribute should be present with the control group labelled \code{"control"}.}
 
-\item{clustering}{Logical; Whether or not treatment clustering is occuring}
-
 \item{cluster_col}{String; name of column with cluster indicies.}
+
+\item{clustering}{Logical; Whether or not treatment clustering is occuring}
 }
 \value{
 \code{data.table} or \code{tibble} with the biased sample estimates.
