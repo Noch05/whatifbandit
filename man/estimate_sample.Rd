@@ -6,9 +6,9 @@
 \alias{estimate_sample.data.table}
 \title{Sample Estimates}
 \usage{
-estimate_sample(data, conditions)
+estimate_sample(data, conditions, clluster_col, clustering)
 
-\method{estimate_sample}{data.frame}(data, conditions)
+\method{estimate_sample}{data.frame}(data, conditions, clustering, cluster_col)
 
 \method{estimate_sample}{data.table}(data, conditions)
 }
@@ -18,14 +18,30 @@ Also used to store simulation outputs.}
 
 \item{conditions}{Character vector of treatment condition labels. If a control group is specified
 the \code{names} attribute should be present with the control group labelled \code{"control"}.}
+
+\item{clustering}{Logical; Whether or not treatment clustering is occuring}
+
+\item{cluster_col}{String; name of column with cluster indicies.}
 }
 \value{
 \code{data.table} or \code{tibble} with the biased sample estimates.
 }
 \description{
 Computes sample proportion and its variance using the traditional formula, which is biased under the adaptive experiment.
-Only provided for comparison, and should not be used for any inference purposes unless there is only 1 period.
-No adjustment for clustering is made.
+Only provided for comparison, and should not be used for any inference purposes unless there is
+only 1 period or a static design was used.
+}
+\details{
+Under an adaptive assignment algorithm this estimator is both biased and inconsistent because the data is no
+longer i.i.d. However under a 1 period epxeriment or a static design the i.i.d assumption holds,
+so the central limit theorem and law of large numbers applies in sufficiently large samples.
+No degrees of freedom are provided, z-tests should be used for inference if applicable.
+
+Under clustering, the estimator is defined as the weighted mean of the sample proportions computed across
+cluster and period. Here the appropriate variance of the sample mean is provided, with degrees
+of freedom based on the number of clusters to build confidence intervals with a t-distribution.
+Like before, this estimator is biased under adaptive assignment but under a
+static trial, valid tests can be performed using the estimator with a t-distribution.
 }
 \seealso{
 Other estimation: 

@@ -30,19 +30,24 @@ are used. Appropriate degrees of freedom are supplied along with the regression'
 \details{
 These estimates follow the procedure in
 \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
-The F-statistic
-provided can be used to conduct their randomization inference test, via simulating a null-F-distribution.
 Degrees of freedom are not provided for the f-statistic, because the traditional F-distribution is invalid
-under the adaptive procedure.
+under the adaptive procedure. However, this f-statistic can be used for the randomization and
+bootstrap infernece joint-tests provided.
 
-The provided coefficients and variances can be used to conduct the typical t-tests on the coefficients
-restricted to constants, because appropriate HC2 and CR2 standard errors are used, so traditional asymptotic
-inference on the linear regression parameters is valid. Treatment effect estimation requires
-using the appropriate variance estimate which includes the covariance of 2 coefficients.
+The provided variances can be used to construct approximate confidence intervals using a t-distribution with
+the provided degrees of freedom. However there are the degrees of freedom provided are \code{n - num_conditions},
+which is likely to be an overestimate given the potential for the number of observations assigned
+to each group to vary widely with the adaptive trial. The HC2 or CR2 corrections help but
+do not capture the temporal dependence created by adaptive assignment. Thus formal pairwise tests
+cannot be conducted using these estimates, because the estimator does not follow a precise t-distribution.
+
+As mentioned in \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)},
+if there is a true best arm, and control augmentation is used, t-test can provide proper coverage
+in large samples because the algorithm converges to a two-arm comparison.
 
 Block fixed effects are not used for estimation due to the prevalence of numerical instability
-in the estimates. Assignment probabilities are the same for all blocks, so the IPW estimator is still
-unbiased without the prescence of the fixed effects.
+in the estimates. Assignment probabilities to treatment are the same within each block,
+so the IPW estimator is still unbiased without the prescence of the fixed effects.
 }
 \references{
 Offer‐Westort, Molly, Alexander Coppock, and Donald P. Green. 2021.

@@ -200,14 +200,16 @@ compute_iaipw.data.table <- function(
 #' keeps effective sample size large, ensuring the asymptotic properties are realized in large samples with only
 #' a few assignment periods, while also properly accounting for the assignment procedure.
 #'
-#' If clustering is specified, within each period individual AIPW estimates are aggregated by cluster, and then the sample size
-#' becomes the sum of the number of clusters in each period, the variance formula is not adjusted, so is not accounting
-#' for the clustering.
+#' If clustering is specified, within each period individual AIPW estimates are aggregated by cluster,
+#' and then the sample size becomes the sum of the number of clusters in each period,
+#' the variance formula is not adjusted, but merely uses the smaller sample.
 #'
 #' The AIPW estimator is unbiased, consistent, and asymptotically normal under the conditions of the simulated trial
 #' of the so can be used for valid inference with a normal distribution. Treatment effects can aslo be estimated as
-#' as the difference in AIPW estimates with the variance of the difference as the sum of the variances. Simple Wald-Style
-#' tests with the normal distribution can be used here.
+#' as the difference in AIPW estimates with the variance of the difference as the sum of the
+#' variances of the two arms. Simple Wald-Style
+#' tests with the normal distribution can be used here if the experiment contains a sufficiently
+#' large number of observations.
 #'
 #' @references
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
@@ -287,20 +289,24 @@ estimate_aipw <- function(
 #' @details
 #' These estimates follow the procedure in
 #' \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
-#' The F-statistic
-#' provided can be used to conduct their randomization inference test, via simulating a null-F-distribution.
 #' Degrees of freedom are not provided for the f-statistic, because the traditional F-distribution is invalid
-#' under the adaptive procedure.
+#' under the adaptive procedure. However, this f-statistic can be used for the randomization and
+#' bootstrap infernece joint-tests provided.
 #'
-#' The provided coefficients and variances can be used to conduct the typical t-tests on the coefficients
-#' restricted to constants, because appropriate HC2 and CR2 standard errors are used, so traditional asymptotic
-#' inference on the linear regression parameters is valid. Treatment effect estimation requires
-#' using the appropriate variance estimate which includes the covariance of 2 coefficients.
+#' The provided variances can be used to construct approximate confidence intervals using a t-distribution with
+#' the provided degrees of freedom. However there are the degrees of freedom provided are `n - num_conditions`,
+#' which is likely to be an overestimate given the potential for the number of observations assigned
+#' to each group to vary widely with the adaptive trial. The HC2 or CR2 corrections help but
+#' do not capture the temporal dependence created by adaptive assignment. Thus formal pairwise tests
+#' cannot be conducted using these estimates, because the estimator does not follow a precise t-distribution.
+#'
+#' As mentioned in \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)},
+#' if there is a true best arm, and control augmentation is used, t-test can provide proper coverage
+#' in large samples because the algorithm converges to a two-arm comparison.
 #'
 #' Block fixed effects are not used for estimation due to the prevalence of numerical instability
-#' in the estimates. Assignment probabilities are the same for all blocks, so the IPW estimator is still
-#' unbiased without the prescence of the fixed effects.
-#'
+#' in the estimates. Assignment probabilities to treatment are the same within each block,
+#' so the IPW estimator is still unbiased without the prescence of the fixed effects.
 #'
 #' @returns A list of the IPW estimates in a `tibble`/`data.table`, along with the variances of the coefficients,
 #' F-statistic and degrees of freedom, and the covariance matrix from the IPW regression.
@@ -380,19 +386,38 @@ estimate_ipw <- function(
 #' @name estimate_sample
 #' @description
 #' Computes sample proportion and its variance using the traditional formula, which is biased under the adaptive experiment.
-#' Only provided for comparison, and should not be used for any inference purposes unless there is only 1 period.
-#' No adjustment for clustering is made.
+#' Only provided for comparison, and should not be used for any inference purposes unless there is
+#' only 1 period or a static design was used.
 #' @inheritParams estimate_aipw
 #' @returns `data.table` or `tibble` with the biased sample estimates.
+#'
+#' @details
+#'
+#' Under an adaptive assignment algorithm this estimator is both biased and inconsistent because the data is no
+#' longer i.i.d. However under a 1 period epxeriment or a static design the i.i.d assumption holds,
+#' so the central limit theorem and law of large numbers applies in sufficiently large samples.
+#' No degrees of freedom are provided, z-tests should be used for inference if applicable.
+#'
+#' Under clustering, the estimator is defined as the weighted mean of the sample proportions computed across
+#' cluster and period. Here the appropriate variance of the sample mean is provided, with degrees
+#' of freedom based on the number of clusters to build confidence intervals with a t-distribution.
+#' Like before, this estimator is biased under adaptive assignment but under a
+#' static trial, valid tests can be performed using the estimator with a t-distribution.
+
 #' @keywords internal
 #' @family estimation
-estimate_sample <- function(data, conditions) {
+estimate_sample <- function(data, conditions, clluster_col, clustering) {
   UseMethod("estimate_sample", data)
 }
 
 #' @method estimate_sample data.frame
 #' @rdname estimate_sample
-estimate_sample.data.frame <- function(data, conditions) {
+estimate_sample.data.frame <- function(
+  data,
+  conditions,
+  clustering,
+  cluster_col
+) {
   data |>
     dplyr::group_by(mab_condition) |>
     dplyr::summarize(

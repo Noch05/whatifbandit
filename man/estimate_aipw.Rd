@@ -54,14 +54,16 @@ simply assigned to all the observations in that period, thus resulting in only a
 keeps effective sample size large, ensuring the asymptotic properties are realized in large samples with only
 a few assignment periods, while also properly accounting for the assignment procedure.
 
-If clustering is specified, within each period individual AIPW estimates are aggregated by cluster, and then the sample size
-becomes the sum of the number of clusters in each period, the variance formula is not adjusted, so is not accounting
-for the clustering.
+If clustering is specified, within each period individual AIPW estimates are aggregated by cluster,
+and then the sample size becomes the sum of the number of clusters in each period,
+the variance formula is not adjusted, but merely uses the smaller sample.
 
 The AIPW estimator is unbiased, consistent, and asymptotically normal under the conditions of the simulated trial
 of the so can be used for valid inference with a normal distribution. Treatment effects can aslo be estimated as
-as the difference in AIPW estimates with the variance of the difference as the sum of the variances. Simple Wald-Style
-tests with the normal distribution can be used here.
+as the difference in AIPW estimates with the variance of the difference as the sum of the
+variances of the two arms. Simple Wald-Style
+tests with the normal distribution can be used here if the experiment contains a sufficiently
+large number of observations.
 }
 \references{
 Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
