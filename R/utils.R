@@ -35,7 +35,8 @@ utils::globalVariables(c(
   "month_date",
   "n",
   ":=",
-  "cluster_means"
+  "cluster_means",
+  "n_periods"
 ))
 
 #' Misellaneous Helper Functions

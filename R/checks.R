@@ -624,3 +624,66 @@ check_p_colnames <- function(p, expected) {
     ))
   }
 }
+
+#' Checking Clusters Do Not Persist Across Periods
+#' @name cluster_check
+#' @inheritParams prep_rct_data
+#' @inheritParams run_mab
+#' @inheritParams estimate_aipw
+#' @description
+#' Checks to ensure that each cluster only exists within a single simulation period, because
+#' if this is the case a true clustered design is no longer specified. See details.
+#' @returns Nothing; Throws an error if any clusters persist across multiple periods.
+#' @details
+#' The assignment algorithm in [mab_loop()] assumes that clusters do not persist across periods. For a
+#' true clustered design, if a cluster persisted across periods, all observations within
+#' it would have to be assigned to the same treatment as in the previous period. In an adaptive
+#' experiment this results in no adaptation, thus this is not implemented
+#' into the algorithm. Instead, the assumption is verified here.
+cluster_check <- function(
+  data,
+  cluster_col
+) {
+  UseMethod("cluster_col", data)
+}
+
+#' @method cluster_check data.frame
+#' @rdname cluster_check
+cluster_check.data.frame <- function(data, cluster_col) {
+  cluster_check <- data |>
+    dplyr::group_by(.data[[cluster_col]]) |>
+    dplyr::summarize(n_periods = dplyr::n_distinct(period_number)) |>
+    dplyr::filter(n_periods > 1)
+
+  if (nrow(cluster_check) > 0) {
+    rlang::abort(
+      c(
+        "Clusters must only appear in a single period.",
+        "x" = paste(
+          "These clusters persist across multiple periods:",
+          paste(cluster_check[[cluster_col]], collapse = ", ")
+        )
+      )
+    )
+  }
+}
+
+#' @method cluster_check data.table
+#' @rdname cluster_check
+cluster_check.data.table <- function(data, cluster_col) {
+  cluster_check <- data[,
+    .(n_periods = data.table::uniqueN(period_number)),
+    by = cluster_col
+  ][n_periods > 1]
+  if (nrow(cluster_check) > 0) {
+    rlang::abort(
+      c(
+        "Clusters must only appear in a single period.",
+        "x" = paste(
+          "These clusters persist across multiple periods:",
+          paste(cluster_check[[cluster_col]], collapse = ", ")
+        )
+      )
+    )
+  }
+}
