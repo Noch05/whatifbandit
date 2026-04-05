@@ -626,7 +626,7 @@ check_p_colnames <- function(p, expected) {
 }
 
 #' Checking Clusters Do Not Persist Across Periods
-#' @name cluster_check
+#' @name check_clusters
 #' @inheritParams prep_rct_data
 #' @inheritParams run_mab
 #' @inheritParams estimate_aipw
@@ -640,49 +640,56 @@ check_p_colnames <- function(p, expected) {
 #' it would have to be assigned to the same treatment as in the previous period. In an adaptive
 #' experiment this results in no adaptation, thus this is not implemented
 #' into the algorithm. Instead, the assumption is verified here.
-cluster_check <- function(
+check_clusters <- function(
   data,
   cluster_col
 ) {
   UseMethod("cluster_col", data)
 }
 
-#' @method cluster_check data.frame
-#' @rdname cluster_check
-cluster_check.data.frame <- function(data, cluster_col) {
-  cluster_check <- data |>
+#' @method check_clusters data.frame
+#' @rdname check_clusters
+check_clusters.data.frame <- function(data, cluster_col) {
+  check_clusters <- data |>
     dplyr::group_by(.data[[cluster_col]]) |>
     dplyr::summarize(n_periods = dplyr::n_distinct(period_number)) |>
     dplyr::filter(n_periods > 1)
-
-  if (nrow(cluster_check) > 0) {
-    rlang::abort(
-      c(
-        "Clusters must only appear in a single period.",
-        "x" = paste(
-          "These clusters persist across multiple periods:",
-          paste(cluster_check[[cluster_col]], collapse = ", ")
-        )
-      )
-    )
-  }
+  cluster_throw(check_clusters, cluster_col)
 }
 
-#' @method cluster_check data.table
-#' @rdname cluster_check
-cluster_check.data.table <- function(data, cluster_col) {
-  cluster_check <- data[,
+#' @method check_clusters data.table
+#' @rdname check_clusters
+check_clusters.data.table <- function(data, cluster_col) {
+  check_clusters <- data[,
     .(n_periods = data.table::uniqueN(period_number)),
     by = cluster_col
   ][n_periods > 1]
-  if (nrow(cluster_check) > 0) {
+  cluster_throw(check_clusters, cluster_col)
+}
+
+#' @describeIn check_clusters Internal Helper which handles all data wrangling agnostic
+#' portions of [check_clusters()]
+#' @inheritParams estimate_aipw
+#' @param check_clusters Object created in [check_clusters()] with all of the clusters
+#' which persist across periods.
+#' @returns Nothing; Throws an error if clusters persist across periods.
+cluster_throw <- function(check_clusters, cluster_col) {
+  if (nrow(check_clusters) > 0) {
+    calling_funcs <- vapply(sys.calls(), deparse, character(1))
+    help_message <- if ("mab_from_rct()" %in% calling_funcs) {
+      "Consider simulating without clustering, or increasing the length of each period."
+    } else if ("simulate_mab()" %in% calling_funcs) {
+      "Consider passing precise `period_sizes` manually based on cluster assignment probabilities,
+    adding more clusters, or lowering `t`."
+    }
     rlang::abort(
       c(
         "Clusters must only appear in a single period.",
         "x" = paste(
           "These clusters persist across multiple periods:",
-          paste(cluster_check[[cluster_col]], collapse = ", ")
-        )
+          paste(check_clusters[[cluster_col]], collapse = ", ")
+        ),
+        "i" = help_message
       )
     )
   }

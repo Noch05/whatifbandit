@@ -334,6 +334,9 @@ prep_sim_data <- function(
   }
 
   data <- do.call(df_func, cols)
+  if (clustering) {
+    check_clusters(data, cluster_col = "cluster")
+  }
 
   data <- assign_treatments(
     current_data = data[current_idx, ],

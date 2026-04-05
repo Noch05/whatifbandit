@@ -127,6 +127,9 @@ prep_rct_data <- function(
   period_sizes <- compute_period_sizes(data)
   end_idxs <- cumsum(period_sizes)
   start_idxs <- c(1, end_idxs[-length(period_sizes)] + 1)
+  if (clustering) {
+    check_clusters(data, cluster_col = col_names$cluster_col)
+  }
 
   return(list(
     data = data,
