@@ -21,7 +21,7 @@ A \code{mab.test} object containing
 \item \code{null_distribution}: A numeric vector of F-statistics under the null.
 \item \code{p_value}: The proportion of simulated F-statistics more extreme than observed.
 \item \code{method}: The method used.
-\item \code{config}: The configuration for the simulation of the adaptive trial
+\item \code{config}: The \code{config} slot of the \code{single_mab} object used to perform the test.
 }
 }
 \description{
@@ -30,6 +30,25 @@ have the same true probability of success, either using a bootstrap procedure or
 procedure adapted from
 \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
 See details for a description of both methods
+}
+\details{
+\code{method = "randomization"} operates under the a sharp null that each unit
+would express the same outcome no matter the treatment they were assigned. To achieve this
+the trial is re-simulated but new outcomes are not generated or imputed, however the adaptive algorithm
+still changes the assignments. This results in a null distribution that captures how the adaptive
+algorithm will assign even when the outcomes are not related to treatments at all. For
+re-simulaed randomized trials, from \verb{[mab_from_rct()]}, the imputed values from the re-simulation
+are treated as the true potential outcomes.
+
+\code{method = "bootstrap"} operates under the null hypothesis that there is no difference between
+treatment arms within each each block/cluster the
+true success probability is the same for any treatment. To generate this distribution,
+the trial is re-simulated using an appropriate \code{p} matrix which satisfies the null. For each
+simulated F-statistic, the \code{p} matrix is redrawn. This is achieved by drawing a single
+probaiblity uniformly between 0 and 1 for each column of the \code{p} matrix. This preserves
+any potential heterogeneity across the block or cluster structure, but still ensures
+no treatment effect is specified. Drawing a new \code{p} matrix each time properly captures
+the uncertainty for the null distribution.
 }
 \references{
 Offer-Westort, Molly, Alexander Coppock, and Donald P. Green.

@@ -6,6 +6,7 @@
 \usage{
 generate_outcomes(
   current_data,
+  current_period,
   data,
   p,
   idx,
@@ -16,6 +17,8 @@ generate_outcomes(
 }
 \arguments{
 \item{current_data}{A \code{data.frame} or \code{data.table} with only observations from the current sampling period.}
+
+\item{current_period}{Indiactor of the current period of the simulation.}
 
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
@@ -34,7 +37,7 @@ For no clusters or blocks simply use a matrix with 1 column.}
 \code{time_model}. Does not guarantee these new dates are used for assignment, \code{delayed_feedback} controls
 that behavior.}
 
-\item{time_model}{An optional function with signature \verb{function(n, conditions, success, blocks = NULL, clusters = NULL, ...)}
+\item{time_model}{An optional function with signature \verb{function(n, conditions, successes, current_period, blocks = NULL, clusters = NULL, ...)}
 that returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{dates_of_assignment} to produce \code{success_date}. Used to simulate delayed feedback mechanism
 during the trial, so outcomes are imperfectly observed. Only used when\code{dates_of_assignment} is also supplied. Dates can be generated even when \code{delayed_feedback == FALSE},
 but they will not be used. Default \code{NULL}. Other optional arguments Cannot share names with arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}.}

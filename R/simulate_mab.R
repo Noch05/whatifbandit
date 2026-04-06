@@ -29,7 +29,8 @@
 #' Units are assigned to clusters via [randomizr::complete_ra()]. Pass `NULL` (default) for no clustering.
 #' @param assignment_dates An optional `Date` vector of dates representing when units are assigned.
 #' If shorter than `n` it is recycled and sorted. If NULL` (default) no assignment dates are recorded.
-#' @param time_model An optional function with signature `function(n, conditions, success, blocks = NULL, clusters = NULL, ...)`
+#' @param time_model An optional function with signature `function(n, conditions, successes,
+#' current_period, blocks = NULL, clusters = NULL, ...)`
 #' that returns a vector of [lubridate::period] objects which will then be added to `dates_of_assignment` to produce `success_date`. Used to simulate delayed feedback mechanism
 #' during the trial, so outcomes are imperfectly observed. Only used when`dates_of_assignment` is also supplied. Dates can be generated even when `delayed_feedback == FALSE`,
 #' but they will not be used. Default `NULL`. Other optional arguments Cannot share names with arguments in [furrr::furrr_options()].
@@ -137,7 +138,7 @@ simulate_mab <- function(
     time_model = time_model,
     period_sizes = period_sizes
   )
-  args <- modifyList(
+  args <- utils::modifyList(
     args,
     list(
       col_names = setup$col_names,
@@ -369,6 +370,7 @@ prep_sim_data <- function(
     generate_outcomes(
       p = p,
       idx = current_idx,
+      current_period = 1,
       data = data,
       simulate_dates = simulate_dates,
       time_model = time_model,
@@ -549,10 +551,12 @@ extract_success_prob <- function(
 #' @inheritParams prep_sim_data
 #' @inheritParams run_mab
 #' @inheritParams compute_prior
+#' @param current_period Indiactor of the current period of the simulation.
 #' @returns Updated `data` object containing all the outcomes generated in the period, such as the treatment assignments, treatment outcomes. and new success dates
 
 generate_outcomes <- function(
   current_data,
+  current_period,
   data,
   p,
   idx,
@@ -578,6 +582,7 @@ generate_outcomes <- function(
       c(
         list(
           n = nrow(current_data),
+          current_period = current_period,
           conditions = conditions,
           success = outcomes,
           blocks = current_data[["block"]],

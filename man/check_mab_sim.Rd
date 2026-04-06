@@ -83,7 +83,7 @@ known to the simulation, until a certain date. When re-computing the adaptive as
 probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the
 assignment are treated as failures. a}
 
-\item{time_model}{An optional function with signature \verb{function(n, conditions, success, blocks = NULL, clusters = NULL, ...)}
+\item{time_model}{An optional function with signature \verb{function(n, conditions, successes, current_period, blocks = NULL, clusters = NULL, ...)}
 that returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{dates_of_assignment} to produce \code{success_date}. Used to simulate delayed feedback mechanism
 during the trial, so outcomes are imperfectly observed. Only used when\code{dates_of_assignment} is also supplied. Dates can be generated even when \code{delayed_feedback == FALSE},
 but they will not be used. Default \code{NULL}. Other optional arguments Cannot share names with arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}.}

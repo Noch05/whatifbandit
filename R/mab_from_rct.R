@@ -336,7 +336,7 @@ mab_from_rct <- function(
     keep_data = keep_data
   )
 
-  args <- modifyList(
+  args <- utils::modifyList(
     args,
     list(
       col_names = col_names,

@@ -314,6 +314,7 @@ mab_loop <- function(
           data = data,
           p = p,
           idx = current_idx,
+          current_period = i,
           simulate_dates = simulate_dates,
           time_model = time_model,
           time_model_args = time_model_args
