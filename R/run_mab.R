@@ -8,14 +8,12 @@
 #' @inheritParams mab_from_rct
 #' @inheritParams prep_rct_data
 #' @inheritParams simulate_mab
-#' @param starts  Numeric vector where element `i` is the starting row number of period `i`.
-#' @param ends  Numeric vector where element `i` is the ending row number of period `i`.
+#' @inheritParams prep_sim_data
 #' @param imputation_information Object created by [precompute_imputation()] containing the conditional
 #' means and success dates
 #' for each treatment block to impute from.
 #' @param sim_type String; Type of simulation to conduct, either `"resim"`, `"param"`, or "`test"`,
-#' for a resimulated rct,
-#' simulation from population parameters, or simulation for the randomization joint test.
+#' for a resimulated rct, simulation from population parameters, or simulation for the randomization joint test.
 #' @param estimators Character vector; Which estimators to compute, can include `"aipw"`, `"ipw"`,
 #' "sample", and any combination
 #' of them in a vector.
@@ -52,7 +50,7 @@ run_mab <- function(
   random_assign_prop,
   prior_periods,
   discount_rate,
-  simulate_dates,
+  simulate_dates = NULL,
   delayed_feedback,
   whole_experiment = NULL,
   conditions,
@@ -62,15 +60,14 @@ run_mab <- function(
   imputation_information = NULL,
   verbose,
   ndraws,
-  starts,
-  ends,
+  period_idxs,
   keep_data,
   r,
   time_model = NULL,
   time_model_args = NULL
 ) {
   verbose_log(verbose, "Starting Bandit Trial")
-  periods <- length(starts)
+  periods <- length(period_idxs[[1]])
   num_conditions <- length(conditions)
 
   sim_results <- mab_loop(
@@ -92,8 +89,7 @@ run_mab <- function(
     imputation_information = imputation_information,
     verbose = verbose,
     ndraws = ndraws,
-    starts = starts,
-    ends = ends,
+    period_idxs = period_idxs,
     periods = periods,
     p = p,
     time_model = time_model,
@@ -175,6 +171,7 @@ run_mab <- function(
 #' @inheritParams mab_from_rct
 #' @inheritParams prep_rct_data
 #' @inheritParams simulate_mab
+#' @inheritParams prep_sim_data
 #' @param num_conditions Number of conditions, equivalent to `length(conditions)`.
 #' @param periods Number of simulation periods.
 #' @returns  A named list containing:
@@ -210,12 +207,11 @@ mab_loop <- function(
   imputation_information = NULL,
   ndraws,
   verbose,
-  starts,
-  ends,
+  period_idxs,
   periods,
   num_conditions,
-  time_model,
-  time_model_args
+  time_model = NULL,
+  time_model_args = NULL
 ) {
   bandits <- vector(mode = "list", length = 2)
 
@@ -242,7 +238,7 @@ mab_loop <- function(
 
   if (periods > 1) {
     for (i in 2:periods) {
-      current_idx <- starts[i]:ends[i]
+      current_idx <- period_idxs[["start_idxs"]][i]:period_idxs[["end_idxs"]][i]
       verbose_log(verbose, paste0("Period: ", i))
 
       prior <- compute_lookback(
@@ -251,7 +247,9 @@ mab_loop <- function(
       )
 
       current_data <- data[current_idx, ]
-      prior_data <- data[starts[prior]:ends[i - 1], ]
+      prior_data <- data[
+        period_idxs[["start_idxs"]][prior]:period_idxs[["end_idxs"]][i - 1],
+      ]
 
       current_bandit <- compute_prior(
         current_data = current_data,

@@ -137,6 +137,13 @@ simulate_mab <- function(
     time_model = time_model,
     period_sizes = period_sizes
   )
+  args <- c(
+    args,
+    col_names = setup$col_names,
+    equal_probs = setup$equal_probs,
+    period_idxs = setup$period_idxs,
+    conditions = setup$conditions
+  )
 
   if (!"control" %in% names(setup$conditions) && control_augment > 0) {
     rlang::abort(c(
@@ -170,8 +177,6 @@ simulate_mab <- function(
     keep_data = keep_data,
     verbose = verbose,
     r = r,
-    starts = setup[["period_idxs"]][["start_idxs"]],
-    ends = setup[["period_idxs"]][["end_idxs"]],
     time_model = time_model,
     time_model_args = other_args[["time_model_args"]],
     p = setup[["p"]],

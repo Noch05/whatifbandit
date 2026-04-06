@@ -153,27 +153,58 @@ joint_test <- function(mab, method, r = 1000) {
   if (!inherits(mab, "single_mab")) {
     rlang::abort(c("Joint-tests can only be performed on `single_mab` objects"))
   }
-  UseMethod("joint_test", mab)
+  if (method == "bootstrap") {} else if (method == "randomization") {}
 }
 
-#' @method joint_test single_param_mab
-#' @rdname joint_test
-joint_test.single_param_mab <- function(mab, method, r = 1000) {
-  if (method == "bootstrap") {
-    args <- mab$config$args
-    rows <- nrow(args$p)
-    cols <- ncol(args$p)
-    new_p <- matrix(
-      sort(rep(stats::runif(cols), rows)),
-      ncol = cols,
-      nrow = rows,
-      dimnames = dimnames(args$p)
-    )
-  } else if (method == "randomization") {}
+#' Randomization
+#'
+joint_randomization_test <- function(mab, r = 1000) {
+  args <- mab$config$args[intersect(
+    names(mab$config$args),
+    methods::formalArgs(run_mab_single)
+  )]
+
+  args <- c(
+    args,
+    data = mab$new_data,
+    sim_type = "test",
+    blocking = !is.null(blocks),
+    clustering = !is.null(clusters),
+    estimators = "ipw"
+  )
+
+  if (data.table::is.data.table(args$data)) {
+    args$data[
+      args$period_idxs$start_idxs[2]:nrow(args$data),
+      mab_condition := NA_character_
+    ]
+  } else {
+    args$data[["mab_condition"]][
+      args$period_idxs$start_idxs[2]:nrow(args$data)
+    ] <- NA_character_
+  }
+
+  run_sim <- do.call(run_mab_single, args)
+  null <- furrr::future_imap_dbl(
+    seq_len(r),
+    \(.) {
+      estimates <- run_sim()[["estimates"]]
+      f <- estimates[["mean"]][[estimates[["mab_condition"]] == "Joint-F"]]
+      return(f)
+    },
+    .options = mab$config$parallel,
+    .progress = mab$config$args$verbose,
+  )
+
+  f <- mab$estimates$mean[[mab$estimates$mab_condition == "Joint-F"]]
+
+  p <- mean(f >= null)
+
+  return(list(
+    f_stat = f,
+    null_distribution = null,
+    p_value = p,
+    method = "randomization",
+    config = list(args = args, parallel = mab$config$parallel)
+  ))
 }
-
-#' @method joint_test single_rct_mab
-#' @rdname joint_test
-joint_test.single_param_mab <- function(mab, method, r = 1000) {}
-
-#' Bootstrap Joint Test

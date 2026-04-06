@@ -136,9 +136,7 @@ prep_rct_data <- function(
     imputation_information = imputation_information,
     char_args = char_args,
     conditions = conditions,
-    period_starts = start_idxs,
-    period_ends = end_idxs,
-    period_sizes = period_sizes
+    period_idxs = list(start_idxs = start_idxs, end_idxs = end_idxs)
   ))
 }
 #---------------------------------------------------------------------------------

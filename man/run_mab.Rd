@@ -14,7 +14,7 @@ run_mab(
   random_assign_prop,
   prior_periods,
   discount_rate,
-  simulate_dates,
+  simulate_dates = NULL,
   delayed_feedback,
   whole_experiment = NULL,
   conditions,
@@ -24,8 +24,7 @@ run_mab(
   imputation_information = NULL,
   verbose,
   ndraws,
-  starts,
-  ends,
+  period_idxs,
   keep_data,
   r,
   time_model = NULL,
@@ -37,8 +36,7 @@ run_mab(
 Also used to store simulation outputs.}
 
 \item{sim_type}{String; Type of simulation to conduct, either \code{"resim"}, \code{"param"}, or "\verb{test"},
-for a resimulated rct,
-simulation from population parameters, or simulation for the randomization joint test.}
+for a resimulated rct, simulation from population parameters, or simulation for the randomization joint test.}
 
 \item{estimators}{Character vector; Which estimators to compute, can include \code{"aipw"}, \code{"ipw"},
 "sample", and any combination
@@ -79,6 +77,10 @@ details.}
 assignment probabilities. A value between 0 and 1, where outcomes from \code{k} periods ago are
 weighted by \code{discount_rate^k}. Default is 1 for no discounting.}
 
+\item{simulate_dates}{Logical; whether or not new success dates should be generated using
+\code{time_model}. Does not guarantee these new dates are used for assignment, \code{delayed_feedback} controls
+that behavior.}
+
 \item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon
 as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
@@ -110,9 +112,8 @@ for each treatment block to impute from.}
 direct calculation fails or overflows. Default is 5000 but can be raised or lowered depending on
 performance and accuracy concerns.}
 
-\item{starts}{Numeric vector where element \code{i} is the starting row number of period \code{i}.}
-
-\item{ends}{Numeric vector where element \code{i} is the ending row number of period \code{i}.}
+\item{period_idxs}{List containing vectors which map their entries to the starting row and ending
+row of each period.}
 
 \item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended
 \code{FALSE}. When\code{ r = 1} the final data is always kept and reported.}

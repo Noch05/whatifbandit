@@ -46,10 +46,6 @@ Clusters are accessed as \code{clusters[[block]][cluster]}. Insided each block, 
 }
 Units are assigned to clusters via \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}. Pass \code{NULL} (default) for no clustering.}
 
-\item{blocking}{Logical; Whether or not treatment blocking is occuring}
-
-\item{clustering}{Logical; Whether or not treatment clustering is occuring}
-
 \item{conditions}{Character vector of treatment condition labels. If a control group is specified
 the \code{names} attribute should be present with the control group labelled \code{"control"}.}
 

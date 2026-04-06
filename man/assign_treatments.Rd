@@ -102,8 +102,7 @@ the constraint that all units within a cluster have to be assigned the same trea
 of \code{length(conditions)} with the same equal probability for all elements.}
 
 \item{sim_type}{String; Type of simulation to conduct, either \code{"resim"}, \code{"param"}, or "\verb{test"},
-for a resimulated rct,
-simulation from population parameters, or simulation for the randomization joint test.}
+for a resimulated rct, simulation from population parameters, or simulation for the randomization joint test.}
 
 \item{idx}{Integer vector of row indices to assign.}
 

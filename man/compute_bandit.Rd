@@ -37,6 +37,9 @@ defines the adaptive assignment process. For more details on these specific algo
 
 \item{num_conditions}{Number of conditions, equivalent to \code{length(conditions)}.}
 
+\item{conditions}{Character vector of treatment condition labels. If a control group is specified
+the \code{names} attribute should be present with the control group labelled \code{"control"}.}
+
 \item{current_period}{Numeric value of length 1; current period of the adaptive trial simulation.}
 
 \item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as "Control". Ranges from 0 to 1,

@@ -2,14 +2,9 @@
 % Please edit documentation in R/methods.R
 \name{joint_test}
 \alias{joint_test}
-\alias{joint_test.single_param_mab}
 \title{Joint Hypothesis Test for Multi-Arm Bandit Trials}
 \usage{
 joint_test(mab, method, r = 1000)
-
-\method{joint_test}{single_param_mab}(mab, method, r = 1000)
-
-\method{joint_test}{single_rct_mab}(mab, method, r = 1000)
 }
 \arguments{
 \item{mab}{A \code{single_rct_mab} or \code{single_param_mab} object.}

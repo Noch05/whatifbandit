@@ -7,6 +7,7 @@
 run_mab_single(
   sim_type,
   algorithm,
+  estimators = c("aipw", "ipw", "sample"),
   control_augment,
   random_assign_prop,
   prior_periods,
@@ -20,8 +21,6 @@ run_mab_single(
   keep_data,
   verbose,
   r,
-  starts,
-  ends,
   imputation_information = NULL,
   whole_experiment = NULL,
   time_model = NULL,
@@ -34,14 +33,13 @@ run_mab_single(
   equal_probs = NULL,
   assignment_dates = NULL,
   simulate_dates = NULL,
-  period_idxs = NULL,
+  period_idxs,
   data = NULL
 )
 }
 \arguments{
 \item{sim_type}{String; Type of simulation to conduct, either \code{"resim"}, \code{"param"}, or "\verb{test"},
-for a resimulated rct,
-simulation from population parameters, or simulation for the randomization joint test.}
+for a resimulated rct, simulation from population parameters, or simulation for the randomization joint test.}
 
 \item{algorithm}{A character string specifying the MAB algorithm to use. Options are \code{"Thompson"} or \code{"UCB1"}, ignoring case. Algorithm
 defines the adaptive assignment process. For more details on these specific algorithms see
@@ -50,6 +48,10 @@ defines the adaptive assignment process. For more details on these specific algo
 \href{https://proceedings.mlr.press/v23/agrawal12.html}{Agrawal and Goyal 2012};
 \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
 \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}
+
+\item{estimators}{Character vector; Which estimators to compute, can include \code{"aipw"}, \code{"ipw"},
+"sample", and any combination
+of them in a vector.}
 
 \item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as "Control". Ranges from 0 to 1,
 and the default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.}
@@ -99,10 +101,6 @@ performance and accuracy concerns.}
 the MAB procedure on a fixed dataset provides important diagnostic information on the
 stochasticity/variance of the re-simulation method. Replications can be conducted in parallel, by
 setting an appropriate \code{\link[future:plan]{future::plan()}}. See details below.}
-
-\item{starts}{Numeric vector where element \code{i} is the starting row number of period \code{i}.}
-
-\item{ends}{Numeric vector where element \code{i} is the ending row number of period \code{i}.}
 
 \item{imputation_information}{Object created by \code{\link[=precompute_imputation]{precompute_imputation()}} containing the conditional
 means and success dates

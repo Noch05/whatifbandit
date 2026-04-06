@@ -306,16 +306,9 @@ mab_from_rct <- function(
     success_date_col = deparse(substitute(success_date_col))
   )
   col_names <- col_names[!vapply(col_names, \(x) all(x == "NULL"), logical(1))]
+
+  algorithm <- tolower(algorithm)
   args <- mget(setdiff(methods::formalArgs(mab_from_rct), names(col_names)))
-  args <- c(
-    args,
-    blocks = col_names$block_cols,
-    clusters = col_names$cluster_col,
-    date_col = col_names$date_col,
-    month_col = col_names$month_col,
-    assignment_date_col = col_names$assignment_date_col,
-    success_date_col = col_names$success_date_col
-  )
 
   blocking <- !is.null(col_names[["block_cols"]])
   clustering <- !is.null(col_names[["cluster_col"]])
@@ -342,6 +335,15 @@ mab_from_rct <- function(
     r = r,
     keep_data = keep_data
   )
+
+  args <- c(
+    args,
+    col_names = col_names,
+    blocks = col_names$block_cols,
+    clusters = col_names$cluster_col,
+    period_idxs = prepped$period_idxs,
+    conditions = prepped$conditions
+  )
   furrr_opt <- do.call(
     furrr::furrr_options,
     c(list(seed = TRUE), rlang::dots_list(..., .named = TRUE))
@@ -364,8 +366,7 @@ mab_from_rct <- function(
     keep_data = keep_data,
     verbose = verbose,
     r = r,
-    starts = prepped[["period_starts"]],
-    ends = prepped[["period_ends"]],
+    period_idxs = prepped[["period_idxs"]],
     imputation_information = prepped[["imputation_information"]],
     data = prepped[["data"]]
   )
@@ -424,6 +425,7 @@ mab_from_rct <- function(
 run_mab_single <- function(
   sim_type,
   algorithm,
+  estimators = c("aipw", "ipw", "sample"),
   control_augment,
   random_assign_prop,
   prior_periods,
@@ -437,8 +439,6 @@ run_mab_single <- function(
   keep_data,
   verbose,
   r,
-  starts,
-  ends,
   imputation_information = NULL,
   whole_experiment = NULL,
   time_model = NULL,
@@ -451,7 +451,7 @@ run_mab_single <- function(
   equal_probs = NULL,
   assignment_dates = NULL,
   simulate_dates = NULL,
-  period_idxs = NULL,
+  period_idxs,
   data = NULL
 ) {
   if (sim_type == "param") {
@@ -475,6 +475,7 @@ run_mab_single <- function(
   run_mab(
     data = data,
     sim_type = sim_type,
+    estimators = estimators,
     algorithm = algorithm,
     control_augment = control_augment,
     random_assign_prop = random_assign_prop,
@@ -488,13 +489,13 @@ run_mab_single <- function(
     col_names = col_names,
     verbose = verbose && r == 1,
     ndraws = ndraws,
-    starts = starts,
-    ends = ends,
+    period_idxs = period_idxs,
     keep_data = keep_data || r == 1,
     r = r,
     imputation_information = imputation_information,
     time_model = time_model,
     time_model_args = time_model_args,
-    p = p
+    p = p,
+    simulate_dates = simulate_dates
   )
 }

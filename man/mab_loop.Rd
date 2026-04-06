@@ -24,12 +24,11 @@ mab_loop(
   imputation_information = NULL,
   ndraws,
   verbose,
-  starts,
-  ends,
+  period_idxs,
   periods,
   num_conditions,
-  time_model,
-  time_model_args
+  time_model = NULL,
+  time_model_args = NULL
 )
 
 compute_lookback(prior_periods = NULL, current_period)
@@ -78,6 +77,10 @@ outcomes. If \code{FALSE}, uses only data available up to the current period. In
 with a high number of periods, setting this to \code{FALSE} can be more computationally intensive,
 though not a significant contributor to total run time. Default is \code{FALSE}.}
 
+\item{simulate_dates}{Logical; whether or not new success dates should be generated using
+\code{time_model}. Does not guarantee these new dates are used for assignment, \code{delayed_feedback} controls
+that behavior.}
+
 \item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon
 as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
@@ -89,6 +92,9 @@ assignment are treated as failures. a}
 
 \item{blocking}{Logical; Whether or not treatment blocking is occuring}
 
+\item{conditions}{Character vector of treatment condition labels. If a control group is specified
+the \code{names} attribute should be present with the control group labelled \code{"control"}.}
+
 \item{col_names}{List holding the columns required from the provided data as strings and symbols.}
 
 \item{ndraws}{Number of draws used to approximate Thompson sampling probabilities. Used only when
@@ -96,6 +102,9 @@ direct calculation fails or overflows. Default is 5000 but can be raised or lowe
 performance and accuracy concerns.}
 
 \item{verbose}{Logical; whether or not to print intermediate messages. Default is \code{FALSE}.}
+
+\item{period_idxs}{List containing vectors which map their entries to the starting row and ending
+row of each period.}
 
 \item{periods}{Number of simulation periods.}
 
@@ -105,6 +114,8 @@ performance and accuracy concerns.}
 that returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{dates_of_assignment} to produce \code{success_date}. Used to simulate delayed feedback mechanism
 during the trial, so outcomes are imperfectly observed. Only used when\code{dates_of_assignment} is also supplied. Dates can be generated even when \code{delayed_feedback == FALSE},
 but they will not be used. Default \code{NULL}. Other optional arguments Cannot share names with arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}.}
+
+\item{time_model_args}{Arguments passed to \code{time_model} function.}
 
 \item{current_period}{The current period of the simulation. Defined by loop structure inside \code{\link[=mab_loop]{mab_loop()}}.}
 }
