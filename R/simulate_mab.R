@@ -137,12 +137,14 @@ simulate_mab <- function(
     time_model = time_model,
     period_sizes = period_sizes
   )
-  args <- c(
+  args <- modifyList(
     args,
-    col_names = setup$col_names,
-    equal_probs = setup$equal_probs,
-    period_idxs = setup$period_idxs,
-    conditions = setup$conditions
+    list(
+      col_names = setup$col_names,
+      equal_probs = setup$equal_probs,
+      period_idxs = setup$period_idxs,
+      conditions = setup$conditions
+    )
   )
 
   if (!"control" %in% names(setup$conditions) && control_augment > 0) {

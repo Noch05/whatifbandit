@@ -124,7 +124,7 @@ construct_mab <- function(mab, type, multi) {
 #' @param r A positive integer; number of simulations used to build the null distribution.
 #' Default is 1000.
 #'
-#' @returns A `mab.test` object containing
+#' @return A `mab.test` object containing
 #' \itemize{
 #'   \item `f_statistic`: The observed F-statistic from the IPW regression.
 #'   \item `null_distribution`: A numeric vector of F-statistics under the null.
@@ -153,24 +153,30 @@ joint_test <- function(mab, method, r = 1000) {
   if (!inherits(mab, "single_mab")) {
     rlang::abort(c("Joint-tests can only be performed on `single_mab` objects"))
   }
-  if (method == "bootstrap") {} else if (method == "randomization") {}
+  if (method == "bootstrap") {} else if (method == "randomization") {
+    joint_random_test(mab = mab, r = r)
+  }
 }
 
-#' Randomization
-#'
-joint_randomization_test <- function(mab, r = 1000) {
+#' Joint Hypothesis Test Via Randomization Inference
+#' @name joint_random_test
+#' @inheritParams joint_test
+#' @keywords internal
+joint_random_test <- function(mab, r) {
   args <- mab$config$args[intersect(
     names(mab$config$args),
     methods::formalArgs(run_mab_single)
   )]
 
-  args <- c(
+  args <- modifyList(
     args,
-    data = mab$new_data,
-    sim_type = "test",
-    blocking = !is.null(blocks),
-    clustering = !is.null(clusters),
-    estimators = "ipw"
+    list(
+      data = mab$new_data,
+      sim_type = "test",
+      blocking = !is.null(mab$config$args$blocks),
+      clustering = !is.null(mab$config$args$clusters),
+      estimators = "ipw"
+    )
   )
 
   if (data.table::is.data.table(args$data)) {
@@ -183,22 +189,20 @@ joint_randomization_test <- function(mab, r = 1000) {
       args$period_idxs$start_idxs[2]:nrow(args$data)
     ] <- NA_character_
   }
-
-  run_sim <- do.call(run_mab_single, args)
-  null <- furrr::future_imap_dbl(
+  null <- furrr::future_map_dbl(
     seq_len(r),
     \(.) {
-      estimates <- run_sim()[["estimates"]]
-      f <- estimates[["mean"]][[estimates[["mab_condition"]] == "Joint-F"]]
+      estimates <- do.call(run_mab_single, args)[["estimates"]]
+      f <- estimates[["mean"]][estimates[["mab_condition"]] == "Joint-F"]
       return(f)
     },
     .options = mab$config$parallel,
-    .progress = mab$config$args$verbose,
+    .progress = mab$config$args$verbose
   )
 
-  f <- mab$estimates$mean[[mab$estimates$mab_condition == "Joint-F"]]
+  f <- mab$estimates$point$mean[mab$estimates$point$mab_condition == "Joint-F"]
 
-  p <- mean(f >= null)
+  p <- mean(null >= f)
 
   return(list(
     f_stat = f,

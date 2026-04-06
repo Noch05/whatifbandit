@@ -336,13 +336,15 @@ mab_from_rct <- function(
     keep_data = keep_data
   )
 
-  args <- c(
+  args <- modifyList(
     args,
-    col_names = col_names,
-    blocks = col_names$block_cols,
-    clusters = col_names$cluster_col,
-    period_idxs = prepped$period_idxs,
-    conditions = prepped$conditions
+    list(
+      col_names = col_names,
+      blocks = col_names$block_cols,
+      clusters = col_names$cluster_col,
+      period_idxs = prepped$period_idxs,
+      conditions = prepped$conditions
+    )
   )
   furrr_opt <- do.call(
     furrr::furrr_options,
@@ -426,19 +428,19 @@ run_mab_single <- function(
   sim_type,
   algorithm,
   estimators = c("aipw", "ipw", "sample"),
-  control_augment,
-  random_assign_prop,
-  prior_periods,
-  delayed_feedback,
-  discount_rate,
+  control_augment = 0,
+  random_assign_prop = 0,
+  prior_periods = NULL,
+  delayed_feedback = FALSE,
+  discount_rate = 1,
   conditions,
   blocking,
   clustering,
   col_names,
-  ndraws,
-  keep_data,
-  verbose,
-  r,
+  ndraws = 5000,
+  keep_data = FALSE,
+  verbose = FALSE,
+  r = 1,
   imputation_information = NULL,
   whole_experiment = NULL,
   time_model = NULL,
