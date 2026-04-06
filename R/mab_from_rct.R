@@ -346,57 +346,36 @@ mab_from_rct <- function(
     furrr::furrr_options,
     c(list(seed = TRUE), rlang::dots_list(..., .named = TRUE))
   )
+  run_single <- purrr::partial(
+    run_mab_single,
+    sim_type = "resim",
+    algorithm = prepped[["char_args"]][["algorithm"]],
+    control_augment = control_augment,
+    random_assign_prop = random_assign_prop,
+    prior_periods = prior_periods,
+    delayed_feedback = delayed_feedback,
+    whole_experiment = whole_experiment,
+    discount_rate = discount_rate,
+    conditions = prepped[["conditions"]],
+    blocking = blocking,
+    clustering = clustering,
+    col_names = col_names,
+    ndraws = ndraws,
+    keep_data = keep_data,
+    verbose = verbose,
+    r = r,
+    starts = prepped[["period_starts"]],
+    ends = prepped[["period_ends"]],
+    imputation_information = prepped[["imputation_information"]],
+    data = prepped[["data"]]
+  )
+
   if (r == 1) {
-    results <- run_mab(
-      data = prepped$data,
-      sim_type = "resim",
-      algorithm = prepped$char_args$algorithm,
-      control_augment = control_augment,
-      random_assign_prop = random_assign_prop,
-      prior_periods = prior_periods,
-      delayed_feedback = delayed_feedback,
-      whole_experiment = whole_experiment,
-      discount_rate = discount_rate,
-      conditions = prepped$conditions,
-      blocking = blocking,
-      clustering = clustering,
-      col_names = col_names,
-      verbose = verbose,
-      imputation_information = prepped$imputation_information,
-      ndraws = ndraws,
-      starts = prepped$period_starts,
-      ends = prepped$period_ends,
-      keep_data = keep_data,
-      r = r
-    )
+    results <- run_single()
   } else {
-    verbose_log(verbose, "Starting Simulations")
     mabs <- furrr::future_map(
       seq_len(r),
-      \(.) {
-        run_mab(
-          data = prepped[["data"]],
-          sim_type = "resim",
-          algorithm = prepped[["char_args"]][["algorithm"]],
-          control_augment = control_augment,
-          random_assign_prop = random_assign_prop,
-          prior_periods = prior_periods,
-          delayed_feedback = delayed_feedback,
-          whole_experiment = whole_experiment,
-          discount_rate = discount_rate,
-          conditions = prepped[["conditions"]],
-          blocking = blocking,
-          clustering = clustering,
-          col_names = col_names,
-          verbose = FALSE,
-          imputation_information = prepped[["imputation_information"]],
-          ndraws = ndraws,
-          starts = prepped[["period_starts"]],
-          ends = prepped[["period_ends"]],
-          keep_data = keep_data,
-          r = r
-        )
-      },
+      \(.) run_single(),
       .options = furrr_opt,
       .progress = verbose
     )
@@ -414,5 +393,108 @@ mab_from_rct <- function(
   results$call <- cl
   return(
     construct_mab(results, type = "rct", multi = r > 1)
+  )
+}
+
+#' @title Run a single MAB simulation iteration
+#' @name run_mab_single
+#' @description Runs a single iteration of a MAB simulation. Intended to be
+#' called either directly for ` r = 1` or as the mapped function inside
+#' [furrr::future_map()]` for ` r > 1`. Handles all `sim_type`.
+#' @inheritParams run_mab
+#' @inheritParams simulate_mab
+#' @inheritParams prep_sim_data
+#' @inheritParams run_mab
+#' @returns: A named list containing:
+#' \itemize{
+#' \item `final_data`: The processed `tibble` or `data.table`, with the trial's results.
+#' \item `bandits`: A `tibble` or `data.table` containing the UCB1 or Thompson Sampling values for each period.
+#' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each
+#' treatment arm at a given period.
+#' \item `assignment_quantities`: A numeric vector of the total number of observations assigned to each
+#' treatment arm.
+#' \item `estimates`: A `tibble` or `data.table` containing the estimates of the specified estimators for
+#' each treatment arm.
+#' \item `ipw_vcov`: Covariance matrix from IPW estimation.
+#' \item `call`: `NULL`; initialized for later assignment.
+#' \item `args`: `NULL`; initialized for later assignment.
+#' \item `furrr`: `NULL`; initialized for later assignment.
+#' }
+#' @keywords internal
+run_mab_single <- function(
+  sim_type,
+  algorithm,
+  control_augment,
+  random_assign_prop,
+  prior_periods,
+  delayed_feedback,
+  discount_rate,
+  conditions,
+  blocking,
+  clustering,
+  col_names,
+  ndraws,
+  keep_data,
+  verbose,
+  r,
+  starts,
+  ends,
+  imputation_information = NULL,
+  whole_experiment = NULL,
+  time_model = NULL,
+  time_model_args = NULL,
+  p = NULL,
+  n = NULL,
+  dt = NULL,
+  blocks = NULL,
+  clusters = NULL,
+  equal_probs = NULL,
+  assignment_dates = NULL,
+  simulate_dates = NULL,
+  period_idxs = NULL,
+  data = NULL
+) {
+  if (sim_type == "param") {
+    data <- prep_sim_data(
+      n = n,
+      p = p,
+      blocks = blocks,
+      clusters = clusters,
+      blocking = blocking,
+      clustering = clustering,
+      period_idxs = period_idxs,
+      conditions = conditions,
+      equal_probs = equal_probs,
+      assignment_dates = assignment_dates,
+      simulate_dates = simulate_dates,
+      time_model = time_model,
+      time_model_args = time_model_args,
+      dt = dt
+    )
+  }
+  run_mab(
+    data = data,
+    sim_type = sim_type,
+    algorithm = algorithm,
+    control_augment = control_augment,
+    random_assign_prop = random_assign_prop,
+    prior_periods = prior_periods,
+    delayed_feedback = delayed_feedback,
+    whole_experiment = whole_experiment,
+    discount_rate = discount_rate,
+    conditions = conditions,
+    blocking = blocking,
+    clustering = clustering,
+    col_names = col_names,
+    verbose = verbose && r == 1,
+    ndraws = ndraws,
+    starts = starts,
+    ends = ends,
+    keep_data = keep_data || r == 1,
+    r = r,
+    imputation_information = imputation_information,
+    time_model = time_model,
+    time_model_args = time_model_args,
+    p = p
   )
 }

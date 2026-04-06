@@ -77,3 +77,4 @@ probabilities \code{1 / K} for each of the \code{K} arms.
 Perfoms all one-time set-up requried for \code{\link[=simulate_mab]{simulate_mab()}} as opposed to
 \code{\link[=prep_sim_data]{prep_sim_data()}} which needs to be re-run each period.
 }
+\keyword{internal}

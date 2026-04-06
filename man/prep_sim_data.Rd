@@ -83,3 +83,4 @@ Initializes the data a simulated MAB trial. Generates block and
 cluster assignments, allocates all required columns, and assigns treatments and
 outcomes for the first period using equal assignment probabilities.
 }
+\keyword{internal}

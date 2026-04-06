@@ -137,7 +137,9 @@ run_mab <- function(
   sample_estimates <- if ("sample" %in% estimators) {
     estimate_sample(
       data = sim_results[["final_data"]],
-      conditions = conditions
+      conditions = conditions,
+      clustering = clustering,
+      cluster_col = col_names[["cluster_col"]]
     )
   } else {
     NULL
@@ -148,7 +150,7 @@ run_mab <- function(
     vcov = ipw_estimates[["vcov"]]
   )
 
-  final_data <- if (keep_data || r == 1) sim_results[["final_data"]] else NULL
+  final_data <- if (keep_data) sim_results[["final_data"]] else NULL
 
   results <- list(
     final_data = final_data,

@@ -133,7 +133,7 @@ simulate_mab <- function(
     p = p,
     blocks = blocks,
     clusters = clusters,
-    assignment_dates = assignmeent_dates,
+    assignment_dates = assignment_dates,
     time_model = time_model,
     period_sizes = period_sizes
   )
@@ -153,93 +153,44 @@ simulate_mab <- function(
     furrr::furrr_options,
     c(list(seed = TRUE), other_args$furrr_args)
   )
+  run_single <- purrr::partial(
+    run_mab_single,
+    sim_type = "param",
+    algorithm = algorithm,
+    control_augment = control_augment,
+    random_assign_prop = random_assign_prop,
+    prior_periods = prior_periods,
+    delayed_feedback = delayed_feedback,
+    discount_rate = discount_rate,
+    conditions = setup[["conditions"]],
+    blocking = setup[["blocking"]],
+    clustering = setup[["clustering"]],
+    col_names = setup[["col_names"]],
+    ndraws = ndraws,
+    keep_data = keep_data,
+    verbose = verbose,
+    r = r,
+    starts = setup[["period_idxs"]][["start_idxs"]],
+    ends = setup[["period_idxs"]][["end_idxs"]],
+    time_model = time_model,
+    time_model_args = other_args[["time_model_args"]],
+    p = setup[["p"]],
+    n = n,
+    dt = dt,
+    blocks = blocks,
+    clusters = clusters,
+    equal_probs = setup[["equal_probs"]],
+    assignment_dates = setup[["assignment_dates"]],
+    simulate_dates = setup[["simulate_dates"]],
+    period_idxs = setup[["period_idxs"]]
+  )
   verbose_log(verbose, "Starting Simulations")
   if (r == 1) {
-    data <- prep_sim_data(
-      n = n,
-      p = setup$p,
-      blocks = blocks,
-      clusters = clusters,
-      blocking = setup$blocking,
-      clustering = setup$clustering,
-      period_idxs = setup$period_idxs,
-      conditions = setup$conditions,
-      equal_probs = setup$equal_probs,
-      assignment_dates = setup$assignment_dates,
-      simulate_dates = setup$simulate_dates,
-      time_model = time_model,
-      time_model_args = other_args$time_model_args,
-      dt = dt
-    )
-    results <- run_mab(
-      data = data,
-      sim_type = "param",
-      p = setup$p,
-      algorithm = algorithm,
-      control_augment = control_augment,
-      random_assign_prop = random_assign_prop,
-      prior_periods = prior_periods,
-      discount_rate = discount_rate,
-      simulate_dates = setup$simulate_dates,
-      delayed_feedback = delayed_feedback,
-      conditions = setup$conditions,
-      blocking = setup$blocking,
-      clustering = setup$clustering,
-      col_names = setup$col_names,
-      verbose = verbose,
-      ndraws = ndraws,
-      starts = setup$period_idxs[["start_idxs"]],
-      ends = setup$period_idxs[["end_idxs"]],
-      keep_data = keep_data,
-      r = r,
-      time_model = time_model,
-      time_model_args = other_args$time_model_args
-    )
+    results <- run_single()
   } else if (r > 1) {
     mabs <- furrr::future_map(
       seq_len(r),
-      \(.) {
-        data <- prep_sim_data(
-          n = n,
-          p = setup[["p"]],
-          blocks = blocks,
-          clusters = clusters,
-          blocking = setup[["blocking"]],
-          clustering = setup[["clustering"]],
-          period_idxs = setup[["period_idxs"]],
-          conditions = setup[["conditions"]],
-          simulate_dates = setup[["simulate_dates"]],
-          equal_probs = setup[["equal_probs"]],
-          assignment_dates = setup[["asssignment_dates"]],
-          time_model = time_model,
-          time_model_args = other_args[["time_model_args"]],
-          dt = dt
-        )
-        run_mab(
-          data = data,
-          sim_type = "param",
-          p = setup[["p"]],
-          algorithm = algorithm,
-          control_augment = control_augment,
-          random_assign_prop = random_assign_prop,
-          prior_periods = prior_periods,
-          discount_rate = discount_rate,
-          simulate_dates = setup[["simulate_dates"]],
-          delayed_feedback = delayed_feedback,
-          conditions = setup[["conditions"]],
-          blocking = setup[["blocking"]],
-          clustering = setup[["clustering"]],
-          col_names = setup[["col_names"]],
-          verbose = verbose,
-          ndraws = ndraws,
-          starts = setup[["period_idxs"]][["start_idxs"]],
-          ends = setup[["period_idxs"]][["end_idxs"]],
-          keep_data = keep_data,
-          r = r,
-          time_model = time_model,
-          time_model_args = other_args[["time_model_args"]]
-        )
-      },
+      run_single,
       .options = furrr_opt,
       .progress = verbose
     )
@@ -254,7 +205,7 @@ simulate_mab <- function(
   results$args <- args
   results$cl <- cl
   results$furrr <- furrr_opt
-  results$args$time_model_args <- other_args$time_model_args
+  results$args$time_model_args <- other_args$time_model$args
   return(construct_mab(results, type = "param", multi = r > 1))
 }
 
@@ -280,7 +231,7 @@ simulate_mab <- function(
 #'   probabilities `1 / K` for each of the `K` arms.
 #'   \item `col_names`: A fixed named list of output column name strings.
 #' }
-#'
+#' @keywords internal
 setup_mab_sim <- function(
   n,
   t,
@@ -343,6 +294,7 @@ setup_mab_sim <- function(
 #'
 #' @returns Initalized `data.table` or `tibble` with the first period simulation conducted, and all
 #' required columns for [run_mab()]
+#' @keywords internal
 
 prep_sim_data <- function(
   n,
