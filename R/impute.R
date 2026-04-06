@@ -47,7 +47,7 @@ precompute_imputation.data.frame <- function(
     data |>
       dplyr::group_by(treatment_block) |>
       dplyr::summarize(
-        success_rate = mean(.data[[col_names[["cluster_col"]]]], na.rm = TRUE),
+        success_rate = mean(.data[[col_names[["success_col"]]]], na.rm = TRUE),
         .groups = "drop"
       ) |>
       dplyr::mutate(failure_rate = 1 - success_rate) |>

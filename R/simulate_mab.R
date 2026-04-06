@@ -144,7 +144,8 @@ simulate_mab <- function(
       col_names = setup$col_names,
       equal_probs = setup$equal_probs,
       period_idxs = setup$period_idxs,
-      conditions = setup$conditions
+      conditions = setup$conditions,
+      simulate_dates = setup$simulate_dates
     )
   )
 

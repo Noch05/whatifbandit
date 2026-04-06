@@ -124,7 +124,7 @@ construct_mab <- function(mab, type, multi) {
 #' @param r A positive integer; number of simulations used to build the null distribution.
 #' Default is 1000.
 #'
-#' @return A `mab.test` object containing
+#' @return A named list object containing
 #' \itemize{
 #'   \item `f_statistic`: The observed F-statistic from the IPW regression.
 #'   \item `null_distribution`: A numeric vector of F-statistics under the null.
@@ -178,7 +178,7 @@ joint_test <- function(mab, method, r = 1000) {
 
   f <- mab$estimates$point$mean[mab$estimates$point$mab_condition == "Joint-F"]
 
-  p <- mean(null >= f)
+  p <- mean(null >= f, na.rm = TRUE)
 
   return(list(
     f_stat = f,
@@ -214,10 +214,11 @@ joint_random_null <- function(mab, r) {
   }
   null <- furrr::future_map_dbl(
     seq_len(r),
-    joint_null_inner,
+    \(.) joint_null_inner(args),
     .options = mab$config$parallel,
     .progress = mab$config$args$verbose
   )
+
   return(null)
 }
 
@@ -226,9 +227,6 @@ joint_random_null <- function(mab, r) {
 #' @keywords internal
 joint_boot_null <- function(mab, r) {
   args <- joint_base_args(mab, sim_type = "param")
-  cols <- ncol(mab$config$args$p)
-  rows <- nrow(mab$config$args$p)
-  dn <- dimnames(mab$config$args$p)
 
   if (inherits(mab, "single_rct_mab")) {
     col_names <- args$col_names
@@ -236,7 +234,8 @@ joint_boot_null <- function(mab, r) {
       impute_dates <- precompute_imputation(
         data = mab$new_data,
         whole_experiment = TRUE,
-        delayed_feedback = args$delayed_feedback
+        delayed_feedback = args$delayed_feedback,
+        col_names = col_names
       )[["dates"]]
       original_dates <- if (data.table::is.data.table(mab$new_data)) {
         mab$new_data[, .("period_number", col_names$assignment_date_col)] |>
@@ -250,8 +249,7 @@ joint_boot_null <- function(mab, r) {
             "period_number",
             col_names$assignment_date_col
           ))) |>
-          dplyr::group_by(period_number) |>
-          dplyr::group_split(.data[[col_names$assignment_date_col]]) |>
+          dplyr::group_split(period_number) |>
           lapply(\(x) {
             x[[col_names$assignment_date_col]]
           })
@@ -266,33 +264,53 @@ joint_boot_null <- function(mab, r) {
         impute_dates,
         original_dates
       ) {
-        dates <- impute_dates[[current_period]][conditions]
+        treatment_block <- paste(conditions, successes, sep = "_")
+        dates <- impute_dates[[current_period]][treatment_block]
         org <- original_dates[[current_period]]
         return(dates - org)
       }
-      args <- utils::modifyList(
-        args,
+    }
+    args <- utils::modifyList(
+      args,
+      list(
         assignment_dates = mab$new_data[[col_names$assignment_date_col]],
-        blocks = mab$new_data[["block"]],
-        clusters = mab$new_data[[col_names$cluster_col]],
+        blocks = mab$new_data[["block"]] %||% NULL,
+        clusters = mab$new_data[[col_names$cluster_col %||% "NULL"]],
         n = nrow(mab$new_data),
         dt = data.table::is.data.table(mab$new_data),
         equal_probs = rep(1 / length(args$conditions), length(args$conditions)),
-        simulate_dates = FALSE,
+        simulate_dates = mab$config$args$delayed_feedback,
         col_names = list(
           cluster_col = "cluster",
           assignment_date_col = "assignment_date",
           success_date_col = "success_date"
         ),
-        time_model = time_model,
+        time_model = time_model %||% NULL,
         time_model_args = list(
-          impute_dates = impute_dates,
-          original_dates = original_dates
+          impute_dates = impute_dates %||% NULL,
+          original_dates = original_dates %||% NULL
         ),
         whole_experiment = NULL,
         data = NULL
       )
+    )
+    rows <- length(mab$config$args$conditions)
+    cols_names <- if (!is.null(col_names$cluster_col)) {
+      x <- unique(mab$new_data[[col_names$cluster_col]])
+      list(length(x), x)
+    } else if (!is.null(col_names$block_col)) {
+      x <- unique(mab$new_data[["block"]])
+      list(length(x), x)
+    } else {
+      list(1, NULL)
     }
+    cols <- cols_names[[1]]
+
+    dn <- list(mab$config$args$conditions, cols_names[[2]])
+  } else {
+    cols <- ncol(mab$config$args$p)
+    rows <- nrow(mab$config$args$p)
+    dn <- dimnames(mab$config$args$p)
   }
 
   null <- furrr::future_map_dbl(
@@ -321,7 +339,6 @@ joint_base_args <- function(mab, sim_type) {
     methods::formalArgs(run_mab_single)
   )] |>
     utils::modifyList(
-      args,
       list(
         sim_type = sim_type,
         blocking = !is.null(mab$config$args$blocks),
@@ -343,5 +360,6 @@ joint_base_args <- function(mab, sim_type) {
 #' @keywords internal
 joint_null_inner <- function(args) {
   estimates <- do.call(run_mab_single, args)[["estimates"]]
-  estimates[["mean"]][estimates[["mab_condition"]] == "Joint-F"]
+  f <- estimates[["mean"]][estimates[["mab_condition"]] == "Joint-F"]
+  return(f)
 }

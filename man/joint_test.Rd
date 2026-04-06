@@ -15,7 +15,7 @@ joint_test(mab, method, r = 1000)
 Default is 1000.}
 }
 \value{
-A \code{mab.test} object containing
+A named list object containing
 \itemize{
 \item \code{f_statistic}: The observed F-statistic from the IPW regression.
 \item \code{null_distribution}: A numeric vector of F-statistics under the null.
