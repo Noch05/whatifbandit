@@ -21,9 +21,5 @@ Numeric vector of \code{length(max(period_nummber))} with each element represent
 }
 \description{
 Compute exact period sizes
-
-\code{\link[=compute_period_sizes]{compute_period_sizes()}} for \code{data.frames}s
-
-\code{\link[=compute_period_sizes]{compute_period_sizes()}} for \code{data.tables}s
 }
 \keyword{internal}

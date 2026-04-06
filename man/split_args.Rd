@@ -21,4 +21,14 @@ A named list with 2 elements, \code{furr_args} and \code{time_model_args} each a
 \description{
 Uses \code{\link[methods:methodUtilities]{methods::formalArgs()}} to match arguments provided to \code{...} of \code{\link[=simulate_mab]{simulate_mab()}} to \code{\link[furrr:furrr_options]{furrr::furrr_options()}} and the user specified \code{time_model}
 }
+\seealso{
+Other param: 
+\code{\link{generate_assignment_dates}()},
+\code{\link{generate_groups}()},
+\code{\link{generate_outcomes}()},
+\code{\link{generate_period_idx}()},
+\code{\link{prep_sim_data}()},
+\code{\link{setup_mab_sim}()}
+}
+\concept{param}
 \keyword{internal}

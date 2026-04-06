@@ -77,4 +77,14 @@ probabilities \code{1 / K} for each of the \code{K} arms.
 Perfoms all one-time set-up requried for \code{\link[=simulate_mab]{simulate_mab()}} as opposed to
 \code{\link[=prep_sim_data]{prep_sim_data()}} which needs to be re-run each period.
 }
+\seealso{
+Other param: 
+\code{\link{generate_assignment_dates}()},
+\code{\link{generate_groups}()},
+\code{\link{generate_outcomes}()},
+\code{\link{generate_period_idx}()},
+\code{\link{prep_sim_data}()},
+\code{\link{split_args}()}
+}
+\concept{param}
 \keyword{internal}

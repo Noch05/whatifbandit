@@ -311,6 +311,7 @@ estimate_aipw <- function(
 #' @returns A list of the IPW estimates in a `tibble`/`data.table`, along with the variances of the coefficients,
 #' F-statistic and degrees of freedom, and the covariance matrix from the IPW regression.
 #' @family estimation
+#' @keywords internal
 
 #' @references
 #' Offer‐Westort, Molly, Alexander Coppock, and Donald P. Green. 2021.

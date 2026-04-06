@@ -415,8 +415,7 @@ create_new_cols <- function(
   UseMethod("create_new_cols", data)
 }
 # --------------------------------------------------
-
-#' @title [create_new_cols()] for `data.frame`s and `tibble`s
+#' @method create_new_cols data.frame
 #' @rdname create_new_cols
 
 create_new_cols.data.frame <- function(
@@ -488,8 +487,8 @@ create_new_cols.data.frame <- function(
   return(data)
 }
 #---------------------------------------------------------------------------------
-#' @title [create_new_cols()] for `data.table`s
 #' @rdname create_new_cols
+#' @method create_new_cols data.table
 
 create_new_cols.data.table <- function(
   data,
@@ -552,7 +551,7 @@ compute_period_sizes <- function(
   UseMethod("compute_period_sizes", data)
 }
 
-#' @title [compute_period_sizes()] for `data.frames`s
+#' @method compute_period_sizes data.frame
 #' @rdname compute_period_sizes
 compute_period_sizes.data.frame <- function(data) {
   data |>
@@ -562,7 +561,7 @@ compute_period_sizes.data.frame <- function(data) {
     dplyr::pull(count)
 }
 
-#' @title [compute_period_sizes()] for `data.tables`s
+#' @method compute_period_sizes data.table
 #' @rdname compute_period_sizes
 compute_period_sizes.data.table <- function(data) {
   counts <- data[, .(count = .N), by = period_number][order(
