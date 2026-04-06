@@ -92,9 +92,9 @@ condense_results <- function(dt, keep_data, mabs) {
 
 construct_mab <- function(mab, type, multi) {
   class <- if (multi) {
-    c(paste0("multi_", type, "_mab"), "multi_mab", ".mab")
+    c(paste0("multi_", type, "_mab"), "multi_mab")
   } else {
-    c(paste0("single_", type, "_mab"), "single_mab", ".mab")
+    c(paste0("single_", type, "_mab"), "single_mab")
   }
   structure(
     list(
@@ -107,7 +107,7 @@ construct_mab <- function(mab, type, multi) {
       estimates = list(point = mab$estimates, vcov = mab$ipw_vcov),
       config = list(args = mab$args, call = mab$cl, parallel = mab$furrr)
     ),
-    class = class
+    class = c(class, ".mab", "list")
   )
 }
 
@@ -115,7 +115,7 @@ construct_mab <- function(mab, type, multi) {
 #' @title Joint Hypothesis Test for Multi-Arm Bandit Trials
 #' @name joint_test
 #' @description Conducts a joint hypothesis test of no treatment effects across all arms, i.e. that all arms
-#' have the same true probability of success, either using parametric bootstrap or the randomization inference
+#' have the same true probability of success, either using a bootstrap procedure or the randomization inference
 #' procedure adapted from
 #' \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
 #' See details for a description of both methods
@@ -133,10 +133,15 @@ construct_mab <- function(mab, type, multi) {
 #'   \item `config`: The configuration for the simulation of the adaptive trial
 #' }
 #'
+#' @details
+#'
+#'
+#'
 #' @references
 #' Offer-Westort, Molly, Alexander Coppock, and Donald P. Green.
 #' "Adaptive Experimental Design: Prospects and Applications in Political Science."
 #'  American Journal of Political Science 65, no. 4 (2021): 826–44. \doi{10.1111/ajps.12597}.
+#'
 #'
 joint_test <- function(mab, method, r = 1000) {
   check_posint(r)
@@ -150,3 +155,25 @@ joint_test <- function(mab, method, r = 1000) {
   }
   UseMethod("joint_test", mab)
 }
+
+#' @method joint_test single_param_mab
+#' @rdname joint_test
+joint_test.single_param_mab <- function(mab, method, r = 1000) {
+  if (method == "bootstrap") {
+    args <- mab$config$args
+    rows <- nrow(args$p)
+    cols <- ncol(args$p)
+    new_p <- matrix(
+      sort(rep(stats::runif(cols), rows)),
+      ncol = cols,
+      nrow = rows,
+      dimnames = dimnames(args$p)
+    )
+  } else if (method == "randomization") {}
+}
+
+#' @method joint_test single_rct_mab
+#' @rdname joint_test
+joint_test.single_param_mab <- function(mab, method, r = 1000) {}
+
+#' Bootstrap Joint Test

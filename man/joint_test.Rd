@@ -2,9 +2,14 @@
 % Please edit documentation in R/methods.R
 \name{joint_test}
 \alias{joint_test}
+\alias{joint_test.single_param_mab}
 \title{Joint Hypothesis Test for Multi-Arm Bandit Trials}
 \usage{
 joint_test(mab, method, r = 1000)
+
+\method{joint_test}{single_param_mab}(mab, method, r = 1000)
+
+\method{joint_test}{single_rct_mab}(mab, method, r = 1000)
 }
 \arguments{
 \item{mab}{A \code{single_rct_mab} or \code{single_param_mab} object.}
@@ -26,7 +31,7 @@ A \code{mab.test} object containing
 }
 \description{
 Conducts a joint hypothesis test of no treatment effects across all arms, i.e. that all arms
-have the same true probability of success, either using parametric bootstrap or the randomization inference
+have the same true probability of success, either using a bootstrap procedure or the randomization inference
 procedure adapted from
 \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
 See details for a description of both methods

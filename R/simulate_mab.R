@@ -32,8 +32,7 @@
 #' @param time_model An optional function with signature `function(n, conditions, success, blocks = NULL, clusters = NULL, ...)`
 #' that returns a vector of [lubridate::period] objects which will then be added to `dates_of_assignment` to produce `success_date`. Used to simulate delayed feedback mechanism
 #' during the trial, so outcomes are imperfectly observed. Only used when`dates_of_assignment` is also supplied. Dates can be generated even when `delayed_feedback == FALSE`,
-#' but they will not be used.
-#' Default `NULL`. Other optional arguments CANNOT share names as arguments in [furrr::furrr_options()]
+#' but they will not be used. Default `NULL`. Other optional arguments Cannot share names with arguments in [furrr::furrr_options()].
 #' @param algorithm Assignment algorithm, determines how probabilities of assignment
 #' are updated each period. Either `"thompson"` for Thompson Sampling, `"ucb1"` for
 #' the UCB1 algorithm, or `"static"` for uniform, non-adaptive assignment. Not case sensitive.
@@ -100,8 +99,8 @@ simulate_mab <- function(
   ...
 ) {
   cl <- match.call()
-  args <- mget(methods::formalArgs(simulate_mab))
   algorithm <- tolower(algorithm)
+  args <- mget(methods::formalArgs(simulate_mab))
   if (check_args) {
     check_mab_sim(
       n = n,
@@ -127,39 +126,29 @@ simulate_mab <- function(
   }
 
   other_args <- split_args(..., time_model = time_model)
-  period_idxs <- generate_period_idx(n = n, t = t, period_sizes = period_sizes)
-  assignment_dates <- generate_assignment_dates(
+
+  setup <- setup_mab_sim(
     n = n,
-    assignment_dates = assignment_dates
+    t = t,
+    p = p,
+    blocks = blocks,
+    clusters = clusters,
+    assignment_dates = assignmeent_dates,
+    time_model = time_model,
+    period_sizes = period_sizes
   )
-  blocking <- !is.null(blocks)
-  clustering <- !is.null(clusters)
-  resimulation <- FALSE
-  simulate_dates <- is.function(time_model) && !is.null(assignment_dates)
-  rownames(p) <- tolower(rownames(p))
-  conditions <- sort(rownames(p))
-  names(conditions) <- ifelse(conditions == "control", "control", "treatment")
 
-  p <- p[conditions, , drop = FALSE]
-
-  equal_probs <- stats::setNames(rep(1 / nrow(p), nrow(p)), conditions)
-
-  if (!"control" %in% names(conditions) && control_augment > 0) {
+  if (!"control" %in% names(setup$conditions) && control_augment > 0) {
     rlang::abort(c(
       "a Control group must be specified when `control_augment` > 0",
       "x" = sprintf(
         "Treatment conditions specified: %s",
-        paste(conditions, sep = ", ")
+        paste(setup$conditions, sep = ", ")
       ),
       "x" = paste0("Control Augment: ", control_augment)
     ))
   }
 
-  col_names <- list(
-    cluster_col = "cluster",
-    assignment_date_col = "assignment_date",
-    success_date_col = "success_date"
-  )
   furrr_opt <- do.call(
     furrr::furrr_options,
     c(list(seed = TRUE), other_args$furrr_args)
@@ -168,39 +157,39 @@ simulate_mab <- function(
   if (r == 1) {
     data <- prep_sim_data(
       n = n,
-      p = p,
+      p = setup$p,
       blocks = blocks,
       clusters = clusters,
-      blocking = blocking,
-      clustering = clustering,
-      period_idxs = period_idxs,
-      conditions = conditions,
-      equal_probs = equal_probs,
-      assignment_dates = assignment_dates,
-      simulate_dates = simulate_dates,
+      blocking = setup$blocking,
+      clustering = setup$clustering,
+      period_idxs = setup$period_idxs,
+      conditions = setup$conditions,
+      equal_probs = setup$equal_probs,
+      assignment_dates = setup$assignment_dates,
+      simulate_dates = setup$simulate_dates,
       time_model = time_model,
-      time_model_args = time_model_args,
+      time_model_args = other_args$time_model_args,
       dt = dt
     )
     results <- run_mab(
       data = data,
       sim_type = "param",
-      p = p,
+      p = setup$p,
       algorithm = algorithm,
       control_augment = control_augment,
       random_assign_prop = random_assign_prop,
       prior_periods = prior_periods,
       discount_rate = discount_rate,
-      simulate_dates = simulate_dates,
+      simulate_dates = setup$simulate_dates,
       delayed_feedback = delayed_feedback,
-      conditions = conditions,
-      blocking = blocking,
-      clustering = clustering,
-      col_names = col_names,
+      conditions = setup$conditions,
+      blocking = setup$blocking,
+      clustering = setup$clustering,
+      col_names = setup$col_names,
       verbose = verbose,
       ndraws = ndraws,
-      starts = period_idxs[["start_idxs"]],
-      ends = period_idxs[["end_idxs"]],
+      starts = setup$period_idxs[["start_idxs"]],
+      ends = setup$period_idxs[["end_idxs"]],
       keep_data = keep_data,
       r = r,
       time_model = time_model,
@@ -212,16 +201,16 @@ simulate_mab <- function(
       \(.) {
         data <- prep_sim_data(
           n = n,
-          p = p,
+          p = setup[["p"]],
           blocks = blocks,
           clusters = clusters,
-          blocking = blocking,
-          clustering = clustering,
-          period_idxs = period_idxs,
-          conditions = conditions,
-          simulate_dates = simulate_dates,
-          equal_probs = equal_probs,
-          assignment_dates = assignment_dates,
+          blocking = setup[["blocking"]],
+          clustering = setup[["clustering"]],
+          period_idxs = setup[["period_idxs"]],
+          conditions = setup[["conditions"]],
+          simulate_dates = setup[["simulate_dates"]],
+          equal_probs = setup[["equal_probs"]],
+          assignment_dates = setup[["asssignment_dates"]],
           time_model = time_model,
           time_model_args = other_args[["time_model_args"]],
           dt = dt
@@ -229,22 +218,22 @@ simulate_mab <- function(
         run_mab(
           data = data,
           sim_type = "param",
-          p = p,
+          p = setup[["p"]],
           algorithm = algorithm,
           control_augment = control_augment,
           random_assign_prop = random_assign_prop,
           prior_periods = prior_periods,
           discount_rate = discount_rate,
-          simulate_dates = simulate_dates,
+          simulate_dates = setup[["simulate_dates"]],
           delayed_feedback = delayed_feedback,
-          conditions = conditions,
-          blocking = blocking,
-          clustering = clustering,
-          col_names = col_names,
+          conditions = setup[["conditions"]],
+          blocking = setup[["blocking"]],
+          clustering = setup[["clustering"]],
+          col_names = setup[["col_names"]],
           verbose = verbose,
           ndraws = ndraws,
-          starts = period_idxs[["start_idxs"]],
-          ends = period_idxs[["end_idxs"]],
+          starts = setup[["period_idxs"]][["start_idxs"]],
+          ends = setup[["period_idxs"]][["end_idxs"]],
           keep_data = keep_data,
           r = r,
           time_model = time_model,
@@ -264,7 +253,77 @@ simulate_mab <- function(
 
   results$args <- args
   results$cl <- cl
+  results$furrr <- furrr_opt
+  results$args$time_model_args <- other_args$time_model_args
   return(construct_mab(results, type = "param", multi = r > 1))
+}
+
+#' Set Up MAB Simulation
+#' @name setup_mab_sim
+#' @description
+#' Perfoms all one-time set-up requried for [simulate_mab()] as opposed to
+#' [prep_sim_data()] which needs to be re-run each period.
+#' @inheritParams simulate_mab
+#' @returns A named list containing:
+#' \itemize{
+#'   \item `period_idxs`: A list of 2 integer vectors of period boundary indicies.
+#'   \item `assignment_dates`: Vector of assignment dates based on provided dates.
+#'   \item `blocking`: Logical; `TRUE` if `blocks` is non-null.
+#'   \item `clustering`: Logical; `TRUE` if `clusters` is non-null.
+#'   \item `simulate_dates`: Logical; `TRUE` if both `time_model` is a function
+#'   and `assignment_dates` is non-null.
+#'   \item `p`: The success probability matrix with lowercase and sorted rownames
+#'   with rows reordered to match `conditions`.
+#'   \item `conditions`: A named character vector of arm labels sorted
+#'   alphabetically, with names `"control"` or `"treatment"` as appropriate.
+#'   \item `equal_probs`: A named numeric vector of equal assignment
+#'   probabilities `1 / K` for each of the `K` arms.
+#'   \item `col_names`: A fixed named list of output column name strings.
+#' }
+#'
+setup_mab_sim <- function(
+  n,
+  t,
+  p,
+  blocks,
+  clusters,
+  assignment_dates,
+  time_model,
+  period_sizes
+) {
+  period_idxs <- generate_period_idx(n = n, t = t, period_sizes = period_sizes)
+  assignment_dates <- generate_assignment_dates(
+    n = n,
+    assignment_dates = assignment_dates
+  )
+
+  blocking <- !is.null(blocks)
+  clustering <- !is.null(clusters)
+  simulate_dates <- is.function(time_model) && !is.null(assignment_dates)
+
+  rownames(p) <- tolower(rownames(p))
+  conditions <- sort(rownames(p))
+  names(conditions) <- ifelse(conditions == "control", "control", "treatment")
+  p <- p[conditions, , drop = FALSE]
+  equal_probs <- stats::setNames(rep(1 / nrow(p), nrow(p)), conditions)
+
+  col_names <- list(
+    cluster_col = "cluster",
+    assignment_date_col = "assignment_date",
+    success_date_col = "success_date"
+  )
+
+  list(
+    period_idxs = period_idxs,
+    assignment_dates = assignment_dates,
+    blocking = blocking,
+    clustering = clustering,
+    simulate_dates = simulate_dates,
+    p = p,
+    conditions = conditions,
+    equal_probs = equal_probs,
+    col_names = col_names
+  )
 }
 
 #' Prepares Data for Simulated MAB

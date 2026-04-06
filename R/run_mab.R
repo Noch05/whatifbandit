@@ -102,14 +102,14 @@ run_mab <- function(
 
   verbose_log(verbose, "Computing final simulation estimates")
 
-  iaipw_estimates <- compute_iaipw(
-    data = sim_results[["final_data"]],
-    assignment_probs = sim_results[["assignment_probs"]],
-    conditions = conditions,
-    periods = periods
-  )
-
   aipw_estimates <- if ("aipw" %in% estimators) {
+    iaipw_estimates <- compute_iaipw(
+      data = sim_results[["final_data"]],
+      assignment_probs = sim_results[["assignment_probs"]],
+      conditions = conditions,
+      periods = periods
+    )
+
     estimate_aipw(
       data = sim_results[["final_data"]],
       assignment_probs = sim_results[["assignment_probs"]],
