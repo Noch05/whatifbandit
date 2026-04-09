@@ -49,6 +49,9 @@ probaiblity uniformly between 0 and 1 for each column of the \code{p} matrix. Th
 any potential heterogeneity across the block or cluster structure, but still ensures
 no treatment effect is specified. Drawing a new \code{p} matrix each time properly captures
 the uncertainty for the null distribution.
+
+For \code{method == "boostrap"} with a \code{single_rct_mab}, the block and or cluster assignment
+proportions are taken from the original dataset.
 }
 \references{
 Offer-Westort, Molly, Alexander Coppock, and Donald P. Green.

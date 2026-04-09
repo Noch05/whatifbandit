@@ -1,5 +1,5 @@
 #' @importFrom rlang .data
-#' @importFrom rlang !! !!!
+#' @importFrom rlang !! !!! %||%
 #' @importFrom data.table .I .N .SD
 utils::globalVariables(c(
   ".SDcols",

@@ -303,20 +303,21 @@ compute_bandit <- function(
     )
   )
 
-  assignment_prob <- bandit[["assignment_prob"]]
-
   if (control_augment > 0) {
     ctrl <- names(conditions) == "control"
-    if (assignment_prob[ctrl] < control_augment) {
-      assignment_prob[ctrl] <- control_augment
-      assignment_prob[!ctrl] <- (assignment_prob[!ctrl] /
-        sum(assignment_prob[!ctrl])) *
+
+    if (bandit[["assignment_prob"]][ctrl] < control_augment) {
+      bandit[["assignment_prob"]][ctrl] <- control_augment
+
+      bandit[["assignment_prob"]][!ctrl] <-
+        (bandit[["assignment_prob"]][!ctrl] /
+          sum(bandit[["assignment_prob"]][!ctrl])) *
         (1 - control_augment)
     }
   }
-  if (!dplyr::near(sum(assignment_prob), 1)) {
-    bandit[["assignment_prob"]] <- assignment_prob / sum(assignment_prob)
-  }
+
+  bandit[["assignment_prob"]] <- bandit[["assignment_prob"]] /
+    sum(bandit[["assignment_prob"]])
 
   return(bandit)
 }

@@ -72,6 +72,9 @@ construct_mab <- function(mab, type, multi) {
 #' no treatment effect is specified. Drawing a new `p` matrix each time properly captures
 #' the uncertainty for the null distribution.
 #'
+#' For `method == "boostrap"` with a `single_rct_mab`, the block and or cluster assignment
+#' proportions are taken from the original dataset.
+#'
 #'
 #' @references
 #' Offer-Westort, Molly, Alexander Coppock, and Donald P. Green.
@@ -193,8 +196,16 @@ joint_boot_null <- function(mab, r) {
       args,
       list(
         assignment_dates = mab$new_data[[col_names$assignment_date_col]],
-        blocks = mab$new_data[["block"]] %||% NULL,
-        clusters = mab$new_data[[col_names$cluster_col %||% "NULL"]],
+        blocks = if (is.null(mab$config$args$blocks)) {
+          NULL
+        } else {
+          group_prop(mab$new_data, "block")
+        },
+        clusters = if (is.null(mab$config$args$clusters)) {
+          NULL
+        } else {
+          group_prop(mab$new_data, col_names$cluster_col)
+        },
         n = nrow(mab$new_data),
         dt = data.table::is.data.table(mab$new_data),
         equal_probs = rep(1 / length(args$conditions), length(args$conditions)),
@@ -214,18 +225,16 @@ joint_boot_null <- function(mab, r) {
       )
     )
     rows <- length(mab$config$args$conditions)
-    cols_names <- if (!is.null(col_names$cluster_col)) {
-      x <- unique(mab$new_data[[col_names$cluster_col]])
-      list(length(x), x)
-    } else if (!is.null(col_names$block_col)) {
-      x <- unique(mab$new_data[["block"]])
-      list(length(x), x)
+    cols_names <- if (!is.null(args$clusters)) {
+      args$clusters
+    } else if (!is.null(args$blocks)) {
+      args$blocks
     } else {
-      list(1, NULL)
+      1
     }
-    cols <- cols_names[[1]]
+    cols <- length(cols_names)
 
-    dn <- list(mab$config$args$conditions, cols_names[[2]])
+    dn <- list(mab$config$args$conditions, names(cols_names))
   } else {
     cols <- ncol(mab$config$args$p)
     rows <- nrow(mab$config$args$p)
@@ -281,4 +290,38 @@ joint_null_inner <- function(args) {
   estimates <- do.call(run_mab_single, args)[["estimates"]]
   f <- estimates[["mean"]][estimates[["mab_condition"]] == "Joint-F"]
   return(f)
+}
+
+#' Get Group Proportions
+#' @description Accepts input data, and a group column, and returns the proportion of the data that belongs
+#' to each group
+#'
+#' @param data Input Data
+#' @param group Column to group by
+#'
+#' @returns A named numeric vector with the `names` corresponding to the group, and the value
+#' to its proportion among the provided data.
+#' @keywords internal
+#'
+group_prop <- function(data, group) {
+  UseMethod("group_prop", data)
+}
+
+#' @rdname group_prop
+#' @method group_prop data.frame
+#'
+group_prop.data.frame <- function(data, group) {
+  n <- nrow(data)
+  data |>
+    dplyr::group_by(!!rlang::sym(group)) |>
+    dplyr::summarize(size = dplyr::n() / n) |>
+    as_named_vec(val = "size", name = group)
+}
+
+#' @rdname group_prop
+#' @method group_prop data.table
+group_prop.data.table <- function(data, group) {
+  n <- nrow(data)
+  data[, .(size = .N / n), by = group] |>
+    as_named_vec(val = "size", name = group)
 }
