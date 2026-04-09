@@ -27,7 +27,7 @@ the \code{names} attribute should be present with the control group labelled \co
 \code{data.table} or \code{tibble} with the biased sample estimates.
 }
 \description{
-Computes sample proportion and its variance using the traditional formula, which is biased under the adaptive experiment.
+Computes sample proportion and its standard error using the traditional formula, which is biased under the adaptive experiment.
 Only provided for comparison, and should not be used for any inference purposes unless there is
 only 1 period or a static design was used.
 }
@@ -38,7 +38,7 @@ so the central limit theorem and law of large numbers applies in sufficiently la
 No degrees of freedom are provided, z-tests should be used for inference if applicable.
 
 Under clustering, the estimator is defined as the weighted mean of the sample proportions computed across
-cluster and period. Here the appropriate variance of the sample mean is provided, with degrees
+cluster and period. Here the appropriate standard error, of the sample mean is provided, with degrees
 of freedom based on the number of clusters to build confidence intervals with a t-distribution.
 Like before, this estimator is biased under adaptive assignment but under a
 static trial, valid tests can be performed using the estimator with a t-distribution.

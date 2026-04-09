@@ -186,8 +186,7 @@ compute_iaipw.data.table <- function(
 #' @inheritParams run_mab
 #' @param iaipw Invidual AIPW scores computed by [compute_iaipw()].
 #' @param cluster_col String; name of column with cluster indicies.
-#' @returns A `tibble`/`data.table` containing the AIPW estimate of treatment success, AIPW variance,
-#' sample proportion of successful treatments (sample mean), and sample mean variance.
+#' @returns A `tibble`/`data.table` containing the AIPW estimate of treatment success, and their standard errors.
 #' @details
 #' The formulas for the calculations in this function can be found in
 #' \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)} at
@@ -264,9 +263,9 @@ estimate_aipw <- function(
       ]]]
       sum_w <- sum(weights)
       mean <- sum(score * weights) / sum_w
-      var <- sum((weights^2) * ((score - mean)^2)) / ((sum_w)^2)
+      se <- sqrt(sum((weights^2) * ((score - mean)^2)) / ((sum_w)^2))
       return(
-        list(mean = mean, var = var, mab_condition = name, estimator = "AIPW")
+        list(mean = mean, se = se, mab_condition = name, estimator = "AIPW")
       )
     }
   ) |>
@@ -280,7 +279,8 @@ estimate_aipw <- function(
 #' @description
 #' Computes the IPW estimates for the true probabilities of success using [estimatr::lm_robust()] to perform
 #' an IPW weighted regressionn for estimation. If blocking was used for the trial, blocks are included
-#' as fixed effects, and if clustering is specified CR2 variances are reported. Otherwise HC2 variances
+#' as fixed effects, and if clustering is specified CR2 standard errors are reported. Otherwise HC2
+#' standard errors
 #' are used. Appropriate degrees of freedom are supplied along with the regression's F-statistic
 #'
 #' @inheritParams compute_iaipw
@@ -293,7 +293,7 @@ estimate_aipw <- function(
 #' under the adaptive procedure. However, this f-statistic can be used for the randomization and
 #' bootstrap infernece joint-tests provided.
 #'
-#' The provided variances can be used to construct approximate confidence intervals using a t-distribution with
+#' The provided standard errors can be used to construct approximate confidence intervals using a t-distribution with
 #' the provided degrees of freedom. However there are the degrees of freedom provided are `n - num_conditions`,
 #' which is likely to be an overestimate given the potential for the number of observations assigned
 #' to each group to vary widely with the adaptive trial. The HC2 or CR2 corrections help but
@@ -308,7 +308,7 @@ estimate_aipw <- function(
 #' in the estimates. Assignment probabilities to treatment are the same within each block,
 #' so the IPW estimator is still unbiased without the prescence of the fixed effects.
 #'
-#' @returns A list of the IPW estimates in a `tibble`/`data.table`, along with the variances of the coefficients,
+#' @returns A list of the IPW estimates in a `tibble`/`data.table`, along with their standard errors,
 #' F-statistic and degrees of freedom, and the covariance matrix from the IPW regression.
 #' @family estimation
 #' @keywords internal
@@ -342,7 +342,7 @@ estimate_ipw <- function(
   }
 
   coefs <- est_lm[["coefficients"]]
-  var <- (est_lm[["std.error"]])^2
+  se <- est_lm[["std.error"]]
   f <- if (is.null(est_lm[["fstatistic"]])) {
     est_lm[["proj_statistic"]][1] |> as.numeric()
   } else {
@@ -352,13 +352,13 @@ estimate_ipw <- function(
 
   fix_names <- \(x) stats::setNames(x, gsub("^mab_condition", "", names(x)))
   coefs <- fix_names(coefs)
-  var <- fix_names(var)
+  se <- fix_names(se)
   df <- fix_names(df)
 
   if (data.table::is.data.table(data)) {
     ipw_estimates <- data.table::data.table(
       mean = c(coefs, f),
-      var = c(var, NA),
+      se = c(se, NA),
       df = c(df, NA),
       mab_condition = c(names(coefs), "Joint-F"),
       estimator = "IPW"
@@ -370,7 +370,7 @@ estimate_ipw <- function(
   } else {
     ipw_estimates <- tibble::tibble(
       mean = c(coefs, f),
-      var = c(var, NA),
+      se = c(se, NA),
       df = c(df, NA),
       mab_condition = c(names(coefs), "Joint-F"),
       estimator = "IPW"
@@ -386,7 +386,7 @@ estimate_ipw <- function(
 #' Sample Estimates
 #' @name estimate_sample
 #' @description
-#' Computes sample proportion and its variance using the traditional formula, which is biased under the adaptive experiment.
+#' Computes sample proportion and its standard error using the traditional formula, which is biased under the adaptive experiment.
 #' Only provided for comparison, and should not be used for any inference purposes unless there is
 #' only 1 period or a static design was used.
 #' @inheritParams estimate_aipw
@@ -400,7 +400,7 @@ estimate_ipw <- function(
 #' No degrees of freedom are provided, z-tests should be used for inference if applicable.
 #'
 #' Under clustering, the estimator is defined as the weighted mean of the sample proportions computed across
-#' cluster and period. Here the appropriate variance of the sample mean is provided, with degrees
+#' cluster and period. Here the appropriate standard error, of the sample mean is provided, with degrees
 #' of freedom based on the number of clusters to build confidence intervals with a t-distribution.
 #' Like before, this estimator is biased under adaptive assignment but under a
 #' static trial, valid tests can be performed using the estimator with a t-distribution.
@@ -429,7 +429,7 @@ estimate_sample.data.frame <- function(
       dplyr::group_by(mab_condition) |>
       dplyr::summarize(
         mean = mean(cluster_means, na.rm = TRUE),
-        var = var(cluster_means, na.rm = TRUE) / dplyr::n(),
+        se = sqrt(stats::var(cluster_means, na.rm = TRUE) / dplyr::n()),
         estimator = "Sample",
         .groups = "drop"
       ) |>
@@ -443,7 +443,7 @@ estimate_sample.data.frame <- function(
         .groups = "drop"
       ) |>
       dplyr::mutate(
-        var = (mean * (1 - mean)) / n,
+        se = sqrt((mean * (1 - mean)) / n),
         estimator = "Sample"
       ) |>
       dplyr::select(-n) |>
@@ -466,11 +466,11 @@ estimate_sample.data.table <- function(
     ][,
       .(
         mean = mean(cluster_means, na.rm = TRUE),
-        var = var(cluster_means, na.rm = TRUE) / .N,
+        se = sqrt(stats::var(cluster_means, na.rm = TRUE) / .N),
         estimator = "Sample"
       ),
       by = mab_condition
-    ][, .(mean, var, mab_condition, estimator)] |>
+    ][, .(mean, se, mab_condition, estimator)] |>
       fill_missing_conditions(conditions = conditions)
   } else {
     sample <- data[,
@@ -480,9 +480,9 @@ estimate_sample.data.table <- function(
       ),
       by = mab_condition
     ][, `:=`(
-      var = ((mean) * (1 - mean)) / n,
+      se = sqrt(((mean) * (1 - mean)) / n),
       estimator = "Sample"
-    )][, .(mean, var, mab_condition, estimator)] |>
+    )][, .(mean, se, mab_condition, estimator)] |>
       fill_missing_conditions(conditions = conditions)
   }
   return(sample)
@@ -513,7 +513,7 @@ fill_missing_conditions <- function(x, conditions) {
           x,
           data.table::data.table(
             mean = NA,
-            var = NA,
+            se = NA,
             mab_condition = missing_conditions,
             estimator = x[["estimator"]][1]
           )
@@ -525,7 +525,7 @@ fill_missing_conditions <- function(x, conditions) {
         x,
         tibble::tibble(
           mean = NA,
-          var = NA,
+          se = NA,
           mab_condition = missing_conditions,
           estimator = x[["estimator"]][1]
         )

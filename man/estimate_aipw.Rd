@@ -33,8 +33,7 @@ the \code{names} attribute should be present with the control group labelled \co
 \item{periods}{Total periods in the simulation.}
 }
 \value{
-A \code{tibble}/\code{data.table} containing the AIPW estimate of treatment success, AIPW variance,
-sample proportion of successful treatments (sample mean), and sample mean variance.
+A \code{tibble}/\code{data.table} containing the AIPW estimate of treatment success, and their standard errors.
 }
 \description{
 Uses provided Invidual AIPW scores created by \code{\link[=compute_iaipw]{compute_iaipw()}} and computes the final

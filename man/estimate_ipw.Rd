@@ -18,13 +18,14 @@ Also used to store simulation outputs.}
 the \code{names} attribute should be present with the control group labelled \code{"control"}.}
 }
 \value{
-A list of the IPW estimates in a \code{tibble}/\code{data.table}, along with the variances of the coefficients,
+A list of the IPW estimates in a \code{tibble}/\code{data.table}, along with their standard errors,
 F-statistic and degrees of freedom, and the covariance matrix from the IPW regression.
 }
 \description{
 Computes the IPW estimates for the true probabilities of success using \code{\link[estimatr:lm_robust]{estimatr::lm_robust()}} to perform
 an IPW weighted regressionn for estimation. If blocking was used for the trial, blocks are included
-as fixed effects, and if clustering is specified CR2 variances are reported. Otherwise HC2 variances
+as fixed effects, and if clustering is specified CR2 standard errors are reported. Otherwise HC2
+standard errors
 are used. Appropriate degrees of freedom are supplied along with the regression's F-statistic
 }
 \details{
@@ -34,7 +35,7 @@ Degrees of freedom are not provided for the f-statistic, because the traditional
 under the adaptive procedure. However, this f-statistic can be used for the randomization and
 bootstrap infernece joint-tests provided.
 
-The provided variances can be used to construct approximate confidence intervals using a t-distribution with
+The provided standard errors can be used to construct approximate confidence intervals using a t-distribution with
 the provided degrees of freedom. However there are the degrees of freedom provided are \code{n - num_conditions},
 which is likely to be an overestimate given the potential for the number of observations assigned
 to each group to vary widely with the adaptive trial. The HC2 or CR2 corrections help but
