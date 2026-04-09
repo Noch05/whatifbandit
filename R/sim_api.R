@@ -373,7 +373,7 @@ run_mab <- function(
 #' \item `estimates`: A `tibble` or `data.table` containing the all estimates and variances for each arm.
 #' Long format, treatment arm, and estimate type are columns along with the mean estimates
 #' and variance estimates.
-#' \item `ipw_vcov`: A 3d arrary containing the covariance matrix of coefficients of IPW estimates of each trial.
+#' \item `ipw_vcov`: A 3d array containing the covariance matrix of coefficients of IPW estimates of each trial.
 #' }
 #' @details
 #' This function iterates over every element in `mabs` and extracts the required element to place in a condensed list

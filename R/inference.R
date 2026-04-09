@@ -399,11 +399,12 @@ estimate_ipw <- function(
 #' so the central limit theorem and law of large numbers applies in sufficiently large samples.
 #' No degrees of freedom are provided, z-tests should be used for inference if applicable.
 #'
-#' Under clustering, the estimator is defined as the weighted mean of the sample proportions computed across
+#' Under clustering, the estimator is defined as the mean of the sample proportions computed across
 #' cluster and period. Here the appropriate standard error, of the sample mean is provided, with degrees
-#' of freedom based on the number of clusters to build confidence intervals with a t-distribution.
+#' of freedom per arm to build confidence intervals with a t-distribution.
 #' Like before, this estimator is biased under adaptive assignment but under a
-#' static trial, valid tests can be performed using the estimator with a t-distribution.
+#' static trial, valid tests can be performed using the estimator with a t-distribution. In custers
+#' df should be pooled for tests among the tested arms.
 
 #' @keywords internal
 #' @family estimation
@@ -431,6 +432,7 @@ estimate_sample.data.frame <- function(
         mean = mean(cluster_means, na.rm = TRUE),
         se = sqrt(stats::var(cluster_means, na.rm = TRUE) / dplyr::n()),
         estimator = "Sample",
+        df = dplyr::n() - 1,
         .groups = "drop"
       ) |>
       fill_missing_conditions(conditions = conditions)
@@ -467,10 +469,11 @@ estimate_sample.data.table <- function(
       .(
         mean = mean(cluster_means, na.rm = TRUE),
         se = sqrt(stats::var(cluster_means, na.rm = TRUE) / .N),
-        estimator = "Sample"
+        estimator = "Sample",
+        df = .N - 1
       ),
       by = mab_condition
-    ][, .(mean, se, mab_condition, estimator)] |>
+    ][, .(mean, se, mab_condition, estimator, df)] |>
       fill_missing_conditions(conditions = conditions)
   } else {
     sample <- data[,
