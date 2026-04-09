@@ -36,7 +36,9 @@ utils::globalVariables(c(
   "n",
   ":=",
   "cluster_means",
-  "n_periods"
+  "n_periods",
+  "df",
+  "se"
 ))
 
 #' Misellaneous Helper Functions
