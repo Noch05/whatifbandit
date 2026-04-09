@@ -34,9 +34,6 @@
 #' that returns a vector of [lubridate::period] objects which will then be added to `dates_of_assignment` to produce `success_date`. Used to simulate delayed feedback mechanism
 #' during the trial, so outcomes are imperfectly observed. Only used when`dates_of_assignment` is also supplied. Dates can be generated even when `delayed_feedback == FALSE`,
 #' but they will not be used. Default `NULL`. Other optional arguments Cannot share names with arguments in [furrr::furrr_options()].
-#' @param algorithm Assignment algorithm, determines how probabilities of assignment
-#' are updated each period. Either `"thompson"` for Thompson Sampling, `"ucb1"` for
-#' the UCB1 algorithm, or `"static"` for uniform, non-adaptive assignment. Not case sensitive.
 #' @param period_sizes Numeric vector of `length(t)`, with the specific number of units to be assigned in each period. Used when it is required to assign different numbers of units
 #' to treatment across the periods of the trial.
 #' @param ... Additional named arguments forwarded to `time_model` and [furrr::furrr_options()].

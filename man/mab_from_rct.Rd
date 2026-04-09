@@ -41,7 +41,8 @@ simply do not provide them in the formula. Clusters can only ever be given by 1 
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
 
-\item{algorithm}{A character string specifying the MAB algorithm to use. Options are \code{"Thompson"} or \code{"UCB1"}, ignoring case. Algorithm
+\item{algorithm}{A character string specifying the MAB algorithm to use. Options are
+\code{"Thompson"}, \code{"UCB1"}, or "static", ignoring case. Algorithm
 defines the adaptive assignment process. For more details on these specific algorithms see
 \href{https://www.jstor.org/stable/2332286}{Thompson 1933};
 \href{https://doi.org/10.1023/A:1013689704352}{Auer et al. 2002};

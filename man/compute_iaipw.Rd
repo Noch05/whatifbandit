@@ -4,6 +4,7 @@
 \alias{compute_iaipw}
 \alias{compute_iaipw.data.frame}
 \alias{compute_iaipw.data.table}
+\alias{iaipw}
 \title{Calculate Observation Level AIPW For Each Treatment Condition}
 \usage{
 compute_iaipw(data, assignment_probs, periods, conditions)
@@ -11,6 +12,8 @@ compute_iaipw(data, assignment_probs, periods, conditions)
 \method{compute_iaipw}{data.frame}(data, assignment_probs, periods, conditions)
 
 \method{compute_iaipw}{data.table}(data, assignment_probs, periods, conditions)
+
+iaipw(conditions_vec, success_vec, mhat, prob, condition)
 }
 \arguments{
 \item{data}{\code{tibble} or \code{data.table} holding necessary information to complete the simulation.
@@ -29,8 +32,7 @@ A named list with the individual aipw estimate vectors for each treatment condit
 }
 \description{
 Calculates the augmented inverse probability weighted estimate (AIPW) of treatment
-success for each observation and treatment (i.e. on the level of a single unit), and returns the final IPW weights
-for each observation, (i.e. the reciprocal specific weight for the treatment they were assigned)
+success for each observation and treatment (i.e. on the level of a single unit).
 }
 \details{
 The specification for the individual AIPW estimates can be found
@@ -40,6 +42,11 @@ the regression adjustment used is the grouped mean of success by treatment, up u
 the current period of estimation (so at period 5, the grouped mean would be calculated
 using the results from periods 1 through 4).
 }
+\section{Functions}{
+\itemize{
+\item \code{iaipw()}: Small function to handle iaipw computation in both branches.
+
+}}
 \references{
 Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
 "Confidence Intervals for Policy Evaluation in Adaptive Experiments." \emph{Proceedings of the National Academy of Sciences of the United States of America} 118

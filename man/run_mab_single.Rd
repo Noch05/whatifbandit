@@ -41,7 +41,8 @@ run_mab_single(
 \item{sim_type}{String; Type of simulation to conduct, either \code{"resim"}, \code{"param"}, or "\verb{test"},
 for a resimulated rct, simulation from population parameters, or simulation for the randomization joint test.}
 
-\item{algorithm}{A character string specifying the MAB algorithm to use. Options are \code{"Thompson"} or \code{"UCB1"}, ignoring case. Algorithm
+\item{algorithm}{A character string specifying the MAB algorithm to use. Options are
+\code{"Thompson"}, \code{"UCB1"}, or "static", ignoring case. Algorithm
 defines the adaptive assignment process. For more details on these specific algorithms see
 \href{https://www.jstor.org/stable/2332286}{Thompson 1933};
 \href{https://doi.org/10.1023/A:1013689704352}{Auer et al. 2002};

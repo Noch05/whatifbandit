@@ -154,7 +154,7 @@ check_clusters <- function(
   data,
   cluster_col
 ) {
-  UseMethod("cluster_col", data)
+  UseMethod("check_clusters", data)
 }
 
 #' @method check_clusters data.frame

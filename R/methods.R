@@ -81,20 +81,20 @@ construct_mab <- function(mab, type, multi) {
 #'
 joint_test <- function(mab, method, r = 1000) {
   check_posint(r)
-  check_string(
-    tolower(method),
-    valid = c("bootstrap", "randomization"),
-    "method"
-  )
   if (!inherits(mab, "single_mab")) {
     rlang::abort(c("Joint-tests can only be performed on `single_mab` objects"))
   }
-  null <- if (method == "bootstrap") {
-    joint_boot_null(mab = mab, r = r)
-  } else if (method == "randomization") {
-    joint_random_null(mab = mab, r = r)
-  }
 
+  null <- switch(
+    method,
+    "bootstrap" = joint_boot_null(mab = mab, r = r),
+    "randomization" = joint_random_null(mab = mab, r = r),
+    check_string(
+      tolower(method),
+      valid = c("bootstrap", "randomization"),
+      "method"
+    )
+  )
   f <- mab$estimates$point$mean[mab$estimates$point$mab_condition == "Joint-F"]
 
   p <- mean(null >= f, na.rm = TRUE)

@@ -326,7 +326,8 @@ create_cutoff.date <- function(
             lubridate::interval(start_month, month_date) /
               months(1) /
               period_length
-          )
+          ) +
+            1
         ) |>
         dplyr::select(-month_date) |>
         dplyr::arrange(.data[[date_col]], period_number)

@@ -227,7 +227,6 @@ summary_to_matrix <- function(df) {
 #' @inheritParams mab_loop
 #' @inheritParams impute_outcomes
 #' @param block_cols Names of the blocking columns
-#' @param impute_idx Index of rows which require imputed outcomes for this period.
 #' @returns A named list containing:
 #' \itemize{
 #' \item `current_data`: A `tibble` or `data.table` containing `impute_block` column to guide the outcome imputations
@@ -261,7 +260,6 @@ prep_imputation <- function(
   imputation_information,
   whole_experiment,
   blocking,
-  impute_idx,
   delayed_feedback,
   current_period
 ) {
@@ -469,7 +467,7 @@ impute_outcomes.data.frame <- function(
 #-------------------------------------------------------------------------------
 #' @inheritParams impute_outcomes
 #' @rdname impute_outcomes
-#' @method impute_outcomes data.frame
+#' @method impute_outcomes data.table
 impute_outcomes.data.table <- function(
   data,
   imputation_info,

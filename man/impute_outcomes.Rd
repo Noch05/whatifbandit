@@ -27,7 +27,7 @@ compute_impute(imputation_info, success_col)
   idx
 )
 
-\method{impute_outcomes}{data.frame}(
+\method{impute_outcomes}{data.table}(
   data,
   imputation_info,
   success_col,

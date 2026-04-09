@@ -11,7 +11,6 @@ prep_imputation(
   imputation_information,
   whole_experiment,
   blocking,
-  impute_idx,
   delayed_feedback,
   current_period
 )
@@ -29,8 +28,6 @@ with a high number of periods, setting this to \code{FALSE} can be more computat
 though not a significant contributor to total run time. Default is \code{FALSE}.}
 
 \item{blocking}{Logical; Whether or not treatment blocking is occuring}
-
-\item{impute_idx}{Index of rows which require imputed outcomes for this period.}
 
 \item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon
 as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is

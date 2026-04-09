@@ -21,13 +21,14 @@ compute_bandit(
 
 bandit_invalid(bandit)
 
-\method{compute_bandit}{ucb1}(past_results, num_conditions, conditions, current_period)
+\method{compute_bandit}{ucb1}(past_results, num_conditions, conditions, current_period = NULL)
 }
 \arguments{
 \item{past_results}{A \code{tibble}/\code{data.table} containing summary of prior periods, with
 successes, number of observations, and success rates, which is created by \code{\link[=compute_prior]{compute_prior()}}.}
 
-\item{algorithm}{A character string specifying the MAB algorithm to use. Options are \code{"Thompson"} or \code{"UCB1"}, ignoring case. Algorithm
+\item{algorithm}{A character string specifying the MAB algorithm to use. Options are
+\code{"Thompson"}, \code{"UCB1"}, or "static", ignoring case. Algorithm
 defines the adaptive assignment process. For more details on these specific algorithms see
 \href{https://www.jstor.org/stable/2332286}{Thompson 1933};
 \href{https://doi.org/10.1023/A:1013689704352}{Auer et al. 2002};
@@ -85,7 +86,8 @@ so \code{assignment_probabilities} will always have 1 element equal to 1, and th
 For example, if the original vector is \verb{(0, 0, 1)}, and \code{control_augment} = 0.2,
 the new vector is \verb{(0.2, 0, 0.8)} assuming the first element is control. If instead the 3rd element
 were the control group the resulting vector would not be changed because it already meets the
-control group threshold.
+control group threshold. Under ties, the assignment probability is split evenly among tied arms,
+so \verb{(0, 1, 1)} would become \verb{(0, 0.5, 0.5)}.
 }
 \section{Functions}{
 \itemize{

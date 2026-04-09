@@ -17,7 +17,8 @@
 #' @param data A `data.frame`, `data.table`, or any object which inherits from `data.frame`, containing input data from the trial. This should be the results
 #' of a traditional Randomized Controlled Trial (RCT).
 #'
-#' @param algorithm A character string specifying the MAB algorithm to use. Options are `"Thompson"` or `"UCB1"`, ignoring case. Algorithm
+#' @param algorithm A character string specifying the MAB algorithm to use. Options are
+#' `"Thompson"`, `"UCB1"`, or "static", ignoring case. Algorithm
 #' defines the adaptive assignment process. For more details on these specific algorithms see
 #' \href{https://www.jstor.org/stable/2332286}{Thompson 1933};
 #' \href{https://doi.org/10.1023/A:1013689704352}{Auer et al. 2002};

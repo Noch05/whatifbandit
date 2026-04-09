@@ -34,7 +34,7 @@ check_rct_args <- function(
     list(
       c(algorithm, period_method),
       list(
-        c("thompson", "ucb1"),
+        c("thompson", "ucb1", "static"),
         c("individual", "batch", "date")
       ),
       c("algorithm", "period_method")

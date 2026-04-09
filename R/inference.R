@@ -1,8 +1,7 @@
-#' Calculate Observation Level AIPW For Each Treatment Condition
+#' @title Calculate Observation Level AIPW For Each Treatment Condition
 #' @name compute_iaipw
 #' @description Calculates the augmented inverse probability weighted estimate (AIPW) of treatment
-#' success for each observation and treatment (i.e. on the level of a single unit), and returns the final IPW weights
-#' for each observation, (i.e. the reciprocal specific weight for the treatment they were assigned)
+#' success for each observation and treatment (i.e. on the level of a single unit).
 #'
 #' @param periods Total periods in the simulation.
 #' @param assignment_probs A `tibble`/`data.table` containing the probabilities of being
@@ -17,7 +16,6 @@
 #' the regression adjustment used is the grouped mean of success by treatment, up until
 #' the current period of estimation (so at period 5, the grouped mean would be calculated
 #' using the results from periods 1 through 4).
-#'
 #'
 #' @references
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
@@ -83,11 +81,15 @@ compute_iaipw.data.frame <- function(
     \(condition) {
       prob <- assignment_probs[[condition]][periods_vec]
       mhat <- mhats[[condition]][periods_vec]
-      indicator <- (as.integer(conditions_vec == condition)) / prob
-      # If prob is 0, indicator is NaN
-      indicator[is.na(indicator)] <- 0
-      iaipw <- (indicator * success_vec) + (1 - indicator) * mhat
-      return(iaipw)
+      return(
+        iaipw(
+          conditions_vec = conditions_vec,
+          success_vec = success_vec,
+          mhat = mhat,
+          prob = prob,
+          condition = condition
+        )
+      )
     }
   )
   names(iaipw_estimates) <- conditions
@@ -137,7 +139,8 @@ compute_iaipw.data.table <- function(
       n = 1L,
       fill = 0,
       type = "lag"
-    )
+    ),
+    by = mab_condition
   ][, .(period_number, mab_condition, mhat)] |>
     data.table::dcast(
       formula = period_number ~ mab_condition,
@@ -155,10 +158,15 @@ compute_iaipw.data.table <- function(
     \(condition) {
       prob <- assignment_probs[periods_vec, ..condition][[1]]
       mhat <- mhats[periods_vec, ..condition][[1]]
-      indicator <- (as.integer(conditions_vec == condition) / prob)
-      indicator[is.na(indicator)] <- 0
-      iaipw <- (indicator * success_vec) + (1 - indicator) * mhat
-      return(iaipw)
+      return(
+        iaipw(
+          conditions_vec = conditions_vec,
+          success_vec = success_vec,
+          mhat = mhat,
+          prob = prob,
+          condition = condition
+        )
+      )
     }
   )
   names(iaipw_estimates) <- conditions
@@ -172,6 +180,16 @@ compute_iaipw.data.table <- function(
   return(iaipw_estimates)
 }
 
+#' @describeIn compute_iaipw Small function to handle iaipw computation in both branches.
+#' @keywords internal
+
+iaipw <- function(conditions_vec, success_vec, mhat, prob, condition) {
+  # If prob is 0, indicator is NaN or Inf
+  indicator <- (as.integer(conditions_vec == condition) / prob)
+  indicator[!is.finite(indicator)] <- 0
+  iaipw <- (indicator * success_vec) + (1 - indicator) * mhat
+  return(iaipw)
+}
 
 #-------------------------------------------------------------------------------
 #' Calculate Adaptive AIPW Estimates

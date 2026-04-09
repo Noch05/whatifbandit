@@ -135,7 +135,7 @@ mab_loop <- function(
           delayed_feedback = delayed_feedback,
           current_period = i
         )
-        col_names[["success_col"]]
+
         data <- impute_outcomes(
           data = data,
           imputation_info = prepped_impute,

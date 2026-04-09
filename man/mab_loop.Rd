@@ -45,7 +45,8 @@ Probabilities are accessed as \code{p[treatment, block]}.
 With blocks and clusters utilize the clusters for the columns because clusters are fully nested in blocks.
 For no clusters or blocks simply use a matrix with 1 column.}
 
-\item{algorithm}{A character string specifying the MAB algorithm to use. Options are \code{"Thompson"} or \code{"UCB1"}, ignoring case. Algorithm
+\item{algorithm}{A character string specifying the MAB algorithm to use. Options are
+\code{"Thompson"}, \code{"UCB1"}, or "static", ignoring case. Algorithm
 defines the adaptive assignment process. For more details on these specific algorithms see
 \href{https://www.jstor.org/stable/2332286}{Thompson 1933};
 \href{https://doi.org/10.1023/A:1013689704352}{Auer et al. 2002};

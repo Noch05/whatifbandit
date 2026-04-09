@@ -252,7 +252,8 @@ finalize_prior_list <- function(prior_list, conditions) {
 #' For example, if the original vector is `(0, 0, 1)`, and `control_augment` = 0.2,
 #' the new vector is `(0.2, 0, 0.8)` assuming the first element is control. If instead the 3rd element
 #' were the control group the resulting vector would not be changed because it already meets the
-#' control group threshold.
+#' control group threshold. Under ties, the assignment probability is split evenly among tied arms,
+#' so `(0, 1, 1)` would become `(0, 0.5, 0.5)`.
 #'
 #'
 #' @references
@@ -293,8 +294,7 @@ compute_bandit <- function(
     "ucb1" = compute_bandit.ucb1(
       past_results = past_results,
       conditions = conditions,
-      num_conditions = num_conditions,
-      current_period = current_period
+      num_conditions = num_conditions
     ),
     list(
       # Default for 'static' assignment
@@ -314,7 +314,7 @@ compute_bandit <- function(
         (1 - control_augment)
     }
   }
-  if (!isTRUE(all.equal(sum(assignment_prob), 1))) {
+  if (!dplyr::near(sum(assignment_prob), 1)) {
     bandit[["assignment_prob"]] <- assignment_prob / sum(assignment_prob)
   }
 
@@ -392,20 +392,21 @@ compute_bandit.ucb1 <- function(
   past_results,
   num_conditions,
   conditions,
-  current_period
+  current_period = NULL
 ) {
-  correction <- 1e-10 ## Prevents Division by 0 when n = 0
+  correction <- 1e-6 ## Prevents Division by 0 when n = 0
   n_safe <- pmax(past_results[["n"]], correction)
+  all_pulls <- sum(past_results[["n"]], na.rm = TRUE)
   success_rates <- past_results[["successes"]] / n_safe
   ucb1 <- success_rates +
-    sqrt((2 * log(current_period)) / n_safe)
+    sqrt((2 * log(all_pulls)) / n_safe)
 
-  best <- names(ucb1)[which.max(ucb1)]
+  best <- names(ucb1)[ucb1 == max(ucb1)]
   assignment_probs <- stats::setNames(
     rep(0, length(ucb1)),
     names(ucb1)
   )
-  assignment_probs[[best]] <- 1
+  assignment_probs[best] <- 1
 
   return(list(
     bandit = ucb1,
