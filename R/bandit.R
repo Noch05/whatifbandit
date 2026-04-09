@@ -394,12 +394,13 @@ compute_bandit.ucb1 <- function(
   conditions,
   current_period = NULL
 ) {
-  correction <- 1e-6 ## Prevents Division by 0 when n = 0
-  n_safe <- pmax(past_results[["n"]], correction)
   all_pulls <- sum(past_results[["n"]], na.rm = TRUE)
-  success_rates <- past_results[["successes"]] / n_safe
+  success_rates <- past_results[["successes"]] / past_results[["n"]]
+
   ucb1 <- success_rates +
-    sqrt((2 * log(all_pulls)) / n_safe)
+    sqrt((2 * log(all_pulls)) / past_results[["n"]])
+
+  ucb1[past_results[["n"]] == 0] <- Inf
 
   best <- names(ucb1)[ucb1 == max(ucb1)]
   assignment_probs <- stats::setNames(
