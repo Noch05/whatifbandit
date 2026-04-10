@@ -92,7 +92,6 @@ run_mab_single <- function(
     ndraws = ndraws,
     period_idxs = period_idxs,
     keep_data = keep_data || r == 1,
-    r = r,
     imputation_information = imputation_information,
     time_model = time_model,
     time_model_args = time_model_args,
@@ -258,7 +257,6 @@ run_mab <- function(
   ndraws,
   period_idxs,
   keep_data,
-  r,
   time_model = NULL,
   time_model_args = NULL
 ) {

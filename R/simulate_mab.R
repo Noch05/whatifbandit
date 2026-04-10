@@ -196,7 +196,9 @@ simulate_mab <- function(
   } else if (r > 1) {
     mabs <- furrr::future_map(
       seq_len(r),
-      run_single,
+      \(.) {
+        run_single()
+      },
       .options = furrr_opt,
       .progress = verbose
     )
