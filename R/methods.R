@@ -58,9 +58,8 @@ construct_mab <- function(mab, type, multi) {
 #' would express the same outcome no matter the treatment they were assigned. To achieve this
 #' the trial is re-simulated but new outcomes are not generated or imputed, however the adaptive algorithm
 #' still changes the assignments. This results in a null distribution that captures how the adaptive
-#' algorithm will assign even when the outcomes are not related to treatments at all. For
-#' re-simulaed randomized trials, from `[mab_from_rct()]`, the imputed values from the re-simulation
-#' are treated as the true potential outcomes.
+#' algorithm will assign even when the outcomes are not related to treatments at all. This test is not
+#' valid for resimulated random trials.
 #'
 #' `method = "bootstrap"` operates under the null hypothesis that there is no difference between
 #' treatment arms within each each block/cluster the
@@ -86,6 +85,11 @@ joint_test <- function(mab, method, r = 1000) {
   check_posint(r)
   if (!inherits(mab, "single_mab")) {
     rlang::abort(c("Joint-tests can only be performed on `single_mab` objects"))
+  }
+  if (method == "randomization" && inherits(mab, "singe_rct_mab")) {
+    rlang::warn(c(
+      "Randomization inference may not be informative for resimulated RCT objects.",
+    ))
   }
 
   null <- switch(
@@ -238,7 +242,7 @@ joint_boot_null <- function(mab, r) {
   } else {
     cols <- ncol(mab$config$args$p)
     rows <- nrow(mab$config$args$p)
-    dn <- dimnames(mab$config$args$p)
+    dn <- dimnames(mab$config$args$p) |> lapply(tolower)
   }
 
   null <- furrr::future_map_dbl(
