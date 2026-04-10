@@ -394,7 +394,7 @@ mab_from_rct <- function(
   results$args <- args
 
   results$furrr <- furrr_opt
-  results$call <- cl
+  results$cl <- cl
   return(
     construct_mab(results, type = "rct", multi = r > 1)
   )
