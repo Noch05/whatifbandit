@@ -19,12 +19,11 @@ the \code{names} attribute should be present with the control group labelled \co
 }
 \value{
 A list of the IPW estimates in a \code{tibble}/\code{data.table}, along with their standard errors,
-F-statistic and degrees of freedom, and the covariance matrix from the IPW regression.
+F-statistic and degrees of freedom.
 }
 \description{
 Computes the IPW estimates for the true probabilities of success using \code{\link[estimatr:lm_robust]{estimatr::lm_robust()}} to perform
-an IPW weighted regressionn for estimation. If blocking was used for the trial, blocks are included
-as fixed effects, and if clustering is specified CR2 standard errors are reported. Otherwise HC2
+an IPW weighted regression for estimation. If clustering is specified CR2 standard errors are reported. Otherwise HC2
 standard errors
 are used. Appropriate degrees of freedom are supplied along with the regression's F-statistic
 }

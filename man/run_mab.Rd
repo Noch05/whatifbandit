@@ -26,7 +26,6 @@ run_mab(
   ndraws,
   period_idxs,
   keep_data,
-  r,
   time_model = NULL,
   time_model_args = NULL
 )
@@ -119,11 +118,6 @@ row of each period.}
 \item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended
 \code{FALSE}. When\code{ r = 1} the final data is always kept and reported.}
 
-\item{r}{Positive integer; number of replications (under different random seed). Replications of
-the MAB procedure on a fixed dataset provides important diagnostic information on the
-stochasticity/variance of the re-simulation method. Replications can be conducted in parallel, by
-setting an appropriate \code{\link[future:plan]{future::plan()}}. See details below.}
-
 \item{time_model}{An optional function with signature \verb{function(n, conditions, successes, current_period, blocks = NULL, clusters = NULL, ...)}
 that returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{dates_of_assignment} to produce \code{success_date}. Used to simulate delayed feedback mechanism
 during the trial, so outcomes are imperfectly observed. Only used when\code{dates_of_assignment} is also supplied. Dates can be generated even when \code{delayed_feedback == FALSE},
@@ -142,7 +136,6 @@ treatment arm at a given period.
 treatment arm.
 \item \code{estimates}: A \code{tibble} or \code{data.table} containing the estimates of the specified estimators for
 each treatment arm.
-\item \code{ipw_vcov}: Covariance matrix from IPW estimation.
 \item \code{call}: \code{NULL}; initialized for later assignment.
 \item \code{args}: \code{NULL}; initialized for later assignment.
 \item \code{furrr}: \code{NULL}; initialized for later assignment.

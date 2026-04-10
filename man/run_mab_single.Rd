@@ -171,7 +171,6 @@ treatment arm at a given period.
 treatment arm.
 \item \code{estimates}: A \code{tibble} or \code{data.table} containing the estimates of the specified estimators for
 each treatment arm.
-\item \code{ipw_vcov}: Covariance matrix from IPW estimation.
 \item \code{call}: \code{NULL}; initialized for later assignment.
 \item \code{args}: \code{NULL}; initialized for later assignment.
 \item \code{furrr}: \code{NULL}; initialized for later assignment.

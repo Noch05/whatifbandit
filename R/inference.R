@@ -296,8 +296,7 @@ estimate_aipw <- function(
 #' @name estimate_ipw
 #' @description
 #' Computes the IPW estimates for the true probabilities of success using [estimatr::lm_robust()] to perform
-#' an IPW weighted regressionn for estimation. If blocking was used for the trial, blocks are included
-#' as fixed effects, and if clustering is specified CR2 standard errors are reported. Otherwise HC2
+#' an IPW weighted regression for estimation. If clustering is specified CR2 standard errors are reported. Otherwise HC2
 #' standard errors
 #' are used. Appropriate degrees of freedom are supplied along with the regression's F-statistic
 #'
@@ -327,7 +326,7 @@ estimate_aipw <- function(
 #' so the IPW estimator is still unbiased without the prescence of the fixed effects.
 #'
 #' @returns A list of the IPW estimates in a `tibble`/`data.table`, along with their standard errors,
-#' F-statistic and degrees of freedom, and the covariance matrix from the IPW regression.
+#' F-statistic and degrees of freedom.
 #' @family estimation
 #' @keywords internal
 
@@ -395,10 +394,7 @@ estimate_ipw <- function(
     ) |>
       fill_missing_conditions(conditions = conditions)
   }
-  return(list(
-    ipw = ipw_estimates,
-    vcov = est_lm[["vcov"]]
-  ))
+  return(ipw_estimates)
 }
 
 #' Sample Estimates
@@ -559,7 +555,6 @@ fill_missing_conditions <- function(x, conditions) {
 #' @description
 #' Combines the AIPW, IPW, and Sample estimates into a single object to be returned.
 #' @param estimates List of `tibbles` or `data.tables` to bind together.
-#' @param vcov Covariance matrix from IPW regression.
 #' @returns A list of 2 elements:
 #' \itemize{
 #' \item `estimates`: Input `estimates` bound together by rows.
@@ -567,11 +562,11 @@ fill_missing_conditions <- function(x, conditions) {
 #' }
 #' @family estimation
 #' @rdname inference_helpers
-combine_estimates <- function(estimates, vcov = NULL) {
+combine_estimates <- function(estimates) {
   est <- if (data.table::is.data.table(estimates[[1]])) {
     data.table::rbindlist(estimates, fill = TRUE)
   } else {
     dplyr::bind_rows(estimates)
   }
-  list(estimates = est, vcov = vcov)
+  return(est)
 }

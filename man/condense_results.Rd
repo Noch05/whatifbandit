@@ -26,8 +26,6 @@ each row is a period, and each columns is a treatment.
 \item \code{estimates}: A \code{tibble} or \code{data.table} containing the all estimates and variances for each arm.
 Long format, treatment arm, and estimate type are columns along with the mean estimates
 and variance estimates.
-\item \code{ipw_vcov}: A 3d array containing the covariance matrix of coefficients of IPW estimates of each trial.
-}
 }
 \description{
 Condenses results of repeated simulations.

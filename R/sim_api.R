@@ -17,7 +17,6 @@
 #' treatment arm.
 #' \item `estimates`: A `tibble` or `data.table` containing the estimates of the specified estimators for
 #' each treatment arm.
-#' \item `ipw_vcov`: Covariance matrix from IPW estimation.
 #' \item `call`: `NULL`; initialized for later assignment.
 #' \item `args`: `NULL`; initialized for later assignment.
 #' \item `furrr`: `NULL`; initialized for later assignment.
@@ -227,7 +226,6 @@ prep_sim_data <- function(
 #' treatment arm.
 #' \item `estimates`: A `tibble` or `data.table` containing the estimates of the specified estimators for
 #' each treatment arm.
-#' \item `ipw_vcov`: Covariance matrix from IPW estimation.
 #' \item `call`: `NULL`; initialized for later assignment.
 #' \item `args`: `NULL`; initialized for later assignment.
 #' \item `furrr`: `NULL`; initialized for later assignment.
@@ -336,8 +334,7 @@ run_mab <- function(
   }
 
   estimates <- combine_estimates(
-    estimates = list(aipw_estimates, ipw_estimates[["ipw"]], sample_estimates),
-    vcov = ipw_estimates[["vcov"]]
+    estimates = list(aipw_estimates, ipw_estimates, sample_estimates)
   )
 
   final_data <- if (keep_data) sim_results[["final_data"]] else NULL
@@ -348,7 +345,6 @@ run_mab <- function(
     assignment_probs = sim_results[["assignment_probs"]],
     assignment_quantities = sim_results[["assignment_quantities"]],
     estimates = estimates[["estimates"]],
-    ipw_vcov = estimates[["vcov"]],
     args = NULL,
     call = NULL,
     furrr = NULL
@@ -371,8 +367,6 @@ run_mab <- function(
 #' \item `estimates`: A `tibble` or `data.table` containing the all estimates and variances for each arm.
 #' Long format, treatment arm, and estimate type are columns along with the mean estimates
 #' and variance estimates.
-#' \item `ipw_vcov`: A 3d array containing the covariance matrix of coefficients of IPW estimates of each trial.
-#' }
 #' @details
 #' This function iterates over every element in `mabs` and extracts the required element to place in a condensed list
 #' for the final output.
@@ -427,10 +421,6 @@ condense_results <- function(dt, keep_data, mabs) {
   results <- lapply(elements, bind_func)
   names(results) <- elements
   results[["final_data"]] <- if (keep_data) nest_func() else NULL
-
-  results[["ipw_vcov"]] <- extract("ipw_vcov") |>
-    unlist() |>
-    array(dim = c(dim(mabs[[1]][["ipw_vcov"]]), r))
 
   return(results)
 }

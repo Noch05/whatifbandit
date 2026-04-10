@@ -8,7 +8,7 @@
 \usage{
 fill_missing_conditions(x, conditions)
 
-combine_estimates(estimates, vcov = NULL)
+combine_estimates(estimates)
 }
 \arguments{
 \item{x}{A \code{tibble}/\code{data.table} containing the appropriate estimates}
@@ -16,8 +16,6 @@ combine_estimates(estimates, vcov = NULL)
 \item{conditions}{Character vector of treatment condition labels.}
 
 \item{estimates}{List of \code{tibbles} or \code{data.tables} to bind together.}
-
-\item{vcov}{Covariance matrix from IPW regression.}
 }
 \value{
 An updated \code{estimates} object with missing conditions initalized.

@@ -23,7 +23,7 @@ construct_mab <- function(mab, type, multi) {
         assignment_prob = mab$assignment_prob,
         assignment_quant = mab$assignment_quantities
       ),
-      estimates = list(point = mab$estimates, vcov = mab$ipw_vcov),
+      estimates = mab$estimates,
       config = list(args = mab$args, call = mab$cl, parallel = mab$furrr)
     ),
     class = c(class, ".mab", "list")
