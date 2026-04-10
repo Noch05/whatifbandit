@@ -28,6 +28,8 @@ standard errors
 are used. Appropriate degrees of freedom are supplied along with the regression's F-statistic
 }
 \details{
+If CR2 standard errors fail to be calculated, CR0 standard errors will be reported.
+
 These estimates follow the procedure in
 \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
 Degrees of freedom are not provided for the f-statistic, because the traditional F-distribution is invalid

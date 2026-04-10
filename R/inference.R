@@ -304,6 +304,9 @@ estimate_aipw <- function(
 #' @inheritParams run_mab
 #' @inheritParams estimate_aipw
 #' @details
+#'
+#' If CR2 standard errors fail to be calculated, CR0 standard errors will be reported.
+#'
 #' These estimates follow the procedure in
 #' \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
 #' Degrees of freedom are not provided for the f-statistic, because the traditional F-distribution is invalid
@@ -341,30 +344,35 @@ estimate_ipw <- function(
   clustering,
   conditions
 ) {
+  lm_fun <- purrr::partial(
+    estimatr::lm_robust,
+    formula = mab_success ~ mab_condition - 1,
+    data = data,
+    weights = ipw_weights
+  )
   est_lm <- if (clustering) {
-    estimatr::lm_robust(
-      mab_success ~ mab_condition - 1,
-      data = data,
-      clusters = data[[cluster_col]],
-      weights = ipw_weights,
-      se_type = "CR2"
+    tryCatch(
+      {
+        lm_fun(
+          clusters = !!rlang::sym(cluster_col),
+          se_type = "CR2"
+        )
+      },
+      error = function(e) {
+        rlang::warn("CR2 failed. Falling back to CR0.")
+        lm_fun(
+          clusters = !!rlang::sym(cluster_col),
+          se_type = "CR0"
+        )
+      }
     )
   } else {
-    estimatr::lm_robust(
-      mab_success ~ mab_condition - 1,
-      data = data,
-      se_type = "HC2",
-      weights = ipw_weights
-    )
+    lm_fun(se_type = "HC2")
   }
 
   coefs <- est_lm[["coefficients"]]
   se <- est_lm[["std.error"]]
-  f <- if (is.null(est_lm[["fstatistic"]])) {
-    est_lm[["proj_statistic"]][1] |> as.numeric()
-  } else {
-    est_lm[["fstatistic"]][1] |> as.numeric()
-  }
+  f <- est_lm[["fstatistic"]][1] |> as.numeric()
   df <- est_lm[["df"]]
 
   fix_names <- \(x) stats::setNames(x, gsub("^mab_condition", "", names(x)))

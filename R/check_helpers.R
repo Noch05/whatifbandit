@@ -164,6 +164,7 @@ check_clusters.data.frame <- function(data, cluster_col) {
     dplyr::group_by(.data[[cluster_col]]) |>
     dplyr::summarize(n_periods = dplyr::n_distinct(period_number)) |>
     dplyr::filter(n_periods > 1)
+
   cluster_throw(check_clusters, cluster_col)
 }
 
@@ -174,6 +175,7 @@ check_clusters.data.table <- function(data, cluster_col) {
     .(n_periods = data.table::uniqueN(period_number)),
     by = cluster_col
   ][n_periods > 1]
+
   cluster_throw(check_clusters, cluster_col)
 }
 
@@ -186,21 +188,13 @@ check_clusters.data.table <- function(data, cluster_col) {
 #' @keywords internal
 cluster_throw <- function(check_clusters, cluster_col) {
   if (nrow(check_clusters) > 0) {
-    calling_funcs <- vapply(sys.calls(), deparse, character(1))
-    help_message <- if ("mab_from_rct()" %in% calling_funcs) {
-      "Consider simulating without clustering, or increasing the length of each period."
-    } else if ("simulate_mab()" %in% calling_funcs) {
-      "Consider passing precise `period_sizes` manually based on cluster assignment probabilities,
-    adding more clusters, or lowering `t`."
-    }
     rlang::abort(
       c(
         "Clusters must only appear in a single period.",
         "x" = paste(
           "These clusters persist across multiple periods:",
           paste(check_clusters[[cluster_col]], collapse = ", ")
-        ),
-        "i" = help_message
+        )
       )
     )
   }
