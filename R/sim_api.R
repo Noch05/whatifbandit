@@ -334,7 +334,9 @@ run_mab <- function(
   }
 
   estimates <- combine_estimates(
-    estimates = list(aipw_estimates, ipw_estimates, sample_estimates)
+    aipw_estimates,
+    ipw_estimates,
+    sample_estimates
   )
 
   final_data <- if (keep_data) sim_results[["final_data"]] else NULL
@@ -344,7 +346,7 @@ run_mab <- function(
     bandits = sim_results[["bandits"]],
     assignment_probs = sim_results[["assignment_probs"]],
     assignment_quantities = sim_results[["assignment_quantities"]],
-    estimates = estimates[["estimates"]],
+    estimates = estimates,
     args = NULL,
     call = NULL,
     furrr = NULL

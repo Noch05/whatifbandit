@@ -49,7 +49,6 @@ construct_mab <- function(mab, type, multi) {
 #'   \item `null_distribution`: A numeric vector of F-statistics under the null.
 #'   \item `p_value`: The proportion of simulated F-statistics more extreme than observed.
 #'   \item `method`: The method used.
-#'   \item `config`: The `config` slot of the `single_mab` object used to perform the test.
 #' }
 #' @export
 #' @details
@@ -110,8 +109,7 @@ joint_test <- function(mab, method, r = 1000) {
     f_stat = f,
     null_distribution = null,
     p_value = p,
-    method = method,
-    config = mab$config
+    method = method
   ))
 }
 

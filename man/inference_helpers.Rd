@@ -8,14 +8,14 @@
 \usage{
 fill_missing_conditions(x, conditions)
 
-combine_estimates(estimates)
+combine_estimates(...)
 }
 \arguments{
 \item{x}{A \code{tibble}/\code{data.table} containing the appropriate estimates}
 
 \item{conditions}{Character vector of treatment condition labels.}
 
-\item{estimates}{List of \code{tibbles} or \code{data.tables} to bind together.}
+\item{...}{\code{tibbles} or \code{data.tables} to bind together.}
 }
 \value{
 An updated \code{estimates} object with missing conditions initalized.

@@ -554,7 +554,7 @@ fill_missing_conditions <- function(x, conditions) {
 #' Combine Estimates
 #' @description
 #' Combines the AIPW, IPW, and Sample estimates into a single object to be returned.
-#' @param estimates List of `tibbles` or `data.tables` to bind together.
+#' @param ... `tibbles` or `data.tables` to bind together.
 #' @returns A list of 2 elements:
 #' \itemize{
 #' \item `estimates`: Input `estimates` bound together by rows.
@@ -562,11 +562,12 @@ fill_missing_conditions <- function(x, conditions) {
 #' }
 #' @family estimation
 #' @rdname inference_helpers
-combine_estimates <- function(estimates) {
-  est <- if (data.table::is.data.table(estimates[[1]])) {
-    data.table::rbindlist(estimates, fill = TRUE)
+combine_estimates <- function(...) {
+  tbls <- rlang::dots_list(...)
+  est <- if (data.table::is.data.table(tbls[[1]])) {
+    data.table::rbindlist(tbls, fill = TRUE)
   } else {
-    dplyr::bind_rows(estimates)
+    dplyr::bind_rows(tbls)
   }
   return(est)
 }

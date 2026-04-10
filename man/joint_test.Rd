@@ -21,7 +21,6 @@ A named list object containing
 \item \code{null_distribution}: A numeric vector of F-statistics under the null.
 \item \code{p_value}: The proportion of simulated F-statistics more extreme than observed.
 \item \code{method}: The method used.
-\item \code{config}: The \code{config} slot of the \code{single_mab} object used to perform the test.
 }
 }
 \description{
