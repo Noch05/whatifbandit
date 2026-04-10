@@ -88,7 +88,7 @@ joint_test <- function(mab, method, r = 1000) {
   }
   if (method == "randomization" && inherits(mab, "singe_rct_mab")) {
     rlang::warn(c(
-      "Randomization inference may not be informative for resimulated RCT objects.",
+      "Randomization inference may not be informative for resimulated RCT objects."
     ))
   }
 
@@ -102,7 +102,7 @@ joint_test <- function(mab, method, r = 1000) {
       "method"
     )
   )
-  f <- mab$estimates$point$mean[mab$estimates$point$mab_condition == "Joint-F"]
+  f <- mab$estimates$mean[mab$estimates$mab_condition == "Joint-F"]
 
   p <- mean(null >= f, na.rm = TRUE)
 

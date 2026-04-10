@@ -16,7 +16,7 @@ condense_results(dt, keep_data, mabs)
 \item{mabs}{List of outputs from repeated \code{\link[=run_mab]{run_mab()}} calls.}
 }
 \value{
-A named list containing
+A named list containing:
 \itemize{
 \item \verb{final_data:} \code{tibble} or \code{data.table} containing the nested \code{tibble}s/\code{data.table}s from each trial. Only provided when \code{keep_data = TRUE}.
 \item \code{bandits}: A \code{tibble} or \code{data.table} containing the UCB1 values or Thompson Sampling posterior distributions for each period and trial. Wide format,
@@ -26,6 +26,7 @@ each row is a period, and each columns is a treatment.
 \item \code{estimates}: A \code{tibble} or \code{data.table} containing the all estimates and variances for each arm.
 Long format, treatment arm, and estimate type are columns along with the mean estimates
 and variance estimates.
+}
 }
 \description{
 Condenses results of repeated simulations.

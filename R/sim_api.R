@@ -357,7 +357,7 @@ run_mab <- function(
 #' @param dt Logical; Whether to output `data.table`s or `tibble`s. When` r * number_of_periods > 100000`, `dt = TRUE`, even if the user passed data is not a
 #' `data.table`.
 #' @param mabs List of outputs from repeated [run_mab()] calls.
-#' @returns A named list containing
+#' @returns A named list containing:
 #' \itemize{
 #' \item `final_data:` `tibble` or `data.table` containing the nested `tibble`s/`data.table`s from each trial. Only provided when `keep_data = TRUE`.
 #' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson Sampling posterior distributions for each period and trial. Wide format,
@@ -367,10 +367,9 @@ run_mab <- function(
 #' \item `estimates`: A `tibble` or `data.table` containing the all estimates and variances for each arm.
 #' Long format, treatment arm, and estimate type are columns along with the mean estimates
 #' and variance estimates.
-#' @details
-#' This function iterates over every element in `mabs` and extracts the required element to place in a condensed list
+#' }
+#' @details This function iterates over every element in `mabs` and extracts the required element to place in a condensed list
 #' for the final output.
-#'
 #' @keywords internal
 
 condense_results <- function(dt, keep_data, mabs) {
