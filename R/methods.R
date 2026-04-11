@@ -262,7 +262,7 @@ joint_boot_null <- function(mab, r) {
   } else {
     cols <- ncol(mab$config$args$p)
     rows <- nrow(mab$config$args$p)
-    dn <- dimnames(mab$config$args$p) |> lapply(\(x) sort(x) |> tolower())
+    dn <- dimnames(mab$config$args$p) |> lapply(sort)
     get_counts <- purrr::partial(
       boot_null_counts,
       data = mab$new_data,

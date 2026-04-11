@@ -145,7 +145,8 @@ simulate_mab <- function(
       equal_probs = setup$equal_probs,
       period_idxs = setup$period_idxs,
       conditions = setup$conditions,
-      simulate_dates = setup$simulate_dates
+      simulate_dates = setup$simulate_dates,
+      p = setup$p
     )
   )
 
@@ -263,12 +264,10 @@ setup_mab_sim <- function(
   blocking <- !is.null(blocks)
   clustering <- !is.null(clusters)
   simulate_dates <- is.function(time_model) && !is.null(assignment_dates)
-
-  rownames(p) <- tolower(rownames(p))
+  dimnames(p) <- lapply(dimnames(p), tolower)
   conditions <- sort(rownames(p))
   names(conditions) <- ifelse(conditions == "control", "control", "treatment")
   p <- p[conditions, , drop = FALSE]
-  colnames(p) <- tolower(colnames(p))
   equal_probs <- stats::setNames(rep(1 / nrow(p), nrow(p)), conditions)
 
   col_names <- list(
