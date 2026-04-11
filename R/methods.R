@@ -65,10 +65,12 @@ construct_mab <- function(mab, type, multi) {
 #' true success probability is the same for any treatment. To generate this distribution,
 #' the trial is re-simulated using an appropriate `p` matrix which satisfies the null. For each
 #' simulated F-statistic, the `p` matrix is redrawn. This is achieved by drawing a single
-#' probaiblity uniformly between 0 and 1 for each column of the `p` matrix. This preserves
+#' probaiblity for each column of `p` matrix from the posterior beta distribution of the original
+#' trial. For an RCT this is the original data, and for the simulated MAB it is the simulated outcomes.
+#' This preserves
 #' any potential heterogeneity across the block or cluster structure, but still ensures
 #' no treatment effect is specified. Drawing a new `p` matrix each time properly captures
-#' the uncertainty for the null distribution.
+#' the uncertainty for the null distribution, using the best estimate available.
 #'
 #' For `method == "boostrap"` with a `single_rct_mab`, the block and or cluster assignment
 #' proportions are taken from the original dataset.
@@ -193,11 +195,19 @@ joint_boot_null <- function(mab, r) {
         org <- original_dates[[current_period]]
         return(dates - org)
       }
+    } else {
+      time_model <- NULL
+      impute_dates <- NULL
+      original_dates <- NULL
     }
     args <- utils::modifyList(
       args,
       list(
-        assignment_dates = mab$new_data[[col_names$assignment_date_col]],
+        assignment_dates = if (is.null(col_names$assignment_date_col)) {
+          NULL
+        } else {
+          mab$new_data[[col_names$assignment_date_col]]
+        },
         blocks = if (is.null(mab$config$args$blocks)) {
           NULL
         } else {
@@ -227,29 +237,67 @@ joint_boot_null <- function(mab, r) {
       )
     )
     rows <- length(mab$config$args$conditions)
-    cols_names <- if (!is.null(args$clusters)) {
-      args$clusters
-    } else if (!is.null(args$blocks)) {
-      args$blocks
-    } else {
-      1
-    }
-    cols <- length(cols_names)
+    get_counts <- purrr::partial(
+      boot_null_counts,
+      data = mab$new_data,
+      success_col = col_names$success_col
+    )
 
-    dn <- list(mab$config$args$conditions, names(cols_names))
+    build_p <- if (!is.null(args$clusters)) {
+      counts <- get_counts(col_names$cluster_col)
+      s <- as_named_vec(counts, val = "s", name = col_names$cluster_col)
+      n <- as_named_vec(counts, val = "n", name = col_names$cluster_col)
+      list(cols = args$clusters, s = s[order(names(s))], n = n[order(names(n))])
+    } else if (!is.null(args$blocks)) {
+      counts <- get_counts("block")
+      s <- as_named_vec(counts, val = "s", name = "block")
+      n <- as_named_vec(counts, val = "n", name = "block")
+      list(cols = args$blocks, s = s[order(names(s))], n = n[order(names(n))])
+    } else {
+      counts <- get_counts()
+      list(cols = 1, s = counts$s, n = counts$n)
+    }
+    cols <- length(build_p$cols)
+    dn <- list(mab$config$args$conditions, sort(names(build_p$cols)))
   } else {
     cols <- ncol(mab$config$args$p)
     rows <- nrow(mab$config$args$p)
-    dn <- dimnames(mab$config$args$p) |> lapply(tolower)
+    dn <- dimnames(mab$config$args$p) |> lapply(\(x) sort(x) |> tolower())
+    get_counts <- purrr::partial(
+      boot_null_counts,
+      data = mab$new_data,
+      success_col = "mab_success"
+    )
+    build_p <- if (!is.null(args$clusters)) {
+      counts <- get_counts("cluster")
+      s <- as_named_vec(counts, val = "s", name = "cluster")
+      n <- as_named_vec(counts, val = "n", name = "cluster")
+      list(s = s[order(names(s))], n = n[order(names(n))])
+    } else if (!is.null(args$blocks)) {
+      counts <- get_counts("block")
+      s <- as_named_vec(counts, val = "s", name = "block")
+      n <- as_named_vec(counts, val = "n", name = "block")
+      list(s = s[order(names(s))], n = n[order(names(n))])
+    } else {
+      counts <- get_counts()
+      list(s = counts$s, n = counts$n)
+    }
   }
 
   null <- furrr::future_map_dbl(
     seq_len(r),
     \(.) {
-      args[["p"]] <- stats::runif(cols) |>
+      args[["p"]] <- stats::setNames(
+        stats::rbeta(
+          cols,
+          shape1 = build_p$s + 1,
+          shape2 = (build_p$n - build_p$s) + 1
+        ),
+        names(dn[[2]])
+      ) |>
         rep(rows) |>
-        sort() |>
-        matrix(ncol = cols, dimnames = dn)
+        matrix(nrow = cols, dimnames = list(dn[[2]], dn[[1]])) |>
+        t()
       joint_null_inner(args = args)
     },
     .options = mab$config$parallel,
@@ -326,4 +374,49 @@ group_prop.data.table <- function(data, group) {
   n <- nrow(data)
   data[, .(size = .N / n), by = group] |>
     as_named_vec(val = "size", name = group)
+}
+
+
+#' Recover Block-Specific Success and Total Counts for Bootstrap Null
+#' @name boot_null_counts
+#'
+#' @description
+#' Recovers the number of successes and total observations within each block
+#' for use in constructing block-specific Beta posteriors for the parametric
+#' bootstrap joint test.
+#'
+#' @param data Data holding the appropriate outcomes
+#' @param ... Columns to group by
+#' @param success_col Column holding the outcomes.
+#'
+#' @returns An aggregated data.frame or data.table, with the appropraite counts.
+#'
+#' @keywords internal
+boot_null_counts <- function(data, success_col, ...) {
+  UseMethod("boot_null_counts", data)
+}
+
+#' @rdname boot_null_counts
+#' @method boot_null_counts data.frame
+boot_null_counts.data.frame <- function(data, success_col, ...) {
+  cols <- c(rlang::dots_list(...) |> unlist())
+  if (!is.null(cols)) {
+    data |>
+      dplyr::group_by(!!!rlang::syms(cols)) |>
+      dplyr::summarize(n = dplyr::n(), s = sum(!!rlang::sym(success_col)))
+  } else {
+    data |>
+      dplyr::summarize(n = dplyr::n(), s = sum(!!rlang::sym(success_col)))
+  }
+}
+
+#' @rdname boot_null_counts
+#' @method boot_null_counts data.table
+boot_null_counts.data.table <- function(data, success_col, ...) {
+  cols <- c(rlang::dots_list(...) |> unlist())
+  if (!is.null(cols)) {
+    data[, .(n = .N, s = sum(get(success_col))), by = cols]
+  } else {
+    data[, .(n = .N, s = sum(get(success_col)))]
+  }
 }
