@@ -94,7 +94,6 @@ simulate_mab <- function(
 ) {
   cl <- match.call()
   algorithm <- tolower(algorithm)
-  args <- mget(methods::formalArgs(simulate_mab))
   if (check_args) {
     check_mab_sim(
       n = n,
@@ -118,6 +117,14 @@ simulate_mab <- function(
       verbose = verbose
     )
   }
+  if (!is.null(blocks)) {
+    names(blocks) <- tolower(names(blocks))
+  }
+  if (!is.null(clusters)) {
+    names(clusters) <- tolower(names(clusters))
+  }
+
+  args <- mget(methods::formalArgs(simulate_mab))
 
   other_args <- split_args(..., time_model = time_model)
 
@@ -261,6 +268,7 @@ setup_mab_sim <- function(
   conditions <- sort(rownames(p))
   names(conditions) <- ifelse(conditions == "control", "control", "treatment")
   p <- p[conditions, , drop = FALSE]
+  colnames(p) <- tolower(colnames(p))
   equal_probs <- stats::setNames(rep(1 / nrow(p), nrow(p)), conditions)
 
   col_names <- list(
