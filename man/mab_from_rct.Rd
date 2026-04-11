@@ -149,11 +149,11 @@ containing the new treatment assignments and outcomes under the simulation. If \
 elements: \itemize{ \item \code{statistic}: Thompson Sampling or UCB1 statistics computed for each
 treatment at each period of each trial. \item \code{assignment_prob}: Assignment probabilities for
 each treatment at each period of each trial. \item \code{assignment_quant}: Assignment quantities for
-each treatment in each trial. } \item \code{estimates}: A list with 2 elements: \itemize{ \item
-\code{point}: A \code{tibble} or \code{data.table} containing point estimates, and variances for the AIPW, IPW,
+each treatment in each trial. } \item \code{estimates}: A \code{tibble} or \code{data.table} containing point
+estimates, and standard errors for the AIPW, IPW,
 and Sample estimators for each treatment in each trial. IPW also includes a joint-F statistic,
-and degrees of freedom \item \code{vcov}: Variance covariance matrix of the IPW regression for each
-trial. } \item \code{config}: Configuration list of 3 elements: \itemize{ \item \code{args}: List of
+and degrees of freedom .
+\item \code{config}: Configuration list of 3 elements: \itemize{ \item \code{args}: List of
 arguments passed to \code{\link[=mab_from_rct]{mab_from_rct()}}. \item \code{call}: The original call to \code{\link[=mab_from_rct]{mab_from_rct()}}. \item
 \code{parallel}: The \code{\link[furrr:furrr_options]{furrr::furrr_options()}} object used for parallelization. } }
 }

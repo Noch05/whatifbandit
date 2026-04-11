@@ -50,12 +50,8 @@
 #' \item `assignment_prob`: Assignment probabilities for each treatment at each period of each trial.
 #' \item `assignment_quant`: Assignment quantities for each treatment in each trial.
 #' }
-#' \item `estimates`: A list with 2 elements:
-#' \itemize{
-#' \item `point`: A `tibble` or `data.table` containing point estimates, and variances for the AIPW, IPW, and Sample estimators
+#' \item `estimates`:  A `tibble` or `data.table` containing point estimates, and standard errors for the AIPW, IPW, and Sample estimators
 #' for each treatment in each trial. IPW also includes a joint-F statistic, and degrees of freedom
-#' \item `vcov`: Variance covariance matrix of the IPW regression for each trial.
-#' }
 #' \item `config`: Configuration list of 3 elements:
 #' \itemize{
 #' \item `args`: List of arguments passed to [simulate_mab()].

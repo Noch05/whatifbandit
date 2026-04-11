@@ -136,12 +136,8 @@ If \code{ r >1} and \code{keep_data = TRUE}, the tables from each trial are nest
 \item \code{assignment_prob}: Assignment probabilities for each treatment at each period of each trial.
 \item \code{assignment_quant}: Assignment quantities for each treatment in each trial.
 }
-\item \code{estimates}: A list with 2 elements:
-\itemize{
-\item \code{point}: A \code{tibble} or \code{data.table} containing point estimates, and variances for the AIPW, IPW, and Sample estimators
+\item \code{estimates}:  A \code{tibble} or \code{data.table} containing point estimates, and standard errors for the AIPW, IPW, and Sample estimators
 for each treatment in each trial. IPW also includes a joint-F statistic, and degrees of freedom
-\item \code{vcov}: Variance covariance matrix of the IPW regression for each trial.
-}
 \item \code{config}: Configuration list of 3 elements:
 \itemize{
 \item \code{args}: List of arguments passed to \code{\link[=simulate_mab]{simulate_mab()}}.
