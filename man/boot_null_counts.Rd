@@ -6,25 +6,25 @@
 \alias{boot_null_counts.data.table}
 \title{Recover Block-Specific Success and Total Counts for Bootstrap Null}
 \usage{
-boot_null_counts(data, success_col, ...)
+boot_null_counts(data, success_col, group = NULL)
 
-\method{boot_null_counts}{data.frame}(data, success_col, ...)
+\method{boot_null_counts}{data.frame}(data, success_col, group = NULL)
 
-\method{boot_null_counts}{data.table}(data, success_col, ...)
+\method{boot_null_counts}{data.table}(data, success_col, group = NULL)
 }
 \arguments{
 \item{data}{Data holding the appropriate outcomes}
 
 \item{success_col}{Column holding the outcomes.}
 
-\item{...}{Columns to group by}
+\item{group}{Column to group by, or \code{NULL} for the whole dataset.}
 }
 \value{
-An aggregated data.frame or data.table, with the appropraite counts.
+An aggregated data.frame or data.table with the appropriate counts.
 }
 \description{
-Recovers the number of successes and total observations within each block
-for use in constructing block-specific Beta posteriors for the parametric
+Recovers the number of successes and total observations within each group
+for use in constructing group-specific Beta posteriors for the parametric
 bootstrap joint test.
 }
 \keyword{internal}

@@ -128,24 +128,19 @@ NULL
 joint_random_null <- function(mab, r) {
   args <- joint_base_args(mab, sim_type = "test")
 
+  na_rows <- args$period_idxs$start_idxs[2]:nrow(args$data)
   if (data.table::is.data.table(args$data)) {
-    args$data[
-      args$period_idxs$start_idxs[2]:nrow(args$data),
-      mab_condition := NA_character_
-    ]
+    args$data[na_rows, mab_condition := NA_character_]
   } else {
-    args$data[["mab_condition"]][
-      args$period_idxs$start_idxs[2]:nrow(args$data)
-    ] <- NA_character_
+    args$data[["mab_condition"]][na_rows] <- NA_character_
   }
-  null <- furrr::future_map_dbl(
+
+  furrr::future_map_dbl(
     seq_len(r),
     \(.) joint_null_inner(args),
     .options = mab$config$parallel,
     .progress = mab$config$args$verbose
   )
-
-  return(null)
 }
 
 #' @describeIn f_helpers Prepares arguments for the parametric bootstrap joint test.
@@ -156,50 +151,9 @@ joint_boot_null <- function(mab, r) {
 
   if (inherits(mab, "single_rct_mab")) {
     col_names <- args$col_names
-    if (args$delayed_feedback) {
-      impute_dates <- precompute_imputation(
-        data = mab$new_data,
-        whole_experiment = TRUE,
-        delayed_feedback = args$delayed_feedback,
-        col_names = col_names
-      )[["dates"]]
-      original_dates <- if (data.table::is.data.table(mab$new_data)) {
-        mab$new_data[, .("period_number", col_names$assignment_date_col)] |>
-          split(by = "period_number") |>
-          lapply(\(x) {
-            x[[col_names$assignment_date_col]]
-          })
-      } else {
-        mab$new_data |>
-          dplyr::select(dplyr::all_of(c(
-            "period_number",
-            col_names$assignment_date_col
-          ))) |>
-          dplyr::group_split(period_number) |>
-          lapply(\(x) {
-            x[[col_names$assignment_date_col]]
-          })
-      }
-      time_model <- function(
-        n,
-        conditions,
-        successes,
-        current_period,
-        blocks = NULL,
-        clusters = NULL,
-        impute_dates,
-        original_dates
-      ) {
-        treatment_block <- paste(conditions, successes, sep = "_")
-        dates <- impute_dates[[current_period]][treatment_block]
-        org <- original_dates[[current_period]]
-        return(dates - org)
-      }
-    } else {
-      time_model <- NULL
-      impute_dates <- NULL
-      original_dates <- NULL
-    }
+
+    time_model_args <- build_time_model_args(mab, args, col_names)
+
     args <- utils::modifyList(
       args,
       list(
@@ -213,11 +167,7 @@ joint_boot_null <- function(mab, r) {
         } else {
           group_prop(mab$new_data, "block")
         },
-        clusters = if (is.null(mab$config$args$clusters)) {
-          NULL
-        } else {
-          group_prop(mab$new_data, col_names$cluster_col)
-        },
+        clusters = build_rct_clusters(mab, col_names),
         n = nrow(mab$new_data),
         dt = data.table::is.data.table(mab$new_data),
         equal_probs = rep(1 / length(args$conditions), length(args$conditions)),
@@ -227,81 +177,209 @@ joint_boot_null <- function(mab, r) {
           assignment_date_col = "assignment_date",
           success_date_col = "success_date"
         ),
-        time_model = time_model %||% NULL,
-        time_model_args = list(
-          impute_dates = impute_dates %||% NULL,
-          original_dates = original_dates %||% NULL
-        ),
+        time_model = time_model_args$time_model,
+        time_model_args = time_model_args$args,
         whole_experiment = NULL,
         data = NULL
       )
     )
-    rows <- length(mab$config$args$conditions)
-    get_counts <- purrr::partial(
-      boot_null_counts,
-      data = mab$new_data,
-      success_col = col_names$success_col
-    )
 
-    build_p <- if (!is.null(args$clusters)) {
-      counts <- get_counts(col_names$cluster_col)
-      s <- as_named_vec(counts, val = "s", name = col_names$cluster_col)
-      n <- as_named_vec(counts, val = "n", name = col_names$cluster_col)
-      list(cols = args$clusters, s = s[order(names(s))], n = n[order(names(n))])
+    success_col <- col_names$success_col
+    group_col <- if (!is.null(args$clusters)) {
+      col_names$cluster_col
     } else if (!is.null(args$blocks)) {
-      counts <- get_counts("block")
-      s <- as_named_vec(counts, val = "s", name = "block")
-      n <- as_named_vec(counts, val = "n", name = "block")
-      list(cols = args$blocks, s = s[order(names(s))], n = n[order(names(n))])
+      "block"
     } else {
-      counts <- get_counts()
-      list(cols = 1, s = counts$s, n = counts$n)
+      NULL
     }
-    cols <- length(build_p$cols)
-    dn <- list(mab$config$args$conditions, sort(names(build_p$cols)))
+    dn <- list(mab$config$args$conditions, sort(names(build_p_cols(args))))
+    print(dn)
   } else {
-    cols <- ncol(mab$config$args$p)
-    rows <- nrow(mab$config$args$p)
-    dn <- dimnames(mab$config$args$p) |> lapply(sort)
-    get_counts <- purrr::partial(
-      boot_null_counts,
-      data = mab$new_data,
-      success_col = "mab_success"
-    )
-    build_p <- if (!is.null(args$clusters)) {
-      counts <- get_counts("cluster")
-      s <- as_named_vec(counts, val = "s", name = "cluster")
-      n <- as_named_vec(counts, val = "n", name = "cluster")
-      list(s = s[order(names(s))], n = n[order(names(n))])
+    success_col <- "mab_success"
+    group_col <- if (!is.null(args$clusters)) {
+      "cluster"
     } else if (!is.null(args$blocks)) {
-      counts <- get_counts("block")
-      s <- as_named_vec(counts, val = "s", name = "block")
-      n <- as_named_vec(counts, val = "n", name = "block")
-      list(s = s[order(names(s))], n = n[order(names(n))])
+      "block"
     } else {
-      counts <- get_counts()
-      list(s = counts$s, n = counts$n)
+      NULL
     }
+    dn <- dimnames(mab$config$args$p) |> lapply(sort)
   }
+
+  build_p <- boot_build_p(
+    data = mab$new_data,
+    success_col = success_col,
+    group_col = group_col,
+    cols = build_p_cols(args)
+  )
 
   null <- furrr::future_map_dbl(
     seq_len(r),
     \(.) {
       args[["p"]] <- stats::setNames(
         stats::rbeta(
-          cols,
+          length(build_p$cols),
           shape1 = build_p$s + 1,
           shape2 = (build_p$n - build_p$s) + 1
         ),
         names(dn[[2]])
       ) |>
-        rep(rows) |>
-        matrix(nrow = cols, dimnames = list(dn[[2]], dn[[1]])) |>
+        rep(length(dn[[1]])) |>
+        matrix(
+          nrow = length(build_p$cols),
+          dimnames = list(dn[[2]], dn[[1]])
+        ) |>
         t()
       joint_null_inner(args = args)
     },
     .options = mab$config$parallel,
     .progress = mab$config$args$verbose
+  )
+}
+
+#' Build Proper Arguments for RCT Boostrap Joint Test
+#' @name build_rct
+#' @keywords internal
+#'
+NULL
+
+#' @describeIn build_rct Resolves the `clusters` argument for a `single_rct_mab` bootstrap.
+#' When both blocks and clusters are present, clusters is a named list of
+#' per-block cluster proportion vectors (as documented in [simulate_mab()]).
+#' When only clusters are present, returns a flat named proportion vector via
+#' [group_prop()]. Returns `NULL` when no clustering was used.
+#' @param mab A `single_rct_mab` object.
+#' @param col_names Named list of column name strings from `args$col_names`.
+#' @returns A named numeric vector, named list of vectors, or `NULL`.
+#' @keywords internal
+build_rct_clusters <- function(mab, col_names) {
+  if (is.null(mab$config$args$clusters)) {
+    return(NULL)
+  }
+  if (!is.null(mab$config$args$blocks)) {
+    data <- mab$new_data
+    blocks <- unique(
+      if (data.table::is.data.table(data)) data[["block"]] else data$block
+    )
+    lapply(
+      stats::setNames(blocks, blocks),
+      \(b) {
+        block_data <- if (data.table::is.data.table(data)) {
+          data[block == b]
+        } else {
+          data[data$block == b, ]
+        }
+        group_prop(block_data, col_names$cluster_col)
+      }
+    )
+  } else {
+    group_prop(mab$new_data, col_names$cluster_col)
+  }
+}
+
+#' @describeIn build_rct Returns the named vector of proportions that drives the columns of the null
+#' `p` matrix — clusters if present, blocks if present, or a scalar `1` for
+#' the no-blocking/no-clustering case. For the blocked-and-clustered case,
+#' clusters is a named list; this flattens it to a single named vector (since
+#' the p matrix columns are individual clusters, not blocks).
+#' @param args The processed args list from [joint_base_args()] (or after
+#'   [utils::modifyList()]) which contains `$clusters` and `$blocks`.
+#' @returns A named numeric vector of proportions, or a scalar `1`.
+#' @keywords internal
+build_p_cols <- function(args) {
+  if (!is.null(args$clusters)) {
+    if (is.list(args$clusters)) {
+      unlist(unname(args$clusters))
+    } else {
+      args$clusters
+    }
+  } else if (!is.null(args$blocks)) {
+    args$blocks
+  } else {
+    c(`1` = 1)
+  }
+}
+
+
+#' @describeIn build_rct Recovers successes and totals for each column group (cluster, block, or
+#' the whole dataset), then returns them alongside the resolved column
+#' proportions vector for use in [joint_boot_null()].
+#' @param data Input data.
+#' @param success_col Name of the success column.
+#' @param group_col Column to group by, or `NULL` for the whole dataset.
+#' @param cols Named numeric vector of column proportions (from [build_p_cols()]).
+#' @returns A list with elements `cols`, `s` (successes), and `n` (totals),
+#'   all named and sorted consistently.
+#' @keywords internal
+boot_build_p <- function(data, success_col, group_col, cols) {
+  counts <- boot_null_counts(data, success_col, group_col)
+  if (!is.null(group_col)) {
+    s <- as_named_vec(counts, val = "s", name = group_col)
+    n <- as_named_vec(counts, val = "n", name = group_col)
+    list(cols = cols, s = s[order(names(s))], n = n[order(names(n))])
+  } else {
+    list(cols = cols, s = counts$s, n = counts$n)
+  }
+}
+
+#' @describeIn build_rct Constructs the `time_model` function and its associated argument list when
+#' `delayed_feedback` is enabled for a `single_rct_mab` bootstrap. Returns a
+#' list with `time_model = NULL` and `args = list()` when delayed feedback is
+#' not in use.
+#' @param mab A `single_rct_mab` object.
+#' @param args The processed args list from [joint_base_args()].
+#' @param col_names Named list of column name strings.
+#' @returns A list with elements `time_model` (function or `NULL`) and `args`
+#'   (list of additional arguments for the time model).
+#' @keywords internal
+build_time_model_args <- function(mab, args, col_names) {
+  if (!args$delayed_feedback) {
+    return(list(
+      time_model = NULL,
+      args = list(impute_dates = NULL, original_dates = NULL)
+    ))
+  }
+
+  impute_dates <- precompute_imputation(
+    data = mab$new_data,
+    whole_experiment = TRUE,
+    delayed_feedback = args$delayed_feedback,
+    col_names = col_names
+  )[["dates"]]
+
+  original_dates <- if (data.table::is.data.table(mab$new_data)) {
+    mab$new_data[, .("period_number", col_names$assignment_date_col)] |>
+      split(by = "period_number") |>
+      lapply(\(x) x[[col_names$assignment_date_col]])
+  } else {
+    mab$new_data |>
+      dplyr::select(dplyr::all_of(c(
+        "period_number",
+        col_names$assignment_date_col
+      ))) |>
+      dplyr::group_split(period_number) |>
+      lapply(\(x) x[[col_names$assignment_date_col]])
+  }
+
+  time_model <- function(
+    n,
+    conditions,
+    successes,
+    current_period,
+    blocks = NULL,
+    clusters = NULL,
+    impute_dates,
+    original_dates
+  ) {
+    treatment_block <- paste(conditions, successes, sep = "_")
+    dates <- impute_dates[[current_period]][treatment_block]
+    org <- original_dates[[current_period]]
+    return(dates - org)
+  }
+
+  list(
+    time_model = time_model,
+    args = list(impute_dates = impute_dates, original_dates = original_dates)
   )
 }
 
@@ -332,6 +410,7 @@ joint_base_args <- function(mab, sim_type) {
   }
   return(args)
 }
+
 #' @describeIn f_helpers inner function for [furrr::future_map()]
 #' @param args Arguments list to [run_mab_single()]
 #' @returns The F-statistic from the IPW regression of the MAB Trial
@@ -381,28 +460,27 @@ group_prop.data.table <- function(data, group) {
 #' @name boot_null_counts
 #'
 #' @description
-#' Recovers the number of successes and total observations within each block
-#' for use in constructing block-specific Beta posteriors for the parametric
+#' Recovers the number of successes and total observations within each group
+#' for use in constructing group-specific Beta posteriors for the parametric
 #' bootstrap joint test.
 #'
 #' @param data Data holding the appropriate outcomes
-#' @param ... Columns to group by
 #' @param success_col Column holding the outcomes.
+#' @param group Column to group by, or `NULL` for the whole dataset.
 #'
-#' @returns An aggregated data.frame or data.table, with the appropraite counts.
+#' @returns An aggregated data.frame or data.table with the appropriate counts.
 #'
 #' @keywords internal
-boot_null_counts <- function(data, success_col, ...) {
+boot_null_counts <- function(data, success_col, group = NULL) {
   UseMethod("boot_null_counts", data)
 }
 
 #' @rdname boot_null_counts
 #' @method boot_null_counts data.frame
-boot_null_counts.data.frame <- function(data, success_col, ...) {
-  cols <- c(rlang::dots_list(...) |> unlist())
-  if (!is.null(cols)) {
+boot_null_counts.data.frame <- function(data, success_col, group = NULL) {
+  if (!is.null(group)) {
     data |>
-      dplyr::group_by(!!!rlang::syms(cols)) |>
+      dplyr::group_by(!!rlang::sym(group)) |>
       dplyr::summarize(n = dplyr::n(), s = sum(!!rlang::sym(success_col)))
   } else {
     data |>
@@ -412,10 +490,9 @@ boot_null_counts.data.frame <- function(data, success_col, ...) {
 
 #' @rdname boot_null_counts
 #' @method boot_null_counts data.table
-boot_null_counts.data.table <- function(data, success_col, ...) {
-  cols <- c(rlang::dots_list(...) |> unlist())
-  if (!is.null(cols)) {
-    data[, .(n = .N, s = sum(get(success_col))), by = cols]
+boot_null_counts.data.table <- function(data, success_col, group = NULL) {
+  if (!is.null(group)) {
+    data[, .(n = .N, s = sum(get(success_col))), by = group]
   } else {
     data[, .(n = .N, s = sum(get(success_col)))]
   }
