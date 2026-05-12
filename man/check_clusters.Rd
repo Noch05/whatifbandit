@@ -27,7 +27,7 @@ which persist across periods.}
 \value{
 Nothing; Throws an error if any clusters persist across multiple periods.
 
-Nothing; Throws an error if clusters persist across periods.
+Nothing; Throws a warning if clusters persist across periods.
 }
 \description{
 Checks to ensure that each cluster only exists within a single simulation period, because

@@ -184,11 +184,11 @@ check_clusters.data.table <- function(data, cluster_col) {
 #' @inheritParams estimate_aipw
 #' @param check_clusters Object created in [check_clusters()] with all of the clusters
 #' which persist across periods.
-#' @returns Nothing; Throws an error if clusters persist across periods.
+#' @returns Nothing; Throws a warning if clusters persist across periods.
 #' @keywords internal
 cluster_throw <- function(check_clusters, cluster_col) {
   if (nrow(check_clusters) > 0) {
-    rlang::abort(
+    rlang::warn(
       c(
         "Clusters must only appear in a single period.",
         "x" = paste(

@@ -105,8 +105,8 @@ formula_parse <- function(formula) {
   parsed <- list(
     condition_col = condition_col,
     success_col = outcome,
-    block_cols = block(other_vars[[1]][["args"]]),
-    cluster_col = cluster(other_vars[[2]][["args"]])
+    block_cols = .block(other_vars[[1]][["args"]]),
+    cluster_col = .cluster(other_vars[[2]][["args"]])
   )
 
   return(parsed)
@@ -137,13 +137,13 @@ gather_args <- function(x) {
 #' @param ... Blocking variables from `formula`
 #' @returns Vector of blocking variables
 #' @keywords internal
-block <- function(...) {
+.block <- function(...) {
   c(...)
 }
 #' @describeIn formula_parse Cluster
 #' @param c cluster variable from `formula`
 #' @returns cluster variable
 #' @keywords internal
-cluster <- function(c) {
+.cluster <- function(c) {
   c
 }

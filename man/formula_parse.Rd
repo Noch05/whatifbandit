@@ -3,17 +3,17 @@
 \name{formula_parse}
 \alias{formula_parse}
 \alias{gather_args}
-\alias{block}
-\alias{cluster}
+\alias{.block}
+\alias{.cluster}
 \title{Formula Parser}
 \usage{
 formula_parse(formula)
 
 gather_args(x)
 
-block(...)
+.block(...)
 
-cluster(c)
+.cluster(c)
 }
 \arguments{
 \item{formula}{\code{formula} passed from \code{\link[=mab_from_rct]{mab_from_rct()}}}
@@ -41,9 +41,9 @@ Parsers the input formula for \code{\link[=mab_from_rct]{mab_from_rct()}}
 \itemize{
 \item \code{gather_args()}: Helper for formula parsing. Parses the expression, and splits the function call from the arguments.
 
-\item \code{block()}: Block
+\item \code{.block()}: Block
 
-\item \code{cluster()}: Cluster
+\item \code{.cluster()}: Cluster
 
 }}
 \keyword{internal}
