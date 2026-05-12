@@ -179,7 +179,8 @@ simulate_mab(n, t, p = p, random_assign_prop = 0.1,
 period_sizes = c(51, rep(7, 9)), algorithm = "thompson")
 
 
-simulate_mab(n, t, p = matrix(c(0.1, 0.5, 0.3, 0.2, 0.3, 0.3), dimnames = list(c("T1", "T2"), c("B1", "B2", "B3")),
+simulate_mab(n, t, p = matrix(c(0.1, 0.5, 0.3, 0.2, 0.3, 0.3),
+dimnames = list(c("T1", "T2"), c("B1", "B2", "B3")),
 ncol = 3, nrow = 2), blocks = c("B1" =0.3, "B2" = 0.5, "B3" = 0.2),
 algorithm = "thompson")
 
