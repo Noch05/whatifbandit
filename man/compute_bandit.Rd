@@ -43,7 +43,7 @@ the \code{names} attribute should be present with the control group labelled \co
 
 \item{current_period}{Numeric value of length 1; current period of the adaptive trial simulation.}
 
-\item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as "Control". Ranges from 0 to 1,
+\item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as \code{"Control"}. Ranges from 0 to 1,
 and the default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.}
 
 \item{ndraws}{Number of draws used to approximate Thompson sampling probabilities. Used only when

@@ -67,7 +67,7 @@ Clusters are accessed as \code{clusters[[block]][cluster]}. Insided each block, 
 }
 Units are assigned to clusters via \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}. Pass \code{NULL} (default) for no clustering.}
 
-\item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as "Control". Ranges from 0 to 1,
+\item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as \code{"Control"}. Ranges from 0 to 1,
 and the default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.}
 
 \item{random_assign_prop}{Proportion of each treatment assignment wave assigned via static, equal

@@ -67,6 +67,31 @@
 #' Clustering is challenging under an adaptive trial, because then the probabilities of assignment being adaptive can have little impact on the new assignments, given that an early treatment assignment to a cluster
 #' must remain the same across the whole trial. As such this function assumes clusters do not persist across periods, so are all respecitvely assigned at the same time. If a design is provided, as such periods are
 #' too small for the clusters to fit in a period, its possible for assignment to vary within the same cluster in the experiment.
+#'
+#' ` r > 1`
+#' Multiple simulations allows researchers to gauge the variance of the procedure and produce bootstrap estimates of variance. For each additional simulation
+#' new data is drawn according to the passed population parameters so as opposed to [mab_from_rct()] resimulation occurs on a new dataset, not a fixed ground truth.
+#'
+#'
+#' @examples
+#' n <- 100
+#' t <- 10
+#'
+#' p <- matrix(c(0.2, 0.5, 0.45, 0.5), ncol =1, dimnames = list(paste0("T", 1:4)))
+#'
+#' set.seed(543)
+#' simulate_mab(n, t, p = p, random_assign_prop = 0.1,
+#' algorithm =  "ucb1", discount_rate  = 0.5)
+#'
+#' simulate_mab(n, t, p = p, random_assign_prop = 0.1,
+#' period_sizes = c(51, rep(7, 9)), algorithm = "thompson")
+#'
+#'
+#' simulate_mab(n, t, p = matrix(c(0.1, 0.5, 0.3, 0.2, 0.3, 0.3), dimnames = list(c("T1", "T2"), c("B1", "B2", "B3")),
+#' ncol = 3, nrow = 2), blocks = c("B1" =0.3, "B2" = 0.5, "B3" = 0.2),
+#' algorithm = "thompson")
+#'
+#'
 #' @export
 
 simulate_mab <- function(

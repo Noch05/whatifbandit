@@ -51,7 +51,7 @@ this value instead represents a probability instead of a raw proportion. Under c
 possible that \code{random_assign_prop} may not reflect the true proportion of units selected due to
 the constraint that all units within a cluster have to be assigned the same treatment.}
 
-\item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as "Control". Ranges from 0 to 1,
+\item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as \code{"Control"}. Ranges from 0 to 1,
 and the default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.}
 
 \item{control_condition}{Value of the control condition. Only necessary when \code{control_augment} is greater than 0. Internally this value

@@ -58,7 +58,7 @@ this value instead represents a probability instead of a raw proportion. Under c
 possible that \code{random_assign_prop} may not reflect the true proportion of units selected due to
 the constraint that all units within a cluster have to be assigned the same treatment.}
 
-\item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as "Control". Ranges from 0 to 1,
+\item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as \code{"Control"}. Ranges from 0 to 1,
 and the default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.}
 
 \item{control_condition}{Value of the control condition. Only necessary when \code{control_augment} is greater than 0. Internally this value
@@ -215,12 +215,13 @@ clustering the formula is slightly adjusted to consider the cluster means within
 opposed to individual observations, which works better when clusters are small. The variance is
 not adjusted for clustering.
 
-Inverse Probability Weighted (IPW) estimates are also provided using \code{\link[estimatr:lm_robust]{estimatr::lm_robust()}}. If
-blocking was specified they are used as fixed effects. These estimates are unbiased but may have
-higher variance than the AIPW. HC2 or CR2 variances are used (CR2 for clustering, HC2 otherwise).
-These cannot be used to estimate treatment effects, an F-statistic is provided, which can be used
-to perform a joint test on the treatment arms using the randomization inference method from
+Inverse Probability Weighted (IPW) estimates are also provided using \code{\link[estimatr:lm_robust]{estimatr::lm_robust()}}.
 \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}
+
+These estimates are unbiased but may have
+higher variance than the AIPW. HC2 or CR2 variances are used (CR2 for clustering, HC2 otherwise).
+These cannot be used to estimate treatment effects, an F-statistic is provided, which can be used for joint tests,
+such as the ones we provide in \code{\link[=joint_test]{joint_test()}}.
 }
 
 \subsection{Performance Concerns}{
@@ -242,7 +243,7 @@ to set \code{prior_periods} to a low number.
 \subsection{\code{ r > 1}}{
 
 Multiple simulations allows researchers to gauge the variance of the simulation procedure itself,
-by repeating it several times under different random states, using the same fixed data
+by repeating it several times under different random states, using the same fixed data.
 \subsection{Parallel Processing}{
 
 The function provides support for parallel processing via the
@@ -262,6 +263,23 @@ For more information about how to use the function, please view the vignette.
 }
 
 }
+}
+\examples{
+data(tanf)
+set.seed(454)
+
+mab_from_rct(success ~ condition, data = tanf, algorithm = "thompson",
+period_method = "batch", period_length = 500, delayed_feedback = TRUE,
+assignment_date_col = appt_date, success_date_col = date_of_recert)
+
+mab_from_rct(success ~ condition, data = tanf, algorithm = "ucb1",
+period_method = "date", time_unit = "day", date_col = appt_date,
+ period_length = 60, r = 2, discount_rate = 0.8)
+
+mab_from_rct(success ~ condition + block(service_center), data = tanf, algorithm = "thompson",
+period_method = "batch", period_length = 500, control_condition = "no_letter",
+control_augment = 0.2, prior_periods = 1)
+
 }
 \references{
 Agrawal, Shipra, and Navin Goyal. 2012. "Analysis of Thompson Sampling for the Multi-Armed Bandit

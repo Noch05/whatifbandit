@@ -54,7 +54,7 @@ defines the adaptive assignment process. For more details on these specific algo
 "sample", and any combination
 of them in a vector.}
 
-\item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as "Control". Ranges from 0 to 1,
+\item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as \code{"Control"}. Ranges from 0 to 1,
 and the default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.}
 
 \item{random_assign_prop}{Proportion of each treatment assignment wave assigned via static, equal
