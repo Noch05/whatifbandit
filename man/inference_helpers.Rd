@@ -3,10 +3,16 @@
 \name{inference_helpers}
 \alias{inference_helpers}
 \alias{fill_missing_conditions}
+\alias{fill_missing_conditions.data.frame}
+\alias{fill_missing_conditions.data.table}
 \alias{combine_estimates}
 \title{Helper Functions for Inference}
 \usage{
 fill_missing_conditions(x, conditions)
+
+\method{fill_missing_conditions}{data.frame}(x, conditions)
+
+\method{fill_missing_conditions}{data.table}(x, conditions)
 
 combine_estimates(...)
 }

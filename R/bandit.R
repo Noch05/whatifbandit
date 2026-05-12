@@ -293,8 +293,7 @@ compute_bandit <- function(
     ),
     "ucb1" = compute_bandit.ucb1(
       past_results = past_results,
-      conditions = conditions,
-      num_conditions = num_conditions
+      conditions = conditions
     ),
     list(
       # Default for 'static' assignment
@@ -391,7 +390,6 @@ bandit_invalid <- function(bandit) {
 
 compute_bandit.ucb1 <- function(
   past_results,
-  num_conditions,
   conditions,
   current_period = NULL
 ) {

@@ -530,33 +530,49 @@ NULL
 #' @rdname inference_helpers
 #' @family estimation
 fill_missing_conditions <- function(x, conditions) {
+  UseMethod("fill_missing_conditions", x)
+}
+
+#' @rdname inference_helpers
+#' @method fill_missing_conditions data.frame
+fill_missing_conditions.data.frame <- function(x, conditions) {
   missing_conditions <- setdiff(conditions, x[["mab_condition"]])
+
   if (length(missing_conditions) > 0) {
-    if (data.table::is.data.table(x)) {
-      x <- data.table::rbindlist(
-        list(
-          x,
-          data.table::data.table(
-            mean = NA,
-            se = NA,
-            mab_condition = missing_conditions,
-            estimator = x[["estimator"]][1]
-          )
-        ),
-        fill = TRUE
+    x <- dplyr::bind_rows(
+      x,
+      tibble::tibble(
+        mean = NA,
+        se = NA,
+        mab_condition = missing_conditions,
+        estimator = x[["estimator"]][1]
       )
-    } else {
-      x <- dplyr::bind_rows(
+    )
+  }
+
+  return(x)
+}
+
+#' @rdname inference_helpers
+#' @method fill_missing_conditions data.table
+fill_missing_conditions.data.table <- function(x, conditions) {
+  missing_conditions <- setdiff(conditions, x[["mab_condition"]])
+
+  if (length(missing_conditions) > 0) {
+    x <- data.table::rbindlist(
+      list(
         x,
-        tibble::tibble(
+        data.table::data.table(
           mean = NA,
           se = NA,
           mab_condition = missing_conditions,
           estimator = x[["estimator"]][1]
         )
-      )
-    }
+      ),
+      fill = TRUE
+    )
   }
+
   return(x)
 }
 #' Combine Estimates

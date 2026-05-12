@@ -47,11 +47,16 @@ check_prop <- function(...) {
       }
     }
   )
-  if (args[["control_augment"]] > 0 && args[["random_assign_prop"]] > 0) {
-    rlang::warn(c(
-      "It is not recommended to use control augmentation with hybrid assignment;
+  if (
+    !is.null(args[["control_augment"]]) &&
+      !is.null(args[["random_assign_prop"]])
+  ) {
+    if (args[["control_augment"]] > 0 && args[["random_assign_prop"]] > 0) {
+      rlang::warn(c(
+        "It is not recommended to use control augmentation with hybrid assignment;
                 control augmentation only affects bandit assignments."
-    ))
+      ))
+    }
   }
 }
 #-------------------------------------------------------------------------------
@@ -79,7 +84,7 @@ check_posint <- function(...) {
 }
 #'
 posint <- function(x) {
-  if (is.numeric(x)) {
+  if (is.numeric(x) && all(!is.na(x))) {
     return(all(x > 0 & x %% 1 == 0))
   } else {
     return(FALSE)

@@ -71,11 +71,7 @@ test_that("Input Check Helpers", {
   )
   passes <- list(
     list(TRUE, FALSE),
-    list(
-      control_augment = 0.5,
-      control_augment = 0.99,
-      random_assign_prop = 0.1
-    ),
+    list(0.5, 0.99, 0.1),
     list(5, 10, 200),
     list(c(0, 0, 1), c(0.1, 0.5, 0.4), c(0.2, 0.3, 0.5)),
     list(list(arg = "bea", valid = "bea", name = "b")),
@@ -130,4 +126,29 @@ test_that("Period Sizes", {
   compute_period_sizes(data) |> expect_equal(truth)
   compute_period_sizes(data.table::as.data.table(data)) |>
     expect_equal(truth)
+})
+
+test_that("Fill Missing Conditions", {
+  df <- data.frame(
+    mean = 1,
+    se = 5,
+    mab_condition = "a",
+    estimator = "The Best Estimator"
+  )
+  filled_df <- dplyr::bind_rows(
+    df,
+    tibble::tibble(
+      mean = NA,
+      se = NA,
+      mab_condition = "b",
+      estimator = "The Best Estimator"
+    )
+  )
+  dt <- data.table::as.data.table(df)
+  filled_dt <- data.table::as.data.table(filled_df)
+
+  purrr::walk(list(list(df, filled_df), list(dt, filled_dt)), \(frame) {
+    expect_equal(fill_missing_conditions(frame[[1]], "a"), frame[[1]])
+    expect_equal(fill_missing_conditions(frame[[1]], c("a", "b")), frame[[2]])
+  })
 })

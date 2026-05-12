@@ -21,7 +21,7 @@ compute_bandit(
 
 bandit_invalid(bandit)
 
-\method{compute_bandit}{ucb1}(past_results, num_conditions, conditions, current_period = NULL)
+\method{compute_bandit}{ucb1}(past_results, conditions, current_period = NULL)
 }
 \arguments{
 \item{past_results}{A \code{tibble}/\code{data.table} containing summary of prior periods, with
