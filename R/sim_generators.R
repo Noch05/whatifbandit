@@ -130,7 +130,7 @@ extract_success_prob <- function(
     )
     p[extract_mat]
   } else {
-    return(p[conditions, ])
+    return(p[conditions, ] |> unname())
   }
 }
 

@@ -152,3 +152,113 @@ test_that("Fill Missing Conditions", {
     expect_equal(fill_missing_conditions(frame[[1]], c("a", "b")), frame[[2]])
   })
 })
+
+test_that("As Named Vector", {
+  val <- rnorm(26)
+  names(val) <- letters
+  df <- data.frame(label = letters, value = val)
+  expect_equal(as_named_vec(df, "value", "label"), val)
+})
+
+
+test_that("Compute Lookback", {
+  expect_equal(compute_lookback(NULL, 5), 1)
+  expect_equal(compute_lookback(5, 10), 5)
+  expect_equal(compute_lookback(10, 5), 1)
+})
+
+test_that("Create Conditions", {
+  df <- data.frame(c = sample(c("T", "A", "B"), 15, replace = TRUE))
+  f <- purrr::partial(
+    create_conditions,
+    data = df,
+    condition_col = "c",
+    control_condition = "T"
+  )
+  truth <- c("A", "B", "T")
+  expect_equal(f(0), truth)
+  names(truth) = c("treatment", "treatment", "control")
+  expect_equal(f(1), truth)
+})
+
+
+test_that("Extraction Test", {
+  p <- matrix(c(1, 2), ncol = 1, dimnames = list(c("A", "B"), NULL))
+  expect_equal(
+    extract_success_prob(p, c("A", "B", "B", "A")),
+    c(1, 2, 2, 1)
+  )
+  p <- matrix(
+    c(1, 2, 3, 4),
+    ncol = 2,
+    dimnames = list(c("A", "B"), c("C", "D"))
+  )
+  expect_equal(
+    extract_success_prob(p, c("A", "B", "B", "A"), c("C", "D", "C", "D")),
+    c(1, 4, 2, 3)
+  )
+})
+
+
+test_that("group_prop returns correct proportions", {
+  df <- data.frame(
+    grp = c("a", "a", "b", "c"),
+    y = c(1, 0, 1, 1)
+  )
+
+  dt <- data.table::as.data.table(df)
+
+  expected <- c(a = 0.5, b = 0.25, c = 0.25)
+
+  expect_equal(group_prop(df, "grp"), expected)
+  expect_equal(group_prop(dt, "grp"), expected)
+})
+
+test_that("boot_null_counts returns correct grouped counts", {
+  df <- data.frame(
+    grp = c("a", "a", "b", "b", "b"),
+    y = c(1, 0, 1, 1, 0)
+  )
+
+  dt <- data.table::as.data.table(df)
+
+  expected <- data.frame(
+    grp = c("a", "b"),
+    n = c(2, 3),
+    s = c(1, 2)
+  )
+
+  expect_equal(
+    as.data.frame(boot_null_counts(df, "y", "grp")),
+    expected
+  )
+
+  expect_equal(
+    as.data.frame(boot_null_counts(dt, "y", "grp")),
+    expected
+  )
+})
+
+test_that("boot_null_counts returns correct overall counts", {
+  df <- data.frame(
+    grp = c("a", "a", "b", "b", "b"),
+    y = c(1, 0, 1, 1, 0)
+  )
+
+  dt <- data.table::as.data.table(df)
+
+  expected <- data.frame(
+    n = 5,
+    s = 3
+  )
+
+  expect_equal(
+    boot_null_counts(df, "y"),
+    expected
+  )
+
+  expect_equal(
+    as.data.frame(boot_null_counts(dt, "y")),
+    expected
+  )
+})
