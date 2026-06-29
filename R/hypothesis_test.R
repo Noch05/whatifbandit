@@ -576,8 +576,8 @@ pairwise_test <- function(
       estimate = est$est,
       statistic = test_stat,
       p_value = p,
-      low = st$est - q * est$se,
-      high = st$est + q * est$se
+      low = est$est - q * est$se,
+      high = est$est + q * est$se
     ),
     null_value = H0,
     direction = direction,
