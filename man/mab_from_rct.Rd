@@ -316,7 +316,7 @@ Multi-Armed Bandit Analysis." \url{https://cran.r-project.org/package=bandit}.
 
 Offer‐Westort, Molly, Alexander Coppock, and Donald P. Green. 2021. "Adaptive Experimental
 Design: Prospects and Applications in Political Science." \emph{American Journal of Political
-Science} 65 (4): 826–44. \doi{10.1111/ajps.12597}..
+Science} 65 (4): 826–44. \doi{10.1111/ajps.12597}.
 
 Slivkins, Aleksandrs. 2024. "Introduction to Multi-Armed Bandits." \emph{arXiv}.
 \doi{10.48550/arXiv.1904.07272}.

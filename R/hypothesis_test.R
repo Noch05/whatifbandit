@@ -477,3 +477,56 @@ boot_null_counts.data.table <- function(data, success_col, group = NULL) {
     data[, .(n = .N, s = sum(get(success_col)))]
   }
 }
+#----------------------------------------------------------------------------#
+#' @title Pairwise and Univariate Hypothesis Tests for Multi-Armed Bandits
+#' @name pairwise_test
+#'
+#' @description
+#' Performs univariate or pairwise hypothesis tests for treatment-arm means or treatment
+#' effects. When a `multi_mab` object is supplied, hypothesis test results are returned
+#' for every trial.
+#'
+#' @param mab An object inheriting from class `.mab`.
+#' @param arm1 A string specifying the treatment arm to test.
+#' @param arm2 An optional string specifying the comparison treatment arm. If omitted,
+#'   a one-sample test is performed on `arm1`.
+#' @param null The null hypothesis value. For univariate tests this is the hypothesized
+#'   mean; for pairwise tests it is the hypothesized difference in means.
+#' @param estimator A character vector specifying the estimator(s) to use. Supported
+#'   values are `"AIPW"`, `"IPW"`, and `"Sample"`.
+#'
+#' @details
+#' Hypothesis tests based on the AIPW estimator use the standard normal distribution,
+#' following href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}.
+#' Tests based on the Sample and IPW estimators use the
+#' t-distribution with either the clustered or unclustered degrees of freedom, as
+#' appropriate.
+#'
+#' In adaptive experiments, the Sample estimator is generally biased, making the
+#' corresponding hypothesis test invalid. Likewise, the IPW estimator converges to an
+#' asymptotically non-normal distribution href {https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}. However, when both arms
+#' have sufficiently large sample sizes, the t-test based on the IPW estimator can still be valid
+#' \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
+#'
+#' @references
+#' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
+#' "Confidence Intervals for Policy Evaluation in Adaptive Experiments."
+#' \emph{Proceedings of the National Academy of Sciences of the United States of America}
+#' 118 (15): e2014602118. \doi{10.1073/pnas.2014602118}.
+#'
+#' Offer-Westort, Molly, Alexander Coppock, and Donald P. Green. 2021.
+#' "Adaptive Experimental Design: Prospects and Applications in Political Science."
+#' \emph{American Journal of Political Science} 65 (4): 826--844.
+#' \doi{10.1111/ajps.12597}.
+#'
+#' @export
+
+pairwise_test <- function(
+  mab,
+  arm1,
+  arm2 = NULL,
+  null = 0,
+  estimator = c("AIPW", "IPW", "Sample")
+) {
+  return(0)
+}

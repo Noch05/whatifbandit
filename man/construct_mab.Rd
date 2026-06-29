@@ -17,7 +17,7 @@ construct_mab(mab, type, multi)
 Input \code{mab} with appropriate S3 class, restructured for output
 }
 \description{
-Simple construction for proper \code{mab} subclasses as output
+Simple constructor for proper \code{mab} subclasses as output
 to \code{\link[=simulate_mab]{simulate_mab()}} and \code{\link[=mab_from_rct]{mab_from_rct()}}.
 }
 \keyword{internal}
