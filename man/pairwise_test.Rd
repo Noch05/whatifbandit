@@ -34,9 +34,10 @@ for every trial.
 \details{
 Hypothesis tests based on the AIPW estimator use the standard normal distribution,
 following href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}.
-Tests based on the Sample and IPW estimators use the
+Tests based on the IPW estimators use the
 t-distribution with either the clustered or unclustered degrees of freedom, as
-appropriate.
+appropriate from \code{\link[estimatr:lm_robust]{estimatr::lm_robust()}}. Tests based on Sample estimates will be follow standard normal of unclustered,
+and t-distribution using appropriate clustered degrees of freedom
 
 In adaptive experiments, the Sample estimator is generally biased, making the
 corresponding hypothesis test invalid. Likewise, the IPW estimator converges to an

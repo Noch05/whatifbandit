@@ -498,9 +498,10 @@ boot_null_counts.data.table <- function(data, success_col, group = NULL) {
 #' @details
 #' Hypothesis tests based on the AIPW estimator use the standard normal distribution,
 #' following href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}.
-#' Tests based on the Sample and IPW estimators use the
+#' Tests based on the IPW estimators use the
 #' t-distribution with either the clustered or unclustered degrees of freedom, as
-#' appropriate.
+#' appropriate from [estimatr::lm_robust()]. Tests based on Sample estimates will be follow standard normal of unclustered,
+#' and t-distribution using appropriate clustered degrees of freedom
 #'
 #' In adaptive experiments, the Sample estimator is generally biased, making the
 #' corresponding hypothesis test invalid. Likewise, the IPW estimator converges to an
@@ -519,8 +520,7 @@ boot_null_counts.data.table <- function(data, success_col, group = NULL) {
 #' \emph{American Journal of Political Science} 65 (4): 826--844.
 #' \doi{10.1111/ajps.12597}.
 #'
-#' @export
-
+#'
 pairwise_test <- function(
   mab,
   arm1,
@@ -528,5 +528,14 @@ pairwise_test <- function(
   null = 0,
   estimator = c("AIPW", "IPW", "Sample")
 ) {
+  estimates <- if (data.table::is.data.table(mab$estimates)) {
+    mab$estimates[mab_condition %in% c(arm1, arm2) & estimator %in% estimator]
+  } else {
+    mab$estimates[
+      mab$estimates$mab_condition %in%
+        c(arm1, arm2) &
+        mab$estimates$estimator %in% estimator,
+    ]
+  }
   return(0)
 }
