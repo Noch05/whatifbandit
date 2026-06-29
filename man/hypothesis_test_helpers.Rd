@@ -8,13 +8,13 @@
 \alias{two_sample_test.data.table}
 \title{Internal hypothesis test helpers}
 \usage{
-one_sample_test(est, arm, H0)
+one_sample_test(est)
 
 two_sample_test(est, arm1, arm2, H0)
 
-two_sample_test.data.frame(est, arm1, arm2, H0)
+\method{two_sample_test}{data.frame}(est, arm1, arm2, H0)
 
-two_sample_test.data.table(est, arm1, arm2, H0)
+\method{two_sample_test}{data.table}(est, arm1, arm2, H0)
 }
 \description{
 Helper functions used by \code{\link[=pairwise_test]{pairwise_test()}} to compute one- and two-sample

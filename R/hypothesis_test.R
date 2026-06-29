@@ -16,6 +16,7 @@
 #'   \item `null_distribution`: A numeric vector of F-statistics under the null.
 #'   \item `p_value`: The proportion of simulated F-statistics more extreme than observed.
 #'   \item `method`: The method used.
+#'   \item `r`: Number of replications used.
 #' }
 #' @export
 #' @details
@@ -88,7 +89,8 @@ joint_test <- function(mab, method, r = 1000) {
     f_stat = f,
     null_distribution = null,
     p_value = p,
-    method = method
+    method = method,
+    r = r
   ))
 }
 
@@ -503,6 +505,16 @@ boot_null_counts.data.table <- function(data, success_col, group = NULL) {
 #' following href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}.
 #' Two-sample tests are always conducted as arm1 - arm2.
 #'
+#' @return A named list object containing
+#' \itemize{
+#'   \item `tests`: A data.frame of the test results with columns containing the estimates, test
+#'   statistics, p-values, and confidence intervals.
+#'   \item `null_value`: Null value for the test.
+#'   \item `direction`: Direction of the test.
+#'   \item `method`: The method used.
+#'   \item `estimator`: Estimator used.
+#' }
+#'
 #' @references
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
 #' "Confidence Intervals for Policy Evaluation in Adaptive Experiments."
@@ -514,6 +526,7 @@ boot_null_counts.data.table <- function(data, success_col, group = NULL) {
 #' \emph{American Journal of Political Science} 65 (4): 826--844.
 #' \doi{10.1111/ajps.12597}.
 #'
+#' @export
 #'
 pairwise_test <- function(
   mab,
@@ -547,24 +560,29 @@ pairwise_test <- function(
     ]
   }
 
-  est <- if (!is.null(arm2)) {
-    one_sample_test(est, arm1, H0)
+  est <- if (is.null(arm2)) {
+    one_sample_test(estimates)
   } else {
-    two_sample_test(est, arm1, arm2, H0)
+    two_sample_test(estimates, arm1, arm2)
   }
-
   alpha <- (1 - conf)
   q <- qnorm(alpha / 2, lower.tail = FALSE)
 
-  test_stat <- (est$diff - H0) / sqrt(est$se)
+  test_stat <- (est$est - H0) / est$se
   p <- pnorm(abs(test_stat), lower.tail = FALSE)
 
   return(list(
-    test_stat = test_stat,
-    p = p,
-    reject = abs(test_stat) > q,
-    low = est$diff - q * est$se,
-    high = est$diff + q * est$se
+    tests = tibble::tibble(
+      estimate = est$est,
+      statistic = test_stat,
+      p_value = p,
+      low = st$est - q * est$se,
+      high = st$est + q * est$se
+    ),
+    null_value = H0,
+    direction = direction,
+    method = if (is.null(arm2)) "One Sample" else "Two Sample",
+    estimator = estimator
   ))
 }
 
@@ -581,7 +599,7 @@ NULL
 
 #' @rdname hypothesis_test_helpers
 #' @keywords internal
-one_sample_test <- function(est, arm, H0) {
+one_sample_test <- function(est) {
   list(
     est = est[["mean"]],
     se = est[["se"]]
@@ -590,7 +608,7 @@ one_sample_test <- function(est, arm, H0) {
 #' @rdname hypothesis_test_helpers
 #' @keywords internal
 two_sample_test <- function(est, arm1, arm2, H0) {
-  setGeneric("two_sample_test", est)
+  UseMethod("two_sample_test", est)
 }
 #' @rdname hypothesis_test_helpers
 #' @keywords internal
@@ -599,8 +617,10 @@ two_sample_test.data.frame <- function(est, arm1, arm2, H0) {
   list(
     est = (est$mean[est$mab_condition == arm1] -
       est$mean[est$mab_condition == arm2]),
-    se = est$se[est$mab_condition == arm1]^2 +
-      est$se[est$mab_condition == arm2]^2
+    se = sqrt(
+      est$se[est$mab_condition == arm1]^2 +
+        est$se[est$mab_condition == arm2]^2
+    )
   )
 }
 #' @rdname hypothesis_test_helpers
@@ -610,7 +630,9 @@ two_sample_test.data.table <- function(est, arm1, arm2, H0) {
   list(
     est = est[mab_condition == arm1, mean] -
       est[mab_condition == arm2, mean],
-    se = est[mab_condition == arm1, se]^2 +
-      est[mab_condition == arm2, se]^2
+    se = sqrt(
+      est[mab_condition == arm1, se]^2 +
+        est[mab_condition == arm2, se]^2
+    )
   )
 }

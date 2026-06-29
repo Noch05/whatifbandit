@@ -33,6 +33,17 @@ for future updates.}
 \item{estimator}{A character vector specifying the estimator to use. Supported
 values are currently only \code{"AIPW"}, with the others planned for future updates.}
 }
+\value{
+A named list object containing
+\itemize{
+\item \code{tests}: A data.frame of the test results with columns containing the estimates, test
+statistics, p-values, and confidence intervals.
+\item \code{null_value}: Null value for the test.
+\item \code{direction}: Direction of the test.
+\item \code{method}: The method used.
+\item \code{estimator}: Estimator used.
+}
+}
 \description{
 Performs two-way univariate or pairwise hypothesis tests for treatment-arm means or treatment
 effects. When a \code{multi_mab} object is supplied, hypothesis test results are returned

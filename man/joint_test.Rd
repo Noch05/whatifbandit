@@ -21,6 +21,7 @@ A named list object containing
 \item \code{null_distribution}: A numeric vector of F-statistics under the null.
 \item \code{p_value}: The proportion of simulated F-statistics more extreme than observed.
 \item \code{method}: The method used.
+\item \code{r}: Number of replications used.
 }
 }
 \description{
