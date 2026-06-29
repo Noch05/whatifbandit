@@ -28,10 +28,3 @@ construct_mab <- function(mab, type, multi) {
     class = c(class, ".mab", "list")
   )
 }
-
-#' Constructs `test` and its other class variances
-#' @name construct_test
-#' @description
-#' Simple constructor for proper `test` subclasses as output from [joint_test()], [pairwise_test()].
-#' @param test Named list outpout of [joint_test()] or [pairwise_test()]
-NULL
