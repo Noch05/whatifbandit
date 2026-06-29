@@ -482,7 +482,7 @@ boot_null_counts.data.table <- function(data, success_col, group = NULL) {
 #' @name pairwise_test
 #'
 #' @description
-#' Performs univariate or pairwise hypothesis tests for treatment-arm means or treatment
+#' Performs two-way univariate or pairwise hypothesis tests for treatment-arm means or treatment
 #' effects. When a `multi_mab` object is supplied, hypothesis test results are returned
 #' for every trial.
 #'
@@ -490,24 +490,18 @@ boot_null_counts.data.table <- function(data, success_col, group = NULL) {
 #' @param arm1 A string specifying the treatment arm to test.
 #' @param arm2 An optional string specifying the comparison treatment arm. If omitted,
 #'   a one-sample test is performed on `arm1`.
-#' @param null The null hypothesis value. For univariate tests this is the hypothesized
+#' @param H0 The null hypothesis value. For univariate tests this is the hypothesized
 #'   mean; for pairwise tests it is the hypothesized difference in means.
-#' @param estimator A character vector specifying the estimator(s) to use. Supported
-#'   values are `"AIPW"`, `"IPW"`, and `"Sample"`.
+#' @param conf Confidence level, default is 95%.
+#' @param direction String specifying test direction, only "twoway" is available, one-way tests are planned
+#' for future updates.
+#' @param estimator A character vector specifying the estimator to use. Supported
+#'   values are currently only `"AIPW"`, with the others planned for future updates.
 #'
 #' @details
 #' Hypothesis tests based on the AIPW estimator use the standard normal distribution,
 #' following href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}.
-#' Tests based on the IPW estimators use the
-#' t-distribution with either the clustered or unclustered degrees of freedom, as
-#' appropriate from [estimatr::lm_robust()]. Tests based on Sample estimates will be follow standard normal of unclustered,
-#' and t-distribution using appropriate clustered degrees of freedom
-#'
-#' In adaptive experiments, the Sample estimator is generally biased, making the
-#' corresponding hypothesis test invalid. Likewise, the IPW estimator converges to an
-#' asymptotically non-normal distribution href {https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}. However, when both arms
-#' have sufficiently large sample sizes, the t-test based on the IPW estimator can still be valid
-#' \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
+#' Two-sample tests are always conducted as arm1 - arm2.
 #'
 #' @references
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
@@ -525,9 +519,24 @@ pairwise_test <- function(
   mab,
   arm1,
   arm2 = NULL,
-  null = 0,
-  estimator = c("AIPW", "IPW", "Sample")
+  H0 = 0,
+  conf = 0.95,
+  direction = "twoway",
+  estimator = "AIPW"
 ) {
+  check_string(tolower(estimator), valid = "aipw", "estimator")
+  check_string(tolower(direction), valid = "twoway", "direction")
+  check_string(arm1, valid = unique(mab$estimates$mab_condition), "arm1")
+  if (!is.null(arm2)) {
+    check_string(arm2, valid = unique(mab$estimates$mab_condition), "arm2")
+  }
+  if (!is.numeric(H0)) {
+    rlang::abort(
+      c("H0 must be a number", "x" = paste0("You Provided: ", H0))
+    )
+  }
+  check_prop(conf)
+
   estimates <- if (data.table::is.data.table(mab$estimates)) {
     mab$estimates[mab_condition %in% c(arm1, arm2) & estimator %in% estimator]
   } else {
@@ -537,5 +546,71 @@ pairwise_test <- function(
         mab$estimates$estimator %in% estimator,
     ]
   }
-  return(0)
+
+  est <- if (!is.null(arm2)) {
+    one_sample_test(est, arm1, H0)
+  } else {
+    two_sample_test(est, arm1, arm2, H0)
+  }
+
+  alpha <- (1 - conf)
+  q <- qnorm(alpha / 2, lower.tail = FALSE)
+
+  test_stat <- (est$diff - H0) / sqrt(est$se)
+  p <- pnorm(abs(test_stat), lower.tail = FALSE)
+
+  return(list(
+    test_stat = test_stat,
+    p = p,
+    reject = abs(test_stat) > q,
+    low = est$diff - q * est$se,
+    high = est$diff + q * est$se
+  ))
+}
+
+#' Internal hypothesis test helpers
+#'
+#' Helper functions used by [pairwise_test()] to compute one- and two-sample
+#' estimates and their standard errors for different estimate storage classes.
+#'
+#' These functions are intended for internal use only.
+#'
+#' @name hypothesis_test_helpers
+#' @keywords internal
+NULL
+
+#' @rdname hypothesis_test_helpers
+#' @keywords internal
+one_sample_test <- function(est, arm, H0) {
+  list(
+    est = est[["mean"]],
+    se = est[["se"]]
+  )
+}
+#' @rdname hypothesis_test_helpers
+#' @keywords internal
+two_sample_test <- function(est, arm1, arm2, H0) {
+  setGeneric("two_sample_test", est)
+}
+#' @rdname hypothesis_test_helpers
+#' @keywords internal
+#' @export
+two_sample_test.data.frame <- function(est, arm1, arm2, H0) {
+  list(
+    est = (est$mean[est$mab_condition == arm1] -
+      est$mean[est$mab_condition == arm2]),
+    se = est$se[est$mab_condition == arm1]^2 +
+      est$se[est$mab_condition == arm2]^2
+  )
+}
+#' @rdname hypothesis_test_helpers
+#' @keywords internal
+#' @export
+two_sample_test.data.table <- function(est, arm1, arm2, H0) {
+  list(
+    est = est[mab_condition == arm1, mean] -
+      est[mab_condition == arm2, mean],
+    se = est[mab_condition == arm1, se]^2 +
+      est[mab_condition == arm2, se]^2
+  )
 }
