@@ -84,9 +84,9 @@ experiment.
 
 }}
 \seealso{
-Other imputation: 
-\code{\link{precompute_imputation}()},
-\code{\link{prep_imputation}()}
+Other imputation:
+\code{\link[=precompute_imputation]{precompute_imputation()}},
+\code{\link[=prep_imputation]{prep_imputation()}}
 }
 \concept{imputation}
 \keyword{internal}

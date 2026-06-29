@@ -19,16 +19,16 @@ A named list with 2 elements, \code{furr_args} and \code{time_model_args} each a
 \code{\link[furrr:furrr_options]{furrr::furrr_options()}} and the user specified \code{time_model}
 }
 \description{
-Uses \code{\link[methods:methodUtilities]{methods::formalArgs()}} to match arguments provided to \code{...} of \code{\link[=simulate_mab]{simulate_mab()}} to \code{\link[furrr:furrr_options]{furrr::furrr_options()}} and the user specified \code{time_model}
+Uses \code{\link[methods:formalArgs]{methods::formalArgs()}} to match arguments provided to \code{...} of \code{\link[=simulate_mab]{simulate_mab()}} to \code{\link[furrr:furrr_options]{furrr::furrr_options()}} and the user specified \code{time_model}
 }
 \seealso{
-Other param: 
-\code{\link{generate_assignment_dates}()},
-\code{\link{generate_groups}()},
-\code{\link{generate_outcomes}()},
-\code{\link{generate_period_idx}()},
-\code{\link{prep_sim_data}()},
-\code{\link{setup_mab_sim}()}
+Other param:
+\code{\link[=generate_assignment_dates]{generate_assignment_dates()}},
+\code{\link[=generate_groups]{generate_groups()}},
+\code{\link[=generate_outcomes]{generate_outcomes()}},
+\code{\link[=generate_period_idx]{generate_period_idx()}},
+\code{\link[=prep_sim_data]{prep_sim_data()}},
+\code{\link[=setup_mab_sim]{setup_mab_sim()}}
 }
 \concept{param}
 \keyword{internal}

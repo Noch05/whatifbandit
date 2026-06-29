@@ -76,9 +76,9 @@ Condenses output from \code{\link[=mab_loop]{mab_loop()}} into
 manageable structure. Contains methods for \code{data.frame} and \code{data.table}.
 }
 \seealso{
-Other simulation: 
-\code{\link{mab_loop}()},
-\code{\link{run_mab}()}
+Other simulation:
+\code{\link[=mab_loop]{mab_loop()}},
+\code{\link[=run_mab]{run_mab()}}
 }
 \concept{simulation}
 \keyword{internal}

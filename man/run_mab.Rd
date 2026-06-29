@@ -146,9 +146,9 @@ Internal helper. Centralizes necessary functions to conduct a
 a MAB trial with adaptive inference. It assumes all inputs have been preprocessed already.
 }
 \seealso{
-Other simulation: 
-\code{\link{collect_mab_results}()},
-\code{\link{mab_loop}()}
+Other simulation:
+\code{\link[=collect_mab_results]{collect_mab_results()}},
+\code{\link[=mab_loop]{mab_loop()}}
 }
 \concept{simulation}
 \keyword{internal}

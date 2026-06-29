@@ -45,10 +45,10 @@ static trial, valid tests can be performed using the estimator with a t-distribu
 df should be pooled for tests among the tested arms.
 }
 \seealso{
-Other estimation: 
-\code{\link{compute_iaipw}()},
-\code{\link{estimate_aipw}()},
-\code{\link{estimate_ipw}()},
+Other estimation:
+\code{\link[=compute_iaipw]{compute_iaipw()}},
+\code{\link[=estimate_aipw]{estimate_aipw()}},
+\code{\link[=estimate_ipw]{estimate_ipw()}},
 \code{\link{inference_helpers}}
 }
 \concept{estimation}

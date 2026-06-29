@@ -34,6 +34,7 @@ compute_iaipw <- function(
 #-------------------------------------------------------------------------------
 #' @method compute_iaipw data.frame
 #' @rdname compute_iaipw
+#' @export
 
 compute_iaipw.data.frame <- function(
   data,
@@ -103,6 +104,7 @@ compute_iaipw.data.frame <- function(
 }
 # ------------------------------------------------------------------------------
 #' @method compute_iaipw data.table
+#' @export
 #' @rdname compute_iaipw
 
 compute_iaipw.data.table <- function(
@@ -435,6 +437,7 @@ estimate_sample <- function(data, conditions, cluster_col, clustering) {
 }
 
 #' @method estimate_sample data.frame
+#' @export
 #' @rdname estimate_sample
 estimate_sample.data.frame <- function(
   data,
@@ -476,6 +479,7 @@ estimate_sample.data.frame <- function(
 }
 
 #' @method estimate_sample data.table
+#' @export
 #' @rdname estimate_sample
 estimate_sample.data.table <- function(
   data,
@@ -535,6 +539,7 @@ fill_missing_conditions <- function(x, conditions) {
 
 #' @rdname inference_helpers
 #' @method fill_missing_conditions data.frame
+#' @export
 fill_missing_conditions.data.frame <- function(x, conditions) {
   missing_conditions <- setdiff(conditions, x[["mab_condition"]])
 
@@ -555,6 +560,7 @@ fill_missing_conditions.data.frame <- function(x, conditions) {
 
 #' @rdname inference_helpers
 #' @method fill_missing_conditions data.table
+#' @export
 fill_missing_conditions.data.table <- function(x, conditions) {
   missing_conditions <- setdiff(conditions, x[["mab_condition"]])
 

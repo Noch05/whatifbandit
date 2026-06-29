@@ -57,10 +57,10 @@ Offer‐Westort, Molly, Alexander Coppock, and Donald P. Green. 2021.
 \emph{American Journal of Political Science} 65 (4): 826–44. \doi{10.1111/ajps.12597}..
 }
 \seealso{
-Other estimation: 
-\code{\link{compute_iaipw}()},
-\code{\link{estimate_aipw}()},
-\code{\link{estimate_sample}()},
+Other estimation:
+\code{\link[=compute_iaipw]{compute_iaipw()}},
+\code{\link[=estimate_aipw]{estimate_aipw()}},
+\code{\link[=estimate_sample]{estimate_sample()}},
 \code{\link{inference_helpers}}
 }
 \concept{estimation}

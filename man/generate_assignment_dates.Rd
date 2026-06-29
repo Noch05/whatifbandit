@@ -19,13 +19,13 @@ vector of assignment dates
 Generates a \code{length(n)} vector of assignment dates based on provided information.
 }
 \seealso{
-Other param: 
-\code{\link{generate_groups}()},
-\code{\link{generate_outcomes}()},
-\code{\link{generate_period_idx}()},
-\code{\link{prep_sim_data}()},
-\code{\link{setup_mab_sim}()},
-\code{\link{split_args}()}
+Other param:
+\code{\link[=generate_groups]{generate_groups()}},
+\code{\link[=generate_outcomes]{generate_outcomes()}},
+\code{\link[=generate_period_idx]{generate_period_idx()}},
+\code{\link[=prep_sim_data]{prep_sim_data()}},
+\code{\link[=setup_mab_sim]{setup_mab_sim()}},
+\code{\link[=split_args]{split_args()}}
 }
 \concept{param}
 \keyword{internal}

@@ -36,6 +36,7 @@ precompute_imputation <- function(
 
 #' @method precompute_imputation data.frame
 #' @rdname precompute_imputation
+#' @export
 
 precompute_imputation.data.frame <- function(
   data,
@@ -112,6 +113,7 @@ precompute_imputation.data.frame <- function(
 #-------------------------------------------------------------------------------
 #' @method precompute_imputation data.table
 #' @rdname precompute_imputation
+#' @export
 
 precompute_imputation.data.table <- function(
   data,
@@ -434,6 +436,7 @@ compute_impute <- function(imputation_info, success_col) {
 #' @inheritParams impute_outcomes
 #' @rdname impute_outcomes
 #' @method impute_outcomes data.frame
+#' @export
 
 impute_outcomes.data.frame <- function(
   data,
@@ -468,6 +471,7 @@ impute_outcomes.data.frame <- function(
 #' @inheritParams impute_outcomes
 #' @rdname impute_outcomes
 #' @method impute_outcomes data.table
+#' @export
 impute_outcomes.data.table <- function(
   data,
   imputation_info,

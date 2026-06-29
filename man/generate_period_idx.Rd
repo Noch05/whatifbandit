@@ -26,13 +26,13 @@ Generates the start and end indexes for each period based on provided informatio
 When not provided period sizes are calculated as \code{n \%/\% t} for all periods, with the last as \code{n \%/\% t  + n \%\% t}.
 }
 \seealso{
-Other param: 
-\code{\link{generate_assignment_dates}()},
-\code{\link{generate_groups}()},
-\code{\link{generate_outcomes}()},
-\code{\link{prep_sim_data}()},
-\code{\link{setup_mab_sim}()},
-\code{\link{split_args}()}
+Other param:
+\code{\link[=generate_assignment_dates]{generate_assignment_dates()}},
+\code{\link[=generate_groups]{generate_groups()}},
+\code{\link[=generate_outcomes]{generate_outcomes()}},
+\code{\link[=prep_sim_data]{prep_sim_data()}},
+\code{\link[=setup_mab_sim]{setup_mab_sim()}},
+\code{\link[=split_args]{split_args()}}
 }
 \concept{param}
 \keyword{internal}

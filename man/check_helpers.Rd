@@ -66,8 +66,8 @@ settings for positive integer arguments and checks if they are valid positive in
 
 }}
 \seealso{
-Other checks: 
-\code{\link{check_rct_args}()}
+Other checks:
+\code{\link[=check_rct_args]{check_rct_args()}}
 }
 \concept{checks}
 \keyword{internal}

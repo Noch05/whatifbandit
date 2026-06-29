@@ -41,17 +41,11 @@ whether or not all provided conditions are present in the data, if not their val
 Combines the AIPW, IPW, and Sample estimates into a single object to be returned.
 }
 \seealso{
-Other estimation: 
-\code{\link{compute_iaipw}()},
-\code{\link{estimate_aipw}()},
-\code{\link{estimate_ipw}()},
-\code{\link{estimate_sample}()}
-
-Other estimation: 
-\code{\link{compute_iaipw}()},
-\code{\link{estimate_aipw}()},
-\code{\link{estimate_ipw}()},
-\code{\link{estimate_sample}()}
+Other estimation:
+\code{\link[=compute_iaipw]{compute_iaipw()}},
+\code{\link[=estimate_aipw]{estimate_aipw()}},
+\code{\link[=estimate_ipw]{estimate_ipw()}},
+\code{\link[=estimate_sample]{estimate_sample()}}
 }
 \concept{estimation}
 \keyword{internal}

@@ -148,9 +148,9 @@ number of prior periods.
 
 }}
 \seealso{
-Other simulation: 
-\code{\link{collect_mab_results}()},
-\code{\link{run_mab}()}
+Other simulation:
+\code{\link[=collect_mab_results]{collect_mab_results()}},
+\code{\link[=run_mab]{run_mab()}}
 }
 \concept{simulation}
 \keyword{internal}

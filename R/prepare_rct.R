@@ -238,6 +238,7 @@ create_cutoff <- function(
 #------------------------------------------------------------------------------------------
 #' @method create_cutoff date
 #' @rdname create_cutoff
+#' @export
 create_cutoff.date <- function(
   data,
   time_unit,
@@ -351,7 +352,7 @@ create_cutoff.date <- function(
 
 #' @method create_cutoff individual
 #' @rdname create_cutoff
-#'
+#' @export
 create_cutoff.individual <- function(data) {
   if (data.table::is.data.table(data)) {
     data[, period_number := .I]
@@ -368,7 +369,7 @@ create_cutoff.individual <- function(data) {
 #----------------------------------------------------------------------------------
 #' @method create_cutoff batch
 #' @rdname create_cutoff
-#'
+#' @export
 create_cutoff.batch <- function(data, period_length) {
   if (data.table::is.data.table(data)) {
     data[, period_number := ceiling((.I / period_length))]
@@ -418,6 +419,7 @@ create_new_cols <- function(
 # --------------------------------------------------
 #' @method create_new_cols data.frame
 #' @rdname create_new_cols
+#' @export
 
 create_new_cols.data.frame <- function(
   data,
@@ -490,6 +492,7 @@ create_new_cols.data.frame <- function(
 #---------------------------------------------------------------------------------
 #' @rdname create_new_cols
 #' @method create_new_cols data.table
+#' @export
 
 create_new_cols.data.table <- function(
   data,
@@ -554,6 +557,7 @@ compute_period_sizes <- function(
 
 #' @method compute_period_sizes data.frame
 #' @rdname compute_period_sizes
+#' @export
 compute_period_sizes.data.frame <- function(data) {
   data |>
     dplyr::group_by(period_number) |>
@@ -564,6 +568,7 @@ compute_period_sizes.data.frame <- function(data) {
 
 #' @method compute_period_sizes data.table
 #' @rdname compute_period_sizes
+#' @export
 compute_period_sizes.data.table <- function(data) {
   counts <- data[, .(count = .N), by = period_number][order(
     period_number

@@ -107,9 +107,9 @@ conditions absent from the prior window with zeros, and sorts alphabetically.
 
 }}
 \seealso{
-Other assign: 
-\code{\link{assign_treatments}()},
-\code{\link{compute_bandit}()}
+Other assign:
+\code{\link[=assign_treatments]{assign_treatments()}},
+\code{\link[=compute_bandit]{compute_bandit()}}
 }
 \concept{assign}
 \keyword{internal}

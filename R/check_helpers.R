@@ -164,6 +164,7 @@ check_clusters <- function(
 
 #' @method check_clusters data.frame
 #' @rdname check_clusters
+#' @export
 check_clusters.data.frame <- function(data, cluster_col) {
   check_clusters <- data |>
     dplyr::group_by(.data[[cluster_col]]) |>
@@ -175,6 +176,7 @@ check_clusters.data.frame <- function(data, cluster_col) {
 
 #' @method check_clusters data.table
 #' @rdname check_clusters
+#' @export
 check_clusters.data.table <- function(data, cluster_col) {
   check_clusters <- data[,
     .(n_periods = data.table::uniqueN(period_number)),

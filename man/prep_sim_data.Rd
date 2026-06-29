@@ -80,13 +80,13 @@ cluster assignments, allocates all required columns, and assigns treatments and
 outcomes for the first period using equal assignment probabilities.
 }
 \seealso{
-Other param: 
-\code{\link{generate_assignment_dates}()},
-\code{\link{generate_groups}()},
-\code{\link{generate_outcomes}()},
-\code{\link{generate_period_idx}()},
-\code{\link{setup_mab_sim}()},
-\code{\link{split_args}()}
+Other param:
+\code{\link[=generate_assignment_dates]{generate_assignment_dates()}},
+\code{\link[=generate_groups]{generate_groups()}},
+\code{\link[=generate_outcomes]{generate_outcomes()}},
+\code{\link[=generate_period_idx]{generate_period_idx()}},
+\code{\link[=setup_mab_sim]{setup_mab_sim()}},
+\code{\link[=split_args]{split_args()}}
 }
 \concept{param}
 \keyword{internal}

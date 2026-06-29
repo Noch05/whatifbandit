@@ -78,13 +78,13 @@ Perfoms all one-time set-up requried for \code{\link[=simulate_mab]{simulate_mab
 \code{\link[=prep_sim_data]{prep_sim_data()}} which needs to be re-run each period.
 }
 \seealso{
-Other param: 
-\code{\link{generate_assignment_dates}()},
-\code{\link{generate_groups}()},
-\code{\link{generate_outcomes}()},
-\code{\link{generate_period_idx}()},
-\code{\link{prep_sim_data}()},
-\code{\link{split_args}()}
+Other param:
+\code{\link[=generate_assignment_dates]{generate_assignment_dates()}},
+\code{\link[=generate_groups]{generate_groups()}},
+\code{\link[=generate_outcomes]{generate_outcomes()}},
+\code{\link[=generate_period_idx]{generate_period_idx()}},
+\code{\link[=prep_sim_data]{prep_sim_data()}},
+\code{\link[=split_args]{split_args()}}
 }
 \concept{param}
 \keyword{internal}

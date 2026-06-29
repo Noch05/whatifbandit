@@ -76,9 +76,9 @@ blocking variables with their new treatment assigned via the Multi-Arm-Bandit
 procedure.
 }
 \seealso{
-Other imputation: 
-\code{\link{impute_outcomes}()},
-\code{\link{precompute_imputation}()}
+Other imputation:
+\code{\link[=impute_outcomes]{impute_outcomes()}},
+\code{\link[=precompute_imputation]{precompute_imputation()}}
 }
 \concept{imputation}
 \keyword{internal}

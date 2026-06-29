@@ -49,6 +49,7 @@ compute_prior <- function(
 }
 #' @method compute_prior fast
 #' @rdname compute_prior
+#' @export
 compute_prior.fast <- function(
   current_data,
   prior_data,
@@ -97,6 +98,7 @@ compute_prior.fast <- function(
 #----------------------------------------------------------------------------------
 #' @method compute_prior data.frame
 #' @rdname compute_prior
+#' @export
 
 compute_prior.data.frame <- function(
   current_data,
@@ -137,6 +139,7 @@ compute_prior.data.frame <- function(
 
 #' @method compute_prior data.table
 #' @rdname compute_prior
+#' @export
 
 compute_prior.data.table <- function(
   current_data,
@@ -323,6 +326,7 @@ compute_bandit <- function(
 #-------------------------------------------------------------------
 #' @method compute_bandit thompson
 #' @rdname compute_bandit
+#' @export
 
 compute_bandit.thompson <- function(
   past_results,
@@ -386,7 +390,7 @@ bandit_invalid <- function(bandit) {
 #-------------------------------------------------------------------
 #' @method compute_bandit ucb1
 #' @rdname compute_bandit
-#' @keywords internal
+#' @export
 
 compute_bandit.ucb1 <- function(
   past_results,

@@ -415,7 +415,7 @@ group_prop <- function(data, group) {
 
 #' @rdname group_prop
 #' @method group_prop data.frame
-#'
+#' @export
 group_prop.data.frame <- function(data, group) {
   n <- nrow(data)
   data |>
@@ -426,6 +426,7 @@ group_prop.data.frame <- function(data, group) {
 
 #' @rdname group_prop
 #' @method group_prop data.table
+#' @export
 group_prop.data.table <- function(data, group) {
   n <- nrow(data)
   data[, .(size = .N / n), by = group] |>
@@ -454,6 +455,7 @@ boot_null_counts <- function(data, success_col, group = NULL) {
 
 #' @rdname boot_null_counts
 #' @method boot_null_counts data.frame
+#' @export
 boot_null_counts.data.frame <- function(data, success_col, group = NULL) {
   if (!is.null(group)) {
     data |>
@@ -467,6 +469,7 @@ boot_null_counts.data.frame <- function(data, success_col, group = NULL) {
 
 #' @rdname boot_null_counts
 #' @method boot_null_counts data.table
+#' @export
 boot_null_counts.data.table <- function(data, success_col, group = NULL) {
   if (!is.null(group)) {
     data[, .(n = .N, s = sum(get(success_col))), by = group]

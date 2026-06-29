@@ -168,7 +168,7 @@ supporting arguments are passed as necessary.
 
 }}
 \seealso{
-Other checks: 
+Other checks:
 \code{\link{check_helpers}}
 }
 \concept{checks}

@@ -157,9 +157,9 @@ randomizr function built by \code{\link[=build_ra_args]{build_ra_args()}}.
 \item \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}}
 }
 
-Other assign: 
-\code{\link{compute_bandit}()},
-\code{\link{compute_prior}()}
+Other assign:
+\code{\link[=compute_bandit]{compute_bandit()}},
+\code{\link[=compute_prior]{compute_prior()}}
 }
 \concept{assign}
 \keyword{internal}

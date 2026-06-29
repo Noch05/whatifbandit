@@ -215,6 +215,7 @@ collect_mab_results <- function(
 #-------------------------------------------------------------------------------
 #' @method collect_mab_results data.frame
 #' @rdname collect_mab_results
+#' @export
 collect_mab_results.data.frame <- function(
   data,
   bandits,
@@ -286,6 +287,7 @@ collect_mab_results.data.frame <- function(
 #-------------------------------------------------------------------------------
 #' @method collect_mab_results data.table
 #' @rdname collect_mab_results
+#' @export
 collect_mab_results.data.table <- function(
   data,
   bandits,

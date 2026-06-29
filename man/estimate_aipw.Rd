@@ -70,10 +70,10 @@ Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 20
 (15): e2014602118. \doi{10.1073/pnas.2014602118}.
 }
 \seealso{
-Other estimation: 
-\code{\link{compute_iaipw}()},
-\code{\link{estimate_ipw}()},
-\code{\link{estimate_sample}()},
+Other estimation:
+\code{\link[=compute_iaipw]{compute_iaipw()}},
+\code{\link[=estimate_ipw]{estimate_ipw()}},
+\code{\link[=estimate_sample]{estimate_sample()}},
 \code{\link{inference_helpers}}
 }
 \concept{estimation}

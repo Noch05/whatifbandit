@@ -71,9 +71,9 @@ named matrix for use with \code{\link[randomizr:block_ra]{randomizr::block_ra()}
 
 }}
 \seealso{
-Other imputation: 
-\code{\link{impute_outcomes}()},
-\code{\link{prep_imputation}()}
+Other imputation:
+\code{\link[=impute_outcomes]{impute_outcomes()}},
+\code{\link[=prep_imputation]{prep_imputation()}}
 }
 \concept{imputation}
 \keyword{internal}

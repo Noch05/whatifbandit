@@ -111,9 +111,9 @@ Thompson, William R. 1933. "On the Likelihood That One Unknown Probability Excee
 Biometrika 25 (3/4): 285–94. \doi{10.2307/2332286}
 }
 \seealso{
-Other assign: 
-\code{\link{assign_treatments}()},
-\code{\link{compute_prior}()}
+Other assign:
+\code{\link[=assign_treatments]{assign_treatments()}},
+\code{\link[=compute_prior]{compute_prior()}}
 }
 \concept{assign}
 \keyword{internal}
