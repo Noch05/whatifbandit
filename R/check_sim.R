@@ -12,7 +12,6 @@ check_mab_sim <- function(
   n,
   t,
   p,
-  algorithm,
   blocks = NULL,
   clusters = NULL,
   control_augment,
@@ -33,7 +32,6 @@ check_mab_sim <- function(
   check_logical(dt, keep_data, keep_models, verbose)
   check_posint(n, t, ndraws, r, prior_periods, period_sizes)
   check_prop(control_augment, random_assign_prop, discount_rate)
-  check_string(algorithm, c("static", "thompson", "ucb1"), "algorithm")
 
   if (t > n) {
     rlang::abort(

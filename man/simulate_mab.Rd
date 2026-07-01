@@ -8,7 +8,7 @@ simulate_mab(
   n,
   t = n,
   p,
-  algorithm,
+  algorithm = c("thompson", "ucb1"),
   blocks = NULL,
   clusters = NULL,
   control_augment = 0,

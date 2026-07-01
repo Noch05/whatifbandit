@@ -12,7 +12,6 @@
 #' @family checks
 check_rct_args <- function(
   data,
-  algorithm,
   control_augment,
   random_assign_prop,
   period_method,
@@ -31,18 +30,6 @@ check_rct_args <- function(
   blocking,
   clustering
 ) {
-  purrr::pwalk(
-    list(
-      c(algorithm, period_method),
-      list(
-        c("thompson", "ucb1", "static"),
-        c("individual", "batch", "date")
-      ),
-      c("algorithm", "period_method")
-    ),
-    check_string
-  )
-
   check_logical(
     verbose,
     whole_experiment,
@@ -323,7 +310,6 @@ check_period_method <- function(
         "`time_unit` must be provided when assignment method is `date`."
       )
     }
-    check_string(time_unit, c("day", "week", "month"), "Time Unit")
   }
   if (period_method %in% c("batch", "date")) {
     if (is.null(period_length)) {

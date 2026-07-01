@@ -101,7 +101,7 @@ simulate_mab <- function(
   n,
   t = n,
   p,
-  algorithm,
+  algorithm = c("thompson", "ucb1"),
   blocks = NULL,
   clusters = NULL,
   control_augment = 0,
@@ -122,13 +122,12 @@ simulate_mab <- function(
   ...
 ) {
   cl <- match.call()
-  algorithm <- tolower(algorithm)
+  algorithm <- rlang::arg_match(algorithm)
   if (check_args) {
     check_mab_sim(
       n = n,
       t = t,
       p = p,
-      algorithm = algorithm,
       blocks = blocks,
       clusters = clusters,
       control_augment = control_augment,

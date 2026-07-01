@@ -7,11 +7,11 @@
 mab_from_rct(
   formula,
   data,
-  algorithm,
+  algorithm = c("thompson", "ucb1"),
   random_assign_prop = 0,
   control_augment = 0,
   control_condition = NULL,
-  period_method,
+  period_method = c("batch", "date", "individual"),
   time_unit = NULL,
   period_length,
   prior_periods = NULL,

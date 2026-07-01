@@ -31,7 +31,6 @@
 
 prep_rct_data <- function(
   data,
-  algorithm,
   random_assign_prop,
   control_augment,
   control_condition,
@@ -58,25 +57,15 @@ prep_rct_data <- function(
   if (data.table::is.data.table(data)) {
     data <- data.table::copy(data)
   }
-  char_args <- lapply(
-    list(
-      period_method = period_method,
-      algorithm = algorithm,
-      time_unit = time_unit
-    ),
-    \(arg) {
-      if (is.character(arg)) tolower(arg) else arg
-    }
-  )
+
   # Input Validation
   if (check_args) {
     check_rct_args(
       data = data,
-      algorithm = char_args$algorithm,
       random_assign_prop = random_assign_prop,
       control_augment = control_augment,
-      period_method = char_args$period_method,
-      time_unit = char_args$time_unit,
+      period_method = period_method,
+      time_unit = time_unit,
       period_length = period_length,
       prior_periods = prior_periods,
       discount_rate = discount_rate,
@@ -107,8 +96,8 @@ prep_rct_data <- function(
     data = data,
     col_names = col_names,
     period_length = period_length,
-    period_method = char_args$period_method,
-    time_unit = char_args$time_unit
+    period_method = period_method,
+    time_unit = time_unit
   ) |>
     create_new_cols(
       col_names = col_names,
@@ -136,7 +125,6 @@ prep_rct_data <- function(
   return(list(
     data = data,
     imputation_information = imputation_information,
-    char_args = char_args,
     conditions = conditions,
     period_idxs = list(start_idxs = start_idxs, end_idxs = end_idxs)
   ))

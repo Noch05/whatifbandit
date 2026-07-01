@@ -297,11 +297,11 @@
 mab_from_rct <- function(
   formula,
   data,
-  algorithm,
+  algorithm = c("thompson", "ucb1"),
   random_assign_prop = 0,
   control_augment = 0,
   control_condition = NULL,
-  period_method,
+  period_method = c("batch", "date", "individual"),
   time_unit = NULL,
   period_length,
   prior_periods = NULL,
@@ -321,6 +321,12 @@ mab_from_rct <- function(
   ...
 ) {
   cl <- match.call()
+  algorithm <- rlang::arg_match(algorithm)
+  period_method <- rlang::arg_match(period_method)
+  if (!is.null(time_unit)) {
+    time_unit <- rlang::arg_match(time_unit, values = c("day", "week", "month"))
+  }
+
   col_names <- c(
     formula_parse(formula),
     date_col = deparse(substitute(date_col)),
@@ -330,7 +336,6 @@ mab_from_rct <- function(
   )
   col_names <- col_names[!vapply(col_names, \(x) all(x == "NULL"), logical(1))]
 
-  algorithm <- tolower(algorithm)
   args <- mget(setdiff(methods::formalArgs(mab_from_rct), names(col_names)))
 
   blocking <- !is.null(col_names[["block_cols"]])
@@ -338,7 +343,6 @@ mab_from_rct <- function(
 
   prepped <- prep_rct_data(
     data = data,
-    algorithm = algorithm,
     control_augment = control_augment,
     control_condition = control_condition,
     random_assign_prop = random_assign_prop,
@@ -377,7 +381,7 @@ mab_from_rct <- function(
   run_single <- purrr::partial(
     run_mab_single,
     sim_type = "resim",
-    algorithm = prepped[["char_args"]][["algorithm"]],
+    algorithm = algorithm,
     control_augment = control_augment,
     random_assign_prop = random_assign_prop,
     prior_periods = prior_periods,
