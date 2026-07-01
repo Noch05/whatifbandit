@@ -48,6 +48,7 @@ prep_rct_data <- function(
   check_args,
   r,
   keep_data,
+  keep_models,
   blocking,
   clustering
 ) {
@@ -86,6 +87,7 @@ prep_rct_data <- function(
       ndraws = ndraws,
       r = r,
       keep_data = keep_data,
+      keep_models = keep_models,
       blocking = blocking,
       clustering = clustering
     )

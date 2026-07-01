@@ -27,9 +27,10 @@ check_mab_sim <- function(
   ndraws = 5000,
   r,
   keep_data,
+  keep_models,
   verbose
 ) {
-  check_logical(dt, keep_data, verbose)
+  check_logical(dt, keep_data, keep_models, verbose)
   check_posint(n, t, ndraws, r, prior_periods, period_sizes)
   check_prop(control_augment, random_assign_prop, discount_rate)
   check_string(algorithm, c("static", "thompson", "ucb1"), "algorithm")

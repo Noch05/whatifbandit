@@ -24,6 +24,7 @@ check_mab_sim(
   ndraws = 5000,
   r,
   keep_data,
+  keep_models,
   verbose
 )
 
@@ -117,6 +118,10 @@ setting an appropriate \code{\link[future:plan]{future::plan()}}. See details be
 
 \item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended
 \code{FALSE}. When\code{ r = 1} the final data is always kept and reported.}
+
+\item{keep_models}{Logical; Whether or not to keep the final IPW and OLS vcov/models from each trial. Recommended
+\code{FALSE}. When\code{ r = 1} models are always kept and reported. Required to be \code{TRUE} to compute
+arbitrary pairwise contrasts.}
 
 \item{verbose}{Logical; whether or not to print intermediate messages. Default is \code{FALSE}.}
 

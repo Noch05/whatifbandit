@@ -23,6 +23,7 @@ simulate_mab(
   ndraws = 5000,
   r = 1,
   keep_data = FALSE,
+  keep_models = FALSE,
   check_args = TRUE,
   verbose = FALSE,
   ...
@@ -116,6 +117,10 @@ setting an appropriate \code{\link[future:plan]{future::plan()}}. See details be
 
 \item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended
 \code{FALSE}. When\code{ r = 1} the final data is always kept and reported.}
+
+\item{keep_models}{Logical; Whether or not to keep the final IPW and OLS vcov/models from each trial. Recommended
+\code{FALSE}. When\code{ r = 1} models are always kept and reported. Required to be \code{TRUE} to compute
+arbitrary pairwise contrasts.}
 
 \item{check_args}{Logical; whether or not to validate passed arguments. Default is \code{TRUE} and recommended
 not to be changed.}

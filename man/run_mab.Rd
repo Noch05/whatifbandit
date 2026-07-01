@@ -26,6 +26,7 @@ run_mab(
   ndraws,
   period_idxs,
   keep_data,
+  keep_models,
   time_model = NULL,
   time_model_args = NULL
 )
@@ -117,6 +118,10 @@ row of each period.}
 
 \item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended
 \code{FALSE}. When\code{ r = 1} the final data is always kept and reported.}
+
+\item{keep_models}{Logical; Whether or not to keep the final IPW and OLS vcov/models from each trial. Recommended
+\code{FALSE}. When\code{ r = 1} models are always kept and reported. Required to be \code{TRUE} to compute
+arbitrary pairwise contrasts.}
 
 \item{time_model}{An optional function with signature \verb{function(n, conditions, successes, current_period, blocks = NULL, clusters = NULL, ...)}
 that returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{dates_of_assignment} to produce \code{success_date}. Used to simulate delayed feedback mechanism

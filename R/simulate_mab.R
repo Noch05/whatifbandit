@@ -116,6 +116,7 @@ simulate_mab <- function(
   ndraws = 5000,
   r = 1,
   keep_data = FALSE,
+  keep_models = FALSE,
   check_args = TRUE,
   verbose = FALSE,
   ...
@@ -142,6 +143,7 @@ simulate_mab <- function(
       ndraws = ndraws,
       r = r,
       keep_data = keep_data,
+      keep_models = keep_models,
       verbose = verbose
     )
   }
@@ -208,6 +210,7 @@ simulate_mab <- function(
     col_names = setup[["col_names"]],
     ndraws = ndraws,
     keep_data = keep_data,
+    keep_models = keep_models,
     verbose = verbose,
     r = r,
     time_model = time_model,
@@ -238,6 +241,7 @@ simulate_mab <- function(
     results <- condense_results(
       dt = dt || (r * t > 100000),
       keep_data = keep_data,
+      keep_models = keep_models,
       mabs = mabs
     )
   }

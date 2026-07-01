@@ -37,6 +37,7 @@ run_mab_single <- function(
   col_names,
   ndraws = 5000,
   keep_data = FALSE,
+  keep_models = FALSE,
   verbose = FALSE,
   r = 1,
   imputation_information = NULL,
@@ -91,6 +92,7 @@ run_mab_single <- function(
     ndraws = ndraws,
     period_idxs = period_idxs,
     keep_data = keep_data || r == 1,
+    keep_models = keep_models || r == 1,
     imputation_information = imputation_information,
     time_model = time_model,
     time_model_args = time_model_args,
@@ -257,6 +259,7 @@ run_mab <- function(
   ndraws,
   period_idxs,
   keep_data,
+  keep_models,
   time_model = NULL,
   time_model_args = NULL
 ) {
@@ -353,6 +356,12 @@ run_mab <- function(
   )
 
   final_data <- if (keep_data) sim_results[["final_data"]] else NULL
+  models <- if (keep_models) {
+    list(
+      ipw = ipw_estimates[["model"]],
+      ols = ols_estimates[["model"]]
+    )
+  }
 
   results <- list(
     final_data = final_data,
@@ -360,10 +369,7 @@ run_mab <- function(
     assignment_probs = sim_results[["assignment_probs"]],
     assignment_quantities = sim_results[["assignment_quantities"]],
     estimates = estimates,
-    models = list(
-      ipw = ipw_estimates[["model"]],
-      ols = ols_estimates[["model"]]
-    ),
+    models = models,
     args = NULL,
     call = NULL,
     furrr = NULL
@@ -388,13 +394,13 @@ run_mab <- function(
 #' and variance estimates.
 #' \item `models`: A nested list containing the vcov matrix for the ipw and ols regressions for each
 #' repetition, or the full model objects. The elements are ipw and ols, either containing a 3d array
-#' of vcov, or a list of full models.
+#' of vcov, or a list of full models. Only provided if `keep_models = TRUE`
 #' }
 #' @details This function iterates over every element in `mabs` and extracts the required element to place in a condensed list
 #' for the final output.
 #' @keywords internal
 
-condense_results <- function(dt, keep_data, mabs) {
+condense_results <- function(dt, keep_data, keep_models, mabs) {
   r <- length(mabs)
   names(mabs) <- as.character(1:r)
   elements <- c(
@@ -443,21 +449,25 @@ condense_results <- function(dt, keep_data, mabs) {
   names(results) <- elements
   results[["final_data"]] <- if (keep_data) nest_func() else NULL
 
-  results[["models"]] <- lapply(
-    c(ipw = "ipw", ols = "ols"),
-    \(estimator) {
-      extracted <- lapply(mabs, \(mab) mab[["models"]][[estimator]])
+  results[["models"]] <- if (keep_models) {
+    lapply(
+      c(ipw = "ipw", ols = "ols"),
+      \(estimator) {
+        extracted <- lapply(mabs, \(mab) mab[["models"]][[estimator]])
 
-      if (is.matrix(extracted[[1]])) {
-        array(
-          unlist(extracted),
-          dim = c(dim(extracted[[1]]), length(extracted))
-        )
-      } else {
-        extracted
+        if (is.matrix(extracted[[1]])) {
+          array(
+            unlist(extracted),
+            dim = c(dim(extracted[[1]]), length(extracted))
+          )
+        } else {
+          extracted
+        }
       }
-    }
-  )
+    )
+  } else {
+    NULL
+  }
 
   return(results)
 }

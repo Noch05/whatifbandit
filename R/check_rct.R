@@ -27,6 +27,7 @@ check_rct_args <- function(
   ndraws,
   r,
   keep_data,
+  keep_models,
   blocking,
   clustering
 ) {
@@ -46,7 +47,8 @@ check_rct_args <- function(
     verbose,
     whole_experiment,
     delayed_feedback,
-    keep_data
+    keep_data,
+    keep_models
   )
 
   check_cols(

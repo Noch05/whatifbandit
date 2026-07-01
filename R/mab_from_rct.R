@@ -114,6 +114,10 @@
 #' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended
 #' `FALSE`. When` r = 1` the final data is always kept and reported.
 #'
+#' @param keep_models Logical; Whether or not to keep the final IPW and OLS vcov/models from each trial. Recommended
+#' `FALSE`. When` r = 1` models are always kept and reported. Required to be `TRUE` to compute
+#' arbitrary pairwise contrasts.
+#'
 #'
 #' @param ... Additional named arguments passed to [furrr::furrr_options()]
 #'
@@ -313,6 +317,7 @@ mab_from_rct <- function(
   verbose = FALSE,
   check_args = TRUE,
   keep_data = FALSE,
+  keep_models = FALSE,
   ...
 ) {
   cl <- match.call()
@@ -351,7 +356,8 @@ mab_from_rct <- function(
     verbose = verbose,
     ndraws = ndraws,
     r = r,
-    keep_data = keep_data
+    keep_data = keep_data,
+    keep_models = keep_models
   )
 
   args <- utils::modifyList(
@@ -384,6 +390,7 @@ mab_from_rct <- function(
     col_names = col_names,
     ndraws = ndraws,
     keep_data = keep_data,
+    keep_models = keep_models,
     verbose = verbose,
     r = r,
     period_idxs = prepped[["period_idxs"]],
@@ -405,6 +412,7 @@ mab_from_rct <- function(
       dt = ((data.table::is.data.table(data)) ||
         r * length(prepped$period_starts) > 100000),
       keep_data = keep_data,
+      keep_models = keep_models,
       mabs = mabs
     )
   }

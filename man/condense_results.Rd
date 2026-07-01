@@ -4,7 +4,7 @@
 \alias{condense_results}
 \title{Condenses results of repeated simulations.}
 \usage{
-condense_results(dt, keep_data, mabs)
+condense_results(dt, keep_data, keep_models, mabs)
 }
 \arguments{
 \item{dt}{Logical; Whether to output \code{data.table}s or \code{tibble}s. When\code{ r * number_of_periods > 100000}, \code{dt = TRUE}, even if the user passed data is not a
@@ -12,6 +12,10 @@ condense_results(dt, keep_data, mabs)
 
 \item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended
 \code{FALSE}. When\code{ r = 1} the final data is always kept and reported.}
+
+\item{keep_models}{Logical; Whether or not to keep the final IPW and OLS vcov/models from each trial. Recommended
+\code{FALSE}. When\code{ r = 1} models are always kept and reported. Required to be \code{TRUE} to compute
+arbitrary pairwise contrasts.}
 
 \item{mabs}{List of outputs from repeated \code{\link[=run_mab]{run_mab()}} calls.}
 }
@@ -28,7 +32,7 @@ Long format, treatment arm, and estimate type are columns along with the mean es
 and variance estimates.
 \item \code{models}: A nested list containing the vcov matrix for the ipw and ols regressions for each
 repetition, or the full model objects. The elements are ipw and ols, either containing a 3d array
-of vcov, or a list of full models.
+of vcov, or a list of full models. Only provided if \code{keep_models = TRUE}
 }
 }
 \description{
