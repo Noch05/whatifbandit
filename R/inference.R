@@ -534,10 +534,28 @@ combine_estimates <- function(...) {
 #' Performs adjustment of CR0 SE to CR1 SE, using Stata's formula
 #' @param x matrix of variances (\eqn{\frac{G}{G-1} * \frac{N-1}{N-k}}) where k is
 #' the number of treatments, and G is the number of clusters.
+#' @param g integer number of clusters
+#' @param k integer number of treatments
+#' @param n integer, dataset size
 #' @returns An adjusted vector of variances
 #' @family estimation
 #' @rdname inference_helpers
 #'
 cr1 <- function(x, g, n, k) {
   x * (g / g - 1) * ((n - 1) / (n - k))
+}
+
+#' Compute Contrasts
+#' @description
+#' Computes specified contrasts of AIPW, IPW, and OLS estimates.
+#' @param model Object containing necessary information for contrasts, either data.frame/data.table
+#' combined with a variance covariance matrix, or the `lm_robust` object.
+#' @param estimator Estimator used, AIPW, IPW, or OLS.
+#' @inheritParams mab_from_rct
+#' @inheritParams run_mab_single
+#' @family estimation
+#' @rdname inference_helpers
+#'
+compute_contrasts <- function(model, contrasts, clustering, estimator) {
+  return(0)
 }

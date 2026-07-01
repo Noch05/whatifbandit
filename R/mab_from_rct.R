@@ -118,6 +118,13 @@
 #' `FALSE`. When` r = 1` models are always kept and reported. Required to be `TRUE` to compute
 #' arbitrary pairwise contrasts.
 #'
+#' @param contrasts Character string specifying which pairwise contrasts to
+#'   precompute after each replication. One of `"control"` (each arm vs. control arm),
+#' `"best"` (each arm vs. the MAB-selected best arm),
+#'  `"both"`, or `"all"` (all `choose(k, 2)` pairwise comparisons, expensive
+#'  for large `k`). All contrasts are tested under the null of no difference.
+#' Defaults to `NULL`, arbitrary contrasts can be computed if `keep_models == TRUE`
+#'
 #'
 #' @param ... Additional named arguments passed to [furrr::furrr_options()]
 #'
@@ -318,6 +325,7 @@ mab_from_rct <- function(
   check_args = TRUE,
   keep_data = FALSE,
   keep_models = FALSE,
+  contrasts = NULL,
   ...
 ) {
   cl <- match.call()
@@ -325,6 +333,12 @@ mab_from_rct <- function(
   period_method <- rlang::arg_match(period_method)
   if (!is.null(time_unit)) {
     time_unit <- rlang::arg_match(time_unit, values = c("day", "week", "month"))
+  }
+  if (!is.null(contrasts)) {
+    contrasts <- rlang::arg_match(
+      contrasts,
+      c("control", "best", "both", "all")
+    )
   }
 
   col_names <- c(
@@ -395,6 +409,7 @@ mab_from_rct <- function(
     ndraws = ndraws,
     keep_data = keep_data,
     keep_models = keep_models,
+    contrasts = contrasts,
     verbose = verbose,
     r = r,
     period_idxs = prepped[["period_idxs"]],

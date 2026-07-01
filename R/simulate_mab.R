@@ -117,12 +117,20 @@ simulate_mab <- function(
   r = 1,
   keep_data = FALSE,
   keep_models = FALSE,
+  contrasts = NULL,
   check_args = TRUE,
   verbose = FALSE,
   ...
 ) {
   cl <- match.call()
   algorithm <- rlang::arg_match(algorithm)
+  if (!is.null(contrasts)) {
+    contrasts <- rlang::arg_match(
+      contrasts,
+      c("control", "best", "both", "all")
+    )
+  }
+
   if (check_args) {
     check_mab_sim(
       n = n,
@@ -210,6 +218,7 @@ simulate_mab <- function(
     ndraws = ndraws,
     keep_data = keep_data,
     keep_models = keep_models,
+    contrasts = contrasts,
     verbose = verbose,
     r = r,
     time_model = time_model,

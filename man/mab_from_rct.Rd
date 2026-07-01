@@ -28,6 +28,7 @@ mab_from_rct(
   check_args = TRUE,
   keep_data = FALSE,
   keep_models = FALSE,
+  contrasts = NULL,
   ...
 )
 }
@@ -143,6 +144,13 @@ not to be changed.}
 \item{keep_models}{Logical; Whether or not to keep the final IPW and OLS vcov/models from each trial. Recommended
 \code{FALSE}. When\code{ r = 1} models are always kept and reported. Required to be \code{TRUE} to compute
 arbitrary pairwise contrasts.}
+
+\item{contrasts}{Character string specifying which pairwise contrasts to
+precompute after each replication. One of \code{"control"} (each arm vs. control arm),
+\code{"best"} (each arm vs. the MAB-selected best arm),
+\code{"both"}, or \code{"all"} (all \code{choose(k, 2)} pairwise comparisons, expensive
+for large \code{k}). All contrasts are tested under the null of no difference.
+Defaults to \code{NULL}, arbitrary contrasts can be computed if \code{keep_models == TRUE}}
 
 \item{...}{Additional named arguments passed to \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
 }

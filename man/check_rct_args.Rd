@@ -23,9 +23,7 @@ check_rct_args(
   ndraws,
   r,
   keep_data,
-  keep_models,
-  blocking,
-  clustering
+  keep_models
 )
 
 check_cols(
@@ -125,8 +123,6 @@ setting an appropriate \code{\link[future:plan]{future::plan()}}. See details be
 arbitrary pairwise contrasts.}
 
 \item{blocking}{Logical; Whether or not treatment blocking is occuring}
-
-\item{clustering}{Logical; Whether or not treatment clustering is occuring}
 }
 \value{
 Throws an error if an argument is missing or misspecified.

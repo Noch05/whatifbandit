@@ -27,6 +27,7 @@ run_mab(
   period_idxs,
   keep_data,
   keep_models,
+  contrasts,
   time_model = NULL,
   time_model_args = NULL
 )
@@ -122,6 +123,13 @@ row of each period.}
 \item{keep_models}{Logical; Whether or not to keep the final IPW and OLS vcov/models from each trial. Recommended
 \code{FALSE}. When\code{ r = 1} models are always kept and reported. Required to be \code{TRUE} to compute
 arbitrary pairwise contrasts.}
+
+\item{contrasts}{Character string specifying which pairwise contrasts to
+precompute after each replication. One of \code{"control"} (each arm vs. control arm),
+\code{"best"} (each arm vs. the MAB-selected best arm),
+\code{"both"}, or \code{"all"} (all \code{choose(k, 2)} pairwise comparisons, expensive
+for large \code{k}). All contrasts are tested under the null of no difference.
+Defaults to \code{NULL}, arbitrary contrasts can be computed if \code{keep_models == TRUE}}
 
 \item{time_model}{An optional function with signature \verb{function(n, conditions, successes, current_period, blocks = NULL, clusters = NULL, ...)}
 that returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{dates_of_assignment} to produce \code{success_date}. Used to simulate delayed feedback mechanism

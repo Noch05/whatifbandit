@@ -38,6 +38,7 @@ run_mab_single <- function(
   ndraws = 5000,
   keep_data = FALSE,
   keep_models = FALSE,
+  contrasts = NULL,
   verbose = FALSE,
   r = 1,
   imputation_information = NULL,
@@ -93,6 +94,7 @@ run_mab_single <- function(
     period_idxs = period_idxs,
     keep_data = keep_data || r == 1,
     keep_models = keep_models || r == 1,
+    contrasts = contrasts,
     imputation_information = imputation_information,
     time_model = time_model,
     time_model_args = time_model_args,
@@ -260,6 +262,7 @@ run_mab <- function(
   period_idxs,
   keep_data,
   keep_models,
+  contrasts,
   time_model = NULL,
   time_model_args = NULL
 ) {
@@ -362,6 +365,16 @@ run_mab <- function(
       ols = ols_estimates[["model"]]
     )
   }
+  contrasts <- if (!is.null(contrasts)) {
+    compute_contrasts(
+      estimates,
+      contrasts = contrasts,
+      clustering = clustering,
+      estimator = "test"
+    )
+  } else {
+    NULL
+  }
 
   results <- list(
     final_data = final_data,
@@ -369,6 +382,7 @@ run_mab <- function(
     assignment_probs = sim_results[["assignment_probs"]],
     assignment_quantities = sim_results[["assignment_quantities"]],
     estimates = estimates,
+    contrasts = contrasts,
     models = models,
     args = NULL,
     call = NULL,
@@ -407,7 +421,8 @@ condense_results <- function(dt, keep_data, keep_models, mabs) {
     "bandits",
     "assignment_probs",
     "assignment_quantities",
-    "estimates"
+    "estimates",
+    "contrasts"
   )
 
   extract <- \(item) lapply(mabs, `[[`, item)
