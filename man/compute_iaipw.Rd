@@ -55,8 +55,7 @@ Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 20
 \seealso{
 Other estimation:
 \code{\link[=estimate_aipw]{estimate_aipw()}},
-\code{\link[=estimate_ipw]{estimate_ipw()}},
-\code{\link[=estimate_sample]{estimate_sample()}},
+\code{\link[=estimate_lm]{estimate_lm()}},
 \code{\link{inference_helpers}}
 }
 \concept{estimation}

@@ -52,6 +52,8 @@
 #' }
 #' \item `estimates`:  A `tibble` or `data.table` containing point estimates, and standard errors for the AIPW, IPW, and Sample estimators
 #' for each treatment in each trial. IPW also includes a joint-F statistic, and degrees of freedom
+#' \item `lms`: A list containing the vcov for each ipw and ols regression, if clustering the full
+#' `lm_robust` is stored.
 #' \item `config`: Configuration list of 3 elements:
 #' \itemize{
 #' \item `args`: List of arguments passed to [simulate_mab()].

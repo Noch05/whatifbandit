@@ -25,7 +25,7 @@
 run_mab_single <- function(
   sim_type,
   algorithm,
-  estimators = c("aipw", "ipw", "sample"),
+  estimators = c("aipw", "ipw", "ols"),
   control_augment = 0,
   random_assign_prop = 0,
   prior_periods = NULL,
@@ -209,7 +209,7 @@ prep_sim_data <- function(
 #' @param sim_type String; Type of simulation to conduct, either `"resim"`, `"param"`, or "`test"`,
 #' for a resimulated rct, simulation from population parameters, or simulation for the randomization joint test.
 #' @param estimators Character vector; Which estimators to compute, can include `"aipw"`, `"ipw"`,
-#' "sample", and any combination
+#' "ols", and any combination
 #' of them in a vector.
 #' @param time_model_args Arguments passed to `time_model` function.
 #' @param conditions Character vector of treatment condition labels. If a control group is specified
@@ -226,6 +226,8 @@ prep_sim_data <- function(
 #' treatment arm.
 #' \item `estimates`: A `tibble` or `data.table` containing the estimates of the specified estimators for
 #' each treatment arm.
+#' #' \item `models`: A nested list containing the vcov matrix for the ipw and ols regressions or
+#' the model objects.
 #' \item `call`: `NULL`; initialized for later assignment.
 #' \item `args`: `NULL`; initialized for later assignment.
 #' \item `furrr`: `NULL`; initialized for later assignment.
@@ -236,7 +238,7 @@ prep_sim_data <- function(
 run_mab <- function(
   data,
   sim_type,
-  estimators = c("aipw", "ipw", "sample"),
+  estimators = c("aipw", "ipw", "ols"),
   p = NULL,
   algorithm,
   control_augment,
@@ -290,6 +292,12 @@ run_mab <- function(
 
   verbose_log(verbose, "Computing final simulation estimates")
 
+  num_clusters <- if (clustering) {
+    length(unique(sim_results[["final_data"]][["cluster"]]))
+  } else {
+    NULL
+  }
+
   aipw_estimates <- if ("aipw" %in% estimators) {
     iaipw_estimates <- compute_iaipw(
       data = sim_results[["final_data"]],
@@ -305,29 +313,34 @@ run_mab <- function(
       periods = periods,
       conditions = conditions,
       clustering = clustering,
-      cluster_col = col_names[["cluster_col"]]
+      cluster_col = col_names[["cluster_col"]],
+      num_clusters = num_clusters
     )
   } else {
     NULL
   }
 
   ipw_estimates <- if ("ipw" %in% estimators) {
-    estimate_ipw(
+    estimate_lm(
       data = sim_results[["final_data"]],
       cluster_col = col_names[["cluster_col"]],
       clustering = clustering,
-      conditions = conditions
+      conditions = conditions,
+      num_clusters = num_clustersm,
+      ipw = TRUE
     )
   } else {
     NULL
   }
 
-  sample_estimates <- if ("sample" %in% estimators) {
-    estimate_sample(
+  ols_estimates <- if ("ols" %in% estimators) {
+    estimate_lm(
       data = sim_results[["final_data"]],
-      conditions = conditions,
+      cluster_col = col_names[["cluster_col"]],
       clustering = clustering,
-      cluster_col = col_names[["cluster_col"]]
+      conditions = conditions,
+      num_clusters = num_clusters,
+      ipw = FALSE
     )
   } else {
     NULL
@@ -335,8 +348,8 @@ run_mab <- function(
 
   estimates <- combine_estimates(
     aipw_estimates,
-    ipw_estimates,
-    sample_estimates
+    ipw_estimates[["estimates"]],
+    ols_estimates[["estimates"]]
   )
 
   final_data <- if (keep_data) sim_results[["final_data"]] else NULL
@@ -347,6 +360,10 @@ run_mab <- function(
     assignment_probs = sim_results[["assignment_probs"]],
     assignment_quantities = sim_results[["assignment_quantities"]],
     estimates = estimates,
+    models = list(
+      ipw = ipw_estimates[["model"]],
+      ols = ols_estimates[["model"]]
+    ),
     args = NULL,
     call = NULL,
     furrr = NULL
@@ -369,6 +386,9 @@ run_mab <- function(
 #' \item `estimates`: A `tibble` or `data.table` containing the all estimates and variances for each arm.
 #' Long format, treatment arm, and estimate type are columns along with the mean estimates
 #' and variance estimates.
+#' \item `models`: A nested list containing the vcov matrix for the ipw and ols regressions for each
+#' repetition, or the full model objects. The elements are ipw and ols, either containing a 3d array
+#' of vcov, or a list of full models.
 #' }
 #' @details This function iterates over every element in `mabs` and extracts the required element to place in a condensed list
 #' for the final output.
@@ -422,6 +442,22 @@ condense_results <- function(dt, keep_data, mabs) {
   results <- lapply(elements, bind_func)
   names(results) <- elements
   results[["final_data"]] <- if (keep_data) nest_func() else NULL
+
+  results[["models"]] <- lapply(
+    c(ipw = "ipw", ols = "ols"),
+    \(estimator) {
+      extracted <- lapply(mabs, \(mab) mab[["models"]][[estimator]])
+
+      if (is.matrix(extracted[[1]])) {
+        array(
+          unlist(extracted),
+          dim = c(dim(extracted[[1]]), length(extracted))
+        )
+      } else {
+        extracted
+      }
+    }
+  )
 
   return(results)
 }

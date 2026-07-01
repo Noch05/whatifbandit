@@ -138,6 +138,8 @@ If \code{ r >1} and \code{keep_data = TRUE}, the tables from each trial are nest
 }
 \item \code{estimates}:  A \code{tibble} or \code{data.table} containing point estimates, and standard errors for the AIPW, IPW, and Sample estimators
 for each treatment in each trial. IPW also includes a joint-F statistic, and degrees of freedom
+\item \code{lms}: A list containing the vcov for each ipw and ols regression, if clustering the full
+\code{lm_robust} is stored.
 \item \code{config}: Configuration list of 3 elements:
 \itemize{
 \item \code{args}: List of arguments passed to \code{\link[=simulate_mab]{simulate_mab()}}.

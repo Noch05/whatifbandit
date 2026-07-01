@@ -7,7 +7,7 @@
 run_mab(
   data,
   sim_type,
-  estimators = c("aipw", "ipw", "sample"),
+  estimators = c("aipw", "ipw", "ols"),
   p = NULL,
   algorithm,
   control_augment,
@@ -38,7 +38,7 @@ Also used to store simulation outputs.}
 for a resimulated rct, simulation from population parameters, or simulation for the randomization joint test.}
 
 \item{estimators}{Character vector; Which estimators to compute, can include \code{"aipw"}, \code{"ipw"},
-"sample", and any combination
+"ols", and any combination
 of them in a vector.}
 
 \item{p}{The true probabilities of success for each treatment arm. Specified as an matrix,
@@ -136,6 +136,8 @@ treatment arm at a given period.
 treatment arm.
 \item \code{estimates}: A \code{tibble} or \code{data.table} containing the estimates of the specified estimators for
 each treatment arm.
+#' \item \code{models}: A nested list containing the vcov matrix for the ipw and ols regressions or
+the model objects.
 \item \code{call}: \code{NULL}; initialized for later assignment.
 \item \code{args}: \code{NULL}; initialized for later assignment.
 \item \code{furrr}: \code{NULL}; initialized for later assignment.

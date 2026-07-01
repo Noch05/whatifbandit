@@ -23,6 +23,7 @@ construct_mab <- function(mab, type, multi) {
         assignment_quant = mab$assignment_quantities
       ),
       estimates = mab$estimates,
+      lms = mab$models,
       config = list(args = mab$args, call = mab$cl, parallel = mab$furrr)
     ),
     class = c(class, ".mab", "list")

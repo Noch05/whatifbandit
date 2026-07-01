@@ -6,6 +6,7 @@
 \alias{fill_missing_conditions.data.frame}
 \alias{fill_missing_conditions.data.table}
 \alias{combine_estimates}
+\alias{cr1}
 \title{Helper Functions for Inference}
 \usage{
 fill_missing_conditions(x, conditions)
@@ -15,9 +16,12 @@ fill_missing_conditions(x, conditions)
 \method{fill_missing_conditions}{data.table}(x, conditions)
 
 combine_estimates(...)
+
+cr1(x, g, n, k)
 }
 \arguments{
-\item{x}{A \code{tibble}/\code{data.table} containing the appropriate estimates}
+\item{x}{matrix of variances (\eqn{\frac{G}{G-1} * \frac{N-1}{N-k}}) where k is
+the number of treatments, and G is the number of clusters.}
 
 \item{conditions}{Character vector of treatment condition labels.}
 
@@ -31,6 +35,8 @@ A list of 2 elements:
 \item \code{estimates}: Input \code{estimates} bound together by rows.
 \item \code{vcov}: \code{vcov} input
 }
+
+An adjusted vector of variances
 }
 \description{
 Internal helpers for estimation in \code{\link[=run_mab]{run_mab()}}.
@@ -39,13 +45,14 @@ Accepts a \code{data.frame} like object, and a character of vector of \code{cond
 whether or not all provided conditions are present in the data, if not their values are initalized to NA
 
 Combines the AIPW, IPW, and Sample estimates into a single object to be returned.
+
+Performs adjustment of CR0 SE to CR1 SE, using Stata's formula
 }
 \seealso{
 Other estimation:
 \code{\link[=compute_iaipw]{compute_iaipw()}},
 \code{\link[=estimate_aipw]{estimate_aipw()}},
-\code{\link[=estimate_ipw]{estimate_ipw()}},
-\code{\link[=estimate_sample]{estimate_sample()}}
+\code{\link[=estimate_lm]{estimate_lm()}}
 }
 \concept{estimation}
 \keyword{internal}

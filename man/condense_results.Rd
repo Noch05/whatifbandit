@@ -26,6 +26,9 @@ each row is a period, and each columns is a treatment.
 \item \code{estimates}: A \code{tibble} or \code{data.table} containing the all estimates and variances for each arm.
 Long format, treatment arm, and estimate type are columns along with the mean estimates
 and variance estimates.
+\item \code{models}: A nested list containing the vcov matrix for the ipw and ols regressions for each
+repetition, or the full model objects. The elements are ipw and ols, either containing a 3d array
+of vcov, or a list of full models.
 }
 }
 \description{

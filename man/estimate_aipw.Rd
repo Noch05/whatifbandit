@@ -11,7 +11,8 @@ estimate_aipw(
   iaipw,
   cluster_col,
   clustering,
-  periods
+  periods,
+  num_clusters = NULL
 )
 }
 \arguments{
@@ -55,14 +56,17 @@ a few assignment periods, while also properly accounting for the assignment proc
 
 If clustering is specified, within each period individual AIPW estimates are aggregated by cluster,
 and then the sample size becomes the sum of the number of clusters in each period,
-the variance formula is not adjusted, but merely uses the smaller sample.
+the variance formula uses the cluster deviations instead (an effective CR0 style estimator),
+which is adjusted via the Stata CR1 estimator (\eqn{\frac{G}{G-1} * \frac{N-1}{N-k}}) where k is
+the number of treatments, and G is the number of clusters.
 
 The AIPW estimator is unbiased, consistent, and asymptotically normal under the conditions of the simulated trial
 of the so can be used for valid inference with a normal distribution. Treatment effects can aslo be estimated as
 as the difference in AIPW estimates with the variance of the difference as the sum of the
 variances of the two arms. Simple Wald-Style
 tests with the normal distribution can be used here if the experiment contains a sufficiently
-large number of observations.
+large number of observations. In the clustered case, we suggest a t, distribution to be more
+conservative, given the sample size is now the cluster, we provide \eqn{G-k} as degrees of freedom.
 }
 \references{
 Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
@@ -72,8 +76,7 @@ Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 20
 \seealso{
 Other estimation:
 \code{\link[=compute_iaipw]{compute_iaipw()}},
-\code{\link[=estimate_ipw]{estimate_ipw()}},
-\code{\link[=estimate_sample]{estimate_sample()}},
+\code{\link[=estimate_lm]{estimate_lm()}},
 \code{\link{inference_helpers}}
 }
 \concept{estimation}

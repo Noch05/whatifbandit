@@ -81,7 +81,9 @@ joint_test <- function(mab, method, r = 1000) {
       "method"
     )
   )
-  f <- mab$estimates$mean[mab$estimates$mab_condition == "Joint-F"]
+  f <- mab$estimates$mean[
+    mab$estimates$mab_condition == "Joint-F" && mab$estimates$estimator == "IPW"
+  ]
 
   p <- mean(null >= f, na.rm = TRUE)
 

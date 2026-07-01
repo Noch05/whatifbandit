@@ -7,7 +7,7 @@
 run_mab_single(
   sim_type,
   algorithm,
-  estimators = c("aipw", "ipw", "sample"),
+  estimators = c("aipw", "ipw", "ols"),
   control_augment = 0,
   random_assign_prop = 0,
   prior_periods = NULL,
@@ -51,7 +51,7 @@ defines the adaptive assignment process. For more details on these specific algo
 \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}
 
 \item{estimators}{Character vector; Which estimators to compute, can include \code{"aipw"}, \code{"ipw"},
-"sample", and any combination
+"ols", and any combination
 of them in a vector.}
 
 \item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as \code{"Control"}. Ranges from 0 to 1,

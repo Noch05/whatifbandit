@@ -221,19 +221,23 @@ iaipw <- function(conditions_vec, success_vec, mhat, prob, condition) {
 #'
 #' If clustering is specified, within each period individual AIPW estimates are aggregated by cluster,
 #' and then the sample size becomes the sum of the number of clusters in each period,
-#' the variance formula is not adjusted, but merely uses the smaller sample.
+#' the variance formula uses the cluster deviations instead (an effective CR0 style estimator),
+#' which is adjusted via the Stata CR1 estimator (\eqn{\frac{G}{G-1} * \frac{N-1}{N-k}}) where k is
+#' the number of treatments, and G is the number of clusters.
 #'
 #' The AIPW estimator is unbiased, consistent, and asymptotically normal under the conditions of the simulated trial
 #' of the so can be used for valid inference with a normal distribution. Treatment effects can aslo be estimated as
 #' as the difference in AIPW estimates with the variance of the difference as the sum of the
 #' variances of the two arms. Simple Wald-Style
 #' tests with the normal distribution can be used here if the experiment contains a sufficiently
-#' large number of observations.
+#' large number of observations. In the clustered case, we suggest a t, distribution to be more
+#' conservative, given the sample size is now the cluster, we provide \eqn{G-k} as degrees of freedom.
 #'
 #' @references
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
 #' "Confidence Intervals for Policy Evaluation in Adaptive Experiments." \emph{Proceedings of the National Academy of Sciences of the United States of America} 118
 #' (15): e2014602118. \doi{10.1073/pnas.2014602118}.
+#'
 #' @family estimation
 #' @keywords internal
 estimate_aipw <- function(
@@ -243,7 +247,8 @@ estimate_aipw <- function(
   iaipw,
   cluster_col,
   clustering,
-  periods
+  periods,
+  num_clusters = NULL
 ) {
   dt <- data.table::is.data.table(data)
   iaipw_periods <- if (clustering) {
@@ -283,9 +288,27 @@ estimate_aipw <- function(
       ]]]
       sum_w <- sum(weights)
       mean <- sum(score * weights) / sum_w
-      se <- sqrt(sum((weights^2) * ((score - mean)^2)) / ((sum_w)^2))
+      var <- (sum((weights^2) * ((score - mean)^2)) / ((sum_w)^2))
+      if (clustering) {
+        se <- sqrt(cr1(
+          var,
+          g = num_clusters,
+          n = nrow(data),
+          k = length(conditions)
+        ))
+        df <- num_clusters - length(conditions)
+      } else {
+        se <- sqrt(var)
+        df <- NULL
+      }
       return(
-        list(mean = mean, se = se, mab_condition = name, estimator = "AIPW")
+        list(
+          mean = mean,
+          se = se,
+          mab_condition = name,
+          estimator = "AIPW",
+          df = df
+        )
       )
     }
   ) |>
@@ -294,20 +317,21 @@ estimate_aipw <- function(
   return(aipw_estimates)
 }
 
-#' IPW Estimates for Probability of Success
-#' @name estimate_ipw
+#' OLS Estimates for Probability of Success
+#' @name estimate_lm
 #' @description
-#' Computes the IPW estimates for the true probabilities of success using [estimatr::lm_robust()] to perform
-#' an IPW weighted regression for estimation. If clustering is specified CR2 standard errors are reported. Otherwise HC2
-#' standard errors
-#' are used. Appropriate degrees of freedom are supplied along with the regression's F-statistic
+#' Computes OLS estimates for true true probabilities of success using [estimatr::lm_robust()].
+#' Supports IPW weighted and unweighted regression. If clustering is specified CR2 standard errors are reported. Otherwise HC2
+#' standard errors are used. Appropriate degrees of freedom are supplied along with the regression's F-statistic
 #'
 #' @inheritParams compute_iaipw
 #' @inheritParams run_mab
 #' @inheritParams estimate_aipw
+#' @param ipw Whether or not to perform IPW weighted regression
 #' @details
 #'
-#' If CR2 standard errors fail to be calculated, CR0 standard errors will be reported.
+#' If CR2 standard errors fail to be calculated, CR0 are computed, and then adjusted via the Stata
+#' CR1 adjustment.
 #'
 #' These estimates follow the procedure in
 #' \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
@@ -328,10 +352,11 @@ estimate_aipw <- function(
 #'
 #' Block fixed effects are not used for estimation due to the prevalence of numerical instability
 #' in the estimates. Assignment probabilities to treatment are the same within each block,
-#' so the IPW estimator is still unbiased without the prescence of the fixed effects.
+#' so the IPW estimator is still unbiased without the presence of the fixed effects.
 #'
-#' @returns A list of the IPW estimates in a `tibble`/`data.table`, along with their standard errors,
-#' F-statistic and degrees of freedom.
+#' @returns A list of the coefficient estimates in a `tibble`/`data.table`, along with their standard errors,
+#' F-statistic and degrees of freedom, accompanied by vcov matrix or full model object, depending on
+#' whether clustering is used.
 #' @family estimation
 #' @keywords internal
 
@@ -340,36 +365,44 @@ estimate_aipw <- function(
 #' "Adaptive Experimental Design: Prospects and Applications in Political Science."
 #' \emph{American Journal of Political Science} 65 (4): 826–44. \doi{10.1111/ajps.12597}..
 #'
-estimate_ipw <- function(
+estimate_lm <- function(
   data,
   cluster_col,
   clustering,
-  conditions
+  conditions,
+  num_clusters = NULL,
+  ipw
 ) {
   lm_fun <- purrr::partial(
     estimatr::lm_robust,
     formula = mab_success ~ mab_condition - 1,
-    data = data,
-    weights = ipw_weights
+    data = data
   )
-  est_lm <- if (clustering) {
-    tryCatch(
+
+  if (ipw) {
+    lm_fun <- purrr::partial(lm_fun, weights = ipw_weights)
+  }
+
+  if (clustering) {
+    est_lm <- tryCatch(
       {
-        lm_fun(
+        x <- lm_fun(
           clusters = !!rlang::sym(cluster_col),
           se_type = "CR2"
         )
       },
       error = function(e) {
-        rlang::warn("CR2 failed. Falling back to CR0.")
-        lm_fun(
+        rlang::warn("CR2 failed. Falling back to Stata CR1")
+        x <- lm_fun(
           clusters = !!rlang::sym(cluster_col),
-          se_type = "CR0"
+          se_type = "stata"
         )
+        x[["df"]] <- num_clusters - length(conditions)
+        return(x)
       }
     )
   } else {
-    lm_fun(se_type = "HC2")
+    est_lm <- lm_fun(se_type = "HC2")
   }
 
   coefs <- est_lm[["coefficients"]]
@@ -382,139 +415,33 @@ estimate_ipw <- function(
   se <- fix_names(se)
   df <- fix_names(df)
 
+  estimator <- if (ipw) "IPW" else "OLS"
+
   if (data.table::is.data.table(data)) {
-    ipw_estimates <- data.table::data.table(
+    lm_estimates <- data.table::data.table(
       mean = c(coefs, f),
       se = c(se, NA),
       df = c(df, NA),
       mab_condition = c(names(coefs), "Joint-F"),
-      estimator = "IPW"
+      estimator = estimator
     )
-    ipw_estimates <- fill_missing_conditions(
-      ipw_estimates,
+    lm_estimates <- fill_missing_conditions(
+      lm_estimates,
       conditions = conditions
     )
   } else {
-    ipw_estimates <- tibble::tibble(
+    lm_estimates <- tibble::tibble(
       mean = c(coefs, f),
       se = c(se, NA),
       df = c(df, NA),
       mab_condition = c(names(coefs), "Joint-F"),
-      estimator = "IPW"
+      estimator = estimator
     ) |>
       fill_missing_conditions(conditions = conditions)
   }
-  return(ipw_estimates)
-}
 
-#' Sample Estimates
-#' @name estimate_sample
-#' @description
-#' Computes sample proportion and its standard error using the traditional formula, which is biased under the adaptive experiment.
-#' Only provided for comparison, and should not be used for any inference purposes unless there is
-#' only 1 period or a static design was used.
-#' @inheritParams estimate_aipw
-#' @returns `data.table` or `tibble` with the biased sample estimates.
-#'
-#' @details
-#'
-#' Under an adaptive assignment algorithm this estimator is both biased and inconsistent because the data is no
-#' longer i.i.d. However under a 1 period epxeriment or a static design the i.i.d assumption holds,
-#' so the central limit theorem and law of large numbers applies in sufficiently large samples.
-#' No degrees of freedom are provided, z-tests should be used for inference if applicable.
-#'
-#' Under clustering, the estimator is defined as the mean of the sample proportions computed across
-#' cluster and period. Here the appropriate standard error, of the sample mean is provided, with degrees
-#' of freedom per arm to build confidence intervals with a t-distribution.
-#' Like before, this estimator is biased under adaptive assignment but under a
-#' static trial, valid tests can be performed using the estimator with a t-distribution. In custers
-#' df should be pooled for tests among the tested arms.
-
-#' @keywords internal
-#' @family estimation
-estimate_sample <- function(data, conditions, cluster_col, clustering) {
-  UseMethod("estimate_sample", data)
-}
-
-#' @method estimate_sample data.frame
-#' @export
-#' @rdname estimate_sample
-estimate_sample.data.frame <- function(
-  data,
-  conditions,
-  cluster_col,
-  clustering
-) {
-  if (clustering) {
-    data |>
-      dplyr::group_by(period_number, mab_condition, .data[[cluster_col]]) |>
-      dplyr::summarize(
-        cluster_means = mean(mab_success, na.rm = TRUE),
-        .groups = "drop"
-      ) |>
-      dplyr::group_by(mab_condition) |>
-      dplyr::summarize(
-        mean = mean(cluster_means, na.rm = TRUE),
-        se = sqrt(stats::var(cluster_means, na.rm = TRUE) / dplyr::n()),
-        estimator = "Sample",
-        df = dplyr::n() - 1,
-        .groups = "drop"
-      ) |>
-      fill_missing_conditions(conditions = conditions)
-  } else {
-    data |>
-      dplyr::group_by(mab_condition) |>
-      dplyr::summarize(
-        mean = mean(mab_success, na.rm = TRUE),
-        n = dplyr::n(),
-        .groups = "drop"
-      ) |>
-      dplyr::mutate(
-        se = sqrt((mean * (1 - mean)) / n),
-        estimator = "Sample"
-      ) |>
-      dplyr::select(-n) |>
-      fill_missing_conditions(conditions = conditions)
-  }
-}
-
-#' @method estimate_sample data.table
-#' @export
-#' @rdname estimate_sample
-estimate_sample.data.table <- function(
-  data,
-  conditions,
-  cluster_col,
-  clustering
-) {
-  if (clustering) {
-    sample <- data[,
-      .(cluster_means = mean(mab_success, na.rm = TRUE)),
-      by = c("period_number", "mab_condition", cluster_col)
-    ][,
-      .(
-        mean = mean(cluster_means, na.rm = TRUE),
-        se = sqrt(stats::var(cluster_means, na.rm = TRUE) / .N),
-        estimator = "Sample",
-        df = .N - 1
-      ),
-      by = mab_condition
-    ][, .(mean, se, mab_condition, estimator, df)] |>
-      fill_missing_conditions(conditions = conditions)
-  } else {
-    sample <- data[,
-      .(
-        mean = mean(mab_success, na.rm = TRUE),
-        n = .N
-      ),
-      by = mab_condition
-    ][, `:=`(
-      se = sqrt(((mean) * (1 - mean)) / n),
-      estimator = "Sample"
-    )][, .(mean, se, mab_condition, estimator)] |>
-      fill_missing_conditions(conditions = conditions)
-  }
-  return(sample)
+  final_model <- if (clustering) est_lm else est_lm[["vcov"]]
+  return(list(estimates = lm_estimates, model = final_model))
 }
 
 #' Helper Functions for Inference
@@ -600,4 +527,17 @@ combine_estimates <- function(...) {
     dplyr::bind_rows(tbls)
   }
   return(est)
+}
+
+#' CR1 Adjustment
+#' @description
+#' Performs adjustment of CR0 SE to CR1 SE, using Stata's formula
+#' @param x matrix of variances (\eqn{\frac{G}{G-1} * \frac{N-1}{N-k}}) where k is
+#' the number of treatments, and G is the number of clusters.
+#' @returns An adjusted vector of variances
+#' @family estimation
+#' @rdname inference_helpers
+#'
+cr1 <- function(x, g, n, k) {
+  x * (g / g - 1) * ((n - 1) / (n - k))
 }
