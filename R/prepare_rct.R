@@ -76,7 +76,8 @@ prep_rct_data <- function(
       ndraws = ndraws,
       r = r,
       keep_data = keep_data,
-      keep_models = keep_models
+      keep_models = keep_models,
+      blocking = blocking
     )
   }
   conditions <- create_conditions(

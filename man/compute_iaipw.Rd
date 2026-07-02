@@ -56,7 +56,8 @@ Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 20
 Other estimation:
 \code{\link[=estimate_aipw]{estimate_aipw()}},
 \code{\link[=estimate_lm]{estimate_lm()}},
-\code{\link{inference_helpers}}
+\code{\link{inference_helpers}},
+\code{\link{lin_contrast}}
 }
 \concept{estimation}
 \keyword{internal}

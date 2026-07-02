@@ -380,7 +380,8 @@ joint_base_args <- function(mab, sim_type) {
         sim_type = sim_type,
         blocking = !is.null(mab$config$args$blocks),
         clustering = !is.null(mab$config$args$clusters),
-        estimators = "ipw"
+        estimators = "ipw",
+        contrasts = NULL
       )
     )
   if (sim_type == "param") {

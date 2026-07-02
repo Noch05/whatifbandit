@@ -128,7 +128,7 @@ arbitrary pairwise contrasts.}
 precompute after each replication. One of \code{"control"} (each arm vs. control arm),
 \code{"best"} (each arm vs. the MAB-selected best arm),
 \code{"both"}, or \code{"all"} (all \code{choose(k, 2)} pairwise comparisons, expensive
-for large \code{k}). All contrasts are tested under the null of no difference.
+for large \code{k}). All contrasts are tested under the two-sided null of no difference.
 Defaults to \code{NULL}, arbitrary contrasts can be computed if \code{keep_models == TRUE}}
 
 \item{time_model}{An optional function with signature \verb{function(n, conditions, successes, current_period, blocks = NULL, clusters = NULL, ...)}

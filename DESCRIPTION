@@ -26,6 +26,7 @@ Depends:
     R (>= 4.1.0)
 Imports:
     bandit,
+    clubSandwich,
     data.table (>= 1.18.0),
     dplyr,
     estimatr,

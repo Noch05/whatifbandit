@@ -26,7 +26,8 @@ check_rct_args <- function(
   ndraws,
   r,
   keep_data,
-  keep_models
+  keep_models,
+  blocking
 ) {
   check_logical(
     verbose,

@@ -70,7 +70,8 @@ Offer‐Westort, Molly, Alexander Coppock, and Donald P. Green. 2021.
 Other estimation:
 \code{\link[=compute_iaipw]{compute_iaipw()}},
 \code{\link[=estimate_aipw]{estimate_aipw()}},
-\code{\link{inference_helpers}}
+\code{\link{inference_helpers}},
+\code{\link{lin_contrast}}
 }
 \concept{estimation}
 \keyword{internal}

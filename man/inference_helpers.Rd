@@ -7,7 +7,6 @@
 \alias{fill_missing_conditions.data.table}
 \alias{combine_estimates}
 \alias{cr1}
-\alias{compute_contrasts}
 \title{Helper Functions for Inference}
 \usage{
 fill_missing_conditions(x, conditions)
@@ -19,8 +18,6 @@ fill_missing_conditions(x, conditions)
 combine_estimates(...)
 
 cr1(x, g, n, k)
-
-compute_contrasts(model, contrasts, clustering, estimator)
 }
 \arguments{
 \item{x}{matrix of variances (\eqn{\frac{G}{G-1} * \frac{N-1}{N-k}}) where k is
@@ -35,20 +32,6 @@ the number of treatments, and G is the number of clusters.}
 \item{n}{integer, dataset size}
 
 \item{k}{integer number of treatments}
-
-\item{model}{Object containing necessary information for contrasts, either data.frame/data.table
-combined with a variance covariance matrix, or the \code{lm_robust} object.}
-
-\item{contrasts}{Character string specifying which pairwise contrasts to
-precompute after each replication. One of \code{"control"} (each arm vs. control arm),
-\code{"best"} (each arm vs. the MAB-selected best arm),
-\code{"both"}, or \code{"all"} (all \code{choose(k, 2)} pairwise comparisons, expensive
-for large \code{k}). All contrasts are tested under the null of no difference.
-Defaults to \code{NULL}, arbitrary contrasts can be computed if \code{keep_models == TRUE}}
-
-\item{clustering}{Logical; Whether or not treatment clustering is occuring}
-
-\item{estimator}{Estimator used, AIPW, IPW, or OLS.}
 }
 \value{
 An updated \code{estimates} object with missing conditions initalized.
@@ -70,14 +53,13 @@ whether or not all provided conditions are present in the data, if not their val
 Combines the AIPW, IPW, and Sample estimates into a single object to be returned.
 
 Performs adjustment of CR0 SE to CR1 SE, using Stata's formula
-
-Computes specified contrasts of AIPW, IPW, and OLS estimates.
 }
 \seealso{
 Other estimation:
 \code{\link[=compute_iaipw]{compute_iaipw()}},
 \code{\link[=estimate_aipw]{estimate_aipw()}},
-\code{\link[=estimate_lm]{estimate_lm()}}
+\code{\link[=estimate_lm]{estimate_lm()}},
+\code{\link{lin_contrast}}
 }
 \concept{estimation}
 \keyword{internal}

@@ -23,7 +23,8 @@ check_rct_args(
   ndraws,
   r,
   keep_data,
-  keep_models
+  keep_models,
+  blocking
 )
 
 check_cols(

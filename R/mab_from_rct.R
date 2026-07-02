@@ -122,7 +122,7 @@
 #'   precompute after each replication. One of `"control"` (each arm vs. control arm),
 #' `"best"` (each arm vs. the MAB-selected best arm),
 #'  `"both"`, or `"all"` (all `choose(k, 2)` pairwise comparisons, expensive
-#'  for large `k`). All contrasts are tested under the null of no difference.
+#'  for large `k`). All contrasts are tested under the two-sided null of no difference.
 #' Defaults to `NULL`, arbitrary contrasts can be computed if `keep_models == TRUE`
 #'
 #'
@@ -339,6 +339,12 @@ mab_from_rct <- function(
       contrasts,
       c("control", "best", "both", "all")
     )
+    if (is.null(control_condition) && contrasts %in% c("control", "both")) {
+      contrasts <- "best"
+      rlang::warn(
+        "No control condition provided; `contrasts` set to \"best\". Supply `control_condition` to use \"control\" or \"both\"."
+      )
+    }
   }
 
   col_names <- c(

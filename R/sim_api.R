@@ -311,7 +311,6 @@ run_mab <- function(
       conditions = conditions,
       periods = periods
     )
-
     estimate_aipw(
       data = sim_results[["final_data"]],
       assignment_probs = sim_results[["assignment_probs"]],
@@ -358,23 +357,19 @@ run_mab <- function(
     ols_estimates[["estimates"]]
   )
 
-  final_data <- if (keep_data) sim_results[["final_data"]] else NULL
+  contrasts_mat <- build_contrast_matrices(
+    conditions = conditions,
+    contrasts = contrasts,
+    bandits = sim_results[["bandits"]]
+  )
   models <- if (keep_models) {
     list(
       ipw = ipw_estimates[["model"]],
       ols = ols_estimates[["model"]]
     )
   }
-  contrasts <- if (!is.null(contrasts)) {
-    compute_contrasts(
-      estimates,
-      contrasts = contrasts,
-      clustering = clustering,
-      estimator = "test"
-    )
-  } else {
-    NULL
-  }
+
+  final_data <- if (keep_data) sim_results[["final_data"]] else NULL
 
   results <- list(
     final_data = final_data,

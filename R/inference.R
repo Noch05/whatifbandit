@@ -411,9 +411,20 @@ estimate_lm <- function(
   df <- est_lm[["df"]]
 
   fix_names <- \(x) stats::setNames(x, gsub("^mab_condition", "", names(x)))
+
   coefs <- fix_names(coefs)
   se <- fix_names(se)
   df <- fix_names(df)
+  rownames(est_lm[["vcov"]]) <- gsub(
+    "^mab_condition",
+    "",
+    rownames(est_lm[["vcov"]])
+  )
+  colnames(est_lm[["vcov"]]) <- gsub(
+    "^mab_condition",
+    "",
+    colnames(est_lm[["vcov"]])
+  )
 
   estimator <- if (ipw) "IPW" else "OLS"
 
@@ -543,19 +554,4 @@ combine_estimates <- function(...) {
 #'
 cr1 <- function(x, g, n, k) {
   x * (g / g - 1) * ((n - 1) / (n - k))
-}
-
-#' Compute Contrasts
-#' @description
-#' Computes specified contrasts of AIPW, IPW, and OLS estimates.
-#' @param model Object containing necessary information for contrasts, either data.frame/data.table
-#' combined with a variance covariance matrix, or the `lm_robust` object.
-#' @param estimator Estimator used, AIPW, IPW, or OLS.
-#' @inheritParams mab_from_rct
-#' @inheritParams run_mab_single
-#' @family estimation
-#' @rdname inference_helpers
-#'
-compute_contrasts <- function(model, contrasts, clustering, estimator) {
-  return(0)
 }
