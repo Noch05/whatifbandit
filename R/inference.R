@@ -451,7 +451,11 @@ estimate_lm <- function(
       fill_missing_conditions(conditions = conditions)
   }
 
-  final_model <- if (clustering) est_lm else est_lm[["vcov"]]
+  final_model <- if (clustering) {
+    est_lm
+  } else {
+    list(coefs = coefs, vcov = est_lm[["vcov"]], df = df)
+  }
   return(list(estimates = lm_estimates, model = final_model))
 }
 

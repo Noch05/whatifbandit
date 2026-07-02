@@ -4,11 +4,23 @@
 \alias{lin_contrast}
 \alias{build_contrast_matrices}
 \alias{make_contrasts}
+\alias{compute_contrast}
 \title{Computing Linear Contrasts}
 \usage{
-build_contrast_matrices(conditions, contrasts, bandits)
+build_contrast_matrices(conditions, contrasts = NULL, bandits)
 
 make_contrasts(conditions, ref_idx, type)
+
+compute_contrast(
+  C,
+  coefs = NULL,
+  vcov = NULL,
+  df = NULL,
+  model = NULL,
+  dt,
+  conditions = NULL,
+  estimator
+)
 }
 \arguments{
 \item{conditions}{Vector of treatment conditions}
@@ -25,9 +37,24 @@ Defaults to \code{NULL}, arbitrary contrasts can be computed if \code{keep_model
 \item{ref_idx}{Index of the reference arm}
 
 \item{type}{Type of contrats, "best" or "control"}
+
+\item{C}{List of 1 x k contrast vectors}
+
+\item{coefs}{named vector of coefficients}
+
+\item{vcov}{A \verb{k x k} variance-covariance matrix}
+
+\item{df}{Numeric scalar giving the degrees of freedom for the t-test. AIPW only uses t-test in
+clustered case.}
+
+\item{model}{An \code{lm_robust} model object}
+
+\item{dt}{Whether to compile results into a data.table or data.frame}
+
+\item{estimator}{estimator used AIPW, IPW, OLS}
 }
 \value{
-A matrix of 1 row contrast vectors, encoding a single pairwise comparison.
+A list of 1 row contrast vectors, encoding a single pairwise comparison.
 
 A matrix row vectors containing each contrast to test.
 }
@@ -40,6 +67,10 @@ A set of helper functions for computing linear contrasts of AIPW, IPW, and OLS e
 between treatment arms.
 
 \item \code{make_contrasts()}: Creates contrast vectors for linear hypothesis test
+
+\item \code{compute_contrast()}: Compute linear contrasts given a list of contrast vectors
+and model inputs. Dispatches to the appropriate method based on the
+estimator type and whether clustering is present.
 
 }}
 \seealso{

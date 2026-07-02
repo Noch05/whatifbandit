@@ -304,63 +304,75 @@ run_mab <- function(
     NULL
   }
 
+  contrasts_list <- build_contrast_matrices(
+    conditions = conditions,
+    contrasts = contrasts,
+    bandits = sim_results[["bandits"]]
+  )
+  dt <- data.table::is.data.table(sim_results[["final_data"]])
+
   aipw_estimates <- if ("aipw" %in% estimators) {
-    iaipw_estimates <- compute_iaipw(
+    iaipw <- compute_iaipw(
       data = sim_results[["final_data"]],
       assignment_probs = sim_results[["assignment_probs"]],
       conditions = conditions,
       periods = periods
     )
-    estimate_aipw(
+    means <- estimate_aipw(
       data = sim_results[["final_data"]],
       assignment_probs = sim_results[["assignment_probs"]],
-      iaipw = iaipw_estimates,
+      iaipw = iaipw,
       periods = periods,
       conditions = conditions,
       clustering = clustering,
       cluster_col = col_names[["cluster_col"]],
       num_clusters = num_clusters
     )
-  } else {
-    NULL
+    contrasts <- compute_contrast(
+      C = contrasts_list,
+      coefs = as_named_vec(means, "mean", "mab_condition"),
+      vcov = diag(means[["se"]]^2),
+      df = unique(means[["df"]]),
+      estimator = "AIPW",
+      dt = dt
+    )
+    list(means = means, contrasts = contrasts)
   }
 
   ipw_estimates <- if ("ipw" %in% estimators) {
-    estimate_lm(
-      data = sim_results[["final_data"]],
-      cluster_col = col_names[["cluster_col"]],
-      clustering = clustering,
+    estimate_lm_bundle(
+      ipw = TRUE,
+      estimator = "IPW",
       conditions = conditions,
-      num_clusters = num_clustersm,
-      ipw = TRUE
-    )
-  } else {
-    NULL
-  }
-
-  ols_estimates <- if ("ols" %in% estimators) {
-    estimate_lm(
-      data = sim_results[["final_data"]],
-      cluster_col = col_names[["cluster_col"]],
+      sim_results = sim_results,
+      col_names = col_names,
       clustering = clustering,
-      conditions = conditions,
       num_clusters = num_clusters,
-      ipw = FALSE
+      dt = dt
     )
-  } else {
-    NULL
+  }
+  ols_estimates <- if ("ols" %in% estimators) {
+    estimate_lm_bundle(
+      ipw = FALSE,
+      estimator = "OLS",
+      conditions = conditions,
+      sim_results = sim_results,
+      col_names = col_names,
+      clustering = clustering,
+      num_clusters = num_clusters,
+      dt = dt
+    )
   }
 
   estimates <- combine_estimates(
-    aipw_estimates,
-    ipw_estimates[["estimates"]],
-    ols_estimates[["estimates"]]
+    aipw_estimates[["means"]],
+    ipw_estimates[["means"]],
+    ols_estimates[["means"]]
   )
-
-  contrasts_mat <- build_contrast_matrices(
-    conditions = conditions,
-    contrasts = contrasts,
-    bandits = sim_results[["bandits"]]
+  contrasts <- combine_estimates(
+    aipw_estimates[["contrasts"]],
+    ipw_estimates[["contrasts"]],
+    ols_estimates[["contrasts"]]
   )
   models <- if (keep_models) {
     list(
@@ -368,7 +380,6 @@ run_mab <- function(
       ols = ols_estimates[["model"]]
     )
   }
-
   final_data <- if (keep_data) sim_results[["final_data"]] else NULL
 
   results <- list(

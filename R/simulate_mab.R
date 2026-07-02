@@ -129,6 +129,15 @@ simulate_mab <- function(
       contrasts,
       c("control", "best", "both", "all")
     )
+    if (
+      !"control" %in% tolower(rownames(p)) &&
+        contrasts %in% c("control", "both")
+    ) {
+      contrasts <- "best"
+      rlang::warn(
+        "No control condition provided; `contrasts` set to \"best\". Supply `control_condition` to use \"control\" or \"both\"."
+      )
+    }
   }
 
   if (check_args) {
