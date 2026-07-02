@@ -234,7 +234,7 @@ estimate_lm_bundle <- function(
   } else {
     compute_contrast(
       C = contrasts_list,
-      coefs = means[["estimates"]][["means"]],
+      coefs = means[["estimates"]][["mean"]],
       vcov = diag(means[["estimates"]][["se"]]^2),
       df = unique(means[["estimates"]][["df"]]),
       estimator = estimator,

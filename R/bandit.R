@@ -47,8 +47,8 @@ compute_prior <- function(
     UseMethod("compute_prior", current_data)
   }
 }
-#' @method compute_prior fast
 #' @rdname compute_prior
+#' @method compute_prior fast
 #' @export
 compute_prior.fast <- function(
   current_data,
@@ -324,9 +324,7 @@ compute_bandit <- function(
   return(bandit)
 }
 #-------------------------------------------------------------------
-#' @method compute_bandit thompson
 #' @rdname compute_bandit
-#' @export
 
 compute_bandit.thompson <- function(
   past_results,
@@ -388,9 +386,7 @@ bandit_invalid <- function(bandit) {
   return(any(is.na(bandit)) || isTRUE(all.equal(sum(bandit), 0)))
 }
 #-------------------------------------------------------------------
-#' @method compute_bandit ucb1
 #' @rdname compute_bandit
-#' @export
 
 compute_bandit.ucb1 <- function(
   past_results,

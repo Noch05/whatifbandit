@@ -148,8 +148,18 @@ test_that("Fill Missing Conditions", {
   filled_dt <- data.table::as.data.table(filled_df)
 
   purrr::walk(list(list(df, filled_df), list(dt, filled_dt)), \(frame) {
-    expect_equal(fill_missing_conditions(frame[[1]], "a"), frame[[1]])
-    expect_equal(fill_missing_conditions(frame[[1]], c("a", "b")), frame[[2]])
+    expect_equal(
+      fill_missing_conditions(frame[[1]], "a", estimator = "The Best Estmator"),
+      frame[[1]]
+    )
+    expect_equal(
+      fill_missing_conditions(
+        frame[[1]],
+        c("a", "b"),
+        estimator = "The Best Estimator"
+      ),
+      frame[[2]]
+    )
   })
 })
 
@@ -177,7 +187,7 @@ test_that("Create Conditions", {
   )
   truth <- c("A", "B", "T")
   expect_equal(f(0), truth)
-  names(truth) = c("treatment", "treatment", "control")
+  names(truth) <- c("treatment", "treatment", "control")
   expect_equal(f(1), truth)
 })
 
@@ -261,4 +271,16 @@ test_that("boot_null_counts returns correct overall counts", {
     as.data.frame(boot_null_counts(dt, "y")),
     expected
   )
+})
+
+test_that("CR1 function returns proper values", {
+  n <- 100
+  k <- 5
+  g <- 10
+
+  var <- runif(5)
+
+  var1 <- (var * (n - 1) * (g)) / ((n - k) * (g - 1))
+  var2 <- cr1(x = var, n = n, k = k, g = g)
+  expect_equal(var1, var2)
 })

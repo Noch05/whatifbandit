@@ -17,11 +17,11 @@ compute_bandit(
   ndraws
 )
 
-\method{compute_bandit}{thompson}(past_results, conditions, current_period, ndraws)
+compute_bandit.thompson(past_results, conditions, current_period, ndraws)
 
 bandit_invalid(bandit)
 
-\method{compute_bandit}{ucb1}(past_results, conditions, current_period = NULL)
+compute_bandit.ucb1(past_results, conditions, current_period = NULL)
 }
 \arguments{
 \item{past_results}{A \code{tibble}/\code{data.table} containing summary of prior periods, with

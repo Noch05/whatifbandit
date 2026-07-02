@@ -9,11 +9,11 @@
 \usage{
 create_cutoff(data, col_names, period_length = NULL, period_method, time_unit)
 
-\method{create_cutoff}{date}(data, time_unit, date_col, month_col, period_length)
+create_cutoff.date(data, time_unit, date_col, month_col, period_length)
 
-\method{create_cutoff}{individual}(data)
+create_cutoff.individual(data)
 
-\method{create_cutoff}{batch}(data, period_length)
+create_cutoff.batch(data, period_length)
 }
 \arguments{
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results

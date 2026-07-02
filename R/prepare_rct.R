@@ -225,9 +225,7 @@ create_cutoff <- function(
   return(invisible(data))
 }
 #------------------------------------------------------------------------------------------
-#' @method create_cutoff date
 #' @rdname create_cutoff
-#' @export
 create_cutoff.date <- function(
   data,
   time_unit,
@@ -338,10 +336,7 @@ create_cutoff.date <- function(
 }
 
 #--------------------------------------------------------------------------
-
-#' @method create_cutoff individual
 #' @rdname create_cutoff
-#' @export
 create_cutoff.individual <- function(data) {
   if (data.table::is.data.table(data)) {
     data[, period_number := .I]
@@ -356,9 +351,7 @@ create_cutoff.individual <- function(data) {
   }
 }
 #----------------------------------------------------------------------------------
-#' @method create_cutoff batch
 #' @rdname create_cutoff
-#' @export
 create_cutoff.batch <- function(data, period_length) {
   if (data.table::is.data.table(data)) {
     data[, period_number := ceiling((.I / period_length))]

@@ -537,8 +537,7 @@ combine_estimates <- function(...) {
 #' CR1 Adjustment
 #' @description
 #' Performs adjustment of CR0 SE to CR1 SE, using Stata's formula
-#' @param x matrix of variances (\eqn{\frac{G}{G-1} * \frac{N-1}{N-k}}) where k is
-#' the number of treatments, and G is the number of clusters.
+#' @param x vector of variances.
 #' @param g integer number of clusters
 #' @param k integer number of treatments
 #' @param n integer, dataset size
@@ -547,5 +546,5 @@ combine_estimates <- function(...) {
 #' @rdname inference_helpers
 #'
 cr1 <- function(x, g, n, k) {
-  x * (g / g - 1) * ((n - 1) / (n - k))
+  x * (g / (g - 1)) * ((n - 1) / (n - k))
 }

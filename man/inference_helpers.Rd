@@ -23,8 +23,7 @@ combine_estimates(...)
 cr1(x, g, n, k)
 }
 \arguments{
-\item{x}{matrix of variances (\eqn{\frac{G}{G-1} * \frac{N-1}{N-k}}) where k is
-the number of treatments, and G is the number of clusters.}
+\item{x}{vector of variances.}
 
 \item{conditions}{Character vector of treatment condition labels.}
 
