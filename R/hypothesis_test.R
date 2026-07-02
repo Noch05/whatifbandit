@@ -81,10 +81,7 @@ joint_test <- function(mab, method, r = 1000) {
       "method"
     )
   )
-  f <- mab$estimates$means$mean[
-    mab$estimates$means$mab_condition == "Joint-F" &&
-      mab$means$estimates$estimator == "IPW"
-  ]
+  f <- mab$f_stats[["IPW"]]
 
   p <- mean(null >= f, na.rm = TRUE)
 
@@ -400,11 +397,7 @@ joint_base_args <- function(mab, sim_type) {
 #' @returns The F-statistic from the IPW regression of the MAB Trial
 #' @keywords internal
 joint_null_inner <- function(args) {
-  estimates <- do.call(run_mab_single, args)[["estimates"]]
-  f <- estimates[["means"]][["mean"]][
-    estimates[["means"]][["mab_condition"]] == "Joint-F"
-  ]
-  return(f)
+  do.call(run_mab_single, args)[["f_stats"]][["IPW"]]
 }
 
 #' Get Group Proportions

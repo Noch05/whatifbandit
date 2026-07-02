@@ -399,8 +399,8 @@ run_mab <- function(
     means = estimates[["means"]],
     contrasts = estimates[["contrasts"]],
     f_stats = c(
-      ipw = ipw_estimates[["f_stat"]],
-      ols = ols_estimates[["f_stat"]]
+      IPW = ipw_estimates[["f_stat"]],
+      OLS = ols_estimates[["f_stat"]]
     ),
     models = models,
     args = NULL,
