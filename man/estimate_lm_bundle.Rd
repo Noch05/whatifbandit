@@ -12,7 +12,8 @@ estimate_lm_bundle(
   clustering,
   conditions,
   num_clusters,
-  dt
+  dt,
+  contrasts_list
 )
 }
 \arguments{
@@ -22,10 +23,16 @@ estimate_lm_bundle(
 \item{estimator}{Character string labelling the estimator, either
 \code{"IPW"} or \code{"OLS"}}
 
+\item{col_names}{List holding the columns required from the provided data as strings and symbols.}
+
 \item{clustering}{Logical; Whether or not treatment clustering is occuring}
 
 \item{conditions}{Character vector of treatment condition labels. If a control group is specified
 the \code{names} attribute should be present with the control group labelled \code{"control"}.}
+
+\item{dt}{Logical. If \code{TRUE} returns a \code{\link[data.table:data.table]{data.table::data.table()}}; otherwise returns a \code{\link[tibble:tibble]{tibble::tibble()}}. Default \code{FALSE}.}
+
+\item{contrasts_list}{List of 1 x k row vector contrasts to compute.}
 }
 \value{
 A named list with three elements: \code{means}, \code{contrasts}, \code{model}, \code{contrasts} are the

@@ -24,7 +24,8 @@ Also used to store simulation outputs.}
 \item{conditions}{Character vector of treatment condition labels. If a control group is specified
 the \code{names} attribute should be present with the control group labelled \code{"control"}.}
 
-\item{ipw}{Whether or not to perform IPW weighted regression}
+\item{ipw}{Logical. If \code{TRUE} IPW-weighted LPM; if
+\code{FALSE}, fits the unweighted OLS LPM.}
 }
 \value{
 A list of the coefficient estimates in a \code{tibble}/\code{data.table}, along with their standard errors,

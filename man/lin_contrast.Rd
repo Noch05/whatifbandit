@@ -12,11 +12,12 @@ build_contrast_matrices(conditions, contrasts = NULL, bandits)
 make_contrasts(conditions, ref_idx, type)
 
 compute_contrast(
-  C,
+  C = NULL,
   coefs = NULL,
   vcov = NULL,
   df = NULL,
   model = NULL,
+  data = NULL,
   dt,
   conditions = NULL,
   estimator
@@ -48,6 +49,9 @@ Defaults to \code{NULL}, arbitrary contrasts can be computed if \code{keep_model
 clustered case.}
 
 \item{model}{An \code{lm_robust} model object}
+
+\item{data}{\code{tibble} or \code{data.table} holding necessary information to complete the simulation.
+Also used to store simulation outputs.}
 
 \item{dt}{Whether to compile results into a data.table or data.frame}
 

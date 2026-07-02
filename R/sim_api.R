@@ -334,7 +334,8 @@ run_mab <- function(
       vcov = diag(means[["se"]]^2),
       df = unique(means[["df"]]),
       estimator = "AIPW",
-      dt = dt
+      dt = dt,
+      conditions = conditions
     )
     list(means = means, contrasts = contrasts)
   }
@@ -348,7 +349,8 @@ run_mab <- function(
       col_names = col_names,
       clustering = clustering,
       num_clusters = num_clusters,
-      dt = dt
+      dt = dt,
+      contrasts_list = contrasts_list
     )
   }
   ols_estimates <- if ("ols" %in% estimators) {
@@ -360,20 +362,21 @@ run_mab <- function(
       col_names = col_names,
       clustering = clustering,
       num_clusters = num_clusters,
-      dt = dt
+      dt = dt,
+      contrasts_list = contrasts_list
     )
   }
+  estimates <- lapply(
+    list(means = "means", "contrasts" = "contrasts"),
+    \(item) {
+      combine_estimates(
+        aipw_estimates[[item]],
+        ipw_estimates[[item]],
+        ols_estimates[[item]]
+      )
+    }
+  )
 
-  estimates <- combine_estimates(
-    aipw_estimates[["means"]],
-    ipw_estimates[["means"]],
-    ols_estimates[["means"]]
-  )
-  contrasts <- combine_estimates(
-    aipw_estimates[["contrasts"]],
-    ipw_estimates[["contrasts"]],
-    ols_estimates[["contrasts"]]
-  )
   models <- if (keep_models) {
     list(
       ipw = ipw_estimates[["model"]],
@@ -388,7 +391,6 @@ run_mab <- function(
     assignment_probs = sim_results[["assignment_probs"]],
     assignment_quantities = sim_results[["assignment_quantities"]],
     estimates = estimates,
-    contrasts = contrasts,
     models = models,
     args = NULL,
     call = NULL,

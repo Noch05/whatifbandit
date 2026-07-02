@@ -81,8 +81,9 @@ joint_test <- function(mab, method, r = 1000) {
       "method"
     )
   )
-  f <- mab$estimates$mean[
-    mab$estimates$mab_condition == "Joint-F" && mab$estimates$estimator == "IPW"
+  f <- mab$estimates$means$mean[
+    mab$estimates$means$mab_condition == "Joint-F" &&
+      mab$means$estimates$estimator == "IPW"
   ]
 
   p <- mean(null >= f, na.rm = TRUE)
@@ -381,7 +382,8 @@ joint_base_args <- function(mab, sim_type) {
         blocking = !is.null(mab$config$args$blocks),
         clustering = !is.null(mab$config$args$clusters),
         estimators = "ipw",
-        contrasts = NULL
+        contrasts = NULL,
+        keep_models = FALSE
       )
     )
   if (sim_type == "param") {
@@ -399,7 +401,9 @@ joint_base_args <- function(mab, sim_type) {
 #' @keywords internal
 joint_null_inner <- function(args) {
   estimates <- do.call(run_mab_single, args)[["estimates"]]
-  f <- estimates[["mean"]][estimates[["mab_condition"]] == "Joint-F"]
+  f <- estimates[["means"]][["mean"]][
+    estimates[["means"]][["mab_condition"]] == "Joint-F"
+  ]
   return(f)
 }
 

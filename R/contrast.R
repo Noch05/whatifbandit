@@ -23,7 +23,7 @@ build_contrast_matrices <- function(
   best_contrasts <- NULL
   all_contrasts <- NULL
 
-  if (contrasts %in% c("control", "both")) {
+  if (isTRUE(contrasts %in% c("control", "both"))) {
     control_idx <- which(names(conditions) == "control")
     control_contrasts <- make_contrasts(
       conditions,
@@ -31,7 +31,7 @@ build_contrast_matrices <- function(
       type = "control"
     )
   }
-  if (contrasts %in% c("best", "both")) {
+  if (isTRUE(contrasts %in% c("best", "both"))) {
     best_idx <- if (data.table::is.data.table(bandits)) {
       which.max(bandits[
         nrow(bandits),
@@ -47,14 +47,21 @@ build_contrast_matrices <- function(
     best_contrasts <- make_contrasts(conditions, best_idx, type = "best")
   }
 
-  if (contrasts == "all") {
+  if (isTRUE(contrasts == "all")) {
     all_contrasts <- clubSandwich::constrain_pairwise(
-      seq_len(conditions),
+      1:length(conditions),
       coefs = conditions
     )
   }
 
   combined <- unique(c(control_contrasts, best_contrasts, all_contrasts))
+  names(combined) <- vapply(
+    combined,
+    \(x) {
+      paste0(conditions[x == 1], " - ", conditions[x == -1])
+    },
+    character(1)
+  )
   return(combined)
 }
 
@@ -105,32 +112,53 @@ make_contrasts <- function(conditions, ref_idx, type) {
 #' @inheritParams estimate_aipw
 #'
 compute_contrast <- function(
-  C,
+  C = NULL,
   coefs = NULL,
   vcov = NULL,
   df = NULL,
   model = NULL,
+  data = NULL,
   dt,
   conditions = NULL,
   estimator
 ) {
+  if (is.null(C)) {
+    return(NULL)
+  }
   as_df_func <- if (dt) data.table::as.data.table else tibble::as_tibble
   df_func <- if (dt) data.table::data.table else tibble::tibble
   if (!is.null(model)) {
     vcr <- tryCatch(
       {
-        clubSandwich::vcovCR(model, cluster = cluster, type = "CR2")
+        clubSandwich::vcovCR(
+          model,
+          type = "CR2",
+          data = data
+        )
       },
       error = function(e) {
-        clubSandwich::vcovCR(model, cluster = cluster, type = "CR1S")
+        rlang::warn("CR2 failed. Falling back to Stata CR1")
+        clubSandwich::vcovCR(
+          model,
+          type = "CR1S",
+          data = data
+        )
       }
     )
+
+    dimnames(vcr) <- lapply(dimnames(vcr), \(x) {
+      gsub(
+        "^mab_condition",
+        "",
+        x
+      )
+    })
     res <- clubSandwich::linear_contrast(
       model,
       vcov = vcr,
       contrasts = C,
       test = "Satterthwaite",
-      p_values = TRUE
+      p_values = FALSE
     ) |>
       tidyr::separate(Coef, into = c("arm1", "arm2"), sep = " - ") |>
       dplyr::select(arm1, arm2, Est, SE, df) |>
@@ -144,21 +172,21 @@ compute_contrast <- function(
         \(x) {
           conditions[x == 1]
         },
-        fun.value = character(1)
+        FUN.VALUE = character(1)
       ),
       arm2 = vapply(
         C,
         \(x) {
           conditions[x == -1]
         },
-        fun.value = character(1)
+        FUN.VALUE = character(1)
       ),
       est = vapply(
         C,
         \(x) {
           as.numeric(x %*% coefs)
         },
-        fun.value = numeric(1)
+        FUN.VALUE = numeric(1)
       ),
       se = vapply(
         C,
@@ -181,11 +209,13 @@ compute_contrast <- function(
 #' and OLS estimators, returning arm-level mean estimates, precomputed
 #' contrasts, and optionally the fitted model object.
 #'
-#' @param ipw Logical. If `TRUE` IPW-weighted LPM; if
-#'   `FALSE`, fits the unweighted OLS LPM.
 #' @param estimator Character string labelling the estimator, either
 #'   `"IPW"` or `"OLS"`
+#' @inheritParams run_mab
+#' @inheritParams estimate_aipw
 #' @inheritParams estimate_lm
+#' @inheritParams run_mab_single
+#' @param contrasts_list List of 1 x k row vector contrasts to compute.
 #'
 #' @return A named list with three elements: `means`, `contrasts`, `model`, `contrasts` are the
 #' computed contrasts, the other 2 elements are the output of [estimate_lm()]
@@ -199,7 +229,8 @@ estimate_lm_bundle <- function(
   clustering,
   conditions,
   num_clusters,
-  dt
+  dt,
+  contrasts_list
 ) {
   means <- estimate_lm(
     data = sim_results[["final_data"]],
@@ -214,7 +245,8 @@ estimate_lm_bundle <- function(
       C = contrasts_list,
       model = means[["model"]],
       estimator = estimator,
-      dt = dt
+      dt = dt,
+      data = sim_results[["final_data"]]
     )
   } else {
     compute_contrast(
@@ -227,5 +259,9 @@ estimate_lm_bundle <- function(
       conditions = conditions
     )
   }
-  list(means = means, contrasts = contrasts, model = means[["model"]])
+  list(
+    means = means[["estimates"]],
+    contrasts = contrasts,
+    model = means[["model"]]
+  )
 }

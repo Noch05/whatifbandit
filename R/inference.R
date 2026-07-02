@@ -299,7 +299,7 @@ estimate_aipw <- function(
         df <- num_clusters - length(conditions)
       } else {
         se <- sqrt(var)
-        df <- NULL
+        df <- NA
       }
       return(
         list(
@@ -327,7 +327,8 @@ estimate_aipw <- function(
 #' @inheritParams compute_iaipw
 #' @inheritParams run_mab
 #' @inheritParams estimate_aipw
-#' @param ipw Whether or not to perform IPW weighted regression
+#' @param ipw Logical. If `TRUE` IPW-weighted LPM; if
+#'   `FALSE`, fits the unweighted OLS LPM.
 #' @details
 #'
 #' If CR2 standard errors fail to be calculated, CR0 are computed, and then adjusted via the Stata
@@ -380,21 +381,21 @@ estimate_lm <- function(
   )
 
   if (ipw) {
-    lm_fun <- purrr::partial(lm_fun, weights = ipw_weights)
+    lm_fun <- purrr::partial(lm_fun, weights = data[["ipw_weights"]])
   }
 
   if (clustering) {
     est_lm <- tryCatch(
       {
         x <- lm_fun(
-          clusters = !!rlang::sym(cluster_col),
+          clusters = data[[cluster_col]],
           se_type = "CR2"
         )
       },
       error = function(e) {
         rlang::warn("CR2 failed. Falling back to Stata CR1")
         x <- lm_fun(
-          clusters = !!rlang::sym(cluster_col),
+          clusters = data[[cluster_col]],
           se_type = "stata"
         )
         x[["df"]] <- num_clusters - length(conditions)
@@ -415,16 +416,13 @@ estimate_lm <- function(
   coefs <- fix_names(coefs)
   se <- fix_names(se)
   df <- fix_names(df)
-  rownames(est_lm[["vcov"]]) <- gsub(
-    "^mab_condition",
-    "",
-    rownames(est_lm[["vcov"]])
-  )
-  colnames(est_lm[["vcov"]]) <- gsub(
-    "^mab_condition",
-    "",
-    colnames(est_lm[["vcov"]])
-  )
+  dimnames(est_lm[["vcov"]]) <- lapply(dimnames(est_lm[["vcov"]]), \(x) {
+    gsub(
+      "^mab_condition",
+      "",
+      x
+    )
+  })
 
   estimator <- if (ipw) "IPW" else "OLS"
 
@@ -454,7 +452,7 @@ estimate_lm <- function(
   final_model <- if (clustering) {
     est_lm
   } else {
-    list(coefs = coefs, vcov = est_lm[["vcov"]], df = df)
+    list(coefs = coefs, vcov = est_lm[["vcov"]], df = est_lm[["df.residual"]])
   }
   return(list(estimates = lm_estimates, model = final_model))
 }
