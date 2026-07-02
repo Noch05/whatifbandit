@@ -234,16 +234,21 @@ estimate_lm_bundle <- function(
   } else {
     compute_contrast(
       C = contrasts_list,
-      coefs = means[["model"]][["coefs"]],
-      vcov = means[["model"]][["vcov"]],
-      df = means[["model"]][["df"]],
+      coefs = means[["estimates"]][["means"]],
+      vcov = diag(means[["estimates"]][["se"]]^2),
+      df = unique(means[["estimates"]][["df"]]),
       estimator = estimator,
       dt = dt,
       conditions = conditions
     )
   }
   list(
-    means = means[["estimates"]],
+    means = fill_missing_conditions(
+      means[["estimates"]],
+      conditions,
+      estimator
+    ),
+    f_stat = means[["f_stat"]],
     contrasts = contrasts,
     model = means[["model"]]
   )

@@ -296,7 +296,7 @@ estimate_aipw <- function(
           n = nrow(data),
           k = length(conditions)
         ))
-        df <- num_clusters - length(conditions)
+        df <- num_clusters - 1
       } else {
         se <- sqrt(var)
         df <- NA
@@ -312,8 +312,7 @@ estimate_aipw <- function(
       )
     }
   ) |>
-    bind_func() |>
-    fill_missing_conditions(conditions = conditions)
+    bind_func()
   return(aipw_estimates)
 }
 
@@ -398,7 +397,6 @@ estimate_lm <- function(
           clusters = data[[cluster_col]],
           se_type = "stata"
         )
-        x[["df"]] <- num_clusters - length(conditions)
         return(x)
       }
     )
@@ -406,55 +404,30 @@ estimate_lm <- function(
     est_lm <- lm_fun(se_type = "HC2")
   }
 
-  coefs <- est_lm[["coefficients"]]
-  se <- est_lm[["std.error"]]
-  f <- est_lm[["fstatistic"]][1] |> as.numeric()
-  df <- est_lm[["df"]]
-
-  fix_names <- \(x) stats::setNames(x, gsub("^mab_condition", "", names(x)))
-
-  coefs <- fix_names(coefs)
-  se <- fix_names(se)
-  df <- fix_names(df)
-  dimnames(est_lm[["vcov"]]) <- lapply(dimnames(est_lm[["vcov"]]), \(x) {
-    gsub(
-      "^mab_condition",
-      "",
-      x
-    )
+  items <- lapply(c("coefficients", "std.error", "df"), \(x) {
+    strip_condition_prefix(est_lm[[x]])
   })
 
   estimator <- if (ipw) "IPW" else "OLS"
-
-  if (data.table::is.data.table(data)) {
-    lm_estimates <- data.table::data.table(
-      mean = c(coefs, f),
-      se = c(se, NA),
-      df = c(df, NA),
-      mab_condition = c(names(coefs), "Joint-F"),
-      estimator = estimator
-    )
-    lm_estimates <- fill_missing_conditions(
-      lm_estimates,
-      conditions = conditions
-    )
+  df_func <- if (data.table::is.data.table(data)) {
+    data.table::data.table
   } else {
-    lm_estimates <- tibble::tibble(
-      mean = c(coefs, f),
-      se = c(se, NA),
-      df = c(df, NA),
-      mab_condition = c(names(coefs), "Joint-F"),
-      estimator = estimator
-    ) |>
-      fill_missing_conditions(conditions = conditions)
+    tibble::tibble
   }
 
-  final_model <- if (clustering) {
-    est_lm
-  } else {
-    list(coefs = coefs, vcov = est_lm[["vcov"]], df = est_lm[["df.residual"]])
-  }
-  return(list(estimates = lm_estimates, model = final_model))
+  lm_estimates <- df_func(
+    mean = items[[1]],
+    se = items[[2]],
+    df = items[[3]],
+    mab_condition = names(items[[1]]),
+    estimator = estimator
+  )
+  model <- if (clustering) est_lm else NULL
+  return(list(
+    estimates = lm_estimates,
+    f_stat = as.numeric(est_lm[["fstatistic"]][1]),
+    model = model
+  ))
 }
 
 #' Helper Functions for Inference
@@ -462,6 +435,22 @@ estimate_lm <- function(
 #' @description Internal helpers for estimation in [run_mab()].
 #' @keywords internal
 NULL
+
+
+#' Strip the `mab_condition` Prefix from Model Names
+#' @describeIn inference_helpers Strips coefficient name prefixes from named vector or matrix's dimnames.
+#' @param x A named vector, or a square matrix with matching dimnames.
+#' @returns `x` with the prefix removed.
+#' @keywords internal
+strip_condition_prefix <- function(x) {
+  clean <- \(nm) gsub("^mab_condition", "", nm)
+  if (is.matrix(x)) {
+    dimnames(x) <- lapply(dimnames(x), clean)
+  } else {
+    names(x) <- clean(names(x))
+  }
+  return(x)
+}
 
 
 #' Fill Missing Conditions
@@ -473,14 +462,14 @@ NULL
 #' @returns An updated `estimates` object with missing conditions initalized.
 #' @rdname inference_helpers
 #' @family estimation
-fill_missing_conditions <- function(x, conditions) {
+fill_missing_conditions <- function(x, conditions, estimator) {
   UseMethod("fill_missing_conditions", x)
 }
 
 #' @rdname inference_helpers
 #' @method fill_missing_conditions data.frame
 #' @export
-fill_missing_conditions.data.frame <- function(x, conditions) {
+fill_missing_conditions.data.frame <- function(x, conditions, estimator) {
   missing_conditions <- setdiff(conditions, x[["mab_condition"]])
 
   if (length(missing_conditions) > 0) {
@@ -490,7 +479,7 @@ fill_missing_conditions.data.frame <- function(x, conditions) {
         mean = NA,
         se = NA,
         mab_condition = missing_conditions,
-        estimator = x[["estimator"]][1]
+        estimator = estimator
       )
     )
   }
@@ -501,7 +490,7 @@ fill_missing_conditions.data.frame <- function(x, conditions) {
 #' @rdname inference_helpers
 #' @method fill_missing_conditions data.table
 #' @export
-fill_missing_conditions.data.table <- function(x, conditions) {
+fill_missing_conditions.data.table <- function(x, conditions, estimator) {
   missing_conditions <- setdiff(conditions, x[["mab_condition"]])
 
   if (length(missing_conditions) > 0) {
@@ -512,7 +501,7 @@ fill_missing_conditions.data.table <- function(x, conditions) {
           mean = NA,
           se = NA,
           mab_condition = missing_conditions,
-          estimator = x[["estimator"]][1]
+          estimator = estimator
         )
       ),
       fill = TRUE

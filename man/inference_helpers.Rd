@@ -2,6 +2,7 @@
 % Please edit documentation in R/inference.R
 \name{inference_helpers}
 \alias{inference_helpers}
+\alias{strip_condition_prefix}
 \alias{fill_missing_conditions}
 \alias{fill_missing_conditions.data.frame}
 \alias{fill_missing_conditions.data.table}
@@ -9,11 +10,13 @@
 \alias{cr1}
 \title{Helper Functions for Inference}
 \usage{
-fill_missing_conditions(x, conditions)
+strip_condition_prefix(x)
 
-\method{fill_missing_conditions}{data.frame}(x, conditions)
+fill_missing_conditions(x, conditions, estimator)
 
-\method{fill_missing_conditions}{data.table}(x, conditions)
+\method{fill_missing_conditions}{data.frame}(x, conditions, estimator)
+
+\method{fill_missing_conditions}{data.table}(x, conditions, estimator)
 
 combine_estimates(...)
 
@@ -34,6 +37,8 @@ the number of treatments, and G is the number of clusters.}
 \item{k}{integer number of treatments}
 }
 \value{
+\code{x} with the prefix removed.
+
 An updated \code{estimates} object with missing conditions initalized.
 
 A list of 2 elements:
@@ -54,6 +59,11 @@ Combines the AIPW, IPW, and Sample estimates into a single object to be returned
 
 Performs adjustment of CR0 SE to CR1 SE, using Stata's formula
 }
+\section{Functions}{
+\itemize{
+\item \code{strip_condition_prefix()}: Strips coefficient name prefixes from named vector or matrix's dimnames.
+
+}}
 \seealso{
 Other estimation:
 \code{\link[=compute_iaipw]{compute_iaipw()}},

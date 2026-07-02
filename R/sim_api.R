@@ -341,7 +341,10 @@ run_mab <- function(
       dt = dt,
       conditions = conditions
     )
-    list(means = means, contrasts = contrasts)
+    list(
+      means = fill_missing_conditions(means, conditions, "AIPW"),
+      contrasts = contrasts
+    )
   }
 
   ipw_estimates <- if ("ipw" %in% estimators) {
@@ -371,7 +374,7 @@ run_mab <- function(
     )
   }
   estimates <- lapply(
-    list(means = "means", "contrasts" = "contrasts"),
+    list(means = "means", contrasts = "contrasts"),
     \(item) {
       combine_estimates(
         aipw_estimates[[item]],
@@ -380,7 +383,6 @@ run_mab <- function(
       )
     }
   )
-
   models <- if (keep_models) {
     list(
       ipw = ipw_estimates[["model"]],
@@ -394,7 +396,12 @@ run_mab <- function(
     bandits = sim_results[["bandits"]],
     assignment_probs = sim_results[["assignment_probs"]],
     assignment_quantities = sim_results[["assignment_quantities"]],
-    estimates = estimates,
+    means = estimates[["means"]],
+    contrasts = estimates[["contrasts"]],
+    f_stats = c(
+      ipw = ipw_estimates[["f_stat"]],
+      ols = ols_estimates[["f_stat"]]
+    ),
     models = models,
     args = NULL,
     call = NULL,
@@ -433,14 +440,19 @@ condense_results <- function(dt, keep_data, keep_models, mabs) {
     "bandits",
     "assignment_probs",
     "assignment_quantities",
-    "estimates",
-    "contrasts"
+    "means",
+    "f_stats"
   )
+  elements <- if (is.null(mabs[[1]][["contrasts"]])) {
+    elements
+  } else {
+    c(elements, "contrasts")
+  }
 
   extract <- \(item) lapply(mabs, `[[`, item)
 
   bind_dt <- \(item) {
-    if (item == "assignment_quantities") {
+    if (item %in% c("assignment_quantities", "f_stats")) {
       data.table::rbindlist(
         extract(item) |> lapply(as.list),
         idcol = "trial",
@@ -480,16 +492,7 @@ condense_results <- function(dt, keep_data, keep_models, mabs) {
     lapply(
       c(ipw = "ipw", ols = "ols"),
       \(estimator) {
-        extracted <- lapply(mabs, \(mab) mab[["models"]][[estimator]])
-
-        if (is.matrix(extracted[[1]])) {
-          array(
-            unlist(extracted),
-            dim = c(dim(extracted[[1]]), length(extracted))
-          )
-        } else {
-          extracted
-        }
+        lapply(mabs, \(mab) mab[["models"]][[estimator]])
       }
     )
   } else {

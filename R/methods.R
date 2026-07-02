@@ -22,8 +22,9 @@ construct_mab <- function(mab, type, multi) {
         assignment_prob = mab$assignment_prob,
         assignment_quant = mab$assignment_quantities
       ),
-      estimates = mab$estimates$means,
-      contrasts = mab$estimates$contrasts,
+      means = mab$means,
+      f_stats = mab$f_stats,
+      contrasts = mab[["contrasts"]],
       lms = mab$models,
       config = list(args = mab$args, call = mab$cl, parallel = mab$furrr)
     ),

@@ -114,9 +114,9 @@
 #' @param keep_data Logical; Whether or not to keep the final data from each trial. Recommended
 #' `FALSE`. When` r = 1` the final data is always kept and reported.
 #'
-#' @param keep_models Logical; Whether or not to keep the final IPW and OLS vcov/models from each trial. Recommended
+#' @param keep_models Logical; Whether or not to keep the final IPW and OLS models from each trial. Recommended
 #' `FALSE`. When` r = 1` models are always kept and reported. Required to be `TRUE` to compute
-#' arbitrary pairwise contrasts.
+#' arbitrary pairwise contrasts. Only utilized under clustering.
 #'
 #' @param contrasts Character string specifying which pairwise contrasts to
 #'   precompute after each replication. One of `"control"` (each arm vs. control arm),

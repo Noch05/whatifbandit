@@ -141,9 +141,9 @@ not to be changed.}
 \item{keep_data}{Logical; Whether or not to keep the final data from each trial. Recommended
 \code{FALSE}. When\code{ r = 1} the final data is always kept and reported.}
 
-\item{keep_models}{Logical; Whether or not to keep the final IPW and OLS vcov/models from each trial. Recommended
+\item{keep_models}{Logical; Whether or not to keep the final IPW and OLS models from each trial. Recommended
 \code{FALSE}. When\code{ r = 1} models are always kept and reported. Required to be \code{TRUE} to compute
-arbitrary pairwise contrasts.}
+arbitrary pairwise contrasts. Only utilized under clustering.}
 
 \item{contrasts}{Character string specifying which pairwise contrasts to
 precompute after each replication. One of \code{"control"} (each arm vs. control arm),
