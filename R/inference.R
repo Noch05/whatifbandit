@@ -539,6 +539,9 @@ combine_estimates <- function(...) {
   } else {
     dplyr::bind_rows(tbls)
   }
+  if (nrow(est) == 0) {
+    return(NULL)
+  }
   return(est)
 }
 

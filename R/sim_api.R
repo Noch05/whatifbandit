@@ -304,11 +304,15 @@ run_mab <- function(
     NULL
   }
 
-  contrasts_list <- build_contrast_matrices(
-    conditions = conditions,
-    contrasts = contrasts,
-    bandits = sim_results[["bandits"]]
-  )
+  contrasts_list <- if (!is.null(contrasts)) {
+    build_contrast_matrices(
+      conditions = conditions,
+      contrasts = contrasts,
+      bandits = sim_results[["bandits"]]
+    )
+  } else {
+    NULL
+  }
   dt <- data.table::is.data.table(sim_results[["final_data"]])
 
   aipw_estimates <- if ("aipw" %in% estimators) {

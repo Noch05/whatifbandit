@@ -128,24 +128,7 @@ compute_contrast <- function(
   as_df_func <- if (dt) data.table::as.data.table else tibble::as_tibble
   df_func <- if (dt) data.table::data.table else tibble::tibble
   if (!is.null(model)) {
-    vcr <- tryCatch(
-      {
-        clubSandwich::vcovCR(
-          model,
-          type = "CR2",
-          data = data
-        )
-      },
-      error = function(e) {
-        rlang::warn("CR2 failed. Falling back to Stata CR1")
-        clubSandwich::vcovCR(
-          model,
-          type = "CR1S",
-          data = data
-        )
-      }
-    )
-
+    vcr <- clubSandwich::vcovCR(model, inverse_var = NULL)
     dimnames(vcr) <- lapply(dimnames(vcr), \(x) {
       gsub(
         "^mab_condition",
