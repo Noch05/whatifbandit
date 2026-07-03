@@ -40,15 +40,9 @@ algorithm will assign even when the outcomes are not related to treatments at al
 
 \code{method = "bootstrap"} operates under the null hypothesis that there is no difference between
 treatment arms within each each block/cluster the
-true success probability is the same for any treatment. To generate this distribution,
-the trial is re-simulated using an appropriate \code{p} matrix which satisfies the null. For each
-simulated F-statistic, the \code{p} matrix is redrawn. This is achieved by drawing a single
-probaiblity for each column of \code{p} matrix from the posterior beta distribution of the original
-trial. For an RCT this is the original data, and for the simulated MAB it is the simulated outcomes.
-This preserves
-any potential heterogeneity across the block or cluster structure, but still ensures
-no treatment effect is specified. Drawing a new \code{p} matrix each time properly captures
-the uncertainty for the null distribution, using the best estimate available.
+true success probability is the same for any treatment. If there are no blocks or clusters, a
+p-matrix is built from the pooled sample mean of the original trial. With blocks and/or clustered
+pooled sample means are estimated within each block or cluster.
 
 For \code{method == "boostrap"} with a \code{single_rct_mab}, the block and or cluster assignment
 proportions are taken from the original dataset.
