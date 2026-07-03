@@ -8,7 +8,7 @@
 #' @param mab A `single_rct_mab` or `single_param_mab` object.
 #' @param method A character string; either `"bootstrap"` or `"randomization"`.
 #' @param r A positive integer; number of simulations used to build the null distribution.
-#' Default is 1000.
+#' Default is 100.
 #'
 #' @return A named list object containing
 #' \itemize{
@@ -60,8 +60,13 @@
 #' joint_test(adaptive, "bootstrap", r = 2)
 #'
 #'
-joint_test <- function(mab, method, r = 1000) {
+joint_test <- function(
+  mab,
+  method = c("bootstrap", "randomization"),
+  r = 100
+) {
   check_posint(r)
+  rlang::arg_match(method)
   if (!inherits(mab, "single_mab")) {
     rlang::abort(c("Joint-tests can only be performed on `single_mab` objects"))
   }
@@ -75,11 +80,6 @@ joint_test <- function(mab, method, r = 1000) {
     method,
     "bootstrap" = joint_boot_null(mab = mab, r = r),
     "randomization" = joint_random_null(mab = mab, r = r),
-    check_string(
-      tolower(method),
-      valid = c("bootstrap", "randomization"),
-      "method"
-    )
   )
   f <- mab$f_stats[["IPW"]]
 
@@ -172,7 +172,6 @@ joint_boot_null <- function(mab, r) {
       NULL
     }
     dn <- list(mab$config$args$conditions, sort(names(build_p_cols(args))))
-    print(dn)
   } else {
     success_col <- "mab_success"
     group_col <- if (!is.null(args$clusters)) {

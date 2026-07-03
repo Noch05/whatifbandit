@@ -284,7 +284,7 @@ compute_bandit <- function(
   conditions,
   current_period,
   control_augment = 0,
-  random_assign_prop,
+  random_assign_prop = 0,
   ndraws
 ) {
   bandit <- switch(

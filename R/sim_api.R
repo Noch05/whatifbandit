@@ -179,7 +179,6 @@ prep_sim_data <- function(
     blocking = blocking,
     clustering = clustering,
     conditions = conditions,
-    random_assign_prop = 0,
     sim_type = "param",
     cluster_col = "cluster"
   ) |>

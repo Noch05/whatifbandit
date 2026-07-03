@@ -4,7 +4,7 @@
 \alias{joint_test}
 \title{Joint Hypothesis Test for Multi-Arm Bandit Trials}
 \usage{
-joint_test(mab, method, r = 1000)
+joint_test(mab, method = c("bootstrap", "randomization"), r = 100)
 }
 \arguments{
 \item{mab}{A \code{single_rct_mab} or \code{single_param_mab} object.}
@@ -12,7 +12,7 @@ joint_test(mab, method, r = 1000)
 \item{method}{A character string; either \code{"bootstrap"} or \code{"randomization"}.}
 
 \item{r}{A positive integer; number of simulations used to build the null distribution.
-Default is 1000.}
+Default is 100.}
 }
 \value{
 A named list object containing
