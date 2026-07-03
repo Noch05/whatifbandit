@@ -478,7 +478,7 @@ create_new_cols.data.table <- function(
   delayed_feedback,
   vars_keep
 ) {
-  data <- data[, .SD, .SDcols = vars_keep]
+  data <- data[, .SD, .SDcols = unique(vars_keep)]
   data[,
     period_number := match(
       period_number,

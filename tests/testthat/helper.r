@@ -77,9 +77,7 @@ expect_joint_equal <- function(df, dt, seed) {
     purrr::walk(c("bootstrap", "randomization"), \(method) {
       f <- lapply(list(df, dt), \(mab) {
         set.seed(seed)
-        expect_no_error(
-          joint_test(mab, method = method, r = 3)
-        )
+        joint_test(mab, method = method, r = 3)
       })
       expect_equal(f[[1]], f[[2]])
       expect_equal(f[[2]], f[[1]])

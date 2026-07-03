@@ -25,8 +25,7 @@
 #' would express the same outcome no matter the treatment they were assigned. To achieve this
 #' the trial is re-simulated but new outcomes are not generated or imputed, however the adaptive algorithm
 #' still changes the assignments. This results in a null distribution that captures how the adaptive
-#' algorithm will assign even when the outcomes are not related to treatments at all. This test is not
-#' valid for resimulated random trials.
+#' algorithm will assign even when the outcomes are not related to treatments at all.
 #'
 #' `method = "bootstrap"` operates under the null hypothesis that there is no difference between
 #' treatment arms within each each block/cluster the
@@ -66,11 +65,11 @@ joint_test <- function(
   r = 100
 ) {
   check_posint(r)
-  rlang::arg_match(method)
+  method <- rlang::arg_match(method)
   if (!inherits(mab, "single_mab")) {
     rlang::abort(c("Joint-tests can only be performed on `single_mab` objects"))
   }
-  if (method == "randomization" && inherits(mab, "singe_rct_mab")) {
+  if (method == "randomization" && inherits(mab, "single_rct_mab")) {
     rlang::warn(c(
       "Randomization inference may not be informative for resimulated RCT objects."
     ))
@@ -83,14 +82,24 @@ joint_test <- function(
   )
   f <- mab$f_stats[["IPW"]]
 
-  p <- mean(null >= f, na.rm = TRUE)
+  null <- null[!is.na(null) & is.finite(null)]
+  if (length(null) != r) {
+    rlang::warn(c(paste(
+      "Test produced ",
+      r - length(null),
+      "NA F-statistics. "
+    )))
+  }
+
+  p <- mean(null > f)
 
   return(list(
     f_stat = f,
     null_distribution = null,
     p_value = p,
     method = method,
-    r = r
+    r = r,
+    effective_r = length(null)
   ))
 }
 
@@ -108,10 +117,13 @@ joint_random_null <- function(mab, r) {
   args <- joint_base_args(mab, sim_type = "test")
 
   na_rows <- args$period_idxs$start_idxs[2]:nrow(args$data)
+  cols_to_drop <- c("mab_assign_prop", "ipw_weights")
   if (data.table::is.data.table(args$data)) {
     args$data[na_rows, mab_condition := NA_character_]
+    args$data[, (cols_to_drop) := NULL]
   } else {
     args$data[["mab_condition"]][na_rows] <- NA_character_
+    args$data[, cols_to_drop] <- NULL
   }
 
   furrr::future_map_dbl(
@@ -326,6 +338,8 @@ build_time_model_args <- function(mab, args, col_names) {
   )[["dates"]]
 
   original_dates <- if (data.table::is.data.table(mab$new_data)) {
+    print(names(mab$new_data))
+    print(mab$new_data)
     mab$new_data[, .("period_number", col_names$assignment_date_col)] |>
       split(by = "period_number") |>
       lapply(\(x) x[[col_names$assignment_date_col]])
@@ -430,7 +444,7 @@ group_prop.data.frame <- function(data, group) {
 #' @export
 group_prop.data.table <- function(data, group) {
   n <- nrow(data)
-  data[, .(size = .N / n), by = group] |>
+  data[, .(size = .N / n), keyby = group] |>
     as_named_vec(val = "size", name = group)
 }
 
@@ -473,7 +487,7 @@ boot_null_counts.data.frame <- function(data, success_col, group = NULL) {
 #' @export
 boot_null_counts.data.table <- function(data, success_col, group = NULL) {
   if (!is.null(group)) {
-    data[, .(n = .N, s = sum(get(success_col))), by = group]
+    data[, .(n = .N, s = sum(get(success_col))), keyby = group]
   } else {
     data[, .(n = .N, s = sum(get(success_col)))]
   }

@@ -36,8 +36,7 @@ See details for a description of both methods
 would express the same outcome no matter the treatment they were assigned. To achieve this
 the trial is re-simulated but new outcomes are not generated or imputed, however the adaptive algorithm
 still changes the assignments. This results in a null distribution that captures how the adaptive
-algorithm will assign even when the outcomes are not related to treatments at all. This test is not
-valid for resimulated random trials.
+algorithm will assign even when the outcomes are not related to treatments at all.
 
 \code{method = "bootstrap"} operates under the null hypothesis that there is no difference between
 treatment arms within each each block/cluster the

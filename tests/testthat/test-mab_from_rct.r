@@ -100,10 +100,10 @@ test_that("mab_from_rct: space-filling argument and design coverage", {
       test_that(paste("mab_from_rct:", design_name, arg_name), {
         seed <- 321
         full_args_df <- utils::modifyList(common_args, args)
-        full_args_dt <- utils::modifyList(
-          full_args_df,
-          list(data = data.table::copy(data.table::as.data.table(data)))
-        )
+        full_args_dt <- full_args_df
+        full_args_dt$data <- data.table::copy(data.table::as.data.table(
+          full_args_df$data
+        ))
 
         set.seed(seed)
         res_df <- expect_no_error(do.call(mab_from_rct, full_args_df))

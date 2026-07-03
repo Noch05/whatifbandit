@@ -145,7 +145,7 @@ mab_loop <- function(
           time_model = time_model,
           time_model_args = time_model_args
         )
-      } else {
+      } else if (sim_type == "test") {
         # Randomization Inference, No Change in Outcomes
         if (data.table::is.data.table(data)) {
           data[current_idx, mab_condition := current_data[, mab_condition]]
