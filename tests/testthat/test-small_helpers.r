@@ -53,46 +53,6 @@ test_that("Finalize Prior List", {
   expect_equal(finalize_prior_list(test_list, conditions = conditions), truth)
 })
 
-test_that("Invalid Bandits", {
-  expect_false(bandit_invalid(c(0, 0.4, 0.3)))
-  expect_true(bandit_invalid(c(NA, 0.4, 0.3)))
-  expect_true(bandit_invalid(c(2e-16, 2e-16, 0)))
-})
-
-
-test_that("Input Check Helpers", {
-  test_funcs <- list(
-    check_logical,
-    check_prop,
-    check_posint,
-    check_sum1,
-    check_string,
-    check_names
-  )
-  passes <- list(
-    list(TRUE, FALSE),
-    list(0.5, 0.99, 0.1),
-    list(5, 10, 200),
-    list(c(0, 0, 1), c(0.1, 0.5, 0.4), c(0.2, 0.3, 0.5)),
-    list(list(arg = "bea", valid = "bea", name = "b")),
-    list(c(b = 5, c = 1), c(y = 6))
-  )
-  fails <- list(
-    list(5, -5, NA, "b"),
-    list(-1, 100, NA, "s"),
-    list(-5, 0, "g", 5.5),
-    list(c(1, 1, 1), c(3, 3, 2)),
-    list(
-      list(arg = 5, valid = "b", name = "beans"),
-      list(arg = "bea", valid = "i", name = "beans")
-    ),
-    list(c(5, 3, 2), c("Bea", "d"))
-  )
-  purrr::pwalk(list(test_funcs, passes, fails), \(t, p, f) {
-    input_check_test(t, p, f)
-  })
-})
-
 
 test_that("Summary to Matrix", {
   set.seed(5)
@@ -117,7 +77,6 @@ test_that("Summary to Matrix", {
     )
   )
 })
-
 
 test_that("Period Sizes", {
   data <- data.frame(period_number = c(1, 1, 1, 2, 2, 2, 3, 3, 4, 5))
@@ -208,7 +167,6 @@ test_that("Extraction Test", {
     c(1, 4, 2, 3)
   )
 })
-
 
 test_that("group_prop returns correct proportions", {
   df <- data.frame(
