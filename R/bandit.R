@@ -234,9 +234,11 @@ finalize_prior_list <- function(prior_list, conditions) {
 #' \itemize{
 #' \item `bandit`: Bandit object, either a named numeric vector of Thompson sampling probabilities UCB1 values.
 #' \item `assignment_probabilities:` Named numeric vector with probabilities of being assigned to the given treatment, where `names(.)` are the treatments.
-#' Adjusted for control augmentation}
+#' Adjusted for control augmentation and random assignment proportion weighting}
 #'
 #' @details
+#'
+#' Control augmentation adjustment is always done last, to ensure proper probability floor.
 #'
 #' The Thompson `assignment_probabilities` are the same as the `bandit` vector except when
 #' `control_augment` or `random_assign_prop` are greater than 0, as these arguments will alter the probabilities

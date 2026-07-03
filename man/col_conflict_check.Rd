@@ -15,7 +15,7 @@ throws an error under any conflict
 a named character vector of reserved column names.
 }
 \description{
-Functions to help resolve conflicts between passed data, and reserved columns
+Identifies column name conflicts between internal reserved columns and input data
 for \code{\link[=mab_from_rct]{mab_from_rct()}}'s internal procedures
 }
 \seealso{

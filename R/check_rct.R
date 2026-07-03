@@ -338,8 +338,7 @@ check_period_method <- function(
 
 #' Check Conflicts with Internal Columns
 #' @name col_conflict_check
-#' @description
-#' Functions to help resolve conflicts between passed data, and reserved columns
+#' @description Identifies column name conflicts between internal reserved columns and input data
 #' for [mab_from_rct()]'s internal procedures
 #'
 #' @returns throws an error under any conflict

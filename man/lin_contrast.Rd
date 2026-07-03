@@ -55,12 +55,16 @@ Also used to store simulation outputs.}
 
 \item{dt}{Whether to compile results into a data.table or data.frame}
 
-\item{estimator}{estimator used AIPW, IPW, OLS}
+\item{estimator}{Character string labelling the estimator, either
+\code{"IPW"} or \code{"OLS"}}
 }
 \value{
 A list of 1 row contrast vectors, encoding a single pairwise comparison.
 
 A matrix row vectors containing each contrast to test.
+
+data.table or data.frame of linear contrasts with columns for each treatment arm, the
+estimated contrast, standard error, and degrees of freedom.
 }
 \description{
 A set of helper functions for computing linear contrasts of AIPW, IPW, and OLS estimates

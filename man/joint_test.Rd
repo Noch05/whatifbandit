@@ -22,6 +22,7 @@ A named list object containing
 \item \code{p_value}: The proportion of simulated F-statistics more extreme than observed.
 \item \code{method}: The method used.
 \item \code{r}: Number of replications used.
+\item \code{effective_r}: Number of generated f_stats which are not \code{NULL} or \code{NA}.
 }
 }
 \description{

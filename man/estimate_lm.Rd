@@ -28,9 +28,12 @@ the \code{names} attribute should be present with the control group labelled \co
 \code{FALSE}, fits the unweighted OLS LPM.}
 }
 \value{
-A list of the coefficient estimates in a \code{tibble}/\code{data.table}, along with their standard errors,
-F-statistic and degrees of freedom, accompanied by vcov matrix or full model object, depending on
-whether clustering is used.
+A list containing 3 elements:
+\itemize{
+\item \code{estimates}: data.table/data.frame of coefficients, standard errors, and degrees of freedom.
+\item \code{f_stat}: F statistic from regression
+\item \code{model}: \code{lm_robust} object, only saved under clustering.
+}
 }
 \description{
 Computes OLS estimates for true true probabilities of success using \code{\link[estimatr:lm_robust]{estimatr::lm_robust()}}.
@@ -38,8 +41,7 @@ Supports IPW weighted and unweighted regression. If clustering is specified CR2 
 standard errors are used. Appropriate degrees of freedom are supplied along with the regression's F-statistic
 }
 \details{
-If CR2 standard errors fail to be calculated, CR0 are computed, and then adjusted via the Stata
-CR1 adjustment.
+If CR2 standard errors fail to be calculated, CR1S are computed, equivlance to \code{vce(cluster, clustervar)} in Stata, and \code{se_type = "stata"} in \code{{estimatr}}
 
 These estimates follow the procedure in
 \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.

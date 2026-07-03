@@ -91,22 +91,9 @@ Character vector of length \code{nrow(current_data)} with treatment assignments.
 }
 \description{
 Assigns new treatments for an assignment wave based on the assignment probabilities provided from
-\code{\link[=compute_bandit]{compute_bandit()}}, and the proportion of randomly assigned observations specified in \code{random_assign_prop}.
-Assignments are made randomly with the given probabilities using \code{\link[randomizr:block_ra]{randomizr::block_ra()}},
+\code{\link[=compute_bandit]{compute_bandit()}}. Assignments are made randomly with the given probabilities using \code{\link[randomizr:block_ra]{randomizr::block_ra()}},
 \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}, \code{\link[randomizr:cluster_ra]{randomizr::cluster_ra()}}, or \code{\link[randomizr:block_and_cluster_ra]{randomizr::block_and_cluster_ra()}}
 depending on whether blocking and/or clustering are used.
-}
-\details{
-The number of rows which are randomly assigned in each period is \code{random_assign_prop} multiplied by
-the number of rows in the period. If this number is less than 1, then Bernoulli draws are made for each row
-with probability \code{random_assign_prop} to determine if that row will be assigned randomly. Else, the number of random
-rows is rounded to the nearest whole number, and then that many rows are selected to be assigned through
-complete random assignment. The row selections are also random.
-
-Clustering introduces difficulties with \code{random_assign_prop} so a more advanced algorithm is used to determine assignment. When \code{random_rows < 1},
-Bernoulli draws are made for each cluster with probabilitiy \code{random_assign_prop}, so its possible for the number of rows to be assigned randomly is far
-larger than the provided proportion if cluster sizes are imbalanced. When \code{random_rows > 1}, a random permutation of the clusters is made and then
-clusters are selected for random assignment greedily until the cumulative count surpasses \code{random_rows}.
 }
 \section{Functions}{
 \itemize{

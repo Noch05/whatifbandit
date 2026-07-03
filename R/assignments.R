@@ -1,7 +1,6 @@
 #' Adaptively Assign Treatments in a Period
 #' @description Assigns new treatments for an assignment wave based on the assignment probabilities provided from
-#' [compute_bandit()], and the proportion of randomly assigned observations specified in `random_assign_prop`.
-#' Assignments are made randomly with the given probabilities using [randomizr::block_ra()],
+#' [compute_bandit()]. Assignments are made randomly with the given probabilities using [randomizr::block_ra()],
 #' [randomizr::complete_ra()], [randomizr::cluster_ra()], or [randomizr::block_and_cluster_ra()]
 #' depending on whether blocking and/or clustering are used.
 #'
@@ -15,17 +14,6 @@
 #' @returns Updated `tibble` or `data.table` with the new treatment conditions for each observation, and whether imputation is required.
 #' If this treatment is different then from under the original experiment, then 'impute_req = 1`, and else is 0 for the observation.
 #'
-#' @details
-#' The number of rows which are randomly assigned in each period is `random_assign_prop` multiplied by
-#' the number of rows in the period. If this number is less than 1, then Bernoulli draws are made for each row
-#' with probability `random_assign_prop` to determine if that row will be assigned randomly. Else, the number of random
-#' rows is rounded to the nearest whole number, and then that many rows are selected to be assigned through
-#' complete random assignment. The row selections are also random.
-#'
-#' Clustering introduces difficulties with `random_assign_prop` so a more advanced algorithm is used to determine assignment. When `random_rows < 1`,
-#' Bernoulli draws are made for each cluster with probabilitiy `random_assign_prop`, so its possible for the number of rows to be assigned randomly is far
-#' larger than the provided proportion if cluster sizes are imbalanced. When `random_rows > 1`, a random permutation of the clusters is made and then
-#' clusters are selected for random assignment greedily until the cumulative count surpasses `random_rows`.
 #' @seealso
 #'* [randomizr::block_ra()]
 #'* [randomizr::complete_ra()]

@@ -12,15 +12,14 @@
 #'
 #' @returns Named list containing:
 #' \itemize{
-#' \item `col_names`: List of necessary columns in `data` as strings and as symbols.
 #' \item `data`: Prepared `data.frame` or `data.table` containing all the necessary columns to
 #' conduct the adaptive trial simulation, subset from the originally provided data to reduce memory usage.
 #' columns required for [run_mab()].
-#' \item `char_args` List of processed string arguments for compatibility.
+#' \item `conditions`: character vector of treatment arm names, named to reflect treatment or
+#' control status.
 #' \item `imputation_information`: List containing necessary information
 #' for outcome and date imputation for [run_mab()].
-#' \item `period_starts`: Numeric vector where element `i` is the starting row number of period `i`.
-#' \item `period_starts`: Numeric vector where element `i` is the ending row number of period `i`.
+#' \item `period_idxs`: List of numeric vectors containing  period start and end indexes.
 #' }
 #' @details
 #'  If a `data.table` is passed it is copied to avoid modifying the

@@ -17,6 +17,7 @@
 #'   \item `p_value`: The proportion of simulated F-statistics more extreme than observed.
 #'   \item `method`: The method used.
 #'   \item `r`: Number of replications used.
+#'   \item `effective_r`: Number of generated f_stats which are not `NULL` or `NA`.
 #' }
 #' @export
 #' @details

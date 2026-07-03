@@ -146,10 +146,13 @@ but they will not be used. Default \code{NULL}. Other optional arguments Cannot 
 treatment arm at a given period.
 \item \code{assignment_quantities}: A numeric vector of the total number of observations assigned to each
 treatment arm.
-\item \code{estimates}: A \code{tibble} or \code{data.table} containing the estimates of the specified estimators for
+\item \code{means}: A \code{tibble} or \code{data.table} containing the mean estimates of the specified estimators for
 each treatment arm.
-#' \item \code{models}: A nested list containing the vcov matrix for the ipw and ols regressions or
-the model objects.
+\item \code{contrasts}: A \code{tibble} or \code{data.table} containing the contrast estimates of the specified estimators for
+the specified contrast structure.
+#' \item \code{f_stats}: Named numeric vector containing f_stat from IPW and OLS regressions.
+#' \item \code{models}: A nested list containing the \code{lm_robust} objects from regressions, only saved
+in clustered case.
 \item \code{call}: \code{NULL}; initialized for later assignment.
 \item \code{args}: \code{NULL}; initialized for later assignment.
 \item \code{furrr}: \code{NULL}; initialized for later assignment.

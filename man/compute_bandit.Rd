@@ -65,7 +65,7 @@ A list of length 2 containing:
 \itemize{
 \item \code{bandit}: Bandit object, either a named numeric vector of Thompson sampling probabilities UCB1 values.
 \item \verb{assignment_probabilities:} Named numeric vector with probabilities of being assigned to the given treatment, where \code{names(.)} are the treatments.
-Adjusted for control augmentation}
+Adjusted for control augmentation and random assignment proportion weighting}
 
 Logical; TRUE if the vector is invalid, FALSE if valid
 }
@@ -77,6 +77,8 @@ package and UCB1 values are calculated using the well-defined formula that can b
 in \href{https://doi.org/10.1023/A:1013689704352}{Auer et al. (2002)}.
 }
 \details{
+Control augmentation adjustment is always done last, to ensure proper probability floor.
+
 The Thompson \code{assignment_probabilities} are the same as the \code{bandit} vector except when
 \code{control_augment} or \code{random_assign_prop} are greater than 0, as these arguments will alter the probabilities
 of assignment.

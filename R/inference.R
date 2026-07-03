@@ -206,7 +206,14 @@ iaipw <- function(conditions_vec, success_vec, mhat, prob, condition) {
 #' @inheritParams run_mab
 #' @param iaipw Invidual AIPW scores computed by [compute_iaipw()].
 #' @param cluster_col String; name of column with cluster indicies.
-#' @returns A `tibble`/`data.table` containing the AIPW estimate of treatment success, and their standard errors.
+#' @returns A `tibble`/`data.table` containing 5 columns:
+#' \itemize{
+#'   \item `means`: AIPW statistics.
+#'   \item `se`: AIPW standard errors.
+#'   \item `mab_condition`: Treatment arm.
+#'   \item `estimator`: "AIPW".
+#'   \item `df`: Degrees of freedom, `NA` implies normal distribution Z test.
+#' }
 #' @details
 #' The formulas for the calculations in this function can be found in
 #' \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)} at
@@ -214,7 +221,7 @@ iaipw <- function(conditions_vec, success_vec, mhat, prob, condition) {
 #'
 #' The estimator assumes pure sequential assignment, but we adapt the estimator to our batched assignment procedure.
 #' In the computations, of the individual estimates, regression estimates were only computed for each period,
-#' instead of for each observation, and similarly the adaptive weights used will only be computed per period, and them
+#' instead of for each observation, and similarly the adaptive weights used will only be computed per period, and then
 #' simply assigned to all the observations in that period, thus resulting in only a few unique weights. This
 #' keeps effective sample size large, ensuring the asymptotic properties are realized in large samples with only
 #' a few assignment periods, while also properly accounting for the assignment procedure.
@@ -231,7 +238,8 @@ iaipw <- function(conditions_vec, success_vec, mhat, prob, condition) {
 #' variances of the two arms. Simple Wald-Style
 #' tests with the normal distribution can be used here if the experiment contains a sufficiently
 #' large number of observations. In the clustered case, we suggest a t, distribution to be more
-#' conservative, given the sample size is now the cluster, we provide \eqn{G-k} as degrees of freedom.
+#' conservative, given the sample size is now the cluster, we provide \eqn{G-1} as degrees of
+#' freedom, as standard by regression packages for clustered infernece (CR0, and CR1).
 #'
 #' @references
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
@@ -330,8 +338,8 @@ estimate_aipw <- function(
 #'   `FALSE`, fits the unweighted OLS LPM.
 #' @details
 #'
-#' If CR2 standard errors fail to be calculated, CR0 are computed, and then adjusted via the Stata
-#' CR1 adjustment.
+#' If CR2 standard errors fail to be calculated, CR1S are computed, equivlance to `vce(cluster,
+#' clustervar)` in Stata, and `se_type = "stata"` in `{estimatr}`
 #'
 #' These estimates follow the procedure in
 #' \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
@@ -354,9 +362,12 @@ estimate_aipw <- function(
 #' in the estimates. Assignment probabilities to treatment are the same within each block,
 #' so the IPW estimator is still unbiased without the presence of the fixed effects.
 #'
-#' @returns A list of the coefficient estimates in a `tibble`/`data.table`, along with their standard errors,
-#' F-statistic and degrees of freedom, accompanied by vcov matrix or full model object, depending on
-#' whether clustering is used.
+#' @returns A list containing 3 elements:
+#' \itemize{
+#'   \item `estimates`: data.table/data.frame of coefficients, standard errors, and degrees of freedom.
+#'   \item `f_stat`: F statistic from regression
+#'   \item `model`: `lm_robust` object, only saved under clustering.
+#' }
 #' @family estimation
 #' @keywords internal
 

@@ -15,8 +15,13 @@
 #' treatment arm at a given period.
 #' \item `assignment_quantities`: A numeric vector of the total number of observations assigned to each
 #' treatment arm.
-#' \item `estimates`: A `tibble` or `data.table` containing the estimates of the specified estimators for
+#' \item `means`: A `tibble` or `data.table` containing the mean estimates of the specified estimators for
 #' each treatment arm.
+#' \item `contrasts`: A `tibble` or `data.table` containing the contrast estimates of the specified estimators for
+#' the specified contrast structure.
+#' #' \item `f_stats`: Named numeric vector containing f_stat from IPW and OLS regressions.
+#' #' \item `models`: A nested list containing the `lm_robust` objects from regressions, only saved
+#' in clustered case.
 #' \item `call`: `NULL`; initialized for later assignment.
 #' \item `args`: `NULL`; initialized for later assignment.
 #' \item `furrr`: `NULL`; initialized for later assignment.
@@ -226,10 +231,13 @@ prep_sim_data <- function(
 #' treatment arm at a given period.
 #' \item `assignment_quantities`: A numeric vector of the total number of observations assigned to each
 #' treatment arm.
-#' \item `estimates`: A `tibble` or `data.table` containing the estimates of the specified estimators for
+#' \item `means`: A `tibble` or `data.table` containing the mean estimates of the specified estimators for
 #' each treatment arm.
-#' #' \item `models`: A nested list containing the vcov matrix for the ipw and ols regressions or
-#' the model objects.
+#' \item `contrasts`: A `tibble` or `data.table` containing the contrast estimates of the specified estimators for
+#' the specified contrast structure.
+#' #' \item `f_stats`: Named numeric vector containing f_stat from IPW and OLS regressions.
+#' #' \item `models`: A nested list containing the `lm_robust` objects from regressions, only saved
+#' in clustered case.
 #' \item `call`: `NULL`; initialized for later assignment.
 #' \item `args`: `NULL`; initialized for later assignment.
 #' \item `furrr`: `NULL`; initialized for later assignment.

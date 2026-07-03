@@ -12,7 +12,7 @@ NULL
 #' @inheritParams mab_from_rct
 #' @param bandits data.frame or data.table of bandit statistics
 #'
-#' @return A list of 1 row contrast vectors, encoding a single pairwise comparison.
+#' @returns A list of 1 row contrast vectors, encoding a single pairwise comparison.
 #' @keywords internal
 build_contrast_matrices <- function(
   conditions,
@@ -102,7 +102,6 @@ make_contrasts <- function(conditions, ref_idx, type) {
 #' @param C List of 1 x k contrast vectors
 #' @param coefs named vector of coefficients
 #' @param vcov A `k x k` variance-covariance matrix
-#' @param estimator estimator used AIPW, IPW, OLS
 #' @param df Numeric scalar giving the degrees of freedom for the t-test. AIPW only uses t-test in
 #' clustered case.
 #' @param model An `lm_robust` model object
@@ -110,6 +109,9 @@ make_contrasts <- function(conditions, ref_idx, type) {
 #' @inheritParams compute_iaipw
 #' @inheritParams run_mab
 #' @inheritParams estimate_aipw
+#' @inheritParams estimate_lm_bundle
+#' @returns data.table or data.frame of linear contrasts with columns for each treatment arm, the
+#' estimated contrast, standard error, and degrees of freedom.
 #'
 compute_contrast <- function(
   C = NULL,

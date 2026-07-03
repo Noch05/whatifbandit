@@ -34,7 +34,14 @@ the \code{names} attribute should be present with the control group labelled \co
 \item{periods}{Total periods in the simulation.}
 }
 \value{
-A \code{tibble}/\code{data.table} containing the AIPW estimate of treatment success, and their standard errors.
+A \code{tibble}/\code{data.table} containing 5 columns:
+\itemize{
+\item \code{means}: AIPW statistics.
+\item \code{se}: AIPW standard errors.
+\item \code{mab_condition}: Treatment arm.
+\item \code{estimator}: "AIPW".
+\item \code{df}: Degrees of freedom, \code{NA} implies normal distribution Z test.
+}
 }
 \description{
 Uses provided Invidual AIPW scores created by \code{\link[=compute_iaipw]{compute_iaipw()}} and computes the final
@@ -49,7 +56,7 @@ equation 5 (estimate), equation 11 (variance), equation 15 (allocation rate).
 
 The estimator assumes pure sequential assignment, but we adapt the estimator to our batched assignment procedure.
 In the computations, of the individual estimates, regression estimates were only computed for each period,
-instead of for each observation, and similarly the adaptive weights used will only be computed per period, and them
+instead of for each observation, and similarly the adaptive weights used will only be computed per period, and then
 simply assigned to all the observations in that period, thus resulting in only a few unique weights. This
 keeps effective sample size large, ensuring the asymptotic properties are realized in large samples with only
 a few assignment periods, while also properly accounting for the assignment procedure.
@@ -66,7 +73,8 @@ as the difference in AIPW estimates with the variance of the difference as the s
 variances of the two arms. Simple Wald-Style
 tests with the normal distribution can be used here if the experiment contains a sufficiently
 large number of observations. In the clustered case, we suggest a t, distribution to be more
-conservative, given the sample size is now the cluster, we provide \eqn{G-k} as degrees of freedom.
+conservative, given the sample size is now the cluster, we provide \eqn{G-1} as degrees of
+freedom, as standard by regression packages for clustered infernece (CR0, and CR1).
 }
 \references{
 Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
