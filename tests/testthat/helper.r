@@ -34,7 +34,8 @@ expect_mab_equal <- function(df, dt) {
   }
 
   dt$config$call <- NULL
-  dt$config$args$dt <- FALSE
+  dt$config$args$dt <- NULL
+  df$config$args$dt <- NULL
   df$config$call <- NULL
   df$config$args$data <- NULL
   dt$config$args$data <- NULL
@@ -84,4 +85,53 @@ expect_joint_equal <- function(df, dt, seed) {
       expect_equal(f[[2]], f[[1]])
     })
   }
+}
+
+
+generate_rct_data <- function(
+  arms = c("control", paste0("t", 1:5)),
+  cfg,
+  n = 600,
+  delayed = TRUE
+) {
+  p <- switch(
+    cfg$design,
+    "blocking" = make_p(arms, design = "blocking", group_probs = cfg$blocks),
+    "clustering" = make_p(
+      arms,
+      design = "clustering",
+      group_probs = cfg$clusters
+    ),
+    make_p(arms, design = "none")
+  )
+
+  sim <- simulate_mab(
+    n = n,
+    t = 1,
+    p = p,
+    blocks = cfg$blocks,
+    clusters = cfg$clusters,
+    delayed_feedback = delayed,
+    assignment_dates = if (delayed) {
+      seq.Date(as.Date("2024-01-01"), by = "day", length.out = n)
+    } else {
+      NULL
+    },
+    time_model = if (delayed) \(n, ...) rep(lubridate::days(0), n) else NULL,
+    r = 1,
+    dt = FALSE,
+    verbose = FALSE
+  )
+  return(sim$new_data)
+}
+
+
+rct_formula <- function(lhs, rhs, design) {
+  if (design %in% c("blocking")) {
+    rhs <- paste(rhs, "+ block(block_col)")
+  }
+  if (design %in% c("clustering")) {
+    rhs <- paste(rhs, "+ cluster(cl)")
+  }
+  stats::as.formula(paste(lhs, "~", rhs))
 }

@@ -349,13 +349,18 @@ check_period_method <- function(
 col_conflict_check <- function(data) {
   reserved_cols <- reserved_cols()
   conflicts <- intersect(colnames(data), reserved_cols)
-  rlang::abort(
-    c(
-      "`data` already contains column(s) reserved internally by `mab_from_rct()`.",
-      "x" = paste0("Conflicting Columns: ", paste0(conflicts, collapse = ","))
-    ),
-    "i":"Rename these columns before proceeding"
-  )
+  if (length(conflicts) > 1) {
+    rlang::abort(
+      c(
+        "`data` already contains column(s) reserved internally by `mab_from_rct()`.",
+        "x" = paste0(
+          "Conflicting Columns: ",
+          paste0(conflicts, collapse = ", ")
+        ),
+        "i" = "Rename these columns before proceeding"
+      ),
+    )
+  }
 }
 
 
@@ -371,6 +376,8 @@ reserved_cols <- function() {
     "new_success_date",
     "block",
     "treatment_block",
-    "period_number"
+    "period_number",
+    "mab_assign_prob",
+    "ipw_weights"
   )
 }

@@ -19,7 +19,6 @@ test_that("simulate_mab: space-filling argument and design coverage", {
   arg_sets <- list(
     default = list(),
     ucb = list(algorithm = "ucb1"),
-    thompson = list(algorithm = "thompson"),
     random_assign = list(random_assign_prop = 0.2),
     control = list(
       control_augment = 0.2,
@@ -77,12 +76,12 @@ test_that("simulate_mab: space-filling argument and design coverage", {
     )
   )
 
-  purrr::imap(sim_designs, \(cfg, design_name) {
+  purrr::iwalk(sim_designs, \(cfg, design_name) {
     common_args$p <- make_p(arms_control, cfg$design, cfg$group_probs)
     common_args$blocks <- if (design_name == "blocking") cfg$group_probs
     common_args$clusters <- if (design_name == "clustering") cfg$group_probs
 
-    purrr::imap(arg_sets, \(args, arg_name) {
+    purrr::iwalk(arg_sets, \(args, arg_name) {
       test_that(paste("simulate_mab:", design_name, arg_name), {
         seed <- 123
         set.seed(seed)

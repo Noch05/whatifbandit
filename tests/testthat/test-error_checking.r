@@ -60,3 +60,8 @@ test_that("check_names rejects unnamed vectors", {
   })
   expect_no_error(check_names(v = c(a = 1, b = 2)))
 })
+
+test_that("conflict columns are properly replaced and remapped", {
+  data <- data.frame(mab_condition = 1, mab_success = 2, random_col = 3)
+  expect_error(col_conflict_check(data))
+})
