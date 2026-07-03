@@ -80,9 +80,6 @@ the \code{names} attribute should be present with the control group labelled \co
 for a resimulated rct, simulation from population parameters, or simulation for the randomization joint test.}
 
 \item{dt}{Logical. Whether \code{current_data} is a data.table.}
-
-\item{random_probs}{Probabilities of assignment for the rows which are completely randomly assigned. Simply a vector
-of \code{length(conditions)} with the same equal probability for all elements.}
 }
 \value{
 Updated \code{tibble} or \code{data.table} with the new treatment conditions for each observation, and whether imputation is required.

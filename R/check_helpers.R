@@ -35,7 +35,6 @@ check_logical <- function(...) {
 #' @keywords internal
 check_prop <- function(...) {
   args <- rlang::dots_list(..., .named = TRUE)
-
   purrr::iwalk(
     args,
     ~ {
@@ -47,17 +46,6 @@ check_prop <- function(...) {
       }
     }
   )
-  if (
-    !is.null(args[["control_augment"]]) &&
-      !is.null(args[["random_assign_prop"]])
-  ) {
-    if (args[["control_augment"]] > 0 && args[["random_assign_prop"]] > 0) {
-      rlang::warn(c(
-        "It is not recommended to use control augmentation with hybrid assignment;
-                control augmentation only affects bandit assignments."
-      ))
-    }
-  }
 }
 #-------------------------------------------------------------------------------
 #' @describeIn check_helpers This function accepts the user's

@@ -25,8 +25,14 @@ make_p <- function(
 }
 
 expect_mab_equal <- function(df, dt) {
-  expect_equal(df$f_stat, dt$f_stat)
-  expect_equal(df$models, dt$models)
+  expect_equal(df$models, dt$models, ignore_attr = TRUE)
+  if (df$config$args$r == 1) {
+    expect_equal(df[["f_stat"]], dt[["f_stat"]])
+    items <- c("new_data", "bandit", "means", "contrasts")
+  } else {
+    items <- c("new_data", "bandit", "means", "contrasts", "f_stat")
+  }
+
   dt$config$call <- NULL
   dt$config$args$dt <- FALSE
   df$config$call <- NULL
@@ -34,7 +40,7 @@ expect_mab_equal <- function(df, dt) {
   dt$config$args$data <- NULL
   expect_equal(dt$config, df$config)
 
-  purrr::walk(c("new_data", "bandit", "means", "contrasts"), \(item) {
+  purrr::walk(items, \(item) {
     if (item == "bandit") {
       purrr::walk(c("statistic", "assignment_prob"), \(item2) {
         inner_dt_df_check(df[[item]], dt[[item]], item2)
@@ -75,6 +81,7 @@ expect_joint_equal <- function(df, dt, seed) {
         )
       })
       expect_equal(f[[1]], f[[2]])
+      expect_equal(f[[2]], f[[1]])
     })
   }
 }

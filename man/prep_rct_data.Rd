@@ -41,7 +41,8 @@ probabilities of assignment. Adaptive probabilities are updated by `p * (1 - ran
 }}
 
 \item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as \code{"Control"}. Ranges from 0 to 1,
-and the default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.}
+and the default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.
+Adjustment is always made after the adjustmentment from random_assign_prop.}
 
 \item{control_condition}{Value of the control condition. Only necessary when \code{control_augment} is greater than 0. Internally this value
 is coerced to a string, so it should be passed as a string, or a type that can easily be converted to a string.}

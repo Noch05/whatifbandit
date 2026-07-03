@@ -23,7 +23,8 @@ test_that("simulate_mab: space-filling argument and design coverage", {
     random_assign = list(random_assign_prop = 0.2),
     control = list(
       control_augment = 0.2,
-      control_condition = "control"
+      control_condition = "control",
+      contrasts = "best"
     ),
     discount = list(
       discount_rate = 0.9
@@ -49,8 +50,7 @@ test_that("simulate_mab: space-filling argument and design coverage", {
     mixed3 = list(
       random_assign_prop = 0.1,
       r = 2,
-      contrasts = "best",
-      prior_periods = 1,
+      prior_periods = 1
     ),
     mixed4 = list(
       delayed_feedback = TRUE,
@@ -72,17 +72,17 @@ test_that("simulate_mab: space-filling argument and design coverage", {
     mixed6 = list(
       algorithm = "thompson",
       contrasts = "all",
-      period_sizes <- c(100, 50, 25, 25, 40, 60, 80, 80, 20, 20),
+      period_sizes = c(100, 50, 25, 25, 40, 60, 80, 80, 20, 20),
       discount_rate = 0.5
     )
   )
 
-  imap(sim_designs, \(cfg, design_name) {
+  purrr::imap(sim_designs, \(cfg, design_name) {
     common_args$p <- make_p(arms_control, cfg$design, cfg$group_probs)
     common_args$blocks <- if (design_name == "blocking") cfg$group_probs
     common_args$clusters <- if (design_name == "clustering") cfg$group_probs
 
-    imap(arg_sets, \(args, arg_name) {
+    purrr::imap(arg_sets, \(args, arg_name) {
       test_that(paste("simulate_mab:", design_name, arg_name), {
         seed <- 123
         set.seed(seed)

@@ -11,8 +11,6 @@
 #' @param condition_col Column name of `current_data` which holds original treatment assignments.
 #' @param cluster_col Column name of `current_data` which holds cluster assignments.
 #' @param probs Named numeric vector; probability of assignment for each treatment condition.
-#' @param random_probs Probabilities of assignment for the rows which are completely randomly assigned. Simply a vector
-#' of `length(conditions)` with the same equal probability for all elements.
 #' @inheritParams compute_prior
 #' @returns Updated `tibble` or `data.table` with the new treatment conditions for each observation, and whether imputation is required.
 #' If this treatment is different then from under the original experiment, then 'impute_req = 1`, and else is 0 for the observation.

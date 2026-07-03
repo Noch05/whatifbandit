@@ -306,6 +306,10 @@ compute_bandit <- function(
     )
   )
 
+  bandit[["assignment_prob"]] <- (1 - random_assign_prop) *
+    bandit[["assignment_prob"]] +
+    random_assign_prop * (1 / num_conditions)
+
   if (control_augment > 0) {
     ctrl <- names(conditions) == "control"
 
@@ -318,10 +322,6 @@ compute_bandit <- function(
         (1 - control_augment)
     }
   }
-
-  bandit[["assignment_prob"]] <- (1 - random_assign_prop) *
-    bandit[["assignment_prob"]] +
-    random_assign_prop * (1 / num_conditions)
 
   # Renormalization for Summing to 1
   bandit[["assignment_prob"]] <- bandit[["assignment_prob"]] /

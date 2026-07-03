@@ -28,6 +28,7 @@
 #'
 #' @param control_augment Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as `"Control"`. Ranges from 0 to 1,
 #' and the default is 0. It is not recommended to use this in conjunction with `random_assign_prop`.
+#' Adjustment is always made after the adjustmentment from random_assign_prop.
 #'
 #' @param control_condition Value of the control condition. Only necessary when `control_augment` is greater than 0. Internally this value
 #' is coerced to a string, so it should be passed as a string, or a type that can easily be converted to a string.
