@@ -73,6 +73,7 @@ sim <- mab_from_rct(
 ## Running multiple trials.
 ```r
 # Setting seed for Reproducible RNG
+set.seed(532543)
 simulations <- mab_from_rct(
   success ~ condition + block(service_center),
   data = tanf,
@@ -87,8 +88,7 @@ simulations <- mab_from_rct(
   month_col = recert_month,
   whole_experiment = FALSE,
   keep_data = TRUE,
-  r = 100,
-  seed = 532454
+  r = 100
 )
 ```
 ## Running in Multiple Trials in Parallel
@@ -98,6 +98,7 @@ library(future)
 # Set any arbitrary plan
 future::plan(plan, workers = availableCores())
 
+set.seed(532543)
 simulations <- mab_from_rct(
   success ~ condition + block(service_center),
   data = tanf,
@@ -112,8 +113,7 @@ simulations <- mab_from_rct(
   month_col = recert_month,
   whole_experiment = FALSE,
   keep_data = TRUE,
-  r = 100,
-  seed = 532454
+  r = 100
 )
 future::plan(sequential)
 ```
