@@ -27,7 +27,7 @@ test_that("mab_from_rct: space-filling argument and design coverage", {
       dplyr::select(tidyr::any_of(c(names(names_map), "assignment_date"))) |>
       dplyr::rename_with(
         ~ unname(names_map[.x]),
-        .cols = tidyselect::any_of(names(names_map))
+        .cols = tidyr::any_of(names(names_map))
       )
     common_args <- list(
       formula = rct_formula(
@@ -102,7 +102,7 @@ test_that("mab_from_rct: space-filling argument and design coverage", {
         full_args_df <- utils::modifyList(common_args, args)
         full_args_dt <- utils::modifyList(
           full_args_df,
-          list(data = data.table::as.data.table(data))
+          list(data = data.table::copy(data.table::as.data.table(data)))
         )
 
         set.seed(seed)
