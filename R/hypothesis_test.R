@@ -112,12 +112,14 @@ joint_random_null <- function(mab, r) {
 
   na_rows <- args$period_idxs$start_idxs[2]:nrow(args$data)
   cols_to_drop <- c("mab_assign_prop", "ipw_weights")
-  if (data.table::is.data.table(args$data)) {
-    args$data[na_rows, mab_condition := NA_character_]
-    args$data[, (cols_to_drop) := NULL]
-  } else {
-    args$data[["mab_condition"]][na_rows] <- NA_character_
-    args$data[, cols_to_drop] <- NULL
+  for (col in cols_to_drop) {
+    if (col %in% names(args$data)) {
+      if (data.table::is.data.table(args$data)) {
+        args$data[, (col) := NULL]
+      } else {
+        args$data[, col] <- NULL
+      }
+    }
   }
 
   furrr::future_map_dbl(
@@ -324,9 +326,10 @@ build_time_model_args <- function(mab, args, col_names) {
   )[["dates"]]
 
   original_dates <- if (data.table::is.data.table(mab$new_data)) {
-    print(names(mab$new_data))
-    print(mab$new_data)
-    mab$new_data[, .("period_number", col_names$assignment_date_col)] |>
+    mab$new_data[,
+      .SD,
+      .SDcols = c("period_number", col_names$assignment_date_col),
+    ] |>
       split(by = "period_number") |>
       lapply(\(x) x[[col_names$assignment_date_col]])
   } else {

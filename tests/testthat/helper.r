@@ -73,11 +73,11 @@ inner_dt_df_check <- function(df, dt, item) {
 }
 
 expect_joint_equal <- function(df, dt, seed) {
-  if (df$config$args$r == 1) {
+  if (df$config$args$r == 1 && dt$config$args$r == 1) {
     purrr::walk(c("bootstrap", "randomization"), \(method) {
       f <- lapply(list(df, dt), \(mab) {
         set.seed(seed)
-        joint_test(mab, method = method, r = 3)
+        expect_no_error(joint_test(mab, method = method, r = 3))
       })
       expect_equal(f[[1]], f[[2]])
       expect_equal(f[[2]], f[[1]])
