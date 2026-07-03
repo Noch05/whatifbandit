@@ -81,7 +81,7 @@ as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, d
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 known to the simulation, until a certain date. When re-computing the adaptive assignment
 probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the
-assignment are treated as failures. a}
+assignment are treated as failures.}
 
 \item{whole_experiment}{Logical; if \code{TRUE}, uses all past experimental data for imputing
 outcomes. If \code{FALSE}, uses only data available up to the current period. In large datasets or

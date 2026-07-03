@@ -8,3 +8,73 @@ input_check_test <- function(test, pass, fails) {
     expect_snapshot_error(do.call(test, f))
   })
 }
+
+make_p <- function(
+  arms,
+  design = c("none", "blocking", "clustering"),
+  group_probs = NULL
+) {
+  design <- match.arg(design)
+  cols <- if (design == "none") "all" else names(group_probs)
+  matrix(
+    stats::runif(length(arms) * length(cols), 0.3, 0.6),
+    nrow = length(arms),
+    ncol = length(cols),
+    dimnames = list(arms, cols)
+  )
+}
+
+expect_mab_equal <- function(df, dt) {
+  expect_equal(df$f_stat, dt$f_stat)
+  expect_equal(df$models, dt$models)
+  dt$config$call <- NULL
+  dt$config$args$dt <- FALSE
+  df$config$call <- NULL
+  df$config$args$data <- NULL
+  dt$config$args$data <- NULL
+  expect_equal(dt$config, df$config)
+
+  purrr::walk(c("new_data", "bandit", "means", "contrasts"), \(item) {
+    if (item == "bandit") {
+      purrr::walk(c("statistic", "assignment_prob"), \(item2) {
+        inner_dt_df_check(df[[item]], dt[[item]], item2)
+      })
+      if (!is.data.frame(df[[item]][["assignment_quant"]])) {
+        expect_equal(
+          df[[item]][["assignment_quant"]],
+          dt[[item]][["assignment_quant"]]
+        )
+      } else {
+        inner_dt_df_check(df[[item]], df[[item]], "assignment_quant")
+      }
+    } else {
+      inner_dt_df_check(df, dt, item)
+    }
+  })
+}
+
+inner_dt_df_check <- function(df, dt, item) {
+  new_df <- if (!is.null(dt[[item]])) tibble::as_tibble(dt[[item]]) else NULL
+  expect_equal(new_df, df[[item]], ignore_attr = TRUE)
+
+  new_dt <- if (!is.null(df[[item]])) {
+    data.table::as.data.table(df[[item]])
+  } else {
+    NULL
+  }
+  expect_equal(new_dt, dt[[item]], ignore_attr = TRUE)
+}
+
+expect_joint_equal <- function(df, dt, seed) {
+  if (df$config$args$r == 1) {
+    purrr::walk(c("bootstrap", "randomization"), \(method) {
+      f <- lapply(list(df, dt), \(mab) {
+        set.seed(seed)
+        expect_no_error(
+          joint_test(mab, method = method, r = 3)
+        )
+      })
+      expect_equal(f[[1]], f[[2]])
+    })
+  }
+}

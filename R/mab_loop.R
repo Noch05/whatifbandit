@@ -315,6 +315,9 @@ collect_mab_results.data.table <- function(
 
   assignment_quantities <- data[, .(count = .N), by = mab_condition] |>
     as_named_vec(val = "count", name = "mab_condition")
+  assignment_quantities <- assignment_quantities[sort(names(
+    assignment_quantities
+  ))]
 
   if (length(assignment_quantities) < length(conditions)) {
     missing <- setdiff(conditions, names(assignment_quantities))

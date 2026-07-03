@@ -86,7 +86,7 @@ as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, d
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 known to the simulation, until a certain date. When re-computing the adaptive assignment
 probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the
-assignment are treated as failures. a}
+assignment are treated as failures.}
 
 \item{whole_experiment}{Logical; if \code{TRUE}, uses all past experimental data for imputing
 outcomes. If \code{FALSE}, uses only data available up to the current period. In large datasets or
@@ -127,7 +127,7 @@ precompute after each replication. One of \code{"control"} (each arm vs. control
 \code{"best"} (each arm vs. the MAB-selected best arm),
 \code{"both"}, or \code{"all"} (all \code{choose(k, 2)} pairwise comparisons, expensive
 for large \code{k}). All contrasts are tested under the two-sided null of no difference.
-Defaults to \code{NULL}, arbitrary contrasts can be computed if \code{keep_models == TRUE}}
+Defaults to \code{NULL}, arbitrary contrasts can be after computed if \code{keep_models == TRUE}}
 
 \item{time_model}{An optional function with signature \verb{function(n, conditions, successes, current_period, blocks = NULL, clusters = NULL, ...)}
 that returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{dates_of_assignment} to produce \code{success_date}. Used to simulate delayed feedback mechanism

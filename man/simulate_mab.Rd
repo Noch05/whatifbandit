@@ -82,7 +82,7 @@ as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, d
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 known to the simulation, until a certain date. When re-computing the adaptive assignment
 probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the
-assignment are treated as failures. a}
+assignment are treated as failures.}
 
 \item{assignment_dates}{An optional \code{Date} vector of dates representing when units are assigned.
 If shorter than \code{n} it is recycled and sorted. If NULL` (default) no assignment dates are recorded.}
@@ -126,7 +126,7 @@ precompute after each replication. One of \code{"control"} (each arm vs. control
 \code{"best"} (each arm vs. the MAB-selected best arm),
 \code{"both"}, or \code{"all"} (all \code{choose(k, 2)} pairwise comparisons, expensive
 for large \code{k}). All contrasts are tested under the two-sided null of no difference.
-Defaults to \code{NULL}, arbitrary contrasts can be computed if \code{keep_models == TRUE}}
+Defaults to \code{NULL}, arbitrary contrasts can be after computed if \code{keep_models == TRUE}}
 
 \item{check_args}{Logical; whether or not to validate passed arguments. Default is \code{TRUE} and recommended
 not to be changed.}
@@ -189,7 +189,7 @@ simulate_mab(n, t, p = p, random_assign_prop = 0.1,
 algorithm =  "ucb1", discount_rate  = 0.5)
 
 simulate_mab(n, t, p = p, random_assign_prop = 0.1,
-period_sizes = c(51, rep(7, 9)), algorithm = "thompson")
+period_sizes = c(37, rep(7, 9)), algorithm = "thompson")
 
 
 simulate_mab(n, t, p = matrix(c(0.1, 0.5, 0.3, 0.2, 0.3, 0.3),

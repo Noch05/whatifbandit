@@ -74,7 +74,7 @@ as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, d
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 known to the simulation, until a certain date. When re-computing the adaptive assignment
 probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the
-assignment are treated as failures. a}
+assignment are treated as failures.}
 
 \item{discount_rate}{Rate for discounting observations from earlier periods when updating
 assignment probabilities. A value between 0 and 1, where outcomes from \code{k} periods ago are
@@ -105,7 +105,7 @@ precompute after each replication. One of \code{"control"} (each arm vs. control
 \code{"best"} (each arm vs. the MAB-selected best arm),
 \code{"both"}, or \code{"all"} (all \code{choose(k, 2)} pairwise comparisons, expensive
 for large \code{k}). All contrasts are tested under the two-sided null of no difference.
-Defaults to \code{NULL}, arbitrary contrasts can be computed if \code{keep_models == TRUE}}
+Defaults to \code{NULL}, arbitrary contrasts can be after computed if \code{keep_models == TRUE}}
 
 \item{verbose}{Logical; whether or not to print intermediate messages. Default is \code{FALSE}.}
 

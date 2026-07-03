@@ -75,7 +75,7 @@ as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, d
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 known to the simulation, until a certain date. When re-computing the adaptive assignment
 probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the
-assignment are treated as failures. a}
+assignment are treated as failures.}
 
 \item{time_model}{An optional function with signature \verb{function(n, conditions, successes, current_period, blocks = NULL, clusters = NULL, ...)}
 that returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{dates_of_assignment} to produce \code{success_date}. Used to simulate delayed feedback mechanism

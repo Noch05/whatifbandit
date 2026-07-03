@@ -86,7 +86,7 @@
 #' algorithm =  "ucb1", discount_rate  = 0.5)
 #'
 #' simulate_mab(n, t, p = p, random_assign_prop = 0.1,
-#' period_sizes = c(51, rep(7, 9)), algorithm = "thompson")
+#' period_sizes = c(37, rep(7, 9)), algorithm = "thompson")
 #'
 #'
 #' simulate_mab(n, t, p = matrix(c(0.1, 0.5, 0.3, 0.2, 0.3, 0.3),

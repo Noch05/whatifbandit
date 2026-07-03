@@ -1,160 +1,105 @@
-valid_sim_args <- function() {
-  list(
-    n = 100,
+test_that("simulate_mab: space-filling argument and design coverage", {
+  arms_control <- c("control", paste0("t", 1:5))
+
+  cl <- stats::setNames(rep(0.1, 10), paste0("c", 1:10))
+  bl <- stats::setNames(rep(0.2, 5), paste0("b", 1:5))
+
+  sim_designs <- list(
+    none = list(design = "none", group_probs = NULL),
+    blocking = list(design = "blocking", group_probs = bl),
+    clustering = list(design = "clustering", group_probs = cl)
+  )
+
+  common_args <- list(
+    n = 500,
     t = 10,
-    p = matrix(
-      c(0.3, 0.4, 0.5),
-      nrow = 3,
-      dimnames = list(c("control", "t1", "t2"), "all")
+    p = make_p(arms_control, "none", NULL)
+  )
+
+  arg_sets <- list(
+    default = list(),
+    ucb = list(algorithm = "ucb1"),
+    thompson = list(algorithm = "thompson"),
+    random_assign = list(random_assign_prop = 0.2),
+    control = list(
+      control_augment = 0.2,
+      control_condition = "control"
     ),
-    blocks = NULL,
-    clusters = NULL,
-    control_augment = 0,
-    random_assign_prop = 0,
-    assignment_dates = NULL,
-    delayed_feedback = FALSE,
-    time_model = NULL,
-    period_sizes = NULL,
-    prior_periods = NULL,
-    discount_rate = 1,
-    dt = FALSE,
-    ndraws = 500,
-    r = 1,
-    keep_data = FALSE,
-    keep_models = FALSE,
-    verbose = FALSE
+    discount = list(
+      discount_rate = 0.9
+    ),
+    reps = list(
+      r = 2
+    ),
+    contrasts = list(
+      contrasts = "all",
+      prior_periods = 2
+    ),
+    mixed1 = list(
+      algorithm = "ucb1",
+      random_assign_prop = 0.1,
+      discount_rate = 0.85,
+      contrasts = "both"
+    ),
+    mixed2 = list(
+      algorithm = "thompson",
+      control_augment = 0.15,
+      r = 2
+    ),
+    mixed3 = list(
+      random_assign_prop = 0.1,
+      r = 2,
+      contrasts = "best",
+      prior_periods = 1,
+    ),
+    mixed4 = list(
+      delayed_feedback = TRUE,
+      assignment_dates = seq.Date(
+        as.Date("2024-01-01"),
+        by = "day",
+        length.out = common_args$n
+      ),
+      time_model = \(n, ...) rep(lubridate::days(1), n),
+      random_assign_prop = 0.1
+    ),
+    mixed5 = list(
+      algorithm = "ucb1",
+      control_augment = 0.2,
+      random_assign_prop = 0.4,
+      control_condition = "control",
+      contrasts = "control"
+    ),
+    mixed6 = list(
+      algorithm = "thompson",
+      contrasts = "all",
+      period_sizes <- c(100, 50, 25, 25, 40, 60, 80, 80, 20, 20),
+      discount_rate = 0.5
+    )
   )
-}
 
-test_that("check_mab_sim accepts a valid baseline call", {
-  expect_no_error(do.call(check_mab_sim, valid_sim_args()))
-})
+  imap(sim_designs, \(cfg, design_name) {
+    common_args$p <- make_p(arms_control, cfg$design, cfg$group_probs)
+    common_args$blocks <- if (design_name == "blocking") cfg$group_probs
+    common_args$clusters <- if (design_name == "clustering") cfg$group_probs
 
-test_that("check_mab_sim rejects invalid single-argument values", {
-  invalid_args <- list(
-    dt = list(1, "x", NA),
-    keep_data = list(1, "x", NA),
-    keep_models = list(1, "x", NA),
-    verbose = list(1, "x", NA),
-    n = list(-1, 0, 1.5, "x"),
-    ndraws = list(-1, 0, 1.5),
-    r = list(-1, 0, 1.5),
-    control_augment = list(-0.1, 1.1, NA_real_),
-    random_assign_prop = list(-0.1, 1.1, NA_real_),
-    discount_rate = list(-0.1, 1.1, NA_real_),
-    time_model = list("not_a_function", 5)
-  )
+    imap(arg_sets, \(args, arg_name) {
+      test_that(paste("simulate_mab:", design_name, arg_name), {
+        seed <- 123
+        set.seed(seed)
 
-  purrr::walk2(invalid_args, names(invalid_args), \(vals, arg_name) {
-    purrr::walk(vals, \(bad_val) {
-      args <- valid_sim_args()
-      args[[arg_name]] <- bad_val
-      expect_error(
-        do.call(check_mab_sim, args)
-      )
+        res_df <- expect_no_error(do.call(
+          simulate_mab,
+          c(common_args, args, list(dt = FALSE))
+        ))
+        set.seed(seed)
+        res_dt <- expect_no_error(do.call(
+          simulate_mab,
+          c(common_args, args, list(dt = TRUE))
+        ))
+
+        expect_mab_equal(res_df, res_dt)
+        expect_joint_equal(res_df, res_dt, seed)
+      })
     })
   })
-})
-
-test_that("check_mab_sim rejects t > n", {
-  args <- valid_sim_args()
-  args$t <- args$n + 1
-  expect_error(do.call(check_mab_sim, args))
-})
-
-test_that("check_mab_sim rejects period_sizes not of length t", {
-  args <- valid_sim_args()
-  args$period_sizes <- rep(1, args$t + 1)
-  expect_error(do.call(check_mab_sim, args))
-})
-
-test_that("check_mab_sim rejects non-Date assignment_dates", {
-  args <- valid_sim_args()
-  args$assignment_dates <- "2024-01-01"
-  expect_error(do.call(check_mab_sim, args))
-})
-
-test_that("check_mab_sim enforces delayed_feedback requirements", {
-  args <- valid_sim_args()
-  args$delayed_feedback <- TRUE
-
-  # Missing a time_model function
-
-  expect_error(do.call(check_mab_sim, args))
-
-  args$time_model <- function(...) NULL
-
-  # missing assignment_dates
-  expect_error(do.call(check_mab_sim, args))
-
-  args$assignment_dates <- as.Date("2024-01-01") + 0:(args$n - 1)
-  expect_no_error(do.call(check_mab_sim, args))
-})
-
-test_that("check_mab_sim warns when time_model/assignment_dates given but delayed_feedback = FALSE", {
-  args <- valid_sim_args()
-  args$time_model <- function(...) NULL
-  args$assignment_dates <- as.Date("2024-01-01") + 0:(args$n - 1)
-  expect_warning(do.call(check_mab_sim, args))
-})
-
-test_that("check_mab_sim rejects malformed p matrices", {
-  args <- valid_sim_args()
-
-  args_char <- args
-  args_char$p <- matrix(
-    c("0.3", "0.4", "0.5"),
-    nrow = 3,
-    dimnames = list(c("control", "t1", "t2"), "all")
-  )
-  expect_error(do.call(check_mab_sim, args_char))
-
-  args_no_rownames <- args
-  dimnames(args_no_rownames$p) <- NULL
-  expect_error(do.call(check_mab_sim, args_no_rownames))
-
-  # 1.5 > 1
-  args_oob <- args
-  args_oob$p[1, 1] <- 1.5
-  expect_error(do.call(check_mab_sim, args_oob))
-
-  args_multicol <- args
-  args_multicol$p <- cbind(args$p, args$p)
-  colnames(args_multicol$p) <- c("all", "extra")
-  expect_error(do.call(check_mab_sim, args_multicol))
-})
-
-test_that("check_mab_sim validates blocks/clusters against p colnames", {
-  args <- valid_sim_args()
-  blocks <- c(b1 = 0.5, b2 = 0.5)
-  p_blocked <- matrix(
-    runif(6, 0.3, 0.6),
-    nrow = 3,
-    dimnames = list(c("control", "t1", "t2"), names(blocks))
-  )
-
-  args$blocks <- blocks
-  args$p <- p_blocked
-  expect_no_error(do.call(check_mab_sim, args))
-
-  # mismatched colnames
-  args_bad <- args
-  colnames(args_bad$p) <- c("b1", "wrong")
-  expect_error(do.call(check_mab_sim, args_bad))
-
-  # blocks don't sum to 1
-  args_bad2 <- args
-  args_bad2$blocks <- c(b1 = 0.4, b2 = 0.4)
-  expect_error(do.call(check_mab_sim, args_bad2))
-
-  # unnamed blocks
-  args_bad3 <- args
-  args_bad3$blocks <- unname(args$blocks)
-  expect_error(do.call(check_mab_sim, args_bad3))
-})
-
-test_that("check_p_colnames rejects mismatched labels directly", {
-  p <- matrix(1, nrow = 1, dimnames = list("control", "a"))
-  expect_error(check_p_colnames(p, expected = "b"))
-  expect_no_error(check_p_colnames(p, expected = "a"))
 })

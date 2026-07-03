@@ -31,7 +31,7 @@ precompute after each replication. One of \code{"control"} (each arm vs. control
 \code{"best"} (each arm vs. the MAB-selected best arm),
 \code{"both"}, or \code{"all"} (all \code{choose(k, 2)} pairwise comparisons, expensive
 for large \code{k}). All contrasts are tested under the two-sided null of no difference.
-Defaults to \code{NULL}, arbitrary contrasts can be computed if \code{keep_models == TRUE}}
+Defaults to \code{NULL}, arbitrary contrasts can be after computed if \code{keep_models == TRUE}}
 
 \item{bandits}{data.frame or data.table of bandit statistics}
 

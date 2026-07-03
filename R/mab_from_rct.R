@@ -79,7 +79,7 @@
 #' assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 #' known to the simulation, until a certain date. When re-computing the adaptive assignment
 #' probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the
-#' assignment are treated as failures. a
+#' assignment are treated as failures.
 #'
 #' @param success_date_col Bare column in `data`; contains original dates each success occurred.
 #' Only necessary when `delayed_feedback = TRUE`. Must be of type `Date`, not a character string.
@@ -119,7 +119,7 @@
 #' `"best"` (each arm vs. the MAB-selected best arm),
 #'  `"both"`, or `"all"` (all `choose(k, 2)` pairwise comparisons, expensive
 #'  for large `k`). All contrasts are tested under the two-sided null of no difference.
-#' Defaults to `NULL`, arbitrary contrasts can be computed if `keep_models == TRUE`
+#' Defaults to `NULL`, arbitrary contrasts can be after computed if `keep_models == TRUE`
 #'
 #'
 #' @param ... Additional named arguments passed to [furrr::furrr_options()]

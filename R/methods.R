@@ -25,7 +25,7 @@ construct_mab <- function(mab, type, multi) {
       means = mab$means,
       f_stats = mab$f_stats,
       contrasts = mab[["contrasts"]],
-      lms = mab$models,
+      models = mab$models,
       config = list(args = mab$args, call = mab$cl, parallel = mab$furrr)
     ),
     class = c(class, ".mab", "list")

@@ -40,13 +40,23 @@ check_mab_sim <- function(
     )
   }
 
-  if (!is.null(period_sizes) && t != length(period_sizes)) {
-    rlang::abort(c(
-      "When provided `period_sizes` must be length `t`",
-      "x" = sprintf("`t`: %d", t),
-      "x" = sprintf("`length(period_sizes)` = %d", length(period_sizes))
-    ))
+  if (!is.null(period_sizes)) {
+    if (t != length(period_sizes)) {
+      rlang::abort(c(
+        "When provided `period_sizes` must be length `t`",
+        "x" = sprintf("`t`: %d", t),
+        "x" = sprintf("`length(period_sizes)` = %d", length(period_sizes))
+      ))
+    }
+    if (n != sum(period_sizes)) {
+      rlang::abort(c(
+        "When provided `period_sizes` must sum to `n`",
+        "x" = sprintf("`n`: %d", n),
+        "x" = sprintf("`sum(period_sizes)` = %d", sum(period_sizes))
+      ))
+    }
   }
+
   if (!is.null(assignment_dates) && !lubridate::is.Date(assignment_dates)) {
     rlang::abort("`assignment_dates` must be a `Date` vector")
   }
