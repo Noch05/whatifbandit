@@ -29,9 +29,11 @@
 #' Units are assigned to clusters via [randomizr::complete_ra()]. Pass `NULL` (default) for no clustering.
 #' @param assignment_dates An optional `Date` vector of dates representing when units are assigned.
 #' If shorter than `n` it is recycled and sorted. If NULL` (default) no assignment dates are recorded.
-#' @param time_model An optional function with signature `function(n, conditions, successes,
-#' current_period, blocks = NULL, clusters = NULL, ...)`
-#' that returns a vector of [lubridate::period] objects which will then be added to `dates_of_assignment` to produce `success_date`. Used to simulate delayed feedback mechanism
+#' @param time_model An optional function with signature:
+#'
+#' `function(n, conditions, successes, current_period, blocks = NULL, clusters = NULL, ...)`
+#'
+#' It returns a vector of [lubridate::period] objects which will then be added to `dates_of_assignment` to produce `success_date`. Used to simulate delayed feedback mechanism
 #' during the trial, so outcomes are imperfectly observed. Only used when`dates_of_assignment` is also supplied. Dates can be generated even when `delayed_feedback == FALSE`,
 #' but they will not be used. Default `NULL`. Other optional arguments Cannot share names with arguments in [furrr::furrr_options()].
 #' @param period_sizes Numeric vector of `length(t)`, with the specific number of units to be assigned in each period. Used when it is required to assign different numbers of units
@@ -50,10 +52,15 @@
 #' \item `assignment_prob`: Assignment probabilities for each treatment at each period of each trial.
 #' \item `assignment_quant`: Assignment quantities for each treatment in each trial.
 #' }
-#' \item `estimates`:  A `tibble` or `data.table` containing point estimates, and standard errors for the AIPW, IPW, and Sample estimators
-#' for each treatment in each trial. IPW also includes a joint-F statistic, and degrees of freedom
-#' \item `lms`: A list containing the vcov for each ipw and ols regression, if clustering the full
-#' `lm_robust` is stored.
+#' \item `means`:  A `tibble` or `data.table` containing point estimates, and standard errors for
+#' the AIPW, IPW, and OLS estimators for each treatment in each trial.
+#' \item `f_stats`: A named numeric vector of F statistics from IPW and OLS regressions. When ` r >
+#' 1`, it is a data.frame/data.table of F statistics with columns corresponding to IPW and OLS.
+#' \item `contrasts`: A `tibble` or `data.table` containing point estimates, and standard errors for
+#' the estimated linear contrasts of treatment arm estimates for each trial. Only when `contrasts`
+#' is not `NULL`.
+#' \item `models`: List containing `lm_robust` objects from IPW and OLS regressions, only stored
+#' when `keep_models = TRUE` or ` r = 1` and clsuters are provided.
 #' \item `config`: Configuration list of 3 elements:
 #' \itemize{
 #' \item `args`: List of arguments passed to [simulate_mab()].
@@ -62,17 +69,101 @@
 #' }
 #' }
 #' @details
+#'
+#' ## Blocking and Clustering
+#'
 #' When blocking and/or clustering are specified, these assignments will be randomly pregenerated before the start of the adaptive sequential assignment. These arguments allow simulating a trial
 #' when there may be hetergenous outcomes across a treatment block or treatment cluster, so different assignment probabilities can be provided for the same treatment, depending on the block and/or cluster
 #' of a unit.
 #'
-#' Clustering is challenging under an adaptive trial, because then the probabilities of assignment being adaptive can have little impact on the new assignments, given that an early treatment assignment to a cluster
-#' must remain the same across the whole trial. As such this function assumes clusters do not persist across periods, so are all respecitvely assigned at the same time. If a design is provided, as such periods are
-#' too small for the clusters to fit in a period, its possible for assignment to vary within the same cluster in the experiment.
+#' Clusters should be contained inside each assignment wave (a warning is thrown if this is not the
+#' case), so it is possible to have 2 observations in the same cluster assigned to different
+#' treatments if they were assigned in different waves. This is assumed because without it the
+#' adaptive probabilities will not be impacting assignments. For example if someone in cluster 1 is
+#' assigned in period 1, then all other members are forced to have the same treatment, even if they
+#' are assigned in period 5, 10, 20 etc.
+#'
+#' ## Implementation
+#'
+#' At each period, either the Thompson sampling probabilities or UCB1 values are calculated based on
+#' the outcomes from the number of `prior_periods` specified weighted by `discount_rate`. New
+#' treatments are then assigned randomly using the Thompson sampling probabilities via the
+#' \href{https://cran.r-project.org/package=randomizr}{randomizr} package, or as the treatment with
+#' the highest UCB1 values, while implementing the specific treatment blocking and control
+#' augmentation specified.
+#'
+#' After assigning treatments, observations will have their outcomes generated via a bernoulli draw
+#' associated to the probability in the `p` matrix corresponding to their treatment and
+#' block/cluster. If `delayed_feedback = TRUE`, dates of success will be generated via the provided `time_model()`
+#' function. When the next period starts, the success dates are checked against the maximum/latest
+#' `assignment_date` for the period, and if any success occurs after that, it is treated as a
+#' failure for the purpose of the bandit decision algorithms.
+#'
+#' ## Inference
+#'
+#' At the end of the simulation the results are aggregated together to calculate the Adaptively
+#' Weighted Augmented Inverse Probability Estimator (Hadad et al. 2021) using the mean and variance
+#' formulas provided, under the constant allocation rate adaptive schema. These estimators are
+#' unbiased and asymptotically normal under the adaptive conditions and their differences are also
+#' unbiased asymptotically normal estimators for treatment effects. See
+#' \href{https://www.pnas.org/doi/pdf/10.1073/pnas.2014602118}{Hadad et al. (2021)}. Under
+#' clustering the unit of observation becomes the cluster, the sample size the number of clusters.
+#' Individual estimates are aggregated in each period by cluster before being used to compute the
+#' final AIPW estimate and variance (CR0 style). The variance is adjusted by the Stata CR1
+#' adjustment, (\eqn{\frac{G}{G-1} * \frac{N-1}{N-k}}) where k is
+#' the number of treatments, and G is the number of clusters. Degrees of freedom of `G-1` are also provided,
+#' for use of the more conservative t-distribution, though inference is still only valid asymptotically.
+#'
+
+#' Inverse Probability Weighted (IPW) estimates are also provided using [estimatr::lm_robust()].
+#' \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
+#' In clustered cases CR2 standard errors are used, and CR1 (Stata) used if CR2 computation fails.
+#' HC2 standard errors are used in non-clustered cases. In high sample sizes for the arms chosen,
+#' standard t-tests of the estimates and their contrasts can be asymptotically valid. F-statistics
+#' are provided for joint tests provided in [joint_test()].
+#'
+#' AIPW and IPW are unbiased, with AIPW having lower variances generally, while standard unweighted
+#' OLS estimates will be biased with spuriously low variance but are provided for comparisons.
 #'
 #' ` r > 1`
-#' Multiple simulations allows researchers to gauge the variance of the procedure and produce bootstrap estimates of variance. For each additional simulation
-#' new data is drawn according to the passed population parameters so as opposed to [mab_from_rct()] resimulation occurs on a new dataset, not a fixed ground truth.
+#' Multiple simulations allows researchers to gauge the variance of the procedure and produce
+#' bootstrap estimates of variance of the procedure under the passed parameters.
+#' For each additional simulation new data is drawn according to the passed population parameters so as opposed to [mab_from_rct()]
+#' resimulation occurs on a new dataset, not a fixed ground truth.
+#'
+#' Further details about the adaptive procedure can be found in [mab_from_rct()]
+#'
+#'
+#' ## Performance Concerns
+#'
+#' This procedure has the potential to be computationally expensive and time-consuming. Performance
+#' depends on the relative size of each period, `t`, `n`, and ` r`.
+#' This function has separate support for `data.frame`s and `data.table`s, selected by the `dt`
+#' argument. This flag defines two separate tracks where either combination of `dplyr`, `tidyr` and base `R` to shape data, and run
+#' the simulation or only `data.table` code operations are used.
+#'
+#' In general, smaller batches run faster under base `R`, while larger ones could benefit from the
+#' performance and memory efficiencies provided by `data.table`. However, we've observed larger
+#' sizes can cause numerical instability with some calculations in the Thompson sampling
+#' procedure. Internal safeguards exist to prevent this, but the best way to preempt any issues is
+#' to set `prior_periods` to a low number.
+#'
+#' #' ## Parallel Processing
+#'
+#' The function provides support for parallel processing via the
+#' \href{https://cran.r-project.org/package=future}{future} and
+#' \href{https://cran.r-project.org/package=furrr}{furrr} packages. When conducting a large number
+#' of simulations, parallelization can improve performance if sufficient system resources are
+#' available. Parallel processing must be explicitly set by the user, through `future::plan()`.
+#' Windows users should set the plan to "multisession", while Linux and MacOS users can use
+#' "multicore" or "multisession". Users running in a High Performance Computing environment (HPC),
+#' are encouraged to use
+#' \href{https://cran.r-project.org/package=future.batchtools}{future.batchtools}, for their
+#' respective HPC scheduler. Note that parallel processing is not guaranteed to work on all systems,
+#' and may require additional setup or debugging effort from the user. For any issues, users are
+#' encouraged to consult the documentation of the above packages.
+#'
+#' @seealso [mab_from_rct()]
 #'
 #'
 #' @examples
@@ -93,6 +184,51 @@
 #' dimnames = list(c("T1", "T2"), c("B1", "B2", "B3")),
 #' ncol = 3, nrow = 2), blocks = c("B1" =0.3, "B2" = 0.5, "B3" = 0.2),
 #' algorithm = "thompson")
+#'
+#' @references
+#'
+#'
+#' Agrawal, Shipra, and Navin Goyal. 2012. "Analysis of Thompson Sampling for the Multi-Armed Bandit
+#' Problem." \emph{Proceedings of the 25th Annual Conference on Learning Theory}, June 16,
+#' 39.1-39.26. \url{https://proceedings.mlr.press/v23/agrawal12.html}.
+#'
+#' Asyuraa, F. C., S. Abdullah, and T. E. Sutanto. 2021. "Empirical Evaluation on Discounted
+#'  Thompson Sampling for Multi-Armed Bandit Problem with Piecewise-Stationary Bernoulli Arms."
+#'  Journal of Physics: Conference Series 1722 (1): 012096. \doi{10.1088/1742-6596/1722/1/012096}
+#'
+#' Auer, Peter, Nicolò Cesa-Bianchi, and Paul Fischer. 2002. "Finite-Time Analysis of the Multiarmed
+#' Bandit Problem." \emph{Machine Learning} 47 (2): 235–56. \doi{10.1023/A:1013689704352}.
+#'
+#' Bengtsson, Henrik. 2025. "Future: Unified Parallel and Distributed Processing in R for Everyone."
+#' \url{https://cran.r-project.org/package=future}.
+#'
+#' Bengtsson, Henrik. 2025. "Future.Batchtools: A Future API for Parallel and Distributed Processing
+#' Using ‘Batchtools.’" \url{https://cran.r-project.org/package=future.batchtools}.
+#'
+#' Garivier, Aurélien, and Eric Moulines. 2008. "On Upper-Confidence Bound Policies for
+#'  Non-Stationary Bandit Problems." arXiv:0805.3415. Preprint, arXiv, May 22.
+#'  \doi{10.48550/arXiv.0805.3415}
+#'
+#' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021. "Confidence
+#' Intervals for Policy Evaluation in Adaptive Experiments." \emph{Proceedings of the National
+#' Academy of Sciences of the United States of America} 118 (15): e2014602118.
+#' \doi{10.1073/pnas.2014602118}.
+#'
+#' Kuleshov, Volodymyr, and Doina Precup. 2014. "Algorithms for Multi-Armed Bandit Problems."
+#' \emph{arXiv}. \doi{10.48550/arXiv.1402.6028}.
+#'
+#' Loecher, Thomas Lotze and Markus. 2022. "Bandit: Functions for Simple a/B Split Test and
+#' Multi-Armed Bandit Analysis." \url{https://cran.r-project.org/package=bandit}.
+#'
+#' Offer‐Westort, Molly, Alexander Coppock, and Donald P. Green. 2021. "Adaptive Experimental
+#' Design: Prospects and Applications in Political Science." \emph{American Journal of Political
+#' Science} 65 (4): 826–44. \doi{10.1111/ajps.12597}.
+#'
+#' Slivkins, Aleksandrs. 2024. "Introduction to Multi-Armed Bandits." \emph{arXiv}.
+#' \doi{10.48550/arXiv.1904.07272}.
+#'
+#' Vaughan, Davis, Matt Dancho, and RStudio. 2022. "Furrr: Apply Mapping Functions in Parallel Using
+#' Futures." \url{https://cran.r-project.org/package=furrr}.
 #'
 #'
 #' @export

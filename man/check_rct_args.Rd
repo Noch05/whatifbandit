@@ -53,8 +53,7 @@ check_period_method(period_method, time_unit, verbose, period_length)
 of a traditional Randomized Controlled Trial (RCT).}
 
 \item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as \code{"Control"}. Ranges from 0 to 1,
-and the default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.
-Adjustment is always made after the adjustmentment from random_assign_prop.}
+and the default is 0. Adjustment is always made after the adjustmentment from random_assign_prop.}
 
 \item{random_assign_prop}{Proportion of each treatment wave assigned via static, equal
 probabilities of assignment. Adaptive probabilities are updated by `p * (1 - random_assign_prop)

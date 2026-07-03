@@ -5,20 +5,20 @@
 #' from an original randomized controlled trial (RCT), and adaptive inference strategies
 #' described in \href{https://www.pnas.org/doi/pdf/10.1073/pnas.2014602118}{Hadad et al. (2021)}
 #' and \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)} to robustly estimate
-#' treatment effects. See the details and vignettes to learn more.
+#' treatment effects. See the details to learn more.
 #'
-#' @param formula A `formula` object specifying outcome variable, treatment indicator, treatment blocking and treatment clustering. The treatment variable should always be the first variable following `~`
+#' @param formula A `formula` object specifying outcome variable, treatment indicator, treatment
+#' blocking and treatment clustering for optional blocked and/or clustered randomized designs. The treatment variable should always be the first variable
+#' following `~`
 #' (Additional covariates to be added in later updates). Clustering and blocking variables
-#' should being included in specific `block()` or `cluster()` groups in the formula, e.g. `outcome ~ treatment + block(x1, x2, x3) + cluster(x4)`. Given a set of probabilities for assigning treatments,
-#' treatment blocking applies these within each block indpendently instead of the whole sample, while for clustering assignment occurs at the cluster level instead of the individual level, so all observations
-#' in a cluster have the same treatment. When blocks and clusters are specified together each cluster must be fully nested in a single block. See below for details. To speciy without clustering or blocking
-#' simply do not provide them in the formula. Clusters can only ever be given by 1 variable, while blocks can be a combination of variables.
+#' should being included in specific `block()` or `cluster()` groups in the formula, e.g. `outcome ~
+#' treatment + block(x1, x2, x3) + cluster(x4)`.
 #'
 #' @param data A `data.frame`, `data.table`, or any object which inherits from `data.frame`, containing input data from the trial. This should be the results
 #' of a traditional Randomized Controlled Trial (RCT).
 #'
 #' @param algorithm A character string specifying the MAB algorithm to use. Options are
-#' `"Thompson"`, `"UCB1"`, or "static", ignoring case. Algorithm
+#' `"thompson"`, `"ucb1"`, or "static", ignoring case. Algorithm
 #' defines the adaptive assignment process. For more details on these specific algorithms see
 #' \href{https://www.jstor.org/stable/2332286}{Thompson 1933};
 #' \href{https://doi.org/10.1023/A:1013689704352}{Auer et al. 2002};
@@ -27,8 +27,7 @@
 #' \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.
 #'
 #' @param control_augment Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as `"Control"`. Ranges from 0 to 1,
-#' and the default is 0. It is not recommended to use this in conjunction with `random_assign_prop`.
-#' Adjustment is always made after the adjustmentment from random_assign_prop.
+#' and the default is 0. Adjustment is always made after the adjustmentment from random_assign_prop.
 #'
 #' @param control_condition Value of the control condition. Only necessary when `control_augment` is greater than 0. Internally this value
 #' is coerced to a string, so it should be passed as a string, or a type that can easily be converted to a string.
@@ -125,29 +124,44 @@
 #'
 #' @param ... Additional named arguments passed to [furrr::furrr_options()]
 #'
-#' @returns Depends on ` r` value if ` r = 1`, an S3 `single_rct_mab` class object, and if ` r > 1`,
-#' an S3 `muti_rct_mab`, with the following: \itemize{ \item `new_data`: `tibble` or `data.table`
-#' containing the new treatment assignments and outcomes under the simulation. If ` r >1` and
-#' `keep_data = TRUE`, the tables from each trial are nested inside. \item `bandits`: A list with 3
-#' elements: \itemize{ \item `statistic`: Thompson Sampling or UCB1 statistics computed for each
-#' treatment at each period of each trial. \item `assignment_prob`: Assignment probabilities for
-#' each treatment at each period of each trial. \item `assignment_quant`: Assignment quantities for
-#' each treatment in each trial. } \item `estimates`: A `tibble` or `data.table` containing point
-#' estimates, and standard errors for the AIPW, IPW,
-#' and Sample estimators for each treatment in each trial. IPW also includes a joint-F statistic,
-#' and degrees of freedom .
-#' \item `config`: Configuration list of 3 elements: \itemize{ \item `args`: List of
-#' arguments passed to [mab_from_rct()]. \item `call`: The original call to [mab_from_rct()]. \item
-#' `parallel`: The [furrr::furrr_options()] object used for parallelization. } }
+#' @returns Depends on ` r` value if ` r = 1`, an S3 `single_rct_mab` class object, and if ` r > 1`, an
+#' S3 `muti_rct_mab`, with the following:
+#' \itemize{
+#' \item `new_data`: `tibble` or `data.table` containing the new treatment assignments and outcomes under the simulation.
+#' If ` r >1` and `keep_data = TRUE`, the tables from each trial are nested inside.
+#' \item `bandits`: A list with 3 elements:
+#' \itemize{
+#' \item `statistic`: Thompson Sampling or UCB1 statistics computed for each treatment at each period of each trial.
+#' \item `assignment_prob`: Assignment probabilities for each treatment at each period of each trial.
+#' \item `assignment_quant`: Assignment quantities for each treatment in each trial.
+#' }
+#' \item `means`:  A `tibble` or `data.table` containing point estimates, and standard errors for
+#' the AIPW, IPW, and OLS estimators for each treatment in each trial.
+#' \item `f_stats`: A named numeric vector of F statistics from IPW and OLS regressions. When ` r >
+#' 1`, it is a data.frame/data.table of F statistics with columns corresponding to IPW and OLS.
+#' \item `contrasts`: A `tibble` or `data.table` containing point estimates, and standard errors for
+#' the estimated linear contrasts of treatment arm estimates for each trial. Only when `contrasts`
+#' is not `NULL`.
+#' \item `models`: List containing `lm_robust` objects from IPW and OLS regressions, only stored
+#' when `keep_models = TRUE` or ` r = 1` and clsuters are provided.
+#' \item `config`: Configuration list of 3 elements:
+#' \itemize{
+#' \item `args`: List of arguments passed to [simulate_mab()].
+#' \item `call`: The original call to [simulate_mab()].
+#' \item `parallel`: The [furrr::furrr_options()] object used for parallelization.
+#' }
+#' }
 #'
 #' @details
 #'
 #' ## Clustering
-#' Under adaptive probabilities of assignment, traditional cluster assignment no longer makes sense,
-#' as then the updated probabilities have no impact. Thus clustering is only performed at the period
-#' level, so across the experiment observations in the same cluster may get different assignments.
-#' In this case cluster level treatment effect estimates are not valid, so the user should ensure
-#' that clusters only persist across 1 period.
+#'
+#' Clusters should be contained inside each assignment wave (a warning is thrown if this is not the
+#' case), so it is possible to have 2 observations in the same cluster assigned to different
+#' treatments if they were assigned in different waves. This is assumed because without it the
+#' adaptive probabilities will not be impacting assignments. For example if someone in cluster 1 is
+#' assigned in period 1, then all other members are forced to have the same treatment, even if they
+#' are assigned in period 5, 10, 20 etc.
 #'
 #' ## Implementation
 #'
@@ -158,17 +172,10 @@
 #' the highest UCB1 values, while implementing the specific treatment blocking and control
 #' augmentation specified.
 #'
-#' `control_augment` is a threshold probability for the control group, and the assignment
-#' probabilities are changed to ensure that threshold is met. The other hybrid assignment is
-#' `random_assign_prop`. Here, the specified proportion of the data is set aside to assign
-#' treatments randomly, while the rest of the data is assigned through the bandit procedure.
-#'
 #' After assigning treatments, observations with new treatments have their outcomes imputed using
 #' success rates from the original randomized trial. These rates are estimated as grouped means
 #' within each treatment arm. If blocking is specified, rates are estimated within each combination
-#' of treatment arm and block. If clustering is specified, rates are not estimated within each
-#' cluster, purely because if a cluster has changed assignment there are no observations from the
-#' original trial in the cluster with that treatment given the cluster design.
+#' of treatment arm and block.
 #'
 #' If `delayed_feedback = TRUE`, new dates of success will be imputed using the means of those dates
 #' in the period, grouped by treatment block if necessary. Observations for which their treatment
@@ -183,25 +190,32 @@
 #' Weighted Augmented Inverse Probability Estimator (Hadad et al. 2021) using the mean and variance
 #' formulas provided, under the constant allocation rate adaptive schema. These estimators are
 #' unbiased and asymptotically normal under the adaptive conditions and their differences are also
-#' un biased asymptotically normal estimators for treatment effects. See
+#' unbiased asymptotically normal estimators for treatment effects. See
 #' \href{https://www.pnas.org/doi/pdf/10.1073/pnas.2014602118}{Hadad et al. (2021)}. Under
-#' clustering the formula is slightly adjusted to consider the cluster means within each period as
-#' opposed to individual observations, which works better when clusters are small. The variance is
-#' not adjusted for clustering.
+#' clustering the unit of observation becomes the cluster, the sample size the number of clusters.
+#' Individual estimates are aggregated in each period by cluster before being used to compute the
+#' final AIPW estimate and variance (CR0 style). The variance is adjusted by the Stata CR1
+#' adjustment, (\eqn{\frac{G}{G-1} * \frac{N-1}{N-k}}) where k is
+#' the number of treatments, and G is the number of clusters. Degrees of freedom of `G-1` are also provided,
+#' for use of the more conservative t-distribution, though inference is still only valid asymptotically.
 #'
+
 #' Inverse Probability Weighted (IPW) estimates are also provided using [estimatr::lm_robust()].
-#' \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}
+#' \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
+#' In clustered cases CR2 standard errors are used, and CR1 (Stata) used if CR2 computation fails.
+#' HC2 standard errors are used in non-clustered cases. In high sample sizes for the arms chosen,
+#' standard t-tests of the estimates and their contrasts can be asymptotically valid. F-statistics
+#' are provided for joint tests provided in [joint_test()].
 #'
-#' These estimates are unbiased but may have
-#' higher variance than the AIPW. HC2 or CR2 variances are used (CR2 for clustering, HC2 otherwise).
-#' These cannot be used to estimate treatment effects, an F-statistic is provided, which can be used for joint tests,
-#' such as the ones we provide in [joint_test()].
+#' AIPW and IPW are unbiased, with AIPW having lower variances generally, while standard unweighted
+#' OLS estimates will be biased with spuriously low variance, but are provided for comparisons.
 #'
 #'
 #' ## Performance Concerns
 #'
 #' This procedure has the potential to be computationally expensive and time-consuming. Performance
-#' depends on the relative size of each period, number of periods, and overall size of the dataset.
+#' depends on the relative size of each period, number of periods, the overall size of the dataset,
+#' and number of replications.
 #' This function has separate support for `data.frame`s and `data.table`s. If a `data.frame` is
 #' passed, the function uses a combination of `dplyr`, `tidyr` and base `R` to shape data, and run
 #' the simulation. However, if a `data.table` is passed the function exclusively uses the
@@ -217,7 +231,7 @@
 #' Multiple simulations allows researchers to gauge the variance of the simulation procedure itself,
 #' by repeating it several times under different random states, using the same fixed data.
 #'
-#' ### Parallel Processing
+#' ## Parallel Processing
 #'
 #' The function provides support for parallel processing via the
 #' \href{https://cran.r-project.org/package=future}{future} and
@@ -231,8 +245,6 @@
 #' respective HPC scheduler. Note that parallel processing is not guaranteed to work on all systems,
 #' and may require additional setup or debugging effort from the user. For any issues, users are
 #' encouraged to consult the documentation of the above packages.
-#'
-#' For more information about how to use the function, please view the vignette.
 #'
 #' @references
 #'
@@ -279,7 +291,7 @@
 #' Futures." \url{https://cran.r-project.org/package=furrr}.
 #'
 #' @seealso \href{https://furrr.futureverse.org}{furrr},
-#' \href{https://future.futureverse.org}{future}
+#' \href{https://future.futureverse.org}{future}, [joint_test()], [simulate_mab()]
 #'
 #' @examples
 #' data(tanf)
@@ -301,7 +313,7 @@
 mab_from_rct <- function(
   formula,
   data,
-  algorithm = c("thompson", "ucb1"),
+  algorithm = c("thompson", "ucb1", "static"),
   random_assign_prop = 0,
   control_augment = 0,
   control_condition = NULL,

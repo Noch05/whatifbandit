@@ -59,8 +59,7 @@ Clusters are accessed as \code{clusters[[block]][cluster]}. Insided each block, 
 Units are assigned to clusters via \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}. Pass \code{NULL} (default) for no clustering.}
 
 \item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as \code{"Control"}. Ranges from 0 to 1,
-and the default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.
-Adjustment is always made after the adjustmentment from random_assign_prop.}
+and the default is 0. Adjustment is always made after the adjustmentment from random_assign_prop.}
 
 \item{random_assign_prop}{Proportion of each treatment wave assigned via static, equal
 probabilities of assignment. Adaptive probabilities are updated by `p * (1 - random_assign_prop)
@@ -78,8 +77,11 @@ known to the simulation, until a certain date. When re-computing the adaptive as
 probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the
 assignment are treated as failures.}
 
-\item{time_model}{An optional function with signature \verb{function(n, conditions, successes, current_period, blocks = NULL, clusters = NULL, ...)}
-that returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{dates_of_assignment} to produce \code{success_date}. Used to simulate delayed feedback mechanism
+\item{time_model}{An optional function with signature:
+
+\verb{function(n, conditions, successes, current_period, blocks = NULL, clusters = NULL, ...)}
+
+It returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{dates_of_assignment} to produce \code{success_date}. Used to simulate delayed feedback mechanism
 during the trial, so outcomes are imperfectly observed. Only used when\code{dates_of_assignment} is also supplied. Dates can be generated even when \code{delayed_feedback == FALSE},
 but they will not be used. Default \code{NULL}. Other optional arguments Cannot share names with arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}.}
 

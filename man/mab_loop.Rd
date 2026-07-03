@@ -46,7 +46,7 @@ With blocks and clusters utilize the clusters for the columns because clusters a
 For no clusters or blocks simply use a matrix with 1 column.}
 
 \item{algorithm}{A character string specifying the MAB algorithm to use. Options are
-\code{"Thompson"}, \code{"UCB1"}, or "static", ignoring case. Algorithm
+\code{"thompson"}, \code{"ucb1"}, or "static", ignoring case. Algorithm
 defines the adaptive assignment process. For more details on these specific algorithms see
 \href{https://www.jstor.org/stable/2332286}{Thompson 1933};
 \href{https://doi.org/10.1023/A:1013689704352}{Auer et al. 2002};
@@ -55,8 +55,7 @@ defines the adaptive assignment process. For more details on these specific algo
 \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}
 
 \item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as \code{"Control"}. Ranges from 0 to 1,
-and the default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.
-Adjustment is always made after the adjustmentment from random_assign_prop.}
+and the default is 0. Adjustment is always made after the adjustmentment from random_assign_prop.}
 
 \item{random_assign_prop}{Proportion of each treatment wave assigned via static, equal
 probabilities of assignment. Adaptive probabilities are updated by `p * (1 - random_assign_prop)
@@ -110,8 +109,11 @@ row of each period.}
 
 \item{num_conditions}{Number of conditions, equivalent to \code{length(conditions)}.}
 
-\item{time_model}{An optional function with signature \verb{function(n, conditions, successes, current_period, blocks = NULL, clusters = NULL, ...)}
-that returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{dates_of_assignment} to produce \code{success_date}. Used to simulate delayed feedback mechanism
+\item{time_model}{An optional function with signature:
+
+\verb{function(n, conditions, successes, current_period, blocks = NULL, clusters = NULL, ...)}
+
+It returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{dates_of_assignment} to produce \code{success_date}. Used to simulate delayed feedback mechanism
 during the trial, so outcomes are imperfectly observed. Only used when\code{dates_of_assignment} is also supplied. Dates can be generated even when \code{delayed_feedback == FALSE},
 but they will not be used. Default \code{NULL}. Other optional arguments Cannot share names with arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}.}
 
