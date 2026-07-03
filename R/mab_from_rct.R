@@ -352,9 +352,6 @@ mab_from_rct <- function(
     success_date_col = deparse(substitute(success_date_col))
   )
   col_names <- col_names[!vapply(col_names, \(x) all(x == "NULL"), logical(1))]
-  new_data <- col_conflict_resolve(data, col_names)
-  col_names <- new_data[["col_names"]]
-  data <- new_data[["data"]]
 
   args <- mget(setdiff(methods::formalArgs(mab_from_rct), names(col_names)))
 
@@ -447,75 +444,5 @@ mab_from_rct <- function(
   results$cl <- cl
   return(
     construct_mab(results, type = "rct", multi = r > 1)
-  )
-}
-
-#' Resolving Conflicts with Internal Columns
-#' @name col_conflict_resolve
-#' @description
-#' Functions to help resolve conflicts between passed data, and reserved columns
-#' for [mab_from_rct()]'s internal procedures
-#'
-#' @seealso [mab_from_rct()]
-#' @keywords internal
-#'
-col_conflict_resolve <- function(
-  data,
-  col_names
-) {
-  reserved_cols <- reserved_cols()
-  conflicts <- intersect(colnames(data), reserved_cols)
-
-  if (length(conflicts) == 0) {
-    return(
-      list(
-        data = data,
-        col_names = col_names
-      )
-    )
-  }
-  # Robust to user having a "col.orig" name already
-  new_names <- vapply(
-    conflicts,
-    \(nm) {
-      candidate <- paste0(nm, ".orig")
-      while (candidate %in% names(data)) {
-        candidate <- paste0(candidate, ".orig")
-      }
-      candidate
-    },
-    character(1)
-  ) |>
-    unname()
-
-  rlang::warn(c(
-    "`data` already contains column(s) reserved internally by `mab_from_rct()`.",
-    "i" = sprintf(
-      "Renamed to avoid being silently overwritten with NA: %s",
-      paste(sprintf("`%s` -> `%s`", conflicts, new_names), collapse = ", ")
-    ),
-    "i" = paste(
-      "These names are used internally to hold the newly-simulated MAB",
-      "assignment and outcome."
-    )
-  ))
-  colnames(data)[match(conflicts, colnames(data))] <- new_names
-  col_names[match(conflicts, col_names)] <- new_names
-  return(list(data = data, col_names = col_names))
-}
-
-
-#' @rdname col_conflict_resolve
-#' @returns a named character vector of reserved column names.
-reserved_cols <- function() {
-  c(
-    "mab_success",
-    "mab_condition",
-    "impute_req",
-    "impute_block",
-    "new_success_date",
-    "block",
-    "treatment_block",
-    "period_number"
   )
 }

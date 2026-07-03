@@ -29,6 +29,8 @@ check_rct_args <- function(
   keep_models,
   blocking
 ) {
+  col_conflict_check(data = data)
+
   check_logical(
     verbose,
     whole_experiment,
@@ -332,4 +334,43 @@ check_period_method <- function(
       "i" = "`time_unit` is not required when assignment method is not `date`. It will be ignored"
     ))
   }
+}
+
+#' Check Conflicts with Internal Columns
+#' @name col_conflict_check
+#' @description
+#' Functions to help resolve conflicts between passed data, and reserved columns
+#' for [mab_from_rct()]'s internal procedures
+#'
+#' @returns throws an error under any conflict
+#' @seealso [mab_from_rct()]
+#' @keywords internal
+#'
+col_conflict_check <- function(data) {
+  reserved_cols <- reserved_cols()
+  conflicts <- intersect(colnames(data), reserved_cols)
+  rlang::abort(
+    c(
+      "`data` already contains column(s) reserved internally by `mab_from_rct()`.",
+      "x" = paste0("Conflicting Columns: ", paste0(conflicts, collapse = ","))
+    ),
+    "i":"Rename these columns before proceeding"
+  )
+}
+
+
+#' @rdname col_conflict_check
+#' @returns a named character vector of reserved column names.
+#' @keywords internal
+reserved_cols <- function() {
+  c(
+    "mab_success",
+    "mab_condition",
+    "impute_req",
+    "impute_block",
+    "new_success_date",
+    "block",
+    "treatment_block",
+    "period_number"
+  )
 }
