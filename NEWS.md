@@ -1,10 +1,8 @@
-# whatifbandit (development version)
-* New function `generate_rct.bernoulli` simulates an RCT with user defined probabilities, along with other parameters, such that it is compatible with `single_mab_simulation()` and `multiple_mab_simulation()`
 
 # whatifbandit 0.3.0
 
 ## Breaking Change
-* `plot.mab()` for `type = "assign"` now displays the proportion of total observations assigned to each treatment for each period, instead of the individual probability of assignment. 
+* `plot.mab()` for `type = "assign"` now displays the proportion of total observations assigned to each treatment for each period, instead of the individual probability of assignment.
 
 ## New Features
 * `multiple_mab_simulation()` calculates the number of observations assigned to each treatment for each trial, and provides support for plotting them has been added to `plot.multiple.mab()` via the `type = "hist"` and `quantity = "assignment"` arguments.

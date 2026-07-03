@@ -19,6 +19,11 @@ Useful links:
 \author{
 \strong{Maintainer}: Noah Ochital \email{noahochital@icloud.com} (\href{https://orcid.org/0009-0009-0398-2963}{ORCID}) [copyright holder]
 
+Authors:
+\itemize{
+  \item Noah Ochital \email{noahochital@icloud.com} (\href{https://orcid.org/0009-0009-0398-2963}{ORCID}) [copyright holder]
+}
+
 Other contributors:
 \itemize{
   \item Ryan T. Moore \email{rtm@american.edu} (\href{https://orcid.org/0000-0002-3916-8113}{ORCID}) [contributor, copyright holder]
