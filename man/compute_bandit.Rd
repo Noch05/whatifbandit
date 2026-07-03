@@ -14,6 +14,7 @@ compute_bandit(
   conditions,
   current_period,
   control_augment = 0,
+  random_assign_prop,
   ndraws
 )
 
@@ -45,6 +46,12 @@ the \code{names} attribute should be present with the control group labelled \co
 
 \item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as \code{"Control"}. Ranges from 0 to 1,
 and the default is 0. It is not recommended to use this in conjunction with \code{random_assign_prop}.}
+
+\item{random_assign_prop}{Proportion of each treatment wave assigned via static, equal
+probabilities of assignment. Adaptive probabilities are updated by `p * (1 - random_assign_prop)
+\itemize{
+\item random_assign_prop * 1/k`, where k is the number of treatment arms.
+}}
 
 \item{ndraws}{Number of draws used to approximate Thompson sampling probabilities. Used only when
 direct calculation fails or overflows. Default is 5000 but can be raised or lowered depending on

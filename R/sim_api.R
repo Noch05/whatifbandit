@@ -161,8 +161,7 @@ prep_sim_data <- function(
     },
     assignment_date = assignment_dates,
     mab_condition = rep(NA_character_, n),
-    mab_success = rep(NA_real_, n),
-    assignment_type = rep(NA_character_, n)
+    mab_success = rep(NA_real_, n)
   )
 
   if (simulate_dates) {

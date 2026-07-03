@@ -428,12 +428,7 @@ create_new_cols.data.frame <- function(
         NA_real_
       ),
       impute_req = dplyr::if_else(period_number == 1, 0, NA),
-      impute_block = NA_character_,
-      assignment_type = dplyr::if_else(
-        period_number == 1,
-        "initial",
-        NA_character_
-      )
+      impute_block = NA_character_
     )
 
   if (delayed_feedback) {
@@ -497,8 +492,7 @@ create_new_cols.data.table <- function(
       ),
       mab_success = get(col_names$success_col),
       impute_req = 0,
-      impute_block = NA_character_,
-      assignment_type = "initial"
+      impute_block = NA_character_
     )
   ]
   if (delayed_feedback) {

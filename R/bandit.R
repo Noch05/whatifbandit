@@ -284,6 +284,7 @@ compute_bandit <- function(
   conditions,
   current_period,
   control_augment = 0,
+  random_assign_prop,
   ndraws
 ) {
   bandit <- switch(
@@ -318,6 +319,11 @@ compute_bandit <- function(
     }
   }
 
+  bandit[["assignment_prob"]] <- (1 - random_assign_prop) *
+    bandit[["assignment_prob"]] +
+    random_assign_prop * (1 / num_conditions)
+
+  # Renormalization for Summing to 1
   bandit[["assignment_prob"]] <- bandit[["assignment_prob"]] /
     sum(bandit[["assignment_prob"]])
 

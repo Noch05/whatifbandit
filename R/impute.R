@@ -488,8 +488,7 @@ impute_outcomes.data.table <- function(
     "mab_condition",
     "mab_success",
     "impute_req",
-    "impute_block",
-    "assignment_type"
+    "impute_block"
   )
 
   if (delayed_feedback) {

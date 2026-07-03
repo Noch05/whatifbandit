@@ -43,98 +43,18 @@ assign_treatments <- function(
   conditions,
   condition_col = NULL,
   cluster_col = NULL,
-  random_assign_prop,
-  random_probs = NULL,
   sim_type
 ) {
-  rows <- nrow(current_data)
-  random_rows <- rows * random_assign_prop
-
-  rand_idx <- if (clustering && random_assign_prop > 0) {
-    if (random_rows < 1) {
-      clusters <- unique(current_data[[cluster_col]])
-      rand_clusters <- clusters[as.logical(stats::rbinom(
-        length(clusters),
-        1,
-        random_assign_prop
-      ))]
-      which(current_data[[cluster_col]] %in% rand_clusters)
-    } else {
-      clusters <- unique(current_data[[cluster_col]])
-      cluster_sizes <- table(current_data[[cluster_col]])
-
-      cluster_permutation <- sample(names(cluster_sizes))
-      cumulative_counts <- cumsum(cluster_sizes[cluster_permutation])
-      clusters_idx <- which(cumulative_counts >= random_rows)[1] # Take the first that is larger as last cluster
-
-      which(
-        current_data[[cluster_col]] %in%
-          cluster_permutation[seq_len(clusters_idx)]
-      )
-    }
-  } else {
-    if (random_rows < 1) {
-      which(as.logical(stats::rbinom(rows, 1, random_assign_prop)))
-    } else {
-      sample(
-        x = rows,
-        size = round(random_rows, 0),
-        replace = FALSE
-      )
-    }
-  }
-
-  band_idx <- setdiff(seq_len(rows), rand_idx)
-
-  assignment_type <- vector(
-    mode = "character",
-    length = nrow(current_data)
-  )
-  assignment_type[band_idx] <- "bandit"
-  assignment_type[rand_idx] <- "random"
-
-  if (data.table::is.data.table(current_data)) {
-    assign_treatments.data.table(
-      current_data = current_data,
-      probs = probs,
-      blocking = blocking,
-      clustering = clustering,
-      conditions = conditions,
-      condition_col = condition_col,
-      cluster_col = cluster_col,
-      rand_idx = rand_idx,
-      band_idx = band_idx,
-      random_probs = random_probs,
-      assignment_type = assignment_type,
-      sim_type = sim_type
-    )
-  } else {
-    assign_treatments.data.frame(
-      current_data = current_data,
-      probs = probs,
-      blocking = blocking,
-      clustering = clustering,
-      conditions = conditions,
-      condition_col = condition_col,
-      cluster_col = cluster_col,
-      rand_idx = rand_idx,
-      band_idx = band_idx,
-      random_probs = random_probs,
-      assignment_type = assignment_type,
-      sim_type = sim_type
-    )
-  }
+  UseMethod("assign_treatments", current_data)
 }
 #' @describeIn assign_treatments Selects the appropriate `{randomizr}` function and constructs its argument list
 #' based on whether blocking and/or clustering are requested.
 #' @inheritParams compute_prior
 #' @inheritParams assign_treatments
-#' @param idx Integer vector of row indices to assign.
 #' @param dt Logical. Whether `current_data` is a data.table.
 #' @returns A list with `fn` (the randomizr function) and `args` (its arguments).
 #' @keywords internal
 build_ra_args <- function(
-  idx,
   current_data,
   probs = NULL,
   conditions,
@@ -147,8 +67,8 @@ build_ra_args <- function(
     list(
       fn = randomizr::block_and_cluster_ra,
       args = list(
-        blocks = current_data[["block"]][idx],
-        clusters = current_data[[cluster_col]][idx],
+        blocks = current_data[["block"]],
+        clusters = current_data[[cluster_col]],
         prob_each = probs,
         conditions = conditions,
         check_inputs = TRUE
@@ -158,7 +78,7 @@ build_ra_args <- function(
     list(
       fn = randomizr::block_ra,
       args = list(
-        blocks = current_data[["block"]][idx],
+        blocks = current_data[["block"]],
         prob_each = probs,
         conditions = conditions,
         check_inputs = TRUE
@@ -168,7 +88,7 @@ build_ra_args <- function(
     list(
       fn = randomizr::cluster_ra,
       args = list(
-        clusters = current_data[[cluster_col]][idx],
+        clusters = current_data[[cluster_col]],
         prob_each = probs,
         conditions = conditions,
         check_inputs = TRUE
@@ -178,7 +98,7 @@ build_ra_args <- function(
     list(
       fn = randomizr::complete_ra,
       args = list(
-        N = length(idx),
+        N = nrow(current_data),
         prob_each = probs,
         conditions = conditions,
         check_inputs = TRUE
@@ -192,17 +112,12 @@ build_ra_args <- function(
 #' randomizr function built by [build_ra_args()].
 #' @inheritParams compute_prior
 #' @inheritParams assign_treatments
-#' @param band_idx Integer vector of bandit-assigned row indices
-#' @param rand_idx Integer vector of randomly-assigned row indices
 #' @returns Character vector of length `nrow(current_data)` with treatment assignments.
 #' @keywords internal
 
 compute_assignments <- function(
   current_data,
-  band_idx,
-  rand_idx,
   probs,
-  random_probs = NULL,
   conditions,
   blocking,
   clustering,
@@ -210,25 +125,18 @@ compute_assignments <- function(
 ) {
   assignments <- vector("character", nrow(current_data))
 
-  for (idx in list(band_idx, rand_idx)) {
-    if (length(idx) == 0) {
-      next
-    }
-    prob <- if (identical(idx, rand_idx)) random_probs else probs
-    ra <- build_ra_args(
-      idx = idx,
-      current_data = current_data,
-      probs = prob,
-      conditions = conditions,
-      blocking = blocking,
-      clustering = clustering,
-      cluster_col = cluster_col
-    )
-    assignments[idx] <- as.character(do.call(
-      ra[["fn"]],
-      ra[["args"]]
-    ))
-  }
+  ra <- build_ra_args(
+    current_data = current_data,
+    probs = probs,
+    conditions = conditions,
+    blocking = blocking,
+    clustering = clustering,
+    cluster_col = cluster_col
+  )
+  assignments <- as.character(do.call(
+    ra[["fn"]],
+    ra[["args"]]
+  ))
 
   return(assignments)
 }
@@ -237,6 +145,7 @@ compute_assignments <- function(
 
 #' @method assign_treatments data.frame
 #' @rdname assign_treatments
+#' @export
 assign_treatments.data.frame <- function(
   current_data,
   probs,
@@ -245,19 +154,11 @@ assign_treatments.data.frame <- function(
   conditions,
   condition_col = NULL,
   cluster_col = NULL,
-  rand_idx,
-  band_idx,
-  random_probs = NULL,
-  assignment_type,
   sim_type
 ) {
-  current_data[["assignment_type"]] <- assignment_type
   current_data[["mab_condition"]] <- compute_assignments(
     current_data = current_data,
-    band_idx = band_idx,
-    rand_idx = rand_idx,
     probs = probs,
-    random_probs = random_probs,
     conditions = conditions,
     blocking = blocking,
     clustering = clustering,
@@ -276,6 +177,7 @@ assign_treatments.data.frame <- function(
 
 #' @method assign_treatments data.table
 #' @rdname assign_treatments
+#' @export
 assign_treatments.data.table <- function(
   current_data,
   probs,
@@ -284,26 +186,18 @@ assign_treatments.data.table <- function(
   conditions,
   condition_col = NULL,
   cluster_col = NULL,
-  rand_idx,
-  band_idx,
-  random_probs = NULL,
-  assignment_type,
   sim_type
 ) {
-  current_data[, `:=`(
-    assignment_type = assignment_type,
-    mab_condition = compute_assignments(
+  current_data[,
+    mab_condition := compute_assignments(
       current_data = current_data,
-      band_idx = band_idx,
-      rand_idx = rand_idx,
       probs = probs,
-      random_probs = random_probs,
       conditions = conditions,
       blocking = blocking,
       clustering = clustering,
       cluster_col = cluster_col
     )
-  )]
+  ]
 
   if (sim_type == "resim") {
     current_data[,

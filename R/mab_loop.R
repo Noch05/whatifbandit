@@ -68,10 +68,6 @@ mab_loop <- function(
     num_conditions
   )
 
-  equal_probs <- bandits[["assignment_prob"]][1, ] |>
-    as.numeric()
-  names(equal_probs) <- conditions
-
   if (periods > 1) {
     for (i in 2:periods) {
       current_idx <- period_idxs[["start_idxs"]][i]:period_idxs[["end_idxs"]][i]
@@ -102,9 +98,11 @@ mab_loop <- function(
           conditions = conditions,
           current_period = i,
           control_augment = control_augment,
+          random_assign_prop = random_assign_prop,
           ndraws = ndraws
         )
       bandits[["bandit_stat"]][i - 1, ] <- current_bandit[["bandit"]]
+      bandits[["assignment_prob"]][i, ] <- current_bandit[["assignment_prob"]]
 
       current_data <- assign_treatments(
         current_data = current_data,
@@ -114,16 +112,8 @@ mab_loop <- function(
         cluster_col = col_names[["cluster_col"]],
         condition_col = col_names[["condition_col"]],
         conditions = conditions,
-        random_assign_prop = random_assign_prop,
-        random_probs = equal_probs,
         sim_type = sim_type
       )
-
-      bandits[["assignment_prob"]][i, ] <- (current_bandit[[
-        "assignment_prob"
-      ]] *
-        (1 - random_assign_prop)) +
-        (equal_probs * random_assign_prop)
 
       if (sim_type == "resim") {
         prepped_impute <- prep_imputation(
