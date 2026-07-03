@@ -1,3 +1,40 @@
+# whatifbandit 1.0.0
+
+## Breaking Changes
+* `multiple_mab_simulation()` and `single_mab_simulation()` are removed in favor of `mab_from_rct()`
+  which performs the same functions. Multiple simulations specified via the `r` argument.
+* `mab_from_rct()` now accepts bare column names and no longer accepts strings
+* `multiple.mab` and `mab` classes have been removed in favor of `multi_rct_mab`, `multi_param_mab`,
+  `single_rct_mab`, `single_param_mab`, and `.mab`.
+* `plot()`, `summary()`, and `print()` methods have been removed pending new versions.
+
+## New Features
+* Joint hypothesis testing is now provided by `joint_test()` a function accepting `single_*_mab`
+  classes. Methods are `"bootstrap"` and `"randomization"` inspired by Offer-Westort et. al (2021),
+  see docs for more.
+* `simulate_mab()` is a new function that simulates a Multi-Arm-Bandit trial from provided
+  population parameters.
+  Uses similar options to `mab_from_rct()`. See the `simulate_mab()` documenation for details.
+*  Inverse Probability Weighted estimates (IPW) are now provided, and cluster robust standard errors
+   supported
+* Linear contrast estimation supported. `simulate_mab()` and `mab_from_rct()` can now produce linear
+  contrasts (e.g. treatment effects) in final output along with traditional mean
+  estimates for all estimators. See the documentaton for which options are available.
+* New discount rate parameter: Information from previous periods is now weighted a discount rate,
+  which can be useful for non-stationary bandits. See `simulate_mab()` and `mab_from_rct()`
+  documentation for more info.
+
+## Other Changes
+* `random_assign_prop` now adjustes the assignment probabilities instead of splitting the data, see
+  docs for more details.
+* Updating UCB1 formula and assignment mechanism to match the canonical paper Auer et al. (2002)
+* Major internal optimizations for runtime. Runtime decreased for packaged `tanf` dataset with individual
+  assignment from 20-30 seconds on v.0.3.0 to 9 seconds.
+* Vignette has been removed pending new version.
+
+## Bug Fixes
+* Aligning output structure for `data.table` versus `tibble` data.frame classes. Ensuring results
+  are data.frame library agnostic. Fixing miscellaneous bugs for `data.table` inputs.
 
 # whatifbandit 0.3.0
 
