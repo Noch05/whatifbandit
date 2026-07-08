@@ -6,7 +6,7 @@
 \alias{build_p_cols}
 \alias{boot_build_p}
 \alias{build_time_model_args}
-\title{Build Proper Arguments for RCT Boostrap Joint Test}
+\title{Build Proper Arguments for RCT Bootstrap Joint Test}
 \usage{
 build_rct_clusters(mab, col_names)
 
@@ -43,7 +43,7 @@ A list with elements \code{time_model} (function or \code{NULL}) and \code{args}
 (list of additional arguments for the time model).
 }
 \description{
-Build Proper Arguments for RCT Boostrap Joint Test
+Build Proper Arguments for RCT Bootstrap Joint Test
 }
 \section{Functions}{
 \itemize{

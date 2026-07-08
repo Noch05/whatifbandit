@@ -131,7 +131,7 @@ check_names <- function(...) {
 #' @name check_clusters
 #' @inheritParams prep_rct_data
 #' @inheritParams run_mab
-#' @inheritParams estimate_aipw
+#' @inheritParams estimate_aw_aipw
 #' @description
 #' Checks to ensure that each cluster only exists within a single simulation period, because
 #' if this is the case a true clustered design is no longer specified. See details.
@@ -176,7 +176,7 @@ check_clusters.data.table <- function(data, cluster_col) {
 
 #' @describeIn check_clusters Internal Helper which handles all data wrangling agnostic
 #' portions of [check_clusters()]
-#' @inheritParams estimate_aipw
+#' @inheritParams estimate_aw_aipw
 #' @param check_clusters Object created in [check_clusters()] with all of the clusters
 #' which persist across periods.
 #' @returns Nothing; Throws a warning if clusters persist across periods.

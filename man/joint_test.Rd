@@ -45,7 +45,7 @@ true success probability is the same for any treatment. If there are no blocks o
 p-matrix is built from the pooled sample mean of the original trial. With blocks and/or clustered
 pooled sample means are estimated within each block or cluster.
 
-For \code{method == "boostrap"} with a \code{single_rct_mab}, the block and or cluster assignment
+For \code{method == "bootstrap"} with a \code{single_rct_mab}, the block and or cluster assignment
 proportions are taken from the original dataset.
 }
 \examples{

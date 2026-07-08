@@ -113,8 +113,8 @@ generate_assignment_dates <- function(n, assignment_dates) {
 #' @inheritParams run_mab
 #' @param conditions A character or factor vector of treatment assignments of
 #'   length `n`.
-#' @param other_idx Character vector of block or cluster assigents to be used as the
-#' additionnal index for extracting from `p`.
+#' @param other_idx Character vector of block or cluster assignments to be used as the
+#' additional index for extracting from `p`.
 #' @returns A numeric vector of length containing the per-unit success
 #'   probabilities to be used for outcome observation.
 #' @keywords internal
@@ -144,7 +144,7 @@ extract_success_prob <- function(
 #' @inheritParams prep_sim_data
 #' @inheritParams run_mab
 #' @inheritParams compute_prior
-#' @param current_period Indiactor of the current period of the simulation.
+#' @param current_period Indicator of the current period of the simulation.
 #' @returns Updated `data` object containing all the outcomes generated in the period, such as the treatment assignments, treatment outcomes. and new success dates
 #' @keywords internal
 #' @family param

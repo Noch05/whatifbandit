@@ -234,7 +234,7 @@ summary_to_matrix <- function(df) {
 #' \item `current_data`: A `tibble` or `data.table` containing `impute_block` column to guide the outcome imputations
 #' \item `impute_success`: A matrix object containing probabilities of success by `treatment_block` used to impute
 #' outcomes taken from [precompute_imputation()].
-#' Modified to remove uneccessary rows, or add necessary ones, and order the matrix
+#' Modified to remove unnecessary rows, or add necessary ones, and order the matrix
 #' appropriately, as required by [randomizr::block_ra()].
 #' \item `impute_dates`: Named date vector by treatment condition, containing the dates of success
 #' to impute if delayed_feedback is FALSE. Subsetted from the [precompute_imputation()] output.}
@@ -381,7 +381,7 @@ check_impute <- function(impute_success, current_data, impute_idx) {
 #' by each period and treatment block (treatment arm + any blocking). These imputations are required because
 #' these observations do not currently have dates of success, as no success was observed during the original experiment.
 #' Therefore if they go through the next iteration of the simulation without being imputed,
-#' the new successes will still be treated as failues becasue of the date masking mechanism.
+#' the new successes will still be treated as failures because of the date masking mechanism.
 #'
 #' Observations that were successful in the original experiment, got assigned a new treatment, and then
 #' imputed as success again, will have their original date kept. This assumes that the treatment has no individual

@@ -64,12 +64,12 @@ Used when there is not blocking.}
 \item{Named list of vectors}{A named list where \code{names(clusters)} are block labels, and each element is a named vector
 of per-block cluster proportions, e.g.
 \code{list(B1 = c(C1 = 0.4, C2=0.6), B2 = c(C3 = 0.2, C4 = 0.8))}
-Clusters are accessed as \code{clusters[[block]][cluster]}. Insided each block, cluster proportions must sum to 1, and the same cluster cannot appear in multiple blocks.}
+Clusters are accessed as \code{clusters[[block]][cluster]}. Inside each block, cluster proportions must sum to 1, and the same cluster cannot appear in multiple blocks.}
 }
 Units are assigned to clusters via \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}. Pass \code{NULL} (default) for no clustering.}
 
-\item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as \code{"Control"}. Ranges from 0 to 1,
-and the default is 0. Adjustment is always made after the adjustmentment from random_assign_prop.}
+\item{control_augment}{Minimum proportion of each treatment assignment wave guaranteed to receive the treatment labeled as \code{"Control"}. Ranges from 0 to 1,
+and the default is 0. Adjustment is always made after the adjustment from random_assign_prop.}
 
 \item{random_assign_prop}{Proportion of each treatment wave assigned via static, equal
 probabilities of assignment. Adaptive probabilities are updated by `p * (1 - random_assign_prop)
@@ -77,11 +77,11 @@ probabilities of assignment. Adaptive probabilities are updated by `p * (1 - ran
 \item random_assign_prop * 1/k`, where k is the number of treatment arms.
 }}
 
-\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon
+\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instantaneous feedback for outcomes, as soon
 as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 known to the simulation, until a certain date. When re-computing the adaptive assignment
-probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the
+probabilities via Thompson Samplings or UCB1 outcomes that have not been observed on the date the
 assignment are treated as failures.}
 
 \item{assignment_dates}{An optional \code{Date} vector of dates representing when units are assigned.
@@ -151,13 +151,13 @@ If \code{ r >1} and \code{keep_data = TRUE}, the tables from each trial are nest
 \item \code{assignment_quant}: Assignment quantities for each treatment in each trial.
 }
 \item \code{means}:  A \code{tibble} or \code{data.table} containing point estimates, and standard errors for
-the AIPW, IPW, and OLS estimators for each treatment in each trial.
+the AW-AIPW, IPW, and OLS estimators for each treatment in each trial.
 \item \code{f_stats}: A named numeric vector of F statistics from IPW and OLS regressions. When \code{ r > 1}, it is a data.frame/data.table of F statistics with columns corresponding to IPW and OLS.
 \item \code{contrasts}: A \code{tibble} or \code{data.table} containing point estimates, and standard errors for
 the estimated linear contrasts of treatment arm estimates for each trial. Only when \code{contrasts}
 is not \code{NULL}.
 \item \code{models}: List containing \code{lm_robust} objects from IPW and OLS regressions, only stored
-when \code{keep_models = TRUE} or \code{ r = 1} and clsuters are provided.
+when \code{keep_models = TRUE} or \code{ r = 1} and clusters are provided.
 \item \code{config}: Configuration list of 3 elements:
 \itemize{
 \item \code{args}: List of arguments passed to \code{\link[=simulate_mab]{simulate_mab()}}.
@@ -176,7 +176,7 @@ uniform baseline, where probabilities of being assigned to one treatment is the 
 \subsection{Blocking and Clustering}{
 
 When blocking and/or clustering are specified, these assignments will be randomly pregenerated before the start of the adaptive sequential assignment. These arguments allow simulating a trial
-when there may be hetergenous outcomes across a treatment block or treatment cluster, so different assignment probabilities can be provided for the same treatment, depending on the block and/or cluster
+when there may be Heterogeneous outcomes across a treatment block or treatment cluster, so different assignment probabilities can be provided for the same treatment, depending on the block and/or cluster
 of a unit.
 
 Clusters should be contained inside each assignment wave (a warning is thrown if this is not the
@@ -196,7 +196,7 @@ treatments are then assigned randomly using the Thompson sampling probabilities 
 the highest UCB1 values, while implementing the specific treatment blocking and control
 augmentation specified.
 
-After assigning treatments, observations will have their outcomes generated via a bernoulli draw
+After assigning treatments, observations will have their outcomes generated via a Bernoulli draw
 associated to the probability in the \code{p} matrix corresponding to their treatment and
 block/cluster. If \code{delayed_feedback = TRUE}, dates of success will be generated via the provided \code{time_model()}
 function. When the next period starts, the success dates are checked against the maximum/latest
@@ -210,11 +210,17 @@ At the end of the simulation the results are aggregated together to calculate th
 Weighted Augmented Inverse Probability Estimator (Hadad et al. 2021) using the mean and variance
 formulas provided, under the constant allocation rate adaptive schema. These estimators are
 unbiased and asymptotically normal under the adaptive conditions and their differences are also
-unbiased asymptotically normal estimators for treatment effects. See
-\href{https://www.pnas.org/doi/pdf/10.1073/pnas.2014602118}{Hadad et al. (2021)}. Under
+unbiased asymptotically normal estimators for treatment effects.
+\href{https://www.pnas.org/doi/pdf/10.1073/pnas.2014602118}{Hadad et al. (2021)}. Asymptotic
+validity, hinges on sub-optimal arms continually being assigned, if arms have low to 0
+probability of being assigned, the central limit theorem proved no longer applies. Thus it is
+recommended to use \code{random_assign_prop} and \code{control_augment} to ensure all arms non-zero probabilities
+of assignment over the whole trial.
+
+Under
 clustering the unit of observation becomes the cluster, the sample size the number of clusters.
 Individual estimates are aggregated in each period by cluster before being used to compute the
-final AIPW estimate and variance (CR0 style). The variance is adjusted by the Stata CR1
+final AW-AIPW estimate and variance (CR0 style). The variance is adjusted by the Stata CR1
 adjustment, (\eqn{\frac{G}{G-1} * \frac{N-1}{N-k}}) where k is
 the number of treatments, and G is the number of clusters. Degrees of freedom of \code{G-1} are also provided,
 for use of the more conservative t-distribution, though inference is still only valid asymptotically.
@@ -226,7 +232,7 @@ HC2 standard errors are used in non-clustered cases. In high sample sizes for th
 standard t-tests of the estimates and their contrasts can be asymptotically valid. F-statistics
 are provided for joint tests provided in \code{\link[=joint_test]{joint_test()}}.
 
-AIPW and IPW are unbiased, with AIPW having lower variances generally, while standard unweighted
+AW-AIPW and IPW are unbiased, with AW-AIPW having lower variances generally, while standard unweighted
 OLS estimates will be biased with spuriously low variance but are provided for comparisons.
 
 \code{ r > 1}

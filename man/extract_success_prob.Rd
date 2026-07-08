@@ -18,8 +18,8 @@ For no clusters or blocks simply use a matrix with 1 column.}
 \item{conditions}{A character or factor vector of treatment assignments of
 length \code{n}.}
 
-\item{other_idx}{Character vector of block or cluster assigents to be used as the
-additionnal index for extracting from \code{p}.}
+\item{other_idx}{Character vector of block or cluster assignments to be used as the
+additional index for extracting from \code{p}.}
 }
 \value{
 A numeric vector of length containing the per-unit success

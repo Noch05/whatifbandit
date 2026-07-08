@@ -24,7 +24,7 @@
 #' \item{Named list of vectors}{A named list where `names(clusters)` are block labels, and each element is a named vector
 #' of per-block cluster proportions, e.g.
 #' `list(B1 = c(C1 = 0.4, C2=0.6), B2 = c(C3 = 0.2, C4 = 0.8))`
-#' Clusters are accessed as `clusters[[block]][cluster]`. Insided each block, cluster proportions must sum to 1, and the same cluster cannot appear in multiple blocks.}
+#' Clusters are accessed as `clusters[[block]][cluster]`. Inside each block, cluster proportions must sum to 1, and the same cluster cannot appear in multiple blocks.}
 #' }
 #' Units are assigned to clusters via [randomizr::complete_ra()]. Pass `NULL` (default) for no clustering.
 #' @param assignment_dates An optional `Date` vector of dates representing when units are assigned.
@@ -53,14 +53,14 @@
 #' \item `assignment_quant`: Assignment quantities for each treatment in each trial.
 #' }
 #' \item `means`:  A `tibble` or `data.table` containing point estimates, and standard errors for
-#' the AIPW, IPW, and OLS estimators for each treatment in each trial.
+#' the AW-AIPW, IPW, and OLS estimators for each treatment in each trial.
 #' \item `f_stats`: A named numeric vector of F statistics from IPW and OLS regressions. When ` r >
 #' 1`, it is a data.frame/data.table of F statistics with columns corresponding to IPW and OLS.
 #' \item `contrasts`: A `tibble` or `data.table` containing point estimates, and standard errors for
 #' the estimated linear contrasts of treatment arm estimates for each trial. Only when `contrasts`
 #' is not `NULL`.
 #' \item `models`: List containing `lm_robust` objects from IPW and OLS regressions, only stored
-#' when `keep_models = TRUE` or ` r = 1` and clsuters are provided.
+#' when `keep_models = TRUE` or ` r = 1` and clusters are provided.
 #' \item `config`: Configuration list of 3 elements:
 #' \itemize{
 #' \item `args`: List of arguments passed to [simulate_mab()].
@@ -73,7 +73,7 @@
 #' ## Blocking and Clustering
 #'
 #' When blocking and/or clustering are specified, these assignments will be randomly pregenerated before the start of the adaptive sequential assignment. These arguments allow simulating a trial
-#' when there may be hetergenous outcomes across a treatment block or treatment cluster, so different assignment probabilities can be provided for the same treatment, depending on the block and/or cluster
+#' when there may be Heterogeneous outcomes across a treatment block or treatment cluster, so different assignment probabilities can be provided for the same treatment, depending on the block and/or cluster
 #' of a unit.
 #'
 #' Clusters should be contained inside each assignment wave (a warning is thrown if this is not the
@@ -92,7 +92,7 @@
 #' the highest UCB1 values, while implementing the specific treatment blocking and control
 #' augmentation specified.
 #'
-#' After assigning treatments, observations will have their outcomes generated via a bernoulli draw
+#' After assigning treatments, observations will have their outcomes generated via a Bernoulli draw
 #' associated to the probability in the `p` matrix corresponding to their treatment and
 #' block/cluster. If `delayed_feedback = TRUE`, dates of success will be generated via the provided `time_model()`
 #' function. When the next period starts, the success dates are checked against the maximum/latest
@@ -105,11 +105,17 @@
 #' Weighted Augmented Inverse Probability Estimator (Hadad et al. 2021) using the mean and variance
 #' formulas provided, under the constant allocation rate adaptive schema. These estimators are
 #' unbiased and asymptotically normal under the adaptive conditions and their differences are also
-#' unbiased asymptotically normal estimators for treatment effects. See
-#' \href{https://www.pnas.org/doi/pdf/10.1073/pnas.2014602118}{Hadad et al. (2021)}. Under
+#' unbiased asymptotically normal estimators for treatment effects.
+#' \href{https://www.pnas.org/doi/pdf/10.1073/pnas.2014602118}{Hadad et al. (2021)}. Asymptotic
+#' validity, hinges on sub-optimal arms continually being assigned, if arms have low to 0
+#' probability of being assigned, the central limit theorem proved no longer applies. Thus it is
+#' recommended to use `random_assign_prop` and `control_augment` to ensure all arms non-zero probabilities
+#' of assignment over the whole trial.
+#'
+#' Under
 #' clustering the unit of observation becomes the cluster, the sample size the number of clusters.
 #' Individual estimates are aggregated in each period by cluster before being used to compute the
-#' final AIPW estimate and variance (CR0 style). The variance is adjusted by the Stata CR1
+#' final AW-AIPW estimate and variance (CR0 style). The variance is adjusted by the Stata CR1
 #' adjustment, (\eqn{\frac{G}{G-1} * \frac{N-1}{N-k}}) where k is
 #' the number of treatments, and G is the number of clusters. Degrees of freedom of `G-1` are also provided,
 #' for use of the more conservative t-distribution, though inference is still only valid asymptotically.
@@ -122,7 +128,7 @@
 #' standard t-tests of the estimates and their contrasts can be asymptotically valid. F-statistics
 #' are provided for joint tests provided in [joint_test()].
 #'
-#' AIPW and IPW are unbiased, with AIPW having lower variances generally, while standard unweighted
+#' AW-AIPW and IPW are unbiased, with AW-AIPW having lower variances generally, while standard unweighted
 #' OLS estimates will be biased with spuriously low variance but are provided for comparisons.
 #'
 #' ` r > 1`
@@ -409,12 +415,12 @@ simulate_mab <- function(
 #' Set Up MAB Simulation
 #' @name setup_mab_sim
 #' @description
-#' Perfoms all one-time set-up requried for [simulate_mab()] as opposed to
+#' Performs all one-time set-up required for [simulate_mab()] as opposed to
 #' [prep_sim_data()] which needs to be re-run each period.
 #' @inheritParams simulate_mab
 #' @returns A named list containing:
 #' \itemize{
-#'   \item `period_idxs`: A list of 2 integer vectors of period boundary indicies.
+#'   \item `period_idxs`: A list of 2 integer vectors of period boundary indices.
 #'   \item `assignment_dates`: Vector of assignment dates based on provided dates.
 #'   \item `blocking`: Logical; `TRUE` if `blocks` is non-null.
 #'   \item `clustering`: Logical; `TRUE` if `clusters` is non-null.

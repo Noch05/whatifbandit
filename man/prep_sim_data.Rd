@@ -42,12 +42,12 @@ Used when there is not blocking.}
 \item{Named list of vectors}{A named list where \code{names(clusters)} are block labels, and each element is a named vector
 of per-block cluster proportions, e.g.
 \code{list(B1 = c(C1 = 0.4, C2=0.6), B2 = c(C3 = 0.2, C4 = 0.8))}
-Clusters are accessed as \code{clusters[[block]][cluster]}. Insided each block, cluster proportions must sum to 1, and the same cluster cannot appear in multiple blocks.}
+Clusters are accessed as \code{clusters[[block]][cluster]}. Inside each block, cluster proportions must sum to 1, and the same cluster cannot appear in multiple blocks.}
 }
 Units are assigned to clusters via \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}. Pass \code{NULL} (default) for no clustering.}
 
 \item{conditions}{Character vector of treatment condition labels. If a control group is specified
-the \code{names} attribute should be present with the control group labelled \code{"control"}.}
+the \code{names} attribute should be present with the control group labeled \code{"control"}.}
 
 \item{equal_probs}{Vector of equal assignment probabilities.}
 
@@ -74,7 +74,7 @@ but they will not be used. Default \code{NULL}. Other optional arguments Cannot 
 \item{dt}{Logical. If \code{TRUE} returns a \code{\link[data.table:data.table]{data.table::data.table()}}; otherwise returns a \code{\link[tibble:tibble]{tibble::tibble()}}. Default \code{FALSE}.}
 }
 \value{
-Initalized \code{data.table} or \code{tibble} with the first period simulation conducted, and all
+Initialized \code{data.table} or \code{tibble} with the first period simulation conducted, and all
 required columns for \code{\link[=run_mab]{run_mab()}}
 }
 \description{

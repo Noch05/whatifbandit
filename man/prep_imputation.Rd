@@ -27,13 +27,13 @@ outcomes. If \code{FALSE}, uses only data available up to the current period. In
 with a high number of periods, setting this to \code{FALSE} can be more computationally intensive,
 though not a significant contributor to total run time. Default is \code{FALSE}.}
 
-\item{blocking}{Logical; Whether or not treatment blocking is occuring}
+\item{blocking}{Logical; Whether or not treatment blocking is occurring}
 
-\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon
+\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instantaneous feedback for outcomes, as soon
 as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 known to the simulation, until a certain date. When re-computing the adaptive assignment
-probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the
+probabilities via Thompson Samplings or UCB1 outcomes that have not been observed on the date the
 assignment are treated as failures.}
 
 \item{current_period}{The current period number.}
@@ -47,7 +47,7 @@ A named list containing:
 \item \code{current_data}: A \code{tibble} or \code{data.table} containing \code{impute_block} column to guide the outcome imputations
 \item \code{impute_success}: A matrix object containing probabilities of success by \code{treatment_block} used to impute
 outcomes taken from \code{\link[=precompute_imputation]{precompute_imputation()}}.
-Modified to remove uneccessary rows, or add necessary ones, and order the matrix
+Modified to remove unnecessary rows, or add necessary ones, and order the matrix
 appropriately, as required by \code{\link[randomizr:block_ra]{randomizr::block_ra()}}.
 \item \code{impute_dates}: Named date vector by treatment condition, containing the dates of success
 to impute if delayed_feedback is FALSE. Subsetted from the \code{\link[=precompute_imputation]{precompute_imputation()}} output.}

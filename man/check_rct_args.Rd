@@ -52,8 +52,8 @@ check_period_method(period_method, time_unit, verbose, period_length)
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
 
-\item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as \code{"Control"}. Ranges from 0 to 1,
-and the default is 0. Adjustment is always made after the adjustmentment from random_assign_prop.}
+\item{control_augment}{Minimum proportion of each treatment assignment wave guaranteed to receive the treatment labeled as \code{"Control"}. Ranges from 0 to 1,
+and the default is 0. Adjustment is always made after the adjustment from random_assign_prop.}
 
 \item{random_assign_prop}{Proportion of each treatment wave assigned via static, equal
 probabilities of assignment. Adaptive probabilities are updated by `p * (1 - random_assign_prop)
@@ -89,11 +89,11 @@ details.}
 assignment probabilities. A value between 0 and 1, where outcomes from \code{k} periods ago are
 weighted by \code{discount_rate^k}. Default is 1 for no discounting.}
 
-\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon
+\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instantaneous feedback for outcomes, as soon
 as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 known to the simulation, until a certain date. When re-computing the adaptive assignment
-probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the
+probabilities via Thompson Samplings or UCB1 outcomes that have not been observed on the date the
 assignment are treated as failures.}
 
 \item{whole_experiment}{Logical; if \code{TRUE}, uses all past experimental data for imputing
@@ -121,7 +121,7 @@ setting an appropriate \code{\link[future:plan]{future::plan()}}. See details be
 \code{FALSE}. When\code{ r = 1} models are always kept and reported. Required to be \code{TRUE} to compute
 arbitrary pairwise contrasts. Only utilized under clustering.}
 
-\item{blocking}{Logical; Whether or not treatment blocking is occuring}
+\item{blocking}{Logical; Whether or not treatment blocking is occurring}
 }
 \value{
 Throws an error if an argument is missing or misspecified.

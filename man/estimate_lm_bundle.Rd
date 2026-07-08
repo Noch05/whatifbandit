@@ -20,15 +20,15 @@ estimate_lm_bundle(
 \item{ipw}{Logical. If \code{TRUE} IPW-weighted LPM; if
 \code{FALSE}, fits the unweighted OLS LPM.}
 
-\item{estimator}{Character string labelling the estimator, either
+\item{estimator}{Character string labeling the estimator, either
 \code{"IPW"} or \code{"OLS"}}
 
 \item{col_names}{List holding the columns required from the provided data as strings and symbols.}
 
-\item{clustering}{Logical; Whether or not treatment clustering is occuring}
+\item{clustering}{Logical; Whether or not treatment clustering is occurring}
 
 \item{conditions}{Character vector of treatment condition labels. If a control group is specified
-the \code{names} attribute should be present with the control group labelled \code{"control"}.}
+the \code{names} attribute should be present with the control group labeled \code{"control"}.}
 
 \item{dt}{Logical. If \code{TRUE} returns a \code{\link[data.table:data.table]{data.table::data.table()}}; otherwise returns a \code{\link[tibble:tibble]{tibble::tibble()}}. Default \code{FALSE}.}
 

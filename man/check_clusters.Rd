@@ -19,7 +19,7 @@ cluster_throw(check_clusters, cluster_col)
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
 
-\item{cluster_col}{String; name of column with cluster indicies.}
+\item{cluster_col}{String; name of column with cluster indices.}
 
 \item{check_clusters}{Object created in \code{\link[=check_clusters]{check_clusters()}} with all of the clusters
 which persist across periods.}

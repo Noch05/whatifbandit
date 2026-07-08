@@ -1,5 +1,5 @@
 #' Computing Linear Contrasts
-#' @description A set of helper functions for computing linear contrasts of AIPW, IPW, and OLS estimates
+#' @description A set of helper functions for computing linear contrasts of AW-AIPW, IPW, and OLS estimates
 #' @name lin_contrast
 #' @family estimation
 #' @keywords internal
@@ -69,7 +69,7 @@ build_contrast_matrices <- function(
 #' @describeIn lin_contrast Creates contrast vectors for linear hypothesis test
 #' @param conditions Vector of treatment conditions
 #' @param ref_idx Index of the reference arm
-#' @param type Type of contrats, "best" or "control"
+#' @param type Type of contrasts, "best" or "control"
 #' @returns A matrix row vectors containing each contrast to test.
 #' @keywords internal
 make_contrasts <- function(conditions, ref_idx, type) {
@@ -102,13 +102,13 @@ make_contrasts <- function(conditions, ref_idx, type) {
 #' @param C List of 1 x k contrast vectors
 #' @param coefs named vector of coefficients
 #' @param vcov A `k x k` variance-covariance matrix
-#' @param df Numeric scalar giving the degrees of freedom for the t-test. AIPW only uses t-test in
+#' @param df Numeric scalar giving the degrees of freedom for the t-test. AW-AIPW only uses t-test in
 #' clustered case.
 #' @param model An `lm_robust` model object
 #' @param dt Whether to compile results into a data.table or data.frame
 #' @inheritParams compute_iaipw
 #' @inheritParams run_mab
-#' @inheritParams estimate_aipw
+#' @inheritParams estimate_aw_aipw
 #' @inheritParams estimate_lm_bundle
 #' @returns data.table or data.frame of linear contrasts with columns for each treatment arm, the
 #' estimated contrast, standard error, and degrees of freedom.
@@ -194,10 +194,10 @@ compute_contrast <- function(
 #' and OLS estimators, returning arm-level mean estimates, precomputed
 #' contrasts, and optionally the fitted model object.
 #'
-#' @param estimator Character string labelling the estimator, either
+#' @param estimator Character string labeling the estimator, either
 #'   `"IPW"` or `"OLS"`
 #' @inheritParams run_mab
-#' @inheritParams estimate_aipw
+#' @inheritParams estimate_aw_aipw
 #' @inheritParams estimate_lm
 #' @inheritParams run_mab_single
 #' @param contrasts_list List of 1 x k row vector contrasts to compute.

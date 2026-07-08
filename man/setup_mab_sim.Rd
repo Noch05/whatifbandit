@@ -40,7 +40,7 @@ Used when there is not blocking.}
 \item{Named list of vectors}{A named list where \code{names(clusters)} are block labels, and each element is a named vector
 of per-block cluster proportions, e.g.
 \code{list(B1 = c(C1 = 0.4, C2=0.6), B2 = c(C3 = 0.2, C4 = 0.8))}
-Clusters are accessed as \code{clusters[[block]][cluster]}. Insided each block, cluster proportions must sum to 1, and the same cluster cannot appear in multiple blocks.}
+Clusters are accessed as \code{clusters[[block]][cluster]}. Inside each block, cluster proportions must sum to 1, and the same cluster cannot appear in multiple blocks.}
 }
 Units are assigned to clusters via \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}. Pass \code{NULL} (default) for no clustering.}
 
@@ -61,7 +61,7 @@ to treatment across the periods of the trial.}
 \value{
 A named list containing:
 \itemize{
-\item \code{period_idxs}: A list of 2 integer vectors of period boundary indicies.
+\item \code{period_idxs}: A list of 2 integer vectors of period boundary indices.
 \item \code{assignment_dates}: Vector of assignment dates based on provided dates.
 \item \code{blocking}: Logical; \code{TRUE} if \code{blocks} is non-null.
 \item \code{clustering}: Logical; \code{TRUE} if \code{clusters} is non-null.
@@ -77,7 +77,7 @@ probabilities \code{1 / K} for each of the \code{K} arms.
 }
 }
 \description{
-Perfoms all one-time set-up requried for \code{\link[=simulate_mab]{simulate_mab()}} as opposed to
+Performs all one-time set-up required for \code{\link[=simulate_mab]{simulate_mab()}} as opposed to
 \code{\link[=prep_sim_data]{prep_sim_data()}} which needs to be re-run each period.
 }
 \seealso{

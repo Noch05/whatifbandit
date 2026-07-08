@@ -46,7 +46,7 @@ utils::globalVariables(c(
   "SE"
 ))
 
-#' Misellaneous Helper Functions
+#' Miscellaneous Helper Functions
 #' @name misc_helpers
 NULL
 
@@ -84,7 +84,7 @@ verbose_log <- function(log, message) {
 #------------------------------------------
 #------------------------------------------------------------------------------
 #' Formula Parser
-#' @description Parsers the input formula for [mab_from_rct()]
+#' @description Parses the input formula for [mab_from_rct()]
 #' @param formula `formula` passed from [mab_from_rct()]
 #' @returns List of columns specified from formula.
 #' @keywords internal
