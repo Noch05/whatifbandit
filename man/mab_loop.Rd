@@ -54,8 +54,8 @@ defines the adaptive assignment process. For more details on these specific algo
 \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
 \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}
 
-\item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as \code{"Control"}. Ranges from 0 to 1,
-and the default is 0. Adjustment is always made after the adjustmentment from random_assign_prop.}
+\item{control_augment}{Minimum proportion of each treatment assignment wave guaranteed to receive the treatment labeled as \code{"Control"}. Ranges from 0 to 1,
+and the default is 0. Adjustment is always made after the adjustment from random_assign_prop.}
 
 \item{random_assign_prop}{Proportion of each treatment wave assigned via static, equal
 probabilities of assignment. Adaptive probabilities are updated by `p * (1 - random_assign_prop)
@@ -80,19 +80,19 @@ though not a significant contributor to total run time. Default is \code{FALSE}.
 \code{time_model}. Does not guarantee these new dates are used for assignment, \code{delayed_feedback} controls
 that behavior.}
 
-\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon
+\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instantaneous feedback for outcomes, as soon
 as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 known to the simulation, until a certain date. When re-computing the adaptive assignment
-probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the
+probabilities via Thompson Samplings or UCB1 outcomes that have not been observed on the date the
 assignment are treated as failures.}
 
-\item{clustering}{Logical; Whether or not treatment clustering is occuring}
+\item{clustering}{Logical; Whether or not treatment clustering is occurring}
 
-\item{blocking}{Logical; Whether or not treatment blocking is occuring}
+\item{blocking}{Logical; Whether or not treatment blocking is occurring}
 
 \item{conditions}{Character vector of treatment condition labels. If a control group is specified
-the \code{names} attribute should be present with the control group labelled \code{"control"}.}
+the \code{names} attribute should be present with the control group labeled \code{"control"}.}
 
 \item{col_names}{List holding the columns required from the provided data as strings and symbols.}
 

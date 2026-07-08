@@ -34,7 +34,7 @@
 #' p-matrix is built from the pooled sample mean of the original trial. With blocks and/or clustered
 #' pooled sample means are estimated within each block or cluster.
 #'
-#' For `method == "boostrap"` with a `single_rct_mab`, the block and or cluster assignment
+#' For `method == "bootstrap"` with a `single_rct_mab`, the block and or cluster assignment
 #' proportions are taken from the original dataset.
 #'
 #'
@@ -216,7 +216,7 @@ joint_boot_null <- function(mab, r) {
   )
 }
 
-#' Build Proper Arguments for RCT Boostrap Joint Test
+#' Build Proper Arguments for RCT Bootstrap Joint Test
 #' @name build_rct
 #' @keywords internal
 #'

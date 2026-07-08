@@ -144,10 +144,11 @@ test_that("Create Conditions", {
     condition_col = "c",
     control_condition = "T"
   )
-  truth <- c("A", "B", "T")
-  expect_equal(f(0), truth)
-  names(truth) <- c("treatment", "treatment", "control")
-  expect_equal(f(1), truth)
+  truth <- stats::setNames(
+    c("A", "B", "T"),
+    c("treatment", "treatment", "control")
+  )
+  expect_equal(f(), truth)
 })
 
 

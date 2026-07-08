@@ -63,7 +63,6 @@ test_that("simulate_mab: space-filling argument and design coverage", {
     ),
     mixed5 = list(
       algorithm = "ucb1",
-      control_augment = 0.2,
       random_assign_prop = 0.4,
       control_condition = "control",
       contrasts = "control"

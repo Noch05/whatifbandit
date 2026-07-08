@@ -52,7 +52,7 @@ via [future](https://future.futureverse.org/), large data support through [data.
 ## Installation
 ```r
 # Install the latest stable version from GitHub
-remotes::install_github("Noch05/whatifbandit@v1.0.0")
+remotes::install_github("Noch05/whatifbandit@v1.0.1")
 
 # Install from v0.03.0 from CRAN
 install.packages("whatifbandit")

@@ -40,8 +40,8 @@ probabilities of assignment. Adaptive probabilities are updated by `p * (1 - ran
 \item random_assign_prop * 1/k`, where k is the number of treatment arms.
 }}
 
-\item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as \code{"Control"}. Ranges from 0 to 1,
-and the default is 0. Adjustment is always made after the adjustmentment from random_assign_prop.}
+\item{control_augment}{Minimum proportion of each treatment assignment wave guaranteed to receive the treatment labeled as \code{"Control"}. Ranges from 0 to 1,
+and the default is 0. Adjustment is always made after the adjustment from random_assign_prop.}
 
 \item{control_condition}{Value of the control condition. Only necessary when \code{control_augment} is greater than 0. Internally this value
 is coerced to a string, so it should be passed as a string, or a type that can easily be converted to a string.}
@@ -76,11 +76,11 @@ weighted by \code{discount_rate^k}. Default is 1 for no discounting.}
 
 \item{col_names}{List holding the columns required from the provided data as strings and symbols.}
 
-\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon
+\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instantaneous feedback for outcomes, as soon
 as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 known to the simulation, until a certain date. When re-computing the adaptive assignment
-probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the
+probabilities via Thompson Samplings or UCB1 outcomes that have not been observed on the date the
 assignment are treated as failures.}
 
 \item{whole_experiment}{Logical; if \code{TRUE}, uses all past experimental data for imputing
@@ -109,9 +109,9 @@ setting an appropriate \code{\link[future:plan]{future::plan()}}. See details be
 \code{FALSE}. When\code{ r = 1} models are always kept and reported. Required to be \code{TRUE} to compute
 arbitrary pairwise contrasts. Only utilized under clustering.}
 
-\item{blocking}{Logical; Whether or not treatment blocking is occuring}
+\item{blocking}{Logical; Whether or not treatment blocking is occurring}
 
-\item{clustering}{Logical; Whether or not treatment clustering is occuring}
+\item{clustering}{Logical; Whether or not treatment clustering is occurring}
 }
 \value{
 Named list containing:

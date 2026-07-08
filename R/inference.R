@@ -1,6 +1,6 @@
-#' @title Calculate Observation Level AIPW For Each Treatment Condition
+#' @title Calculate Observation Level AW-AIPW For Each Treatment Condition
 #' @name compute_iaipw
-#' @description Calculates the augmented inverse probability weighted estimate (AIPW) of treatment
+#' @description Calculates the augmented inverse probability weighted estimate (AW-AIPW) of treatment
 #' success for each observation and treatment (i.e. on the level of a single unit).
 #'
 #' @param periods Total periods in the simulation.
@@ -10,7 +10,7 @@
 #'
 #' @returns A named list with the individual aipw estimate vectors for each treatment condition.
 #' @details
-#' The specification for the individual AIPW estimates can be found
+#' The specification for the individual AW-AIPW estimates can be found
 #' in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}. The
 #' formulas in equation 5, formed the basis for this function's calculations. Here
 #' the regression adjustment used is the grouped mean of success by treatment, up until
@@ -194,24 +194,24 @@ iaipw <- function(conditions_vec, success_vec, mhat, prob, condition) {
 }
 
 #-------------------------------------------------------------------------------
-#' Calculate Adaptive AIPW Estimates
-#' @name estimate_aipw
+#' Calculate Adaptive AW-AIPW Estimates
+#' @name estimate_aw_aipw
 #'
-#' @description Uses provided Invidual AIPW scores created by [compute_iaipw()] and computes the final
-#' AIPW estimate and variance using the formulas from
+#' @description Uses provided Individual AIPW scores created by [compute_iaipw()] and computes the final
+#' Adaptively Weighted AIPW estimate and variance using the formulas from
 #' \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et. al (2021)}.
 #' Uses the constant allocation rate adaptive weight.
 #'
 #' @inheritParams compute_iaipw
 #' @inheritParams run_mab
-#' @param iaipw Invidual AIPW scores computed by [compute_iaipw()].
-#' @param cluster_col String; name of column with cluster indicies.
+#' @param iaipw Individual AW-AIPW scores computed by [compute_iaipw()].
+#' @param cluster_col String; name of column with cluster indices.
 #' @returns A `tibble`/`data.table` containing 5 columns:
 #' \itemize{
-#'   \item `means`: AIPW statistics.
-#'   \item `se`: AIPW standard errors.
+#'   \item `means`: AW-AIPW statistics.
+#'   \item `se`: AW-AIPW standard errors.
 #'   \item `mab_condition`: Treatment arm.
-#'   \item `estimator`: "AIPW".
+#'   \item `estimator`: "AW-AIPW".
 #'   \item `df`: Degrees of freedom, `NA` implies normal distribution Z test.
 #' }
 #' @details
@@ -232,14 +232,14 @@ iaipw <- function(conditions_vec, success_vec, mhat, prob, condition) {
 #' which is adjusted via the Stata CR1 estimator (\eqn{\frac{G}{G-1} * \frac{N-1}{N-k}}) where k is
 #' the number of treatments, and G is the number of clusters.
 #'
-#' The AIPW estimator is unbiased, consistent, and asymptotically normal under the conditions of the simulated trial
-#' of the so can be used for valid inference with a normal distribution. Treatment effects can aslo be estimated as
-#' as the difference in AIPW estimates with the variance of the difference as the sum of the
-#' variances of the two arms. Simple Wald-Style
-#' tests with the normal distribution can be used here if the experiment contains a sufficiently
-#' large number of observations. In the clustered case, we suggest a t, distribution to be more
+#' The AW-AIPW estimator is unbiased, consistent, and asymptotically normal when a a sufficently
+#' large non-zero
+#' probability of assignment is guaranteed for each treatment condition in each period. The provided standard errors
+#' of the so can be used for valid inference with a normal distribution. Treatment effects can also be estimated as
+#' as the difference in AW-AIPW estimates with the variance of the difference as the sum of the
+#' variances of the two arms. In the clustered case, we suggest a t, distribution to be more
 #' conservative, given the sample size is now the cluster, we provide \eqn{G-1} as degrees of
-#' freedom, as standard by regression packages for clustered infernece (CR0, and CR1).
+#' freedom, as standard by regression packages for clustered inference (CR0, and CR1).
 #'
 #' @references
 #' Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 2021.
@@ -248,7 +248,7 @@ iaipw <- function(conditions_vec, success_vec, mhat, prob, condition) {
 #'
 #' @family estimation
 #' @keywords internal
-estimate_aipw <- function(
+estimate_aw_aipw <- function(
   data,
   assignment_probs,
   conditions,
@@ -288,7 +288,7 @@ estimate_aipw <- function(
 
   bind_func <- if (dt) data.table::rbindlist else dplyr::bind_rows
 
-  aipw_estimates <- purrr::imap(
+  aw_aipw_estimates <- purrr::imap(
     iaipw_periods[["iaipw"]],
     \(score, name) {
       weights <- sqrt(assignment_probs[[name]] / length(score))[iaipw_periods[[
@@ -314,14 +314,14 @@ estimate_aipw <- function(
           mean = mean,
           se = se,
           mab_condition = name,
-          estimator = "AIPW",
+          estimator = "AW-AIPW",
           df = df
         )
       )
     }
   ) |>
     bind_func()
-  return(aipw_estimates)
+  return(aw_aipw_estimates)
 }
 
 #' OLS Estimates for Probability of Success
@@ -333,19 +333,19 @@ estimate_aipw <- function(
 #'
 #' @inheritParams compute_iaipw
 #' @inheritParams run_mab
-#' @inheritParams estimate_aipw
+#' @inheritParams estimate_aw_aipw
 #' @param ipw Logical. If `TRUE` IPW-weighted LPM; if
 #'   `FALSE`, fits the unweighted OLS LPM.
 #' @details
 #'
-#' If CR2 standard errors fail to be calculated, CR1S are computed, equivlance to `vce(cluster,
+#' If CR2 standard errors fail to be calculated, CR1S are computed, equivalence to `vce(cluster,
 #' clustervar)` in Stata, and `se_type = "stata"` in `{estimatr}`
 #'
 #' These estimates follow the procedure in
 #' \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
 #' Degrees of freedom are not provided for the f-statistic, because the traditional F-distribution is invalid
 #' under the adaptive procedure. However, this f-statistic can be used for the randomization and
-#' bootstrap infernece joint-tests provided.
+#' bootstrap inference joint-tests provided.
 #'
 #' The provided standard errors can be used to construct approximate confidence intervals using a t-distribution with
 #' the provided degrees of freedom. However there are the degrees of freedom provided are `n - num_conditions`,
@@ -467,10 +467,10 @@ strip_condition_prefix <- function(x) {
 #' Fill Missing Conditions
 #' @description
 #' Accepts a `data.frame` like object, and a character of vector of `conditions`. It checks
-#' whether or not all provided conditions are present in the data, if not their values are initalized to NA
+#' whether or not all provided conditions are present in the data, if not their values are initialized to NA
 #' @param x A `tibble`/`data.table` containing the appropriate estimates
 #' @param conditions Character vector of treatment condition labels.
-#' @returns An updated `estimates` object with missing conditions initalized.
+#' @returns An updated `estimates` object with missing conditions initialized.
 #' @rdname inference_helpers
 #' @family estimation
 fill_missing_conditions <- function(x, conditions, estimator) {
@@ -523,7 +523,7 @@ fill_missing_conditions.data.table <- function(x, conditions, estimator) {
 }
 #' Combine Estimates
 #' @description
-#' Combines the AIPW, IPW, and Sample estimates into a single object to be returned.
+#' Combines the AW-AIPW, IPW, and Sample estimates into a single object to be returned.
 #' @param ... `tibbles` or `data.tables` to bind together.
 #' @returns A list of 2 elements:
 #' \itemize{

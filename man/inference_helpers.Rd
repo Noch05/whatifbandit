@@ -38,7 +38,7 @@ cr1(x, g, n, k)
 \value{
 \code{x} with the prefix removed.
 
-An updated \code{estimates} object with missing conditions initalized.
+An updated \code{estimates} object with missing conditions initialized.
 
 A list of 2 elements:
 \itemize{
@@ -52,9 +52,9 @@ An adjusted vector of variances
 Internal helpers for estimation in \code{\link[=run_mab]{run_mab()}}.
 
 Accepts a \code{data.frame} like object, and a character of vector of \code{conditions}. It checks
-whether or not all provided conditions are present in the data, if not their values are initalized to NA
+whether or not all provided conditions are present in the data, if not their values are initialized to NA
 
-Combines the AIPW, IPW, and Sample estimates into a single object to be returned.
+Combines the AW-AIPW, IPW, and Sample estimates into a single object to be returned.
 
 Performs adjustment of CR0 SE to CR1 SE, using Stata's formula
 }
@@ -66,7 +66,7 @@ Performs adjustment of CR0 SE to CR1 SE, using Stata's formula
 \seealso{
 Other estimation:
 \code{\link[=compute_iaipw]{compute_iaipw()}},
-\code{\link[=estimate_aipw]{estimate_aipw()}},
+\code{\link[=estimate_aw_aipw]{estimate_aw_aipw()}},
 \code{\link[=estimate_lm]{estimate_lm()}},
 \code{\link{lin_contrast}}
 }

@@ -1,3 +1,10 @@
+# whatifbandit 1.0.1
+
+## Minor Fixes
+* Fixing an error in contrast estimation for `"control"` when `control_augment` = 0 in `mab_from_rct()`
+* Changed estimator "AIPW" to "AW-AIPW" to emphasize adaptive weighting.
+
+
 # whatifbandit 1.0.0
 
 ## Breaking Changes
@@ -14,18 +21,18 @@
   see docs for more.
 * `simulate_mab()` is a new function that simulates a Multi-Arm-Bandit trial from provided
   population parameters.
-  Uses similar options to `mab_from_rct()`. See the `simulate_mab()` documenation for details.
-*  Inverse Probability Weighted estimates (IPW) are now provided, and cluster robust standard errors
+  Uses similar options to `mab_from_rct()`. See the `simulate_mab()` documentation for details.
+*  Inverse Probability Weighted estimates (IPW) are now provided, and cluster-robust standard errors
    supported
 * Linear contrast estimation supported. `simulate_mab()` and `mab_from_rct()` can now produce linear
   contrasts (e.g. treatment effects) in final output along with traditional mean
-  estimates for all estimators. See the documentaton for which options are available.
-* New discount rate parameter: Information from previous periods is now weighted a discount rate,
+  estimates for all estimators. See the documentation for which options are available.
+* New discount rate parameter: Information from previous periods is now weighted by a discount rate,
   which can be useful for non-stationary bandits. See `simulate_mab()` and `mab_from_rct()`
   documentation for more info.
 
 ## Other Changes
-* `random_assign_prop` now adjustes the assignment probabilities instead of splitting the data, see
+* `random_assign_prop` now adjusts the assignment probabilities instead of splitting the data; see
   docs for more details.
 * Updating UCB1 formula and assignment mechanism to match the canonical paper Auer et al. (2002)
 * Major internal optimizations for runtime. Runtime decreased for packaged `tanf` dataset with individual

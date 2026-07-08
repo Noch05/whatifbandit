@@ -5,8 +5,8 @@
 #' running the Multi-Arm-Bandit re-simulation. Intakes the data and column names to
 #' check for valid arguments, format and create new columns as needed, and pre-compute
 #' key values to avoid doing so within the simulation loop.
-#' @param blocking Logical; Whether or not treatment blocking is occuring
-#' @param clustering Logical; Whether or not treatment clustering is occuring
+#' @param blocking Logical; Whether or not treatment blocking is occurring
+#' @param clustering Logical; Whether or not treatment clustering is occurring
 #' @inheritParams mab_from_rct
 #' @param col_names List holding the columns required from the provided data as strings and symbols.
 #'
@@ -146,7 +146,7 @@ create_conditions <- function(
   conditions <- sort(as.character(unique(data[[
     condition_col
   ]])))
-  if (control_augment > 0) {
+  if (!is.null(control_condition)) {
     if (length(control_condition) != 1) {
       rlang::abort(c(
         "`control_condition` must have a length of 1",

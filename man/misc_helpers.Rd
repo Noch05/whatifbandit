@@ -4,7 +4,7 @@
 \alias{misc_helpers}
 \alias{as_named_vec}
 \alias{verbose_log}
-\title{Misellaneous Helper Functions}
+\title{Miscellaneous Helper Functions}
 \usage{
 as_named_vec(df, val, name)
 

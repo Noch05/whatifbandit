@@ -122,7 +122,7 @@ run_mab_single <- function(
 #' `time_model`. Does not guarantee these new dates are used for assignment, `delayed_feedback` controls
 #' that behavior.
 #' @family param
-#' @returns Initalized `data.table` or `tibble` with the first period simulation conducted, and all
+#' @returns Initialized `data.table` or `tibble` with the first period simulation conducted, and all
 #' required columns for [run_mab()]
 #' @keywords internal
 
@@ -220,7 +220,7 @@ prep_sim_data <- function(
 #' of them in a vector.
 #' @param time_model_args Arguments passed to `time_model` function.
 #' @param conditions Character vector of treatment condition labels. If a control group is specified
-#' the `names` attribute should be present with the control group labelled `"control"`.
+#' the `names` attribute should be present with the control group labeled `"control"`.
 #'
 #'
 #' @returns: A named list containing:
@@ -321,14 +321,14 @@ run_mab <- function(
   }
   dt <- data.table::is.data.table(sim_results[["final_data"]])
 
-  aipw_estimates <- if ("aipw" %in% estimators) {
+  aw_aipw_estimates <- if ("aipw" %in% estimators) {
     iaipw <- compute_iaipw(
       data = sim_results[["final_data"]],
       assignment_probs = sim_results[["assignment_probs"]],
       conditions = conditions,
       periods = periods
     )
-    means <- estimate_aipw(
+    means <- estimate_aw_aipw(
       data = sim_results[["final_data"]],
       assignment_probs = sim_results[["assignment_probs"]],
       iaipw = iaipw,
@@ -343,12 +343,12 @@ run_mab <- function(
       coefs = as_named_vec(means, "mean", "mab_condition"),
       vcov = diag(means[["se"]]^2),
       df = unique(means[["df"]]),
-      estimator = "AIPW",
+      estimator = "AW-AIPW",
       dt = dt,
       conditions = conditions
     )
     list(
-      means = fill_missing_conditions(means, conditions, "AIPW"),
+      means = fill_missing_conditions(means, conditions, "AW-AIPW"),
       contrasts = contrasts
     )
   }
@@ -383,7 +383,7 @@ run_mab <- function(
     list(means = "means", contrasts = "contrasts"),
     \(item) {
       combine_estimates(
-        aipw_estimates[[item]],
+        aw_aipw_estimates[[item]],
         ipw_estimates[[item]],
         ols_estimates[[item]]
       )

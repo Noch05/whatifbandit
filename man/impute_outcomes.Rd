@@ -46,11 +46,11 @@ of a traditional Randomized Controlled Trial (RCT).}
 
 \item{success_date_col}{String; name of column holding outcome observation date from original experiment.}
 
-\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon
+\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instantaneous feedback for outcomes, as soon
 as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 known to the simulation, until a certain date. When re-computing the adaptive assignment
-probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the
+probabilities via Thompson Samplings or UCB1 outcomes that have not been observed on the date the
 assignment are treated as failures.}
 
 \item{idx}{Index of rows imputed in the period, used to update the original data.}
@@ -71,7 +71,7 @@ When \code{delayed_feedback = TRUE}, dates of success are imputed according to t
 by each period and treatment block (treatment arm + any blocking). These imputations are required because
 these observations do not currently have dates of success, as no success was observed during the original experiment.
 Therefore if they go through the next iteration of the simulation without being imputed,
-the new successes will still be treated as failues becasue of the date masking mechanism.
+the new successes will still be treated as failures because of the date masking mechanism.
 
 Observations that were successful in the original experiment, got assigned a new treatment, and then
 imputed as success again, will have their original date kept. This assumes that the treatment has no individual

@@ -35,7 +35,7 @@ Vector of blocking variables
 cluster variable
 }
 \description{
-Parsers the input formula for \code{\link[=mab_from_rct]{mab_from_rct()}}
+Parses the input formula for \code{\link[=mab_from_rct]{mab_from_rct()}}
 }
 \section{Functions}{
 \itemize{

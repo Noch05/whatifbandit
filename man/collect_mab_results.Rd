@@ -53,7 +53,7 @@ defines the adaptive assignment process. For more details on these specific algo
 \item{periods}{Total number of periods in Multi-Arm-Bandit trial.}
 
 \item{conditions}{Character vector of treatment condition labels. If a control group is specified
-the \code{names} attribute should be present with the control group labelled \code{"control"}.}
+the \code{names} attribute should be present with the control group labeled \code{"control"}.}
 
 \item{num_conditions}{Number of conditions, equivalent to \code{length(conditions)}.}
 

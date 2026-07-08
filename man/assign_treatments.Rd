@@ -65,12 +65,12 @@ compute_assignments(
 
 \item{probs}{Named numeric vector; probability of assignment for each treatment condition.}
 
-\item{blocking}{Logical; Whether or not treatment blocking is occuring}
+\item{blocking}{Logical; Whether or not treatment blocking is occurring}
 
-\item{clustering}{Logical; Whether or not treatment clustering is occuring}
+\item{clustering}{Logical; Whether or not treatment clustering is occurring}
 
 \item{conditions}{Character vector of treatment condition labels. If a control group is specified
-the \code{names} attribute should be present with the control group labelled \code{"control"}.}
+the \code{names} attribute should be present with the control group labeled \code{"control"}.}
 
 \item{condition_col}{Column name of \code{current_data} which holds original treatment assignments.}
 

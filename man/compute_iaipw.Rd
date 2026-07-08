@@ -5,7 +5,7 @@
 \alias{compute_iaipw.data.frame}
 \alias{compute_iaipw.data.table}
 \alias{iaipw}
-\title{Calculate Observation Level AIPW For Each Treatment Condition}
+\title{Calculate Observation Level AW-AIPW For Each Treatment Condition}
 \usage{
 compute_iaipw(data, assignment_probs, periods, conditions)
 
@@ -25,17 +25,17 @@ assigned each treatment at a given period.}
 \item{periods}{Total periods in the simulation.}
 
 \item{conditions}{Character vector of treatment condition labels. If a control group is specified
-the \code{names} attribute should be present with the control group labelled \code{"control"}.}
+the \code{names} attribute should be present with the control group labeled \code{"control"}.}
 }
 \value{
 A named list with the individual aipw estimate vectors for each treatment condition.
 }
 \description{
-Calculates the augmented inverse probability weighted estimate (AIPW) of treatment
+Calculates the augmented inverse probability weighted estimate (AW-AIPW) of treatment
 success for each observation and treatment (i.e. on the level of a single unit).
 }
 \details{
-The specification for the individual AIPW estimates can be found
+The specification for the individual AW-AIPW estimates can be found
 in \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et al. (2021)}. The
 formulas in equation 5, formed the basis for this function's calculations. Here
 the regression adjustment used is the grouped mean of success by treatment, up until
@@ -54,7 +54,7 @@ Hadad, Vitor, David A. Hirshberg, Ruohan Zhan, Stefan Wager, and Susan Athey. 20
 }
 \seealso{
 Other estimation:
-\code{\link[=estimate_aipw]{estimate_aipw()}},
+\code{\link[=estimate_aw_aipw]{estimate_aw_aipw()}},
 \code{\link[=estimate_lm]{estimate_lm()}},
 \code{\link{inference_helpers}},
 \code{\link{lin_contrast}}

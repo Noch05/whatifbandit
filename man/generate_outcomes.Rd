@@ -18,7 +18,7 @@ generate_outcomes(
 \arguments{
 \item{current_data}{A \code{data.frame} or \code{data.table} with only observations from the current sampling period.}
 
-\item{current_period}{Indiactor of the current period of the simulation.}
+\item{current_period}{Indicator of the current period of the simulation.}
 
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}

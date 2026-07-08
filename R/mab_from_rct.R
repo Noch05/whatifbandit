@@ -26,8 +26,8 @@
 #' \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
 #' \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.
 #'
-#' @param control_augment Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as `"Control"`. Ranges from 0 to 1,
-#' and the default is 0. Adjustment is always made after the adjustmentment from random_assign_prop.
+#' @param control_augment Minimum proportion of each treatment assignment wave guaranteed to receive the treatment labeled as `"Control"`. Ranges from 0 to 1,
+#' and the default is 0. Adjustment is always made after the adjustment from random_assign_prop.
 #'
 #' @param control_condition Value of the control condition. Only necessary when `control_augment` is greater than 0. Internally this value
 #' is coerced to a string, so it should be passed as a string, or a type that can easily be converted to a string.
@@ -74,11 +74,11 @@
 #' be created from your `date_col` via `lubridate::month(data[[date_col]])` or
 #' `format(data[[date_col]], "%m")`.
 #'
-#' @param delayed_feedback Logical; if `FALSE`, assumes instanteneous feedback for outcomes, as soon
+#' @param delayed_feedback Logical; if `FALSE`, assumes instantaneous feedback for outcomes, as soon
 #' as a treatment is assigned, the outcome is realized and known. If `TRUE`, delayed feedback is
 #' assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 #' known to the simulation, until a certain date. When re-computing the adaptive assignment
-#' probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the
+#' probabilities via Thompson Samplings or UCB1 outcomes that have not been observed on the date the
 #' assignment are treated as failures.
 #'
 #' @param success_date_col Bare column in `data`; contains original dates each success occurred.
@@ -143,7 +143,7 @@
 #' the estimated linear contrasts of treatment arm estimates for each trial. Only when `contrasts`
 #' is not `NULL`.
 #' \item `models`: List containing `lm_robust` objects from IPW and OLS regressions, only stored
-#' when `keep_models = TRUE` or ` r = 1` and clsuters are provided.
+#' when `keep_models = TRUE` or ` r = 1` and clusters are provided.
 #' \item `config`: Configuration list of 3 elements:
 #' \itemize{
 #' \item `args`: List of arguments passed to [simulate_mab()].
@@ -191,7 +191,14 @@
 #' formulas provided, under the constant allocation rate adaptive schema. These estimators are
 #' unbiased and asymptotically normal under the adaptive conditions and their differences are also
 #' unbiased asymptotically normal estimators for treatment effects. See
-#' \href{https://www.pnas.org/doi/pdf/10.1073/pnas.2014602118}{Hadad et al. (2021)}. Under
+#' \href{https://www.pnas.org/doi/pdf/10.1073/pnas.2014602118}{Hadad et al. (2021)}. Asymptotic
+#' validity hinges on sub-optimal arms continually being assigned, if arms have low to 0
+#' probability of being assigned, the central limit theorem proved no longer applies. Thus it is
+#' recommended to use `random_assign_prop` and `control_augment` to ensure all arms non-zero probabilities
+#' of assignment over the whole trial.
+#'
+#'
+#' Under
 #' clustering the unit of observation becomes the cluster, the sample size the number of clusters.
 #' Individual estimates are aggregated in each period by cluster before being used to compute the
 #' final AIPW estimate and variance (CR0 style). The variance is adjusted by the Stata CR1

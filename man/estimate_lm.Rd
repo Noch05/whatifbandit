@@ -17,12 +17,12 @@ estimate_lm(
 \item{data}{\code{tibble} or \code{data.table} holding necessary information to complete the simulation.
 Also used to store simulation outputs.}
 
-\item{cluster_col}{String; name of column with cluster indicies.}
+\item{cluster_col}{String; name of column with cluster indices.}
 
-\item{clustering}{Logical; Whether or not treatment clustering is occuring}
+\item{clustering}{Logical; Whether or not treatment clustering is occurring}
 
 \item{conditions}{Character vector of treatment condition labels. If a control group is specified
-the \code{names} attribute should be present with the control group labelled \code{"control"}.}
+the \code{names} attribute should be present with the control group labeled \code{"control"}.}
 
 \item{ipw}{Logical. If \code{TRUE} IPW-weighted LPM; if
 \code{FALSE}, fits the unweighted OLS LPM.}
@@ -41,13 +41,13 @@ Supports IPW weighted and unweighted regression. If clustering is specified CR2 
 standard errors are used. Appropriate degrees of freedom are supplied along with the regression's F-statistic
 }
 \details{
-If CR2 standard errors fail to be calculated, CR1S are computed, equivlance to \code{vce(cluster, clustervar)} in Stata, and \code{se_type = "stata"} in \code{{estimatr}}
+If CR2 standard errors fail to be calculated, CR1S are computed, equivalence to \code{vce(cluster, clustervar)} in Stata, and \code{se_type = "stata"} in \code{{estimatr}}
 
 These estimates follow the procedure in
 \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
 Degrees of freedom are not provided for the f-statistic, because the traditional F-distribution is invalid
 under the adaptive procedure. However, this f-statistic can be used for the randomization and
-bootstrap infernece joint-tests provided.
+bootstrap inference joint-tests provided.
 
 The provided standard errors can be used to construct approximate confidence intervals using a t-distribution with
 the provided degrees of freedom. However there are the degrees of freedom provided are \code{n - num_conditions},
@@ -72,7 +72,7 @@ Offer‐Westort, Molly, Alexander Coppock, and Donald P. Green. 2021.
 \seealso{
 Other estimation:
 \code{\link[=compute_iaipw]{compute_iaipw()}},
-\code{\link[=estimate_aipw]{estimate_aipw()}},
+\code{\link[=estimate_aw_aipw]{estimate_aw_aipw()}},
 \code{\link{inference_helpers}},
 \code{\link{lin_contrast}}
 }

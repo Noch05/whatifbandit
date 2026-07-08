@@ -37,7 +37,7 @@ Defaults to \code{NULL}, arbitrary contrasts can be after computed if \code{keep
 
 \item{ref_idx}{Index of the reference arm}
 
-\item{type}{Type of contrats, "best" or "control"}
+\item{type}{Type of contrasts, "best" or "control"}
 
 \item{C}{List of 1 x k contrast vectors}
 
@@ -45,7 +45,7 @@ Defaults to \code{NULL}, arbitrary contrasts can be after computed if \code{keep
 
 \item{vcov}{A \verb{k x k} variance-covariance matrix}
 
-\item{df}{Numeric scalar giving the degrees of freedom for the t-test. AIPW only uses t-test in
+\item{df}{Numeric scalar giving the degrees of freedom for the t-test. AW-AIPW only uses t-test in
 clustered case.}
 
 \item{model}{An \code{lm_robust} model object}
@@ -55,7 +55,7 @@ Also used to store simulation outputs.}
 
 \item{dt}{Whether to compile results into a data.table or data.frame}
 
-\item{estimator}{Character string labelling the estimator, either
+\item{estimator}{Character string labeling the estimator, either
 \code{"IPW"} or \code{"OLS"}}
 }
 \value{
@@ -67,7 +67,7 @@ data.table or data.frame of linear contrasts with columns for each treatment arm
 estimated contrast, standard error, and degrees of freedom.
 }
 \description{
-A set of helper functions for computing linear contrasts of AIPW, IPW, and OLS estimates
+A set of helper functions for computing linear contrasts of AW-AIPW, IPW, and OLS estimates
 }
 \section{Functions}{
 \itemize{
@@ -84,7 +84,7 @@ estimator type and whether clustering is present.
 \seealso{
 Other estimation:
 \code{\link[=compute_iaipw]{compute_iaipw()}},
-\code{\link[=estimate_aipw]{estimate_aipw()}},
+\code{\link[=estimate_aw_aipw]{estimate_aw_aipw()}},
 \code{\link[=estimate_lm]{estimate_lm()}},
 \code{\link{inference_helpers}}
 }

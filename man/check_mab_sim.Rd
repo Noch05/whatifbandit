@@ -54,12 +54,12 @@ Used when there is not blocking.}
 \item{Named list of vectors}{A named list where \code{names(clusters)} are block labels, and each element is a named vector
 of per-block cluster proportions, e.g.
 \code{list(B1 = c(C1 = 0.4, C2=0.6), B2 = c(C3 = 0.2, C4 = 0.8))}
-Clusters are accessed as \code{clusters[[block]][cluster]}. Insided each block, cluster proportions must sum to 1, and the same cluster cannot appear in multiple blocks.}
+Clusters are accessed as \code{clusters[[block]][cluster]}. Inside each block, cluster proportions must sum to 1, and the same cluster cannot appear in multiple blocks.}
 }
 Units are assigned to clusters via \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}. Pass \code{NULL} (default) for no clustering.}
 
-\item{control_augment}{Minimum proportion of each treatment assignment wave guarenteed to recieve the treatment labelled as \code{"Control"}. Ranges from 0 to 1,
-and the default is 0. Adjustment is always made after the adjustmentment from random_assign_prop.}
+\item{control_augment}{Minimum proportion of each treatment assignment wave guaranteed to receive the treatment labeled as \code{"Control"}. Ranges from 0 to 1,
+and the default is 0. Adjustment is always made after the adjustment from random_assign_prop.}
 
 \item{random_assign_prop}{Proportion of each treatment wave assigned via static, equal
 probabilities of assignment. Adaptive probabilities are updated by `p * (1 - random_assign_prop)
@@ -70,11 +70,11 @@ probabilities of assignment. Adaptive probabilities are updated by `p * (1 - ran
 \item{assignment_dates}{An optional \code{Date} vector of dates representing when units are assigned.
 If shorter than \code{n} it is recycled and sorted. If NULL` (default) no assignment dates are recorded.}
 
-\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instanteneous feedback for outcomes, as soon
+\item{delayed_feedback}{Logical; if \code{FALSE}, assumes instantaneous feedback for outcomes, as soon
 as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 known to the simulation, until a certain date. When re-computing the adaptive assignment
-probabilities via Thompsom Samplings or UCB1 outcomes that have not been observed on the date the
+probabilities via Thompson Samplings or UCB1 outcomes that have not been observed on the date the
 assignment are treated as failures.}
 
 \item{time_model}{An optional function with signature:
