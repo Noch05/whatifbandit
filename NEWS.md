@@ -1,3 +1,10 @@
+# whatifbandit 1.0.1
+
+## Minor Fixes
+* Fixing an error in contrast estimation for `"control"` when `control_augment` = 0 in `mab_from_rct()`
+* Changed estimator "AIPW" to "AW-AIPW" to emphasize adaptive weighting.
+
+
 # whatifbandit 1.0.0
 
 ## Breaking Changes
