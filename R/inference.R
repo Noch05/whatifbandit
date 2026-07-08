@@ -197,8 +197,8 @@ iaipw <- function(conditions_vec, success_vec, mhat, prob, condition) {
 #' Calculate Adaptive AW-AIPW Estimates
 #' @name estimate_aw_aipw
 #'
-#' @description Uses provided Individual AW-AIPW scores created by [compute_iaipw()] and computes the final
-#' AW-AIPW estimate and variance using the formulas from
+#' @description Uses provided Individual AIPW scores created by [compute_iaipw()] and computes the final
+#' Adaptively Weighted AIPW estimate and variance using the formulas from
 #' \href{https://www.pnas.org/doi/full/10.1073/pnas.2014602118}{Hadad et. al (2021)}.
 #' Uses the constant allocation rate adaptive weight.
 #'
@@ -226,18 +226,18 @@ iaipw <- function(conditions_vec, success_vec, mhat, prob, condition) {
 #' keeps effective sample size large, ensuring the asymptotic properties are realized in large samples with only
 #' a few assignment periods, while also properly accounting for the assignment procedure.
 #'
-#' If clustering is specified, within each period individual AW-AIPW estimates are aggregated by cluster,
+#' If clustering is specified, within each period individual AIPW estimates are aggregated by cluster,
 #' and then the sample size becomes the sum of the number of clusters in each period,
 #' the variance formula uses the cluster deviations instead (an effective CR0 style estimator),
 #' which is adjusted via the Stata CR1 estimator (\eqn{\frac{G}{G-1} * \frac{N-1}{N-k}}) where k is
 #' the number of treatments, and G is the number of clusters.
 #'
-#' The AW-AIPW estimator is unbiased, consistent, and asymptotically normal under the conditions of the simulated trial
+#' The AW-AIPW estimator is unbiased, consistent, and asymptotically normal when a a sufficently
+#' large non-zero
+#' probability of assignment is guaranteed for each treatment condition in each period. The provided standard errors
 #' of the so can be used for valid inference with a normal distribution. Treatment effects can also be estimated as
 #' as the difference in AW-AIPW estimates with the variance of the difference as the sum of the
-#' variances of the two arms. Simple Wald-Style
-#' tests with the normal distribution can be used here if the experiment contains a sufficiently
-#' large number of observations. In the clustered case, we suggest a t, distribution to be more
+#' variances of the two arms. In the clustered case, we suggest a t, distribution to be more
 #' conservative, given the sample size is now the cluster, we provide \eqn{G-1} as degrees of
 #' freedom, as standard by regression packages for clustered inference (CR0, and CR1).
 #'

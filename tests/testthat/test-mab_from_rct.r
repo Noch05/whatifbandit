@@ -76,7 +76,8 @@ test_that("mab_from_rct: space-filling argument and design coverage", {
         algorithm = "ucb1",
         random_assign_prop = 0.1,
         discount_rate = 0.85,
-        control_condition = "control"
+        control_condition = "control",
+        contrasts = "control"
       ),
       mixed2 = list(
         algorithm = "thompson",
