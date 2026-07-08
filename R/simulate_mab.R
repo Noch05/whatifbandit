@@ -271,7 +271,7 @@ simulate_mab <- function(
     ) {
       contrasts <- "best"
       rlang::warn(
-        "No control condition provided; `contrasts` set to \"best\". Supply `control_condition` to use \"control\" or \"both\"."
+        "No control condition provided; `contrasts` set to \"best\". Name a row \"control\" in `p` to use \"control\" or \"both\"."
       )
     }
   }

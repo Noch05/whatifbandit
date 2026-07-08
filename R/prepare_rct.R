@@ -146,7 +146,7 @@ create_conditions <- function(
   conditions <- sort(as.character(unique(data[[
     condition_col
   ]])))
-  if (control_augment > 0) {
+  if (!is.null(control_condition)) {
     if (length(control_condition) != 1) {
       rlang::abort(c(
         "`control_condition` must have a length of 1",
