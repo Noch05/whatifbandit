@@ -235,7 +235,7 @@ OLS estimates will be biased with spuriously low variance but are provided for c
 
 \subsection{\code{ r > 1}}{
 
-Multiple simulations allows researchers to gauge the variance of the procedure and produce
+Multiple simulations allow researchers to gauge the variance of the procedure and produce
 bootstrap estimates of variance of the procedure under the passed parameters. For each simulation
 new data is drawn according to the passed population parameters. This differs from \code{\link[=mab_from_rct]{mab_from_rct()}}
 where resimulations occurs on the same fixed dataset.

@@ -33,7 +33,8 @@ procedure adapted from
 See details for a description of both methods
 }
 \section{NOTE}{
-This procedure is experimental and has no Type I error guarantee
+This procedure is experimental and has no Type I error guarantee. Offer-Westort et. al (2021)
+also note the test suffers from low power, but it is provided for experimentation nonetheless.
 
 \code{method = "randomization"} operates under the sharp null that each unit
 would express the same outcome no matter the treatment they were assigned. To achieve this
