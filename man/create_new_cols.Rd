@@ -24,7 +24,7 @@ of a traditional Randomized Controlled Trial (RCT).}
 as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 known to the simulation, until a certain date. When re-computing the adaptive assignment
-probabilities via Thompson Samplings or UCB1 outcomes that have not been observed on the date the
+probabilities, outcomes that have not been observed on the date of
 assignment are treated as failures.}
 
 \item{vars_keep}{Character vector of variables to keep}
@@ -37,7 +37,7 @@ A \code{data.frame}/\code{data.table} subsetted to all the user provided columns
 \item \code{impute_req}: Binary indicator for imputation requirement, NA until assigned.
 \item \code{new_success_date}: New variable to hold the new success date under Multi-arm bandit procedure, NA until assigned.
 \item \code{block}: New variable indicating the variables to block by for assignment.
-\item \code{treatment_group}: New variable combining block with original treatment condition.
+\item \code{treatment_block}: New variable combining block with original treatment condition.
 }
 }
 \description{

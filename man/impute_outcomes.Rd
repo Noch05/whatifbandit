@@ -50,7 +50,7 @@ of a traditional Randomized Controlled Trial (RCT).}
 as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 known to the simulation, until a certain date. When re-computing the adaptive assignment
-probabilities via Thompson Samplings or UCB1 outcomes that have not been observed on the date the
+probabilities, outcomes that have not been observed on the date of
 assignment are treated as failures.}
 
 \item{idx}{Index of rows imputed in the period, used to update the original data.}
@@ -80,7 +80,7 @@ experiment.
 }
 \section{Functions}{
 \itemize{
-\item \code{compute_impute()}: Performs all \code{data.table}/\code{data.frame} agnostic portions of \code{impute_sucess}
+\item \code{compute_impute()}: Performs all \code{data.table}/\code{data.frame} agnostic portions of \code{impute_success}
 
 }}
 \seealso{

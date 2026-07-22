@@ -3,7 +3,7 @@
 #' @description Simple constructor for proper `mab` subclasses as output
 #' to [simulate_mab()] and [mab_from_rct()].
 #' @param mab Named list output of [simulate_mab()] or [mab_from_rct()].
-#' @param type Type of simulated trial, either `"rct"` or `"param"` to denote whether it was an rct re-simulation or an simulation form population parameters.
+#' @param type Type of simulated trial, either `"rct"` or `"param"` to denote whether it was an RCT re-simulation or an simulation from population parameters.
 #' @param multi Logical; `TRUE` denotes multiple trials.
 #' @returns Input `mab` with appropriate S3 class, restructured for output
 #' @keywords internal

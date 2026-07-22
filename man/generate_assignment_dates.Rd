@@ -10,7 +10,7 @@ generate_assignment_dates(n, assignment_dates)
 \item{n}{A positive integer. Total number of units to simulate.}
 
 \item{assignment_dates}{An optional \code{Date} vector of dates representing when units are assigned.
-If shorter than \code{n} it is recycled and sorted. If NULL` (default) no assignment dates are recorded.}
+If shorter than \code{n} it is recycled and sorted. If \code{NULL} (default) no assignment dates are recorded.}
 }
 \value{
 vector of assignment dates

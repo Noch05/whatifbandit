@@ -1,7 +1,7 @@
 #' Gather Past Results for Given Assignment Period
 #' @name compute_prior
 #' @description Summarizes results of prior periods to update assignment probabilities in the current period.
-#' This function calculates the number of success under each treatment and the total number of observations
+#' This function calculates the number of successes under each treatment and the total number of observations
 #' assigned to each treatment which are used to calculate UCB1 values or Thompson sampling probabilities.
 #' These values are weighted by the discount_rate provided.
 #'
@@ -17,9 +17,8 @@
 #' When `delayed_feedback = TRUE`, the maximum value from the specified
 #' `assignment_date_col` in the current data is taken as the last possible date
 #' the researchers conducting the experiment could have learned about a treatment outcome.
-#' All successes that occur past this date are masked and treated as failures for the purposes
-#' of assigning this treatments periods, as it simulates the researchers not having
-#' received that information yet.
+#' All successes that occur past this date are masked and are treated as failures for the purposes
+#' this period's assignments.
 #'
 #' @family assign
 #' @keywords internal
@@ -232,8 +231,9 @@ finalize_prior_list <- function(prior_list, conditions) {
 #'
 #' @returns A list of length 2 containing:
 #' \itemize{
-#' \item `bandit`: Bandit object, either a named numeric vector of Thompson sampling probabilities UCB1 values.
-#' \item `assignment_probabilities:` Named numeric vector with probabilities of being assigned to the given treatment, where `names(.)` are the treatments.
+#' \item `bandit`: Bandit object, either a named numeric vector of Thompson sampling probabilities
+#' or UCB1 values.
+#' \item `assignment_probabilities`: Named numeric vector with probabilities of being assigned to the given treatment, where `names(.)` are the treatments.
 #' Adjusted for control augmentation and random assignment proportion weighting}
 #'
 #' @details

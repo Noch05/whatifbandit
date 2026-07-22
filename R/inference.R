@@ -232,12 +232,12 @@ iaipw <- function(conditions_vec, success_vec, mhat, prob, condition) {
 #' which is adjusted via the Stata CR1 estimator (\eqn{\frac{G}{G-1} * \frac{N-1}{N-k}}) where k is
 #' the number of treatments, and G is the number of clusters.
 #'
-#' The AW-AIPW estimator is unbiased, consistent, and asymptotically normal when a a sufficently
+#' The AW-AIPW estimator is unbiased, consistent, and asymptotically normal when a sufficently
 #' large non-zero
 #' probability of assignment is guaranteed for each treatment condition in each period. The provided standard errors
-#' of the so can be used for valid inference with a normal distribution. Treatment effects can also be estimated as
+#' of the so can be used for valid inference with a normal distribution. Treatment effects can also be estimated
 #' as the difference in AW-AIPW estimates with the variance of the difference as the sum of the
-#' variances of the two arms. In the clustered case, we suggest a t, distribution to be more
+#' variances of the two arms. In the clustered case, we suggest a t distribution to be more
 #' conservative, given the sample size is now the cluster, we provide \eqn{G-1} as degrees of
 #' freedom, as standard by regression packages for clustered inference (CR0, and CR1).
 #'
@@ -338,7 +338,7 @@ estimate_aw_aipw <- function(
 #'   `FALSE`, fits the unweighted OLS LPM.
 #' @details
 #'
-#' If CR2 standard errors fail to be calculated, CR1S are computed, equivalence to `vce(cluster,
+#' If CR2 standard errors fail to be calculated, CR1S are computed, equivalent to `vce(cluster,
 #' clustervar)` in Stata, and `se_type = "stata"` in `{estimatr}`
 #'
 #' These estimates follow the procedure in
@@ -348,7 +348,7 @@ estimate_aw_aipw <- function(
 #' bootstrap inference joint-tests provided.
 #'
 #' The provided standard errors can be used to construct approximate confidence intervals using a t-distribution with
-#' the provided degrees of freedom. However there are the degrees of freedom provided are `n - num_conditions`,
+#' the provided degrees of freedom. However the degrees of freedom provided are `n - num_conditions`,
 #' which is likely to be an overestimate given the potential for the number of observations assigned
 #' to each group to vary widely with the adaptive trial. The HC2 or CR2 corrections help but
 #' do not capture the temporal dependence created by adaptive assignment. Thus formal pairwise tests
@@ -374,7 +374,7 @@ estimate_aw_aipw <- function(
 #' @references
 #' Offer‐Westort, Molly, Alexander Coppock, and Donald P. Green. 2021.
 #' "Adaptive Experimental Design: Prospects and Applications in Political Science."
-#' \emph{American Journal of Political Science} 65 (4): 826–44. \doi{10.1111/ajps.12597}..
+#' \emph{American Journal of Political Science} 65 (4): 826–44. \doi{10.1111/ajps.12597}.
 #'
 estimate_lm <- function(
   data,

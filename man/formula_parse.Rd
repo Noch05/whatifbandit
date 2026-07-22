@@ -27,7 +27,7 @@ gather_args(x)
 \value{
 List of columns specified from formula.
 
-A list containing the function call, and the arguments so \code{"Block(x1)"} gets turned into a list
+A list containing the function call, and the arguments so \code{"block(x1)"} gets turned into a list
 with elements \verb{block, "x1"}.
 
 Vector of blocking variables

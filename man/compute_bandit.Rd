@@ -48,10 +48,7 @@ the \code{names} attribute should be present with the control group labeled \cod
 and the default is 0. Adjustment is always made after the adjustment from random_assign_prop.}
 
 \item{random_assign_prop}{Proportion of each treatment wave assigned via static, equal
-probabilities of assignment. Adaptive probabilities are updated by `p * (1 - random_assign_prop)
-\itemize{
-\item random_assign_prop * 1/k`, where k is the number of treatment arms.
-}}
+probabilities of assignment. Adaptive probabilities are updated by \code{p * (1 - random_assign_prop) + random_assign_prop * 1/k}, where k is the number of treatment arms.}
 
 \item{ndraws}{Number of draws used to approximate Thompson sampling probabilities. Used only when
 direct calculation fails or overflows. Default is 5000 but can be raised or lowered depending on
@@ -62,8 +59,9 @@ performance and accuracy concerns.}
 \value{
 A list of length 2 containing:
 \itemize{
-\item \code{bandit}: Bandit object, either a named numeric vector of Thompson sampling probabilities UCB1 values.
-\item \verb{assignment_probabilities:} Named numeric vector with probabilities of being assigned to the given treatment, where \code{names(.)} are the treatments.
+\item \code{bandit}: Bandit object, either a named numeric vector of Thompson sampling probabilities
+or UCB1 values.
+\item \code{assignment_probabilities}: Named numeric vector with probabilities of being assigned to the given treatment, where \code{names(.)} are the treatments.
 Adjusted for control augmentation and random assignment proportion weighting}
 
 Logical; TRUE if the vector is invalid, FALSE if valid

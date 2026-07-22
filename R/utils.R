@@ -118,7 +118,7 @@ formula_parse <- function(formula) {
 }
 #' Gather Args
 #' @param x String representing an `R` expression, like `"block(x1)"`.
-#' @returns A list containing the function call, and the arguments so `"Block(x1)"` gets turned into a list
+#' @returns A list containing the function call, and the arguments so `"block(x1)"` gets turned into a list
 #' with elements `block, "x1"`.
 #' @describeIn formula_parse Helper for formula parsing. Parses the expression, and splits the function call from the arguments.
 #' @keywords internal

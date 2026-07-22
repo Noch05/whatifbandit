@@ -251,7 +251,7 @@ check_data <- function(
     rlang::abort(c(
       "`period_length` cannot be larger than data size",
       "x" = sprintf(
-        "You data has %d rows, and your batch size is %d rows",
+        "Your data has %d rows, and your batch size is %d rows",
         nrow(data),
         period_length
       )
@@ -274,7 +274,7 @@ check_data <- function(
 
     if (period_length > data_interval) {
       rlang::abort(c(
-        "`period_length` cannot be larger the date range of your data",
+        "`period_length` cannot be larger then the date range of your data",
         "x" = sprintf(
           "Your period length is %d %ss but your data only covers %d %ss",
           period_length,
@@ -348,7 +348,7 @@ check_period_method <- function(
 col_conflict_check <- function(data) {
   reserved_cols <- reserved_cols()
   conflicts <- intersect(colnames(data), reserved_cols)
-  if (length(conflicts) > 1) {
+  if (length(conflicts) > 0) {
     rlang::abort(
       c(
         "`data` already contains column(s) reserved internally by `mab_from_rct()`.",

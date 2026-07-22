@@ -37,9 +37,9 @@ compute_lookback(prior_periods = NULL, current_period)
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
 
-\item{p}{The true probabilities of success for each treatment arm. Specified as an matrix,
-where \code{rownames(p)} are the treatment. If there is a control condition, specify its rowname as \code{"Control"}
-labels, and \code{colnames(p)} are the cluster or block labels, e.g.
+\item{p}{The true probabilities of success for each treatment arm. Specified as a matrix,
+where \code{rownames(p)} are the treatment arm names. If there is a control condition, specify its
+rowname as \code{"Control"}. \code{colnames(p)} are the cluster or block labels, e.g.
 \code{matrix(c(0.5, 0.3, 0.5, 0.6), nrow = 2, ncol = 2, dimnames(list(c("Control", "T1"), c("B1", "B2"))))}.
 Probabilities are accessed as \code{p[treatment, block]}.
 With blocks and clusters utilize the clusters for the columns because clusters are fully nested in blocks.
@@ -58,10 +58,7 @@ defines the adaptive assignment process. For more details on these specific algo
 and the default is 0. Adjustment is always made after the adjustment from random_assign_prop.}
 
 \item{random_assign_prop}{Proportion of each treatment wave assigned via static, equal
-probabilities of assignment. Adaptive probabilities are updated by `p * (1 - random_assign_prop)
-\itemize{
-\item random_assign_prop * 1/k`, where k is the number of treatment arms.
-}}
+probabilities of assignment. Adaptive probabilities are updated by \code{p * (1 - random_assign_prop) + random_assign_prop * 1/k}, where k is the number of treatment arms.}
 
 \item{prior_periods}{A positive integer; number of previous periods to use in the treatment
 assignment model. Default is \code{NULL}, where all prior periods are considered. See below for
@@ -84,7 +81,7 @@ that behavior.}
 as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 known to the simulation, until a certain date. When re-computing the adaptive assignment
-probabilities via Thompson Samplings or UCB1 outcomes that have not been observed on the date the
+probabilities, outcomes that have not been observed on the date of
 assignment are treated as failures.}
 
 \item{clustering}{Logical; Whether or not treatment clustering is occurring}
@@ -113,8 +110,8 @@ row of each period.}
 
 \verb{function(n, conditions, successes, current_period, blocks = NULL, clusters = NULL, ...)}
 
-It returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{dates_of_assignment} to produce \code{success_date}. Used to simulate delayed feedback mechanism
-during the trial, so outcomes are imperfectly observed. Only used when\code{dates_of_assignment} is also supplied. Dates can be generated even when \code{delayed_feedback == FALSE},
+It returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{assignment_dates} to produce \code{success_date}. Used to simulate delayed feedback mechanism
+during the trial, so outcomes are imperfectly observed. Only used when\code{assignment_dates} is also supplied. Dates can be generated even when \code{delayed_feedback == FALSE},
 but they will not be used. Default \code{NULL}. Other optional arguments Cannot share names with arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}.}
 
 \item{time_model_args}{Arguments passed to \code{time_model} function.}
@@ -135,7 +132,7 @@ Numeric value referring to the period index to look back from.
 }
 \description{
 Performs a full Multi-Arm Bandit (MAB) trial using Thompson Sampling or UCB1.
-The function provides loop around each step of the process for each treatment wave, performing adaptive
+The function provides a loop around each step of the process for each treatment wave, performing adaptive
 treatment assignment, and outcome imputation or generation as needed.
 }
 \details{

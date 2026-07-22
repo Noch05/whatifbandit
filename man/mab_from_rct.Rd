@@ -37,7 +37,7 @@ mab_from_rct(
 blocking and treatment clustering for optional blocked and/or clustered randomized designs. The treatment variable should always be the first variable
 following \code{~}
 (Additional covariates to be added in later updates). Clustering and blocking variables
-should being included in specific \code{block()} or \code{cluster()} groups in the formula, e.g. \code{outcome ~ treatment + block(x1, x2, x3) + cluster(x4)}.}
+should be included in specific \code{block()} or \code{cluster()} groups in the formula, e.g. \code{outcome ~ treatment + block(x1, x2, x3) + cluster(x4)}.}
 
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
@@ -52,10 +52,7 @@ defines the adaptive assignment process. For more details on these specific algo
 \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}
 
 \item{random_assign_prop}{Proportion of each treatment wave assigned via static, equal
-probabilities of assignment. Adaptive probabilities are updated by `p * (1 - random_assign_prop)
-\itemize{
-\item random_assign_prop * 1/k`, where k is the number of treatment arms.
-}}
+probabilities of assignment. Adaptive probabilities are updated by \code{p * (1 - random_assign_prop) + random_assign_prop * 1/k}, where k is the number of treatment arms.}
 
 \item{control_augment}{Minimum proportion of each treatment assignment wave guaranteed to receive the treatment labeled as \code{"Control"}. Ranges from 0 to 1,
 and the default is 0. Adjustment is always made after the adjustment from random_assign_prop.}
@@ -75,12 +72,12 @@ require an additional column with the months of each observation, but it can acc
 \code{month_col}. If \code{month_col} is specified, the periods follow the calendar months strictly, and
 when it is not specified months are simply used as the time interval. For example if a dataset
 has dates starting on July 26th, under month based assignment and a specified \code{month_col} the
-dates July 26th and August 3st would be in different periods, but if the \code{month_col} was not
+dates July 26th and August 3rd would be in different periods, but if the \code{month_col} was not
 specified, they would be in the same period because the dates are less than one month apart.}
 
 \item{period_length}{A positive integer; represents the length of each treatment period. If
 \code{period_method} is "date", this length refers the number of units specified in \code{time_unit}.
-(i.e., if \verb{"day"``, 10 would be 10 days). If }period_method\code{=}"batch"`, this refers to the
+(i.e., if \code{"day"}, 10 would be 10 days). If \code{period_method} = \code{"batch"}, this refers to the
 number of units in each batch.}
 
 \item{prior_periods}{A positive integer; number of previous periods to use in the treatment
@@ -105,7 +102,7 @@ be created from your \code{date_col} via \code{lubridate::month(data[[date_col]]
 as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 known to the simulation, until a certain date. When re-computing the adaptive assignment
-probabilities via Thompson Samplings or UCB1 outcomes that have not been observed on the date the
+probabilities, outcomes that have not been observed on the date of
 assignment are treated as failures.}
 
 \item{assignment_date_col}{Bare column in \code{data}; contains original dates treatments were
@@ -147,7 +144,7 @@ precompute after each replication. One of \code{"control"} (each arm vs. control
 \code{"best"} (each arm vs. the MAB-selected best arm),
 \code{"both"}, or \code{"all"} (all \code{choose(k, 2)} pairwise comparisons, expensive
 for large \code{k}). All contrasts are tested under the two-sided null of no difference.
-Defaults to \code{NULL}, arbitrary contrasts can be after computed if \code{keep_models == TRUE}}
+Defaults to \code{NULL}, arbitrary contrasts can be computed after if \code{keep_models == TRUE}}
 
 \item{...}{Additional named arguments passed to \code{\link[furrr:furrr_options]{furrr::furrr_options()}}}
 }
@@ -229,11 +226,11 @@ unbiased asymptotically normal estimators for treatment effects. See
 \href{https://www.pnas.org/doi/pdf/10.1073/pnas.2014602118}{Hadad et al. (2021)}. Asymptotic
 validity hinges on sub-optimal arms continually being assigned, if arms have low to 0
 probability of being assigned, the central limit theorem proved no longer applies. Thus it is
-recommended to use \code{random_assign_prop} and \code{control_augment} to ensure all arms non-zero probabilities
+recommended to use \code{random_assign_prop} and \code{control_augment} to ensure all arms have non-zero probabilities
 of assignment over the whole trial.
 
 Under
-clustering the unit of observation becomes the cluster, the sample size the number of clusters.
+clustering the unit of observation becomes the cluster, the sample size becomes the number of clusters.
 Individual estimates are aggregated in each period by cluster before being used to compute the
 final AIPW estimate and variance (CR0 style). The variance is adjusted by the Stata CR1
 adjustment, (\eqn{\frac{G}{G-1} * \frac{N-1}{N-k}}) where k is

@@ -384,7 +384,7 @@ create_cutoff.batch <- function(data, period_length) {
 #' \item `impute_req`: Binary indicator for imputation requirement, NA until assigned.
 #' \item `new_success_date`: New variable to hold the new success date under Multi-arm bandit procedure, NA until assigned.
 #' \item `block`: New variable indicating the variables to block by for assignment.
-#' \item `treatment_group`: New variable combining block with original treatment condition.
+#' \item `treatment_block`: New variable combining block with original treatment condition.
 #' }
 #'
 #' @keywords internal

@@ -35,7 +35,7 @@ the \code{names} attribute should be present with the control group labeled \cod
 \item{contrasts_list}{List of 1 x k row vector contrasts to compute.}
 }
 \value{
-A named list with three elements: \code{means}, \code{contrasts}, \code{model}, \code{contrasts} are the
+A named list with three elements: \code{means}, \code{contrasts}, \code{model}. \code{contrasts} are the
 computed contrasts, the other 2 elements are the output of \code{\link[=estimate_lm]{estimate_lm()}}
 }
 \description{

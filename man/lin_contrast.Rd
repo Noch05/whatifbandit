@@ -31,7 +31,7 @@ precompute after each replication. One of \code{"control"} (each arm vs. control
 \code{"best"} (each arm vs. the MAB-selected best arm),
 \code{"both"}, or \code{"all"} (all \code{choose(k, 2)} pairwise comparisons, expensive
 for large \code{k}). All contrasts are tested under the two-sided null of no difference.
-Defaults to \code{NULL}, arbitrary contrasts can be after computed if \code{keep_models == TRUE}}
+Defaults to \code{NULL}, arbitrary contrasts can be computed after if \code{keep_models == TRUE}}
 
 \item{bandits}{data.frame or data.table of bandit statistics}
 
@@ -71,7 +71,7 @@ A set of helper functions for computing linear contrasts of AW-AIPW, IPW, and OL
 }
 \section{Functions}{
 \itemize{
-\item \code{build_contrast_matrices()}: Constructs a matrix of contrast vectors contrast matrices for testing pairwise comparisons
+\item \code{build_contrast_matrices()}: Constructs a matrix of contrast vectors for testing pairwise comparisons
 between treatment arms.
 
 \item \code{make_contrasts()}: Creates contrast vectors for linear hypothesis test

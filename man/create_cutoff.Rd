@@ -23,7 +23,7 @@ of a traditional Randomized Controlled Trial (RCT).}
 
 \item{period_length}{A positive integer; represents the length of each treatment period. If
 \code{period_method} is "date", this length refers the number of units specified in \code{time_unit}.
-(i.e., if \verb{"day"``, 10 would be 10 days). If }period_method\code{=}"batch"`, this refers to the
+(i.e., if \code{"day"}, 10 would be 10 days). If \code{period_method} = \code{"batch"}, this refers to the
 number of units in each batch.}
 
 \item{period_method}{A character string; one of \code{"date"}, \code{"batch"}, or \code{"individual"}, to define
@@ -38,7 +38,7 @@ require an additional column with the months of each observation, but it can acc
 \code{month_col}. If \code{month_col} is specified, the periods follow the calendar months strictly, and
 when it is not specified months are simply used as the time interval. For example if a dataset
 has dates starting on July 26th, under month based assignment and a specified \code{month_col} the
-dates July 26th and August 3st would be in different periods, but if the \code{month_col} was not
+dates July 26th and August 3rd would be in different periods, but if the \code{month_col} was not
 specified, they would be in the same period because the dates are less than one month apart.}
 
 \item{date_col}{Bare column in \code{data}; contains original date of event/trial. Only necessary when

@@ -40,7 +40,7 @@ run_mab_single(
 )
 }
 \arguments{
-\item{sim_type}{String; Type of simulation to conduct, either \code{"resim"}, \code{"param"}, or "\verb{test"},
+\item{sim_type}{String; Type of simulation to conduct, either \code{"resim"}, \code{"param"}, or \code{"test"},
 for a resimulated rct, simulation from population parameters, or simulation for the randomization joint test.}
 
 \item{algorithm}{A character string specifying the MAB algorithm to use. Options are
@@ -60,10 +60,7 @@ of them in a vector.}
 and the default is 0. Adjustment is always made after the adjustment from random_assign_prop.}
 
 \item{random_assign_prop}{Proportion of each treatment wave assigned via static, equal
-probabilities of assignment. Adaptive probabilities are updated by `p * (1 - random_assign_prop)
-\itemize{
-\item random_assign_prop * 1/k`, where k is the number of treatment arms.
-}}
+probabilities of assignment. Adaptive probabilities are updated by \code{p * (1 - random_assign_prop) + random_assign_prop * 1/k}, where k is the number of treatment arms.}
 
 \item{prior_periods}{A positive integer; number of previous periods to use in the treatment
 assignment model. Default is \code{NULL}, where all prior periods are considered. See below for
@@ -73,7 +70,7 @@ details.}
 as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 known to the simulation, until a certain date. When re-computing the adaptive assignment
-probabilities via Thompson Samplings or UCB1 outcomes that have not been observed on the date the
+probabilities, outcomes that have not been observed on the date of
 assignment are treated as failures.}
 
 \item{discount_rate}{Rate for discounting observations from earlier periods when updating
@@ -105,7 +102,7 @@ precompute after each replication. One of \code{"control"} (each arm vs. control
 \code{"best"} (each arm vs. the MAB-selected best arm),
 \code{"both"}, or \code{"all"} (all \code{choose(k, 2)} pairwise comparisons, expensive
 for large \code{k}). All contrasts are tested under the two-sided null of no difference.
-Defaults to \code{NULL}, arbitrary contrasts can be after computed if \code{keep_models == TRUE}}
+Defaults to \code{NULL}, arbitrary contrasts can be computed after if \code{keep_models == TRUE}}
 
 \item{verbose}{Logical; whether or not to print intermediate messages. Default is \code{FALSE}.}
 
@@ -127,15 +124,15 @@ though not a significant contributor to total run time. Default is \code{FALSE}.
 
 \verb{function(n, conditions, successes, current_period, blocks = NULL, clusters = NULL, ...)}
 
-It returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{dates_of_assignment} to produce \code{success_date}. Used to simulate delayed feedback mechanism
-during the trial, so outcomes are imperfectly observed. Only used when\code{dates_of_assignment} is also supplied. Dates can be generated even when \code{delayed_feedback == FALSE},
+It returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{assignment_dates} to produce \code{success_date}. Used to simulate delayed feedback mechanism
+during the trial, so outcomes are imperfectly observed. Only used when\code{assignment_dates} is also supplied. Dates can be generated even when \code{delayed_feedback == FALSE},
 but they will not be used. Default \code{NULL}. Other optional arguments Cannot share names with arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}.}
 
 \item{time_model_args}{Arguments passed to \code{time_model} function.}
 
-\item{p}{The true probabilities of success for each treatment arm. Specified as an matrix,
-where \code{rownames(p)} are the treatment. If there is a control condition, specify its rowname as \code{"Control"}
-labels, and \code{colnames(p)} are the cluster or block labels, e.g.
+\item{p}{The true probabilities of success for each treatment arm. Specified as a matrix,
+where \code{rownames(p)} are the treatment arm names. If there is a control condition, specify its
+rowname as \code{"Control"}. \code{colnames(p)} are the cluster or block labels, e.g.
 \code{matrix(c(0.5, 0.3, 0.5, 0.6), nrow = 2, ncol = 2, dimnames(list(c("Control", "T1"), c("B1", "B2"))))}.
 Probabilities are accessed as \code{p[treatment, block]}.
 With blocks and clusters utilize the clusters for the columns because clusters are fully nested in blocks.
@@ -150,7 +147,7 @@ are the block labels. Units are assigned to blocks via \code{\link[randomizr:com
 
 \item{clusters}{Cluster membership probabilities. Can be:
 \describe{
-\item{Numeric vector}{A named vector where \code{names(clusters)} are the cluster labels e. g. \code{C(C1 = 0.4, C2 = 0.6)}.
+\item{Numeric vector}{A named vector where \code{names(clusters)} are the cluster labels e. g. \verb{cC1 = 0.4, C2 = 0.6)}.
 Used when there is not blocking.}
 \item{Named list of vectors}{A named list where \code{names(clusters)} are block labels, and each element is a named vector
 of per-block cluster proportions, e.g.
@@ -162,7 +159,7 @@ Units are assigned to clusters via \code{\link[randomizr:complete_ra]{randomizr:
 \item{equal_probs}{Vector of equal assignment probabilities.}
 
 \item{assignment_dates}{An optional \code{Date} vector of dates representing when units are assigned.
-If shorter than \code{n} it is recycled and sorted. If NULL` (default) no assignment dates are recorded.}
+If shorter than \code{n} it is recycled and sorted. If \code{NULL} (default) no assignment dates are recorded.}
 
 \item{simulate_dates}{Logical; whether or not new success dates should be generated using
 \code{time_model}. Does not guarantee these new dates are used for assignment, \code{delayed_feedback} controls

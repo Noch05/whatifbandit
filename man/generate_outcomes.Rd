@@ -23,9 +23,9 @@ generate_outcomes(
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
 of a traditional Randomized Controlled Trial (RCT).}
 
-\item{p}{The true probabilities of success for each treatment arm. Specified as an matrix,
-where \code{rownames(p)} are the treatment. If there is a control condition, specify its rowname as \code{"Control"}
-labels, and \code{colnames(p)} are the cluster or block labels, e.g.
+\item{p}{The true probabilities of success for each treatment arm. Specified as a matrix,
+where \code{rownames(p)} are the treatment arm names. If there is a control condition, specify its
+rowname as \code{"Control"}. \code{colnames(p)} are the cluster or block labels, e.g.
 \code{matrix(c(0.5, 0.3, 0.5, 0.6), nrow = 2, ncol = 2, dimnames(list(c("Control", "T1"), c("B1", "B2"))))}.
 Probabilities are accessed as \code{p[treatment, block]}.
 With blocks and clusters utilize the clusters for the columns because clusters are fully nested in blocks.
@@ -41,14 +41,14 @@ that behavior.}
 
 \verb{function(n, conditions, successes, current_period, blocks = NULL, clusters = NULL, ...)}
 
-It returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{dates_of_assignment} to produce \code{success_date}. Used to simulate delayed feedback mechanism
-during the trial, so outcomes are imperfectly observed. Only used when\code{dates_of_assignment} is also supplied. Dates can be generated even when \code{delayed_feedback == FALSE},
+It returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{assignment_dates} to produce \code{success_date}. Used to simulate delayed feedback mechanism
+during the trial, so outcomes are imperfectly observed. Only used when\code{assignment_dates} is also supplied. Dates can be generated even when \code{delayed_feedback == FALSE},
 but they will not be used. Default \code{NULL}. Other optional arguments Cannot share names with arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}.}
 
 \item{time_model_args}{Arguments passed to \code{time_model} function.}
 }
 \value{
-Updated \code{data} object containing all the outcomes generated in the period, such as the treatment assignments, treatment outcomes. and new success dates
+Updated \code{data} object containing all the outcomes generated in the period, such as the treatment assignments, treatment outcomes, and new success dates
 }
 \description{
 Uses provided success probabilities to draw a Bernoulli outcome for each unit. If \code{time_model} is provided, it is also used to compute

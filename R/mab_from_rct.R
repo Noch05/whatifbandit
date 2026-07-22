@@ -11,7 +11,7 @@
 #' blocking and treatment clustering for optional blocked and/or clustered randomized designs. The treatment variable should always be the first variable
 #' following `~`
 #' (Additional covariates to be added in later updates). Clustering and blocking variables
-#' should being included in specific `block()` or `cluster()` groups in the formula, e.g. `outcome ~
+#' should be included in specific `block()` or `cluster()` groups in the formula, e.g. `outcome ~
 #' treatment + block(x1, x2, x3) + cluster(x4)`.
 #'
 #' @param data A `data.frame`, `data.table`, or any object which inherits from `data.frame`, containing input data from the trial. This should be the results
@@ -33,8 +33,7 @@
 #' is coerced to a string, so it should be passed as a string, or a type that can easily be converted to a string.
 #
 #' @param random_assign_prop Proportion of each treatment wave assigned via static, equal
-#' probabilities of assignment. Adaptive probabilities are updated by `p * (1 - random_assign_prop)
-#' + random_assign_prop * 1/k`, where k is the number of treatment arms.
+#' probabilities of assignment. Adaptive probabilities are updated by `p * (1 - random_assign_prop) + random_assign_prop * 1/k`, where k is the number of treatment arms.
 #'
 #' @param period_method A character string; one of `"date"`, `"batch"`, or `"individual"`, to define
 #' the assignment into treatment waves. When using `"batch"` or `"individual"`, ensure your dataset
@@ -48,12 +47,12 @@
 #' `month_col`. If `month_col` is specified, the periods follow the calendar months strictly, and
 #' when it is not specified months are simply used as the time interval. For example if a dataset
 #' has dates starting on July 26th, under month based assignment and a specified `month_col` the
-#' dates July 26th and August 3st would be in different periods, but if the `month_col` was not
+#' dates July 26th and August 3rd would be in different periods, but if the `month_col` was not
 #' specified, they would be in the same period because the dates are less than one month apart.
 #'
 #' @param period_length A positive integer; represents the length of each treatment period. If
 #' `period_method` is "date", this length refers the number of units specified in `time_unit`.
-#' (i.e., if `"day"``, 10 would be 10 days). If `period_method` = `"batch"`, this refers to the
+#' (i.e., if `"day"`, 10 would be 10 days). If `period_method` = `"batch"`, this refers to the
 #' number of units in each batch.
 #'
 #' @param prior_periods A positive integer; number of previous periods to use in the treatment
@@ -78,7 +77,7 @@
 #' as a treatment is assigned, the outcome is realized and known. If `TRUE`, delayed feedback is
 #' assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 #' known to the simulation, until a certain date. When re-computing the adaptive assignment
-#' probabilities via Thompson Samplings or UCB1 outcomes that have not been observed on the date the
+#' probabilities, outcomes that have not been observed on the date of
 #' assignment are treated as failures.
 #'
 #' @param success_date_col Bare column in `data`; contains original dates each success occurred.
@@ -119,7 +118,7 @@
 #' `"best"` (each arm vs. the MAB-selected best arm),
 #'  `"both"`, or `"all"` (all `choose(k, 2)` pairwise comparisons, expensive
 #'  for large `k`). All contrasts are tested under the two-sided null of no difference.
-#' Defaults to `NULL`, arbitrary contrasts can be after computed if `keep_models == TRUE`
+#' Defaults to `NULL`, arbitrary contrasts can be computed after if `keep_models == TRUE`
 #'
 #'
 #' @param ... Additional named arguments passed to [furrr::furrr_options()]
@@ -194,12 +193,12 @@
 #' \href{https://www.pnas.org/doi/pdf/10.1073/pnas.2014602118}{Hadad et al. (2021)}. Asymptotic
 #' validity hinges on sub-optimal arms continually being assigned, if arms have low to 0
 #' probability of being assigned, the central limit theorem proved no longer applies. Thus it is
-#' recommended to use `random_assign_prop` and `control_augment` to ensure all arms non-zero probabilities
+#' recommended to use `random_assign_prop` and `control_augment` to ensure all arms have non-zero probabilities
 #' of assignment over the whole trial.
 #'
 #'
 #' Under
-#' clustering the unit of observation becomes the cluster, the sample size the number of clusters.
+#' clustering the unit of observation becomes the cluster, the sample size becomes the number of clusters.
 #' Individual estimates are aggregated in each period by cluster before being used to compute the
 #' final AIPW estimate and variance (CR0 style). The variance is adjusted by the Stata CR1
 #' adjustment, (\eqn{\frac{G}{G-1} * \frac{N-1}{N-k}}) where k is

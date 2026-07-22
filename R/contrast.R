@@ -6,7 +6,7 @@
 NULL
 
 #' Build Contrast Matrices for Pairwise Comparisons
-#' @describeIn lin_contrast Constructs a matrix of contrast vectors contrast matrices for testing pairwise comparisons
+#' @describeIn lin_contrast Constructs a matrix of contrast vectors for testing pairwise comparisons
 #' between treatment arms.
 #' @inheritParams run_mab_single
 #' @inheritParams mab_from_rct
@@ -202,7 +202,7 @@ compute_contrast <- function(
 #' @inheritParams run_mab_single
 #' @param contrasts_list List of 1 x k row vector contrasts to compute.
 #'
-#' @return A named list with three elements: `means`, `contrasts`, `model`, `contrasts` are the
+#' @returns A named list with three elements: `means`, `contrasts`, `model`. `contrasts` are the
 #' computed contrasts, the other 2 elements are the output of [estimate_lm()]
 #'
 #' @keywords internal

@@ -76,14 +76,14 @@ the \code{names} attribute should be present with the control group labeled \cod
 
 \item{cluster_col}{Column name of \code{current_data} which holds cluster assignments.}
 
-\item{sim_type}{String; Type of simulation to conduct, either \code{"resim"}, \code{"param"}, or "\verb{test"},
+\item{sim_type}{String; Type of simulation to conduct, either \code{"resim"}, \code{"param"}, or \code{"test"},
 for a resimulated rct, simulation from population parameters, or simulation for the randomization joint test.}
 
 \item{dt}{Logical. Whether \code{current_data} is a data.table.}
 }
 \value{
 Updated \code{tibble} or \code{data.table} with the new treatment conditions for each observation, and whether imputation is required.
-If this treatment is different then from under the original experiment, then 'impute_req = 1`, and else is 0 for the observation.
+If this treatment is different from the original experiment, \code{impute_req = 1}, otherwise it is 0.
 
 A list with \code{fn} (the randomizr function) and \code{args} (its arguments).
 

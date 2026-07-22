@@ -67,12 +67,12 @@ the variance formula uses the cluster deviations instead (an effective CR0 style
 which is adjusted via the Stata CR1 estimator (\eqn{\frac{G}{G-1} * \frac{N-1}{N-k}}) where k is
 the number of treatments, and G is the number of clusters.
 
-The AW-AIPW estimator is unbiased, consistent, and asymptotically normal when a a sufficently
+The AW-AIPW estimator is unbiased, consistent, and asymptotically normal when a sufficently
 large non-zero
 probability of assignment is guaranteed for each treatment condition in each period. The provided standard errors
-of the so can be used for valid inference with a normal distribution. Treatment effects can also be estimated as
+of the so can be used for valid inference with a normal distribution. Treatment effects can also be estimated
 as the difference in AW-AIPW estimates with the variance of the difference as the sum of the
-variances of the two arms. In the clustered case, we suggest a t, distribution to be more
+variances of the two arms. In the clustered case, we suggest a t distribution to be more
 conservative, given the sample size is now the cluster, we provide \eqn{G-1} as degrees of
 freedom, as standard by regression packages for clustered inference (CR0, and CR1).
 }

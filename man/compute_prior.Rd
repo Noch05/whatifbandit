@@ -59,7 +59,7 @@ finalize_prior_list(prior_list, conditions)
 as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 known to the simulation, until a certain date. When re-computing the adaptive assignment
-probabilities via Thompson Samplings or UCB1 outcomes that have not been observed on the date the
+probabilities, outcomes that have not been observed on the date of
 assignment are treated as failures.}
 
 \item{assignment_date_col}{Bare column in \code{data}; contains original dates treatments were
@@ -87,7 +87,7 @@ each a named numeric vector of length \code{length(conditions)}.
 }
 \description{
 Summarizes results of prior periods to update assignment probabilities in the current period.
-This function calculates the number of success under each treatment and the total number of observations
+This function calculates the number of successes under each treatment and the total number of observations
 assigned to each treatment which are used to calculate UCB1 values or Thompson sampling probabilities.
 These values are weighted by the discount_rate provided.
 }
@@ -95,9 +95,8 @@ These values are weighted by the discount_rate provided.
 When \code{delayed_feedback = TRUE}, the maximum value from the specified
 \code{assignment_date_col} in the current data is taken as the last possible date
 the researchers conducting the experiment could have learned about a treatment outcome.
-All successes that occur past this date are masked and treated as failures for the purposes
-of assigning this treatments periods, as it simulates the researchers not having
-received that information yet.
+All successes that occur past this date are masked and are treated as failures for the purposes
+this period's assignments.
 }
 \section{Functions}{
 \itemize{

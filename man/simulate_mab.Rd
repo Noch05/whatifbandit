@@ -37,9 +37,9 @@ simulate_mab(
 The sizes of each period will be equal as \code{n \%/\% t},
 except for the last period which will be \code{n \%/\% t + n \%\% t}, when \code{period_sizes = NULL}.}
 
-\item{p}{The true probabilities of success for each treatment arm. Specified as an matrix,
-where \code{rownames(p)} are the treatment. If there is a control condition, specify its rowname as \code{"Control"}
-labels, and \code{colnames(p)} are the cluster or block labels, e.g.
+\item{p}{The true probabilities of success for each treatment arm. Specified as a matrix,
+where \code{rownames(p)} are the treatment arm names. If there is a control condition, specify its
+rowname as \code{"Control"}. \code{colnames(p)} are the cluster or block labels, e.g.
 \code{matrix(c(0.5, 0.3, 0.5, 0.6), nrow = 2, ncol = 2, dimnames(list(c("Control", "T1"), c("B1", "B2"))))}.
 Probabilities are accessed as \code{p[treatment, block]}.
 With blocks and clusters utilize the clusters for the columns because clusters are fully nested in blocks.
@@ -59,7 +59,7 @@ are the block labels. Units are assigned to blocks via \code{\link[randomizr:com
 
 \item{clusters}{Cluster membership probabilities. Can be:
 \describe{
-\item{Numeric vector}{A named vector where \code{names(clusters)} are the cluster labels e. g. \code{C(C1 = 0.4, C2 = 0.6)}.
+\item{Numeric vector}{A named vector where \code{names(clusters)} are the cluster labels e. g. \verb{cC1 = 0.4, C2 = 0.6)}.
 Used when there is not blocking.}
 \item{Named list of vectors}{A named list where \code{names(clusters)} are block labels, and each element is a named vector
 of per-block cluster proportions, e.g.
@@ -72,27 +72,24 @@ Units are assigned to clusters via \code{\link[randomizr:complete_ra]{randomizr:
 and the default is 0. Adjustment is always made after the adjustment from random_assign_prop.}
 
 \item{random_assign_prop}{Proportion of each treatment wave assigned via static, equal
-probabilities of assignment. Adaptive probabilities are updated by `p * (1 - random_assign_prop)
-\itemize{
-\item random_assign_prop * 1/k`, where k is the number of treatment arms.
-}}
+probabilities of assignment. Adaptive probabilities are updated by \code{p * (1 - random_assign_prop) + random_assign_prop * 1/k}, where k is the number of treatment arms.}
 
 \item{delayed_feedback}{Logical; if \code{FALSE}, assumes instantaneous feedback for outcomes, as soon
 as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 known to the simulation, until a certain date. When re-computing the adaptive assignment
-probabilities via Thompson Samplings or UCB1 outcomes that have not been observed on the date the
+probabilities, outcomes that have not been observed on the date of
 assignment are treated as failures.}
 
 \item{assignment_dates}{An optional \code{Date} vector of dates representing when units are assigned.
-If shorter than \code{n} it is recycled and sorted. If NULL` (default) no assignment dates are recorded.}
+If shorter than \code{n} it is recycled and sorted. If \code{NULL} (default) no assignment dates are recorded.}
 
 \item{time_model}{An optional function with signature:
 
 \verb{function(n, conditions, successes, current_period, blocks = NULL, clusters = NULL, ...)}
 
-It returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{dates_of_assignment} to produce \code{success_date}. Used to simulate delayed feedback mechanism
-during the trial, so outcomes are imperfectly observed. Only used when\code{dates_of_assignment} is also supplied. Dates can be generated even when \code{delayed_feedback == FALSE},
+It returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{assignment_dates} to produce \code{success_date}. Used to simulate delayed feedback mechanism
+during the trial, so outcomes are imperfectly observed. Only used when\code{assignment_dates} is also supplied. Dates can be generated even when \code{delayed_feedback == FALSE},
 but they will not be used. Default \code{NULL}. Other optional arguments Cannot share names with arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}.}
 
 \item{period_sizes}{Numeric vector of \code{length(t)}, with the specific number of units to be assigned in each period. Used when it is required to assign different numbers of units
@@ -129,7 +126,7 @@ precompute after each replication. One of \code{"control"} (each arm vs. control
 \code{"best"} (each arm vs. the MAB-selected best arm),
 \code{"both"}, or \code{"all"} (all \code{choose(k, 2)} pairwise comparisons, expensive
 for large \code{k}). All contrasts are tested under the two-sided null of no difference.
-Defaults to \code{NULL}, arbitrary contrasts can be after computed if \code{keep_models == TRUE}}
+Defaults to \code{NULL}, arbitrary contrasts can be computed after if \code{keep_models == TRUE}}
 
 \item{check_args}{Logical; whether or not to validate passed arguments. Default is \code{TRUE} and recommended
 not to be changed.}
@@ -176,7 +173,7 @@ uniform baseline, where probabilities of being assigned to one treatment is the 
 \subsection{Blocking and Clustering}{
 
 When blocking and/or clustering are specified, these assignments will be randomly pregenerated before the start of the adaptive sequential assignment. These arguments allow simulating a trial
-when there may be Heterogeneous outcomes across a treatment block or treatment cluster, so different assignment probabilities can be provided for the same treatment, depending on the block and/or cluster
+when there may be heterogeneous outcomes across a treatment block or treatment cluster, so different assignment probabilities can be provided for the same treatment, depending on the block and/or cluster
 of a unit.
 
 Clusters should be contained inside each assignment wave (a warning is thrown if this is not the
@@ -234,12 +231,14 @@ are provided for joint tests provided in \code{\link[=joint_test]{joint_test()}}
 
 AW-AIPW and IPW are unbiased, with AW-AIPW having lower variances generally, while standard unweighted
 OLS estimates will be biased with spuriously low variance but are provided for comparisons.
+}
 
-\code{ r > 1}
+\subsection{\code{ r > 1}}{
+
 Multiple simulations allows researchers to gauge the variance of the procedure and produce
-bootstrap estimates of variance of the procedure under the passed parameters.
-For each additional simulation new data is drawn according to the passed population parameters so as opposed to \code{\link[=mab_from_rct]{mab_from_rct()}}
-resimulation occurs on a new dataset, not a fixed ground truth.
+bootstrap estimates of variance of the procedure under the passed parameters. For each simulation
+new data is drawn according to the passed population parameters. This differs from \code{\link[=mab_from_rct]{mab_from_rct()}}
+where resimulations occurs on the same fixed dataset.
 
 Further details about the adaptive procedure can be found in \code{\link[=mab_from_rct]{mab_from_rct()}}
 }
@@ -257,8 +256,9 @@ performance and memory efficiencies provided by \code{data.table}. However, we'v
 sizes can cause numerical instability with some calculations in the Thompson sampling
 procedure. Internal safeguards exist to prevent this, but the best way to preempt any issues is
 to set \code{prior_periods} to a low number.
+}
 
-#' ## Parallel Processing
+\subsection{Parallel Processing}{
 
 The function provides support for parallel processing via the
 \href{https://cran.r-project.org/package=future}{future} and

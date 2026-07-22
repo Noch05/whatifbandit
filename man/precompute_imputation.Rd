@@ -28,7 +28,7 @@ though not a significant contributor to total run time. Default is \code{FALSE}.
 as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 known to the simulation, until a certain date. When re-computing the adaptive assignment
-probabilities via Thompson Samplings or UCB1 outcomes that have not been observed on the date the
+probabilities, outcomes that have not been observed on the date of
 assignment are treated as failures.}
 
 \item{col_names}{List holding the columns required from the provided data as strings and symbols.}
@@ -39,9 +39,9 @@ assignment are treated as failures.}
 \value{
 A named list containing:
 \itemize{
-\item \code{original_summary}: The matrix or list of matrices containing the probability of success for each
+\item \code{success}: The matrix or list of matrices containing the probability of success for each
 treatment block, at each period.
-\item \code{dates_summary}: A list of vectors containing the average success date for
+\item \code{dates}: A list of vectors containing the average success date for
 each treatment block at each treatment period.
 }
 
@@ -56,11 +56,9 @@ success is calculated for each treatment block at every period.
 }
 \details{
 \code{\link[=precompute_imputation]{precompute_imputation()}} is an optimization, meant to reduce the cost of calculating these variables
-within the simulation loop. When \code{whole_experiment = TRUE}, \code{original_summary} is a single matrix,
-and used through the simulation. When \code{whole_experiment = FALSE}, \code{original_summary} is a list of matrices,
-each containing the cumulative probabilities of all periods up to the index \code{i}.
+within the simulation loop. When \code{whole_experiment = TRUE}, \verb{success' is a single matrix, and used through the simulation. When }whole_experiment = FALSE\verb{, }success\verb{is a list of matrices, each containing the cumulative probabilities of all periods up to the index}i`.
 
-If \code{perfect_assignment = FALSE}, \code{dates_summary} is not calculated, and is \code{NULL}.
+If \code{delayed_feedback = FALSE}, \code{dates} is not calculated, and is \code{NULL}.
 No covariates are used in the calculation, these are all simply grouped means.
 }
 \section{Functions}{

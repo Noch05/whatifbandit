@@ -25,7 +25,7 @@ of a traditional Randomized Controlled Trial (RCT).}
 which persist across periods.}
 }
 \value{
-Nothing; Throws an error if any clusters persist across multiple periods.
+Nothing; Throws a warning if any clusters persist across multiple periods.
 
 Nothing; Throws a warning if clusters persist across periods.
 }

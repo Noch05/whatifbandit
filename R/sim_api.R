@@ -200,7 +200,7 @@ prep_sim_data <- function(
   return(invisible(data))
 }
 #------------------------------------------------------------------------------
-#' @title Simulates MAB Trial From Prepared Inputs and Performs Inference
+#' @title Simulates a MAB Trial From Prepared Inputs and Performs Inference
 #' @name run_mab
 #' @description Internal helper. Centralizes necessary functions to conduct a
 #' a MAB trial with adaptive inference. It assumes all inputs have been preprocessed already.
@@ -213,7 +213,7 @@ prep_sim_data <- function(
 #' @param imputation_information Object created by [precompute_imputation()] containing the conditional
 #' means and success dates
 #' for each treatment block to impute from.
-#' @param sim_type String; Type of simulation to conduct, either `"resim"`, `"param"`, or "`test"`,
+#' @param sim_type String; Type of simulation to conduct, either `"resim"`, `"param"`, or `"test"`,
 #' for a resimulated rct, simulation from population parameters, or simulation for the randomization joint test.
 #' @param estimators Character vector; Which estimators to compute, can include `"aipw"`, `"ipw"`,
 #' "ols", and any combination
@@ -223,7 +223,7 @@ prep_sim_data <- function(
 #' the `names` attribute should be present with the control group labeled `"control"`.
 #'
 #'
-#' @returns: A named list containing:
+#' @returns A named list containing:
 #' \itemize{
 #' \item `final_data`: The processed `tibble` or `data.table`, with the trial's results.
 #' \item `bandits`: A `tibble` or `data.table` containing the UCB1 or Thompson Sampling values for each period.
@@ -423,11 +423,11 @@ run_mab <- function(
 #' @param mabs List of outputs from repeated [run_mab()] calls.
 #' @returns A named list containing:
 #' \itemize{
-#' \item `final_data:` `tibble` or `data.table` containing the nested `tibble`s/`data.table`s from each trial. Only provided when `keep_data = TRUE`.
+#' \item `final_data`: `tibble` or `data.table` containing the nested `tibble`s/`data.table`s from each trial. Only provided when `keep_data = TRUE`.
 #' \item `bandits`: A `tibble` or `data.table` containing the UCB1 values or Thompson Sampling posterior distributions for each period and trial. Wide format,
-#' each row is a period, and each columns is a treatment.
+#' each row is a period, and each column is a treatment.
 #' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period and trial. Wide format,
-#' each row is a period, and each columns is a treatment.
+#' each row is a period, and each column is a treatment.
 #' \item `estimates`: A `tibble` or `data.table` containing the all estimates and variances for each arm.
 #' Long format, treatment arm, and estimate type are columns along with the mean estimates
 #' and variance estimates.

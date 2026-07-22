@@ -14,7 +14,7 @@ are the block labels. Units are assigned to blocks via \code{\link[randomizr:com
 
 \item{clusters}{Cluster membership probabilities. Can be:
 \describe{
-\item{Numeric vector}{A named vector where \code{names(clusters)} are the cluster labels e. g. \code{C(C1 = 0.4, C2 = 0.6)}.
+\item{Numeric vector}{A named vector where \code{names(clusters)} are the cluster labels e. g. \verb{cC1 = 0.4, C2 = 0.6)}.
 Used when there is not blocking.}
 \item{Named list of vectors}{A named list where \code{names(clusters)} are block labels, and each element is a named vector
 of per-block cluster proportions, e.g.
@@ -30,7 +30,7 @@ for each vector come from the labels for each block and cluster.
 \description{
 Takes a named probability vector for blocks and clusters and uses
 \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}} to randomly assign each of \code{n} units to a
-blocks and cluster according to those probabilities.
+block and cluster according to those probabilities.
 }
 \seealso{
 Other param:

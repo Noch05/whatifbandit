@@ -9,7 +9,7 @@ construct_mab(mab, type, multi)
 \arguments{
 \item{mab}{Named list output of \code{\link[=simulate_mab]{simulate_mab()}} or \code{\link[=mab_from_rct]{mab_from_rct()}}.}
 
-\item{type}{Type of simulated trial, either \code{"rct"} or \code{"param"} to denote whether it was an rct re-simulation or an simulation form population parameters.}
+\item{type}{Type of simulated trial, either \code{"rct"} or \code{"param"} to denote whether it was an RCT re-simulation or an simulation from population parameters.}
 
 \item{multi}{Logical; \code{TRUE} denotes multiple trials.}
 }

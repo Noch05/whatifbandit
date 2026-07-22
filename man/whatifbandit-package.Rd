@@ -4,9 +4,9 @@
 \name{whatifbandit-package}
 \alias{whatifbandit}
 \alias{whatifbandit-package}
-\title{whatifbandit: Analyzing Randomized Experiments as Multi-Arm Bandits}
+\title{whatifbandit: Analyzing Randomized Experiments Using Multi-Arm Bandits}
 \description{
-Simulates the results of completed randomized controlled trials, as if they had been conducted as adaptive Multi-Arm Bandit (MAB) trials instead. Augmented inverse probability weighted estimation (AIPW), outlined by Hadad et al. (2021) \doi{10.1073/pnas.2014602118}, is used to robustly estimate the probability of success for each treatment arm under the adaptive design. Provides customization options to simulate perfect/imperfect information, stationary/non-stationary bandits, blocked treatment assignments, along with control augmentation, and other hybrid strategies for assigning treatment arms. The methods used in simulation were inspired by Offer-Westort et al. (2021) \doi{10.1111/ajps.12597}.
+Simulates response-adaptive experimental trials using Multi-Arm Bandits. Adaptive robust estimators defined in Hadad et al. (2021) \doi{10.1073/pnas.2014602118} and Offer-Westort et al. (2021) \doi{10.1111/ajps.12597} are used to robustly estimate conditional expectations and treatment effects. Provides significant simulation customization options for imperfect information, non-stationary bandits, and increased exploration strategies for assignments.
 }
 \seealso{
 Useful links:
@@ -17,11 +17,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Noah Ochital \email{noahochital@icloud.com} (\href{https://orcid.org/0009-0009-0398-2963}{ORCID}) [copyright holder]
+\strong{Maintainer}: Noah Ochital \email{no9857a@american.edu} (\href{https://orcid.org/0009-0009-0398-2963}{ORCID}) [copyright holder]
 
 Authors:
 \itemize{
-  \item Noah Ochital \email{noahochital@icloud.com} (\href{https://orcid.org/0009-0009-0398-2963}{ORCID}) [copyright holder]
+  \item Noah Ochital \email{no9857a@american.edu} (\href{https://orcid.org/0009-0009-0398-2963}{ORCID}) [copyright holder]
 }
 
 Other contributors:

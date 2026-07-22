@@ -21,21 +21,22 @@
 #' }
 #' @export
 #' @details
+#' # NOTE
+#' This procedure is experimental and has no Type I error guarantee. Offer-Westort et. al (2021)
+#' also note the test suffers from low power, but it is provided for experimentation nonetheless.
 #'
-#' `method = "randomization"` operates under the a sharp null that each unit
+#' `method = "randomization"` operates under the sharp null that each unit
 #' would express the same outcome no matter the treatment they were assigned. To achieve this
 #' the trial is re-simulated but new outcomes are not generated or imputed, however the adaptive algorithm
 #' still changes the assignments. This results in a null distribution that captures how the adaptive
 #' algorithm will assign even when the outcomes are not related to treatments at all.
 #'
 #' `method = "bootstrap"` operates under the null hypothesis that there is no difference between
-#' treatment arms within each each block/cluster the
-#' true success probability is the same for any treatment. If there are no blocks or clusters, a
-#' p-matrix is built from the pooled sample mean of the original trial. With blocks and/or clustered
-#' pooled sample means are estimated within each block or cluster.
-#'
-#' For `method == "bootstrap"` with a `single_rct_mab`, the block and or cluster assignment
+#' treatment arms within each block/cluster. If there are no blocks or clusters, a
+#' p-matrix is built from the pooled sample mean of the original trial. With block and or cluster
+#' pooled sample means are estimated within each block or cluster. The block and or cluster assignment
 #' proportions are taken from the original dataset.
+#'
 #'
 #'
 #' @references

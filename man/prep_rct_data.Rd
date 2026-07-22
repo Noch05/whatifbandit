@@ -35,10 +35,7 @@ create_conditions(control_condition, data, condition_col, control_augment)
 of a traditional Randomized Controlled Trial (RCT).}
 
 \item{random_assign_prop}{Proportion of each treatment wave assigned via static, equal
-probabilities of assignment. Adaptive probabilities are updated by `p * (1 - random_assign_prop)
-\itemize{
-\item random_assign_prop * 1/k`, where k is the number of treatment arms.
-}}
+probabilities of assignment. Adaptive probabilities are updated by \code{p * (1 - random_assign_prop) + random_assign_prop * 1/k}, where k is the number of treatment arms.}
 
 \item{control_augment}{Minimum proportion of each treatment assignment wave guaranteed to receive the treatment labeled as \code{"Control"}. Ranges from 0 to 1,
 and the default is 0. Adjustment is always made after the adjustment from random_assign_prop.}
@@ -58,12 +55,12 @@ require an additional column with the months of each observation, but it can acc
 \code{month_col}. If \code{month_col} is specified, the periods follow the calendar months strictly, and
 when it is not specified months are simply used as the time interval. For example if a dataset
 has dates starting on July 26th, under month based assignment and a specified \code{month_col} the
-dates July 26th and August 3st would be in different periods, but if the \code{month_col} was not
+dates July 26th and August 3rd would be in different periods, but if the \code{month_col} was not
 specified, they would be in the same period because the dates are less than one month apart.}
 
 \item{period_length}{A positive integer; represents the length of each treatment period. If
 \code{period_method} is "date", this length refers the number of units specified in \code{time_unit}.
-(i.e., if \verb{"day"``, 10 would be 10 days). If }period_method\code{=}"batch"`, this refers to the
+(i.e., if \code{"day"}, 10 would be 10 days). If \code{period_method} = \code{"batch"}, this refers to the
 number of units in each batch.}
 
 \item{prior_periods}{A positive integer; number of previous periods to use in the treatment
@@ -80,7 +77,7 @@ weighted by \code{discount_rate^k}. Default is 1 for no discounting.}
 as a treatment is assigned, the outcome is realized and known. If \code{TRUE}, delayed feedback is
 assumed, so as soon as treatment is assigned, a potential outcome is realized, but it is not
 known to the simulation, until a certain date. When re-computing the adaptive assignment
-probabilities via Thompson Samplings or UCB1 outcomes that have not been observed on the date the
+probabilities, outcomes that have not been observed on the date of
 assignment are treated as failures.}
 
 \item{whole_experiment}{Logical; if \code{TRUE}, uses all past experimental data for imputing

@@ -54,7 +54,7 @@ via [future](https://future.futureverse.org/), large data support through [data.
 # Install the latest stable version from GitHub
 remotes::install_github("Noch05/whatifbandit@v1.0.1")
 
-# Install from v0.03.0 from CRAN
+# Install the latest CRAN version (likely behind GitHub)
 install.packages("whatifbandit")
 
 ```
@@ -120,5 +120,5 @@ future::plan(sequential)
 ## More Information
 For more complete information about the package details, please refer to the the full documentation.
 
-If you have any specific questions about the package, feel free to send me an email at <noahochital@icloud.com>, and if you encounter
+If you have any specific questions about the package, feel free to send me an email at <no9857a@american.edu>, and if you encounter
 any bugs, please create an issue on [GitHub](https://github.com/Noch05/whatifbandit/issues) with a reproducible example.

@@ -1,7 +1,7 @@
 #' Runs Multi-Arm Bandit Trial
 #' @name mab_loop
 #' @description Performs a full Multi-Arm Bandit (MAB) trial using Thompson Sampling or UCB1.
-#' The function provides loop around each step of the process for each treatment wave, performing adaptive
+#' The function provides a loop around each step of the process for each treatment wave, performing adaptive
 #' treatment assignment, and outcome imputation or generation as needed.
 #'
 #' @inheritParams mab_from_rct

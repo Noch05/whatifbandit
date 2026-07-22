@@ -22,7 +22,7 @@ joint_null_inner(args)
 \item{r}{A positive integer; number of simulations used to build the null distribution.
 Default is 100.}
 
-\item{sim_type}{String; Type of simulation to conduct, either \code{"resim"}, \code{"param"}, or "\verb{test"},
+\item{sim_type}{String; Type of simulation to conduct, either \code{"resim"}, \code{"param"}, or \code{"test"},
 for a resimulated rct, simulation from population parameters, or simulation for the randomization joint test.}
 
 \item{args}{Arguments list to \code{\link[=run_mab_single]{run_mab_single()}}}

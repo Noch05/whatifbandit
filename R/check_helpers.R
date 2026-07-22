@@ -4,7 +4,7 @@
 #' @param ... Arguments to check
 #' @description
 #' This set of functions is common across the main argument checkers, and they each
-#' check a clear condition on a set of arguments, such ensuring the proper data type.
+#' check a clear condition on a set of arguments, such as ensuring the proper data type.
 NULL
 
 
@@ -21,7 +21,7 @@ check_logical <- function(...) {
         rlang::abort(
           c(
             sprintf("`%s` must be a logical (TRUE or FALSE)", .y),
-            "x" = paste0("You Passed: ", deparse(.x))
+            "x" = paste0("You passed: ", deparse(.x))
           )
         )
       }
@@ -51,7 +51,6 @@ check_prop <- function(...) {
 #' @describeIn check_helpers This function accepts the user's
 #' settings for positive integer arguments and checks if they are valid positive integers.
 #' @returns Throws an error if any input is not a valid positive integer.
-#' @keywords internal
 #' @keywords internal
 check_posint <- function(...) {
   args <- rlang::dots_list(..., .named = TRUE)
@@ -101,7 +100,7 @@ check_sum1 <- function(...) {
 #' @param arg Argument to check.
 #' @param valid vector of valid arguments.
 #' @param name name of the argument.
-#' @returns Nothing; Throws an error of the string argument is invalid.
+#' @returns Nothing; Throws an error if the string argument is invalid.
 check_string <- function(arg, valid, name) {
   if (!arg %in% valid) {
     rlang::abort(
@@ -135,7 +134,7 @@ check_names <- function(...) {
 #' @description
 #' Checks to ensure that each cluster only exists within a single simulation period, because
 #' if this is the case a true clustered design is no longer specified. See details.
-#' @returns Nothing; Throws an error if any clusters persist across multiple periods.
+#' @returns Nothing; Throws a warning if any clusters persist across multiple periods.
 #' @details
 #' The assignment algorithm in [mab_loop()] assumes that clusters do not persist across periods. For a
 #' true clustered design, if a cluster persisted across periods, all observations within

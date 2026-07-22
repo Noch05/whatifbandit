@@ -1,11 +1,7 @@
 ## R CMD check results
 
-0 errors | 0 warnings | 1 note
+0 errors | 0 warnings | 0 notes
 
-* This is a new release.
 
-## Resubmission
-This is a resubmission. I have:
-
-* Removed the unecessary LICENSE file
-* Made the GitHub Repo public so hyperlinks work approprietly
+## Notes
+This is a breaking release with major changes. No reverse dependencies to check.

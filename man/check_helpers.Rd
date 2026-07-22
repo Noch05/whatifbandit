@@ -40,13 +40,13 @@ Throws an error if any input is not a valid positive integer.
 
 Nothing; Throws an error if a numeric vector does not sum to 1.
 
-Nothing; Throws an error of the string argument is invalid.
+Nothing; Throws an error if the string argument is invalid.
 
 Nothing; Throws an if an argument does not have \code{names} attribute.
 }
 \description{
 This set of functions is common across the main argument checkers, and they each
-check a clear condition on a set of arguments, such ensuring the proper data type.
+check a clear condition on a set of arguments, such as ensuring the proper data type.
 }
 \section{Functions}{
 \itemize{

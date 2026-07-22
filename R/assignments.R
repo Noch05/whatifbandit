@@ -12,7 +12,7 @@
 #' @param probs Named numeric vector; probability of assignment for each treatment condition.
 #' @inheritParams compute_prior
 #' @returns Updated `tibble` or `data.table` with the new treatment conditions for each observation, and whether imputation is required.
-#' If this treatment is different then from under the original experiment, then 'impute_req = 1`, and else is 0 for the observation.
+#' If this treatment is different from the original experiment, `impute_req = 1`, otherwise it is 0.
 #'
 #' @seealso
 #'* [randomizr::block_ra()]

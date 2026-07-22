@@ -8,18 +8,18 @@
 #' @inheritParams prep_rct_data
 #' @returns A named list containing:
 #' \itemize{
-#' \item `original_summary`: The matrix or list of matrices containing the probability of success for each
+#' \item `success`: The matrix or list of matrices containing the probability of success for each
 #' treatment block, at each period.
-#' \item `dates_summary`: A list of vectors containing the average success date for
+#' \item `dates`: A list of vectors containing the average success date for
 #' each treatment block at each treatment period.
 #' }
 #' @details
 #' [precompute_imputation()] is an optimization, meant to reduce the cost of calculating these variables
-#' within the simulation loop. When `whole_experiment = TRUE`, `original_summary` is a single matrix,
-#' and used through the simulation. When `whole_experiment = FALSE`, `original_summary` is a list of matrices,
+#' within the simulation loop. When `whole_experiment = TRUE`, `success' is a single matrix,
+#' and used through the simulation. When `whole_experiment = FALSE`, `success` is a list of matrices,
 #' each containing the cumulative probabilities of all periods up to the index `i`.
 #'
-#' If `perfect_assignment = FALSE`, `dates_summary` is not calculated, and is `NULL`.
+#' If `delayed_feedback = FALSE`, `dates` is not calculated, and is `NULL`.
 #' No covariates are used in the calculation, these are all simply grouped means.
 #' @keywords internal
 #' @family imputation
@@ -402,7 +402,7 @@ impute_outcomes <- function(
 }
 
 #' Compute Imputations
-#' @describeIn impute_outcomes Performs all `data.table`/`data.frame` agnostic portions of `impute_sucess`
+#' @describeIn impute_outcomes Performs all `data.table`/`data.frame` agnostic portions of `impute_success`
 #' @inheritParams impute_outcomes
 #' @returns Numeric vector of imputed outcomes
 

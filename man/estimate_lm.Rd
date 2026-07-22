@@ -41,7 +41,7 @@ Supports IPW weighted and unweighted regression. If clustering is specified CR2 
 standard errors are used. Appropriate degrees of freedom are supplied along with the regression's F-statistic
 }
 \details{
-If CR2 standard errors fail to be calculated, CR1S are computed, equivalence to \code{vce(cluster, clustervar)} in Stata, and \code{se_type = "stata"} in \code{{estimatr}}
+If CR2 standard errors fail to be calculated, CR1S are computed, equivalent to \code{vce(cluster, clustervar)} in Stata, and \code{se_type = "stata"} in \code{{estimatr}}
 
 These estimates follow the procedure in
 \href{https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12597}{Offer-Westort et al. (2021)}.
@@ -50,7 +50,7 @@ under the adaptive procedure. However, this f-statistic can be used for the rand
 bootstrap inference joint-tests provided.
 
 The provided standard errors can be used to construct approximate confidence intervals using a t-distribution with
-the provided degrees of freedom. However there are the degrees of freedom provided are \code{n - num_conditions},
+the provided degrees of freedom. However the degrees of freedom provided are \code{n - num_conditions},
 which is likely to be an overestimate given the potential for the number of observations assigned
 to each group to vary widely with the adaptive trial. The HC2 or CR2 corrections help but
 do not capture the temporal dependence created by adaptive assignment. Thus formal pairwise tests
@@ -67,7 +67,7 @@ so the IPW estimator is still unbiased without the presence of the fixed effects
 \references{
 Offer‐Westort, Molly, Alexander Coppock, and Donald P. Green. 2021.
 "Adaptive Experimental Design: Prospects and Applications in Political Science."
-\emph{American Journal of Political Science} 65 (4): 826–44. \doi{10.1111/ajps.12597}..
+\emph{American Journal of Political Science} 65 (4): 826–44. \doi{10.1111/ajps.12597}.
 }
 \seealso{
 Other estimation:

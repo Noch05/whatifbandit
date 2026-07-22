@@ -2,7 +2,7 @@
 #' @name generate_groups
 #' @description Takes a named probability vector for blocks and clusters and uses
 #' [randomizr::complete_ra()] to randomly assign each of `n` units to a
-#' blocks and cluster according to those probabilities.
+#' block and cluster according to those probabilities.
 #'
 #' @inheritParams simulate_mab
 #'
@@ -115,7 +115,7 @@ generate_assignment_dates <- function(n, assignment_dates) {
 #'   length `n`.
 #' @param other_idx Character vector of block or cluster assignments to be used as the
 #' additional index for extracting from `p`.
-#' @returns A numeric vector of length containing the per-unit success
+#' @returns A numeric vector of length `n` containing the per-unit success
 #'   probabilities to be used for outcome observation.
 #' @keywords internal
 extract_success_prob <- function(
@@ -145,7 +145,7 @@ extract_success_prob <- function(
 #' @inheritParams run_mab
 #' @inheritParams compute_prior
 #' @param current_period Indicator of the current period of the simulation.
-#' @returns Updated `data` object containing all the outcomes generated in the period, such as the treatment assignments, treatment outcomes. and new success dates
+#' @returns Updated `data` object containing all the outcomes generated in the period, such as the treatment assignments, treatment outcomes, and new success dates
 #' @keywords internal
 #' @family param
 

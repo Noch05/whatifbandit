@@ -22,9 +22,9 @@ setup_mab_sim(
 The sizes of each period will be equal as \code{n \%/\% t},
 except for the last period which will be \code{n \%/\% t + n \%\% t}, when \code{period_sizes = NULL}.}
 
-\item{p}{The true probabilities of success for each treatment arm. Specified as an matrix,
-where \code{rownames(p)} are the treatment. If there is a control condition, specify its rowname as \code{"Control"}
-labels, and \code{colnames(p)} are the cluster or block labels, e.g.
+\item{p}{The true probabilities of success for each treatment arm. Specified as a matrix,
+where \code{rownames(p)} are the treatment arm names. If there is a control condition, specify its
+rowname as \code{"Control"}. \code{colnames(p)} are the cluster or block labels, e.g.
 \code{matrix(c(0.5, 0.3, 0.5, 0.6), nrow = 2, ncol = 2, dimnames(list(c("Control", "T1"), c("B1", "B2"))))}.
 Probabilities are accessed as \code{p[treatment, block]}.
 With blocks and clusters utilize the clusters for the columns because clusters are fully nested in blocks.
@@ -35,7 +35,7 @@ are the block labels. Units are assigned to blocks via \code{\link[randomizr:com
 
 \item{clusters}{Cluster membership probabilities. Can be:
 \describe{
-\item{Numeric vector}{A named vector where \code{names(clusters)} are the cluster labels e. g. \code{C(C1 = 0.4, C2 = 0.6)}.
+\item{Numeric vector}{A named vector where \code{names(clusters)} are the cluster labels e. g. \verb{cC1 = 0.4, C2 = 0.6)}.
 Used when there is not blocking.}
 \item{Named list of vectors}{A named list where \code{names(clusters)} are block labels, and each element is a named vector
 of per-block cluster proportions, e.g.
@@ -45,14 +45,14 @@ Clusters are accessed as \code{clusters[[block]][cluster]}. Inside each block, c
 Units are assigned to clusters via \code{\link[randomizr:complete_ra]{randomizr::complete_ra()}}. Pass \code{NULL} (default) for no clustering.}
 
 \item{assignment_dates}{An optional \code{Date} vector of dates representing when units are assigned.
-If shorter than \code{n} it is recycled and sorted. If NULL` (default) no assignment dates are recorded.}
+If shorter than \code{n} it is recycled and sorted. If \code{NULL} (default) no assignment dates are recorded.}
 
 \item{time_model}{An optional function with signature:
 
 \verb{function(n, conditions, successes, current_period, blocks = NULL, clusters = NULL, ...)}
 
-It returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{dates_of_assignment} to produce \code{success_date}. Used to simulate delayed feedback mechanism
-during the trial, so outcomes are imperfectly observed. Only used when\code{dates_of_assignment} is also supplied. Dates can be generated even when \code{delayed_feedback == FALSE},
+It returns a vector of \link[lubridate:period]{lubridate::period} objects which will then be added to \code{assignment_dates} to produce \code{success_date}. Used to simulate delayed feedback mechanism
+during the trial, so outcomes are imperfectly observed. Only used when\code{assignment_dates} is also supplied. Dates can be generated even when \code{delayed_feedback == FALSE},
 but they will not be used. Default \code{NULL}. Other optional arguments Cannot share names with arguments in \code{\link[furrr:furrr_options]{furrr::furrr_options()}}.}
 
 \item{period_sizes}{Numeric vector of \code{length(t)}, with the specific number of units to be assigned in each period. Used when it is required to assign different numbers of units

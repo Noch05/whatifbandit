@@ -7,9 +7,9 @@
 #' @param t Total number of assignment periods. Positive integer. Default is `t = n` for pure sequential (one unit per period) assignment.
 #' The sizes of each period will be equal as `n %/% t`,
 #' except for the last period which will be `n %/% t + n %% t`, when `period_sizes = NULL`.
-#' @param p The true probabilities of success for each treatment arm. Specified as an matrix,
-#' where `rownames(p)` are the treatment. If there is a control condition, specify its rowname as `"Control"`
-#' labels, and `colnames(p)` are the cluster or block labels, e.g.
+#' @param p The true probabilities of success for each treatment arm. Specified as a matrix,
+#' where `rownames(p)` are the treatment arm names. If there is a control condition, specify its
+#' rowname as `"Control"`. `colnames(p)` are the cluster or block labels, e.g.
 #'       `matrix(c(0.5, 0.3, 0.5, 0.6), nrow = 2, ncol = 2, dimnames(list(c("Control", "T1"), c("B1", "B2"))))`.
 #'       Probabilities are accessed as `p[treatment, block]`.
 #' With blocks and clusters utilize the clusters for the columns because clusters are fully nested in blocks.
@@ -19,7 +19,7 @@
 #' are the block labels. Units are assigned to blocks via [randomizr::complete_ra()]. Pass `NULL` (default) for no blocking.
 #' @param clusters Cluster membership probabilities. Can be:
 #' \describe{
-#' \item{Numeric vector}{A named vector where `names(clusters)` are the cluster labels e. g. `C(C1 = 0.4, C2 = 0.6)`.
+#' \item{Numeric vector}{A named vector where `names(clusters)` are the cluster labels e. g. `cC1 = 0.4, C2 = 0.6)`.
 #' Used when there is not blocking.}
 #' \item{Named list of vectors}{A named list where `names(clusters)` are block labels, and each element is a named vector
 #' of per-block cluster proportions, e.g.
@@ -28,13 +28,13 @@
 #' }
 #' Units are assigned to clusters via [randomizr::complete_ra()]. Pass `NULL` (default) for no clustering.
 #' @param assignment_dates An optional `Date` vector of dates representing when units are assigned.
-#' If shorter than `n` it is recycled and sorted. If NULL` (default) no assignment dates are recorded.
+#' If shorter than `n` it is recycled and sorted. If `NULL` (default) no assignment dates are recorded.
 #' @param time_model An optional function with signature:
 #'
 #' `function(n, conditions, successes, current_period, blocks = NULL, clusters = NULL, ...)`
 #'
-#' It returns a vector of [lubridate::period] objects which will then be added to `dates_of_assignment` to produce `success_date`. Used to simulate delayed feedback mechanism
-#' during the trial, so outcomes are imperfectly observed. Only used when`dates_of_assignment` is also supplied. Dates can be generated even when `delayed_feedback == FALSE`,
+#' It returns a vector of [lubridate::period] objects which will then be added to `assignment_dates` to produce `success_date`. Used to simulate delayed feedback mechanism
+#' during the trial, so outcomes are imperfectly observed. Only used when`assignment_dates` is also supplied. Dates can be generated even when `delayed_feedback == FALSE`,
 #' but they will not be used. Default `NULL`. Other optional arguments Cannot share names with arguments in [furrr::furrr_options()].
 #' @param period_sizes Numeric vector of `length(t)`, with the specific number of units to be assigned in each period. Used when it is required to assign different numbers of units
 #' to treatment across the periods of the trial.
@@ -73,7 +73,7 @@
 #' ## Blocking and Clustering
 #'
 #' When blocking and/or clustering are specified, these assignments will be randomly pregenerated before the start of the adaptive sequential assignment. These arguments allow simulating a trial
-#' when there may be Heterogeneous outcomes across a treatment block or treatment cluster, so different assignment probabilities can be provided for the same treatment, depending on the block and/or cluster
+#' when there may be heterogeneous outcomes across a treatment block or treatment cluster, so different assignment probabilities can be provided for the same treatment, depending on the block and/or cluster
 #' of a unit.
 #'
 #' Clusters should be contained inside each assignment wave (a warning is thrown if this is not the
@@ -131,11 +131,11 @@
 #' AW-AIPW and IPW are unbiased, with AW-AIPW having lower variances generally, while standard unweighted
 #' OLS estimates will be biased with spuriously low variance but are provided for comparisons.
 #'
-#' ` r > 1`
-#' Multiple simulations allows researchers to gauge the variance of the procedure and produce
-#' bootstrap estimates of variance of the procedure under the passed parameters.
-#' For each additional simulation new data is drawn according to the passed population parameters so as opposed to [mab_from_rct()]
-#' resimulation occurs on a new dataset, not a fixed ground truth.
+#' ## ` r > 1`
+#' Multiple simulations allow researchers to gauge the variance of the procedure and produce
+#' bootstrap estimates of variance of the procedure under the passed parameters. For each simulation
+#' new data is drawn according to the passed population parameters. This differs from [mab_from_rct()]
+#' where resimulations occurs on the same fixed dataset.
 #'
 #' Further details about the adaptive procedure can be found in [mab_from_rct()]
 #'
@@ -154,7 +154,7 @@
 #' procedure. Internal safeguards exist to prevent this, but the best way to preempt any issues is
 #' to set `prior_periods` to a low number.
 #'
-#' #' ## Parallel Processing
+#' ## Parallel Processing
 #'
 #' The function provides support for parallel processing via the
 #' \href{https://cran.r-project.org/package=future}{future} and
