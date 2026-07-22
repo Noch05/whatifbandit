@@ -47,7 +47,7 @@ for a resimulated rct, simulation from population parameters, or simulation for 
 \code{"thompson"}, \code{"ucb1"}, or "static", ignoring case. Algorithm
 defines the adaptive assignment process. For more details on these specific algorithms see
 \href{https://www.jstor.org/stable/2332286}{Thompson 1933};
-\href{https://doi.org/10.1023/A:1013689704352}{Auer et al. 2002};
+\href{https://link.springer.com/article/10.1023/A:1013689704352}{Auer et al. 2002};
 \href{https://proceedings.mlr.press/v23/agrawal12.html}{Agrawal and Goyal 2012};
 \href{https://arxiv.org/abs/1402.6028}{Kuleshov and Precup 2014} and
 \href{https://arxiv.org/abs/1904.07272}{Slivkins 2024}.}

@@ -1,6 +1,6 @@
 # whatifbandit 1.0.2
 
-* Update to CRAN version.
+* CRAN Submission
 
 # whatifbandit 1.0.1
 

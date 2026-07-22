@@ -428,17 +428,20 @@ run_mab <- function(
 #' each row is a period, and each column is a treatment.
 #' \item `assignment_probs`: A `tibble` or `data.table` containing the probability of being assigned each treatment arm at a given period and trial. Wide format,
 #' each row is a period, and each column is a treatment.
-#' \item `estimates`: A `tibble` or `data.table` containing the all estimates and variances for each arm.
-#' Long format, treatment arm, and estimate type are columns along with the mean estimates
-#' and variance estimates.
-#' \item `models`: A nested list containing the vcov matrix for the ipw and ols regressions for each
-#' repetition, or the full model objects. The elements are ipw and ols, either containing a 3d array
-#' of vcov, or a list of full models. Only provided if `keep_models = TRUE`
+#' \item `assignment_quantities`: A `tibble` or `data.table` containing total number of observations assigned to each
+#' treatment arm in each trial.
+# \item `means`: A `tibble` or `data.table` containing the mean estimates of the specified estimators for
+#' each treatment arm in each trial.
+#' \item `contrasts`: A `tibble` or `data.table` containing the contrast estimates of the specified estimators for
+#' the specified contrast structure for each trial.
+#' \item `f_stats`: Named `tibble` or `data.table` containing f_stat from IPW and OLS regressions
+#' for each trial.
+#' \item `models`: A nested list containing the `lm_robust` objects from regressions, only saved
+#' in clustered case, and when `keep_models = TRUE`
 #' }
 #' @details This function iterates over every element in `mabs` and extracts the required element to place in a condensed list
 #' for the final output.
 #' @keywords internal
-
 condense_results <- function(dt, keep_data, keep_models, mabs) {
   r <- length(mabs)
   names(mabs) <- as.character(1:r)

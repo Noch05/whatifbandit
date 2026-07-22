@@ -220,7 +220,7 @@ finalize_prior_list <- function(prior_list, conditions) {
 #' Thompson sampling is done using [bandit::best_binomial_bandit()] from
 #' the \href{https://cran.r-project.org/package=bandit}{bandit}
 #' package and UCB1 values are calculated using the well-defined formula that can be found
-#' in \href{https://doi.org/10.1023/A:1013689704352}{Auer et al. (2002)}.
+#' in \href{https://link.springer.com/article/10.1023/A:1013689704352}{Auer et al. (2002)}.
 #'
 #' @name compute_bandit
 #' @inheritParams mab_loop

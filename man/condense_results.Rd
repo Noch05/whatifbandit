@@ -27,12 +27,15 @@ A named list containing:
 each row is a period, and each column is a treatment.
 \item \code{assignment_probs}: A \code{tibble} or \code{data.table} containing the probability of being assigned each treatment arm at a given period and trial. Wide format,
 each row is a period, and each column is a treatment.
-\item \code{estimates}: A \code{tibble} or \code{data.table} containing the all estimates and variances for each arm.
-Long format, treatment arm, and estimate type are columns along with the mean estimates
-and variance estimates.
-\item \code{models}: A nested list containing the vcov matrix for the ipw and ols regressions for each
-repetition, or the full model objects. The elements are ipw and ols, either containing a 3d array
-of vcov, or a list of full models. Only provided if \code{keep_models = TRUE}
+\item \code{assignment_quantities}: A \code{tibble} or \code{data.table} containing total number of observations assigned to each
+treatment arm in each trial.
+each treatment arm in each trial.
+\item \code{contrasts}: A \code{tibble} or \code{data.table} containing the contrast estimates of the specified estimators for
+the specified contrast structure for each trial.
+\item \code{f_stats}: Named \code{tibble} or \code{data.table} containing f_stat from IPW and OLS regressions
+for each trial.
+\item \code{models}: A nested list containing the \code{lm_robust} objects from regressions, only saved
+in clustered case, and when \code{keep_models = TRUE}
 }
 }
 \description{
