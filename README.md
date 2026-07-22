@@ -88,7 +88,7 @@ sim <- mab_from_rct(
   whole_experiment = TRUE
 )
 ```
-### Running multiple trials.
+#### Running multiple trials.
 ```r
 # Setting seed for Reproducible RNG
 set.seed(532543)
@@ -109,7 +109,7 @@ simulations <- mab_from_rct(
   r = 100
 )
 ```
-### Running in Multiple Trials in Parallel
+#### Running in Multiple Trials in Parallel
 ```r
 library(future)
 
@@ -135,7 +135,7 @@ simulations <- mab_from_rct(
 )
 future::plan(sequential)
 ```
-## Simulating a New Adaptive Trial
+### Simulating a New Adaptive Trial
 
 ```r
 # Assumed true success probabilities for 3 treatment arms
