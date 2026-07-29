@@ -70,7 +70,7 @@ build_ra_args <- function(
         check_inputs = TRUE
       )
     )
-  } else if (clustering) {
+  } else if (clustering && FALSE) {
     list(
       fn = randomizr::cluster_ra,
       args = list(
