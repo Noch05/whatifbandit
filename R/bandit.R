@@ -383,7 +383,7 @@ compute_bandit.thompson <- function(
     ))
   }
 
-  return(list(bandit = bandit, assignment_prob = bandit))
+  return(list(bandit = bandit, assignment_prob = round(bandit, 4)))
 }
 #' @describeIn compute_bandit Checks if the Thompson Sampling probabilities either sum arbitrarily close
 #' to 0 or if any of them are NA, indicating the direct calculation failed or did not converge.
