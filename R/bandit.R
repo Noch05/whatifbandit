@@ -383,7 +383,7 @@ compute_bandit.thompson <- function(
     ))
   }
 
-  return(list(bandit = bandit, assignment_prob = round(bandit, 8)))
+  return(list(bandit = bandit, assignment_prob = round(bandit, 4)))
 }
 #' @describeIn compute_bandit Checks if the Thompson Sampling probabilities either sum arbitrarily close
 #' to 0 or if any of them are NA, indicating the direct calculation failed or did not converge.
@@ -409,8 +409,7 @@ compute_bandit.ucb1 <- function(
 
   ucb1[past_results[["n"]] == 0] <- Inf
 
-  ucb1_rounded <- round(ucb1, 8)
-  best <- names(ucb1)[ucb1_rounded == max(ucb1_rounded)]
+  best <- names(ucb1)[ucb1 == max(ucb1)]
   assignment_probs <- stats::setNames(
     rep(0, length(ucb1)),
     names(ucb1)
