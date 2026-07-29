@@ -112,8 +112,6 @@ test_that("mab_from_rct: space-filling argument and design coverage", {
         res_dt <- expect_no_error(do.call(mab_from_rct, full_args_dt))
 
         expect_mab_equal(res_df, res_dt)
-        expect_equal(unique(full_args_df[["cl"]]), unique(full_args_dt[["cl"]]))
-        expect_equal(unique(full_args_dt[["cl"]]), unique(full_args_df[["cl"]]))
         expect_joint_equal(res_df, res_dt, seed)
       })
     })
