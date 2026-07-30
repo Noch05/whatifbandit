@@ -305,7 +305,7 @@ run_mab <- function(
   verbose_log(verbose, "Computing final simulation estimates")
 
   num_clusters <- if (clustering) {
-    length(unique(sim_results[["final_data"]][["cluster"]]))
+    length(unique(sim_results[["final_data"]][[col_names[["cluster_col"]]]]))
   } else {
     NULL
   }

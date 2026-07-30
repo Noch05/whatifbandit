@@ -414,7 +414,7 @@ compute_bandit.ucb1 <- function(
     rep(0, length(ucb1)),
     names(ucb1)
   )
-  assignment_probs[best] <- 1
+  assignment_probs[best] <- 1 / length(best)
 
   return(list(
     bandit = ucb1,

@@ -49,7 +49,7 @@ mab_loop <- function(
   time_model = NULL,
   time_model_args = NULL
 ) {
-  bandits <- vector(mode = "list", length = 2)
+  bandits <- vector(mode = "list", length = 0)
 
   bandits[["bandit_stat"]] <- matrix(
     NA,
