@@ -51,8 +51,7 @@ precompute_imputation.data.frame <- function(
         success_rate = mean(.data[[col_names[["success_col"]]]], na.rm = TRUE),
         .groups = "drop"
       ) |>
-      dplyr::mutate(failure_rate = 1 - success_rate) |>
-      summary_to_matrix()
+      as_named_vec("success_rate", "treatment_block")
   } else {
     data |>
       dplyr::group_by(period_number, treatment_block) |>
@@ -73,10 +72,9 @@ precompute_imputation.data.frame <- function(
         )
       ) |>
       dplyr::ungroup() |>
-      dplyr::mutate(failure_rate = 1 - success_rate) |>
       dplyr::group_split(period_number) |>
       lapply(\(df) {
-        summary_to_matrix(df)
+        as_named_vec(df, "success_rate", "treatment_block")
       })
   }
   dates_summary <- if (delayed_feedback) {
@@ -131,9 +129,8 @@ precompute_imputation.data.table <- function(
       ),
       by = treatment_block
     ]
-    rct_sum[, failure_rate := 1 - success_rate]
     data.table::setorder(rct_sum, treatment_block)
-    summary_to_matrix(rct_sum)
+    as_named_vec(rct_sum, "success_rate", "treatment_block")
   } else {
     rct_sum <- data[,
       .(
@@ -167,12 +164,11 @@ precompute_imputation.data.table <- function(
         cumulative_success / cumulative_count,
         0
       )
-    ][,
-      failure_rate := 1 - success_rate
     ]
-
     split(rct_sum, by = "period_number") |>
-      lapply(summary_to_matrix)
+      lapply(\(df) {
+        as_named_vec(df, "success_rate", "treatment_block")
+      })
   }
 
   dates_summary <- if (delayed_feedback) {
@@ -305,15 +301,13 @@ prep_imputation <- function(
     NULL
   }
   impute_idx <- which(current_data[["impute_req"]] == 1)
-
-  if (length(impute_idx) > 0) {
-    impute_success <- check_impute(
+  impute_success <- if (length(impute_idx) > 0) {
+    check_impute(
       impute_success = impute_success,
       current_data = current_data,
       impute_idx = impute_idx
     )
   }
-
   return(list(
     current_data = current_data,
     impute_success = impute_success,
@@ -332,34 +326,11 @@ prep_imputation <- function(
 #' @keywords internal
 check_impute <- function(impute_success, current_data, impute_idx) {
   current_blocks <- stats::na.omit(current_data[["impute_block"]][impute_idx])
-  imputation_blocks <- rownames(impute_success)
+  imputation_blocks <- names(impute_success)
 
   missing_blocks <- setdiff(current_blocks, imputation_blocks)
-  blocks_to_remove <- setdiff(imputation_blocks, current_blocks)
-
-  if (length(missing_blocks) > 0) {
-    mean_rate <- mean(impute_success[, "success_rate"])
-    n_miss <- length(missing_blocks)
-    addition <- matrix(
-      c(rep(1 - mean_rate, n_miss), rep(mean_rate, n_miss)),
-      nrow = n_miss,
-      ncol = 2,
-      dimnames = list(missing_blocks, c("failure_rate", "success_rate"))
-    )
-    impute_success <- rbind(impute_success, addition)
-  }
-
-  if (length(blocks_to_remove) > 0) {
-    keep <- !rownames(impute_success) %in% blocks_to_remove
-
-    impute_success <- impute_success[keep, , drop = FALSE]
-  }
-
-  return(impute_success[
-    order(rownames(impute_success)),
-    ,
-    drop = FALSE
-  ])
+  impute_success[missing_blocks] <- mean(impute_success)
+  return(impute_success)
 }
 #------------------------------------------------------------------------------------
 
@@ -409,6 +380,7 @@ impute_outcomes <- function(
 compute_impute <- function(imputation_info, success_col) {
   current_data <- imputation_info[["current_data"]]
   imputation_means <- imputation_info[["impute_success"]]
+  print(imputation_means)
   impute_idx <- imputation_info[["impute_idx"]]
   non_impute_idx <- setdiff(
     seq_len(nrow(current_data)),
@@ -422,12 +394,10 @@ compute_impute <- function(imputation_info, success_col) {
   imputations[non_impute_idx] <- current_data[[success_col]][non_impute_idx]
 
   if (length(impute_idx) > 0) {
-    imputations[impute_idx] <- randomizr::block_ra(
-      blocks = current_data[["impute_block"]][impute_idx],
-      block_prob_each = imputation_means,
-      num_arms = 2,
-      conditions = c(0, 1),
-      check_inputs = FALSE
+    imputations[impute_idx] <- stats::rbinom(
+      length(impute_idx),
+      1,
+      prob = imputation_means[current_data[["impute_block"]][impute_idx]]
     )
   }
   return(imputations)
