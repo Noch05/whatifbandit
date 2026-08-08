@@ -353,7 +353,6 @@ impute_outcomes <- function(
 compute_impute <- function(imputation_info, success_col) {
   current_data <- imputation_info[["current_data"]]
   imputation_means <- imputation_info[["impute_success"]]
-  print(imputation_means)
   impute_idx <- imputation_info[["impute_idx"]]
   non_impute_idx <- setdiff(
     seq_len(nrow(current_data)),

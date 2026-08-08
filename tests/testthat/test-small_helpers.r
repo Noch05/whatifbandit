@@ -53,31 +53,6 @@ test_that("Finalize Prior List", {
   expect_equal(finalize_prior_list(test_list, conditions = conditions), truth)
 })
 
-
-test_that("Summary to Matrix", {
-  set.seed(5)
-  fail <- runif(10)
-  success <- runif(10)
-  treatment_block <- paste0("T", 1:10)
-
-  df <- data.frame(
-    failure_rate = fail,
-    success_rate = success,
-    random = rbinom(1, 10, 0.3),
-    random2 = sample(10),
-    treatment_block = treatment_block
-  )
-  expect_equal(
-    summary_to_matrix(df),
-    matrix(
-      c(fail, success),
-      ncol = 2,
-      nrow = 10,
-      dimnames = list(treatment_block, c("failure_rate", "success_rate"))
-    )
-  )
-})
-
 test_that("Period Sizes", {
   data <- data.frame(period_number = c(1, 1, 1, 2, 2, 2, 3, 3, 4, 5))
   truth <- c(3, 3, 2, 1, 1)

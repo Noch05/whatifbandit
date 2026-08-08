@@ -7,18 +7,15 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-
 # Introduction
 
 Traditional randomized controlled trials (RCTs) are the workhorse of causal inference in the social
-sciences. Randomization of treatments provides unconfoundedness, and the fixed, equal probability
-each participant has of being treated makes estimation of causal effects viable even with the most simplistic,
-intuitive estimators. However, these designs come with two distinct costs:
+sciences. Randomization of treatments provides unconfoundedness, aand the fixed, equal probability of treatment assignment means causal effects can be validly estimated even with the simplest, most intuitive estimators. However, these designs come with two distinct costs:
 
- The number of treatments that can be tested must be limited or pruned beforehand by researchers, in order to maintain the power of the experiment given a fixed sample size.
- Participants continue to be assigned weaker treatments, even after incoming data reveal it may be more optimal for them to receive a different one.
+- The number of treatments to be tested must be limited or pruned in advance by researchers to maintain the experiment's power given a fixed sample size.
+- Participants continue to be assigned weaker treatments, even after incoming data reveal it may be more optimal for them to receive a different one.
 
-In a two- or three-armed, one-shot experiment, these costs are negligible, but academics and policy experimenters frequently run trials over long periods of time where participants' welfare is directly at stake, making these costs non-ignorable.
+In a two- or three-armed, one-shot experiment, these costs are negligible, but academics and policy experimenters frequently run trials over long periods of time in which participants' welfare is directly at stake, making these costs non-negligible.
 
 Response-adaptive designs address these costs directly by tying assignment probabilities to the
 evidence a trial has already produced rather than fixing them in advance. As data accumulate, the
@@ -80,7 +77,7 @@ library(whatifbandit)
 library(dplyr)
 ```
 
-## Example Data: `tanf`
+# Example Data: `tanf`
 
 Examples throughout this vignette use the `tanf` dataset bundled with the
 package. It contains anonymized Temporary Assistance for Needy Families (TANF) recertification
@@ -97,9 +94,9 @@ head(tanf)
 glimpse(tanf)
 ```
 
-## Core Package Features
+# Core Package Features
 
-To customize the simulation `{whatifbandit}` provides this core set of simulation features:
+To customize the simulation, `{whatifbandit}` provides this core set of simulation features:
 
 - **Two bandit algorithms**: probability matching via Thompson sampling, and
  UCB1 (Upper Confidence Bound).
@@ -126,13 +123,14 @@ also supported for potentially large datasets.
 I encourage a look at the documentation for `mab_from_rct()`, `simulate_mab()`, and `joint_test()`
 for a more detailed look at all these features and their defaults.
 
-## Resimulating an RCT as a Bandit Trial
+# Resimulating an RCT as a Bandit Trial
 
-### A Single Resimulation
+## A Single Resimulation
 
-To resimulate an RCT as a bandit trial, we use `mab_from_rct()`. It requires a formula relating the
+To resimulate an RCT as a bandit trial, use `mab_from_rct()`. It requires a formula relating the
 outcome to the treatment, with any potential blocking or clustering included in `block()` and
-`cluster()` wrappers, and how the cutoff points are made.
+`cluster()` wrappers, and how the cutoff points are determined.
+
 
 ```{r}
 sim <- mab_from_rct(
@@ -154,7 +152,7 @@ the entire dataset (instead of the data received up to that point).
 
 The original experiment in @moore2022 randomized within blocks defined by the closest service
 center. There is also a natural delay from when notification letters were assigned (and sent)
-compared to when researchers recieved the recertification outcome. The example below accounts for these features to make the
+compared to when researchers received the recertification outcome. The example below accounts for these features to make the
 experiment a more realistic resimulation.
 
 ```{r}
@@ -178,14 +176,15 @@ simulations <- mab_from_rct(
 future::plan("sequential")
 ```
 
-The changes I've made are:
+Somethings to highlight are:
 
 - `block(service_center)` inside the formula tells `{whatifbandit}` to treat
-  `service_center` as a blocking variable, so randomization and outcome
+ `service_center` as a blocking variable, so randomization and outcome
  imputation respect the original block structure.
 - `period_method = "date"` together with `time_unit = "month"` and
-  `period_length = 1` recomputes assignment probabilities once per calendar
- month, rather than after a fixed number of participants to match the original structure of the trial.
+ `period_length = 1` recomputes assignment probabilities once per calendar
+month, rather than after a fixed number of participants. This mimicks the assignment schedule of the
+original experiment.
 - `delayed_feedback = TRUE`, along with the `assignment_date_col`, `success_date_col`, `date_col`,
 and `month_col` arguments, tells the algorithm which outcomes were actually observable by the time each new assignment decision was made, capturing the time lag.
 - ` r = 100` requests 100 independent resimulations of the trial since any single resimulation is just one draw of
@@ -193,7 +192,7 @@ and `month_col` arguments, tells the algorithm which outcomes were actually obse
 - Running `future::plan("multisession")` before the call means the 100 resimulations are conducted in
 parallel across multiple cores.
 
-## Simulating a New Adaptive Trial from Scratch
+# Simulating a New Adaptive Trial from Scratch
 
 When no trial data exists yet, `simulate_mab()` lets you specify assumed true
 success probabilities for each arm and simulate how a bandit algorithm would
@@ -233,7 +232,7 @@ In this example:
  algorithm fully commit to the arm it currently believes is best.
 - `contrasts = "all"` will compute all $\binom{5}{2}$ pairwise effect contrasts between the treatment arms.
 
-## Estimation: AW-AIPW
+# Estimation: AW-AIPW
 
 Naively applying standard difference-in-means or OLS
 estimators to data produced from a multi-arm bandit trial is biased, because each new set of
@@ -242,24 +241,25 @@ assignment probabilities are dependent on previously observed outcomes in the sa
 `{whatifbandit}` addresses this by powering its estimation of conditional expectations and treatment
 effects with the Adaptively Weighted Augmented
 Inverse Probability Weighted (AW-AIPW) estimator from @hadad2021a and the Inverse Probability Weighted (IPW) estimator proposed in @offer-westort2021. Both of the estimators are robust to
-adaptive assignment are are unbiased under the procedure. However, the adaptive weights
+adaptive assignment and are unbiased under the procedure. However, the adaptive weights
 (`{whatifbandit}` uses the constant allocation rate) in
 @hadad2021a give the AW-AIPW an asymptotic normal distribution, powering inference on conditional
 expectations and estimated pairwise contrasts. The conditions for this asymptotic convergence are
-outlined in the paper, but the most important condition is positivity, that all treatment arms have
-non-zero (the inverse probability of assignment, cannot trend to $\infty$ over time) for the weights
-to be valid. Therefore for valid inference the appropraite exploration parameters must be used to
-ensure a base-line level of assignment.
+outlined in the paper, but the most important condition is positivity: that all treatment arms have
+non-zero assignment probability (i.e., the inverse probability of assignment cannot trend to $\infty$ over
+time) for the weights to be valid.
+Therefore, for valid inference, the appropriate exploration parameters must be used to
+ensure a baseline level of assignment.
 
 
-## Hypothesis Testing and Contrasts
+# Hypothesis Testing and Contrasts
 
 During and after a simulation, `{whatifbandit}` supports standard pairwise and joint inference.
 
-### Pairwise Contrasts
+## Pairwise Contrasts
 
 Pairwise contrasts can be requested flexibly before running the trial to be computed internally, for
-each treatment versus control, each treatment versus the best arm (determined by bandit algorithm,
+each treatment versus control, each treatment versus the best arm (determined by the bandit algorithm,
 not estimate), both, or all $\binom{n}{k}$ pairwise comparisons among treatment arms. For the
 AW-AIPW estimates (not the IPW!), p-values can be computed using a standard normal distribution. Below is an
 example testing whether each simple difference is 0.
@@ -274,14 +274,14 @@ print(p_values)
 ```
 
 
-### Joint Hypothesis Tests
+## Joint Hypothesis Tests
 
 Joint hypothesis tests can also be conducted using either the randomization inference procedure in
 @offer-westort2021 or a bootstrap test. These tests are experimental, have not been formally
 verified, and have been noted to have low power. However, they are still included for completeness.
 These tests re-simulate the trial under the appropriate $H_0$ and report the F-Statistic
 from the regression used to estimate the IPW estimator. The p-value from the test is the observed
-proportion of test statistics generated under $H_0$ which are greater then the one observed in the
+proportion of test statistics generated under $H_0$ which are greater than the one observed in the
 original simulation.
 
 ```{r}
@@ -305,14 +305,14 @@ delayed feedback, and enforced exploration, backed by adaptive-robust estimation
 (AW-AIPW) and both joint and pairwise inference.
 
 # Future Plans
-Future plans for this package are ambitious and expansive:
+Plans for this package are ambitious and expansive:
 
 - Contextual Bandits
 - Continuous Outcomes
-- Post simulation helper functions, and classes for output with generics
+- Post-simulation helper functions and classes for output with generics
 - Fixed confidence (as opposed to the current fixed budget) simulations and early stopping.
-- Treatment pool and switching (i.e. that treatments don't just get dropped but get swapped out,
-mimicking a infinitely running experiment).
+- Treatment pool and switching (i.e., that treatments don't just get dropped but get swapped out,
+mimicking an infinitely running experiment).
 - Exporting modular internal functions for more fine-tuned user control.
 
 # Getting Help and Contributions
@@ -325,4 +325,4 @@ email at <no9857a@american.edu>. If you encounter a bug, please open an issue on
 [GitHub](https://github.com/Noch05/whatifbandit/issues) with a reproducible
 example.
 
-## References
+# References
