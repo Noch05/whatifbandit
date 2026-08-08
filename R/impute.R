@@ -8,15 +8,15 @@
 #' @inheritParams prep_rct_data
 #' @returns A named list containing:
 #' \itemize{
-#' \item `success`: The matrix or list of matrices containing the probability of success for each
+#' \item `success`: The vector or list of vectors containing the probability of success for each
 #' treatment block, at each period.
 #' \item `dates`: A list of vectors containing the average success date for
 #' each treatment block at each treatment period.
 #' }
 #' @details
 #' [precompute_imputation()] is an optimization, meant to reduce the cost of calculating these variables
-#' within the simulation loop. When `whole_experiment = TRUE`, `success' is a single matrix,
-#' and used through the simulation. When `whole_experiment = FALSE`, `success` is a list of matrices,
+#' within the simulation loop. When `whole_experiment = TRUE`, `success' is a single vector,
+#' and used through the simulation. When `whole_experiment = FALSE`, `success` is a list of vectors,
 #' each containing the cumulative probabilities of all periods up to the index `i`.
 #'
 #' If `delayed_feedback = FALSE`, `dates` is not calculated, and is `NULL`.
@@ -196,31 +196,12 @@ precompute_imputation.data.table <- function(
   return(imputation_information)
 }
 
-#-----------------------------------------------------------------------------
-#' Convert Treatment Block Summary to Matrix
-#' @describeIn precompute_imputation Converts a summarized data.frame or data.table containing
-#' `treatment_block`, `success_rate`, and `failure_rate` columns into a
-#' named matrix for use with [randomizr::block_ra()].
-#' @param df A `data.frame` or `data.table` with columns `treatment_block`,
-#' `success_rate`, and `failure_rate`.
-#' @returns A numeric matrix with row names equal to `treatment_block` and
-#' columns `failure_rate` and `success_rate`.
-#' @keywords internal
-summary_to_matrix <- function(df) {
-  matrix(
-    c(df[["failure_rate"]], df[["success_rate"]]),
-    ncol = 2,
-    nrow = nrow(df),
-    dimnames = list(df[["treatment_block"]], c("failure_rate", "success_rate"))
-  )
-}
 #-------------------------------------------------------------------------------
 #' @title Outcome Imputation Preparation
 #' @name prep_imputation
 #' @description Executes all preparations necessary to impute outcomes for
 #' each iteration of the simulation loop. Adds an additional column to the current data,
-#' subsets necessary information from the [precompute_imputation()] output, and ensures
-#' compatibility with [randomizr::block_ra()].
+#' subsets necessary information from the [precompute_imputation()] output.
 #' @inheritParams compute_prior
 #' @inheritParams mab_loop
 #' @inheritParams impute_outcomes
@@ -228,23 +209,15 @@ summary_to_matrix <- function(df) {
 #' @returns A named list containing:
 #' \itemize{
 #' \item `current_data`: A `tibble` or `data.table` containing `impute_block` column to guide the outcome imputations
-#' \item `impute_success`: A matrix object containing probabilities of success by `treatment_block` used to impute
+#' \item `impute_success`: A vector containing probabilities of success by `treatment_block` used to impute
 #' outcomes taken from [precompute_imputation()].
-#' Modified to remove unnecessary rows, or add necessary ones, and order the matrix
-#' appropriately, as required by [randomizr::block_ra()].
 #' \item `impute_dates`: Named date vector by treatment condition, containing the dates of success
 #' to impute if delayed_feedback is FALSE. Subsetted from the [precompute_imputation()] output.}
 #'
 #' @details
-#' The goal of this function is to set up the imputation procedure and prevent
-#' errors from occurring. [randomizr::block_ra()] does not see the names
-#' of the probabilities passed per block, so the imputation information must be subsetted
-#' to contain only the treatment blocks which exist in a given period.
-#'
 #'  When blocks are required but do not exist in the information provided it is added
-#' to the matrix, with an estimated conditional probability of success as
-#' the average across other blocks. When blocks are present but not required, they are removed.
-#' Then the rows are sorted by their names.
+#' to the vector, with an estimated conditional probability of success as
+#' the average across other blocks.
 #'
 #' `impute_block` is the observation's new treatment block, combining any
 #' blocking variables with their new treatment assigned via the Multi-Arm-Bandit
@@ -322,7 +295,7 @@ prep_imputation <- function(
 #' @inheritParams impute_outcomes
 #' @param impute_success The `success` element of the `imputation_information`
 #' list created by [precompute_imputation()] for the given period.
-#' @returns Proper `impute_success` matrix as required by [randomizr::block_ra()].
+#' @returns Proper `impute_success` vector for [compute_impute()]
 #' @keywords internal
 check_impute <- function(impute_success, current_data, impute_idx) {
   current_blocks <- stats::na.omit(current_data[["impute_block"]][impute_idx])
@@ -337,7 +310,7 @@ check_impute <- function(impute_success, current_data, impute_idx) {
 #' Imputing New Outcomes of Multi-Arm-Bandit Trial
 #' @name impute_outcomes
 #' @description Imputes outcomes for the current treatment assignment period.
-#' Uses [randomizr::block_ra()] to impute the outcomes for observations
+#' Uses [stats::rbinom()] to impute the outcomes for observations
 #' who were assigned new treatments. The probabilities used to guide the imputation
 #' of the outcomes are pre-computed using the existing data from the original randomized experiment.
 #' @inheritParams prep_rct_data
