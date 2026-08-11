@@ -5,12 +5,15 @@ vignette: >
   %\VignetteIndexEntry{Introduction to `{whatifbandit}`}
   %\VignetteEngine{quarto::html}
   %\VignetteEncoding{UTF-8}
+cache: TRUE
+message: FALSE
+warnings: FALSE
 ---
 
 # Introduction
 
 Traditional randomized controlled trials (RCTs) are the workhorse of causal inference in the social
-sciences. Randomization of treatments provides unconfoundedness, aand the fixed, equal probability of treatment assignment means causal effects can be validly estimated even with the simplest, most intuitive estimators. However, these designs come with two distinct costs:
+sciences. Randomization of treatments provides unconfoundedness, and the fixed, equal probability of treatment assignment means causal effects can be validly estimated even with the simplest, most intuitive estimators. However, these designs come with two distinct costs:
 
 - The number of treatments to be tested must be limited or pruned in advance by researchers to maintain the experiment's power given a fixed sample size.
 - Participants continue to be assigned weaker treatments, even after incoming data reveal it may be more optimal for them to receive a different one.
@@ -18,7 +21,7 @@ sciences. Randomization of treatments provides unconfoundedness, aand the fixed,
 In a two- or three-armed, one-shot experiment, these costs are negligible, but academics and policy experimenters frequently run trials over long periods of time in which participants' welfare is directly at stake, making these costs non-negligible.
 
 Response-adaptive designs address these costs directly by tying assignment probabilities to the
-evidence a trial has already produced rather than fixing them in advance. As data accumulate, the
+evidence a trial has already produced rather than fixing them in advance. As the data accumulates, the
 probability of assignment shifts toward treatments that appear to be working, and away from ones
 that aren't. This gives researchers room to test more treatments up front, since underperforming
 arms will be phased out or dropped, while participants become concentrated on the treatments that
@@ -66,13 +69,11 @@ for:
 ## Scope and Limitations
 
 `{whatifbandit}` is currently built specifically for experiments with **binary
-outcomes** (success/failure). Support for other outcome types may be added in
+outcomes** (success/failure), without covariates (except for discrete blocking variables). Support for other outcome types may be added in
 future releases, but any design considered in this vignette assumes a binary
 response.
 
 ```{r}
-#| label: setup
-
 library(whatifbandit)
 library(dplyr)
 ```
@@ -98,7 +99,7 @@ glimpse(tanf)
 
 To customize the simulation, `{whatifbandit}` provides this core set of simulation features:
 
-- **Two bandit algorithms**: probability matching via Thompson sampling, and
+- **Two bandit algorithms**: probability matching via Thompson Sampling, and
  UCB1 (Upper Confidence Bound).
 - **Flexible assignment periods**: individual-level, batch-based, or date-based
  assignment cutoffs for bandit updates.
@@ -133,6 +134,7 @@ outcome to the treatment, with any potential blocking or clustering included in 
 
 
 ```{r}
+set.seed(5)
 sim <- mab_from_rct(
   success ~ condition,
   data = tanf,
@@ -176,7 +178,7 @@ simulations <- mab_from_rct(
 future::plan("sequential")
 ```
 
-Somethings to highlight are:
+Some things to highlight are:
 
 - `block(service_center)` inside the formula tells `{whatifbandit}` to treat
  `service_center` as a blocking variable, so randomization and outcome
@@ -188,9 +190,9 @@ original experiment.
 - `delayed_feedback = TRUE`, along with the `assignment_date_col`, `success_date_col`, `date_col`,
 and `month_col` arguments, tells the algorithm which outcomes were actually observable by the time each new assignment decision was made, capturing the time lag.
 - ` r = 100` requests 100 independent resimulations of the trial since any single resimulation is just one draw of
- assignments and imputations (which compound over the course of the trial).
+ assignments and imputations.
 - Running `future::plan("multisession")` before the call means the 100 resimulations are conducted in
-parallel across multiple cores.
+parallel across multiple workers.
 
 # Simulating a New Adaptive Trial from Scratch
 
@@ -207,6 +209,7 @@ p <- matrix(
     NULL
   )
 )
+print(p)
 
 set.seed(123)
 sim_from_scratch <- simulate_mab(
@@ -250,6 +253,102 @@ non-zero assignment probability (i.e., the inverse probability of assignment can
 time) for the weights to be valid.
 Therefore, for valid inference, the appropriate exploration parameters must be used to
 ensure a baseline level of assignment.
+
+# Understanding The Output
+
+## Class Structure
+
+Both `mab_from_rct()` and `simulage_mab()` return an S3 `.mab` class with the same fields.
+Additionally, each object has another S3 class identifier, marking which function it comes from and
+whether multiple trials were conducted, giving 4 total options:
+
+- `single_rct_mab`: A single simulation using `mab_from_rct()`.
+- `multi_rct_mab`: Multiple simulations using `mab_from_rct()`.
+- `single_param_mab`: A single simulation using `simulate_mab()`.
+- `multi_param_mab`: Multiple simulations using `simulate_mab()`.
+
+Using the computed examples above:
+
+- `sim_from_scratch` is a `single_param_mab`
+```{r}
+class(sim_from_scratch)
+```
+
+- `sim` is a `single_rct_mab`
+```{r}
+class(sim)
+```
+
+- `simulations` is a `multi_rct_mab`
+```{r}
+class(simulations)
+```
+
+This class structure at the moment has no implemented generics, but plans in the future are to write
+generics which expedite common analyses on the final output objects.
+
+## Fields
+
+The function nor the number of simulations meaningfully change the structure of the final output,
+which contains the following fields:
+
+- `new_data`: The new data with the outcomes and assignments from the MAB procedure for all
+replications.
+
+```{r}
+glimpse(sim$new_data)
+glimpse(sim_from_scratch$new_data)
+```
+
+- `bandit`: A list containing results of the MAB procedure for each period in each trial replication. It stores
+the computed Thompson probabilities and UCB1 values (`statistic`), the corresponding probability of
+assignment (`assignment_prob`), and the total assignment quantities to each treatment
+(`assignment_quant`; only stored at trial replication level).
+
+```{r}
+sim_from_scratch$bandit
+```
+
+- `means`: A data.frame containing the condition expectation estimates for each treatment arm, for
+each trial replication, for each estimator. It contains the mean estimate (`mean`), its estimated
+standard error (`se`), the treatment arm (`mab_condition`), the estimator used (`estimator`), and
+the degrees of freedom (`df`) if appropriate. As explained before, the AW-AIPW is both unbiased and
+under appropriate conditions is asymptotically normal [@hadad2021a]. The IPW is provided for
+comparison, and it is unbiased [@hadad2021a; @offer-westort2021], but does not have the same
+asymptotic distributional garunetees. OLS is also provided for comparison, but is completely invalid
+for inference.
+```{r}
+sim_from_scratch$means
+```
+
+- `f_stats`: Contains F statistics from the regressions used to estimate the IPW and OLS estimates.
+`contrasts`
+
+```{r}
+sim_from_scratch$f_stats
+```
+- `models`: Only provided if clustering is used, this is a list containing the `lm_robust()` objects
+used to compute the IPW and OLS estimates so arbitrary contrasts can be estimated later with the CR2
+Variance-Covariance estimator (using `clubSandwich::linear_contrast()`).
+
+- `config`: A list containing `args`, which contains all of the arguments passed to the function,
+along with some intermediate precomputations; `call`, which is the original captured call object;
+and `parallel` which is the `furrr_options` object created from arguments passed to `...` in the
+original call. Saved to ease future documentation and replication
+
+```{r}
+# update can be used to re-run the same call again
+set.seed(5)
+sim2 <- update(sim$config)
+needed_args <- sim$config$args[methods::formalArgs(mab_from_rct)]
+needed_args$... <- NULL
+set.seed(5)
+sim3 <- do.call(mab_from_rct, needed_args)
+all.equal(sim, sim2)
+
+# Only the call object differs here, because do.call will evaluate the data so it gets captured directly
+all.equal(sim, sim3)
+```
 
 
 # Hypothesis Testing and Contrasts
