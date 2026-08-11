@@ -5,6 +5,10 @@ vignette: >
   %\VignetteIndexEntry{Introduction to `{whatifbandit}`}
   %\VignetteEngine{quarto::html}
   %\VignetteEncoding{UTF-8}
+knitr:
+  opts_chunk:
+    collapse: true
+    comment: '#>'
 cache: TRUE
 message: FALSE
 warnings: FALSE
@@ -235,25 +239,6 @@ In this example:
  algorithm fully commit to the arm it currently believes is best.
 - `contrasts = "all"` will compute all $\binom{5}{2}$ pairwise effect contrasts between the treatment arms.
 
-# Estimation: AW-AIPW
-
-Naively applying standard difference-in-means or OLS
-estimators to data produced from a multi-arm bandit trial is biased, because each new set of
-assignment probabilities are dependent on previously observed outcomes in the same experiment.
-
-`{whatifbandit}` addresses this by powering its estimation of conditional expectations and treatment
-effects with the Adaptively Weighted Augmented
-Inverse Probability Weighted (AW-AIPW) estimator from @hadad2021a and the Inverse Probability Weighted (IPW) estimator proposed in @offer-westort2021. Both of the estimators are robust to
-adaptive assignment and are unbiased under the procedure. However, the adaptive weights
-(`{whatifbandit}` uses the constant allocation rate) in
-@hadad2021a give the AW-AIPW an asymptotic normal distribution, powering inference on conditional
-expectations and estimated pairwise contrasts. The conditions for this asymptotic convergence are
-outlined in the paper, but the most important condition is positivity: that all treatment arms have
-non-zero assignment probability (i.e., the inverse probability of assignment cannot trend to $\infty$ over
-time) for the weights to be valid.
-Therefore, for valid inference, the appropriate exploration parameters must be used to
-ensure a baseline level of assignment.
-
 # Understanding The Output
 
 ## Class Structure
@@ -312,11 +297,10 @@ sim_from_scratch$bandit
 - `means`: A data.frame containing the condition expectation estimates for each treatment arm, for
 each trial replication, for each estimator. It contains the mean estimate (`mean`), its estimated
 standard error (`se`), the treatment arm (`mab_condition`), the estimator used (`estimator`), and
-the degrees of freedom (`df`) if appropriate. As explained before, the AW-AIPW is both unbiased and
-under appropriate conditions is asymptotically normal [@hadad2021a]. The IPW is provided for
-comparison, and it is unbiased [@hadad2021a; @offer-westort2021], but does not have the same
-asymptotic distributional garunetees. OLS is also provided for comparison, but is completely invalid
-for inference.
+the degrees of freedom (`df`) if appropriate. The AW-AIPW is both unbiased and
+under appropriate conditions its sampling distribution is asymptotically normal [@hadad2021a]. The
+IPW estimator is unbiased, but does not have a well-defined asymptotical sampling distribution [@hadad2021a; @offer-westort2021],
+while traditional OLS is provided for comparison as well but is completely invalid for inference.
 ```{r}
 sim_from_scratch$means
 ```
@@ -349,7 +333,6 @@ all.equal(sim, sim2)
 # Only the call object differs here, because do.call will evaluate the data so it gets captured directly
 all.equal(sim, sim3)
 ```
-
 
 # Hypothesis Testing and Contrasts
 

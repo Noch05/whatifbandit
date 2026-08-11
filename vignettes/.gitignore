@@ -4,3 +4,4 @@ whatifbandit_files/*
 
 /.quarto/
 **/*.quarto_ipynb
+*_files

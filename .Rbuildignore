@@ -10,3 +10,5 @@
 ^vignettes/whatifbandit_files/
 ^CRAN-SUBMISSION$
 ^.gitattributes$
+^vignettes/\.quarto$
+^vignettes/*_files$

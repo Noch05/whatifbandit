@@ -1,0 +1,20 @@
+---
+title: "The Multi-Arm Bandit Problem"
+bibliography: "REFERENCES.bib"
+vignette: >
+  %\VignetteIndexEntry{The Multi-Arm Bandit Problem}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+knitr:
+  opts_chunk:
+    collapse: true
+    comment: '#>'
+cache: TRUE
+message: FALSE
+warnings: FALSE
+---
+
+```{r}
+#| label: setup
+library(whatifbandit)
+```
