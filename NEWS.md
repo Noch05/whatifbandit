@@ -1,3 +1,18 @@
+# whatifbandit 1.0.3
+
+## Bug Fixes
+- Fixing CRAN identified bug with `data.frame`, `data.table` equality on NoLD R build.
+    - For `mab_from_rct()` imputations are no computed using `stats::rbinom()` with appropriate
+      probabilities instead of `randomizr::block_ra()`. This new approach increases the variance of
+      the imputations, but was a planned change to support custom imputation functions in the
+      future.
+- Ensuring probabilities of assignment are split evenly under UCB1 ties (`bandit.R`
+  Line 412-417), instead of relying on a later implicit normalization. This ensures the intended
+  effect with `control_augment` and `random_assign_prop`
+
+## Other
+- Introductory vignette updated for 1.x.x release, along with 2 new vignettes planned.
+
 # whatifbandit 1.0.2
 
 * CRAN Submission
