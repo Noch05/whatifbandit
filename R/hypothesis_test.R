@@ -1,4 +1,4 @@
-#' @title Joint Hypothesis Test for Multi-Arm Bandit Trials
+#' @title *Experimental*: Joint Hypothesis Test for Multi-Arm Bandit Trials
 #' @name joint_test
 #' @description Conducts a joint hypothesis test of no treatment effects across all arms, i.e. that all arms
 #' have the same true probability of success, either using a bootstrap procedure or the randomization inference
@@ -22,9 +22,13 @@
 #' @export
 #' @details
 #' # NOTE
-#' This procedure is experimental and has no Type I error guarantee. Offer-Westort et. al (2021)
+#'
+#' This test works by comparing the observed F-statistic of the IPW regression to a estimated
+#' distribution of F-statistics generated with no treatment effect across arms. The proportion of
+#' F-statistics more extreme than the observed is the P-value of the test. This procedure is experimental and has no Type I error guarantee. Offer-Westort et. al (2021)
 #' also note the test suffers from low power, but it is provided for experimentation nonetheless.
 #'
+#' # Null Hypotheses
 #' `method = "randomization"` operates under the sharp null that each unit
 #' would express the same outcome no matter the treatment they were assigned. To achieve this
 #' the trial is re-simulated but new outcomes are not generated or imputed, however the adaptive algorithm
@@ -35,7 +39,10 @@
 #' treatment arms within each block/cluster. If there are no blocks or clusters, a
 #' p-matrix is built from the pooled sample mean of the original trial. With block and or cluster
 #' pooled sample means are estimated within each block or cluster. The block and or cluster assignment
-#' proportions are taken from the original dataset.
+#' proportions are taken from the original dataset. The sample mean is a biased estimator under a
+#' bandit trial, but the bootstrap tests simply needs to simulate what would occur in the bandit
+#' trial if there was no true treatment effect, so the exact value should not matter (as long as it
+#' is not too extreme).
 #'
 #'
 #'

@@ -305,14 +305,19 @@ run_mab <- function(
   verbose_log(verbose, "Computing final simulation estimates")
 
   num_clusters <- if (clustering) {
-    length(unique(sim_results[["final_data"]][["cluster"]]))
+    length(unique(sim_results[["final_data"]][[col_names[["cluster_col"]]]]))
   } else {
     NULL
   }
 
+  used_conditions <- unique(sim_results[["final_data"]][[
+    "mab_condition"
+  ]])
+  used_conditions <- conditions[conditions %in% used_conditions]
+
   contrasts_list <- if (!is.null(contrasts)) {
     build_contrast_matrices(
-      conditions = conditions,
+      conditions = used_conditions,
       contrasts = contrasts,
       bandits = sim_results[["bandits"]]
     )
@@ -325,7 +330,7 @@ run_mab <- function(
     iaipw <- compute_iaipw(
       data = sim_results[["final_data"]],
       assignment_probs = sim_results[["assignment_probs"]],
-      conditions = conditions,
+      conditions = used_conditions,
       periods = periods
     )
     means <- estimate_aw_aipw(
@@ -333,7 +338,7 @@ run_mab <- function(
       assignment_probs = sim_results[["assignment_probs"]],
       iaipw = iaipw,
       periods = periods,
-      conditions = conditions,
+      conditions = used_conditions,
       clustering = clustering,
       cluster_col = col_names[["cluster_col"]],
       num_clusters = num_clusters
@@ -345,7 +350,7 @@ run_mab <- function(
       df = unique(means[["df"]]),
       estimator = "AW-AIPW",
       dt = dt,
-      conditions = conditions
+      conditions = used_conditions
     )
     list(
       means = fill_missing_conditions(means, conditions, "AW-AIPW"),
@@ -357,7 +362,7 @@ run_mab <- function(
     estimate_lm_bundle(
       ipw = TRUE,
       estimator = "IPW",
-      conditions = conditions,
+      conditions = used_conditions,
       sim_results = sim_results,
       col_names = col_names,
       clustering = clustering,
@@ -370,7 +375,7 @@ run_mab <- function(
     estimate_lm_bundle(
       ipw = FALSE,
       estimator = "OLS",
-      conditions = conditions,
+      conditions = used_conditions,
       sim_results = sim_results,
       col_names = col_names,
       clustering = clustering,

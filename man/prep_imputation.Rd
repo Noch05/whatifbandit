@@ -45,31 +45,22 @@ list created by \code{\link[=precompute_imputation]{precompute_imputation()}} fo
 A named list containing:
 \itemize{
 \item \code{current_data}: A \code{tibble} or \code{data.table} containing \code{impute_block} column to guide the outcome imputations
-\item \code{impute_success}: A matrix object containing probabilities of success by \code{treatment_block} used to impute
+\item \code{impute_success}: A vector containing probabilities of success by \code{treatment_block} used to impute
 outcomes taken from \code{\link[=precompute_imputation]{precompute_imputation()}}.
-Modified to remove unnecessary rows, or add necessary ones, and order the matrix
-appropriately, as required by \code{\link[randomizr:block_ra]{randomizr::block_ra()}}.
 \item \code{impute_dates}: Named date vector by treatment condition, containing the dates of success
 to impute if delayed_feedback is FALSE. Subsetted from the \code{\link[=precompute_imputation]{precompute_imputation()}} output.}
 
-Proper \code{impute_success} matrix as required by \code{\link[randomizr:block_ra]{randomizr::block_ra()}}.
+Proper \code{impute_success} vector for \code{\link[=compute_impute]{compute_impute()}}
 }
 \description{
 Executes all preparations necessary to impute outcomes for
 each iteration of the simulation loop. Adds an additional column to the current data,
-subsets necessary information from the \code{\link[=precompute_imputation]{precompute_imputation()}} output, and ensures
-compatibility with \code{\link[randomizr:block_ra]{randomizr::block_ra()}}.
+subsets necessary information from the \code{\link[=precompute_imputation]{precompute_imputation()}} output.
 }
 \details{
-The goal of this function is to set up the imputation procedure and prevent
-errors from occurring. \code{\link[randomizr:block_ra]{randomizr::block_ra()}} does not see the names
-of the probabilities passed per block, so the imputation information must be subsetted
-to contain only the treatment blocks which exist in a given period.
-
 When blocks are required but do not exist in the information provided it is added
-to the matrix, with an estimated conditional probability of success as
-the average across other blocks. When blocks are present but not required, they are removed.
-Then the rows are sorted by their names.
+to the vector, with an estimated conditional probability of success as
+the average across other blocks.
 
 \code{impute_block} is the observation's new treatment block, combining any
 blocking variables with their new treatment assigned via the Multi-Arm-Bandit

@@ -62,7 +62,7 @@ Numeric vector of imputed outcomes
 }
 \description{
 Imputes outcomes for the current treatment assignment period.
-Uses \code{\link[randomizr:block_ra]{randomizr::block_ra()}} to impute the outcomes for observations
+Uses \code{\link[stats:rbinom]{stats::rbinom()}} to impute the outcomes for observations
 who were assigned new treatments. The probabilities used to guide the imputation
 of the outcomes are pre-computed using the existing data from the original randomized experiment.
 }

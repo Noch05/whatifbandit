@@ -4,7 +4,6 @@
 \alias{precompute_imputation}
 \alias{precompute_imputation.data.frame}
 \alias{precompute_imputation.data.table}
-\alias{summary_to_matrix}
 \title{Precomputing Key Values for Outcome Imputation}
 \usage{
 precompute_imputation(data, whole_experiment, delayed_feedback, col_names)
@@ -12,8 +11,6 @@ precompute_imputation(data, whole_experiment, delayed_feedback, col_names)
 \method{precompute_imputation}{data.frame}(data, whole_experiment, delayed_feedback, col_names)
 
 \method{precompute_imputation}{data.table}(data, whole_experiment, delayed_feedback, col_names)
-
-summary_to_matrix(df)
 }
 \arguments{
 \item{data}{A \code{data.frame}, \code{data.table}, or any object which inherits from \code{data.frame}, containing input data from the trial. This should be the results
@@ -32,21 +29,15 @@ probabilities, outcomes that have not been observed on the date of
 assignment are treated as failures.}
 
 \item{col_names}{List holding the columns required from the provided data as strings and symbols.}
-
-\item{df}{A \code{data.frame} or \code{data.table} with columns \code{treatment_block},
-\code{success_rate}, and \code{failure_rate}.}
 }
 \value{
 A named list containing:
 \itemize{
-\item \code{success}: The matrix or list of matrices containing the probability of success for each
+\item \code{success}: The vector or list of vectors containing the probability of success for each
 treatment block, at each period.
 \item \code{dates}: A list of vectors containing the average success date for
 each treatment block at each treatment period.
 }
-
-A numeric matrix with row names equal to \code{treatment_block} and
-columns \code{failure_rate} and \code{success_rate}.
 }
 \description{
 Pre-computes key values required for the outcome imputation step of the MAB
@@ -56,18 +47,11 @@ success is calculated for each treatment block at every period.
 }
 \details{
 \code{\link[=precompute_imputation]{precompute_imputation()}} is an optimization, meant to reduce the cost of calculating these variables
-within the simulation loop. When \code{whole_experiment = TRUE}, \verb{success' is a single matrix, and used through the simulation. When }whole_experiment = FALSE\verb{, }success\verb{is a list of matrices, each containing the cumulative probabilities of all periods up to the index}i`.
+within the simulation loop. When \code{whole_experiment = TRUE}, \verb{success' is a single vector, and used through the simulation. When }whole_experiment = FALSE\verb{, }success\verb{is a list of vectors, each containing the cumulative probabilities of all periods up to the index}i`.
 
 If \code{delayed_feedback = FALSE}, \code{dates} is not calculated, and is \code{NULL}.
 No covariates are used in the calculation, these are all simply grouped means.
 }
-\section{Functions}{
-\itemize{
-\item \code{summary_to_matrix()}: Converts a summarized data.frame or data.table containing
-\code{treatment_block}, \code{success_rate}, and \code{failure_rate} columns into a
-named matrix for use with \code{\link[randomizr:block_ra]{randomizr::block_ra()}}.
-
-}}
 \seealso{
 Other imputation:
 \code{\link[=impute_outcomes]{impute_outcomes()}},
