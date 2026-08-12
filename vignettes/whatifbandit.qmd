@@ -13,7 +13,6 @@ cache: TRUE
 message: FALSE
 warnings: FALSE
 ---
-
 # Introduction
 
 Traditional randomized controlled trials (RCTs) are the workhorse of causal inference in the social
@@ -104,7 +103,8 @@ glimpse(tanf)
 To customize the simulation, `{whatifbandit}` provides this core set of simulation features:
 
 - **Two bandit algorithms**: probability matching via Thompson Sampling, and
- UCB1 (Upper Confidence Bound).
+UCB1 (Upper Confidence Bound). Details on each algorithm and their implementations can be found in
+[The Multi-Arm Bandit Problem](bandit.html), and the documentation.
 - **Flexible assignment periods**: individual-level, batch-based, or date-based
  assignment cutoffs for bandit updates.
 - **A configurable lookback window and discounting**: complete control over the number of periods
@@ -185,11 +185,11 @@ future::plan("sequential")
 Some things to highlight are:
 
 - `block(service_center)` inside the formula tells `{whatifbandit}` to treat
- `service_center` as a blocking variable, so randomization and outcome
+ `service_center` as a blocking variable, so randomization and outcome
  imputation respect the original block structure.
 - `period_method = "date"` together with `time_unit = "month"` and
- `period_length = 1` recomputes assignment probabilities once per calendar
-month, rather than after a fixed number of participants. This mimicks the assignment schedule of the
+ `period_length = 1` recomputes assignment probabilities once per calendar
+month, rather than after a fixed number of participants. This mimics the assignment schedule of the
 original experiment.
 - `delayed_feedback = TRUE`, along with the `assignment_date_col`, `success_date_col`, `date_col`,
 and `month_col` arguments, tells the algorithm which outcomes were actually observable by the time each new assignment decision was made, capturing the time lag.
@@ -274,7 +274,7 @@ generics which expedite common analyses on the final output objects.
 
 ## Fields
 
-The function nor the number of simulations meaningfully change the structure of the final output,
+Neither the function nor the number of simulations meaningfully change the structure of the final output,
 which contains the following fields:
 
 - `new_data`: The new data with the outcomes and assignments from the MAB procedure for all
@@ -297,31 +297,62 @@ sim_from_scratch$bandit
 - `means`: A data.frame containing the condition expectation estimates for each treatment arm, for
 each trial replication, for each estimator. It contains the mean estimate (`mean`), its estimated
 standard error (`se`), the treatment arm (`mab_condition`), the estimator used (`estimator`), and
-the degrees of freedom (`df`) if appropriate. The AW-AIPW is both unbiased and
-under appropriate conditions its sampling distribution is asymptotically normal [@hadad2021a]. The
-IPW estimator is unbiased, but does not have a well-defined asymptotical sampling distribution [@hadad2021a; @offer-westort2021],
+the degrees of freedom (`df`) if appropriate. The AW-AIPW is both unbiased and, under appropriate conditions, its sampling distribution is asymptotically normal [@hadad2021a]. The
+IPW estimator is unbiased, but does not have a well-defined asymptotic sampling distribution [@hadad2021a; @offer-westort2021],
 while traditional OLS is provided for comparison as well but is completely invalid for inference.
+More details on this are in the [Causal Inference With Bandits](estimate.html) vignette.
 ```{r}
 sim_from_scratch$means
+
+# Simple One Sample Test H_0: Mu = 0.5
+sim_from_scratch$means |>
+  filter(estimator == "AW-AIPW") |>
+  mutate(
+    z_stat = (mean - 0.5) / se,
+    p = pnorm(abs(z_stat), lower.tail = FALSE) * 2
+  ) |>
+  select(mab_condition, mean, se, z_stat, p)
 ```
 
 - `f_stats`: Contains F statistics from the regressions used to estimate the IPW and OLS estimates.
-`contrasts`
 
 ```{r}
 sim_from_scratch$f_stats
 ```
-- `models`: Only provided if clustering is used, this is a list containing the `lm_robust()` objects
+
+- `contrasts`: A data.frame containing computed pairwise linear contrast estimates created from the above
+conditional expectation estimates. Pairwise contrasts can be requested flexibly before running the
+trial to be computed internally. The available options are `"control"` which computes each treatment
+versus the labelled control group, `"best"` which computes each treatment versus the best treatment
+as determined by the bandit algorithm (maximum UCB1 or TS probability), `"both"` which computes
+both, and `"all"` which computes all for $\binom{n}{k}$ pairwise comparisons among the arms. Just as
+with `means`, the difference of AW-AIPW estimators is unbiased for the true difference, with an
+asymptotically normal sampling distribution, allowing for standard inference of treatment effects.
+
+```{r}
+sim_from_scratch$contrasts
+# Simple example of 0 difference between each arm
+sim_from_scratch$contrasts |>
+  filter(estimator == "AW-AIPW") |>
+  mutate(
+    z_stat = est / se,
+    p = pnorm(abs(z_stat), lower.tail = FALSE) * 2
+  ) |>
+  select(arm1, arm2, est, se, z_stat, p)
+```
+
+
+- `models`: Only provided if clustering is used; this is a list containing the `lm_robust()` objects
 used to compute the IPW and OLS estimates so arbitrary contrasts can be estimated later with the CR2
 Variance-Covariance estimator (using `clubSandwich::linear_contrast()`).
 
 - `config`: A list containing `args`, which contains all of the arguments passed to the function,
 along with some intermediate precomputations; `call`, which is the original captured call object;
-and `parallel` which is the `furrr_options` object created from arguments passed to `...` in the
+and `parallel`, which is the `furrr_options` object created from arguments passed to `...` in the
 original call. Saved to ease future documentation and replication
 
 ```{r}
-# update can be used to re-run the same call again
+# Update can be used to re-run the same call again
 set.seed(5)
 sim2 <- update(sim$config)
 needed_args <- sim$config$args[methods::formalArgs(mab_from_rct)]
@@ -334,42 +365,55 @@ all.equal(sim, sim2)
 all.equal(sim, sim3)
 ```
 
-# Hypothesis Testing and Contrasts
+# Joint Hypothesis Tests
 
-During and after a simulation, `{whatifbandit}` supports standard pairwise and joint inference.
-
-## Pairwise Contrasts
-
-Pairwise contrasts can be requested flexibly before running the trial to be computed internally, for
-each treatment versus control, each treatment versus the best arm (determined by the bandit algorithm,
-not estimate), both, or all $\binom{n}{k}$ pairwise comparisons among treatment arms. For the
-AW-AIPW estimates (not the IPW!), p-values can be computed using a standard normal distribution. Below is an
-example testing whether each simple difference is 0.
-
-```{r}
-aw_aipw <- sim_from_scratch$contrasts[
-  sim_from_scratch$contrasts$estimator == "AW-AIPW",
-]
-p_values <- pnorm(abs(aw_aipw$est / aw_aipw$se), lower.tail = FALSE) * 2
-
-print(p_values)
-```
-
-
-## Joint Hypothesis Tests
-
-Joint hypothesis tests can also be conducted using either the randomization inference procedure in
+`{whatifbandit}` also implements Multi-Arm-Bandit-aware joint hypothesis tests either via a randomization inference procedure in
 @offer-westort2021 or a bootstrap test. These tests are experimental, have not been formally
 verified, and have been noted to have low power. However, they are still included for completeness.
 These tests re-simulate the trial under the appropriate $H_0$ and report the F-Statistic
 from the regression used to estimate the IPW estimator. The p-value from the test is the observed
 proportion of test statistics generated under $H_0$ which are greater than the one observed in the
-original simulation.
+original simulation. Joint tests are further explained in [Causal Inference With Bandits](estimate.html)
+```{r}
+boot <- joint_test(sim_from_scratch, method = "bootstrap", r = 100)
+rand <- joint_test(sim_from_scratch, method = "randomization", r = 100)
+```
+
+For both types of tests, the output is the same. A list is returned with the following:
+
+- `f_statistic`: The observed F-statistic from the IPW regression.
 
 ```{r}
-joint_test(sim_from_scratch, method = "bootstrap", r = 100)$p_value
-joint_test(sim_from_scratch, method = "randomization", r = 100)$p_value
+boot$f_statistic
 ```
+-  `null_distribution`: The generated distribution of F-statistics under $H_0$
+
+```{r}
+# First 10 values
+boot$null_distribution[1:10]
+```
+
+-  `p_value`: The approximate p-value for the test, computed as the proportion of generated
+F-statistics more extreme than the observed. An exact p-value for the randomization inference test
+is unavailable as the set of possible sequential assignment paths the bandit algorithm can
+produce is intractably large.
+
+```{r}
+boot$p_value
+
+boot$p_value == mean(boot$null_distribution > boot$f_statistic, na.rm = TRUE)
+```
+
+-  `method`: Type of test `"randomization"` or `"bootstrap"`.
+```{r}
+boot$method
+```
+-  `r`: Number of replications used.
+
+-  `effective_r`: In testing with synthetic data, it is observed that some iterations result in
+a `NA` F-Statistic, likely due to some lop-sided assignment such that not all arms received any
+treatment. The number of these is usually important, but given the experimental nature of the test
+it is important information to know. This value is the number of generated statistics that are not `NA`.
 
 # Summary
 
@@ -389,18 +433,24 @@ delayed feedback, and enforced exploration, backed by adaptive-robust estimation
 # Future Plans
 Plans for this package are ambitious and expansive:
 
-- Contextual Bandits
-- Continuous Outcomes
-- Post-simulation helper functions and classes for output with generics
-- Fixed confidence (as opposed to the current fixed budget) simulations and early stopping.
-- Treatment pool and switching (i.e., that treatments don't just get dropped but get swapped out,
-mimicking an infinitely running experiment).
-- Exporting modular internal functions for more fine-tuned user control.
+- Support for Conextual Bandits (covariate-aware adaptation).
+- Continuus outcomes.
+- Post-simulation helper functions to accelerate analysis.
+- Fixed confidence settings and early stopping for fixed-budget settings.
+- Adaptive treatment pool, as in switching treatments in an out of the potential assignment pool
+overtime. This mimics an infinitely running experiment where new treatments are added in-real-time.
+- Exporting modular internal functions for more fine-tuned user control, and to help others run
+their own adpative experiments in the field.
 
 # Getting Help and Contributions
 
 For more complete details on individual function arguments and behavior, consult
-the full package documentation (`?mab_from_rct`, `?simulate_mab`, `?joint_test`).
+the full package documentation (`?mab_from_rct`, `?simulate_mab`, `?joint_test`). If this vignette
+was too high level and you want to get an overview of Multi-Arm Bandits or the mechanics of causal
+inference with adaptive experiments, take a look at the other vignettes.
+
+- [The Multi-Arm Bandit Problem](bandit.html)
+- [Causal Inference With Bandits](estimate.html)
 
 If you have specific questions about the package, feel free to reach out by
 email at <no9857a@american.edu>. If you encounter a bug, please open an issue on
@@ -408,3 +458,6 @@ email at <no9857a@american.edu>. If you encounter a bug, please open an issue on
 example.
 
 # References
+
+:::{#refs}
+:::
