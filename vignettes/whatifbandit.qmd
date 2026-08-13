@@ -37,7 +37,7 @@ bandit trial instead?*** The package name reflects this directly: *bandit* for
 multi-armed bandit, and *whatif* for the counterfactual question the package
 lets you explore. This vignette walks through the package's two main modes of use, its supporting
 design features, and how to interpret the estimates it produces. For more details on the theory
-behind Multi-Arm Bandits please see analyzing  [The Multi-Arm Bandit Problem](bandit.qmd)
+behind Multi-Arm Bandits, please see   [The Multi-Arm Bandit Problem](bandit.qmd)
 
 # Two Ways to Explore a Bandit Design
 
@@ -110,7 +110,7 @@ To customize the simulation, `{whatifbandit}` provides this core set of simulati
 
 - **Two bandit algorithms**: probability matching via Thompson Sampling (TS), and
 UCB1 (Upper Confidence Bound). Details on each algorithm and their implementations can be found in
-[The Multi-Arm Bandit Problem](bandit.html), and the documentation.
+[The Multi-Arm Bandit Problem](bandit.html) and the documentation.
 - **Flexible assignment periods**: individual-level, batch-based, or date-based
  assignment cutoffs for bandit updates.
 - **A configurable lookback window and discounting**: complete control over the number of periods
@@ -193,22 +193,22 @@ future::plan("sequential")
 Some things to highlight are:
 
 - `block(service_center)` inside the formula tells `{whatifbandit}` to treat
- `service_center` as a blocking variable, so randomization and outcome
+ `service_center` as a blocking variable, so randomization and outcome
  imputation respect the original block structure.
 - `period_method = "date"` together with `time_unit = "month"` and
- `period_length = 1` recomputes assignment probabilities once per calendar
+ `period_length = 1` recomputes assignment probabilities once per calendar
 month, rather than after a fixed number of participants. This mimics the assignment schedule of the
 original experiment.
 - `delayed_feedback = TRUE`, along with the `assignment_date_col`, `success_date_col`, `date_col`,
 and `month_col` arguments, tells the algorithm which outcomes were actually observable by the time each new assignment decision was made, capturing the time lag.
 - ` r = 100` requests 100 independent resimulations of the trial since any single resimulation is just one draw of
  assignments and imputations.
-- `keep_data = TRUE` forces the `new_data` object (explained below) to be saved for each iteration. By default they are not saved to limit memory footprint of the final the output.
+- `keep_data = TRUE` forces the `new_data` object (explained below) to be saved for each iteration. By default, they are not saved to limit the memory footprint of the final output.
 - Running `future::plan("multisession")` before the call means the 100 resimulations are conducted in
 parallel across multiple workers. `seed` is an argument passed to `future::future()` for parallelization, setting it to `TRUE`
-ensures that given the same seed in the previous `set.seed()` the same results will be returned
+ensures that, given the same seed in the previous `set.seed()`, the same results will be returned
 (essentially normal R behavior for RNG with seeds). Users have complete control over the
-parallezation, and can take advantage of `...` to pass arguments to `furrr::furrr_options()`
+parallelization, and can take advantage of `...` to pass arguments to `furrr::furrr_options()`
 which control the parallel setup.
 
 # Simulating a New Adaptive Trial from Scratch
@@ -271,16 +271,16 @@ generics which expedite common analyses on the final output objects.
 Regardless of function or number of replications conducted, every `.mab` object contains the same
 fields.
 
-First the `new_data` from the resulting MAB procedure is stored allowing users to interact
+First, the `new_data` from the resulting MAB procedure is stored, allowing users to interact
 with the results directly.^[By default when multiple simulations are conducted `new_data` is not
 returned to limit the memory required for the output object, but can be requested by setting
-`keep_data = TRUE`]
+`keep_data = TRUE`.]
 ```{r}
 head(sim$new_data)
 ```
 
-Second `bandit` contains the diagnostic information of the bandit procedure, which can be used to
-examine the algorithm's behavior (`statistic`), and the resulting assignment_probabilities
+Second, `bandit` contains the diagnostic information of the bandit procedure, which can be used to
+examine the algorithm's behavior (`statistic`) and the resulting assignment_probabilities
 (`assignment_prob`) over the course of the experiment. The final assignment counts to each treatment
 are included as well (`assignment_quant`). Below is a glimpse of each object, along with an example
 plot of the assignment probabilities over time for @moore2022 MAB replication.
@@ -339,7 +339,7 @@ arm (`means`) and treatment effect estimates (`contrasts`) for the requested con
 with their standard errors.
 Treatment effects can be requested via the `contrasts` argument for the following configurations:
 
-- `"best"`: effect releative to the best treatment arm, as determined by the maximum UCB1 value or
+- `"best"`: effect relative to the best treatment arm, as determined by the maximum UCB1 value or
 TS probabilities.
 - `"control"`: effect relative to the labelled control arm.
 - `"both"`: both of the above
@@ -349,10 +349,10 @@ Estimates are reported for the AW-AIPW estimator [@hadad2021a], the IPW estimato
 [@offer-westort2021], and a traditional OLS estimator. More details about the properties of these
 estimators are available in [Causal Inference With Bandits](estimate.html), but a quick overview:
 
-- AW-AWIPW is unbiased and asymptotically normal [@hadad2021a] so it can be used for hypothesis
+- AW-AWIPW is unbiased and asymptotically normal [@hadad2021a], so it can be used for hypothesis
 tests with the standard normal distribution.
 - IPW is unbiased with a non-normal asymptotic sampling distribution, but @offer-westort2021
-that in extremely large samples t-tests may provided proper coverage still.
+that in extremely large samples t-tests may still provide proper coverage.
 - OLS is biased and completely invalid to use for inference, but is provided for comparison
 nonetheless.
 
@@ -404,8 +404,8 @@ sim_from_scratch$contrasts |>
 The other objects returned are the F-statistics from the IPW and OLS regressions (`f-stats`), the
 `lm_robust` objects from the IPW and OLS regressions (`models`),^[Only provided if clustering is
 used so that arbitrary contrasts can be estimated later with the appropriate CR2 covariance matrix
-estimator using `clubSandwich::linear_contrast()`. By default with multiple simulations these are
-not returned since each is large memory-wise but can be requested by setting `keep_models = TRUE`.],
+estimator using `clubSandwich::linear_contrast()`. By default, with multiple simulations, these are
+not returned since each is large memory-wise but can be requested by setting `keep_models = TRUE`.]
 and a `config` object containing the arguments and original `call` object for easy replication since
 there are so many customizable settings.
 
@@ -426,7 +426,7 @@ Both return a list with the observed F-statistic (`F-statistic`), the null distr
 under $H_0$ (`null_distribution`), the resulting `p_value` (The proportion of null F-statistics
 greater than the observed one), the `method` used, the number of simulations to perform the test (`
 r`), and the number of those simulations with a non-`NA` F-statistic (`effective_r`; Some iterations
-can produce extremely skewed treatment assignment resulting in an undefined F-statistic)
+can produce extremely skewed treatment assignment, resulting in an undefined F-statistic)
 
 ```{r}
 boot$f_statistic
@@ -436,21 +436,26 @@ boot$method
 
 # Adaptive Vs. Static
 
-Now that we know
+[Section in Progress]
+
+
+# Adaptive Vs. Static
+
+[Section in Progress]
 
 
 
 # Future Plans
 Plans for this package are ambitious and expansive:
 
-- Support for Conextual Bandits (covariate-aware adaptation).
-- Continuus outcomes.
+- Support for Contextual Bandits (covariate-aware adaptation).
+- Continuous outcomes.
 - Post-simulation helper functions to accelerate analysis.
 - Fixed confidence settings and early stopping for fixed-budget settings.
-- Adaptive treatment pool, as in switching treatments in an out of the potential assignment pool
-overtime. This mimics an infinitely running experiment where new treatments are added in-real-time.
+- Adaptive treatment pool, as in switching treatments in and out of the potential assignment pool
+over time. This mimics an infinitely running experiment where new treatments are added in real time.
 - Exporting modular internal functions for more fine-tuned user control, and to help others run
-their own adpative experiments in the field.
+their own adaptive experiments in the field.
 
 # Getting Help and Contributions
 
