@@ -12,6 +12,7 @@ knitr:
 message: FALSE
 warnings: FALSE
 ---
+
 # Introduction
 
 Traditional randomized controlled trials (RCTs) are the workhorse of causal inference in the social
@@ -35,7 +36,8 @@ The central question `{whatifbandit}` is ***What if my experiment had been run a
 bandit trial instead?*** The package name reflects this directly: *bandit* for
 multi-armed bandit, and *whatif* for the counterfactual question the package
 lets you explore. This vignette walks through the package's two main modes of use, its supporting
-design features, and how to interpret the estimates it produces.
+design features, and how to interpret the estimates it produces. For more details on the theory
+behind Multi-Arm Bandits please see analyzing  [The Multi-Arm Bandit Problem](bandit.qmd)
 
 # Two Ways to Explore a Bandit Design
 
@@ -76,8 +78,9 @@ future releases, but any design considered in this vignette assumes a binary
 response.
 
 ```{r}
+#| output: FALSE
 library(whatifbandit)
-library(dplyr)
+library(tidyverse)
 ```
 
 # Example Data: `tanf`
@@ -101,7 +104,7 @@ glimpse(tanf)
 
 To customize the simulation, `{whatifbandit}` provides this core set of simulation features:
 
-- **Two bandit algorithms**: probability matching via Thompson Sampling, and
+- **Two bandit algorithms**: probability matching via Thompson Sampling (TS), and
 UCB1 (Upper Confidence Bound). Details on each algorithm and their implementations can be found in
 [The Multi-Arm Bandit Problem](bandit.html), and the documentation.
 - **Flexible assignment periods**: individual-level, batch-based, or date-based
@@ -137,7 +140,7 @@ outcome to the treatment, with any potential blocking or clustering included in 
 
 
 ```{r}
-set.seed(5)
+set.seed(543645)
 sim <- mab_from_rct(
   success ~ condition,
   data = tanf,
@@ -162,7 +165,7 @@ experiment a more realistic resimulation.
 
 ```{r}
 future::plan("multisession", workers = 2)
-set.seed(532543)
+set.seed(53254339)
 simulations <- mab_from_rct(
   success ~ condition + block(service_center),
   data = tanf,
@@ -176,7 +179,9 @@ simulations <- mab_from_rct(
   date_col = appt_date,
   month_col = recert_month,
   whole_experiment = FALSE,
-  r = 100
+  r = 100,
+  keep_data = TRUE,
+  seed = TRUE
 )
 future::plan("sequential")
 ```
@@ -194,8 +199,13 @@ original experiment.
 and `month_col` arguments, tells the algorithm which outcomes were actually observable by the time each new assignment decision was made, capturing the time lag.
 - ` r = 100` requests 100 independent resimulations of the trial since any single resimulation is just one draw of
  assignments and imputations.
+- `keep_data = TRUE` forces the `new_data` object (explained below) to be saved for each iteration. By default they are not saved to limit memory footprint of the final the output.
 - Running `future::plan("multisession")` before the call means the 100 resimulations are conducted in
-parallel across multiple workers.
+parallel across multiple workers. `seed` is an argument passed to `future::future()` for parallelization, setting it to `TRUE`
+ensures that given the same seed in the previous `set.seed()` the same results will be returned
+(essentially normal R behavior for RNG with seeds). Users have complete control over the
+parallezation, and can take advantage of `...` to pass arguments to `furrr::furrr_options()`
+which control the parallel setup.
 
 # Simulating a New Adaptive Trial from Scratch
 
@@ -208,7 +218,7 @@ p <- matrix(
   c(0.20, 0.35, 0.5, 0.27, 0.33),
   ncol = 1,
   dimnames = list(
-    c("control", "treatment1", "treatment2", "treatment3", "treatment4"),
+    c("control", "T1", "T2", "T3", "T4"),
     NULL
   )
 )
@@ -240,194 +250,188 @@ In this example:
 
 # Understanding The Output
 
-## Class Structure
-
 Both `mab_from_rct()` and `simulage_mab()` return an S3 `.mab` class with the same fields.
-Additionally, each object has another S3 class identifier, marking which function it comes from and
-whether multiple trials were conducted, giving 4 total options:
+Additionally, each object has a second class identifier, marking which function produced it and
+whether multiple trials were run: `single_rct_mab`, `multi_rct_mab`, `single_param_mab`, and
+`multi_param_mab`. Using the computed examples above:
 
-- `single_rct_mab`: A single simulation using `mab_from_rct()`.
-- `multi_rct_mab`: Multiple simulations using `mab_from_rct()`.
-- `single_param_mab`: A single simulation using `simulate_mab()`.
-- `multi_param_mab`: Multiple simulations using `simulate_mab()`.
-
-Using the computed examples above:
-
-- `sim_from_scratch` is a `single_param_mab`
 ```{r}
 class(sim_from_scratch)
-```
-
-- `sim` is a `single_rct_mab`
-```{r}
 class(sim)
-```
-
-- `simulations` is a `multi_rct_mab`
-```{r}
 class(simulations)
 ```
 
 This class structure at the moment has no implemented generics, but plans in the future are to write
 generics which expedite common analyses on the final output objects.
 
-## Fields
+Regardless of function or number of replications conducted, every `.mab` object contains the same
+fields.
 
-Neither the function nor the number of simulations meaningfully change the structure of the final output,
-which contains the following fields:
-
-- `new_data`: The new data with the outcomes and assignments from the MAB procedure for all
-replications.
-
+First the `new_data` from the resulting MAB procedure is stored allowing users to interact
+with the results directly.^[By default when multiple simulations are conducted `new_data` is not
+returned to limit the memory required for the output object, but can be requested by setting
+`keep_data = TRUE`]
 ```{r}
-glimpse(sim$new_data)
-glimpse(sim_from_scratch$new_data)
+head(sim$new_data)
 ```
 
-- `bandit`: A list containing results of the MAB procedure for each period in each trial replication. It stores
-the computed Thompson probabilities and UCB1 values (`statistic`), the corresponding probability of
-assignment (`assignment_prob`), and the total assignment quantities to each treatment
-(`assignment_quant`; only stored at trial replication level).
+Second `bandit` contains the diagnostic information of the bandit procedure, which can be used to
+examine the algorithm's behavior (`statistic`), and the resulting assignment_probabilities
+(`assignment_prob`) over the course of the experiment. The final assignment counts to each treatment
+are included as well (`assignment_quant`). Below is a glimpse of each object, along with an example
+plot of the assignment probabilities over time for @moore2022 MAB replication.
 
 ```{r}
-sim_from_scratch$bandit
+head(sim_from_scratch$bandit$statistic)
+head(sim_from_scratch$bandit$assignment_prob)
+sim_from_scratch$bandit$assignment_quant
+
+# Assignment probabilities over time
+simulations$bandit$assignment_prob |>
+  pivot_longer(
+    cols = c(no_letter, open_appt, specific_appt),
+    values_to = "p",
+    names_to = "mab_condition"
+  ) |>
+  summarize(
+    avg_p = mean(p),
+    sd = sd(p),
+    .by = c(mab_condition, period_number)
+  ) |>
+  mutate(
+    lo = avg_p - 2 * sd,
+    hi = avg_p + 2 * sd,
+    mab_condition = str_to_title(str_replace(mab_condition, "_", " "))
+  ) |>
+  ggplot(aes(
+    x = period_number,
+    y = avg_p,
+    color = mab_condition,
+    fill = mab_condition
+  )) +
+  geom_ribbon(aes(ymax = hi, ymin = lo), alpha = 0.15, color = NA) +
+  geom_line(linewidth = 0.8) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    x = "Period",
+    y = "Probability of Assignment",
+    title = "Assignment Probability to Treatment
+Arms Over Time",
+    subtitle = "With 2 Standard Deviation Uncertainty Ribbon",
+    color = "Treatment Arm",
+    fill = "Treatment Arm"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_blank(),
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(face = "italic")
+  )
 ```
 
-- `means`: A data.frame containing the condition expectation estimates for each treatment arm, for
-each trial replication, for each estimator. It contains the mean estimate (`mean`), its estimated
-standard error (`se`), the treatment arm (`mab_condition`), the estimator used (`estimator`), and
-the degrees of freedom (`df`) if appropriate. The AW-AIPW is both unbiased and, under appropriate conditions, its sampling distribution is asymptotically normal [@hadad2021a]. The
-IPW estimator is unbiased, but does not have a well-defined asymptotic sampling distribution [@hadad2021a; @offer-westort2021],
-while traditional OLS is provided for comparison as well but is completely invalid for inference.
-More details on this are in the [Causal Inference With Bandits](estimate.html) vignette.
-```{r}
-sim_from_scratch$means
+Third, `means` and `contrasts` contain the final conditional expectation estimates for each treatment
+arm (`means`) and treatment effect estimates (`contrasts`) for the requested configuration, along
+with their standard errors.
+Treatment effects can be requested via the `contrasts` argument for the following configurations:
 
-# Simple One Sample Test H_0: Mu = 0.5
+- `"best"`: effect releative to the best treatment arm, as determined by the maximum UCB1 value or
+TS probabilities.
+- `"control"`: effect relative to the labelled control arm.
+- `"both"`: both of the above
+- `"all"`: all $\binom{n}{k}$ pairwise differences among arms
+
+Estimates are reported for the AW-AIPW estimator [@hadad2021a], the IPW estimator
+[@offer-westort2021], and a traditional OLS estimator. More details about the properties of these
+estimators are available in [Causal Inference With Bandits](estimate.html), but a quick overview:
+
+- AW-AWIPW is unbiased and asymptotically normal [@hadad2021a] so it can be used for hypothesis
+tests with the standard normal distribution.
+- IPW is unbiased with a non-normal asymptotic sampling distribution, but @offer-westort2021
+that in extremely large samples t-tests may provided proper coverage still.
+- OLS is biased and completely invalid to use for inference, but is provided for comparison
+nonetheless.
+
+Below is a glimpse of each object, along with examples of a confidence interval plot for the AW-AIPW
+mean estimates, and a p-value computation for the AW-AIPW treatment effects.
+
+```{r}
+head(sim_from_scratch$means)
+# Plotting 95% CI using Normal distribution for AW-AIPW estimates
 sim_from_scratch$means |>
   filter(estimator == "AW-AIPW") |>
   mutate(
-    z_stat = (mean - 0.5) / se,
-    p = pnorm(abs(z_stat), lower.tail = FALSE) * 2
+    lo = mean + qnorm(0.025) * se,
+    hi = mean + qnorm(0.975) * se,
+    mab_condition = str_to_title(mab_condition),
+    mab_condition = fct_reorder(mab_condition, mean)
   ) |>
-  select(mab_condition, mean, se, z_stat, p)
-```
+  ggplot(aes(x = mean, y = mab_condition)) +
+  geom_errorbar(
+    aes(xmin = lo, xmax = hi),
+    orientation = "y",
+    width = 0.15,
+    color = "grey40",
+    linewidth = 0.6
+  ) +
+  geom_point(size = 2.5, color = "#2c3e50") +
+  theme_minimal(base_size = 12) +
+  labs(
+    y = NULL,
+    x = "Probability of Success",
+    title = "Estimated Probability of Success By Arm",
+    subtitle = "AW-AIPW Point Estimates with 95% Confidence Interval"
+  ) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(face = "italic")
+  )
 
-- `f_stats`: Contains F statistics from the regressions used to estimate the IPW and OLS estimates.
 
-```{r}
-sim_from_scratch$f_stats
-```
-
-- `contrasts`: A data.frame containing computed pairwise linear contrast estimates created from the above
-conditional expectation estimates. Pairwise contrasts can be requested flexibly before running the
-trial to be computed internally. The available options are `"control"` which computes each treatment
-versus the labelled control group, `"best"` which computes each treatment versus the best treatment
-as determined by the bandit algorithm (maximum UCB1 or TS probability), `"both"` which computes
-both, and `"all"` which computes all for $\binom{n}{k}$ pairwise comparisons among the arms. Just as
-with `means`, the difference of AW-AIPW estimators is unbiased for the true difference, with an
-asymptotically normal sampling distribution, allowing for standard inference of treatment effects.
-
-```{r}
-sim_from_scratch$contrasts
-# Simple example of 0 difference between each arm
+# Simple test of no treatment effect between each pair
 sim_from_scratch$contrasts |>
   filter(estimator == "AW-AIPW") |>
   mutate(
     z_stat = est / se,
-    p = pnorm(abs(z_stat), lower.tail = FALSE) * 2
+    p_value = pnorm(abs(z_stat), lower.tail = FALSE) * 2
   ) |>
-  select(arm1, arm2, est, se, z_stat, p)
+  select(arm1, arm2, est, se, z_stat, p_value)
 ```
 
-
-- `models`: Only provided if clustering is used; this is a list containing the `lm_robust()` objects
-used to compute the IPW and OLS estimates so arbitrary contrasts can be estimated later with the CR2
-Variance-Covariance estimator (using `clubSandwich::linear_contrast()`).
-
-- `config`: A list containing `args`, which contains all of the arguments passed to the function,
-along with some intermediate precomputations; `call`, which is the original captured call object;
-and `parallel`, which is the `furrr_options` object created from arguments passed to `...` in the
-original call. Saved to ease future documentation and replication
-
-```{r}
-# Update can be used to re-run the same call again
-set.seed(5)
-sim2 <- update(sim$config)
-needed_args <- sim$config$args[methods::formalArgs(mab_from_rct)]
-needed_args$... <- NULL
-set.seed(5)
-sim3 <- do.call(mab_from_rct, needed_args)
-all.equal(sim, sim2)
-
-# Only the call object differs here, because do.call will evaluate the data so it gets captured directly
-all.equal(sim, sim3)
-```
+The other objects returned are the F-statistics from the IPW and OLS regressions (`f-stats`), the
+`lm_robust` objects from the IPW and OLS regressions (`models`),^[Only provided if clustering is
+used so that arbitrary contrasts can be estimated later with the appropriate CR2 covariance matrix
+estimator using `clubSandwich::linear_contrast()`. By default with multiple simulations these are
+not returned since each is large memory-wise but can be requested by setting `keep_models = TRUE`.],
+and a `config` object containing the arguments and original `call` object for easy replication since
+there are so many customizable settings.
 
 # Joint Hypothesis Tests
 
 `{whatifbandit}` also implements Multi-Arm-Bandit-aware joint hypothesis tests either via a randomization inference procedure in
-@offer-westort2021 or a bootstrap test. These tests are experimental, have not been formally
-verified, and have been noted to have low power. However, they are still included for completeness.
-These tests re-simulate the trial under the appropriate $H_0$ and report the F-Statistic
-from the regression used to estimate the IPW estimator. The p-value from the test is the observed
-proportion of test statistics generated under $H_0$ which are greater than the one observed in the
-original simulation. Joint tests are further explained in [Causal Inference With Bandits](estimate.html)
+@offer-westort2021 or a bootstrap test, testing whether any treatment effect exists across arms.
+Both tests are experimental, unverified, and noted to have low power, but are included for
+completeness nonetheless. Both tests use the F-statistic from the IPW regression as its test
+statistic, and simulate its sampling distribution under the appropriate $H_0$ to compute a p-value. The logic behind each test is further explained in [Causal Inference With Bandits](estimate.html)
+
 ```{r}
 boot <- joint_test(sim_from_scratch, method = "bootstrap", r = 100)
 rand <- joint_test(sim_from_scratch, method = "randomization", r = 100)
 ```
 
-For both types of tests, the output is the same. A list is returned with the following:
-
-- `f_statistic`: The observed F-statistic from the IPW regression.
+Both return a list with the observed F-statistic (`F-statistic`), the null distribution generated
+under $H_0$ (`null_distribution`), the resulting `p_value` (The proportion of null F-statistics
+greater than the observed one), the `method` used, the number of simulations to perform the test (`
+r`), and the number of those simulations with a non-`NA` F-statistic (`effective_r`; Some iterations
+can produce extremely skewed treatment assignment resulting in an undefined F-statistic)
 
 ```{r}
 boot$f_statistic
-```
--  `null_distribution`: The generated distribution of F-statistics under $H_0$
-
-```{r}
-# First 10 values
-boot$null_distribution[1:10]
-```
-
--  `p_value`: The approximate p-value for the test, computed as the proportion of generated
-F-statistics more extreme than the observed. An exact p-value for the randomization inference test
-is unavailable as the set of possible sequential assignment paths the bandit algorithm can
-produce is intractably large.
-
-```{r}
 boot$p_value
-
-boot$p_value == mean(boot$null_distribution > boot$f_statistic, na.rm = TRUE)
-```
-
--  `method`: Type of test `"randomization"` or `"bootstrap"`.
-```{r}
 boot$method
 ```
--  `r`: Number of replications used.
 
--  `effective_r`: In testing with synthetic data, it is observed that some iterations result in
-a `NA` F-Statistic, likely due to some lop-sided assignment such that not all arms received any
-treatment. The number of these is usually important, but given the experimental nature of the test
-it is important information to know. This value is the number of generated statistics that are not `NA`.
-
-# Summary
-
-`{whatifbandit}` provides a full workflow for exploring adaptive,
-multi-armed-bandit experimental designs for binary-outcome trials, whether you
-are:
-
-- retrospectively asking what would have happened had an existing RCT been run
- adaptively (`mab_from_rct()`), or
-- prospectively designing a future adaptive trial from assumed population
- parameters (`simulate_mab()`).
-
-Along the way, it supports realistic design features like blocking, clustering,
-delayed feedback, and enforced exploration, backed by adaptive-robust estimation
-(AW-AIPW) and both joint and pairwise inference.
 
 # Future Plans
 Plans for this package are ambitious and expansive:
