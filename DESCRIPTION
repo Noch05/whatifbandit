@@ -35,6 +35,7 @@ Imports:
     tidyr
 Suggests:
     future,
+    knitr,
     quarto,
     testthat (>= 3.0.0)
 VignetteBuilder:
