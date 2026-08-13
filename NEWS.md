@@ -9,6 +9,8 @@
 - Ensuring probabilities of assignment are split evenly under UCB1 ties (`bandit.R`
   Line 412-417), instead of relying on a later implicit normalization. This ensures the intended
   effect with `control_augment` and `random_assign_prop`
+- In `simulate_mab()`, `furrr::furrr_options()` is now called with the appropraite `furrr_args`
+  object instead of `...`, which also contains arguments for the user specific `time_model`.
 
 ## Other
 - Introductory vignette updated for 1.x.x release, along with 2 new vignettes planned.

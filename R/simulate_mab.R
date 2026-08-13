@@ -105,12 +105,12 @@
 #' Weighted Augmented Inverse Probability Estimator (Hadad et al. 2021) using the mean and variance
 #' formulas provided, under the constant allocation rate adaptive schema. These estimators are
 #' unbiased and asymptotically normal under the adaptive conditions and their differences are also
-#' unbiased asymptotically normal estimators for treatment effects.
+#' unbiased asymptotically normal estimators for treatment effects. See
 #' \href{https://www.pnas.org/doi/pdf/10.1073/pnas.2014602118}{Hadad et al. (2021)}. Asymptotic
-#' validity, hinges on sub-optimal arms continually being assigned, if arms have low to 0
+#' validity hinges on sub-optimal arms continually being assigned, if arms have low to 0
 #' probability of being assigned, the central limit theorem proved no longer applies. Thus it is
-#' recommended to use `random_assign_prop` and `control_augment` to ensure all arms non-zero probabilities
-#' of assignment over the whole trial.
+#' recommended to use `random_assign_prop` and `control_augment` to ensure all arms (or at least the
+#' control arm) have non-zero probabilities of assignment over the whole trial.
 #'
 #' Under
 #' clustering the unit of observation becomes the cluster, the sample size the number of clusters.
@@ -160,14 +160,9 @@
 #' \href{https://cran.r-project.org/package=future}{future} and
 #' \href{https://cran.r-project.org/package=furrr}{furrr} packages. When conducting a large number
 #' of simulations, parallelization can improve performance if sufficient system resources are
-#' available. Parallel processing must be explicitly set by the user, through `future::plan()`.
-#' Windows users should set the plan to "multisession", while Linux and MacOS users can use
-#' "multicore" or "multisession". Users running in a High Performance Computing environment (HPC),
-#' are encouraged to use
-#' \href{https://cran.r-project.org/package=future.batchtools}{future.batchtools}, for their
-#' respective HPC scheduler. Note that parallel processing is not guaranteed to work on all systems,
-#' and may require additional setup or debugging effort from the user. For any issues, users are
-#' encouraged to consult the documentation of the above packages.
+#' available. For any issues with parallelization and ensuring replicable results, please consult
+#' the \href{https://cran.r-project.org/package=future}{future} and
+#' \href{https://cran.r-project.org/package=furrr}{furrr} documentation
 #'
 #' @seealso [mab_from_rct()]
 #'
@@ -351,8 +346,9 @@ simulate_mab <- function(
 
   furrr_opt <- do.call(
     furrr::furrr_options,
-    c(list(seed = TRUE), other_args$furrr_args)
+    other_args[["furrr_args"]]
   )
+
   run_single <- purrr::partial(
     run_mab_single,
     sim_type = "param",
