@@ -34,9 +34,13 @@ Imports:
     tibble,
     tidyr
 Suggests:
+    forcats,
     future,
+    ggplot2,
     knitr,
     quarto,
+    scales,
+    stringr,
     testthat (>= 3.0.0)
 VignetteBuilder:
     quarto

@@ -80,7 +80,11 @@ response.
 ```{r}
 #| output: FALSE
 library(whatifbandit)
-library(tidyverse)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(stringr)
+library(forcats)
 ```
 
 # Example Data: `tanf`
@@ -156,7 +160,7 @@ to recompute assignment probabilities every 1,000 participants.
 `whole_experiment = TRUE` means the probabilities used to impute new outcomes are estimated from
 the entire dataset (instead of the data received up to that point).
 
-### Blocking and Date-Based Periods with Delayed Feedback
+## Blocking and Date-Based Periods with Delayed Feedback
 
 The original experiment in @moore2022 randomized within blocks defined by the closest service
 center. There is also a natural delay from when notification letters were assigned (and sent)
@@ -387,8 +391,6 @@ sim_from_scratch$means |>
     plot.title = element_text(face = "bold"),
     plot.subtitle = element_text(face = "italic")
   )
-
-
 # Simple test of no treatment effect between each pair
 sim_from_scratch$contrasts |>
   filter(estimator == "AW-AIPW") |>
@@ -432,6 +434,11 @@ boot$p_value
 boot$method
 ```
 
+# Adaptive Vs. Static
+
+Now that we know
+
+
 
 # Future Plans
 Plans for this package are ambitious and expansive:
@@ -448,8 +455,7 @@ their own adpative experiments in the field.
 # Getting Help and Contributions
 
 For more complete details on individual function arguments and behavior, consult
-the full package documentation (`?mab_from_rct`, `?simulate_mab`, `?joint_test`). If this vignette
-was too high level and you want to get an overview of Multi-Arm Bandits or the mechanics of causal
+the full package documentation (`?mab_from_rct`, `?simulate_mab`, `?joint_test`). If you want to get an overview of Multi-Arm Bandits or the mechanics of causal
 inference with adaptive experiments, take a look at the other vignettes.
 
 - [The Multi-Arm Bandit Problem](bandit.html)
