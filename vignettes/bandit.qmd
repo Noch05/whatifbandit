@@ -1,0 +1,121 @@
+---
+title: "The Multi-Arm Bandit Problem"
+bibliography: "REFERENCES.bib"
+vignette: >
+  %\VignetteIndexEntry{The Multi-Arm Bandit Problem}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+knitr:
+  opts_chunk:
+    collapse: true
+    comment: '#>'
+cache: TRUE
+message: FALSE
+warnings: FALSE
+---
+# Problem Setup
+
+This vignette is a quick theoretical introduction to Multi-Arm Bandits (MAB) and to the specific
+algorithms that `{whatifbandit}` implements. MABs provide a clear mathematical framework for
+understanding the trade-offs implicit in response-adaptive experiments, and algorithms to optimally
+determine each period's assignments.
+
+The standard stochastic MAB problem, first proposed by @robbins1952, models sequential decision-making under
+uncertainty across potentially infinite time horizons. Let there be $K$ treatment arms indexed by
+$i$, each of which is associated with a fixed unknown reward distribution $\mathcal{D}_i$. The experiment
+takes place over a $T$ discrete time steps. At each time step $t \in
+\{1,2,\dots T\}$, the policy $\pi_t: H^{t-1} \to A_t$ selects a single action $A_t$ which
+corresponds to a treatment arm $i \in \{1,\dots, K\}$, and observes the outcome $Y_{t, A_t} \sim
+\mathcal{D}_{A_t}$. $H^{t-1} = \{Y_{t-1, A_{t-1}}, \dots, Y_{1, A_1}\}$ is the history of outcomes
+through period $t-1$.
+
+The sequence $\pi = \{\pi_1, \dots, \pi_T\}$
+constitutes the adaptive algorithm or learner. As actions, $A_t$, accumulate, the adaptive algorithm
+learns more about each $\mathcal{D}_i$, informing future $\pi_{t+j}$ and creating the
+exploration-exploitation tradeoff central to the MAB framework. At each time step $\pi_t$ must
+decide whether to make the greedy choice of exploiting
+the current best arm based on $H^{t-1}$ or explore the other available arms to gather more
+information. A purely greedy algorithm would always choose to exploit, while a non-greedy algorithm
+takes locally sub-optimal actions to explore the treatment space more thoroughly. This exploration
+may lead to a more globally optimal outcome, since a better treatment arm can be discovered later in
+the experiment.
+
+# A Simple Example
+
+The classic example of the stochastic MAB is slot machines.^[In fact, that's where the name of the
+problem comes from: slot machines are typically called one-armed bandits as they only need one
+arm to steal your money [@lai1985].] Following the setup above, suppose we have $K$ slot machines,
+each having an equal payoff of \$1, but different distinct probabilities of winning the payoff, $\theta_i
+\in [0, 1]$, a standard Bernoulli Bandit. Over time $T$, the goal is to maximize the total payoff or number of successes, and to learn which
+slot machine has the highest payoff probability, $i^* = \arg\max \theta_i$, such that it can be exploited
+in the future. Although these goals may seem complementary since identifying the slot machine with
+the highest pay-off allows it to be exploited to accumulate winnings, they are actually adversarial
+in nature, due to the actions required for each goal.
+
+Identifying $i^*$ requires estimating each
+$\hat{\theta}_i$ precisely enough to be confidant to select $\hat{i}^*$. However, the only way to
+estimate each $\hat{\theta}_i$ is to pull arm $i$ and observe the outcome, which comes with an expected
+cost of $\theta^* - \theta_i$, relative to exploiting the best arm, $\theta^*$. The cost is accepted for the
+benefit of receiving the additional outcome and updating $\hat{\theta}_i$. Therefore, the relative
+balance between exploration and exploitation depends on $T$. For small $T$, exploration is more
+costly, because there are fewer total periods which could be used to exploit $i^*$, so exploiting
+based on relatively imprecise $\hat{\theta}_i$ could result in larger cumulative payoff. For large
+or potentially infinite $T$, exploration is less costly, at least relative to the value that the
+additional information has, since it can be used to select $\hat{i}^*$ more confidently, and have
+higher cumulative payoff in the long run. **Regret** formalizes the balance, giving a single
+cumulative assessment of the tradeoff over the full horizon $T$.
+
+# Regret
+
+Formally, cumulative expected regret sums the per-period cost, over the full horizon. Let
+$\mathbb{E}[\mathcal{D}_{i}] = \mu_i$ and $\mu^* = \max \mu_i$ be the maximum expected reward, then
+the cumulative expected regret is:
+
+$$
+ \mathbb{E}[\mathcal{R}_T] = \sum_{t=1}^T (\mu^* - \mu_{A_t})
+$$ {#eq-regret}
+Optimal algorithms, $\pi^*$, attempt to minimize the growth rate of $\mathbb{E}[\mathcal{R}_T]$ with respect to
+$T$. Naive policies exhibit linear rgeret, while optimal ones achieve sub-linear growth, on the
+order of $\mathcal{O}(\ln(T))$ [@lai1985; @auer2002; @auer2003; @agrawal2012;
+@agrawal2017; @erraqabi2017]. @lai1985 proved that no optimal policy can do better than
+$\mathcal{O}(\ln(T))$ on average, meaning even optimal algorithms must continue sampling inferior
+arms at a non-vaninishing rate.^[$\lim_{T \to \infty} \ln(T)$ diverges to $\infty$, so on an infinite
+time horizon at the optimal regret bound, cumulative expected regret cannot be finite.]
+
+# Best-Arm Identification
+
+Regret is not the only objective a MAB algorithm can optimize. **Best-arm identification** ignores
+reward accumulation and instead evaluates a policy only on whether it correctly identifies
+$\widehat{i}^* = i^*$ appropriately by the end of the experiment. This objective is commonly framed
+as *pure exploration* by the literature [@gavalda2009] since every pull is justified by the
+information provided. Because of this, the regret minimizing policy,$\pi^*_{\mathcal{R}}$, and the best-arm identifying,
+$\pi^*_{\mathcal{B}}$, are commonly not the same.
+
+The simplest best-arm identification algorithm is
+**uniform assignment**: each earm is selected with equal probability in every peruid, with no
+adaptation. The experimental analog is the traditional Randomized Controlled Trial (RCT), in
+which assignment is completely randomized with equal probabilities to each treatment. This approach ensures each $\hat{\mu}_i$ is estimated with the same relative level of
+precision.
+
+Adaptive algorithms can still improve this basic approach, because not every arm is worth
+estimating to the same degree of precision. Suppose a subset of arms $J \subset \{1, \dots, K\}$ arms have considerably higher
+means then the rest, $\mu_j > \mu_i, \forall j \in J, \text{ and } \forall\ i, \in \{1, \dots, K\}
+\setminus J$. In this case identifying the best-arm only requires estimating the arms $j \in J$
+precisely. If precision is instead split equally across all arms, the sample size devoted to $J$ is
+smaller, potentially allowing a sub-optimal arm to be selected over the true best arm due to the
+precision decrease.
+
+It is impossible to know which arms belong in $J$ before running the trial, so RCTs and uniform
+assignment decide to hedge over this by estimating all the arms as precisely as possible. However it
+is possible for an adaptive algorithm to learn the arms in $J$ during the trial and shift the mass
+of assignments later in the trial to have more precise final estimates of $j \in J$, at the expense
+of the arms $i \in \{1, \dots, K\} \setminus J$, which is neglible because the only goal is to find
+the best arm.
+
+# Selected Algorithms
+
+## Thompson Sampling
+
+## UCB1
+
+# Regret Analysis
