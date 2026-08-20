@@ -36,8 +36,7 @@ The central question `{whatifbandit}` is ***What if my experiment had been run a
 bandit trial instead?*** The package name reflects this directly: *bandit* for
 multi-armed bandit, and *whatif* for the counterfactual question the package
 lets you explore. This vignette walks through the package's two main modes of use, its supporting
-design features, and how to interpret the estimates it produces. For more details on the theory
-behind Multi-Arm Bandits, please see   [The Multi-Arm Bandit Problem](bandit.qmd)
+design features, and how to interpret the estimates it produces.
 
 # Two Ways to Explore a Bandit Design
 
@@ -145,7 +144,7 @@ outcome to the treatment, with any potential blocking or clustering included in 
 
 ```{r}
 set.seed(543645)
-sim <- mab_from_rct(
+first_sim <- mab_from_rct(
   success ~ condition,
   data = tanf,
   algorithm = "ucb1",
@@ -169,8 +168,8 @@ experiment a more realistic resimulation.
 
 ```{r}
 future::plan("multisession", workers = 2)
-set.seed(53254339)
-simulations <- mab_from_rct(
+set.seed(53254)
+tanf_simulations <- mab_from_rct(
   success ~ condition + block(service_center),
   data = tanf,
   algorithm = "thompson",
@@ -183,6 +182,7 @@ simulations <- mab_from_rct(
   date_col = appt_date,
   month_col = recert_month,
   whole_experiment = FALSE,
+  random_assign_prop = 0.3,
   r = 100,
   keep_data = TRUE,
   seed = TRUE
@@ -200,7 +200,12 @@ Some things to highlight are:
 month, rather than after a fixed number of participants. This mimics the assignment schedule of the
 original experiment.
 - `delayed_feedback = TRUE`, along with the `assignment_date_col`, `success_date_col`, `date_col`,
-and `month_col` arguments, tells the algorithm which outcomes were actually observable by the time each new assignment decision was made, capturing the time lag.
+and `month_col` arguments, tells the algorithm which outcomes were actually observable by the time
+each new assignment decision was made, capturing the time lag.
+- `random_assign_prop = 0.3` enforces that 30% of assignment probability mass is
+ held out for random (non-adaptive) assignment across arms in every period,
+ guaranteeing a minimum level of continued exploration rather than letting the
+ algorithm fully commit to the arm it currently believes is best.
 - ` r = 100` requests 100 independent resimulations of the trial since any single resimulation is just one draw of
  assignments and imputations.
 - `keep_data = TRUE` forces the `new_data` object (explained below) to be saved for each iteration. By default, they are not saved to limit the memory footprint of the final output.
@@ -244,12 +249,6 @@ In this example:
 - `p` encodes the researcher's assumed true success probability for each arm.
 - `n = 2000` sets the total number of simulated participants, and `t = 20` sets
  the number of periods over which assignment probabilities are updated.
-- `algorithm = "thompson"` selects Thompson sampling as
- the bandit algorithm, as opposed to `"ucb1"`.
-- `random_assign_prop = 0.3` enforces that 30% of assignment probability mass is
- held out for random (non-adaptive) assignment across arms in every period,
- guaranteeing a minimum level of continued exploration rather than letting the
- algorithm fully commit to the arm it currently believes is best.
 - `contrasts = "all"` will compute all $\binom{5}{2}$ pairwise effect contrasts between the treatment arms.
 
 # Understanding The Output
@@ -261,8 +260,8 @@ whether multiple trials were run: `single_rct_mab`, `multi_rct_mab`, `single_par
 
 ```{r}
 class(sim_from_scratch)
-class(sim)
-class(simulations)
+class(first_sim)
+class(tanf_simulations)
 ```
 
 This class structure at the moment has no implemented generics, but plans in the future are to write
@@ -276,7 +275,7 @@ with the results directly.^[By default when multiple simulations are conducted `
 returned to limit the memory required for the output object, but can be requested by setting
 `keep_data = TRUE`.]
 ```{r}
-head(sim$new_data)
+head(first_sim$new_data)
 ```
 
 Second, `bandit` contains the diagnostic information of the bandit procedure, which can be used to
@@ -291,7 +290,7 @@ head(sim_from_scratch$bandit$assignment_prob)
 sim_from_scratch$bandit$assignment_quant
 
 # Assignment probabilities over time
-simulations$bandit$assignment_prob |>
+tanf_simulations$bandit$assignment_prob |>
   pivot_longer(
     cols = c(no_letter, open_appt, specific_appt),
     values_to = "p",
@@ -346,8 +345,7 @@ TS probabilities.
 - `"all"`: all $\binom{n}{k}$ pairwise differences among arms
 
 Estimates are reported for the AW-AIPW estimator [@hadad2021a], the IPW estimator
-[@offer-westort2021], and a traditional OLS estimator. More details about the properties of these
-estimators are available in [Causal Inference With Bandits](estimate.html), but a quick overview:
+[@offer-westort2021], and a traditional OLS estimator. A quick overview of each is:
 
 - AW-AWIPW is unbiased and asymptotically normal [@hadad2021a], so it can be used for hypothesis
 tests with the standard normal distribution.
@@ -415,34 +413,227 @@ there are so many customizable settings.
 @offer-westort2021 or a bootstrap test, testing whether any treatment effect exists across arms.
 Both tests are experimental, unverified, and noted to have low power, but are included for
 completeness nonetheless. Both tests use the F-statistic from the IPW regression as its test
-statistic, and simulate its sampling distribution under the appropriate $H_0$ to compute a p-value. The logic behind each test is further explained in [Causal Inference With Bandits](estimate.html)
+statistic, and simulate its sampling distribution under the appropriate $H_0$ to compute a p-value.
 
 ```{r}
+# joint_test parallelizes through the same options as the original sim
+sim_from_scratch$config$parallel <- furrr::furrr_options(seed = TRUE)
+set.seed(123)
 boot <- joint_test(sim_from_scratch, method = "bootstrap", r = 100)
 rand <- joint_test(sim_from_scratch, method = "randomization", r = 100)
 ```
 
-Both return a list with the observed F-statistic (`F-statistic`), the null distribution generated
+Both return a list with the observed F-statistic (`f-stat`), the null distribution generated
 under $H_0$ (`null_distribution`), the resulting `p_value` (The proportion of null F-statistics
 greater than the observed one), the `method` used, the number of simulations to perform the test (`
 r`), and the number of those simulations with a non-`NA` F-statistic (`effective_r`; Some iterations
 can produce extremely skewed treatment assignment, resulting in an undefined F-statistic)
 
 ```{r}
-boot$f_statistic
+boot$f_stat
 boot$p_value
 boot$method
 ```
 
-# Adaptive Vs. Static
+# Estimating Regret and Welfare Benefits
 
-[Section in Progress]
+Everything I've walked us through so far, means, contrats, joint tests, and assignment probabilities
+(even if they would just be a flat line), could be obtained from any causal analysis, whether it is
+adaptive or not. What it doesn't tell us, is whether adaptivity produced any theoretical or tangible
+benefits. This is important to consider because adaptive trials require additional complexity both
+in administration, and, as explained above, valid estimation and inference, so we should be sure
+they are worth the hassle. To explore these potential benefits I'll walk us through a regret
+analysis of an adaptive trial with the `tanf` dataset.
 
+## Visualizing Regret
 
-# Adaptive Vs. Static
+Regret is simply the difference between the outcome under the optimal treatment and the outcome under the selected
+treatment for each observation in the trial. Similar to causal inference settings, since both of
+these values cannot be directly observed in a single experiment, we opt to measure the expected
+regret, which just replaces the true outcomes with the means. These regrets can be added
+cumulativelly over-time to create cumulative expected regret, a theoretical value which
+characterizes the asymptotic performance of MAB algorithms. Algorithms are assesed based on the
+growth rate of the cumulative expected regret, with a lower bound on optimal algorithms being
+$\mathcal{O}(\ln(T))$, as proven by @lai1985.
 
-[Section in Progress]
+Although `{whatifbandit}` does not have a dedicated function to compute cumulative expected regret,
+it is easily done using the availabe data (remember to set `keep_data = TRUE` for multiple
+simulations). To illustrate regret clearly, I use a pure bandit trial (no enforced exploration)
+under sequential assignment (1 observation batches) to match the theoretical Multi-Armed Bandit
+problem.
 
+```{r}
+#| include: FALSE
+load("pure_sims.RData")
+```
+
+```{r}
+#| eval: FALSE
+set.seed(53245)
+pure_ucb_sims <- mab_from_rct(
+  success ~ condition,
+  data = tanf,
+  algorithm = "ucb1",
+  period_method = "individual",
+  keep_data = TRUE,
+  seed = TRUE,
+  r = 100,
+  whole_experiment = TRUE
+)
+pure_ts_sims <- update(pure_ucb_sims$config, algorithm = "thompson")
+```
+
+It is important to note that under sequential assignment, the ordering of our data can signficantly
+impact the results, because the early observations (under no enforced exploration) will influence
+the trajectory of the algorithm's assignments. While this is true for all adaptive trials, those
+will larger period sizes are less susceptible since the algorithms obtain more data before adapting.
+
+The `tanf` data is inherently ordered by the corresponding
+appointment dates, even though assignment is only monthly, but for a one-period RCT it may be
+beneficial to randomly permute the data in each iteration as a robustness check (feature planned).
+
+Regret is computed with respect to the original RCT mean estimates, since they provide an
+estimates that are not a product of the adaptive environment. However, the AW-AIPW and IPW estimates
+are unbiased for the true mean so they could be used as well, while for an original simulation the
+posited population parameters should be used instead (since they are the truth). Regret is commonly visualized in a plot (below), where the relative rates of cumulative growth can
+be examined to evaluate the adaptive allocation algorithm.
+
+```{r}
+# RCT Mean Estimates
+tanf_estimates <- coef(lm(success ~ condition - 1, tanf))
+names(tanf_estimates) <- str_replace(names(tanf_estimates), "condition", "")
+best <- names(tanf_estimates)[which.max(tanf_estimates)]
+
+# Original RCT Data
+rct_regret <- tanf |>
+  whatifbandit:::create_cutoff(
+    period_length = 1,
+    period_method = "individual",
+  ) |>
+  mutate(mab_condition = condition)
+
+# Selecting a random trial of the 100 simulations for regret analysis
+set.seed(0934)
+i <- sample.int(100, 1)
+
+bandit_regrets <- lapply(list(pure_ucb_sims, pure_ts_sims), \(mab) {
+  mab$new_data |> unnest(data) |> filter(trial == i)
+})
+
+lapply(
+  list(
+    "Static" = rct_regret,
+    "UCB1" = bandit_regrets[[1]],
+    "Thompson Sampling" = bandit_regrets[[2]]
+  ),
+  \(df) {
+    df |>
+      mutate(
+        regret = tanf_estimates[[best]] - tanf_estimates[mab_condition]
+      ) |>
+      arrange(period_number) |>
+      mutate(c_regret = cumsum(regret))
+  }
+) |>
+  bind_rows(.id = "algorithm") |>
+  select(algorithm, c_regret) |>
+  mutate(x = row_number(), .by = algorithm) |>
+  ggplot(aes(x = x, y = c_regret, color = algorithm)) +
+  geom_smooth(linewidth = 0.8, se = FALSE) +
+  theme_minimal(base_size = 12) +
+  labs(
+    y = "Cumulative Regret",
+    x = "Participants Assigned",
+    title = "Cumulative Expected Regret By Adaptive Algorithm",
+    subtitle = paste0(
+      "Static Refers To Original RCT; Simulation ",
+      i,
+      " Selected"
+    )
+  ) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(face = "italic")
+  )
+```
+
+## Quantifying Welfare
+
+Regret and welfare are two sides of the same coin. While regret asks *"What is the loss from a
+sub-optimal decision"*, a welfare analysis asks *What is the benefit from additional
+optimal-decisions in this specific experiment"*. Analyzing welfare is simply translating regret into
+the language of the current experiment, to produce tangible values which could be presented as
+evidence for an adaptive trial. This is particularly important for experiments with binary outcomes,
+where regret only measures the difference in success probability.
+
+In the `tanf` experiment, welfare comes from the additional recertifications for the TANF
+program. TANF provides monetary support, so additional welfare can be estimated using publically available benfit
+amounts, combined with the additional number of recertifications produced by the trial. This is not
+a normative analysis of the TANF program, but I assume that more people recieving the benefits which
+they are already elgibible for under the program is a benefit to society as a whole, to which the
+adaptive trial can support. In Washington D.C., for 2025-2026, the monthly benefits based on
+household size are below (@dctanf), and benefit totals are calculated assuming every family has the
+same household size, creating a lower and upper bound.
+
+```{r}
+tanf_benefits <- data.frame(
+  hh_size = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
+  benefit = c(504, 629, 803, 983, 1136, 1335, 1532, 1691, 1863, 2024)
+)
+```
+
+Estimting welfare is not always straightforward however, and I provide two competing estimates.
+Firstly, a data based estimate, using the observed outcomes in each of the resimulated trials, and
+second an expectation based estimate, using only the observed allocations in each resimulated trial
+combined with the mean estimates of the original trial.
+
+```{r}
+# Data Method
+true_success_n <- sum(tanf$success)
+lapply(
+  list("Thompson Sampling" = pure_ts_sims, "UCB1" = pure_ucb_sims),
+  \(mab) {
+    mab$new_data |>
+      unnest(data) |>
+      summarize(
+        add_success_n = sum(mab_success) - true_success_n,
+        .by = trial
+      ) |>
+      summarize(mean_add_success_n = mean(add_success_n))
+  }
+) |>
+  bind_rows(.id = "algorithm") |>
+  pivot_wider(names_from = algorithm, values_from = mean_add_success_n) |>
+  cbind(tanf_benefits) |>
+  mutate(
+    Welfare_TS = `Thompson Sampling` * benefit,
+    Welfare_UCB1 = UCB1 * benefit
+  ) |>
+  select(hh_size, benefit, Welfare_TS, Welfare_UCB1)
+
+# Expectation Method
+lapply(
+  list("Thompson Sampling" = pure_ts_sims, "UCB1" = pure_ucb_sims),
+  \(mab) {
+    quants <- mab$bandit$assignment_quant[, -1] |> as.matrix()
+    ests <- tanf_estimates[colnames(quants)]
+    return(mean(quants %*% ests - true_success_n))
+  }
+) |>
+  bind_rows(.id = "algorithm") |>
+  cbind(tanf_benefits) |>
+  mutate(
+    Welfare_TS = `Thompson Sampling` * benefit,
+    Welfare_UCB1 = UCB1 * benefit
+  ) |>
+  select(hh_size, benefit, Welfare_TS, Welfare_UCB1)
+```
+
+As expected both methods offer similar but different results. Obviously the estimates are imperfect,
+and a better single point estimate would come from either using the average household size and
+assume all households are that size, or generate a distribution of household sizes to compute a
+final total benefit, though both are beyond the scope here.
 
 
 # Future Plans
@@ -460,11 +651,7 @@ their own adaptive experiments in the field.
 # Getting Help and Contributions
 
 For more complete details on individual function arguments and behavior, consult
-the full package documentation (`?mab_from_rct`, `?simulate_mab`, `?joint_test`). If you want to get an overview of Multi-Arm Bandits or the mechanics of causal
-inference with adaptive experiments, take a look at the other vignettes.
-
-- [The Multi-Arm Bandit Problem](bandit.html)
-- [Causal Inference With Bandits](estimate.html)
+the full package documentation (`?mab_from_rct`, `?simulate_mab`, `?joint_test`).
 
 If you have specific questions about the package, feel free to reach out by
 email at <no9857a@american.edu>. If you encounter a bug, please open an issue on
