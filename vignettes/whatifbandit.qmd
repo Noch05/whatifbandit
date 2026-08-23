@@ -578,7 +578,8 @@ potential benefits and drawbacks, I'll walk through a regret analysis of an adap
 ## Visualizing Regret
 
 Regret is a commonly used metric in the MAB literature [@lai1985; @agrawal2012; @agrawal2017;
-@auer2002; @auer2003], to quantify and compare decision algorithms. For a single observation in the
+@auer2002],^[Not an exhaustive list of the MAB or the regret literature, simply a small sample of
+the papers referring to `{whatifbandit}`'s implemented algorithms.] to quantify and compare decision algorithms. For a single observation in the
 trial, regret is simply the difference between the outcome under the optimal treatment and the
 outcome under the selected treatment. Thus it quantifies how much you **regret** your selected
 treatment, and when you select the optimal treatment the regret is **0**. Similar to the fundamental

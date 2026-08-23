@@ -4,4 +4,4 @@
 
 
 ## Notes
-NoLD error identified in earlier submission has been fixed.
+NoLD error identified in earlier submission has been fixed (better late than never).
