@@ -56,7 +56,7 @@ via [future](https://future.futureverse.org/), large data support through
 
 Estimation of conditional expectations and treatment effects is powered by the Adaptively Weighted
 Augmented Inverse Probability Weighted estimation (AW-AIPW) from [Hadad et.
-al(2021)](doi.org/10.1073/pnas.2014602118). This estimator is adaptive robust, correcting
+al (2021)](https:://doi.org/10.1073/pnas.2014602118). This estimator is adaptive robust, correcting
 for the violations in traditional estimators caused by adaptive probabilities of assignment.
 
 ## Installation
