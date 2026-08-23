@@ -24,4 +24,14 @@ tanf_simulations <- mab_from_rct(
 )
 future::plan("sequential")
 
-save.image("vignettes/tanf_sims.RData")
+# Selecting only the elements used in the vignette to reduce size
+set.seed(12345)
+i <- sample(100, 1)
+
+tanf_simulations$means <- tanf_simulations$means |> filter(trial == i)
+tanf_simulations$new_data <- tanf_simulations$new_data[i, ]
+tanf_simulations$bandit$statistic <- NULL
+tanf_simulations$bandit$assignment_quant <- NULL
+tanf_simulations$config <- NULL
+tanf_simulations$f_stats <- NULL
+save.image("vignettes/tanf_sims.RData", compress = "xz")

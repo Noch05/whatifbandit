@@ -770,7 +770,7 @@ compared to the original RCT.
 
 ```{r}
 true_success_n <- sum(tanf$success)
-lapply(
+data_method <- lapply(
   list("Thompson Sampling" = pure_ts_sims, "UCB1" = pure_ucb_sims),
   \(mab) {
     mab$new_data |>
@@ -790,6 +790,10 @@ lapply(
     Welfare_UCB1 = UCB1 * benefit
   ) |>
   select(hh_size, benefit, Welfare_TS, Welfare_UCB1)
+
+data_method
+lo <- min(data_method[1, c("Welfare_TS", "Welfare_UCB1")])
+hi <- max(data_method[10, c("Welfare_TS", "Welfare_UCB1")])
 ```
 
 In the case that `keep_data = FALSE`, the outcomes from each
@@ -803,7 +807,7 @@ amount. In the future, the
 number of successes may be reported in standard output to avoid this issue.
 
 ```{r}
-lapply(
+expectation_method <- lapply(
   list("Thompson Sampling" = pure_ts_sims, "UCB1" = pure_ucb_sims),
   \(mab) {
     quants <- mab$bandit$assignment_quant[, -1] |> as.matrix()
@@ -822,7 +826,7 @@ lapply(
 
 Both methods produce similar welfare estimates. In general, the welfare is positive,
 indicating that for the `tanf` experiment, a response-adaptive trial could have produced anywhere
-between \$15,719 and \$124,293 per month in TANF benefits from the additional recertifications in
+between \$`r format(lo, big.mark = ",")` and \$`r format(hi, big.mark = ",")` per month in TANF benefits from the additional recertifications in
 the experiment.^[Values represent a general adaptive trial based on the 2 algorithms used. The lower
 bound is the minimum of the welfare under a household size of 1 (UCB1), and the upper bound is the
 maximum welfare under a household size of 10 (TS). Values are from the `keep_data = TRUE` method.] For how

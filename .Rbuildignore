@@ -12,4 +12,3 @@
 ^vignettes/\.quarto$
 ^vignettes/.*_files$
 ^vignettes/.*\.R$
-^vignettes/.*\.RData$

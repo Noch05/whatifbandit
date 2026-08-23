@@ -1,9 +1,0 @@
-project:
-  type: default
-
-format:
-  html:
-    embed-resources: true
-
-execute:
-  freeze: true
