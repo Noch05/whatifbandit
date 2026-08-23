@@ -7,8 +7,9 @@
 ^Meta$
 ^cran-comments\.md$
 ^NEWS_files/
-^vignettes/whatifbandit_files/
 ^CRAN-SUBMISSION$
 ^.gitattributes$
 ^vignettes/\.quarto$
-^vignettes/*_files$
+^vignettes/.*_files$
+^vignettes/.*\.R$
+^vignettes/.*\.RData$
