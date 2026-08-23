@@ -98,8 +98,7 @@ recertification results [@moore2022]. These new notification letters were design
 cognitive load required to understand the instructions, and were touted as a solution to reduce the
 program's notorious churn (where welfare recipients let their benefits lapse and reapply to the
 program, as opposed to recertifying their benefits) [@moore2022]. The experiment was conducted with
-real TANF recipients in Washington, D.C. This experiment will be referred to as "the `tanf` trial"
-or simply `tanf` for the remainder of this vignette.
+real TANF recipients in Washington, D.C.
 
 ```{r}
 data("tanf")
@@ -297,7 +296,7 @@ Second, `bandit` contains the diagnostic information of the bandit procedure, wh
 examine the algorithm's behavior (`statistic`) and the resulting assignment_probabilities
 (`assignment_prob`) over the course of the experiment. The final assignment counts to each treatment
 are included as well (`assignment_quant`). Below is a glimpse of each object, along with an example
-plot of the assignment probabilities over time for @moore2022 MAB replication.
+plot of the assignment probabilities over time for the @moore2022 MAB replication.
 
 ```{r}
 head(sim_from_scratch$bandit$statistic)
@@ -424,13 +423,20 @@ outcomes remain well-defined, and more complex
 assumptions like SUTVA derive from the design and administration, not the fact
 that assignment probabilities are constant. Most importantly, however, is that treatment assignment is
 unconfounded conditional on the history of previous assignments and outcomes, which is why the
-simple IPW estimator is unbiased under an adaptive trial. The exact probabilities of assignment are
-available for the correction, which encompass the history; just an estimated propensity score
-adjustment is used when treatment assignment is unconfounded conditional on a set of covariates.
+simple IPW estimator is unbiased under an adaptive trial. Similar to how IPW uses a known or estimated
+propensity score when treatment assignment is unconfounded only conditional on a set of
+observed covariates to remove bias, the IPW in the adaptive case uses the exact probabilities of assignment
+produced by the MAB algorithm to account for the bias. Additionally, just as
+researchers model pre-treatment covariates in RCTs purely to improve efficiency, the AW-AIPW's
+adaptive weighting serves the same role, controlling the variance compared to the IPW without
+impacting unbiasedness. However, the adaptive weights play an even more crucial role than covariate
+adjustments, since they create the conditions necessary to prove a central limit theorem
+[@hadad2021a], allowing for valid hypothesis testing using the asymptotically normal sampling distribution.
 
 The only assumption that you need to be careful about is positivity [@rubin1978; @holland1986], since a MAB
 algorithm can drop a treatment arm permanently from the trial. This assumption is not only required
-for valid inference but for the asymptotic normality of the AW-AIPW to hold [@hadad2021a].
+for a causal analysis but also for the asymptotic normality of the AW-AIPW to hold because of the
+assumptions imposed on the adaptive weights required for the central limit theorem [@hadad2021a].
 `{whatifbandit}` can ensure this is the case with`control_augment` and `random_assign_prop`, which
 prevents assignment probabilities of 0 to the control arm or to all the arms jointly. If these
 settings were unused and arms were dropped from the trial, then their estimated mean or treatment
@@ -450,7 +456,7 @@ or invalid estimates, as opposed to an RCT where all arms are estimated with the
 precision, creating an important variance reallocation trade-off that can be controlled with `random_assign_prop`
 and `control_augment`.
 
-An example of this, using the realistic resimulation of the `tanf` experiment
+An example of this, using the realistic resimulation of @moore2022,
 is below:
 
 ```{r}
@@ -514,7 +520,7 @@ bandit |>
     p_value = pnorm(abs(z_stat), lower.tail = FALSE) * 2
   ) |>
   filter(mab_condition != "no_letter") |>
-  select(z = z_stat, se = z_se, p_value)
+  select(mab_condition, z = z_stat, se = z_se, p_value)
 ```
 
 ## Other Returned Objects
@@ -567,7 +573,7 @@ complexity costs of adaptive trials in both administration and estimation. This 
 tangible gains, which could be used to persuade a stakeholder or policymaker to approve of an
 adaptive experiment as opposed to a statistician. To explore these
 potential benefits and drawbacks, I'll walk through a regret analysis of an adaptive trial with the
-`tanf` dataset.
+`tanf` dataset from @moore2022.
 
 ## Visualizing Regret
 
@@ -700,7 +706,7 @@ lapply(
 
 As expected, the original RCT has linear cumulative regret, while both TS and UCB1 exhibit
 sub-linear regret growth patterns, showing they make more optimal assignments, in terms of
-regret, than standard simple random assignment with equal probabilities.
+regret, than the block-randomized design used by @moore2022.
 
 ## Quantifying Welfare
 
@@ -712,11 +718,11 @@ is the expected outcome of the treatment arm selected. However, for experiments 
 sciences, this simple metric is uninformative.
 
 Firstly, for experiments where the outcome is binary,
-like `tanf`, the cumulative reward is simply the sum of the estimated probabilities of success
+like @moore2022, the cumulative reward is simply the sum of the estimated probabilities of success
 corresponding to each assigned outcome. While this could be used to compare between algorithms,
 since a higher cumulative reward corresponds to assigning more participants to the better treatments,
 there is no way to assess the magnitude of the gain. The real-world payoff of assigning more people
-to the most effective treatments, for `tanf`, is the monetary value of the TANF benefits that
+to the most effective treatments, for @moore2022, is the monetary value of the TANF benefits that
 would not have been retained under the traditional RCT because of the sub-optimal treatment
 assignments. In fact, to go even further, it would not just be the monetary value, but how the
 additional benefits improve the standard of living for recipients. This, however, is a much less defined
@@ -729,7 +735,7 @@ about. Take, for example, an educational experiment where the outcome variable o
 standardized test scores. Here the expected cumulative reward has magnitude, as you can clearly
 identify the additional points scored due to the assignment algorithm. However, researchers may only
 care about using test scores to proxy wage differentials or college acceptances, so once again the
-outcome variable must be translated into the downstream quantity it can be used to accurately
+outcome variable must be translated into a downstream quantity that can be used to accurately
 gauge the additional value the adaptive trial is creating due to more optimal assignments.
 
 I refer to the results of these outcome translations as **welfare**, an experiment-context-specific
@@ -739,11 +745,11 @@ traditional RCTs. The complexity of **welfare** depends on the experimental cont
 the same experiment can have different **welfare** measures depending on the benefit of interest, and the
 level of plausibility desired by the researcher.
 
-As explained above, in the `tanf` experiment, the estimated **welfare** comes from how the
+As explained above, in the @moore2022 experiment, the estimated **welfare** comes from how the
 additional TANF recertifications map to the additional monetary value of TANF benefits which would
 not have been received under the initial trial. For simplicity's sake, even though the experiment
 was conducted in 2017 [@moore2022], assume it is conducted today, and subject to the current TANF
-benefit structure. In Washington, D.C., below are the monthly TANF benefits effective from October 1,
+benefit structure. Below are the monthly TANF benefits in Washington, D.C. effective from October 1,
 2025 to September 30, 2026, for each listed household size:
 
 ```{r}
@@ -803,8 +809,8 @@ treatment per trial are always reported, so using the probabilities of successfu
 from the original RCT, the expected number of successes for each trial can be estimated. From here,
 the computation is the same: calculate the average additional number of successes compared to
 the RCT, using the expected successful recertifications per trial, then multiply by the benefit
-amount. In the future, the
-number of successes may be reported in standard output to avoid this issue.
+amount.^[In the future, the
+number of successes may be reported in standard output to avoid this issue.]
 
 ```{r}
 expectation_method <- lapply(
@@ -822,14 +828,17 @@ expectation_method <- lapply(
     Welfare_UCB1 = UCB1 * benefit
   ) |>
   select(hh_size, benefit, Welfare_TS, Welfare_UCB1)
+expectation_method
 ```
 
 Both methods produce similar welfare estimates. In general, the welfare is positive,
-indicating that for the `tanf` experiment, a response-adaptive trial could have produced anywhere
+indicating that for the @moore2022 experiment, a response-adaptive trial could have produced anywhere
 between \$`r format(lo, big.mark = ",")` and \$`r format(hi, big.mark = ",")` per month in TANF benefits from the additional recertifications in
-the experiment.^[Values represent a general adaptive trial based on the 2 algorithms used. The lower
-bound is the minimum of the welfare under a household size of 1 (UCB1), and the upper bound is the
-maximum welfare under a household size of 10 (TS). Values are from the `keep_data = TRUE` method.] For how
+the experiment.^[The lower bound is the minimum of the welfare under a household size of 1 (UCB1). The upper bound is the
+maximum welfare under a household size of 10 (TS). Values are from the `keep_data = TRUE` method.
+This range is only representative of an adaptive trial administered under the same settings as
+the simulation used (pure bandit, no enforced exploration) and would likely be reduced in a more
+realistic simulation where exploration is enforced to ensure valid causal inference.] For how
 many months to extend the value for is uncertain and recipient dependent, since nothing prevents a
 TANF recipient that failed to
 recertify from reapplying to the program later, since they are still eligible under the income limits.^[This program churn is the exact problem @moore2022
@@ -847,7 +856,7 @@ by an RCT would be implemented permanently afterwards, the value of more optimal
 sample size, or takes place over a long period of time, since a longer trial delays when the most
 effective treatment can be permanently rolled out. It is also the case for experiments involving
 real, unknowing participants, since the effect of receiving the better treatment can meaningfully
-improve their lives, as in `tanf`.
+improve their lives, as in @moore2022.
 
 In the @moore2022 experiment, all the participants were D.C. TANF
 recipients up for recertification during the timeframe of the study; they did not opt into the trial
@@ -868,7 +877,7 @@ traditional RCTs. What adaptive designs do require, though, is a clear understan
 precision tradeoffs they impose, since these tradeoffs can still impact whether an estimated effect
 is determined to be statistically significant. `{whatifbandit}` is designed to help researchers
 navigate this tradeoff, making it possible to explore, resimulate, and evaluate adaptive designs
-before committing to it in the field.
+before committing to them in the field.
 
 # Future Plans
 Plans for this package are ambitious and expansive:
@@ -887,7 +896,7 @@ their own adaptive experiments in the field.
 For more complete details on individual function arguments and behavior, consult
 the full package documentation (`?mab_from_rct`, `?simulate_mab`, `?joint_test`).
 
-If you have specific questions about the package, feel free to reach out by
+If you have specific questions about the package, feel free to reach out to me by
 email at <no9857a@american.edu>. If you encounter a bug, please open an issue on
 [GitHub](https://github.com/Noch05/whatifbandit/issues) with a reproducible
 example.
