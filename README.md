@@ -19,7 +19,7 @@ progresses using the observed outcomes; the most effective treatments can be pri
 maximizes real-world benefits from trials, and potentially increases the power of pairwise tests of
 treatment effects, if the original RCT was underpowered. Multi-Arm Bandits provide a framework and
 set of algorithms for optimally choosing the adaptive probabilities, balancing the difficult task of
-exploring all the treatments, and exploiting the best ones.
+exploring all the treatments and exploiting the best ones.
 
 `{whatifbandit}` lets researchers explore this alternative experimental design, helping them
 determine if it fits for their next field experiment, in two different ways:
@@ -62,7 +62,7 @@ for the violations in traditional estimators caused by adaptive probabilities of
 ## Installation
 ```r
 # Install the latest stable version from GitHub
-remotes::install_github("Noch05/whatifbandit@v1.0.2")
+remotes::install_github("Noch05/whatifbandit@v1.0.3")
 
 # Install the latest CRAN version (likely behind GitHub)
 install.packages("whatifbandit")
